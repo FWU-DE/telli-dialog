@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
-import { waitForAutosave } from '../../utils/utils';
+import { confirmDuplicate, waitForAutosave } from '../../utils/utils';
 import { nanoid } from 'nanoid';
 import { configureLearningScenario } from '../../utils/learning-scenario';
 
@@ -15,10 +15,11 @@ test('create learning scenario from template', async ({ page }) => {
   // Non-owned scenarios now route to read-only view instead of editor
   await page.waitForURL('/learning-scenarios/**');
 
-  const duplicateButton = page.getByRole('button', { name: 'Duplizieren' }).first();
+  const duplicateButton = page.getByTestId('custom-chat-duplicate-button').first();
   await expect(duplicateButton).toBeVisible();
   await expect(duplicateButton).toBeEnabled();
   await duplicateButton.click();
+  await confirmDuplicate(page);
   // After duplicating, should be redirected to the editor of the new scenario
   await page.waitForURL('/learning-scenarios/editor/**');
 

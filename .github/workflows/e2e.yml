@@ -74,22 +74,22 @@ jobs:
       # Keycloak container cannot be started under services, because it needs to mount files from the repo
       - name: Start keycloak container (in background)
         run: |
-          docker run --detach \
+          docker run \
             --name keycloak \
             -v "$PWD/devops/docker/keycloak:/opt/keycloak/data/import" \
             -p 8080:8080 \
             -e CLIENT_NAME=$VIDIS_CLIENT_ID -e CLIENT_SECRET=$VIDIS_CLIENT_SECRET \
             --entrypoint /opt/keycloak/data/import/entrypoint.sh \
-            quay.io/keycloak/keycloak:26.6.0 &
+            quay.io/keycloak/keycloak:26.6.1 > /tmp/keycloak.log 2>&1 &
 
       # crawl4ai is not started under services because its large image (~40s pull) would delay the whole pipeline
       - name: Start crawl4ai container (in background)
         run: |
-          docker run --detach \
+          docker run \
             --name crawl4ai \
             --shm-size=2gb \
             -p 11235:11235 \
-            unclecode/crawl4ai:0.8.6 &
+            unclecode/crawl4ai:0.8.6 > /tmp/crawl4ai.log 2>&1 &
 
       - name: Load 1Password Secrets
         uses: 1password/load-secrets-action@v4
@@ -110,7 +110,7 @@ jobs:
           LLM_GPT5NANO_BASE_URL: op://telli Engineering/.env.e2e chatbot/LLM_GPT5NANO_BASE_URL
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -227,10 +227,10 @@ jobs:
         if: always()
         run: |
           echo "=== crawl4ai logs ==="
-          docker logs crawl4ai || true
+          cat /tmp/crawl4ai.log || true
 
       - name: Print keycloak logs
         if: always()
         run: |
           echo "=== keycloak logs ==="
-          docker logs keycloak || true
+          cat /tmp/keycloak.log || true

@@ -13,7 +13,6 @@ import { FileStatus } from '../chat/upload-file-button';
 import TrashIcon from '../icons/trash';
 import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
-import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 
@@ -103,7 +102,7 @@ export default function FilesTable({
                     <span className="text-sm font-medium">{fileStem}</span>
                   </div>
                 </td>
-                <td className="flex items-center gap-4 ml-auto">
+                <td className="flex items-center gap-2 ml-auto">
                   <span className="text-sm whitespace-nowrap">{formatBytes(size)}</span>
                   {status === 'uploading' && (
                     <span className="text-sm text-gray-500">{t('upload.uploading')}</span>
@@ -115,12 +114,14 @@ export default function FilesTable({
                     <DestructiveActionButton
                       aria-label={t('delete.button')}
                       modalDescription={t('delete.modal-description')}
-                      triggerButtonClassName={cn('flex items-center', iconClassName)}
+                      triggerButtonVariant="ghost"
+                      triggerButtonSize="icon-round"
+                      triggerButtonClassName="text-primary"
                       modalTitle={t('delete.modal-title')}
                       confirmText={t('delete.confirm')}
                       actionFn={() => handleDeleteFile(id)}
                     >
-                      <TrashIcon className="w-9 h-9" />
+                      <TrashIcon className="size-8" />
                       <span className="sr-only">{t('delete.button')}</span>
                     </DestructiveActionButton>
                   )}

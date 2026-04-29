@@ -79,7 +79,7 @@ export async function sendCharacterMessage({
     throw new Error(productAccess.errorType);
   }
 
-  if (teacherUserAndContext.school.userRole !== 'teacher') {
+  if (teacherUserAndContext.userRole !== 'teacher') {
     throw new Error('The user assigned to this chat is not a teacher');
   }
 

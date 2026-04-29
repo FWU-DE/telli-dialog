@@ -15,7 +15,6 @@ import {
   getDefaultImageModel,
 } from '@shared/image-generation/image-generation-service';
 import { requireAuth } from '@/auth/requireAuth';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
@@ -26,8 +25,11 @@ interface PageProps {
 
 export default async function Page(props: PageProps) {
   const { conversationId } = await props.params;
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+  };
 
   if (!federalState.featureToggles.isImageGenerationEnabled) {
     redirect('/');
@@ -70,9 +72,7 @@ export default async function Page(props: PageProps) {
       <ImageStyleProvider defaultImageStyle={lastUsedStyleInChat}>
         <HeaderPortal>
           <div className="flex w-full gap-4 justify-center items-center z-30">
-            <ToggleSidebarButton
-              isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-            />
+            <ToggleSidebarButton />
             <NewChatButton />
             <SelectImageModel />
             <SelectImageStyle />

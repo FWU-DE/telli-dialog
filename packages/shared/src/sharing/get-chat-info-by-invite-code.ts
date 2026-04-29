@@ -1,5 +1,5 @@
 import { db } from '@shared/db';
-import { and, eq, isNotNull } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { sharedCharacterConversation, sharedLearningScenarioTable } from '@shared/db/schema';
 import { NotFoundError } from '@shared/error';
 
@@ -32,7 +32,7 @@ async function tryGetLearningScenarioIdByInviteCode({ inviteCode }: { inviteCode
     .where(
       and(
         eq(sharedLearningScenarioTable.inviteCode, inviteCode),
-        isNotNull(sharedLearningScenarioTable.startedAt),
+        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
       ),
     );
   return maybeSharedChat?.learningScenarioId;
@@ -45,7 +45,7 @@ async function tryGetCharacterIdByInviteCode({ inviteCode }: { inviteCode: strin
     .where(
       and(
         eq(sharedCharacterConversation.inviteCode, inviteCode),
-        isNotNull(sharedCharacterConversation.startedAt),
+        isNull(sharedCharacterConversation.manuallyStoppedAt),
       ),
     );
   return maybeCharacterChat?.characterId;

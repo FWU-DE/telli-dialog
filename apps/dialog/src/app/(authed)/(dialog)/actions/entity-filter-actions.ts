@@ -10,7 +10,7 @@ import {
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { getAssistantsByOverviewFilter } from '@shared/assistants/assistant-service';
 import { enrichCharactersWithImage, type CharacterWithImage } from '../characters/utils';
-import { enrichAssistantsWithImage, type AssistantWithImage } from '../custom/utils';
+import { enrichAssistantsWithImage, type AssistantWithImage } from '../assistants/utils';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 
 function resolveFilter(filter: OverviewFilter, isSchoolSharingEnabled: boolean): OverviewFilter {
@@ -20,7 +20,7 @@ function resolveFilter(filter: OverviewFilter, isSchoolSharingEnabled: boolean):
 export async function getCharactersByFilterAction(
   filter: OverviewFilter,
 ): Promise<CharacterWithImage[]> {
-  const { user, school, federalState } = await requireAuth();
+  const { user, federalState } = await requireAuth();
   const effectiveFilter = resolveFilter(
     filter,
     federalState.featureToggles.isShareTemplateWithSchoolEnabled,
@@ -29,7 +29,7 @@ export async function getCharactersByFilterAction(
   const characters = await getCharactersByOverviewFilter({
     filter: effectiveFilter,
     userId: user.id,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
     federalStateId: federalState.id,
   });
 
@@ -39,7 +39,7 @@ export async function getCharactersByFilterAction(
 export async function getLearningScenariosByFilterAction(
   filter: OverviewFilter,
 ): Promise<LearningScenarioWithImage[]> {
-  const { user, school, federalState } = await requireAuth();
+  const { user, federalState } = await requireAuth();
   const effectiveFilter = resolveFilter(
     filter,
     federalState.featureToggles.isShareTemplateWithSchoolEnabled,
@@ -48,7 +48,7 @@ export async function getLearningScenariosByFilterAction(
   const learningScenarios = await getLearningScenariosByOverviewFilter({
     filter: effectiveFilter,
     userId: user.id,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
     federalStateId: federalState.id,
   });
 
@@ -60,7 +60,7 @@ export async function getLearningScenariosByFilterAction(
 export async function getAssistantsByFilterAction(
   filter: OverviewFilter,
 ): Promise<AssistantWithImage[]> {
-  const { user, school, federalState } = await requireAuth();
+  const { user, federalState } = await requireAuth();
   const effectiveFilter = resolveFilter(
     filter,
     federalState.featureToggles.isShareTemplateWithSchoolEnabled,
@@ -69,7 +69,7 @@ export async function getAssistantsByFilterAction(
   const assistants = await getAssistantsByOverviewFilter({
     filter: effectiveFilter,
     userId: user.id,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
     federalStateId: federalState.id,
   });
 

@@ -64,9 +64,9 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     id: '9578ed80-b0c2-4968-b253-d897576e5512',
     organizationId: ORGANIZATION_ID,
     provider: 'ionos',
-    name: 'meta-llama/Llama-3.3-70B-Instruct',
-    displayName: 'Llama-3.3-70B',
-    description: 'Llama-3.3-70B model for testing',
+    name: 'meta-llama/Meta-Llama-3.1-8B-Instruct',
+    displayName: 'Llama-3.1-8B',
+    description: 'Efficient for lighter tasks',
     setting: {
       provider: 'ionos',
       apiKey: ionosApiKey,
@@ -74,8 +74,26 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     },
     priceMetadata: {
       type: 'text',
-      promptTokenPrice: 150, // 0.15 € per 1M tokens
-      completionTokenPrice: 250, // 0.25 € per 1M tokens
+      promptTokenPrice: 170,
+      completionTokenPrice: 280,
+    },
+  },
+  {
+    id: '038ac4d1-c8c9-49a1-a2f9-c269b07961aa',
+    organizationId: ORGANIZATION_ID,
+    provider: 'ionos',
+    name: 'mistralai/Mistral-Nemo-Instruct-2407',
+    displayName: 'Mistral Nemo Instruct',
+    description: 'Multilingual, open source and efficient',
+    setting: {
+      provider: 'ionos',
+      apiKey: ionosApiKey,
+      baseUrl: ionosBaseUrl,
+    },
+    priceMetadata: {
+      type: 'text',
+      promptTokenPrice: 150,
+      completionTokenPrice: 150,
     },
   },
   {

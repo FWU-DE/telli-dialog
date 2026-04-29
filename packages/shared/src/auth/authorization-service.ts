@@ -10,11 +10,11 @@ type AuthorizedItem = {
 
 export function verifyReadAccess<T extends AuthorizedItem>({
   item,
-  schoolId,
+  schoolIds,
   userId,
 }: {
   item: T;
-  schoolId?: string;
+  schoolIds?: string[];
   userId?: string;
 }) {
   // allow access if shared by link
@@ -24,7 +24,9 @@ export function verifyReadAccess<T extends AuthorizedItem>({
   // allow if owner (disregarding the access-level)
   if (item.userId && item.userId === userId) return;
   // allow if school-shared and the same school
-  if (item.accessLevel === 'school' && item.schoolId && item.schoolId === schoolId) return;
+  if (item.accessLevel === 'school' && item.schoolId && schoolIds?.includes(item.schoolId)) {
+    return;
+  }
 
   throw new ForbiddenError('Not authorized for read access');
 }

@@ -30,6 +30,10 @@ export type FileMetadata = {
   height?: number;
 };
 
+export const userSchoolRoleSchema = z.enum(['student', 'teacher']);
+export const userSchoolRoleEnum = pgEnum('user_school_role', userSchoolRoleSchema.enum);
+export type UserSchoolRole = z.infer<typeof userSchoolRoleSchema>;
+
 /**
  * Schema for table user_entity
  */
@@ -40,6 +44,12 @@ export const userTable = pgTable('user_entity', {
   email: text('email').notNull().unique(),
   lastUsedModel: text('last_used_model'),
   versionAcceptedConditions: integer(),
+  schoolIds: text('school_ids')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
+  federalStateId: text('federal_state_id').references(() => federalStateTable.id),
+  userRole: userSchoolRoleEnum('user_role').notNull().default('student'),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -157,77 +167,6 @@ export type ConversationMessageInsertModel = z.infer<typeof conversationMessageI
 export type ConversationMessageUpdateModel = z.infer<typeof conversationMessageUpdateSchema>;
 
 /**
- * Schema for table user_school_mapping
- */
-export const userSchoolRoleSchema = z.enum(['student', 'teacher']);
-export const userSchoolRoleEnum = pgEnum('user_school_role', userSchoolRoleSchema.enum);
-export type UserSchoolRole = z.infer<typeof userSchoolRoleSchema>;
-
-export const userSchoolMappingTable = pgTable(
-  'user_school_mapping',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id')
-      .references(() => userTable.id)
-      .notNull(),
-    schoolId: text('school_id')
-      .references(() => schoolTable.id)
-      .notNull(),
-    role: userSchoolRoleEnum('role').notNull(),
-    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [unique().on(table.userId, table.schoolId)],
-);
-
-export const userSchoolMappingSelectSchema = createSelectSchema(userSchoolMappingTable);
-export const userSchoolMappingInsertSchema = createInsertSchema(userSchoolMappingTable).omit({
-  id: true,
-  createdAt: true,
-});
-export const userSchoolMappingUpdateSchema = createUpdateSchema(userSchoolMappingTable)
-  .omit({
-    userId: true,
-    schoolId: true,
-    createdAt: true,
-  })
-  .extend({
-    id: z.string(),
-  });
-
-export type UserSchoolMappingSelectModel = z.infer<typeof userSchoolMappingSelectSchema>;
-export type UserSchoolMappingInsertModel = z.infer<typeof userSchoolMappingInsertSchema>;
-export type UserSchoolMappingUpdateModel = z.infer<typeof userSchoolMappingUpdateSchema>;
-
-/**
- * Schema for table school
- */
-export const schoolTable = pgTable(
-  'school',
-  {
-    id: text('id').primaryKey(),
-    federalStateId: text('federal_state_id')
-      .references(() => federalStateTable.id)
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [index().on(table.federalStateId)],
-);
-
-export const schoolSelectSchema = createSelectSchema(schoolTable).extend({
-  createdAt: z.coerce.date(),
-});
-export const schoolInsertSchema = createInsertSchema(schoolTable).omit({
-  createdAt: true,
-});
-export const schoolUpdateSchema = createUpdateSchema(schoolTable).omit({ createdAt: true }).extend({
-  id: z.string(),
-});
-
-export type SchoolSelectModel = z.infer<typeof schoolSelectSchema>;
-export type SchoolInsertModel = z.infer<typeof schoolInsertSchema>;
-export type SchoolUpdateModel = z.infer<typeof schoolUpdateSchema>;
-
-/**
  * Schema for table federal_state
  */
 export const federalStateFeatureTogglesSchema = z.object({
@@ -237,7 +176,6 @@ export const federalStateFeatureTogglesSchema = z.object({
   isCustomGptEnabled: z.boolean().default(true),
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
   isImageGenerationEnabled: z.boolean().optional(),
-  isNewUiDesignEnabled: z.boolean().default(false),
 });
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
 
@@ -288,6 +226,122 @@ export type FederalStateInsertModel = z.infer<typeof federalStateInsertSchema>;
 export type FederalStateUpdateModel = z.infer<typeof federalStateUpdateSchema>;
 
 /**
+ * Schema for table info_banner
+ */
+export const infoBannerTypeSchema = z.enum(['warning', 'info']);
+export const infoBannerTypeEnum = pgEnum('info_banner_type', infoBannerTypeSchema.enum);
+export type InfoBannerType = z.infer<typeof infoBannerTypeSchema>;
+
+export const infoBannerTable = pgTable(
+  'info_banner',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    type: infoBannerTypeEnum('type').notNull(),
+    message: text('message').notNull(),
+    buttonLabel: text('button_label'),
+    buttonUrl: text('button_url'),
+    startsAt: timestamp('starts_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    endsAt: timestamp('ends_at', { mode: 'date', withTimezone: true }).notNull(),
+    maxLoginCount: integer('max_login_count'),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .$onUpdateFn(() => new Date())
+      .notNull(),
+    isDeleted: boolean('is_deleted').notNull().default(false),
+  },
+  (table) => [index().on(table.startsAt), index().on(table.endsAt), index().on(table.isDeleted)],
+);
+
+export const infoBannerSelectSchema = createSelectSchema(infoBannerTable).extend({
+  type: infoBannerTypeSchema,
+  startsAt: z.coerce.date(),
+  endsAt: z.coerce.date(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+});
+export const infoBannerInsertSchema = createInsertSchema(infoBannerTable)
+  .extend({
+    type: infoBannerTypeSchema,
+  })
+  .omit({ id: true, createdAt: true, updatedAt: true, isDeleted: true });
+export const infoBannerUpdateSchema = createUpdateSchema(infoBannerTable)
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    id: z.string(),
+    type: infoBannerTypeSchema,
+  });
+
+export type InfoBannerSelectModel = z.infer<typeof infoBannerSelectSchema>;
+export type InfoBannerInsertModel = z.infer<typeof infoBannerInsertSchema>;
+export type InfoBannerUpdateModel = z.infer<typeof infoBannerUpdateSchema>;
+
+/**
+ * Schema for table info_banner_federal_state_mapping
+ */
+export const infoBannerFederalStateMappingTable = pgTable(
+  'info_banner_federal_state_mapping',
+  {
+    infoBannerId: uuid('info_banner_id')
+      .notNull()
+      .references(() => infoBannerTable.id, { onDelete: 'cascade' }),
+    federalStateId: text('federal_state_id').notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.infoBannerId, table.federalStateId] }),
+    foreignKey({
+      columns: [table.federalStateId],
+      foreignColumns: [federalStateTable.id],
+      name: 'info_banner_mapping_federal_state_id_fk',
+    }).onDelete('cascade'),
+    index().on(table.federalStateId),
+  ],
+);
+
+export const infoBannerFederalStateMappingSelectSchema = createSelectSchema(
+  infoBannerFederalStateMappingTable,
+);
+export const infoBannerFederalStateMappingInsertSchema = createInsertSchema(
+  infoBannerFederalStateMappingTable,
+);
+
+export type InfoBannerFederalStateMappingSelectModel = z.infer<
+  typeof infoBannerFederalStateMappingSelectSchema
+>;
+export type InfoBannerFederalStateMappingInsertModel = z.infer<
+  typeof infoBannerFederalStateMappingInsertSchema
+>;
+
+/**
+ * Schema for table info_banner_user_state
+ */
+export const infoBannerUserStateTable = pgTable(
+  'info_banner_user_state',
+  {
+    infoBannerId: uuid('info_banner_id')
+      .notNull()
+      .references(() => infoBannerTable.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => userTable.id, { onDelete: 'cascade' }),
+    loginCount: integer('login_count').notNull().default(0),
+  },
+  (table) => [
+    primaryKey({ columns: [table.infoBannerId, table.userId] }),
+    index().on(table.userId),
+  ],
+);
+
+export const infoBannerUserStateSelectSchema = createSelectSchema(infoBannerUserStateTable);
+export const infoBannerUserStateInsertSchema = createInsertSchema(infoBannerUserStateTable);
+
+export type InfoBannerUserStateSelectModel = z.infer<typeof infoBannerUserStateSelectSchema>;
+export type InfoBannerUserStateInsertModel = z.infer<typeof infoBannerUserStateInsertSchema>;
+
+/**
  * Schema for table character
  */
 export const accessLevelSchema = z.enum(['private', 'school', 'global']);
@@ -321,7 +375,7 @@ export const characterTable = pgTable(
     initialMessage: text('initial_message'),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
-    schoolId: text('school_id').references(() => schoolTable.id),
+    schoolId: text('school_id'),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
       .defaultNow()
@@ -534,7 +588,7 @@ export const learningScenarioTable = pgTable(
       .notNull(),
     isDeleted: boolean('is_deleted').notNull().default(false),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
-    schoolId: text('school_id').references(() => schoolTable.id),
+    schoolId: text('school_id'),
     originalLearningScenarioId: uuid('original_learning_scenario_id'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
   },
@@ -619,13 +673,13 @@ export const sharedLearningScenarioTable = pgTable(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
-    telliPointsLimit: integer('telli_points_limit'),
-    maxUsageTimeLimit: integer('max_usage_time_limit'),
-    inviteCode: text('invite_code').unique(),
-    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow(),
+    telliPointsLimit: integer('telli_points_limit').notNull(),
+    maxUsageTimeLimit: integer('max_usage_time_limit').notNull(),
+    inviteCode: text('invite_code').unique().notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+    manuallyStoppedAt: timestamp('manually_stopped_at', { withTimezone: true }),
   },
   (table) => [
-    unique().on(table.learningScenarioId, table.userId),
     foreignKey({
       columns: [table.learningScenarioId],
       foreignColumns: [learningScenarioTable.id],
@@ -639,7 +693,8 @@ export const sharedLearningScenarioTable = pgTable(
 export const sharedLearningScenarioSelectSchema = createSelectSchema(
   sharedLearningScenarioTable,
 ).extend({
-  startedAt: z.coerce.date().nullable(),
+  startedAt: z.coerce.date(),
+  manuallyStoppedAt: z.coerce.date().nullable(),
 });
 export const sharedLearningScenarioInsertSchema = createInsertSchema(
   sharedLearningScenarioTable,
@@ -647,6 +702,7 @@ export const sharedLearningScenarioInsertSchema = createInsertSchema(
   id: true,
   inviteCode: true,
   startedAt: true,
+  manuallyStoppedAt: true,
 });
 export const sharedLearningScenarioUpdateSchema = createUpdateSchema(sharedLearningScenarioTable)
   .omit({ learningScenarioId: true, userId: true, startedAt: true })
@@ -667,7 +723,11 @@ export const learningScenarioWithShareDataModel = learningScenarioSelectSchema.a
 );
 export const learningScenarioOptionalShareDataModel = learningScenarioSelectSchema.and(
   sharedLearningScenarioTransformedSchema.extend({
+    inviteCode: z.string().nullable(),
+    maxUsageTimeLimit: z.number().nullable(),
+    startedAt: z.coerce.date().nullable(),
     startedBy: z.string().nullable(),
+    telliPointsLimit: z.number().nullable(),
   }),
 );
 export type LearningScenarioWithShareDataModel = z.infer<typeof learningScenarioWithShareDataModel>;
@@ -787,26 +847,24 @@ export type ConversationUsageTrackingUpdateModel = z.infer<
 /**
  * Schema for table shared_character_conversation
  */
-export const sharedCharacterConversation = pgTable(
-  'shared_character_conversation',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    characterId: uuid('character_id').notNull(),
-    userId: uuid('user_id')
-      .references(() => userTable.id)
-      .notNull(),
-    telliPointsLimit: integer('telli_points_limit'),
-    maxUsageTimeLimit: integer('max_usage_time_limit'),
-    inviteCode: text('invite_code').unique(),
-    startedAt: timestamp('started_at', { withTimezone: true }),
-  },
-  (table) => [unique().on(table.characterId, table.userId)],
-);
+export const sharedCharacterConversation = pgTable('shared_character_conversation', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  characterId: uuid('character_id').notNull(),
+  userId: uuid('user_id')
+    .references(() => userTable.id)
+    .notNull(),
+  telliPointsLimit: integer('telli_points_limit').notNull(),
+  maxUsageTimeLimit: integer('max_usage_time_limit').notNull(),
+  inviteCode: text('invite_code').unique().notNull(),
+  startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+  manuallyStoppedAt: timestamp('manually_stopped_at', { withTimezone: true }),
+});
 
 export const sharedCharacterConversationSelectSchema = createSelectSchema(
   sharedCharacterConversation,
 ).extend({
-  startedAt: z.coerce.date().nullable(),
+  startedAt: z.coerce.date(),
+  manuallyStoppedAt: z.coerce.date().nullable(),
 });
 export const sharedCharacterConversationInsertSchema = createInsertSchema(
   sharedCharacterConversation,
@@ -838,7 +896,11 @@ export const characterWithShareDataModel = characterSelectSchema.and(
 );
 export const characterOptionalShareDataModel = characterSelectSchema.and(
   sharedCharacterTransformedSchema.extend({
+    inviteCode: z.string().nullable(),
+    maxUsageTimeLimit: z.number().nullable(),
+    startedAt: z.coerce.date().nullable(),
     startedBy: z.string().nullable(),
+    telliPointsLimit: z.number().nullable(),
   }),
 );
 export type CharacterWithShareDataModel = z.infer<typeof characterWithShareDataModel>;
@@ -905,7 +967,7 @@ export const assistantTable = pgTable(
       .defaultNow()
       .$onUpdateFn(() => new Date())
       .notNull(),
-    schoolId: text('school_id').references(() => schoolTable.id),
+    schoolId: text('school_id'),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     pictureId: text('picture_id'),

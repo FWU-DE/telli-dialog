@@ -3,8 +3,9 @@ import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import { auth, unstable_update } from '.';
 import { type UserAndContext } from './types';
-import { dbGetSchoolAndMappingAndFederalStateByUserId } from '@shared/db/functions/school';
+import { dbGetUserAndFederalStateByUserId } from '@shared/db/functions/school';
 import { FederalStateSelectModel } from '@shared/db/schema';
+import { FederalStateModel } from '@shared/federal-states/types';
 import { LOGOUT_URL } from '@/app/api/auth/const';
 import { getSafeCallbackUrl } from './callback-url';
 
@@ -80,19 +81,23 @@ export async function getUserAndContextByUserId({
 }: {
   userId: string;
 }): Promise<UserAndContext> {
-  const userAndContext = await dbGetSchoolAndMappingAndFederalStateByUserId({
+  const userAndContext = await dbGetUserAndFederalStateByUserId({
     userId,
   });
 
-  if (userAndContext === undefined) {
-    throw Error('Could not extract the school and federal state for the user');
+  // we make sure that the user has a federal state assigned, because this is required for the app to work
+  //  and if this is not the case, something went wrong during the login process or misconfiguration in vidis.
+  if (userAndContext === undefined || userAndContext.user.federalStateId === null) {
+    throw new Error('Could not extract the user and federal state for the user');
   }
 
   return {
     ...userAndContext.user,
-    ...userAndContext,
-    federalState: obscureFederalState(userAndContext.federalState),
-    hasApiKeyAssigned: !!userAndContext.federalState.encryptedApiKey,
+    federalStateId: userAndContext.user.federalStateId,
+    federalState: {
+      ...obscureFederalState(userAndContext.federalState),
+      hasApiKeyAssigned: !!userAndContext.federalState.encryptedApiKey,
+    },
   };
 }
 
@@ -102,4 +107,4 @@ function obscureFederalState(federalState: FederalStateSelectModel) {
 
   return rest;
 }
-export type ObscuredFederalState = ReturnType<Awaited<typeof obscureFederalState>>;
+export type ObscuredFederalState = Omit<FederalStateModel, 'apiKeyId'>;

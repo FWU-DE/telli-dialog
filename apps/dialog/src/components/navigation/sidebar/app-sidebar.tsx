@@ -4,7 +4,6 @@ import {
   ChatTextIcon,
   ImageSquareIcon,
   LegoSmileyIcon,
-  MoonStarsIcon,
   MountainsIcon,
   QuestionIcon,
   SidebarSimpleIcon,
@@ -22,14 +21,14 @@ import {
 import { AppMenuItem } from './app-menu-item';
 import TelliLogo from '@/components/icons/logo';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
-import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
 import { MyTelliPoints } from './my-telli-points';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { UserModel } from '@shared/auth/user-model';
 import { ChatHistory } from './chat-history';
-import { IconButton } from '@ui/components/IconButton';
 import Link from 'next/link';
+import { Button } from '@ui/components/Button';
+import { useState } from 'react';
 
 type AppSidebarProps = {
   federalState: FederalStateModel;
@@ -45,16 +44,8 @@ export function AppSidebar({
   userPriceLimit,
 }: AppSidebarProps) {
   const { toggleSidebar, open } = useSidebar();
-  const { resolvedTheme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
-  const isDarkTheme = resolvedTheme === 'dark';
-  const lightThemeLabel = t('aria.toggle-light-theme');
-  const darkThemeLabel = t('aria.toggle-dark-theme');
-
-  function toggleTheme() {
-    const currentTheme = resolvedTheme ?? 'light';
-    setTheme(currentTheme === 'light' ? 'dark' : 'light');
-  }
+  const [sidebarContentEl, setSidebarContentEl] = useState<HTMLDivElement | null>(null);
 
   return (
     <Sidebar>
@@ -64,23 +55,19 @@ export function AppSidebar({
             <Link href="/" aria-hidden="true" tabIndex={-1} className="mr-auto rounded">
               <TelliLogo className="h-7 text-primary" />
             </Link>
-            <IconButton
-              onClick={toggleTheme}
-              aria-label={isDarkTheme ? lightThemeLabel : darkThemeLabel}
-              aria-pressed={isDarkTheme}
-            >
-              <MoonStarsIcon />
-            </IconButton>
-            <IconButton
+            <Button
+              variant="toggle"
+              size="icon-round"
+              className="text-primary -mt-1"
               onClick={toggleSidebar}
               aria-label={open ? t('aria.close-sidebar') : t('aria.open-sidebar')}
               aria-expanded={open}
             >
-              <SidebarSimpleIcon />
-            </IconButton>
+              <SidebarSimpleIcon className="size-6" />
+            </Button>
           </div>
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent ref={setSidebarContentEl}>
           <SidebarGroup>
             <nav aria-label={t('aria.main-navigation')}>
               <SidebarMenu>
@@ -132,7 +119,7 @@ export function AppSidebar({
           </SidebarGroup>
 
           <SidebarGroup className="mt-4">
-            <ChatHistory />
+            <ChatHistory scrollContainer={sidebarContentEl} />
           </SidebarGroup>
         </SidebarContent>
       </div>

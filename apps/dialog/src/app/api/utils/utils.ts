@@ -38,7 +38,7 @@ async function getModelAndApiKey({
 
   if (error !== null) {
     logError('Error fetching federal state with decrypted API key:', error);
-    throw Error(error.message);
+    throw new Error(error.message);
   }
 
   if (!federalStateObject.apiKeyId) {

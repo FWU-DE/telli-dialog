@@ -316,5 +316,5 @@ Die Freischaltung des KI-Tools erfolgt automatisiert.`,
 };
 
 if (!Number.isInteger(VERSION)) {
-  throw Error(`Version must be set to an Integer, Value: ${VERSION}`);
+  throw new Error(`Version must be set to an Integer, Value: ${VERSION}`);
 }

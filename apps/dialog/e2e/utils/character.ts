@@ -1,6 +1,22 @@
 import { expect, Page } from '@playwright/test';
 import { waitForAutosave } from './utils';
 
+export async function createCharacter(page: Page) {
+  await page.goto('/characters');
+  await page.waitForURL('/characters**');
+  await page.getByRole('button', { name: 'Dialogpartner erstellen' }).click();
+  await page.waitForURL('/characters/editor/**');
+}
+
+export async function deleteCharacterFromDetailPage(page: Page) {
+  const deleteButton = page.getByTestId('custom-chat-delete-button').first();
+  await expect(deleteButton).toBeVisible();
+  await deleteButton.click();
+  const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
+  await expect(deleteConfirmButton).toBeVisible();
+  await deleteConfirmButton.click();
+}
+
 export async function deleteCharacter(page: Page, name: string) {
   const card = page.getByTestId('entity-card').filter({ hasText: name }).first();
   await expect(card).toBeVisible({ timeout: 15000 });
@@ -22,7 +38,6 @@ export async function configureCharacter(
 ) {
   await page.getByTestId('character-name-input').fill(data?.name ?? 'John Cena');
   await page.getByTestId('character-name-input').press('Tab');
-  await waitForAutosave(page);
 
   await page
     .getByTestId('character-description-input')
@@ -31,7 +46,6 @@ export async function configureCharacter(
         'Er ist bekannt für seinen Spruch „You can`t see me“ und seine Wrestling-Karriere.',
     );
   await page.getByTestId('character-description-input').press('Tab');
-  await waitForAutosave(page);
 
   await page
     .getByTestId('character-initial-message-input')
@@ -40,7 +54,6 @@ export async function configureCharacter(
         'Hallo, ich bin John Cena! Was möchtest du über Wrestling oder meine Karriere wissen?',
     );
   await page.getByTestId('character-initial-message-input').press('Tab');
-  await waitForAutosave(page);
 
   await page
     .getByTestId('character-instructions-input')

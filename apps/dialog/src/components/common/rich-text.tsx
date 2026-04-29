@@ -1,12 +1,21 @@
 import { ReactNode } from 'react';
 
-type Tag = 'b' | 'i' | 'p';
+const RICH_TEXT_TAGS = ['b', 'i', 'p'] as const;
+
+type Tag = (typeof RICH_TEXT_TAGS)[number];
+
+export function stripRichTextTags(value: string): string {
+  return RICH_TEXT_TAGS.reduce(
+    (result, tag) => result.replaceAll(`<${tag}>`, '').replaceAll(`</${tag}>`, ''),
+    value,
+  );
+}
 
 type Props = {
   children(tags: Record<Tag, (chunks: ReactNode) => ReactNode>): ReactNode;
 };
 
-export default function RichText({ children }: Props) {
+export function RichText({ children }: Props) {
   return (
     <>
       {children({

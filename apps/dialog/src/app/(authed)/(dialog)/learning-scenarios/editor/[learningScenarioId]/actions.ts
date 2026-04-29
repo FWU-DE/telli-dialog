@@ -52,13 +52,13 @@ export async function shareLearningScenarioAction({
   learningScenarioId: string;
   data: SharedConversationShareFormValues;
 }) {
-  const { user, school } = await requireAuth();
+  const { user } = await requireAuth();
 
   return runServerAction(shareLearningScenario)({
     learningScenarioId,
     user,
     data,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
   });
 }
 

@@ -3,10 +3,11 @@ import { AUTH_FILES } from '../../utils/const';
 import { sendMessage } from '../../utils/chat';
 import { waitForToast } from '../../utils/utils';
 import { configureCharacter, deleteCharacter } from '../../utils/character';
+import { nanoid } from 'nanoid';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
-const characterName = 'Albert Einstein';
+const characterName = 'Albert Einstein ' + nanoid(8);
 
 test('teacher can create character with initial message and verify it appears in shared chat', async ({
   page,

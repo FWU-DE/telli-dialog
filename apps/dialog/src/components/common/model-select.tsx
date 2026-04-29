@@ -80,7 +80,9 @@ export default function ModelSelect({
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content
-          className={cn('flex flex-col bg-white shadow-dropdown rounded-xl ml-0 z-100')}
+          className={cn(
+            'flex flex-col bg-background shadow-dropdown rounded-xl ml-0 z-100 overflow-y-auto max-h-(--radix-dropdown-menu-content-available-height)',
+          )}
           align="start"
           sideOffset={10}
         >
@@ -99,6 +101,7 @@ export default function ModelSelect({
                       )}
                       onClick={() => handleSelectModel(model)}
                       aria-label={`Select ${model.name} Model`}
+                      data-testid={model.displayName}
                     >
                       <ModelSpan model={model} modelType={modelType} />
                     </button>

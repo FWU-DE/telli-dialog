@@ -56,7 +56,7 @@ export function AssistantView({
         text={t('back-button-text')}
         aria-label={t('back-button-aria')}
         onClick={() => {
-          router.push('/custom');
+          router.push('/assistants');
         }}
       />
       <CustomChatTitle title={assistant.name} />

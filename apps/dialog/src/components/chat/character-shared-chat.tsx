@@ -32,7 +32,7 @@ export default function CharacterSharedChat({
   const timeLeft = calculateTimeLeft(character);
   const chatActive = timeLeft > 0;
 
-  const { error, handleError, resetError } = useCheckStatusCode();
+  const { error, isChatExpired, handleError, resetError } = useCheckStatusCode();
 
   const initialMessages: ChatMessage[] = character.initialMessage
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
@@ -91,7 +91,7 @@ export default function CharacterSharedChat({
 
   return (
     <>
-      {!chatActive && (
+      {(!chatActive || isChatExpired) && (
         <ExpiredChatModal
           conversationMessages={uiMessages}
           title={character.name}

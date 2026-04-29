@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
 import { usePathname } from 'next/navigation';
 
 function subscribe(callback: () => void) {
@@ -20,14 +20,6 @@ export function useCustomPathname() {
     () => window.location.pathname,
     () => '', // Not supported on server
   );
-  const [pathname, setPathname] = useState(nextPathname);
 
-  useEffect(() => {
-    setPathname(nextPathname);
-  }, [nextPathname]);
-  useEffect(() => {
-    setPathname(locationPathname);
-  }, [locationPathname]);
-
-  return pathname;
+  return locationPathname || nextPathname;
 }

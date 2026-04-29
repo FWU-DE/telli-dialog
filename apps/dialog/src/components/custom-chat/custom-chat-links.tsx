@@ -14,7 +14,6 @@ import {
 } from '@/configuration-text-inputs/const';
 import { useToast } from '@/components/common/toast';
 import { ingestWebContentAction } from '@/components/forms/actions';
-import { IconButton } from '@ui/components/IconButton';
 import { useTranslations } from 'next-intl';
 
 export type CustomChatLinksProps = {
@@ -101,7 +100,8 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
   return (
     <div className="flex flex-col gap-8">
       {!isReadonly && (
-        <div className="flex flex-row gap-2 w-full">
+        // the breakpoint is lg because the sidebar collapses at sm, we want the input to be big enough also between sm and lg
+        <div className="flex w-full flex-col gap-2 lg:flex-row">
           <Input
             wrapperClassName="flex-1"
             type="url"
@@ -120,6 +120,7 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
             }}
           />
           <Button
+            className="self-center"
             disabled={maxLinksReached}
             onClick={handleAddLink}
             aria-label={t('aria-add-link')}
@@ -154,16 +155,16 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
                   <TooltipContent>{link.link}</TooltipContent>
                 </Tooltip>
                 {!isReadonly && (
-                  <IconButton
-                    variant="primary"
-                    size="md"
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="hover:bg-primary/15"
                     disabled={isProcessing}
                     aria-label={t('aria-delete', { link: displayTitle })}
                     onClick={() => handleDeleteLink(index)}
                   >
                     <TrashSimpleIcon className="size-4" />
-                  </IconButton>
+                  </Button>
                 )}
               </div>
             );

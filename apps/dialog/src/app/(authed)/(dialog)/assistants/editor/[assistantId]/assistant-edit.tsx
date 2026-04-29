@@ -22,7 +22,6 @@ import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions'
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
-import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import {
   createNewAssistantAction,
@@ -46,7 +45,8 @@ import { WebsearchSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
-import { useInstructionsExample } from '@/hooks/use-instructions-example';
+import { RichText, stripRichTextTags } from '@/components/common/rich-text';
+import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -176,9 +176,6 @@ export function AssistantEdit({
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
 
-  const { instructionsPlaceholder, instructionsExampleDialogContent } =
-    useInstructionsExample('assistants');
-
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
       return;
@@ -202,7 +199,7 @@ export function AssistantEdit({
     const createResult = await createNewAssistantAction({
       templateId: assistant.id,
       duplicateAssistantName: t('duplicate-name-format-string', {
-        sourceName: assistant.name,
+        sourceName: name,
       }),
     });
     if (createResult.success) {
@@ -223,7 +220,7 @@ export function AssistantEdit({
       toast.error(t('toasts.delete-toast-error'));
     }
     guardNavigation(() => {
-      router.push('/custom');
+      router.push('/assistants');
     });
   };
 
@@ -295,120 +292,118 @@ export function AssistantEdit({
         modalTitle={t('delete-modal-title')}
         modalDescription={t('delete-modal-description')}
       />
-      <CustomChatActionSave onClick={handleAutoSave} />
     </CustomChatActions>
   );
 
+  const headerContent = useMemo(
+    () => (
+      <CustomChatFormState isDirty={isDirty} isSubmitting={isSaving} hasSaveError={hasSaveError} />
+    ),
+    [isDirty, isSaving, hasSaveError],
+  );
+
   return (
-    <CustomChatLayoutContainer>
-      <BackButton
-        href="/custom"
-        text={t('back-button')}
-        aria-label={t('back-button-aria-label')}
-        onClick={() => {
-          guardNavigation(() => {
-            router.push('/custom');
-          });
-        }}
-      />
-      <CustomChatTitle title={name} />
-      <div className="flex flex-row justify-between">
-        {assistantActions}
-        <CustomChatFormState
-          isDirty={isDirty}
-          isSubmitting={isSaving}
-          hasSaveError={hasSaveError}
+    <>
+      <CustomChatHeaderContent>{headerContent}</CustomChatHeaderContent>
+      <CustomChatLayoutContainer>
+        <BackButton
+          href="/custom"
+          text={t('back-button')}
+          aria-label={t('back-button-aria-label')}
+          onClick={() => {
+            guardNavigation(() => {
+              router.push('/assistants');
+            });
+          }}
         />
-      </div>
-      {showShareInfo && (
-        <CustomChatShareInfo
-          href="#share-settings"
-          info={t('sharing-info')}
-          linkText={t('sharing-settings')}
-        />
-      )}
-      <CustomChatImageUpload
-        avatarPictureUrl={avatarPictureUrl}
-        onUploadPicture={handleUploadPicture}
-      />
-
-      <form
-        id="assistant-edit-form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleAutoSave();
-        }}
-      >
-        <Card>
-          <CardContent>
-            <FieldGroup>
-              <FormField
-                name="name"
-                control={control}
-                {...assistantFieldValidationConfig.name}
-                label={t('name-label')}
-                placeholder={t('name-placeholder')}
-                autoFocusWhenEmpty
-                testId="assistant-name-input"
-                onBlur={handleAutoSave}
-              />
-              <FormField
-                name="description"
-                control={control}
-                {...assistantFieldValidationConfig.description}
-                label={t('description-label')}
-                placeholder={t('description-placeholder')}
-                testId="assistant-description-input"
-                onBlur={handleAutoSave}
-                type="textArea"
-                className="h-27 resize-none"
-              />
-              <FormField
-                name="instructions"
-                control={control}
-                {...assistantFieldValidationConfig.instructions}
-                label={t('instructions-label')}
-                labelAction={
-                  <CustomChatInstructionsExampleDialog
-                    descriptionContent={instructionsExampleDialogContent}
-                  />
-                }
-                placeholder={instructionsPlaceholder}
-                testId="assistant-instructions-input"
-                onBlur={handleAutoSave}
-                type="textArea"
-                className="h-125"
-              />
-              <CustomChatPromptSuggestions control={control} onBlur={handleAutoSave} />
-            </FieldGroup>
-          </CardContent>
-        </Card>
-
-        <CustomChatFilesAndLinks
-          initialFiles={relatedFiles}
-          onFileUploaded={handleFileUploaded}
-          onDeleteFile={handleDeleteFile}
-          onDownloadFile={handleDownloadFile}
-          initialLinks={initialLinks}
-          onLinksChange={handleLinksChange}
+        <CustomChatTitle title={name} />
+        <div className="flex flex-wrap items-start gap-3">{assistantActions}</div>
+        {showShareInfo && (
+          <CustomChatShareInfo
+            href="#share-settings"
+            info={t('sharing-info')}
+            linkText={t('sharing-settings')}
+          />
+        )}
+        <CustomChatImageUpload
+          avatarPictureUrl={avatarPictureUrl}
+          onUploadPicture={handleUploadPicture}
         />
 
-        <CustomShareSection
-          control={control}
-          schoolSharingName="isSchoolShared"
-          linkSharingName="hasLinkAccess"
-          linkToShare={`/assistants/${assistant.id}`}
-          onShareChange={handleSharingChange}
-        />
-      </form>
-      <div className="flex flex-row justify-between">
-        {assistantActions}
-        <CustomChatFormState
-          isDirty={isDirty}
-          isSubmitting={isSaving}
-          hasSaveError={hasSaveError}
-        />
-      </div>
-    </CustomChatLayoutContainer>
+        <form
+          id="assistant-edit-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleAutoSave();
+          }}
+        >
+          <Card>
+            <CardContent>
+              <FieldGroup>
+                <FormField
+                  name="name"
+                  control={control}
+                  {...assistantFieldValidationConfig.name}
+                  label={t('name-label')}
+                  placeholder={t('name-placeholder')}
+                  autoFocusWhenEmpty
+                  testId="assistant-name-input"
+                  onBlur={handleAutoSave}
+                />
+                <FormField
+                  name="description"
+                  control={control}
+                  {...assistantFieldValidationConfig.description}
+                  label={t('description-label')}
+                  placeholder={t('description-placeholder')}
+                  testId="assistant-description-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-27 resize-none"
+                />
+                <FormField
+                  name="instructions"
+                  control={control}
+                  {...assistantFieldValidationConfig.instructions}
+                  label={t('instructions-label')}
+                  labelAction={
+                    <CustomChatInstructionsExampleDialog
+                      descriptionContent={
+                        <div className="whitespace-pre-line">
+                          <RichText>{(tags) => t.rich('instructions-placeholder', tags)}</RichText>
+                        </div>
+                      }
+                    />
+                  }
+                  placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
+                  testId="assistant-instructions-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-125"
+                />
+                <CustomChatPromptSuggestions control={control} onBlur={handleAutoSave} />
+              </FieldGroup>
+            </CardContent>
+          </Card>
+
+          <CustomChatFilesAndLinks
+            initialFiles={relatedFiles}
+            onFileUploaded={handleFileUploaded}
+            onDeleteFile={handleDeleteFile}
+            onDownloadFile={handleDownloadFile}
+            initialLinks={initialLinks}
+            onLinksChange={handleLinksChange}
+          />
+
+          <CustomShareSection
+            control={control}
+            schoolSharingName="isSchoolShared"
+            linkSharingName="hasLinkAccess"
+            linkToShare={`/assistants/${assistant.id}`}
+            onShareChange={handleSharingChange}
+          />
+        </form>
+      </CustomChatLayoutContainer>
+    </>
   );
 }

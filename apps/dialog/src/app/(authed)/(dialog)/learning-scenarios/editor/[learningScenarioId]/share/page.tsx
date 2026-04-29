@@ -1,8 +1,7 @@
 import SidebarCloseIcon from '@/components/icons/sidebar-close';
 import Footer from '@/components/navigation/footer';
 import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
-import { cn } from '@/utils/tailwind';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
+import { Button } from '@ui/components/Button';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import CountDownTimer from '../../../_components/count-down';
@@ -15,14 +14,16 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { notFound } from 'next/navigation';
 import CollapseSidebar from '@/components/common/collapse-sidebar';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
-import { buildLegacyUserAndContext } from '@/auth/types';
 
 export default async function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]/share'>,
 ) {
   const { learningScenarioId } = await props.params;
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+  };
 
   const learningScenario = await getSharedLearningScenario({
     learningScenarioId: learningScenarioId,
@@ -42,10 +43,7 @@ export default async function Page(
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
       <CollapseSidebar />
-      <CustomChatHeader
-        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-        userAndContext={userAndContext}
-      />
+      <CustomChatHeader userAndContext={userAndContext} />
       <Link
         href={`/learning-scenarios/editor/${learningScenario.id}`}
         className="flex gap-2 items-center text-primary w-full"
@@ -57,7 +55,7 @@ export default async function Page(
         <h1 className="text-4xl sm:text-7xl font-medium mb-10 sm:mb-16">{t('join')}</h1>
         <CountDownTimer
           leftTime={Math.max(leftTime, 0)}
-          totalTime={learningScenario.maxUsageTimeLimit ?? 0}
+          totalTime={learningScenario.maxUsageTimeLimit}
           stopWatchClassName="w-8 h-8"
         />
         <main className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">
@@ -82,22 +80,16 @@ export default async function Page(
                 />
               </div>
             </div>
-            <Link
-              href={shareUrl}
-              target="_blank"
-              className={cn(buttonPrimaryClassName, 'mt-10 sm:mt-16')}
-            >
-              {t('open-chat')}
-            </Link>
+            <Button asChild className="mt-10 sm:mt-16">
+              <Link href={shareUrl} target="_blank">
+                {t('open-chat')}
+              </Link>
+            </Button>
           </section>
           <div className="hidden sm:block w-1 border-r" />
           <section className="flex flex-col justify-between items-center gap-8 sm:gap-12">
             <h2 className="text-2xl sm:text-3xl text-center">{t('use-qr')}</h2>
-            <QRCodeSVG
-              id="qr-code"
-              className="w-64 h-64 sm:w-[400px] sm:h-[400px]"
-              value={shareUrl}
-            />
+            <QRCodeSVG id="qr-code" className="w-64 h-64 sm:w-100 sm:h-100" value={shareUrl} />
           </section>
         </main>
       </div>

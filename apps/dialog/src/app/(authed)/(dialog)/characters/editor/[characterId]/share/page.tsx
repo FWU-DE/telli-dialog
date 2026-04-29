@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import { cn } from '@/utils/tailwind';
+import { Button } from '@ui/components/Button';
 import SidebarCloseIcon from '@/components/icons/sidebar-close';
 import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
 import Footer from '@/components/navigation/footer';
@@ -15,12 +14,14 @@ import { notFound } from 'next/navigation';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import CollapseSidebar from '@/components/common/collapse-sidebar';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
-import { buildLegacyUserAndContext } from '@/auth/types';
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
   const params = await props.params;
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+  };
 
   const character = await getSharedCharacter({
     userId: user.id,
@@ -38,10 +39,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
       <CollapseSidebar />
-      <CustomChatHeader
-        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-        userAndContext={userAndContext}
-      />
+      <CustomChatHeader userAndContext={userAndContext} />
       <Link
         href={`/characters/editor/${character.id}`}
         className="flex gap-2 items-center text-primary w-full"
@@ -53,7 +51,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
         <h1 className="text-4xl sm:text-5xl font-medium mb-10">{t('join')}</h1>
         <CountDownTimer
           leftTime={Math.max(leftTime, 0)}
-          totalTime={character.maxUsageTimeLimit ?? 0}
+          totalTime={character.maxUsageTimeLimit}
           stopWatchClassName="w-4 h-4"
         />
         <main className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">
@@ -78,22 +76,16 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
                 />
               </div>
             </div>
-            <Link
-              href={shareUrl}
-              target="_blank"
-              className={cn(buttonPrimaryClassName, 'mt-10 sm:mt-16')}
-            >
-              {t('open-chat')}
-            </Link>
+            <Button asChild className="mt-10 sm:mt-16">
+              <Link href={shareUrl} target="_blank">
+                {t('open-chat')}
+              </Link>
+            </Button>
           </section>
           <div className="hidden sm:block w-1 border-r" />
           <section className="flex flex-col justify-between items-center gap-8 sm:gap-12">
             <h2 className="text-2xl sm:text-3xl text-center">{t('use-qr')}</h2>
-            <QRCodeSVG
-              id="qr-code"
-              className="w-64 h-64 sm:w-[400px] sm:h-[400px]"
-              value={shareUrl}
-            />
+            <QRCodeSVG id="qr-code" className="w-64 h-64 sm:w-100 sm:h-100" value={shareUrl} />
           </section>
         </main>
       </div>

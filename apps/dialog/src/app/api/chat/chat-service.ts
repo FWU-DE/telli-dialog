@@ -28,10 +28,11 @@ import {
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
-import { extractUrls } from './websearch-service';
+import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
+//import { searchWeb } from './websearch';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -140,6 +141,9 @@ export async function sendChatMessage({
     federalStateId: user.federalState.id,
   });
 
+  // Web search
+  //const webSearchResults = await searchWeb(userMessage.content);
+
   // Save user message to DB
   await dbInsertChatContent({
     conversationId: conversation.id,
@@ -189,7 +193,7 @@ export async function sendChatMessage({
   const systemPrompt = await constructChatSystemPrompt({
     characterId,
     assistantId: assistantId,
-    isTeacher: user.school.userRole === 'teacher',
+    isTeacher: user.userRole === 'teacher',
     federalState: user.federalState,
     chunks,
     errorUrls,

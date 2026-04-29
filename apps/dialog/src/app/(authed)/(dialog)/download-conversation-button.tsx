@@ -5,8 +5,7 @@ import React from 'react';
 import Spinner from '@/components/icons/spinner';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
-import { cn } from '@/utils/tailwind';
-import { iconClassName } from '@/utils/tailwind/icon';
+import { Button } from '@ui/components/Button';
 
 type DownloadConversationButtonProps = {
   conversationId: string;
@@ -65,15 +64,17 @@ export default function DownloadConversationButton({
   const t = useTranslations('common');
 
   return (
-    <button
-      className={cn('flex items-center gap-1 ml-2', iconClassName, 'disabled:bg-transparent')}
+    <Button
+      variant="ghost"
+      size="icon-round"
+      className="text-primary"
       title={t('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}
     >
-      {isLoading ? <Spinner className="p-2 w-8 h-8" /> : <WebDownloadIcon className="w-8 h-8" />}
+      {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-8" />}
       {showText && tCommon('conversation-download')}
-    </button>
+    </Button>
   );
 }
 

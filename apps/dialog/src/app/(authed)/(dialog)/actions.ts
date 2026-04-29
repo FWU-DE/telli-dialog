@@ -10,6 +10,7 @@ import deleteConversation, {
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
 import { dbUpdateUserTermsVersion } from '@shared/db/functions/user';
 import { FileModel } from '@shared/db/schema';
+import { trackInfoBannerView } from '@shared/info-banners/info-banner-service';
 
 export async function deleteConversationAction({ conversationId }: { conversationId: string }) {
   const { user } = await requireAuth();
@@ -46,4 +47,10 @@ export async function refetchFileMapping(
   // Verify the user owns this conversation before returning file data
   await getConversation({ conversationId, userId: user.id });
   return await dbGetRelatedFiles(conversationId);
+}
+
+export async function trackInfoBannerViewAction(infoBannerId: string): Promise<void> {
+  const { user } = await requireAuth();
+
+  await runServerAction(trackInfoBannerView)({ infoBannerId, userId: user.id });
 }

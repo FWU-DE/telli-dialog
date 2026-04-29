@@ -25,6 +25,9 @@ test.describe('cleanup', () => {
   let userId = '';
   let modelId = '';
 
+  // cleanup tests must not run in parallel as they all call the same cleanup endpoint
+  test.describe.configure({ mode: 'default' });
+
   test.beforeEach(async () => {
     await db.transaction(async (tx) => {
       const [user] = await tx
@@ -32,13 +35,13 @@ test.describe('cleanup', () => {
         .values({ firstName: '', lastName: '', email: generateUUID() })
         .returning();
       if (!user) {
-        throw Error('Failed to create user');
+        throw new Error('Failed to create user');
       }
       userId = user.id;
 
       const [model] = await tx.select().from(llmModelTable).limit(1);
       if (!model) {
-        throw Error('Failed to find model');
+        throw new Error('Failed to find model');
       }
       modelId = model.id;
     });
@@ -188,7 +191,7 @@ async function createLearningScenario(
     })
     .returning();
   if (!learningScenario) {
-    throw Error('failed to create learning scenario');
+    throw new Error('failed to create learning scenario');
   }
 
   const fileId = await createFile();
@@ -213,7 +216,7 @@ async function createCharacter(data?: Partial<z.infer<typeof characterInsertSche
     })
     .returning();
   if (!character) {
-    throw Error('failed to create character');
+    throw new Error('failed to create character');
   }
 
   const fileId = await createFile();
@@ -235,7 +238,7 @@ async function createAssistant(data?: Partial<z.infer<typeof assistantInsertSche
     })
     .returning();
   if (!assistant) {
-    throw Error('failed to create assistant');
+    throw new Error('failed to create assistant');
   }
 
   const fileId = await createFile();
@@ -263,7 +266,7 @@ async function createWebChunk(createdAt: Date) {
     })
     .returning();
   if (!chunk) {
-    throw Error('failed to create web chunk');
+    throw new Error('failed to create web chunk');
   }
   return chunk;
 }

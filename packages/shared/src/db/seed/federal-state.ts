@@ -12,7 +12,7 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
   if (skip) return;
   if (FEDERAL_STATES.length === 0) {
     const envVariables = FEDERAL_STATE_DEFINITIONS.map((f) => f.envKeyName);
-    throw Error(
+    throw new Error(
       `Failed to insert Federal States, configure at least one of the following env variables: ${envVariables.join(', ')}`,
     );
   }
@@ -169,6 +169,5 @@ export const FEDERAL_STATES = FEDERAL_STATE_DEFINITIONS.filter((state) => {
     isSharedChatEnabled: true,
     isShareTemplateWithSchoolEnabled: true,
     isImageGenerationEnabled: true,
-    isNewUiDesignEnabled: true,
   },
 })) satisfies Array<Omit<FederalStateInsertModel, 'organizationId'>>;

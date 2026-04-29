@@ -27,7 +27,7 @@ export default function SharedChat({
   const chatActive = timeLeft > 0;
 
   const [dialogStarted, setDialogStarted] = useState(false);
-  const { error, handleError, resetError } = useCheckStatusCode();
+  const { error, isChatExpired, handleError, resetError } = useCheckStatusCode();
 
   const {
     messages,
@@ -76,7 +76,7 @@ export default function SharedChat({
 
   return (
     <>
-      {!chatActive && (
+      {(!chatActive || isChatExpired) && (
         <ExpiredChatModal
           conversationMessages={uiMessages}
           title={sharedSchoolChat.name}

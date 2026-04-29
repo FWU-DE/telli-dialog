@@ -16,3 +16,9 @@ export async function waitForChatHistory(page: Page) {
 export async function waitForAutosave(page: Page) {
   await expect(page.getByTestId('autosave-saved').first()).toBeVisible({ timeout: 5000 });
 }
+
+export async function confirmDuplicate(page: Page) {
+  const confirmButton = page.getByTestId('custom-chat-confirm-button').first();
+  await expect(confirmButton).toBeVisible();
+  await confirmButton.click();
+}

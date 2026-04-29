@@ -1,11 +1,22 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { deleteChat, selectDifferentModel, sendMessage, uploadFile } from '../../utils/chat';
+import { LLM_MODELS } from '../../utils/llm-models';
 import path from 'path';
 
-const modelWithImageSupport = 'GPT-5 nano';
-
 test.use({ storageState: AUTH_FILES.teacher });
+
+test.afterAll(async ({ browser }) => {
+  const page = await browser.newPage({ storageState: AUTH_FILES.teacher });
+
+  try {
+    // restore default text model
+    await page.goto('/');
+    await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_1);
+  } finally {
+    await page.close();
+  }
+});
 
 test('should successfully upload a file and get response about its contents', async ({ page }) => {
   await page.goto('/');
@@ -21,7 +32,7 @@ test('should successfully upload a file and get response about its contents', as
   // Verify the response contains the expected content
   const assistantMessage = page.getByLabel('assistant message 1');
   await expect(assistantMessage).toBeVisible();
-  await expect(assistantMessage).toContainText('Napoleon Bonaparte');
+  await expect(assistantMessage).toContainText(/Napol[eé]on Bonaparte/i);
 
   // Clean up by deleting the conversation
   await deleteChat(page, path.basename(page.url()));
@@ -31,7 +42,7 @@ test('should successfully upload an image and get response about its contents', 
   page,
 }) => {
   await page.goto('/');
-  await selectDifferentModel(page, modelWithImageSupport);
+  await selectDifferentModel(page, LLM_MODELS.IMAGE_CAPABLE_MODEL);
 
   await uploadFile(page, './e2e/fixtures/lazy.webp');
 

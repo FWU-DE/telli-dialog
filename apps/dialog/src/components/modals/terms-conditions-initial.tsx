@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { startTransition, useEffect, useRef, useState } from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { DisclaimerConfig } from './const';
@@ -52,11 +52,11 @@ export default function TermsConditionsModal({
     const div = scrollRef.current;
     if (div) {
       if (div.scrollHeight <= div.clientHeight) {
-        setScrollFinished(true);
+        startTransition(() => setScrollFinished(true));
       } else {
         const overflow = div.scrollHeight - div.clientHeight;
         const shouldBeFinished = overflow <= div.scrollHeight * SCROLL_EXCEESING_TOLERANCE;
-        setScrollFinished(shouldBeFinished);
+        startTransition(() => setScrollFinished(shouldBeFinished));
       }
     }
   };
@@ -111,7 +111,6 @@ export default function TermsConditionsModal({
   const currentContent = <MarkdownDisplay>{contents[pageNumber] ?? ''}</MarkdownDisplay>;
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     checkScrollState();
   }, [pageNumber, contents]);
 

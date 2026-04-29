@@ -1,6 +1,6 @@
 import MarkdownDisplay from './markdown-display';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import AvatarPicture from '../common/avatar-picture';
+import { Button } from '@ui/components/Button';
 
 export function InitialChatContentDisplay({
   title,
@@ -28,9 +28,9 @@ export function InitialChatContentDisplay({
         </div>
       )}
       {setDialogStarted !== undefined && (
-        <button className={buttonPrimaryClassName} onClick={() => setDialogStarted(true)}>
+        <Button onClick={() => setDialogStarted(true)} className="mt-3">
           Dialog starten
-        </button>
+        </Button>
       )}
     </div>
   );

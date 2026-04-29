@@ -3,7 +3,7 @@ import { defineConfig } from 'drizzle-kit';
 const databaseUrl = process.env.API_DATABASE_URL ?? process.env.DATABASE_URL;
 
 if (databaseUrl === undefined) {
-  throw Error('Expected process.env.API_DATABASE_URL to be defined');
+  throw new Error('Expected process.env.API_DATABASE_URL to be defined');
 }
 
 export default defineConfig({

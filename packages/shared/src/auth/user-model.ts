@@ -9,6 +9,7 @@ export const userSchema = userSelectSchema
     email: true,
   })
   .extend({
+    federalStateId: z.string(),
     userRole: userSchoolRoleSchema,
   });
 

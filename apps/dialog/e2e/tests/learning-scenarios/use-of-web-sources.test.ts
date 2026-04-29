@@ -3,6 +3,7 @@ import { AUTH_FILES } from '../../utils/const';
 import { sendMessage } from '../../utils/chat';
 import { configureLearningScenario } from '../../utils/learning-scenario';
 import { waitForAutosave } from '../../utils/utils';
+import { nanoid } from 'nanoid';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
@@ -11,7 +12,7 @@ const data = {
     'Der Chatbot soll aus der Perspektive eines neutralen Vermittlers im Nahostkonflikt antworten und verschiedene Sichtweisen beleuchten.',
   description: 'Konfliktanalyse und Lösungsansätze im Nahostkonflikt',
   gradeLevel: '11. Klasse',
-  name: 'Analyse des Nahostkonflikts – Gruppe 1 Vermittler',
+  name: 'Analyse des Nahostkonflikts – Gruppe 1 Vermittler ' + nanoid(8),
   schoolType: 'Gymnasium',
   studentExercise:
     'Schüler sollen die Ursachen, den Verlauf und mögliche Lösungsansätze des Nahostkonflikts analysieren.',

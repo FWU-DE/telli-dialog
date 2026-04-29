@@ -12,8 +12,11 @@ import {
 } from '@ui/components/AlertDialog';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
+import { Button } from '@ui/components/Button';
 
 type DestructiveActionButtonProps = {
+  triggerButtonVariant?: React.ComponentProps<typeof Button>['variant'];
+  triggerButtonSize?: React.ComponentProps<typeof Button>['size'];
   triggerButtonClassName?: string;
   children: React.ReactNode;
   modalTitle: string;
@@ -23,6 +26,8 @@ type DestructiveActionButtonProps = {
 } & React.ComponentProps<'button'>;
 
 export default function DestructiveActionButton({
+  triggerButtonVariant = 'outline',
+  triggerButtonSize,
   triggerButtonClassName,
   children,
   onClick,
@@ -42,7 +47,9 @@ export default function DestructiveActionButton({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <button
+        <Button
+          variant={triggerButtonVariant}
+          size={triggerButtonSize}
           className={triggerButtonClassName}
           onClick={(event) => {
             event.stopPropagation();
@@ -53,7 +60,7 @@ export default function DestructiveActionButton({
           {...buttonProps}
         >
           {children}
-        </button>
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

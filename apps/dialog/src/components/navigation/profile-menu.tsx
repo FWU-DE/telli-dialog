@@ -9,10 +9,8 @@ import Link from 'next/link';
 import { IMPRESSUM_URL, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from './const';
 import { useTranslations } from 'next-intl';
 import DotsHorizontalIcon from '@/components/icons/dots-horizontal';
-
-import { cn } from '@/utils/tailwind';
-import { iconClassName } from '@/utils/tailwind/icon';
 import { usePortalContainer } from '@ui/components/portal-container';
+import { Button } from '@ui/components/Button';
 
 function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAndContext }) {
   const t = useTranslations('legal');
@@ -59,13 +57,15 @@ export default function ProfileMenu({ userAndContext }: { userAndContext?: UserA
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <button
+        <Button
+          variant="ghost"
+          size="icon-round"
           aria-label="profileDropdown"
-          className={cn('focus:outline-hidden group rounded-enterprise-sm', iconClassName)}
+          className="text-primary"
           title="Profil"
         >
-          <UserIcon className="w-8 h-8" />
-        </button>
+          <UserIcon className="size-8" />
+        </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal container={container}>
         <DropdownMenu.Content

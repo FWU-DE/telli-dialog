@@ -68,6 +68,8 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
   versionAcceptedConditions: null,
   createdAt: new Date(),
   userRole,
+  federalStateId: generateUUID(),
+  schoolIds: [generateUUID()],
 });
 
 function buildFunctionList(
@@ -148,7 +150,7 @@ function buildFunctionList(
       testFunction: () =>
         getLearningScenario({
           learningScenarioId,
-          schoolId,
+          schoolIds: [schoolId],
           user,
         }),
     },
@@ -167,7 +169,7 @@ function buildFunctionList(
         shareLearningScenario({
           data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
           learningScenarioId,
-          schoolId,
+          schoolIds: [schoolId],
           user,
         }),
     },
@@ -177,7 +179,7 @@ function buildFunctionList(
         downloadFileFromLearningScenario({
           learningScenarioId,
           fileId,
-          schoolId,
+          schoolIds: [schoolId],
           user,
         }),
     },
@@ -410,7 +412,7 @@ describe('learning-scenario-service', () => {
         const result = await getLearningScenario({
           learningScenarioId,
           user: differentUser,
-          schoolId: differentSchoolId,
+          schoolIds: [differentSchoolId],
         });
 
         expect(result.learningScenario).toBe(mockLearningScenario);
@@ -445,7 +447,7 @@ describe('learning-scenario-service', () => {
           getFilesForLearningScenario({
             learningScenarioId,
             user: differentUser,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).resolves.not.toThrow();
       });
@@ -471,7 +473,7 @@ describe('learning-scenario-service', () => {
           getLearningScenario({
             learningScenarioId,
             user: differentUser,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -492,7 +494,7 @@ describe('learning-scenario-service', () => {
           getFilesForLearningScenario({
             learningScenarioId,
             user: differentUser,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -640,6 +642,83 @@ describe('learning-scenario-service', () => {
         picturePath: `shared-chats/${learningScenarioId}/avatar_3a6eb0790f39`,
         signedUrl: 'https://signed-url',
       });
+    });
+  });
+
+  describe('unshareLearningScenario – NotFoundError when no active share', () => {
+    const learningScenarioId = generateUUID();
+    const user = mockUser('teacher');
+
+    beforeEach(() => {
+      (
+        dbGetSharedLearningScenarioConversations as MockedFunction<
+          typeof dbGetSharedLearningScenarioConversations
+        >
+      ).mockResolvedValue([] as never);
+    });
+
+    it('throws NotFoundError when the teacher has no active share to stop', async () => {
+      await expect(unshareLearningScenario({ learningScenarioId, user })).rejects.toThrow(
+        NotFoundError,
+      );
+    });
+  });
+
+  describe('shareLearningScenario – success', () => {
+    const userId = generateUUID();
+    const learningScenarioId = generateUUID();
+    const user = { ...mockUser(), id: userId };
+    const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
+      id: learningScenarioId,
+      userId,
+      accessLevel: 'private',
+      hasLinkAccess: false,
+      name: 'Test Scenario',
+    };
+    const newShare = {
+      id: generateUUID(),
+      learningScenarioId,
+      userId,
+      telliPointsLimit: 50,
+      maxUsageTimeLimit: 60,
+      inviteCode: 'ABCD1234',
+      startedAt: new Date(),
+      manuallyStoppedAt: null,
+    };
+
+    beforeEach(() => {
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(mockLearningScenario as never);
+      (
+        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdOptionalShareData
+        >
+      ).mockResolvedValue(mockLearningScenario as never);
+      (
+        dbCreateLearningScenarioShare as MockedFunction<typeof dbCreateLearningScenarioShare>
+      ).mockResolvedValue(newShare as never);
+      (
+        dbGetSharedLearningScenarioConversations as MockedFunction<
+          typeof dbGetSharedLearningScenarioConversations
+        >
+      ).mockResolvedValue([] as never);
+    });
+
+    it('throws an error when there is already an active share', async () => {
+      (
+        dbGetSharedLearningScenarioConversations as MockedFunction<
+          typeof dbGetSharedLearningScenarioConversations
+        >
+      ).mockResolvedValue([newShare] as never);
+
+      await expect(
+        shareLearningScenario({
+          learningScenarioId,
+          data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
+          user,
+        }),
+      ).rejects.toThrow('There can only be one active share at a time');
     });
   });
 });

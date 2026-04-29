@@ -185,7 +185,6 @@
   --color-ring: var(--ring);
 
   --shadow-dropdown: 0px 4px 10px 0px rgba(0, 41, 102, 0.1);
-  --shadow-3xl: 0 4px 9px 0px rgba(0, 41, 102, 0.2); /* only used in collapsible-sidebar.tsx */
 
   --radius-1: 1px;
   --radius-lg: var(--radius);
@@ -320,9 +319,5 @@
     font-weight: 400;
     margin-top: 1em;
     margin-bottom: 1em;
-  }
-
-  .gradient {
-    background-image: conic-gradient(#9d174dff, #6b21a8ff, #3730a3ff);
   }
 }
