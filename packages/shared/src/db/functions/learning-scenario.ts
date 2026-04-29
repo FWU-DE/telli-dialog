@@ -46,6 +46,7 @@ function baseLearningScenarioWithShareQuery() {
       inviteCode: sharedLearningScenarioTable.inviteCode,
       maxUsageTimeLimit: sharedLearningScenarioTable.maxUsageTimeLimit,
       startedAt: sharedLearningScenarioTable.startedAt,
+      manuallyStoppedAt: sharedLearningScenarioTable.manuallyStoppedAt,
       startedBy: sharedLearningScenarioTable.userId,
       ownerSchoolIds: sql<string[]>`coalesce(${userTable.schoolIds}, '{}'::text[])`,
     })
@@ -403,7 +404,12 @@ export async function dbCreateLearningScenarioShare({
   learningScenarioId,
   telliPointsLimit,
   maxUsageTimeLimit,
-}: Omit<SharedLearningScenarioSelectModel, 'id' | 'userId'> & { user: Pick<UserModel, 'id'> }) {
+}: {
+  user: Pick<UserModel, 'id'>;
+  learningScenarioId: string;
+  telliPointsLimit: number;
+  maxUsageTimeLimit: number;
+}) {
   // share learning scenario instance
   const [maybeExistingEntry] = await db
     .select()

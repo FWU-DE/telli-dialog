@@ -434,7 +434,7 @@ export const unshareCharacter = async ({
   // unshare character instance by setting startedAt to null
   const [updatedCharacter] = await db
     .update(sharedCharacterConversation)
-    .set({ startedAt: null, maxUsageTimeLimit: null, telliPointsLimit: null })
+    .set({ manuallyStoppedAt: new Date() })
     .where(
       and(
         eq(sharedCharacterConversation.characterId, characterId),

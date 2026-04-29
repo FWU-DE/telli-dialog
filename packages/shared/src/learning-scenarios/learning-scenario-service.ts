@@ -39,7 +39,6 @@ import {
 import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
-import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { and, eq } from 'drizzle-orm';
 import { OverviewFilter } from '@shared/overview-filter';
 import z from 'zod';
@@ -293,13 +292,9 @@ export async function shareLearningScenario({
 
   const parsedValues = learningScenarioShareValuesSchema.parse(data);
 
-  const inviteCode = generateInviteCode();
-  const startedAt = new Date();
   const sharedLearningScenario = await dbCreateLearningScenarioShare({
     user,
     learningScenarioId,
-    inviteCode,
-    startedAt,
     telliPointsLimit: parsedValues.telliPointsPercentageLimit,
     maxUsageTimeLimit: parsedValues.usageTimeLimit,
   });
@@ -336,7 +331,7 @@ export async function unshareLearningScenario({
 
   const [updatedShare] = await db
     .update(sharedLearningScenarioTable)
-    .set({ startedAt: null, maxUsageTimeLimit: null, telliPointsLimit: null })
+    .set({ manuallyStoppedAt: new Date() })
     .where(
       and(
         eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
