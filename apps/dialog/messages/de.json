@@ -23,7 +23,7 @@
     "minutes": "Minuten",
     "conversation-download": "Konversation herunterladen",
     "send-message-placeholder": "Wie kann ich Dir helfen?",
-    "information-disclaimer": "telli kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",
+    "information-disclaimer": "AIS.chat kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",
     "character-limit-reached": "Zeichenlimit erreicht",
     "chat-expired": "Der Chat ist abgelaufen.",
     "new-chat": "Neuer Chat",
@@ -33,7 +33,7 @@
     "copy-clipboard": "In die Zwischenablage kopieren",
     "regenerate-message": "Antwort erneut generieren",
     "image-load-failed": "Bild konnte nicht geladen werden",
-    "rate-limit-error": "Das bereitgestellte Budget an telli-Points wurde aufgebraucht.",
+    "rate-limit-error": "Das bereitgestellte Tokenvolumen wurde aufgebraucht.",
     "generic-error": "Ein Fehler ist aufgetreten",
     "retry-button": "Erneut versuchen"
   },
@@ -50,13 +50,13 @@
     "community": "Community",
     "community-tooltip": "Wird als Community-Vorlage sicht- und kopierbar.\n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "link": "Via Link",
-    "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit telli-Zugang. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
+    "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit AIS.chat-Zugang. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "copy-link": "Link kopieren",
     "link-copied": "Link in die Zwischenablage kopiert",
     "link-copied-error": "Link konnte nicht kopiert werden"
   },
   "usage-disclaimer": {
-    "initial-title": "Willkommen bei telli!",
+    "initial-title": "Willkommen bei AIS.chat!",
     "terms-and-conditions-title": "Nutzungsbedingungen"
   },
   "sidebar": {
@@ -75,7 +75,7 @@
     "learning-scenarios": "Lernszenarien",
     "characters": "Dialogpartner",
     "help-chat": "Hilfe-Chat",
-    "telli-points": "Meine telli-Points",
+    "telli-points": "Tokenvolumen",
     "chat-search-placeholder": "Chat suchen",
     "delete-chat": "Chat löschen",
     "rename-chat": "Umbenennen",
@@ -140,10 +140,10 @@
     }
   },
   "help-mode": {
-    "chat-heading": "Hallo, ich bin tellis Hilfe",
+    "chat-heading": "Hallo, ich bin die in AIS.chat integrierte Hilfe",
     "chat-subheading": "Ich kenne mich hier aus und kann hoffentlich alle Fragen beantworten oder bei Problemen weiterhelfen. Ansonsten kann auch gerne meine {FAQ_LINK} besucht oder der Support unter {SUPPORT_ADRESSES} kontaktiert werden.",
     "chat-placeholder": "Wie kann ich helfen?",
-    "faq-link": "[FAQ Seite](https://telli.schule/faq/)",
+    "faq-link": "[FAQ Seite](https://ais-chat.schule/faq/)",
     "support-addresses-concat": "oder"
   },
   "custom-gpt": {
@@ -183,8 +183,8 @@
       },
       "additional-assets-label": "Hintergrundwissen",
       "additional-assets-content": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Der Assistent bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
-      "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
-      "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
+      "attached-files-label": "Welche Dateien dienen der KI als Grundlage?",
+      "attached-links-label": "Welche Webquellen dienen der KI als Grundlage?",
       "attached-links-placeholder": "Web-Link",
       "add-link": "Link hinzufügen"
     },
@@ -301,10 +301,8 @@
         "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht, wenn die Seite verlassen wird. Kopiere den Dialogpartner in den privaten Bereich, um ihn anzupassen.",
         "copy-template": "Dialogpartner bearbeiten"
       },
-      "additional-assets-label": "Hintergrundwissen für telli",
-      "additional-assets-content": "Es können jeweils bis zu 5 Dateien und Links hinzugefügt werden. telli nutzt diese Informationen, um den Dialogpartner besser auf das Thema abzustimmen.",
-      "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
-      "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
+      "attached-files-label": "Welche Dateien dienen AIS.chat als Grundlage?",
+      "attached-links-label": "Welche Webquellen dienen AIS.chat als Grundlage?",
       "attached-links-placeholder": "Web-Link",
       "add-link": "Link hinzufügen"
     },
@@ -329,7 +327,7 @@
   },
   "learning-scenarios": {
     "title": "Lernszenarien",
-    "description": "Im Dialog mit telli setzen sich Lernende mit einem konkreten Thema auseinander und erarbeiten sich so einen Lerngegenstand interaktiv und selbstständig. Die zeitlich begrenzten Chats können einfach einzeln oder gruppenweise mit Lernenden geteilt werden.",
+    "description": "Im Dialog mit der KI setzen sich Lernende mit einem konkreten Thema auseinander und erarbeiten sich so einen Lerngegenstand interaktiv und selbstständig. Die zeitlich begrenzten Chats können einfach einzeln oder gruppenweise mit Lernenden geteilt werden.",
     "back-button": "Lernszenarien",
     "back-button-aria-label": "Zurück zu den Lernszenarien",
     "name-label": "Name des Lernszenarios",
@@ -368,7 +366,7 @@
       "title": "Lernszenario erstellen",
       "settings": "Lernszenario-Einstellungen",
       "name": "Wie heißt das Szenario?",
-      "name-placeholder": "telli4you",
+      "name-placeholder": "AIS.chat4you",
       "purpose-label": "Wie kann das Szenario kurz beschrieben werden?",
       "purpose-placeholder": "Schneller Zugang zu KI für die Lernenden",
       "school-type-label": "Schultyp",
@@ -379,12 +377,11 @@
       "subject-placeholder": "Projektarbeit",
       "student-exercise-label": "Wie lautet der Auftrag an die Lernenden?",
       "student-exercise-placeholder": "1. Nutze KI, um an deinem aktuellen Thema zu arbeiten.\n2. Übernimm nur das, was für dich hilfreich ist.\n3. Reflektiere am Ende, was du durch die Nutzung der KI gelernt hast.",
-      "additional-instructions-label": "Wie verhält sich telli im Lernszenario?",
       "additional-instructions-placeholder": "Beantworte immer nur eine Frage. Formuliere Rückfragen, wenn du noch Informationen brauchst, um konkrete Antworten zu finden. Bitte bei unverständlichen Prompts um mehr Klarheit und Verständlichkeit.",
-      "additional-assets-label": "Hintergrundwissen für telli",
-      "additional-assets-content": "Es können jeweils bis zu 5 Dateien und Links hinzugefügt werden. telli nutzt diese Informationen, um das Lernszenario besser auf das Thema abzustimmen.",
-      "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
-      "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
+      "additional-assets-label": "Hintergrundwissen für AIS.chat",
+      "additional-assets-content": "Es können jeweils bis zu 5 Dateien und Links hinzugefügt werden. Die KI nutzt diese Informationen, um das Lernszenario besser auf das Thema abzustimmen.",
+      "attached-files-label": "Welche Dateien dienen AIS.chat als Grundlage?",
+      "attached-links-label": "Welche Webquellen dienen AIS.chat als Grundlage?",
       "attached-links-placeholder": "Web-Link",
       "add-link": "Link hinzufügen",
       "copy-page": {
@@ -450,13 +447,13 @@
     }
   },
   "top-up": {
-    "title": "telli-Points aufladen",
-    "description": "Um telli mehr nutzen zu können, lade deine telli-Points einfach hier auf.",
+    "title": "Tokenvolumen aufladen",
+    "description": "Um AIS.chat mehr nutzen zu können, lade dein Tokenvolumen einfach hier auf.",
     "voucher": "Gutscheincode",
     "voucher-placeholder": "Gib deinen 16-stelligen Gutscheincode ein",
     "redeem-button": "Gutschein einlösen",
     "toasts": {
-      "redeem-success": "Deine telli-Points wurden erfolgreich aufgeladen.",
+      "redeem-success": "Dein Tokenvolumen wurde erfolgreich aufgeladen.",
       "redeem-invalid": "Der eingegebene Gutscheincode ist ungültig."
     }
   },
@@ -545,7 +542,7 @@
     },
     "files-and-links": {
       "heading": "Hintergrundwissen",
-      "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Telli bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: {supported_formats}",
+      "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Die KI bezieht dieses Wissen bei Bedarf in ihre Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: {supported_formats}",
       "files": "Dateien",
       "links": "Webseiten",
       "links-tooltip": "Wichtig: Bitte jeweils konkrete Webseiten angeben (z.B. http://wikipedia.org/wiki/Astronomie). Nur http://wikipedia.org ist nicht ausreichend.",

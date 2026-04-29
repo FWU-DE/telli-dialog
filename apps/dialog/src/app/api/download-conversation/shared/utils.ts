@@ -45,7 +45,7 @@ export async function generateSharedConversationDocxFiles({
 function getConversationMetadata() {
   return [
     new Paragraph({
-      children: [new TextRun({ text: `telli Konversation`, bold: true, size: 40 })],
+      children: [new TextRun({ text: `AIS.chat Konversation`, bold: true, size: 40 })],
     }),
     new Paragraph({
       children: [
@@ -71,7 +71,7 @@ function getConversationMessages({
     new Paragraph({
       children: [
         new TextRun({
-          text: `${message.role === 'user' ? userFullName : 'telli'}:`,
+          text: `${message.role === 'user' ? userFullName : 'AIS.chat'}:`,
           bold: true,
           size: 22,
         }),
