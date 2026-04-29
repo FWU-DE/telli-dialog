@@ -19,11 +19,7 @@ export default async function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]/share'>,
 ) {
   const { learningScenarioId } = await props.params;
-  const { user, federalState } = await requireAuth();
-  const userAndContext = {
-    ...user,
-    federalState,
-  };
+  const { user } = await requireAuth();
 
   const learningScenario = await getSharedLearningScenario({
     learningScenarioId: learningScenarioId,
@@ -43,7 +39,7 @@ export default async function Page(
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
       <CollapseSidebar />
-      <CustomChatHeader userAndContext={userAndContext} />
+      <CustomChatHeader />
       <Link
         href={`/learning-scenarios/editor/${learningScenario.id}`}
         className="flex gap-2 items-center text-primary w-full"

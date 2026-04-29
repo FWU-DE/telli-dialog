@@ -9,7 +9,6 @@ import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
-import { ChatHeaderBar } from '@/components/chat/header-bar';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,12 +37,14 @@ export default async function Page(props: PageProps<'/assistants/d/[assistantId]
 
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
-      <ChatHeaderBar
-        chatId={id}
-        userAndContext={userAndContext}
-        downloadConversationEnabled={false}
-      />
-      <DefaultPageLayout>
+      <DefaultPageLayout
+        header={{
+          headerType: 'chat',
+          chatId: id,
+          userAndContext,
+          downloadConversationEnabled: false,
+        }}
+      >
         <Chat
           id={id}
           initialMessages={[]}

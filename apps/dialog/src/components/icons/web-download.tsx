@@ -2,7 +2,7 @@ export default function WebDownloadIcon(props: React.ComponentProps<'svg'>) {
   return (
     <svg
       preserveAspectRatio="xMidYMid meet"
-      viewBox="0 0 32 32"
+      viewBox="7 7 18 18"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
