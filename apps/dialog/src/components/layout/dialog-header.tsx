@@ -8,7 +8,7 @@ import {
   ReactNode,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -92,7 +92,7 @@ export function DialogHeader({ userAndContext }: { userAndContext?: UserAndConte
   );
 
   return (
-    <header className="h-19 flex-none px-6 py-4 flex items-center justify-between gap-4">
+    <header className="h-20 flex-none px-6 py-4 flex items-center justify-between gap-4">
       <ToggleSidebarButton />
       <div className="min-w-0 flex-1">
         <div className="w-full" ref={headerMountRef} />
@@ -116,9 +116,8 @@ export function DialogWrapper({
 }: {
   children: ReactNode;
   userAndContext?: UserAndContext;
-  infoBanners?: InfoBanner[]; 
+  infoBanners?: InfoBanner[];
 }) {
-
   return (
     <DialogHeaderProvider>
       <div className="relative flex flex-col h-dvh w-dvw overflow-hidden bg-background-2">
@@ -147,7 +146,7 @@ export function DialogHeaderContent({ children }: { children: ReactNode }) {
 export function DialogHeaderCompactMenuContent({ children }: { children: ReactNode }) {
   const { compactMenuMountNode, setHasCompactMenuContent } = useDialogHeader();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setHasCompactMenuContent(true);
     return () => {
       setHasCompactMenuContent(false);

@@ -12,6 +12,7 @@ type DownloadConversationButtonProps = {
   characterName?: string;
   disabled: boolean;
   showText?: boolean;
+  className?: string;
 };
 
 export default function DownloadConversationButton({
@@ -19,6 +20,7 @@ export default function DownloadConversationButton({
   characterName,
   disabled = true,
   showText = false,
+  className,
 }: DownloadConversationButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const toast = useToast();
@@ -67,7 +69,7 @@ export default function DownloadConversationButton({
     <Button
       variant="ghost"
       size="icon-round"
-      className="text-primary"
+      className={['text-primary', className].filter(Boolean).join(' ')}
       title={t('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}

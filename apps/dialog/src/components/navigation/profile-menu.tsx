@@ -12,14 +12,17 @@ import DotsHorizontalIcon from '@/components/icons/dots-horizontal';
 import { usePortalContainer } from '@ui/components/portal-container';
 import { Button } from '@ui/components/Button';
 
-function MenuActionRow({ action }: { action: React.ReactNode }) {
-  return (
-    <DropdownMenu.Item>
-      <div className="flex p-2 pl-4 [&_button]:h-auto [&_button]:justify-start [&_button]:border-none [&_button]:bg-transparent [&_button]:px-0 [&_button]:py-0 [&_button]:flex-row [&_button]:gap-2 [&_button]:text-base [&_button]:font-normal [&_button:hover]:bg-transparent [&_button:hover]:underline [&_button:hover]:text-primary">
-        {action}
-      </div>
-    </DropdownMenu.Item>
-  );
+
+function MenuActionRow({ action }: { action: React.ReactElement<{ className?: string }> }) {
+  const className = [
+    'flex w-full h-auto items-center justify-start gap-2 p-2 pl-4 text-base font-normal bg-transparent border-none hover:bg-transparent hover:underline hover:text-primary',
+    action.props.className,
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const actionWithClasses = React.cloneElement(action, { className });
+
+  return <DropdownMenu.Item asChild>{actionWithClasses}</DropdownMenu.Item>;
 }
 
 function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAndContext }) {
@@ -95,8 +98,8 @@ export function ThreeDotsProfileMenu({
   deleteButtonJSX,
   userAndContext,
 }: {
-  downloadButtonJSX?: React.ReactNode;
-  deleteButtonJSX?: React.ReactNode;
+  downloadButtonJSX?: ActionMenuElement;
+  deleteButtonJSX?: ActionMenuElement;
   userAndContext?: UserAndContext;
 }) {
   const container = usePortalContainer();

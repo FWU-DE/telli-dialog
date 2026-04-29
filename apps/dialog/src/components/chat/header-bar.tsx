@@ -24,7 +24,6 @@ export function ChatHeaderBarContent({
   chatId,
 }: ChatHeaderBarProps) {
   const { downloadConversationEnabled: downloadConversationEnabledFromContext } = useLlmModels();
-  // Either the server-provided prop or the client-side context (updated after first message sent)
   const downloadConversationEnabled =
     downloadConversationEnabledProp || downloadConversationEnabledFromContext;
 
@@ -39,12 +38,14 @@ export function ChatHeaderBarContent({
             <span className="font-normal text-xl truncate">{title}</span>
           </div>
         )}
-        <DownloadConversationButton
-          conversationId={chatId}
-          characterName={title}
-          disabled={!downloadConversationEnabled}
-          showText={false}
-        />
+        <div className="hidden sm:flex">
+          <DownloadConversationButton
+            conversationId={chatId}
+            characterName={title}
+            disabled={!downloadConversationEnabled}
+            showText={false}
+          />
+        </div>
       </div>
       <div className="flex flex-1 w-full sm:hidden">
         <span className="font-normal text-xl">{title}</span>

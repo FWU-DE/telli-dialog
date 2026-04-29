@@ -65,7 +65,9 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
               currentModelCosts={priceInCent ?? 0}
               userPriceLimit={userPriceLimit ?? 500}
             />
-            <DialogWrapper userAndContext={userAndContext} infoBanners={activeBanners}>{children}</DialogWrapper>
+            <DialogWrapper userAndContext={userAndContext} infoBanners={activeBanners}>
+              {children}
+            </DialogWrapper>
           </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (
