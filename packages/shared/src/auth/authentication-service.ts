@@ -5,7 +5,9 @@ import { normalizeVidisSchoolIds } from '../db/functions/vidis';
 const authErrorCodeSchema = z.enum(['federal_state_not_found', 'federal_state_changed']);
 export type AuthErrorCode = z.infer<typeof authErrorCodeSchema>;
 
-type OidcValidationResult = { success: true } | { success: false; fieldErrors: string[] };
+type OidcValidationResult =
+  | { success: true; value: z.infer<typeof vidisProfileSchema> }
+  | { success: false; fieldErrors: string[] };
 
 function isEmptyString(value: string): boolean {
   return value.trim().length === 0;
@@ -52,7 +54,7 @@ export function validateOidcProfile(profile: unknown): OidcValidationResult {
     return { success: false, fieldErrors };
   }
 
-  return { success: true };
+  return { success: true, value: profileResult.data };
 }
 
 /**

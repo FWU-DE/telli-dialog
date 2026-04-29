@@ -1,5 +1,4 @@
 import { dbCreateUser, dbGetUserById, dbUpdateUserById } from '@telli/shared/db/functions/user';
-import { vidisProfileSchema } from '@telli/shared/auth/vidis';
 import { dbGetFederalStateById } from '@shared/db/functions/federal-state';
 import { AuthErrorCode, validateOidcProfile } from '@shared/auth/authentication-service';
 import { normalizeVidisSchoolIds, vidisRoleToUserSchoolRole } from '@shared/db/functions/vidis';
@@ -15,7 +14,7 @@ export async function validateAndSyncVidisUser(profile: unknown): Promise<VidisS
     return profileValidationResult;
   }
 
-  const parsedProfile = vidisProfileSchema.parse(profile);
+  const parsedProfile = profileValidationResult.value;
   const federalState = await dbGetFederalStateById(parsedProfile.bundesland.trim());
   if (!federalState) {
     return { success: false, authError: 'federal_state_not_found' };
