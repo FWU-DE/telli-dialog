@@ -60,52 +60,55 @@ test.describe('share assistant school-wide', () => {
     await page.close();
   });
 
-  // Teacher's perspective (school1)
-  test.use({ storageState: AUTH_FILES.teacher });
+  test.describe('teacher perspective', () => {
+    test.use({ storageState: AUTH_FILES.teacher });
 
-  test('teacher sees assistant shared by teacher2 (same school)', async ({ page }) => {
-    await page.goto('/assistants');
-    await page.waitForURL('/assistants');
-    await expect(page.getByText(assistantTeacher2).first()).toBeVisible();
+    test('teacher sees assistant shared by teacher2 (same school)', async ({ page }) => {
+      await page.goto('/assistants');
+      await page.waitForURL('/assistants');
+      await expect(page.getByText(assistantTeacher2).first()).toBeVisible();
+    });
+
+    test('teacher does not see assistant shared by teacher3 (different schools)', async ({
+      page,
+    }) => {
+      await page.goto('/assistants');
+      await page.waitForURL('/assistants');
+      await expect(page.getByText(assistantTeacher3).first()).not.toBeVisible();
+    });
   });
 
-  test('teacher does not see assistant shared by teacher3 (different schools)', async ({
-    page,
-  }) => {
-    await page.goto('/assistants');
-    await page.waitForURL('/assistants');
-    await expect(page.getByText(assistantTeacher3).first()).not.toBeVisible();
+  test.describe('teacher2 perspective', () => {
+    test.use({ storageState: AUTH_FILES.teacher2 });
+
+    test('teacher2 sees assistant shared by teacher (shared school)', async ({ page }) => {
+      await page.goto('/assistants');
+      await page.waitForURL('/assistants');
+      await expect(page.getByText(assistantTeacher).first()).toBeVisible();
+    });
+
+    test('teacher2 sees assistant shared by teacher3 (shared school)', async ({ page }) => {
+      await page.goto('/assistants');
+      await page.waitForURL('/assistants');
+      await expect(page.getByText(assistantTeacher3).first()).toBeVisible();
+    });
   });
 
-  // Teacher2's perspective (school1 & school2)
-  test.use({ storageState: AUTH_FILES.teacher2 });
+  test.describe('teacher3 perspective', () => {
+    test.use({ storageState: AUTH_FILES.teacher3 });
 
-  test('teacher2 sees assistant shared by teacher (shared school)', async ({ page }) => {
-    await page.goto('/assistants');
-    await page.waitForURL('/assistants');
-    await expect(page.getByText(assistantTeacher).first()).toBeVisible();
-  });
+    test('teacher3 sees assistant shared by teacher2 (shared school)', async ({ page }) => {
+      await page.goto('/assistants');
+      await page.waitForURL('/assistants');
+      await expect(page.getByText(assistantTeacher2).first()).toBeVisible();
+    });
 
-  test('teacher2 sees assistant shared by teacher3 (shared school)', async ({ page }) => {
-    await page.goto('/assistants');
-    await page.waitForURL('/assistants');
-    await expect(page.getByText(assistantTeacher3).first()).toBeVisible();
-  });
-
-  // Teacher3's perspective (school2 & school3)
-  test.use({ storageState: AUTH_FILES.teacher3 });
-
-  test('teacher3 sees assistant shared by teacher2 (shared school)', async ({ page }) => {
-    await page.goto('/assistants');
-    await page.waitForURL('/assistants');
-    await expect(page.getByText(assistantTeacher2).first()).toBeVisible();
-  });
-
-  test('teacher3 does not see assistant shared by teacher (different schools)', async ({
-    page,
-  }) => {
-    await page.goto('/assistants');
-    await page.waitForURL('/assistants');
-    await expect(page.getByText(assistantTeacher).first()).not.toBeVisible();
+    test('teacher3 does not see assistant shared by teacher (different schools)', async ({
+      page,
+    }) => {
+      await page.goto('/assistants');
+      await page.waitForURL('/assistants');
+      await expect(page.getByText(assistantTeacher).first()).not.toBeVisible();
+    });
   });
 });
