@@ -39,7 +39,7 @@ function DefaultPageHeader({ header }: { header?: DefaultPageLayoutHeaderConfig 
   if (header.headerType === 'image') {
     return (
       <DialogHeaderContent>
-        <div className="flex w-full gap-4 justify-center items-center z-30 p-4 border-b">
+        <div className="flex w-full gap-4">
           <SelectImageModel />
           <SelectImageStyle />
         </div>

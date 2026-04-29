@@ -19,8 +19,6 @@ import AppSidebar from '@/components/navigation/sidebar/app-sidebar';
 import { SidebarProvider } from '@telli/ui/components/Sidebar';
 import SessionWatcher from '@/auth/SessionWatcher';
 import { getActiveBannersForUser } from '@shared/info-banners/info-banner-service';
-import ActiveInfoBanners from '@/components/info-banners/active-info-banners';
-import { DialogHeader, DialogHeaderProvider } from '@/components/layout/dialog-header';
 import { DialogWrapper } from '@/components/layout/dialog-header';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
@@ -41,10 +39,10 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
       }),
     ]);
 
-  const productAccess = checkProductAccess({ ...userWithRole, hasCompletedTraining });
+  const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
   const userAndContext = {
     ...user,
-    userRole: user.school.userRole,
+    userRole: user.userRole,
     federalState,
   };
   const federalStateDisclaimer =
@@ -67,8 +65,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
               currentModelCosts={priceInCent ?? 0}
               userPriceLimit={userPriceLimit ?? 500}
             />
-            <ActiveInfoBanners infoBanners={activeBanners} />
-            <DialogWrapper userAndContext={userAndContext}>{children}</DialogWrapper>
+            <DialogWrapper userAndContext={userAndContext} infoBanners={activeBanners}>{children}</DialogWrapper>
           </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (

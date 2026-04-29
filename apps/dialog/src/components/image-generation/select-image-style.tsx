@@ -7,10 +7,12 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { cn } from '@/utils/tailwind';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { ImageStyle } from '@shared/utils/chat';
+import { usePortalContainer } from '@ui/components/portal-container';
 
 export default function SelectImageStyle() {
   const { styles, selectedStyle, setSelectedStyle } = useImageStyle();
   const tImageGeneration = useTranslations('image-generation');
+  const container = usePortalContainer();
 
   async function handleSelectStyle(style: ImageStyle | undefined) {
     startTransition(() => {
@@ -43,41 +45,43 @@ export default function SelectImageStyle() {
             {styles.length > 1 && <ChevronDown className="text-primary" />}
           </button>
         </DropdownMenu.Trigger>
-        <DropdownMenu.Content
-          className={cn('flex flex-col bg-white shadow-dropdown rounded-xl ml-0')}
-          align="start"
-          sideOffset={10}
-        >
-          {styles
-            .filter((style) => {
-              if (selectedStyle === undefined) {
-                return style.name !== 'none';
-              } else {
-                return style.name !== selectedStyle.name;
-              }
-            })
-            .map((style) => {
-              return (
-                <React.Fragment key={style.name}>
-                  <DropdownMenu.Item asChild>
-                    <button
-                      className={cn(
-                        'hover:bg-primary text-left py-6 px-7 outline-hidden flex flex-col',
-                        iconClassName,
-                      )}
-                      onClick={() => handleSelectStyle(style.name === 'none' ? undefined : style)}
-                      aria-label={`Select ${style.displayName} Style`}
-                    >
-                      <div className="flex gap-2 items-center">
-                        <span>{style.displayName}</span>
-                      </div>
-                    </button>
-                  </DropdownMenu.Item>
-                  <hr className="text-gray-200 mx-2 last:mb-2 last:hidden" />
-                </React.Fragment>
-              );
-            })}
-        </DropdownMenu.Content>
+        <DropdownMenu.Portal container={container}>
+          <DropdownMenu.Content
+            className={cn('flex flex-col bg-white shadow-dropdown rounded-xl ml-0')}
+            align="start"
+            sideOffset={10}
+          >
+            {styles
+              .filter((style) => {
+                if (selectedStyle === undefined) {
+                  return style.name !== 'none';
+                } else {
+                  return style.name !== selectedStyle.name;
+                }
+              })
+              .map((style) => {
+                return (
+                  <React.Fragment key={style.name}>
+                    <DropdownMenu.Item asChild>
+                      <button
+                        className={cn(
+                          'hover:bg-primary text-left py-6 px-7 outline-hidden flex flex-col',
+                          iconClassName,
+                        )}
+                        onClick={() => handleSelectStyle(style.name === 'none' ? undefined : style)}
+                        aria-label={`Select ${style.displayName} Style`}
+                      >
+                        <div className="flex gap-2 items-center">
+                          <span>{style.displayName}</span>
+                        </div>
+                      </button>
+                    </DropdownMenu.Item>
+                    <hr className="text-gray-200 mx-2 last:mb-2 last:hidden" />
+                  </React.Fragment>
+                );
+              })}
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
       </DropdownMenu.Root>
     </div>
   );

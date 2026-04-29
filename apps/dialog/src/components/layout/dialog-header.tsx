@@ -16,6 +16,8 @@ import {
 import { createPortal } from 'react-dom';
 import useBreakpoints from '@/components/hooks/use-breakpoints';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
+import type { InfoBanner } from '@shared/info-banners/info-banner';
+import ActiveInfoBanners from '@/components/info-banners/active-info-banners';
 
 type DialogHeaderContextValue = {
   headerMountNode: HTMLDivElement | null;
@@ -110,13 +112,17 @@ export function DialogHeader({ userAndContext }: { userAndContext?: UserAndConte
 export function DialogWrapper({
   children,
   userAndContext,
+  infoBanners,
 }: {
   children: ReactNode;
   userAndContext?: UserAndContext;
+  infoBanners?: InfoBanner[]; 
 }) {
+
   return (
     <DialogHeaderProvider>
       <div className="relative flex flex-col h-dvh w-dvw overflow-hidden bg-background-2">
+        {infoBanners !== undefined && <ActiveInfoBanners infoBanners={infoBanners} />}
         <DialogHeader userAndContext={userAndContext} />
         <main className="min-h-0 w-full mx-auto flex-1 overflow-auto">{children}</main>
       </div>
