@@ -23,7 +23,7 @@ export default async function Page(props: PageProps<'/assistants/d/[assistantId]
 
   const assistant = await getAssistantForNewChat({
     assistantId: assistantId,
-    userId: user.id,
+    user: user,
   }).catch(handleErrorInServerComponent);
 
   const logoElement = <Logo logoPath={federalState.pictureUrls?.logo} />;

@@ -1,5 +1,5 @@
 import { db } from '..';
-import { and, desc, eq, getTableColumns, inArray, or } from 'drizzle-orm';
+import { and, arrayOverlaps, desc, eq, getTableColumns, inArray, or, sql } from 'drizzle-orm';
 import {
   conversationMessageTable,
   conversationTable,
@@ -9,16 +9,27 @@ import {
   assistantTable,
   assistantTemplateMappingTable,
   fileTable,
+  userTable,
 } from '../schema';
 import { NotFoundError } from '@shared/error';
-import { dbGetUserIdsWithSharedSchools } from '../helpers/school-sharing';
+import { UserModel } from '@shared/auth/user-model';
+
+function baseAssistantQuery() {
+  return db
+    .select({
+      ...getTableColumns(assistantTable),
+      ownerSchoolIds: sql<string[]>`coalesce(${userTable.schoolIds}, '{}'::text[])`,
+    })
+    .from(assistantTable)
+    .leftJoin(userTable, eq(assistantTable.userId, userTable.id));
+}
 
 export async function dbGetAssistantsByUserId({
-  userId,
+  user,
 }: {
-  userId: string;
+  user: Pick<UserModel, 'id'>;
 }): Promise<AssistantSelectModel[]> {
-  return db.select().from(assistantTable).where(eq(assistantTable.userId, userId));
+  return baseAssistantQuery().where(eq(assistantTable.userId, user.id));
 }
 
 export async function dbGetAssistantById({
@@ -26,10 +37,7 @@ export async function dbGetAssistantById({
 }: {
   assistantId: string;
 }): Promise<AssistantSelectModel> {
-  const [assistant] = await db
-    .select()
-    .from(assistantTable)
-    .where(and(eq(assistantTable.id, assistantId)));
+  const [assistant] = await baseAssistantQuery().where(eq(assistantTable.id, assistantId));
 
   if (!assistant) throw new NotFoundError('Assistant not found');
 
@@ -37,14 +45,14 @@ export async function dbGetAssistantById({
 }
 
 export async function dbGetGlobalGpts({
-  federalStateId,
+  user,
 }: {
-  federalStateId?: string;
+  user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<AssistantSelectModel[]> {
+  const federalStateId = user.federalStateId;
+
   if (federalStateId) {
-    return db
-      .select({ ...getTableColumns(assistantTable) })
-      .from(assistantTable)
+    return baseAssistantQuery()
       .innerJoin(
         assistantTemplateMappingTable,
         eq(assistantTemplateMappingTable.assistantId, assistantTable.id),
@@ -57,9 +65,7 @@ export async function dbGetGlobalGpts({
       )
       .orderBy(desc(assistantTable.createdAt));
   } else {
-    return db
-      .select()
-      .from(assistantTable)
+    return baseAssistantQuery()
       .where(eq(assistantTable.accessLevel, 'global'))
       .orderBy(desc(assistantTable.createdAt));
   }
@@ -70,75 +76,69 @@ export async function dbGetGlobalAssistantByName({
 }: {
   name: string;
 }): Promise<AssistantSelectModel | undefined> {
-  const [assistant] = await db
-    .select()
-    .from(assistantTable)
-    .where(and(eq(assistantTable.name, name), eq(assistantTable.accessLevel, 'global')));
+  const [assistant] = await baseAssistantQuery().where(
+    and(eq(assistantTable.name, name), eq(assistantTable.accessLevel, 'global')),
+  );
   return assistant;
 }
 
 export async function dbGetGptsByAssociatedSchools({
-  userId,
+  user,
 }: {
-  userId: string;
+  user: Pick<UserModel, 'schoolIds'>;
 }): Promise<AssistantSelectModel[]> {
-  // Get all users who share at least one school with the requesting user
-  const sharedUserIds = await dbGetUserIdsWithSharedSchools(userId);
+  const requesterSchoolIds = user.schoolIds ?? [];
 
-  if (sharedUserIds.length === 0) {
+  if (requesterSchoolIds.length === 0) {
     return [];
   }
 
-  return db
-    .select()
-    .from(assistantTable)
+  return baseAssistantQuery()
     .where(
-      and(inArray(assistantTable.userId, sharedUserIds), eq(assistantTable.accessLevel, 'school')),
+      and(
+        eq(assistantTable.accessLevel, 'school'),
+        arrayOverlaps(userTable.schoolIds, requesterSchoolIds),
+      ),
     )
     .orderBy(desc(assistantTable.createdAt));
 }
 
-export async function dbGetGptsByUserId({
-  userId,
+export async function dbGetGptsByUser({
+  user,
 }: {
-  userId: string;
+  user: Pick<UserModel, 'id'>;
 }): Promise<AssistantSelectModel[]> {
-  return db
-    .select()
-    .from(assistantTable)
-    .where(and(eq(assistantTable.userId, userId), eq(assistantTable.accessLevel, 'private')))
+  return baseAssistantQuery()
+    .where(and(eq(assistantTable.userId, user.id), eq(assistantTable.accessLevel, 'private')))
     .orderBy(desc(assistantTable.createdAt));
 }
 
 export async function dbGetAssistantByIdOrAssociatedSchool({
   assistantId,
-  userId,
+  user,
 }: {
   assistantId: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds'>;
 }) {
-  const sharedUserIds = await dbGetUserIdsWithSharedSchools(userId);
+  const requesterSchoolIds = user.schoolIds ?? [];
 
-  const [assistant] = await db
-    .select()
-    .from(assistantTable)
-    .where(
-      or(
-        and(
-          eq(assistantTable.id, assistantId),
-          eq(assistantTable.userId, userId),
-          eq(assistantTable.accessLevel, 'private'),
-        ),
-        sharedUserIds.length > 0
-          ? and(
-              eq(assistantTable.id, assistantId),
-              inArray(assistantTable.userId, sharedUserIds),
-              eq(assistantTable.accessLevel, 'school'),
-            )
-          : undefined,
-        eq(assistantTable.accessLevel, 'global'),
+  const [assistant] = await baseAssistantQuery().where(
+    or(
+      and(
+        eq(assistantTable.id, assistantId),
+        eq(assistantTable.userId, user.id),
+        eq(assistantTable.accessLevel, 'private'),
       ),
-    );
+      requesterSchoolIds.length > 0
+        ? and(
+            eq(assistantTable.id, assistantId),
+            eq(assistantTable.accessLevel, 'school'),
+            arrayOverlaps(userTable.schoolIds, requesterSchoolIds),
+          )
+        : undefined,
+      eq(assistantTable.accessLevel, 'global'),
+    ),
+  );
 
   return assistant;
 }
@@ -157,7 +157,8 @@ export async function dbUpsertAssistant({
     })
     .returning();
 
-  return insertedAssistant;
+  if (!insertedAssistant) return undefined;
+  return { ...insertedAssistant, ownerSchoolIds: [] };
 }
 
 export async function dbUpdateAssistant({
@@ -173,7 +174,8 @@ export async function dbUpdateAssistant({
     .where(eq(assistantTable.id, assistantId))
     .returning();
 
-  return updatedAssistant;
+  if (!updatedAssistant) return undefined;
+  return { ...updatedAssistant, ownerSchoolIds: [] };
 }
 
 export async function dbDeleteAssistant({ assistantId }: { assistantId: string }) {
@@ -198,17 +200,17 @@ export async function dbDeleteAssistant({ assistantId }: { assistantId: string }
   });
 }
 
-export async function dbDeleteAssistantByIdAndUserId({
+export async function dbDeleteAssistantByIdAndUser({
   gptId: gptId,
-  userId,
+  user,
 }: {
   gptId: string;
-  userId: string;
+  user: Pick<UserModel, 'id'>;
 }) {
   const [assistant] = await db
     .select()
     .from(assistantTable)
-    .where(and(eq(assistantTable.id, gptId), eq(assistantTable.userId, userId)));
+    .where(and(eq(assistantTable.id, gptId), eq(assistantTable.userId, user.id)));
 
   if (assistant === undefined) {
     throw new Error('Assistant does not exist');
@@ -244,7 +246,7 @@ export async function dbDeleteAssistantByIdAndUserId({
     const deletedAssistant = (
       await tx
         .delete(assistantTable)
-        .where(and(eq(assistantTable.id, gptId), eq(assistantTable.userId, userId)))
+        .where(and(eq(assistantTable.id, gptId), eq(assistantTable.userId, user.id)))
         .returning()
     )[0];
 

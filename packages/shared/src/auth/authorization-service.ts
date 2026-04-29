@@ -1,54 +1,47 @@
 import { ForbiddenError } from '@shared/error';
 import { AccessLevel, UserSchoolRole } from '@shared/db/schema';
-import { dbGetUserIdsWithSharedSchools } from '@shared/db/helpers/school-sharing';
+import { UserModel } from './user-model';
 
 type AuthorizedItem = {
   accessLevel: AccessLevel;
   hasLinkAccess: boolean;
   userId: string | null;
-};
-
-type VerifyReadAccessParams<T extends AuthorizedItem> = {
-  item: T;
-  userId?: string;
-  sharedSchoolUserIds?: ReadonlySet<string>;
+  schoolIds?: string[];
 };
 
 export async function verifyReadAccess<T extends AuthorizedItem>({
   item,
-  userId,
-  sharedSchoolUserIds,
-}: VerifyReadAccessParams<T>) {
+  user,
+}: {
+  item: T;
+  user?: Pick<UserModel, 'id' | 'schoolIds'>;
+}) {
   // allow access if shared by link
   if (item.hasLinkAccess) return;
   // allow access if shared globally
   if (item.accessLevel === 'global') return;
   // allow if owner (disregarding the access-level)
-  if (item.userId && item.userId === userId) return;
+  if (item.userId && item.userId === user?.id) return;
   // allow if school-shared
-  if (item.accessLevel === 'school') {
-    if (!userId || !item.userId) {
-      throw new ForbiddenError('Not authorized for read access');
-    }
-
-    const schoolSharedUserIds =
-      sharedSchoolUserIds ?? new Set(await dbGetUserIdsWithSharedSchools(userId));
-
-    if (schoolSharedUserIds.has(item.userId)) return;
-  }
+  if (
+    item.accessLevel === 'school' &&
+    user?.schoolIds &&
+    item.schoolIds?.some((id) => user.schoolIds?.includes(id))
+  )
+    return;
 
   throw new ForbiddenError('Not authorized for read access');
 }
 
 export function verifyWriteAccess<T extends AuthorizedItem>({
   item,
-  userId,
+  user,
 }: {
   item: T;
-  userId?: string;
+  user?: Pick<UserModel, 'id'>;
 }) {
   // allow if owner (disregarding the access-level)
-  if (item.userId && item.userId === userId) return;
+  if (item.userId && item.userId === user?.id) return;
 
   throw new ForbiddenError('Not authorized for write access');
 }

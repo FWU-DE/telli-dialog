@@ -32,7 +32,6 @@ import {
   copyEntityPictureIfExists,
   copyRelatedTemplateFiles,
 } from '../templates/template-service';
-import { dbGetUserIdsWithSharedSchools } from '@shared/db/helpers/school-sharing';
 
 vi.mock('../db/functions/character', () => ({
   dbGetSharedCharacterConversations: vi.fn(),
@@ -63,9 +62,6 @@ vi.mock('../templates/template-service', () => ({
   copyEntityPictureIfExists: vi.fn(),
   copyRelatedTemplateFiles: vi.fn(),
 }));
-vi.mock('@shared/db/helpers/school-sharing', () => ({
-  dbGetUserIdsWithSharedSchools: vi.fn(),
-}));
 const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
   const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
@@ -88,9 +84,6 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
 describe('character-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (
-      dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
-    ).mockResolvedValue([]);
   });
 
   describe('NotFoundError scenarios', () => {
@@ -131,7 +124,7 @@ describe('character-service', () => {
       await expect(
         uploadAvatarPictureForCharacter({
           characterId: generateUUID(),
-          userId: 'user-id',
+          user: { id: 'user-id' },
           croppedImageBlob: new Blob(),
         }),
       ).rejects.toThrow(NotFoundError);
@@ -176,7 +169,7 @@ describe('character-service', () => {
           deleteFileMappingAndEntity({
             characterId: generateUUID(),
             fileId: generateUUID(),
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
           }),
       },
       {
@@ -184,7 +177,7 @@ describe('character-service', () => {
         testFunction: () =>
           linkFileToCharacter({
             characterId: generateUUID(),
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
             fileId: generateUUID(),
           }),
       },
@@ -193,7 +186,7 @@ describe('character-service', () => {
         testFunction: () =>
           updateCharacter({
             id: generateUUID(),
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
             name: 'new-name',
           }),
       },
@@ -202,7 +195,7 @@ describe('character-service', () => {
         testFunction: () =>
           deleteCharacter({
             characterId: generateUUID(),
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
           }),
       },
       {
@@ -210,7 +203,7 @@ describe('character-service', () => {
         testFunction: () =>
           uploadAvatarPictureForCharacter({
             characterId: generateUUID(),
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
             croppedImageBlob: new Blob(),
           }),
       },
@@ -237,7 +230,7 @@ describe('character-service', () => {
       await expect(
         updateCharacterAccessLevel({
           characterId: generateUUID(),
-          userId: userId,
+          user: { id: userId },
           accessLevel: 'global',
         }),
       ).rejects.toThrow(ForbiddenError);
@@ -257,7 +250,7 @@ describe('character-service', () => {
       await expect(
         updateCharacterAccessLevel({
           characterId: generateUUID(),
-          userId: 'different-user-id',
+          user: { id: 'different-user-id' },
           accessLevel: 'school',
         }),
       ).rejects.toThrow(ForbiddenError);
@@ -277,7 +270,7 @@ describe('character-service', () => {
       await expect(
         fetchFileMappings({
           characterId: generateUUID(),
-          userId: 'different-user-id',
+          user: mockUser(),
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -292,45 +285,38 @@ describe('character-service', () => {
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
         mockCharacter as never,
       );
-      (
-        dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
-      ).mockResolvedValue([]);
 
       await expect(
         fetchFileMappings({
           characterId: generateUUID(),
-          userId: 'different-user-id',
+          user: mockUser(),
         }),
       ).rejects.toThrow(ForbiddenError);
     });
     it('should allow access when character access level is school and users share school - fetchFileMappings', async () => {
       const characterId = generateUUID();
       const ownerUserId = generateUUID();
-      const viewerUserId = generateUUID();
 
-      const mockCharacter: Partial<CharacterSelectModel> = {
+      const mockCharacter: Partial<CharacterSelectModel> & { schoolIds?: string[] } = {
         userId: ownerUserId,
         accessLevel: 'school',
+        schoolIds: ['shared-school-id'],
       };
 
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
         mockCharacter as never,
       );
       (
-        dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
-      ).mockResolvedValue([ownerUserId]);
-      (
         dbGetRelatedCharacterFiles as MockedFunction<typeof dbGetRelatedCharacterFiles>
       ).mockResolvedValue([]);
 
+      const viewerUser = { ...mockUser(), schoolIds: ['shared-school-id'] };
       await expect(
         fetchFileMappings({
           characterId,
-          userId: viewerUserId,
+          user: viewerUser,
         }),
       ).resolves.toEqual([]);
-
-      expect(dbGetUserIdsWithSharedSchools).toHaveBeenCalledWith(viewerUserId);
     });
   });
 
@@ -454,7 +440,7 @@ describe('character-service', () => {
       expect(copyCharacter).toHaveBeenCalledWith(
         templateId,
         'private',
-        expect.any(String),
+        expect.objectContaining({ id: expect.any(String) }),
         duplicateCharacterName,
       );
       expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
@@ -507,7 +493,7 @@ describe('character-service', () => {
           deleteFileMappingAndEntity({
             characterId: 'invalid-uuid',
             fileId: generateUUID(),
-            userId: 'user-id',
+            user: { id: 'user-id' },
           }),
       },
       {
@@ -515,7 +501,7 @@ describe('character-service', () => {
         testFunction: () =>
           fetchFileMappings({
             characterId: 'invalid-uuid',
-            userId: 'user-id',
+            user: mockUser(),
           }),
       },
       {
@@ -523,7 +509,7 @@ describe('character-service', () => {
         testFunction: () =>
           linkFileToCharacter({
             characterId: 'invalid-uuid',
-            userId: 'user-id',
+            user: { id: 'user-id' },
             fileId: generateUUID(),
           }),
       },
@@ -532,7 +518,7 @@ describe('character-service', () => {
         testFunction: () =>
           updateCharacter({
             id: 'invalid-uuid',
-            userId: 'user-id',
+            user: { id: 'user-id' },
             name: 'new-name',
           }),
       },
@@ -541,7 +527,7 @@ describe('character-service', () => {
         testFunction: () =>
           deleteCharacter({
             characterId: 'invalid-uuid',
-            userId: 'user-id',
+            user: { id: 'user-id' },
           }),
       },
       {
@@ -557,7 +543,7 @@ describe('character-service', () => {
         testFunction: () =>
           uploadAvatarPictureForCharacter({
             characterId: 'invalid-uuid',
-            userId: 'user-id',
+            user: { id: 'user-id' },
             croppedImageBlob: new Blob(),
           }),
       },
@@ -572,7 +558,6 @@ describe('character-service', () => {
   describe('Link sharing bypass scenarios', () => {
     const characterId = generateUUID();
     const ownerUserId = generateUUID();
-    const differentUserId = generateUUID();
 
     describe('should allow access when hasLinkAccess is true - bypassing normal restrictions', () => {
       it.each([
@@ -599,7 +584,7 @@ describe('character-service', () => {
         // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getCharacterForChatSession({
           characterId,
-          userId: differentUserId,
+          user: mockUser(),
         });
 
         expect(result).toBe(mockCharacter);
@@ -641,7 +626,7 @@ describe('character-service', () => {
         // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getCharacterForEditView({
           characterId,
-          userId: differentUserId,
+          user: mockUser(),
         });
 
         expect(result.character).toBe(mockCharacter);
@@ -652,22 +637,19 @@ describe('character-service', () => {
           userId: ownerUserId,
           accessLevel: 'school' as const,
           hasLinkAccess: false,
+          schoolIds: ['shared-school-id'],
         };
 
         (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
           mockCharacter as never,
         );
-        (
-          dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
-        ).mockResolvedValue([ownerUserId]);
 
         const result = await getCharacterForChatSession({
           characterId,
-          userId: differentUserId,
+          user: { ...mockUser(), schoolIds: ['shared-school-id'] },
         });
 
         expect(result).toBe(mockCharacter);
-        expect(dbGetUserIdsWithSharedSchools).toHaveBeenCalledWith(differentUserId);
       });
       it.each([
         {
@@ -696,7 +678,7 @@ describe('character-service', () => {
         await expect(
           fetchFileMappings({
             characterId,
-            userId: differentUserId,
+            user: mockUser(),
           }),
         ).resolves.not.toThrow();
       });
@@ -718,7 +700,7 @@ describe('character-service', () => {
         await expect(
           getCharacterForChatSession({
             characterId,
-            userId: differentUserId,
+            user: mockUser(),
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -740,7 +722,7 @@ describe('character-service', () => {
         await expect(
           getCharacterForEditView({
             characterId,
-            userId: differentUserId,
+            user: mockUser(),
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -759,7 +741,7 @@ describe('character-service', () => {
         await expect(
           fetchFileMappings({
             characterId,
-            userId: differentUserId,
+            user: mockUser(),
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -794,7 +776,7 @@ describe('character-service', () => {
     it('should upload avatar, update db and return picturePath and signedUrl', async () => {
       const result = await uploadAvatarPictureForCharacter({
         characterId,
-        userId,
+        user: { id: userId },
         croppedImageBlob: new Blob(['data'], { type: 'image/png' }),
       });
 

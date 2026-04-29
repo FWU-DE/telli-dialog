@@ -30,7 +30,6 @@ import {
   copyEntityPictureIfExists,
   copyRelatedTemplateFiles,
 } from '../templates/template-service';
-import { dbGetUserIdsWithSharedSchools } from '@shared/db/helpers/school-sharing';
 
 vi.mock('../db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
@@ -57,9 +56,6 @@ vi.mock('../templates/template-service', () => ({
   copyRelatedTemplateFiles: vi.fn(),
   copyEntityPictureIfExists: vi.fn(),
 }));
-vi.mock('@shared/db/helpers/school-sharing', () => ({
-  dbGetUserIdsWithSharedSchools: vi.fn(),
-}));
 const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
   const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
@@ -82,9 +78,6 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
 describe('assistant-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (
-      dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
-    ).mockResolvedValue([]);
   });
 
   describe('NotFoundError scenarios', () => {
@@ -95,43 +88,45 @@ describe('assistant-service', () => {
     it.each([
       {
         functionName: 'getAssistantByUser',
-        testFunction: () => getAssistantByUser({ assistantId, userId }),
+        testFunction: () => getAssistantByUser({ assistantId, user: mockUser() }),
       },
       {
         functionName: 'getAssistantForNewChat',
-        testFunction: () => getAssistantForNewChat({ assistantId, userId }),
+        testFunction: () => getAssistantForNewChat({ assistantId, user: mockUser() }),
       },
       {
         functionName: 'linkFileToAssistant',
-        testFunction: () => linkFileToAssistant({ assistantId, fileId, userId }),
+        testFunction: () => linkFileToAssistant({ assistantId, fileId, user: { id: userId } }),
       },
       {
         functionName: 'deleteFileMappingAndEntity',
-        testFunction: () => deleteFileMappingAndEntity({ assistantId, fileId, userId }),
+        testFunction: () =>
+          deleteFileMappingAndEntity({ assistantId, fileId, user: { id: userId } }),
       },
       {
         functionName: 'getFileMappings',
-        testFunction: () => getFileMappings({ assistantId, userId }),
+        testFunction: () => getFileMappings({ assistantId, user: mockUser() }),
       },
       {
         functionName: 'updateAssistantAccessLevel',
         testFunction: () =>
-          updateAssistantAccessLevel({ assistantId, accessLevel: 'school', userId }),
+          updateAssistantAccessLevel({ assistantId, accessLevel: 'school', user: { id: userId } }),
       },
       {
         functionName: 'updateAssistant',
-        testFunction: () => updateAssistant({ assistantId, assistantProps: {}, userId }),
+        testFunction: () =>
+          updateAssistant({ assistantId, assistantProps: {}, user: { id: userId } }),
       },
       {
         functionName: 'deleteAssistant',
-        testFunction: () => deleteAssistant({ assistantId, userId }),
+        testFunction: () => deleteAssistant({ assistantId, user: { id: userId, schoolIds: [] } }),
       },
       {
         functionName: 'uploadAvatarPictureForAssistant',
         testFunction: () =>
           uploadAvatarPictureForAssistant({
             assistantId,
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
             croppedImageBlob: new Blob(),
           }),
       },
@@ -226,7 +221,7 @@ describe('assistant-service', () => {
         testFunction: () =>
           getAssistantByUser({
             assistantId,
-            userId: 'different-user-id',
+            user: mockUser(),
           }),
       },
       {
@@ -235,7 +230,7 @@ describe('assistant-service', () => {
           linkFileToAssistant({
             assistantId,
             fileId,
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
           }),
       },
       {
@@ -244,7 +239,7 @@ describe('assistant-service', () => {
           deleteFileMappingAndEntity({
             assistantId,
             fileId,
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
           }),
       },
       {
@@ -253,7 +248,7 @@ describe('assistant-service', () => {
           updateAssistantAccessLevel({
             assistantId,
             accessLevel: 'school',
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
           }),
       },
       {
@@ -261,7 +256,7 @@ describe('assistant-service', () => {
         testFunction: () =>
           updateAssistant({
             assistantId,
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
             assistantProps: {},
           }),
       },
@@ -270,7 +265,7 @@ describe('assistant-service', () => {
         testFunction: () =>
           deleteAssistant({
             assistantId,
-            userId: 'different-user-id',
+            user: { id: 'different-user-id', schoolIds: [] },
           }),
       },
       {
@@ -278,7 +273,7 @@ describe('assistant-service', () => {
         testFunction: () =>
           uploadAvatarPictureForAssistant({
             assistantId,
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
             croppedImageBlob: new Blob(),
           }),
       },
@@ -300,7 +295,7 @@ describe('assistant-service', () => {
         testFunction: () =>
           getAssistantByUser({
             assistantId,
-            userId: 'different-user-id',
+            user: mockUser(),
           }),
       },
       {
@@ -308,7 +303,7 @@ describe('assistant-service', () => {
         testFunction: () =>
           getAssistantForNewChat({
             assistantId,
-            userId: 'different-user-id',
+            user: mockUser(),
           }),
       },
     ])(
@@ -333,7 +328,7 @@ describe('assistant-service', () => {
         testFunction: () =>
           getAssistantByUser({
             assistantId,
-            userId: 'different-user-id',
+            user: mockUser(),
           }),
       },
       {
@@ -341,7 +336,7 @@ describe('assistant-service', () => {
         testFunction: () =>
           getAssistantForNewChat({
             assistantId,
-            userId: 'different-user-id',
+            user: mockUser(),
           }),
       },
     ])(
@@ -396,7 +391,7 @@ describe('assistant-service', () => {
       await expect(
         getFileMappings({
           assistantId,
-          userId: 'different-user-id',
+          user: mockUser(),
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -416,7 +411,7 @@ describe('assistant-service', () => {
       await expect(
         getFileMappings({
           assistantId,
-          userId: 'different-user-id',
+          user: mockUser(),
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -434,7 +429,7 @@ describe('assistant-service', () => {
         updateAssistantAccessLevel({
           assistantId,
           accessLevel: 'global',
-          userId: userId,
+          user: { id: userId },
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -482,7 +477,7 @@ describe('assistant-service', () => {
       expect(copyAssistant).toHaveBeenCalledWith(
         templateId,
         'private',
-        expect.any(String),
+        expect.objectContaining({ id: expect.any(String) }),
         duplicatedAssistantName,
       );
       expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
@@ -519,7 +514,7 @@ describe('assistant-service', () => {
       expect(copyAssistant).toHaveBeenCalledWith(
         templateId,
         'private',
-        expect.any(String),
+        expect.objectContaining({ id: expect.any(String) }),
         undefined,
       );
     });
@@ -585,7 +580,7 @@ describe('assistant-service', () => {
         testFunction: () =>
           getAssistantByUser({
             assistantId: 'invalid-uuid',
-            userId: 'user-id',
+            user: mockUser(),
           }),
       },
       {
@@ -593,7 +588,7 @@ describe('assistant-service', () => {
         testFunction: () =>
           getAssistantForNewChat({
             assistantId: 'invalid-uuid',
-            userId: 'user-id',
+            user: mockUser(),
           }),
       },
       {
@@ -620,7 +615,7 @@ describe('assistant-service', () => {
           linkFileToAssistant({
             assistantId: 'invalid-uuid',
             fileId: generateUUID(),
-            userId: 'user-id',
+            user: { id: 'user-id' },
           }),
       },
       {
@@ -629,7 +624,7 @@ describe('assistant-service', () => {
           deleteFileMappingAndEntity({
             assistantId: 'invalid-uuid',
             fileId: generateUUID(),
-            userId: 'user-id',
+            user: { id: 'user-id' },
           }),
       },
       {
@@ -637,7 +632,7 @@ describe('assistant-service', () => {
         testFunction: () =>
           getFileMappings({
             assistantId: 'invalid-uuid',
-            userId: 'user-id',
+            user: mockUser(),
           }),
       },
       {
@@ -646,7 +641,7 @@ describe('assistant-service', () => {
           updateAssistantAccessLevel({
             assistantId: 'invalid-uuid',
             accessLevel: 'school',
-            userId: 'user-id',
+            user: { id: 'user-id' },
           }),
       },
       {
@@ -654,7 +649,7 @@ describe('assistant-service', () => {
         testFunction: () =>
           deleteAssistant({
             assistantId: 'invalid-uuid',
-            userId: 'user-id',
+            user: { id: 'user-id', schoolIds: [] },
           }),
       },
     ])(
@@ -667,15 +662,16 @@ describe('assistant-service', () => {
 
   describe('getAssistantForNewChat', () => {
     const assistantId = generateUUID();
-    const userIdOfOwner = generateUUID();
+    const ownerUser = mockUser();
+    const differentUser = mockUser();
 
     describe.each([
-      { accessLevel: 'private', userId: userIdOfOwner },
-      { accessLevel: 'global', userId: 'different-user-id' },
-    ] as const)('accessLevel=$accessLevel', ({ accessLevel, userId }) => {
+      { accessLevel: 'private' as const, user: ownerUser },
+      { accessLevel: 'global' as const, user: differentUser },
+    ])('accessLevel=$accessLevel', ({ accessLevel, user }) => {
       it(`should return assistant with accessLevel=${accessLevel} - getAssistantForNewChat`, async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
-          userId: userIdOfOwner,
+          userId: ownerUser.id,
           accessLevel,
         };
 
@@ -685,7 +681,7 @@ describe('assistant-service', () => {
 
         const assistant = await getAssistantForNewChat({
           assistantId,
-          userId,
+          user,
         });
 
         expect(assistant).toBe(mockAssistant);
@@ -695,15 +691,16 @@ describe('assistant-service', () => {
 
   describe('getAssistantByUser', () => {
     const assistantId = generateUUID();
-    const userIdOfOwner = generateUUID();
+    const ownerUser = mockUser();
+    const differentUser = mockUser();
 
     describe.each([
-      { accessLevel: 'private', userId: userIdOfOwner },
-      { accessLevel: 'global', userId: 'different-user-id' },
-    ] as const)('accessLevel=$accessLevel', ({ accessLevel, userId }) => {
+      { accessLevel: 'private' as const, user: ownerUser },
+      { accessLevel: 'global' as const, user: differentUser },
+    ])('accessLevel=$accessLevel', ({ accessLevel, user }) => {
       it(`should return assistant with accessLevel=${accessLevel} - getAssistantByUser`, async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
-          userId: userIdOfOwner,
+          userId: ownerUser.id,
           accessLevel,
         };
 
@@ -713,7 +710,7 @@ describe('assistant-service', () => {
 
         const { assistant } = await getAssistantByUser({
           assistantId,
-          userId,
+          user,
         });
 
         expect(assistant).toBe(mockAssistant);
@@ -724,7 +721,6 @@ describe('assistant-service', () => {
   describe('Link sharing bypass scenarios', () => {
     const assistantId = generateUUID();
     const ownerUserId = generateUUID();
-    const differentUserId = generateUUID();
 
     describe('should allow access when hasLinkAccess is true - bypassing normal restrictions', () => {
       it.each([
@@ -750,7 +746,7 @@ describe('assistant-service', () => {
         // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getAssistantByUser({
           assistantId,
-          userId: differentUserId,
+          user: mockUser(),
         });
 
         expect(result.assistant).toBe(mockAssistant);
@@ -779,7 +775,7 @@ describe('assistant-service', () => {
         // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getAssistantForNewChat({
           assistantId,
-          userId: differentUserId,
+          user: mockUser(),
         });
 
         expect(result).toBe(mockAssistant);
@@ -812,7 +808,7 @@ describe('assistant-service', () => {
         await expect(
           getFileMappings({
             assistantId,
-            userId: differentUserId,
+            user: mockUser(),
           }),
         ).resolves.not.toThrow();
       });
@@ -833,7 +829,7 @@ describe('assistant-service', () => {
         await expect(
           getAssistantByUser({
             assistantId,
-            userId: differentUserId,
+            user: mockUser(),
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -852,7 +848,7 @@ describe('assistant-service', () => {
         await expect(
           getAssistantForNewChat({
             assistantId,
-            userId: differentUserId,
+            user: mockUser(),
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -887,7 +883,7 @@ describe('assistant-service', () => {
     it('should upload avatar, update db and return picturePath and signedUrl', async () => {
       const result = await uploadAvatarPictureForAssistant({
         assistantId,
-        userId,
+        user: { id: userId },
         croppedImageBlob: new Blob(['data'], { type: 'image/png' }),
       });
 

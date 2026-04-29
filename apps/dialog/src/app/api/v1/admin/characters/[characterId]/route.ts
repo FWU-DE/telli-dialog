@@ -100,7 +100,7 @@ export async function DELETE(
     const requestBody = await request.json();
     const { userId } = deleteCharacterSchema.parse(requestBody);
 
-    await deleteCharacter({ characterId, userId });
+    await deleteCharacter({ characterId, user: { id: userId } });
 
     return new Response(null, { status: 204 });
   } catch (error) {

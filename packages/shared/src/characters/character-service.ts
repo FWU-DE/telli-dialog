@@ -1,19 +1,18 @@
 import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import {
-  dbDeleteCharacterByIdAndUserId,
+  dbDeleteCharacterByIdAndUser,
   dbGetAllAccessibleCharacters,
-  dbGetAllCharactersByUserId,
+  dbGetAllCharactersByUser,
   dbGetCharacterById,
   dbGetCharacterByIdOptionalShareData,
   dbGetCharacterByIdWithShareData,
   dbGetCharacters,
   dbGetCharactersByAssociatedSchools,
-  dbGetCharactersByUserId,
+  dbGetCharactersByUser,
   dbGetGlobalCharacters,
   dbGetSharedCharacterConversations,
 } from '@shared/db/functions/character';
-import { dbGetUserIdsWithSharedSchools } from '@shared/db/helpers/school-sharing';
 import { dbGetFileForCharacter, dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import {
@@ -84,7 +83,7 @@ export const createNewCharacter = async ({
     let insertedCharacter = await copyCharacter(
       templateId,
       'private',
-      user.id,
+      user,
       duplicateCharacterName,
     );
 
@@ -151,16 +150,16 @@ export const createNewCharacter = async ({
 export const deleteFileMappingAndEntity = async ({
   characterId,
   fileId,
-  userId,
+  user,
 }: {
   characterId: string;
   fileId: string;
-  userId: string;
+  user: Pick<UserModel, 'id'>;
 }) => {
   checkParameterUUID(characterId);
   // Authorization check: user must own character
-  const { character } = await getCharacterInfo(characterId, userId);
-  verifyWriteAccess({ item: character, userId });
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyWriteAccess({ item: character, user });
 
   // Delete the mapping and the file entry
   await db.transaction(async (tx) => {
@@ -181,20 +180,17 @@ export const deleteFileMappingAndEntity = async ({
  */
 export const fetchFileMappings = async ({
   characterId,
-  userId,
-  sharedSchoolUserIds,
+  user,
 }: {
   characterId: string;
-  userId: string;
-  sharedSchoolUserIds?: ReadonlySet<string>;
+  user: Pick<UserModel, 'id' | 'schoolIds'>;
 }): Promise<FileModel[]> => {
   checkParameterUUID(characterId);
   // Authorization check
-  const { character } = await getCharacterInfo(characterId, userId);
+  const { character } = await getCharacterInfo(characterId, user.id);
   await verifyReadAccess({
     item: character,
-    userId,
-    sharedSchoolUserIds,
+    user,
   });
 
   // Fetch and return related files
@@ -209,16 +205,16 @@ export const fetchFileMappings = async ({
 export const linkFileToCharacter = async ({
   fileId,
   characterId,
-  userId,
+  user,
 }: {
   fileId: string;
   characterId: string;
-  userId: string;
+  user: Pick<UserModel, 'id'>;
 }) => {
   checkParameterUUID(characterId);
   // Authorization check
-  const { character } = await getCharacterInfo(characterId, userId);
-  verifyWriteAccess({ item: character, userId });
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyWriteAccess({ item: character, user });
 
   // create a new file mapping
   const [insertedFileMapping] = await db
@@ -238,11 +234,11 @@ export const linkFileToCharacter = async ({
 export const updateCharacterAccessLevel = async ({
   characterId,
   accessLevel,
-  userId,
+  user,
 }: {
   characterId: string;
   accessLevel: AccessLevel;
-  userId: string;
+  user: Pick<UserModel, 'id'>;
 }) => {
   checkParameterUUID(characterId);
   accessLevelSchema.parse(accessLevel);
@@ -252,14 +248,14 @@ export const updateCharacterAccessLevel = async ({
     throw new ForbiddenError('Not authorized to set the access level to global');
   }
 
-  const { character } = await getCharacterInfo(characterId, userId);
-  verifyWriteAccess({ item: character, userId });
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyWriteAccess({ item: character, user });
 
   // Update the access level in database
   const [updatedCharacter] = await db
     .update(characterTable)
     .set({ accessLevel })
-    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
+    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
     .returning();
 
   if (updatedCharacter === undefined) {
@@ -285,13 +281,13 @@ export type UpdateCharacterActionModel = z.infer<typeof updateCharacterSchema>;
  * The user must be the owner of the character.
  */
 export const updateCharacter = async ({
-  userId,
+  user,
   ...character
-}: UpdateCharacterActionModel & { userId: string }) => {
+}: UpdateCharacterActionModel & { user: Pick<UserModel, 'id'> }) => {
   checkParameterUUID(character.id);
   // Authorization check
-  const { character: existingCharacter } = await getCharacterInfo(character.id, userId);
-  verifyWriteAccess({ item: existingCharacter, userId });
+  const { character: existingCharacter } = await getCharacterInfo(character.id, user.id);
+  verifyWriteAccess({ item: existingCharacter, user });
 
   // Update the character in database
   const cleanedCharacter = removeNullishValues(character);
@@ -302,7 +298,7 @@ export const updateCharacter = async ({
   const [updatedCharacter] = await db
     .update(characterTable)
     .set({ ...parsedCharacterValues })
-    .where(and(eq(characterTable.id, character.id), eq(characterTable.userId, userId)))
+    .where(and(eq(characterTable.id, character.id), eq(characterTable.userId, user.id)))
     .returning();
 
   if (updatedCharacter === undefined) {
@@ -317,20 +313,20 @@ export const updateCharacter = async ({
  */
 export const deleteCharacter = async ({
   characterId,
-  userId,
+  user,
 }: {
   characterId: string;
-  userId: string;
+  user: Pick<UserModel, 'id'>;
 }) => {
   checkParameterUUID(characterId);
   // Authorization check
-  const { character } = await getCharacterInfo(characterId, userId);
-  verifyWriteAccess({ item: character, userId });
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyWriteAccess({ item: character, user });
 
   const relatedFiles = await dbGetRelatedCharacterFiles(characterId);
 
   // delete character from db
-  const deletedCharacter = await dbDeleteCharacterByIdAndUserId({ characterId, userId: userId });
+  const deletedCharacter = await dbDeleteCharacterByIdAndUser({ characterId, user });
 
   // delete avatar picture from S3
   await deleteAvatarPicture(character.pictureId);
@@ -361,9 +357,10 @@ export const shareCharacter = async ({
   requireTeacherRole(user.userRole);
 
   const { character } = await getCharacterInfo(characterId, user.id);
+  // We need to take the schoolIds from character for the routes to work properly when the character is shared with school and the user accessing it is not the owner.
   await verifyReadAccess({
     item: character,
-    userId: user.id,
+    user: { ...user, schoolIds: character.ownerSchoolIds ?? [] },
   });
 
   // validate input parameters
@@ -429,7 +426,7 @@ export const unshareCharacter = async ({
 
   const sharedConversations = await dbGetSharedCharacterConversations({
     characterId,
-    userId: user.id,
+    user,
   });
   if (sharedConversations.length === 0)
     throw new ForbiddenError('Not authorized to stop this shared character instance');
@@ -467,17 +464,17 @@ export const unshareCharacter = async ({
  */
 export const getCharacterForChatSession = async ({
   characterId,
-  userId,
+  user,
 }: {
   characterId: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds'>;
 }) => {
   checkParameterUUID(characterId);
   const character = await dbGetCharacterById({ characterId });
   if (!character) throw new NotFoundError('Character not found');
   await verifyReadAccess({
     item: character,
-    userId,
+    user,
   });
 
   return character;
@@ -496,33 +493,23 @@ export const getCharacterForChatSession = async ({
  */
 export const getCharacterForEditView = async ({
   characterId,
-
-  userId,
+  user,
 }: {
   characterId: string;
-
-  userId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds'>;
 }): Promise<{
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
   maybeSignedPictureUrl: string | undefined;
 }> => {
   checkParameterUUID(characterId);
-  const character = await dbGetCharacterByIdOptionalShareData({ characterId, userId });
+  const character = await dbGetCharacterByIdOptionalShareData({ characterId, user });
   if (!character) throw new NotFoundError('Character not found');
-  const sharedSchoolUserIds =
-    !character.hasLinkAccess &&
-    character.accessLevel === 'school' &&
-    character.userId &&
-    character.userId !== userId
-      ? new Set(await dbGetUserIdsWithSharedSchools(userId))
-      : undefined;
-  await verifyReadAccess({ item: character, userId, sharedSchoolUserIds });
+  await verifyReadAccess({ item: character, user });
 
   const relatedFiles = await fetchFileMappings({
     characterId,
-    userId,
-    sharedSchoolUserIds,
+    user,
   });
   const maybeSignedPictureUrl = await getReadOnlySignedUrl({
     key: character.pictureId,
@@ -542,7 +529,7 @@ export const getSharedCharacter = async ({
   userId: string;
 }): Promise<CharacterWithShareDataModel> => {
   checkParameterUUID(characterId);
-  const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
+  const character = await dbGetCharacterByIdWithShareData({ characterId, user: { id: userId } });
   if (!character || !character.inviteCode) throw new NotFoundError('Character not found');
 
   return character;
@@ -556,11 +543,11 @@ export const getSharedCharacter = async ({
  * - character is not deleted
  */
 export async function getCharacters({
-  userId,
+  user,
 }: {
-  userId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds'>;
 }): Promise<CharacterSelectModel[]> {
-  const characters = await dbGetCharacters({ userId });
+  const characters = await dbGetCharacters({ user });
   return characters;
 }
 
@@ -570,20 +557,18 @@ export async function getCharacters({
  */
 export async function getCharacterByAccessLevel({
   accessLevel,
-  userId,
-  federalStateId,
+  user,
 }: {
   accessLevel: AccessLevel;
-  userId: string;
-  federalStateId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<CharacterOptionalShareDataModel[]> {
   switch (accessLevel) {
     case 'global':
-      return dbGetGlobalCharacters({ userId, federalStateId });
+      return dbGetGlobalCharacters({ user });
     case 'school':
-      return dbGetCharactersByAssociatedSchools({ userId });
+      return dbGetCharactersByAssociatedSchools({ user });
     case 'private':
-      return dbGetCharactersByUserId({ userId });
+      return dbGetCharactersByUser({ user });
     default:
       return [];
   }
@@ -591,22 +576,20 @@ export async function getCharacterByAccessLevel({
 
 export async function getCharactersByOverviewFilter({
   filter,
-  userId,
-  federalStateId,
+  user,
 }: {
   filter: OverviewFilter;
-  userId: string;
-  federalStateId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<CharacterOptionalShareDataModel[]> {
   switch (filter) {
     case 'all':
-      return dbGetAllAccessibleCharacters({ userId, federalStateId });
+      return dbGetAllAccessibleCharacters({ user });
     case 'mine':
-      return await dbGetAllCharactersByUserId({ userId });
+      return await dbGetAllCharactersByUser({ user });
     case 'official':
-      return await dbGetGlobalCharacters({ userId, federalStateId });
+      return await dbGetGlobalCharacters({ user });
     case 'school':
-      return await dbGetCharactersByAssociatedSchools({ userId });
+      return await dbGetCharactersByAssociatedSchools({ user });
     default:
       return [];
   }
@@ -653,15 +636,15 @@ export async function cleanupCharacters() {
 export async function uploadAvatarPictureForCharacter({
   characterId,
   croppedImageBlob,
-  userId,
+  user,
 }: {
   characterId: string;
   croppedImageBlob: Blob;
-  userId: string;
+  user: Pick<UserModel, 'id'>;
 }) {
   checkParameterUUID(characterId);
-  const { character } = await getCharacterInfo(characterId, userId);
-  verifyWriteAccess({ item: character, userId: userId });
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyWriteAccess({ item: character, user });
 
   // Compute hash of the blob for cache busting
   const hash = await computeBlobHash(croppedImageBlob);
@@ -686,7 +669,7 @@ export async function uploadAvatarPictureForCharacter({
   const [updatedCharacter] = await db
     .update(characterTable)
     .set({ pictureId: key })
-    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
+    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
     .returning();
 
   if (!updatedCharacter) {
@@ -718,13 +701,11 @@ export async function uploadAvatarPictureForCharacter({
 export async function downloadFileFromCharacter({
   characterId,
   fileId,
-
   user,
 }: {
   characterId: string;
   fileId: string;
-
-  user: Pick<UserModel, 'id' | 'userRole'>;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
 }) {
   checkParameterUUID(characterId);
   requireTeacherRole(user.userRole);
@@ -732,7 +713,7 @@ export async function downloadFileFromCharacter({
   if (!character) throw new NotFoundError('Character not found');
   await verifyReadAccess({
     item: character,
-    userId: user.id,
+    user,
   });
 
   const file = await dbGetFileForCharacter({ fileId, characterId });

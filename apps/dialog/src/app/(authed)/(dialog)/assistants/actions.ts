@@ -23,10 +23,9 @@ export async function createNewAssistantAction({
 }) {
   const { user } = await requireAuth();
 
-  // TODO: Will be implemented in TD-701
   return runServerAction(createNewAssistant)({
     templateId,
-    user: user,
+    user,
     duplicateAssistantName,
   });
 }
@@ -40,7 +39,7 @@ export async function deleteFileMappingAndEntityAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(deleteFileMappingAndEntity)({ assistantId, fileId, userId: user.id });
+  return runServerAction(deleteFileMappingAndEntity)({ assistantId, fileId, user });
 }
 
 export async function linkFileToAssistantAction({
@@ -52,7 +51,7 @@ export async function linkFileToAssistantAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(linkFileToAssistant)({ fileId, assistantId, userId: user.id });
+  return runServerAction(linkFileToAssistant)({ fileId, assistantId, user });
 }
 
 export async function updateAssistantAccessLevelAction({
@@ -67,7 +66,7 @@ export async function updateAssistantAccessLevelAction({
   return runServerAction(updateAssistantAccessLevel)({
     assistantId,
     accessLevel,
-    userId: user.id,
+    user,
   });
 }
 
@@ -79,7 +78,7 @@ export async function updateAssistantAction({
 
   return runServerAction(updateAssistant)({
     assistantId,
-    userId: user.id,
+    user,
     assistantProps: assistant,
   });
 }
@@ -87,7 +86,7 @@ export async function updateAssistantAction({
 export async function deleteAssistantAction({ assistantId }: { assistantId: string }) {
   const { user } = await requireAuth();
 
-  return runServerAction(deleteAssistant)({ assistantId, userId: user.id });
+  return runServerAction(deleteAssistant)({ assistantId, user });
 }
 
 export async function uploadAvatarPictureForAssistantAction({
@@ -102,7 +101,7 @@ export async function uploadAvatarPictureForAssistantAction({
   return runServerAction(uploadAvatarPictureForAssistant)({
     assistantId,
     croppedImageBlob,
-    userId: user.id,
+    user,
   });
 }
 

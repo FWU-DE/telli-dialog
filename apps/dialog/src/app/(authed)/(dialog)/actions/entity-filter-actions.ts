@@ -28,8 +28,11 @@ export async function getCharactersByFilterAction(
 
   const characters = await getCharactersByOverviewFilter({
     filter: effectiveFilter,
-    userId: user.id,
-    federalStateId: federalState.id,
+    user: {
+      id: user.id,
+      schoolIds: user.schoolIds,
+      federalStateId: federalState.id,
+    },
   });
 
   return enrichCharactersWithImage({ characters: characters.filter((c) => c.name.trim() !== '') });
@@ -46,8 +49,11 @@ export async function getLearningScenariosByFilterAction(
 
   const learningScenarios = await getLearningScenariosByOverviewFilter({
     filter: effectiveFilter,
-    userId: user.id,
-    federalStateId: federalState.id,
+    user: {
+      id: user.id,
+      schoolIds: user.schoolIds,
+      federalStateId: federalState.id,
+    },
   });
 
   return enrichLearningScenarioWithPictureUrl({
@@ -66,8 +72,11 @@ export async function getAssistantsByFilterAction(
 
   const assistants = await getAssistantsByOverviewFilter({
     filter: effectiveFilter,
-    userId: user.id,
-    federalStateId: federalState.id,
+    user: {
+      id: user.id,
+      schoolIds: user.schoolIds,
+      federalStateId: federalState.id,
+    },
   });
 
   return enrichAssistantsWithImage({

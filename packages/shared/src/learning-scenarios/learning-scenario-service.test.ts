@@ -28,7 +28,6 @@ import { LearningScenarioSelectModel } from '@shared/db/schema';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { UserModel } from '@shared/auth/user-model';
 import { getReadOnlySignedUrl, uploadFileToS3 } from '../s3';
-import { dbGetUserIdsWithSharedSchools } from '@shared/db/helpers/school-sharing';
 
 vi.mock('../db/functions/learning-scenario', () => ({
   dbCreateLearningScenarioShare: vi.fn(),
@@ -53,9 +52,6 @@ vi.mock('../s3', () => ({
   getReadOnlySignedUrl: vi.fn(),
   uploadFileToS3: vi.fn(),
   deleteFileFromS3: vi.fn(),
-}));
-vi.mock('@shared/db/helpers/school-sharing', () => ({
-  dbGetUserIdsWithSharedSchools: vi.fn(),
 }));
 const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
@@ -187,7 +183,7 @@ function buildFunctionList(
       testFunction: () =>
         getSharedLearningScenario({
           learningScenarioId,
-          userId: user.id,
+          user,
         }),
     },
   ];
@@ -213,9 +209,6 @@ function buildFunctionList(
 describe('learning-scenario-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (
-      dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
-    ).mockResolvedValue([]);
   });
 
   describe('NotFoundError scenarios', () => {
@@ -239,7 +232,7 @@ describe('learning-scenario-service', () => {
   describe('ForbiddenError scenarios', () => {
     const userId = generateUUID();
     const learningScenarioId = generateUUID();
-    let mockLearningScenario: Partial<LearningScenarioSelectModel>;
+    let mockLearningScenario: Partial<LearningScenarioSelectModel> & { schoolIds?: string[] };
 
     beforeEach(() => {
       mockLearningScenario = {
@@ -283,10 +276,11 @@ describe('learning-scenario-service', () => {
     });
 
     describe('accessLevel=school and user not in same school', () => {
-      const differentUser = { ...mockUser(), schoolId: generateUUID() };
+      const differentUser = { ...mockUser(), schoolIds: ['viewer-school-id'] };
 
       beforeEach(() => {
         mockLearningScenario.accessLevel = 'school';
+        mockLearningScenario.schoolIds = ['owner-school-id'];
       });
 
       it.each(buildFunctionList({ learningScenarioId, user: differentUser }, 'read', 'write'))(
@@ -480,9 +474,9 @@ describe('learning-scenario-service', () => {
 
   describe('Success scenarios', () => {
     const userId = generateUUID();
-    const schoolId = generateUUID();
+    const sharedSchoolId = generateUUID();
     const learningScenarioId = generateUUID();
-    let mockLearningScenario: Partial<LearningScenarioSelectModel>;
+    let mockLearningScenario: Partial<LearningScenarioSelectModel> & { schoolIds?: string[] };
 
     beforeEach(() => {
       mockLearningScenario = {
@@ -546,13 +540,11 @@ describe('learning-scenario-service', () => {
     });
 
     describe('shared with school', () => {
-      const differentUser = { ...mockUser(), schoolId };
+      const differentUser = { ...mockUser(), schoolIds: [sharedSchoolId] };
 
       beforeEach(() => {
         mockLearningScenario.accessLevel = 'school';
-        (
-          dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
-        ).mockResolvedValue([userId]);
+        mockLearningScenario.schoolIds = [sharedSchoolId];
       });
 
       it.each(buildFunctionList({ learningScenarioId, user: differentUser }, 'read'))(

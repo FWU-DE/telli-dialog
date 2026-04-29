@@ -5,11 +5,11 @@ import {
 } from '@shared/conversation/conversation-service';
 import { db } from '@shared/db';
 import {
-  dbDeleteAssistantByIdAndUserId,
+  dbDeleteAssistantByIdAndUser,
   dbGetAssistantById,
   dbGetGlobalGpts,
   dbGetGptsByAssociatedSchools,
-  dbGetGptsByUserId,
+  dbGetGptsByUser,
   dbInsertAssistantFileMapping,
 } from '@shared/db/functions/assistants';
 import { dbGetFileForAssistant, dbGetRelatedAssistantFiles } from '@shared/db/functions/files';
@@ -62,10 +62,10 @@ function buildAvatarFilename(hash: string) {
  */
 export async function getAssistantByUser({
   assistantId,
-  userId,
+  user,
 }: {
   assistantId: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds'>;
 }): Promise<{
   assistant: AssistantSelectModel;
   fileMappings: FileModel[];
@@ -75,7 +75,7 @@ export async function getAssistantByUser({
   const assistant = await dbGetAssistantById({ assistantId });
   await verifyReadAccess({
     item: assistant,
-    userId,
+    user,
   });
 
   const [fileMappings, pictureUrl] = await Promise.all([
@@ -97,10 +97,10 @@ export async function getAssistantByUser({
  */
 export async function getAssistantForNewChat({
   assistantId,
-  userId,
+  user,
 }: {
   assistantId: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds'>;
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({
@@ -108,7 +108,7 @@ export async function getAssistantForNewChat({
   });
   await verifyReadAccess({
     item: assistant,
-    userId,
+    user,
   });
 
   return assistant;
@@ -145,20 +145,18 @@ export async function getConversationWithMessagesAndAssistant({
  */
 export async function getAssistantByAccessLevel({
   accessLevel,
-  userId,
-  federalStateId,
+  user,
 }: {
   accessLevel: AccessLevel;
-  userId: string;
-  federalStateId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<AssistantSelectModel[]> {
   switch (accessLevel) {
     case 'global':
-      return await dbGetGlobalGpts({ federalStateId });
+      return await dbGetGlobalGpts({ user });
     case 'school':
-      return await dbGetGptsByAssociatedSchools({ userId });
+      return await dbGetGptsByAssociatedSchools({ user });
     case 'private':
-      return await dbGetGptsByUserId({ userId });
+      return await dbGetGptsByUser({ user });
     default:
       return [];
   }
@@ -166,28 +164,26 @@ export async function getAssistantByAccessLevel({
 
 export async function getAssistantsByOverviewFilter({
   filter,
-  userId,
-  federalStateId,
+  user,
 }: {
   filter: OverviewFilter;
-  userId: string;
-  federalStateId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<AssistantSelectModel[]> {
   switch (filter) {
     case 'all': {
       const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
-        dbGetGptsByUserId({ userId }),
-        dbGetGptsByAssociatedSchools({ userId }),
-        dbGetGlobalGpts({ federalStateId }),
+        dbGetGptsByUser({ user }),
+        dbGetGptsByAssociatedSchools({ user }),
+        dbGetGlobalGpts({ user }),
       ]);
       return [...privateAssistants, ...schoolAssistants, ...globalAssistants];
     }
     case 'mine':
-      return await dbGetGptsByUserId({ userId });
+      return await dbGetGptsByUser({ user });
     case 'official':
-      return await dbGetGlobalGpts({ federalStateId });
+      return await dbGetGlobalGpts({ user });
     case 'school':
-      return await dbGetGptsByAssociatedSchools({ userId });
+      return await dbGetGptsByAssociatedSchools({ user });
     default:
       return [];
   }
@@ -213,7 +209,7 @@ export async function createNewAssistant({
     let insertedAssistant = await copyAssistant(
       templateId,
       'private',
-      user.id,
+      user,
       duplicateAssistantName,
     );
 
@@ -232,7 +228,7 @@ export async function createNewAssistant({
         .returning();
 
       if (updatedAssistant) {
-        insertedAssistant = updatedAssistant;
+        insertedAssistant = { ...updatedAssistant, ownerSchoolIds: user.schoolIds };
       }
     }
 
@@ -269,15 +265,15 @@ export async function createNewAssistant({
 export async function linkFileToAssistant({
   fileId,
   assistantId,
-  userId,
+  user,
 }: {
   fileId: string;
   assistantId: string;
-  userId: string;
+  user: Pick<UserModel, 'id'>;
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  verifyWriteAccess({ item: assistant, userId });
+  verifyWriteAccess({ item: assistant, user });
 
   const insertedFileMapping = await dbInsertAssistantFileMapping({
     assistantId,
@@ -297,15 +293,15 @@ export async function linkFileToAssistant({
 export async function deleteFileMappingAndEntity({
   assistantId,
   fileId,
-  userId,
+  user,
 }: {
   assistantId: string;
   fileId: string;
-  userId: string;
+  user: Pick<UserModel, 'id'>;
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  verifyWriteAccess({ item: assistant, userId });
+  verifyWriteAccess({ item: assistant, user });
 
   // delete mapping and file entry in db
   await db.transaction(async (tx) => {
@@ -326,16 +322,16 @@ export async function deleteFileMappingAndEntity({
  */
 export async function getFileMappings({
   assistantId,
-  userId,
+  user,
 }: {
   assistantId: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds'>;
 }): Promise<FileModel[]> {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
   await verifyReadAccess({
     item: assistant,
-    userId,
+    user,
   });
 
   return await dbGetRelatedAssistantFiles(assistantId);
@@ -349,11 +345,11 @@ export async function getFileMappings({
 export async function updateAssistantAccessLevel({
   accessLevel,
   assistantId,
-  userId,
+  user,
 }: {
   accessLevel: AccessLevel;
   assistantId: string;
-  userId: string;
+  user: Pick<UserModel, 'id'>;
 }) {
   checkParameterUUID(assistantId);
   accessLevelSchema.parse(accessLevel);
@@ -364,12 +360,12 @@ export async function updateAssistantAccessLevel({
   }
 
   const assistant = await dbGetAssistantById({ assistantId });
-  verifyWriteAccess({ item: assistant, userId });
+  verifyWriteAccess({ item: assistant, user });
 
   const [updatedAssistant] = await db
     .update(assistantTable)
     .set({ accessLevel })
-    .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, userId)))
+    .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, user.id)))
     .returning();
 
   if (!updatedAssistant) {
@@ -393,23 +389,23 @@ const updateAssistantSchema = assistantUpdateSchema.omit({
  */
 export async function updateAssistant({
   assistantId,
-  userId,
+  user,
   assistantProps,
 }: {
   assistantId: string;
-  userId: string;
+  user: Pick<UserModel, 'id'>;
   assistantProps: z.infer<typeof updateAssistantSchema>;
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  verifyWriteAccess({ item: assistant, userId });
+  verifyWriteAccess({ item: assistant, user });
 
   const parsedValues = updateAssistantSchema.parse(assistantProps);
 
   const [updatedAssistant] = await db
     .update(assistantTable)
     .set(parsedValues)
-    .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, userId)))
+    .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, user.id)))
     .returning();
 
   if (!updatedAssistant) {
@@ -426,19 +422,19 @@ export async function updateAssistant({
  */
 export async function deleteAssistant({
   assistantId,
-  userId,
+  user,
 }: {
   assistantId: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds'>;
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  verifyWriteAccess({ item: assistant, userId });
+  verifyWriteAccess({ item: assistant, user });
 
   const relatedFiles = await dbGetRelatedAssistantFiles(assistantId);
 
   // delete assistant from db
-  const deletedAssistant = await dbDeleteAssistantByIdAndUserId({ gptId: assistantId, userId });
+  const deletedAssistant = await dbDeleteAssistantByIdAndUser({ gptId: assistantId, user });
 
   // delete avatar picture from S3
   await deleteAvatarPicture(assistant.pictureId);
@@ -469,15 +465,15 @@ export async function cleanupAssistants() {
 export async function uploadAvatarPictureForAssistant({
   assistantId,
   croppedImageBlob,
-  userId,
+  user,
 }: {
   assistantId: string;
   croppedImageBlob: Blob;
-  userId: string;
+  user: Pick<UserModel, 'id'>;
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  verifyWriteAccess({ item: assistant, userId: userId });
+  verifyWriteAccess({ item: assistant, user });
 
   // Compute hash of the blob for cache busting
   const hash = await computeBlobHash(croppedImageBlob);
@@ -502,7 +498,7 @@ export async function uploadAvatarPictureForAssistant({
   const [updatedAssistant] = await db
     .update(assistantTable)
     .set({ pictureId: key })
-    .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, userId)))
+    .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, user.id)))
     .returning();
 
   if (!updatedAssistant) {
@@ -538,13 +534,13 @@ export async function downloadFileFromAssistant({
 }: {
   assistantId: string;
   fileId: string;
-  user: Pick<UserModel, 'id' | 'userRole'>;
+  user: Pick<UserModel, 'id' | 'schoolIds'>;
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
   await verifyReadAccess({
     item: assistant,
-    userId: user.id,
+    user,
   });
 
   const file = await dbGetFileForAssistant({ fileId, assistantId });

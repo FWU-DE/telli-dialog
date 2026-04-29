@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const { userId } = getCharactersSchema.parse(Object.fromEntries(searchParams));
 
     const characters = await getCharacters({
-      userId,
+      user: { id: userId, schoolIds: [] },
     });
 
     return Response.json(characters);

@@ -14,7 +14,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
 
   const { character, relatedFiles, maybeSignedPictureUrl } = await getCharacterForEditView({
     characterId,
-    userId: user.id,
+    user,
   }).catch(handleErrorInServerComponent);
 
   const initialLinks = character.attachedLinks

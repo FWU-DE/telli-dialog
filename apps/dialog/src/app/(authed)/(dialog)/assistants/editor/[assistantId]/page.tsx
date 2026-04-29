@@ -12,7 +12,7 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
 
   const { assistant, fileMappings, pictureUrl } = await getAssistantByUser({
     assistantId: assistantId,
-    userId: user.id,
+    user,
   }).catch(handleErrorInServerComponent);
 
   const initialLinks = assistant.attachedLinks

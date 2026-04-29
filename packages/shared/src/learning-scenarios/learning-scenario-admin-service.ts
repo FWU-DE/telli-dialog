@@ -18,6 +18,7 @@ import {
   copyRelatedTemplateFiles,
 } from '@shared/templates/template-service';
 import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
+import { UserModel } from '@shared/auth/user-model';
 
 /**
  * This function creates a duplicate of an existing learning scenario,
@@ -25,13 +26,13 @@ import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
  */
 export async function duplicateLearningScenario({
   accessLevel,
-  userId,
+  user,
   originalLearningScenarioId,
   duplicateLearningScenarioName,
 }: {
   accessLevel: AccessLevel | undefined;
   originalLearningScenarioId: string;
-  userId: string;
+  user: Pick<UserModel, 'id'>;
   duplicateLearningScenarioName?: string;
 }) {
   const existingLearningScenario = await dbGetLearningScenarioById({
@@ -61,7 +62,7 @@ export async function duplicateLearningScenario({
     name: duplicateLearningScenarioName ?? expectedValues.name,
     originalLearningScenarioId,
     pictureId: avatarPictureUrl,
-    userId,
+    userId: user.id,
   };
 
   const [insertedLearningScenario] = await db

@@ -21,7 +21,7 @@ async function getAttachedLinks(
     return assistant?.attachedLinks.filter((l) => l !== '') ?? [];
   }
   if (characterId) {
-    const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
+    const character = await dbGetCharacterByIdWithShareData({ characterId, user: { id: userId } });
     return character?.attachedLinks.filter((l) => l !== '') ?? [];
   }
   return null;
