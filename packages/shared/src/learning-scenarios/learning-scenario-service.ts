@@ -40,7 +40,7 @@ import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { OverviewFilter } from '@shared/overview-filter';
 import z from 'zod';
 import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-admin-service';
@@ -306,8 +306,15 @@ export async function shareLearningScenario({
 
   const parsedValues = learningScenarioShareValuesSchema.parse(data);
 
+  const activeShares = await dbGetSharedLearningScenarioConversations({
+    learningScenarioId,
+    userId: user.id,
+  });
+  if (activeShares.length > 0) throw new Error('There can only be one active share at a time');
+
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
+
   const sharedLearningScenario = await dbCreateLearningScenarioShare({
     userId: user.id,
     learningScenarioId,
@@ -345,17 +352,13 @@ export async function unshareLearningScenario({
     userId: user.id,
   });
   if (sharedConversations.length === 0)
-    throw new ForbiddenError('Not authorized to stop this shared learning scenario instance');
+    throw new NotFoundError('No active sharing found for this learning scenario');
 
+  const sharedConversationIds = sharedConversations.map((s) => s.id);
   const [updatedShare] = await db
     .update(sharedLearningScenarioTable)
-    .set({ startedAt: null, maxUsageTimeLimit: null, telliPointsLimit: null })
-    .where(
-      and(
-        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
-        eq(sharedLearningScenarioTable.userId, user.id),
-      ),
-    )
+    .set({ manuallyStoppedAt: new Date() })
+    .where(inArray(sharedLearningScenarioTable.id, sharedConversationIds))
     .returning();
 
   if (!updatedShare) {

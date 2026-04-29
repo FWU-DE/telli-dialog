@@ -344,8 +344,10 @@ export function LearningScenarioEdit({
         )}
 
         <CustomChatShareWithLearners
-          startedAt={learningScenario.startedAt ?? null}
-          maxUsageTimeLimit={learningScenario.maxUsageTimeLimit ?? null}
+          startedAt={learningScenario.startedAt}
+          manuallyStoppedAt={learningScenario.manuallyStoppedAt}
+          maxUsageTimeLimit={learningScenario.maxUsageTimeLimit}
+          telliPointsLimit={learningScenario.telliPointsLimit}
           pointsPercentageValues={telliPointsPercentageValues}
           usageTimeValues={usageTimeValuesInMinutes}
           onShare={async (data) =>
