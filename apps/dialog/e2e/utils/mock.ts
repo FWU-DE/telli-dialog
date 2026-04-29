@@ -1,6 +1,7 @@
 import { UserAndContext } from '@/auth/types';
 import { generateRandomString } from './random';
 import { generateUUID } from '@shared/utils/uuid';
+import { E2E_FEDERAL_STATE } from './const';
 import {
   CharacterSelectModel,
   ConversationUsageTrackingSelectModel,
@@ -9,10 +10,10 @@ import {
   SharedCharacterChatUsageTrackingSelectModel,
   SharedLearningScenarioUsageTrackingSelectModel,
 } from '@shared/db/schema';
-import { E2E_FEDERAL_STATE } from './const';
 
 export const mockUserAndContext = (): UserAndContext => {
   const schoolId = generateUUID();
+  const federalStateId = E2E_FEDERAL_STATE;
 
   return {
     id: generateUUID(),
@@ -22,7 +23,7 @@ export const mockUserAndContext = (): UserAndContext => {
     federalStateId: E2E_FEDERAL_STATE,
     userRole: 'teacher',
     federalState: {
-      id: generateUUID(),
+      id: federalStateId,
       teacherPriceLimit: 500,
       createdAt: new Date(),
       studentPriceLimit: 0,
@@ -99,6 +100,7 @@ export const mockLearningScenario = (): LearningScenarioSelectModel => {
     originalLearningScenarioId: null,
     isDeleted: false,
     hasLinkAccess: false,
+    ownerSchoolIds: [generateUUID()],
   };
 };
 
@@ -153,5 +155,6 @@ export const mockCharacter = (): CharacterSelectModel => {
     originalCharacterId: null,
     isDeleted: false,
     hasLinkAccess: false,
+    ownerSchoolIds: [generateUUID()],
   };
 };
