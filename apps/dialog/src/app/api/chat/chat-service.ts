@@ -238,6 +238,7 @@ export async function sendChatMessage({
             orderNumber: messages.length + 2,
             modelName: definedModel.name,
             conversationId: conversation.id,
+            webSearchResults,
           });
 
           // Generate title if needed
@@ -307,6 +308,6 @@ export async function sendChatMessage({
   return {
     stream,
     messageId: assistantMessageId,
-    textSearchResults: webSearchResults,
+    webSearchResults,
   };
 }

@@ -70,7 +70,7 @@ export function ChatBox({
   const parsedUrls = children.role === 'user' ? (parseHyperlinks(children.content) ?? []) : [];
   const userWebsearchSources = children.role === 'user' ? [...(websources ?? [])] : [];
   const assistantWebsearchSources =
-    children.role === 'assistant' ? (children.textSearchResults ?? []) : [];
+    children.role === 'assistant' ? (children.webSearchResults ?? []) : [];
 
   for (const url of parsedUrls) {
     if (userWebsearchSources.find((source) => source.link === url) === undefined) {
