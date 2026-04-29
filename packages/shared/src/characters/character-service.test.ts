@@ -297,10 +297,10 @@ describe('character-service', () => {
       const characterId = generateUUID();
       const ownerUserId = generateUUID();
 
-      const mockCharacter: Partial<CharacterSelectModel> & { schoolIds?: string[] } = {
+      const mockCharacter: Partial<CharacterSelectModel> = {
         userId: ownerUserId,
         accessLevel: 'school',
-        schoolIds: ['shared-school-id'],
+        ownerSchoolIds: ['shared-school-id'],
       };
 
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
@@ -481,7 +481,7 @@ describe('character-service', () => {
         user: mockUser('teacher'),
       });
 
-      expect(result).toEqual(updatedCharacter);
+      expect(result).toEqual({ ...updatedCharacter, ownerSchoolIds: expect.any(Array) });
     });
   });
 
@@ -637,7 +637,7 @@ describe('character-service', () => {
           userId: ownerUserId,
           accessLevel: 'school' as const,
           hasLinkAccess: false,
-          schoolIds: ['shared-school-id'],
+          ownerSchoolIds: ['shared-school-id'],
         };
 
         (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(

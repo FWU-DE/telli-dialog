@@ -529,6 +529,7 @@ describe('assistant-service', () => {
         ...insertedAssistant,
         pictureId: copiedPictureKey,
       } as AssistantSelectModel;
+      const user = mockUser('teacher');
 
       (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
         insertedAssistant as never,
@@ -540,7 +541,7 @@ describe('assistant-service', () => {
 
       const result = await createNewAssistant({
         templateId,
-        user: mockUser('teacher'),
+        user,
       });
 
       expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
@@ -548,7 +549,7 @@ describe('assistant-service', () => {
         newEntityId: insertedAssistant.id,
         buildPictureKey: expect.any(Function),
       });
-      expect(result).toEqual(updatedAssistant);
+      expect(result).toEqual({ ...updatedAssistant, ownerSchoolIds: user.schoolIds });
     });
 
     it('should keep assistant unchanged when no copied picture key is returned', async () => {

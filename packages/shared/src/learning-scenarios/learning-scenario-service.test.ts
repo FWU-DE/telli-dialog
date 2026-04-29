@@ -232,7 +232,7 @@ describe('learning-scenario-service', () => {
   describe('ForbiddenError scenarios', () => {
     const userId = generateUUID();
     const learningScenarioId = generateUUID();
-    let mockLearningScenario: Partial<LearningScenarioSelectModel> & { schoolIds?: string[] };
+    let mockLearningScenario: Partial<LearningScenarioSelectModel>;
 
     beforeEach(() => {
       mockLearningScenario = {
@@ -280,7 +280,7 @@ describe('learning-scenario-service', () => {
 
       beforeEach(() => {
         mockLearningScenario.accessLevel = 'school';
-        mockLearningScenario.schoolIds = ['owner-school-id'];
+        mockLearningScenario.ownerSchoolIds = ['owner-school-id'];
       });
 
       it.each(buildFunctionList({ learningScenarioId, user: differentUser }, 'read', 'write'))(
@@ -476,7 +476,7 @@ describe('learning-scenario-service', () => {
     const userId = generateUUID();
     const sharedSchoolId = generateUUID();
     const learningScenarioId = generateUUID();
-    let mockLearningScenario: Partial<LearningScenarioSelectModel> & { schoolIds?: string[] };
+    let mockLearningScenario: Partial<LearningScenarioSelectModel>;
 
     beforeEach(() => {
       mockLearningScenario = {
@@ -544,7 +544,7 @@ describe('learning-scenario-service', () => {
 
       beforeEach(() => {
         mockLearningScenario.accessLevel = 'school';
-        mockLearningScenario.schoolIds = [sharedSchoolId];
+        mockLearningScenario.ownerSchoolIds = [sharedSchoolId];
       });
 
       it.each(buildFunctionList({ learningScenarioId, user: differentUser }, 'read'))(

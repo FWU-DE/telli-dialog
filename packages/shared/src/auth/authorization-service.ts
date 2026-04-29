@@ -6,7 +6,7 @@ type AuthorizedItem = {
   accessLevel: AccessLevel;
   hasLinkAccess: boolean;
   userId: string | null;
-  schoolIds?: string[];
+  ownerSchoolIds?: string[];
 };
 
 export async function verifyReadAccess<T extends AuthorizedItem>({
@@ -26,7 +26,7 @@ export async function verifyReadAccess<T extends AuthorizedItem>({
   if (
     item.accessLevel === 'school' &&
     user?.schoolIds &&
-    item.schoolIds?.some((id) => user.schoolIds?.includes(id))
+    item.ownerSchoolIds?.some((id) => user.schoolIds?.includes(id))
   )
     return;
 

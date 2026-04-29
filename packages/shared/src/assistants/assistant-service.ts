@@ -255,7 +255,7 @@ export async function createNewAssistant({
     throw new Error('Could not create a new assistant');
   }
 
-  return insertedAssistant;
+  return { ...insertedAssistant, ownerSchoolIds: user.schoolIds };
 }
 
 /**

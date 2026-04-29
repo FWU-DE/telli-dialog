@@ -102,7 +102,10 @@ export const createNewCharacter = async ({
         .returning();
 
       if (updatedCharacter) {
-        insertedCharacter = updatedCharacter;
+        insertedCharacter = {
+          ...updatedCharacter,
+          ownerSchoolIds: user.schoolIds,
+        } as typeof insertedCharacter;
       }
     }
 
@@ -138,7 +141,7 @@ export const createNewCharacter = async ({
     throw new Error('Could not create a new character');
   }
 
-  return insertedCharacter;
+  return { ...insertedCharacter, ownerSchoolIds: user.schoolIds };
 };
 
 /**
@@ -348,7 +351,7 @@ export const shareCharacter = async ({
   usageTimeLimitMinutes,
 }: {
   characterId: string;
-  user: Pick<UserModel, 'id' | 'userRole'>;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
   telliPointsPercentageLimit: number;
   usageTimeLimitMinutes: number;
 }) => {
@@ -357,10 +360,9 @@ export const shareCharacter = async ({
   requireTeacherRole(user.userRole);
 
   const { character } = await getCharacterInfo(characterId, user.id);
-  // We need to take the schoolIds from character for the routes to work properly when the character is shared with school and the user accessing it is not the owner.
   await verifyReadAccess({
     item: character,
-    user: { ...user, schoolIds: character.ownerSchoolIds ?? [] },
+    user,
   });
 
   // validate input parameters

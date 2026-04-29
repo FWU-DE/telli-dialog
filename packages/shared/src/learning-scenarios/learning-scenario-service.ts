@@ -277,17 +277,16 @@ export async function shareLearningScenario({
 }: {
   learningScenarioId: string;
   data: LearningScenarioShareValues;
-  user: Pick<UserModel, 'id' | 'userRole'>;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
 }) {
   checkParameterUUID(learningScenarioId);
   // Authorization check: user must be a teacher and must have access to the learning scenario
   requireTeacherRole(user.userRole);
 
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user);
-  // We need to take the schoolIds from learning scenario for the routes to work properly when the learning scenario is shared with school and the user accessing it is not the owner.
   await verifyReadAccess({
     item: learningScenario,
-    user: { ...user, schoolIds: learningScenario.ownerSchoolIds ?? [] },
+    user,
   });
 
   const parsedValues = learningScenarioShareValuesSchema.parse(data);
