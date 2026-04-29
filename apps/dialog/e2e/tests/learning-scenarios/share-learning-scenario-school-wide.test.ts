@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { configureLearningScenario, createLearningScenario } from '../../utils/learning-scenario';
+import { waitForAutosave } from '../../utils/utils';
 import { nanoid } from 'nanoid';
 
 const learningScenarioTeacher = 'Absolutismus unter Ludwig XIV - teacher - ' + nanoid(8);
@@ -14,6 +15,7 @@ test.describe('share learning scenario school-wide', () => {
     await createLearningScenario(page);
     await configureLearningScenario(page, { name: learningScenarioTeacher });
     await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await waitForAutosave(page);
     await page.close();
 
     // Create learning scenario as teacher2 (shared to school1 & school2)
@@ -21,6 +23,7 @@ test.describe('share learning scenario school-wide', () => {
     await createLearningScenario(page);
     await configureLearningScenario(page, { name: learningScenarioTeacher2 });
     await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await waitForAutosave(page);
     await page.close();
 
     // Create learning scenario as teacher3 (shared to school2 & school3)
@@ -28,6 +31,7 @@ test.describe('share learning scenario school-wide', () => {
     await createLearningScenario(page);
     await configureLearningScenario(page, { name: learningScenarioTeacher3 });
     await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await waitForAutosave(page);
     await page.close();
   });
 

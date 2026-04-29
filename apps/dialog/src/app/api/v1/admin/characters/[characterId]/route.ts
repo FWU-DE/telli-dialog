@@ -6,6 +6,7 @@ import {
   unshareCharacter,
 } from '@shared/characters/character-service';
 import { dbGetCharacterById } from '@shared/db/functions/character';
+import { dbGetUserById } from '@shared/db/functions/user';
 import { NextRequest } from 'next/server';
 import z from 'zod';
 
@@ -59,9 +60,14 @@ export async function PATCH(
       const { telliPointsPercentageLimit, usageTimeLimitMinutes, userId } =
         patchCharacterValues.shareCharacter;
 
+      const user = await dbGetUserById({ userId });
+      if (!user) {
+        return Response.json({ error: 'User not found' }, { status: 400 });
+      }
+
       const result = await shareCharacter({
         characterId,
-        user: { id: userId, userRole: 'teacher' },
+        user: { id: user.id, userRole: user.userRole, schoolIds: user.schoolIds },
         telliPointsPercentageLimit,
         usageTimeLimitMinutes,
       });

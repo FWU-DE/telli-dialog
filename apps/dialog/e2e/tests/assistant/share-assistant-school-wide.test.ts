@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { configureAssistant } from '../../utils/assistant';
+import { waitForAutosave } from '../../utils/utils';
 import { nanoid } from 'nanoid';
 
 const assistantTeacher = 'Assistant by teacher - ' + nanoid(8);
@@ -23,6 +24,7 @@ test.describe('share assistant school-wide', () => {
       instructions: 'Teacher assistant',
     });
     await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await waitForAutosave(page);
     await page.close();
 
     // Create assistant as teacher2 (shared to school1 & school2)
@@ -38,6 +40,7 @@ test.describe('share assistant school-wide', () => {
       instructions: 'Teacher2 assistant',
     });
     await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await waitForAutosave(page);
     await page.close();
 
     // Create assistant as teacher3 (shared to school2 & school3)
@@ -53,6 +56,7 @@ test.describe('share assistant school-wide', () => {
       instructions: 'Teacher3 assistant',
     });
     await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await waitForAutosave(page);
     await page.close();
   });
 

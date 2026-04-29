@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { configureCharacter } from '../../utils/character';
+import { waitForAutosave } from '../../utils/utils';
 import { nanoid } from 'nanoid';
 
 const characterTeacher = 'Character by teacher - ' + nanoid(8);
@@ -18,6 +19,7 @@ test.describe('share character school-wide', () => {
     await createButton.click();
     await page.waitForURL('/characters/editor/**');
     await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await waitForAutosave(page);
     await configureCharacter(page, {
       name: characterTeacher,
       description: 'Created by teacher',
@@ -33,6 +35,7 @@ test.describe('share character school-wide', () => {
     await page.getByRole('button', { name: 'Dialogpartner erstellen' }).click();
     await page.waitForURL('/characters/editor/**');
     await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await waitForAutosave(page);
     await configureCharacter(page, {
       name: characterTeacher2,
       description: 'Created by teacher2',
@@ -48,6 +51,7 @@ test.describe('share character school-wide', () => {
     await page.getByRole('button', { name: 'Dialogpartner erstellen' }).click();
     await page.waitForURL('/characters/editor/**');
     await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await waitForAutosave(page);
     await configureCharacter(page, {
       name: characterTeacher3,
       description: 'Created by teacher3',
