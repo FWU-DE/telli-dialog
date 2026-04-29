@@ -143,7 +143,7 @@ export async function sendChatMessage({
 
   // Web search
   const webSearchResults = await searchWeb(userMessage.content);
-  const textSearchResults = webSearchResults.length > 0 ? webSearchResults : undefined;
+  //const textSearchResults = webSearchResults.length > 0 ? webSearchResults : undefined;
 
   // Save user message to DB
   await dbInsertChatContent({
@@ -194,7 +194,7 @@ export async function sendChatMessage({
   const systemPrompt = await constructChatSystemPrompt({
     characterId,
     assistantId: assistantId,
-    isTeacher: user.school.userRole === 'teacher',
+    isTeacher: user.userRole === 'teacher',
     federalState: user.federalState,
     chunks,
     errorUrls,
@@ -310,6 +310,6 @@ export async function sendChatMessage({
   return {
     stream,
     messageId: assistantMessageId,
-    textSearchResults,
+    textSearchResults: webSearchResults,
   };
 }

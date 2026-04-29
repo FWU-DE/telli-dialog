@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/auth/requireAuth';
-import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
+import { setLastUsedModelOfUser } from '@shared/users/user-service';
 import { updateSession } from '@/auth/utils';
 import { z } from 'zod';
 import { handleErrorInRoute } from '@/error/handle-error-in-route';
@@ -15,7 +15,11 @@ export async function POST(request: NextRequest) {
     const requestBody = await request.json();
     const { modelName } = requestSchema.parse(requestBody);
 
-    const updatedUser = await dbUpdateLastUsedModelByUserId({ userId: user.id, modelName });
+    const updatedUser = await setLastUsedModelOfUser({
+      userId: user.id,
+      modelName,
+    });
+
     await updateSession({ user: updatedUser });
 
     return NextResponse.json({ ok: true });

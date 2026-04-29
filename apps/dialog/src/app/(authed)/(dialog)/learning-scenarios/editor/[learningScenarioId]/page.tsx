@@ -1,6 +1,5 @@
 import { requireAuth } from '@/auth/requireAuth';
 import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebsearchSource } from '@shared/db/types';
 import { LearningScenarioEdit } from './learning-scenario-edit';
@@ -13,12 +12,11 @@ export default async function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]'>,
 ) {
   const { learningScenarioId } = await props.params;
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user } = await requireAuth();
 
   const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
     learningScenarioId: learningScenarioId,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
     user,
   }).catch(handleErrorInServerComponent);
   const readOnly = user.id !== learningScenario.userId;
@@ -38,7 +36,7 @@ export default async function Page(
     );
 
   return (
-    <DefaultPageLayout userAndContext={userAndContext}>
+    <DefaultPageLayout header={{ headerType: 'form' }}>
       <LearningScenarioEdit
         learningScenario={learningScenario}
         relatedFiles={relatedFiles}

@@ -1,6 +1,4 @@
-import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import Chat from '@/components/chat/chat';
-import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { requireAuth } from '@/auth/requireAuth';
@@ -8,7 +6,6 @@ import {
   getConversation,
   getConversationMessages,
 } from '@shared/conversation/conversation-service';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
@@ -28,8 +25,11 @@ export default async function Page(
 ) {
   const params = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+  };
 
   const [chat, rawChatMessages, character] = await Promise.all([
     getConversation({
@@ -43,7 +43,7 @@ export default async function Page(
     getCharacterForChatSession({
       characterId: params.characterId,
       userId: user.id,
-      schoolId: school.id,
+      schoolIds: user.schoolIds ?? [],
     }),
   ]).catch(handleErrorInServerComponent);
 
@@ -74,15 +74,15 @@ export default async function Page(
       defaultLlmModelByCookie={currentModel}
       initialDownloadConversationEnabled={rawChatMessages.length > 0}
     >
-      <HeaderPortal>
-        <ChatHeaderBar
-          chatId={chat.id}
-          title={character.name}
-          downloadConversationEnabled={rawChatMessages.length > 0}
-          userAndContext={userAndContext}
-        />
-      </HeaderPortal>
-      <DefaultPageLayout>
+      <DefaultPageLayout
+        header={{
+          headerType: 'chat',
+          chatId: chat.id,
+          title: character.name,
+          downloadConversationEnabled: rawChatMessages.length > 0,
+          userAndContext,
+        }}
+      >
         <Chat
           id={chat.id}
           initialMessages={chatMessages}

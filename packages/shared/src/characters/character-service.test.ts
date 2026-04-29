@@ -77,6 +77,8 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
   lastUsedModel: null,
   versionAcceptedConditions: null,
   createdAt: new Date(),
+  federalStateId: generateUUID(),
+  schoolIds: [generateUUID()],
 });
 
 describe('character-service', () => {
@@ -100,7 +102,7 @@ describe('character-service', () => {
           downloadFileFromCharacter({
             characterId: generateUUID(),
             fileId: generateUUID(),
-            schoolId: generateUUID(),
+            schoolIds: [generateUUID()],
             user: mockUser(),
           }),
       },
@@ -270,7 +272,7 @@ describe('character-service', () => {
         fetchFileMappings({
           characterId: generateUUID(),
           userId: 'different-user-id',
-          schoolId: 'school-id',
+          schoolIds: ['school-id'],
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -291,7 +293,7 @@ describe('character-service', () => {
         fetchFileMappings({
           characterId: generateUUID(),
           userId: 'different-user-id',
-          schoolId: 'different-school-id',
+          schoolIds: ['different-school-id'],
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -364,12 +366,12 @@ describe('character-service', () => {
           user: mockUser('teacher'),
           telliPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
-          schoolId: 'different-school-id',
+          schoolIds: ['different-school-id'],
         }),
       ).rejects.toThrow(ForbiddenError);
     });
 
-    it('should throw ForbiddenError when user can only unshare a character they started sharing - unshareCharacter', async () => {
+    it('should throw NotFoundError when there is no active sharing to unshare - unshareCharacter', async () => {
       (
         dbGetSharedCharacterConversations as MockedFunction<
           typeof dbGetSharedCharacterConversations
@@ -381,7 +383,50 @@ describe('character-service', () => {
           characterId: generateUUID(),
           user: mockUser('teacher'),
         }),
-      ).rejects.toThrow(ForbiddenError);
+      ).rejects.toThrow(NotFoundError);
+    });
+  });
+
+  describe('shareCharacter – duplicate share', () => {
+    const userId = generateUUID();
+    const characterId = generateUUID();
+    const user = { ...mockUser('teacher'), id: userId };
+    const existingShare = {
+      id: generateUUID(),
+      characterId,
+      userId,
+      telliPointsLimit: 50,
+      maxUsageTimeLimit: 60,
+      inviteCode: 'ABCD1234',
+      startedAt: new Date(),
+      manuallyStoppedAt: null,
+    };
+
+    beforeEach(() => {
+      const mockCharacter: Partial<CharacterSelectModel> = {
+        id: characterId,
+        userId,
+        accessLevel: 'private',
+      };
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        mockCharacter as never,
+      );
+      (
+        dbGetSharedCharacterConversations as MockedFunction<
+          typeof dbGetSharedCharacterConversations
+        >
+      ).mockResolvedValue([existingShare] as never);
+    });
+
+    it('throws when there is already an active share', async () => {
+      await expect(
+        shareCharacter({
+          characterId,
+          user,
+          telliPointsPercentageLimit: 10,
+          usageTimeLimitMinutes: 60,
+        }),
+      ).rejects.toThrow('There can only be one active share at a time');
     });
   });
 
@@ -485,7 +530,7 @@ describe('character-service', () => {
           fetchFileMappings({
             characterId: 'invalid-uuid',
             userId: 'user-id',
-            schoolId: 'school-id',
+            schoolIds: ['school-id'],
           }),
       },
       {
@@ -573,7 +618,7 @@ describe('character-service', () => {
         const result = await getCharacterForChatSession({
           characterId,
           userId: differentUserId,
-          schoolId: differentSchoolId,
+          schoolIds: [differentSchoolId],
         });
 
         expect(result).toBe(mockCharacter);
@@ -617,7 +662,7 @@ describe('character-service', () => {
         const result = await getCharacterForEditView({
           characterId,
           userId: differentUserId,
-          schoolId: differentSchoolId,
+          schoolIds: [differentSchoolId],
         });
 
         expect(result.character).toBe(mockCharacter);
@@ -652,7 +697,7 @@ describe('character-service', () => {
           fetchFileMappings({
             characterId,
             userId: differentUserId,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).resolves.not.toThrow();
       });
@@ -676,7 +721,7 @@ describe('character-service', () => {
           getCharacterForChatSession({
             characterId,
             userId: differentUserId,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -700,7 +745,7 @@ describe('character-service', () => {
           getCharacterForEditView({
             characterId,
             userId: differentUserId,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -721,7 +766,7 @@ describe('character-service', () => {
           fetchFileMappings({
             characterId,
             userId: differentUserId,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });

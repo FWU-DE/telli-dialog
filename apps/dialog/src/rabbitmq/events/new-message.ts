@@ -27,12 +27,12 @@ type FunctionProps =
 export function constructTelliNewMessageEvent(props: FunctionProps): TelliNewChatMessageEventType {
   const commonObjectProps = {
     event_type: 'telli_new_chat_message' as const,
-    school_id: props.user.school.id,
+    school_id: props.user.schoolIds?.[0] ?? '',
     federal_state: props.user.federalState.id,
     provider: props.provider,
     cost_in_cent: props.costsInCent,
     timestamp: new Date(),
-    user_role: props.anonymous ? 'anonymous' : props.user.school.userRole,
+    user_role: props.anonymous ? 'anonymous' : props.user.userRole,
     input_tokens: props.promptTokens,
     output_tokens: props.completionTokens,
   };

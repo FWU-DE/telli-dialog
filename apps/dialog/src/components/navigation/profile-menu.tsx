@@ -9,8 +9,20 @@ import Link from 'next/link';
 import { IMPRESSUM_URL, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from './const';
 import { useTranslations } from 'next-intl';
 import DotsHorizontalIcon from '@/components/icons/dots-horizontal';
+import { cn } from '@/utils/tailwind';
 import { usePortalContainer } from '@ui/components/portal-container';
 import { Button } from '@ui/components/Button';
+
+function MenuActionRow({ action }: { action: React.ReactElement<{ className?: string }> }) {
+  const className = cn(
+    'flex w-full h-auto items-center justify-start gap-2 p-2 pl-4 text-base font-normal bg-transparent border-none hover:bg-transparent hover:underline hover:text-primary',
+    action.props.className,
+  );
+
+  const actionElement = React.cloneElement(action, { className });
+
+  return <DropdownMenu.Item asChild>{actionElement}</DropdownMenu.Item>;
+}
 
 function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAndContext }) {
   const t = useTranslations('legal');
@@ -85,8 +97,8 @@ export function ThreeDotsProfileMenu({
   deleteButtonJSX,
   userAndContext,
 }: {
-  downloadButtonJSX?: React.ReactNode;
-  deleteButtonJSX?: React.ReactNode;
+  downloadButtonJSX?: React.ReactElement<{ className?: string }>;
+  deleteButtonJSX?: React.ReactElement<{ className?: string }>;
   userAndContext?: UserAndContext;
 }) {
   const container = usePortalContainer();
@@ -108,8 +120,8 @@ export function ThreeDotsProfileMenu({
           sideOffset={10}
           className="z-20 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
         >
-          {deleteButtonJSX && <DropdownMenu.Item asChild>{deleteButtonJSX}</DropdownMenu.Item>}
-          {downloadButtonJSX && <DropdownMenu.Item asChild>{downloadButtonJSX}</DropdownMenu.Item>}
+          {deleteButtonJSX && <MenuActionRow action={deleteButtonJSX} />}
+          {downloadButtonJSX && <MenuActionRow action={downloadButtonJSX} />}
           {(deleteButtonJSX || downloadButtonJSX) && <hr className="border-gray-200 mx-2" />}
           <ProfileMenuContent userAndContext={userAndContext} />
         </DropdownMenu.Content>

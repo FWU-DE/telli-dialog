@@ -29,8 +29,8 @@
     "k6:run:cloud": "k6 cloud run -e LOADTEST_USERNAME=$LOADTEST_USERNAME -e LOADTEST_PASSWORD=$LOADTEST_PASSWORD -e LOADTEST_IDP_HINT=$LOADTEST_IDP_HINT -e LOADTEST_BASE_URL=$LOADTEST_BASE_URL"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1030.0",
-    "@aws-sdk/s3-request-presigner": "3.1030.0",
+    "@aws-sdk/client-s3": "3.1036.0",
+    "@aws-sdk/s3-request-presigner": "3.1036.0",
     "@deutschlandgpt/core": "0.1.5",
     "@hookform/resolvers": "5.2.2",
     "@langchain/textsplitters": "1.0.1",
@@ -43,9 +43,9 @@
     "@radix-ui/react-select": "2.2.6",
     "@radix-ui/react-toast": "1.2.15",
     "@radix-ui/react-tooltip": "1.2.8",
-    "@sentry/nextjs": "10.48.0",
+    "@sentry/nextjs": "10.50.0",
     "@t3-oss/env-nextjs": "0.13.11",
-    "@tanstack/react-query": "5.99.0",
+    "@tanstack/react-query": "5.100.1",
     "@tanstack/react-virtual": "3.13.24",
     "@telli/ai-core": "workspace:*",
     "@telli/shared": "workspace:*",
@@ -78,7 +78,7 @@
     "rabbitmq-client": "5.0.8",
     "react": "19.2.5",
     "react-dom": "19.2.5",
-    "react-hook-form": "7.72.1",
+    "react-hook-form": "7.73.1",
     "react-image-crop": "11.0.10",
     "react-markdown": "10.1.0",
     "react-syntax-highlighter": "16.1.1",
@@ -93,11 +93,11 @@
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.11.1",
-    "@dotenvx/dotenvx": "1.61.0",
+    "@axe-core/playwright": "4.11.2",
+    "@dotenvx/dotenvx": "1.62.0",
     "@eslint/eslintrc": "3.3.5",
     "@playwright/test": "1.59.1",
-    "@tailwindcss/postcss": "4.2.2",
+    "@tailwindcss/postcss": "4.2.4",
     "@telli/typescript-config": "workspace:*",
     "@types/he": "1.2.3",
     "@types/jsdom": "21.1.7",
@@ -109,7 +109,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/react-syntax-highlighter": "15.5.13",
-    "@vitest/coverage-v8": "4.1.4",
+    "@vitest/coverage-v8": "4.1.5",
     "esbuild": "0.28.0",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.4",
@@ -119,13 +119,13 @@
     "eslint-plugin-prettier": "5.5.5",
     "k6": "0.0.0",
     "playwright-core": "1.59.1",
-    "postcss": "8.5.10",
+    "postcss": "8.5.11",
     "prettier": "3.8.3",
     "prettier-eslint": "16.4.2",
-    "tailwindcss": "4.2.2",
+    "tailwindcss": "4.2.4",
     "tailwindcss-animate": "1.0.7",
     "tsx": "4.21.0",
-    "typescript": "6.0.2",
-    "vitest": "4.1.4"
+    "typescript": "6.0.3",
+    "vitest": "4.1.5"
   }
 }

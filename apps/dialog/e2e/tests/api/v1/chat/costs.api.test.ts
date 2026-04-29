@@ -88,7 +88,21 @@ test.describe('costs', () => {
       ...user,
       federalState: { ...user.federalState, teacherPriceLimit: teacherPriceLimit },
     };
-    await db.insert(userTable).values(user);
+    const [insertedUser] = await db
+      .insert(userTable)
+      .values({
+        firstName: 'test',
+        lastName: 'user',
+        email: `${generateRandomString(8)}@example.com`,
+        lastUsedModel: user.lastUsedModel,
+        versionAcceptedConditions: user.versionAcceptedConditions,
+        schoolIds: user.schoolIds,
+        federalStateId: user.federalStateId,
+        userRole: 'teacher',
+      })
+      .returning({ id: userTable.id });
+    if (!insertedUser) throw new Error('Failed to insert test user');
+    user = { ...user, id: insertedUser.id, userRole: 'teacher' };
 
     const model = mockLlmModel();
     await db.insert(llmModelTable).values(model);
@@ -102,6 +116,7 @@ test.describe('costs', () => {
       modelId: model.id,
       inviteCode: generateRandomString(8),
       startedAt: new Date(),
+      manuallyStoppedAt: null,
       startedBy: user.id,
     };
 
@@ -163,7 +178,21 @@ test.describe('costs', () => {
       ...user,
       federalState: { ...user.federalState, teacherPriceLimit: teacherPriceLimit },
     };
-    await db.insert(userTable).values(user);
+    const [insertedUser] = await db
+      .insert(userTable)
+      .values({
+        firstName: 'test',
+        lastName: 'user',
+        email: `${generateRandomString(8)}@example.com`,
+        lastUsedModel: user.lastUsedModel,
+        versionAcceptedConditions: user.versionAcceptedConditions,
+        schoolIds: user.schoolIds,
+        federalStateId: user.federalStateId,
+        userRole: 'teacher',
+      })
+      .returning({ id: userTable.id });
+    if (!insertedUser) throw new Error('Failed to insert test user');
+    user = { ...user, id: insertedUser.id, userRole: 'teacher' };
 
     const model = mockLlmModel();
     await db.insert(llmModelTable).values(model);
@@ -175,6 +204,7 @@ test.describe('costs', () => {
       schoolId: 'test_school1',
       accessLevel: 'private' as const,
       startedAt: new Date(),
+      manuallyStoppedAt: null,
       telliPointsLimit: telliPointsLimit,
       maxUsageTimeLimit: maxUsageTimeLimit,
       inviteCode: generateRandomString(8),

@@ -7,15 +7,15 @@ import { type UserAndContext } from '@/auth/types';
 import { dbGetCreditIncreaseForCurrentMonth } from '@shared/db/functions/voucher';
 
 export async function getPriceLimitInCentByUser(user: UserAndContext) {
-  if (user.school === undefined || user.federalState === undefined) return null;
+  if (user.federalState === undefined) return null;
 
   const codeBonus = await dbGetCreditIncreaseForCurrentMonth(user.id);
 
-  if (user.school.userRole === 'student') {
+  if (user.userRole === 'student') {
     return user.federalState.studentPriceLimit + codeBonus;
   }
 
-  if (user.school.userRole === 'teacher') {
+  if (user.userRole === 'teacher') {
     return user.federalState.teacherPriceLimit + codeBonus;
   }
 
@@ -23,11 +23,9 @@ export async function getPriceLimitInCentByUser(user: UserAndContext) {
 }
 
 export async function getPriceInCentByUser(user: Omit<UserAndContext, 'subscription'>) {
-  if (user.school === undefined) return null;
-
   // students cannot have shared chats
   const sharedChatsUsageInCent =
-    user.school.userRole !== 'student'
+    user.userRole !== 'student'
       ? await dbGetLearningScenarioUsageInCentByUserId({ userId: user.id })
       : 0;
 

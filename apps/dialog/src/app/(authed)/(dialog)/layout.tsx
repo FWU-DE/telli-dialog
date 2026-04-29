@@ -1,6 +1,5 @@
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
-import { HEADER_PORTAL_ID } from './header-portal';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
@@ -20,13 +19,12 @@ import AppSidebar from '@/components/navigation/sidebar/app-sidebar';
 import { SidebarProvider } from '@telli/ui/components/Sidebar';
 import SessionWatcher from '@/auth/SessionWatcher';
 import { getActiveBannersForUser } from '@shared/info-banners/info-banner-service';
-import ActiveInfoBanners from '@/components/info-banners/active-info-banners';
+import { DialogWrapper } from '@/components/layout/dialog-header';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
   const user = await getUser();
-  const userWithRole = { ...user, userRole: user.school.userRole };
-  if (!user.hasApiKeyAssigned) throw new Error(t('no-api-key'));
+  if (!user.federalState.hasApiKeyAssigned) throw new Error(t('no-api-key'));
 
   const [federalState, models, priceInCent, userPriceLimit, hasCompletedTraining, activeBanners] =
     await Promise.all([
@@ -42,8 +40,13 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     ]);
 
   const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
+  const userAndContext = {
+    ...user,
+    userRole: user.userRole,
+    federalState,
+  };
   const federalStateDisclaimer =
-    federalStateDisclaimers[user.school.federalStateId as FederalStateId];
+    federalStateDisclaimers[(user.federalStateId ?? user.federalState.id) as FederalStateId];
   const userMustAccept =
     federalStateDisclaimer !== undefined &&
     (user.versionAcceptedConditions === null || user.versionAcceptedConditions < VERSION);
@@ -57,20 +60,14 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
             defaultLlmModelByCookie={user.lastUsedModel ?? DEFAULT_CHAT_MODEL}
           >
             <AppSidebar
-              user={userWithRole}
+              user={user}
               federalState={federalState}
               currentModelCosts={priceInCent ?? 0}
               userPriceLimit={userPriceLimit ?? 500}
             />
-            <div className="relative flex flex-col h-dvh w-dvw overflow-hidden bg-background-2">
-              <ActiveInfoBanners infoBanners={activeBanners} />
-              {/* Todo: Refactor HeaderPortal and header components to not rely on style of this div */}
-              <header
-                id={HEADER_PORTAL_ID}
-                className="h-19 flex-none px-6 py-4 flex items-center justify-between gap-4"
-              ></header>
-              <main className="min-h-0 w-full mx-auto flex-1 overflow-auto">{children}</main>
-            </div>
+            <DialogWrapper userAndContext={userAndContext} infoBanners={activeBanners}>
+              {children}
+            </DialogWrapper>
           </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (

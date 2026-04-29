@@ -1,7 +1,5 @@
-import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import Chat from '@/components/chat/chat';
-import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -9,7 +7,6 @@ import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { getConversationWithMessagesAndAssistant } from '@shared/assistants/assistant-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
@@ -24,8 +21,11 @@ export default async function Page(
 ) {
   const { assistantId, conversationId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+  };
 
   const { conversation, messages, assistant } = await getConversationWithMessagesAndAssistant({
     conversationId: conversationId,
@@ -54,15 +54,15 @@ export default async function Page(
       defaultLlmModelByCookie={currentModel}
       initialDownloadConversationEnabled={chatMessages.length > 0}
     >
-      <HeaderPortal>
-        <ChatHeaderBar
-          chatId={conversation.id}
-          title={assistant.name}
-          downloadConversationEnabled={chatMessages.length > 0}
-          userAndContext={userAndContext}
-        />
-      </HeaderPortal>
-      <DefaultPageLayout>
+      <DefaultPageLayout
+        header={{
+          headerType: 'chat',
+          chatId: conversation.id,
+          title: assistant.name,
+          downloadConversationEnabled: chatMessages.length > 0,
+          userAndContext,
+        }}
+      >
         <Chat
           id={conversation.id}
           initialMessages={chatMessages}

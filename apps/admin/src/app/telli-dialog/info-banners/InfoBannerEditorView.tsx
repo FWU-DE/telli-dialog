@@ -182,7 +182,6 @@ export default function InfoBannerEditorView({
       const createdInfoBanner = await createInfoBannerAction(payload, selectedMappings);
       toast.success('Info-Banner erfolgreich erstellt.');
       router.push(ROUTES.dialog.infoBannerDetails(createdInfoBanner.id));
-      router.refresh();
     } catch (error) {
       logError('Error saving info banner', error);
       toast.error('Fehler beim Speichern der Info-Banner.');
@@ -203,7 +202,6 @@ export default function InfoBannerEditorView({
       await deleteInfoBannerAction(infoBanner.id);
       toast.success('Info-Banner erfolgreich gelöscht.');
       router.push(ROUTES.dialog.infoBanners);
-      router.refresh();
     } catch (error) {
       logError('Error deleting info banner', error);
       toast.error('Fehler beim Löschen der Info-Banner.');

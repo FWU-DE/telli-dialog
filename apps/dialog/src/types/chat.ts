@@ -1,4 +1,5 @@
 import type { SharedChatExpiredError, TelliPointsExceededError } from '@telli/ai-core/errors';
+import { TextSearchResult } from 'linkup-sdk';
 
 export type TextSearchResult = {
   name: string;

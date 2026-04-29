@@ -3,9 +3,8 @@
 import { CaretRightIcon, GlobeSimpleIcon } from '@phosphor-icons/react';
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { useTranslations } from 'next-intl';
-import { openInNewTab } from '@/utils/navigation/router';
 import { cn } from '@/utils/tailwind';
-import { TextSearchResult } from '@/types/chat';
+import type { TextSearchResult } from 'linkup-sdk';
 import { Button } from '@ui/components/Button';
 
 function getSourceTitle(source: TextSearchResult) {
@@ -74,9 +73,9 @@ export function WebSearchSourcesPanel({
 
   return (
     <div className="flex w-full max-w-172.75 flex-col items-start gap-3" ref={panelRef}>
-      <button
-        type="button"
-        className="inline-flex items-center gap-1 rounded-full bg-black/10 px-3 py-1 text-sm text-main-900"
+      <Button
+        variant="ghost"
+        className="h-auto gap-1 rounded-full bg-black/10 px-3 py-1 text-sm text-main-900 hover:bg-black/15"
         onClick={onToggle}
         aria-expanded={isOpen}
         aria-controls={panelId}
@@ -87,7 +86,7 @@ export function WebSearchSourcesPanel({
           className={cn('size-3 transition-transform', isOpen ? 'rotate-90' : 'rotate-0')}
           weight="bold"
         />
-      </button>
+      </Button>
 
       {isOpen && (
         <div
@@ -100,11 +99,12 @@ export function WebSearchSourcesPanel({
               const domain = getSourceDomain(source);
 
               return (
-                <button
+                <a
                   key={`${source.url}-${index}`}
-                  type="button"
-                  className="flex w-full items-center gap-4 px-4 py-0.5 text-left hover:bg-secondary/20"
-                  onClick={() => openInNewTab(source.url)}
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-auto w-full items-center gap-4 rounded-none px-4 py-0.5 text-left hover:bg-secondary/20"
                   title={title}
                   aria-label={tWebsearch('results.open-source', { source: title })}
                 >
@@ -112,7 +112,7 @@ export function WebSearchSourcesPanel({
                     {title}
                   </span>
                   <span className="shrink-0 text-xs text-black/70">{domain}</span>
-                </button>
+                </a>
               );
             })}
           </div>
@@ -141,9 +141,7 @@ export function WebSearchSourcesButton({
       size={'icon'}
       className="text-primary hover:text-primary hover:bg-secondary/30"
     >
-      <div>
-        <GlobeSimpleIcon className="size-4" />
-      </div>
+      <GlobeSimpleIcon className="size-4" />
     </Button>
   );
 }

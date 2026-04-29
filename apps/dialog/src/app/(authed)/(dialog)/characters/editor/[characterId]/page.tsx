@@ -1,6 +1,5 @@
 import { getCharacterForEditView } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebsearchSource } from '@shared/db/types';
 import { CharacterEdit } from './character-edit';
@@ -11,13 +10,12 @@ export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]'>) {
   const { characterId } = await props.params;
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user } = await requireAuth();
 
   const { character, relatedFiles, maybeSignedPictureUrl } = await getCharacterForEditView({
     characterId,
     userId: user.id,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
   }).catch(handleErrorInServerComponent);
 
   const initialLinks = character.attachedLinks
@@ -37,7 +35,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   }
 
   return (
-    <DefaultPageLayout userAndContext={userAndContext}>
+    <DefaultPageLayout header={{ headerType: 'form' }}>
       <CharacterEdit
         character={character}
         relatedFiles={relatedFiles}

@@ -14,14 +14,12 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { notFound } from 'next/navigation';
 import CollapseSidebar from '@/components/common/collapse-sidebar';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
-import { buildLegacyUserAndContext } from '@/auth/types';
 
 export default async function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]/share'>,
 ) {
   const { learningScenarioId } = await props.params;
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user } = await requireAuth();
 
   const learningScenario = await getSharedLearningScenario({
     learningScenarioId: learningScenarioId,
@@ -41,7 +39,7 @@ export default async function Page(
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
       <CollapseSidebar />
-      <CustomChatHeader userAndContext={userAndContext} />
+      <CustomChatHeader />
       <Link
         href={`/learning-scenarios/editor/${learningScenario.id}`}
         className="flex gap-2 items-center text-primary w-full"
@@ -53,7 +51,7 @@ export default async function Page(
         <h1 className="text-4xl sm:text-7xl font-medium mb-10 sm:mb-16">{t('join')}</h1>
         <CountDownTimer
           leftTime={Math.max(leftTime, 0)}
-          totalTime={learningScenario.maxUsageTimeLimit ?? 0}
+          totalTime={learningScenario.maxUsageTimeLimit}
           stopWatchClassName="w-8 h-8"
         />
         <main className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">

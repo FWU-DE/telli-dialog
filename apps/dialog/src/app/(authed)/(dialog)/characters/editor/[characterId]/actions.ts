@@ -56,14 +56,14 @@ export async function shareCharacterAction({
   telliPointsPercentageLimit,
   usageTimeLimit,
 }: { id: string } & SharedConversationShareFormValues) {
-  const { user, school } = await requireAuth();
+  const { user } = await requireAuth();
 
   return runServerAction(shareCharacter)({
     characterId: id,
     telliPointsPercentageLimit: telliPointsPercentageLimit,
     usageTimeLimitMinutes: usageTimeLimit,
     user: user,
-    schoolId: school?.id,
+    schoolIds: user.schoolIds ?? [],
   });
 }
 
@@ -127,12 +127,12 @@ export async function downloadFileFromCharacterAction({
   characterId: string;
   fileId: string;
 }) {
-  const { user, school } = await requireAuth();
+  const { user } = await requireAuth();
 
   return runServerAction(downloadFileFromCharacter)({
     characterId,
     fileId,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
     user,
   });
 }

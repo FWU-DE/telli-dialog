@@ -1,13 +1,10 @@
 import { generateUUID } from '@shared/utils/uuid';
-import { ChatHeaderBar } from '@/components/chat/header-bar';
-import HeaderPortal from '../../../header-portal';
 import { notFound } from 'next/navigation';
 import Chat from '@/components/chat/chat';
 import Logo from '@/components/common/logo';
 import { type ChatMessage as Message } from '@/types/chat';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { parseSearchParams } from '@/utils/parse-search-params';
@@ -24,13 +21,16 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
 
   const id = generateUUID();
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+  };
 
   const character = await getCharacterForChatSession({
     characterId,
     userId: user.id,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
   }).catch(() => {
     notFound();
   });
@@ -51,15 +51,15 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
-      <HeaderPortal>
-        <ChatHeaderBar
-          chatId={id}
-          title={character.name}
-          downloadConversationEnabled={false}
-          userAndContext={userAndContext}
-        />
-      </HeaderPortal>
-      <DefaultPageLayout>
+      <DefaultPageLayout
+        header={{
+          headerType: 'chat',
+          chatId: id,
+          title: character.name,
+          downloadConversationEnabled: false,
+          userAndContext,
+        }}
+      >
         <Chat
           id={id}
           initialMessages={initialMessages}
