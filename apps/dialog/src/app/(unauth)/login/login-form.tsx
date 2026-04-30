@@ -3,7 +3,7 @@
 import SharedChatLoginForm from '../../(authed)/(dialog)/learning-scenarios/_components/shared-chat-login-form';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { signIn } from 'next-auth/react';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import TelliLogo from '@/components/icons/logo';
 import { cn } from '@/utils/tailwind';
 import { useSearchParams } from 'next/navigation';
@@ -16,7 +16,11 @@ export default function LoginForm() {
   useEffect(() => {
     // Clear sessionStorage on login to reset the per-session state (e.g., dismissed info banners).
     // All logout paths redirect to the login page, making it the single place to clear state from the previous session.
-    window.sessionStorage.clear();
+    try {
+      window.sessionStorage.clear();
+    } catch {
+      // Ignore storage failures (e.g., when storage is blocked/disabled).
+    }
   }, []);
 
   return (
