@@ -1,7 +1,7 @@
 import { dbCreateUser, dbGetUserById, dbUpdateUserById } from '@telli/shared/db/functions/user';
 import { dbGetFederalStateById } from '@shared/db/functions/federal-state';
 import { AuthErrorCode, validateOidcProfile } from '@shared/auth/authentication-service';
-import { normalizeVidisSchoolIds, vidisRoleToUserSchoolRole } from '@shared/db/functions/vidis';
+import { normalizeVidisSchoolIds, vidisRoleToUserRole } from '@shared/db/functions/vidis';
 
 export type VidisSignInResult =
   | { success: true }
@@ -30,7 +30,7 @@ export async function validateAndSyncVidisUser(profile: unknown): Promise<VidisS
   }
 
   const schoolIds = normalizeVidisSchoolIds(parsedProfile.schulkennung);
-  const userRole = vidisRoleToUserSchoolRole(parsedProfile.rolle.trim());
+  const userRole = vidisRoleToUserRole(parsedProfile.rolle.trim());
 
   if (!existingUser) {
     await dbCreateUser({

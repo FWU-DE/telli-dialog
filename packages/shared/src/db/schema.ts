@@ -30,9 +30,9 @@ export type FileMetadata = {
   height?: number;
 };
 
-export const userSchoolRoleSchema = z.enum(['student', 'teacher']);
-export const userSchoolRoleEnum = pgEnum('user_school_role', userSchoolRoleSchema.enum);
-export type UserSchoolRole = z.infer<typeof userSchoolRoleSchema>;
+export const userRoleSchema = z.enum(['student', 'teacher']);
+export const userRoleEnum = pgEnum('user_school_role', userRoleSchema.enum);
+export type UserRole = z.infer<typeof userRoleSchema>;
 
 /**
  * Schema for table user_entity
@@ -49,7 +49,7 @@ export const userTable = pgTable('user_entity', {
     .notNull()
     .default(sql`'{}'::text[]`),
   federalStateId: text('federal_state_id').references(() => federalStateTable.id),
-  userRole: userSchoolRoleEnum('user_role').notNull().default('student'),
+  userRole: userRoleEnum('user_role').notNull().default('student'),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
 });
 

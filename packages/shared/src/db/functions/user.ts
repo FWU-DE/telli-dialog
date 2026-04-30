@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from '..';
-import { UserInsertModel, UserSchoolRole, userTable } from '../schema';
+import { UserInsertModel, UserRole, userTable } from '../schema';
 
 export async function dbGetUserById({ userId }: { userId: string | undefined }) {
   if (userId === undefined) return undefined;
@@ -48,7 +48,7 @@ export async function dbCreateUser(
     id: string;
     schoolIds: string[];
     federalStateId: string;
-    userRole: UserSchoolRole;
+    userRole: UserRole;
   },
 ) {
   const [insertedUser] = await db.insert(userTable).values(user).returning();
@@ -60,7 +60,7 @@ export async function dbUpdateUserById(
     id: string;
     schoolIds: string[];
     federalStateId: string;
-    userRole: UserSchoolRole;
+    userRole: UserRole;
   },
 ) {
   const [updatedUser] = await db
@@ -84,7 +84,7 @@ export async function dbCreateOrUpdateUser(
     id: string;
     schoolIds: string[];
     federalStateId: string;
-    userRole: UserSchoolRole;
+    userRole: UserRole;
   },
 ) {
   const insertedUser = await db

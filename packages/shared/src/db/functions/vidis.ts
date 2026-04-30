@@ -1,8 +1,8 @@
-import { UserSchoolRole } from '../schema';
+import { UserRole } from '../schema';
 
 type VidisSchoolIds = string | string[];
 
-export function vidisRoleToUserSchoolRole(role: string): UserSchoolRole {
+export function vidisRoleToUserRole(role: string): UserRole {
   switch (role) {
     case 'LEHR':
       return 'teacher';
