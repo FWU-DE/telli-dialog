@@ -4,7 +4,7 @@ import { chunkText } from './chunking';
 import { embedText, embedChunks } from './embedding';
 import { vectorSearch } from './retrieval';
 import { RetrievedChunk, UnembeddedChunk } from './types';
-import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
+import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { logError } from '@shared/logging';
 
 /**
@@ -97,7 +97,7 @@ export async function retrieveChunks({
     embedding: queryEmbedding,
     fileIds,
     sourceUrls,
-    limit: FILE_SEARCH_LIMIT,
+    limit: VECTOR_SEARCH_LIMIT,
   });
 
   return chunks;
