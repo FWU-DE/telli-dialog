@@ -1,6 +1,6 @@
 import { SUPPORTED_DOCUMENTS_EXTENSIONS, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
 import { RetrievedChunk } from '../rag/types';
-import { TextSearchResult } from 'linkup-sdk';
+import type { TextSearchResult } from 'linkup-sdk';
 
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien
@@ -55,10 +55,14 @@ export function constructRagContext(
 
   const fileChunks = chunks
     .filter((chunk) => chunk.sourceType === 'file')
-    .sort((a, b) => a.orderIndex - b.orderIndex);
+    .sort(
+      (a, b) => (a.fileName ?? '').localeCompare(b.fileName ?? '') || a.orderIndex - b.orderIndex,
+    );
   const webpageChunks = chunks
     .filter((chunk) => chunk.sourceType === 'webpage')
-    .sort((a, b) => a.orderIndex - b.orderIndex);
+    .sort(
+      (a, b) => (a.sourceUrl ?? '').localeCompare(b.sourceUrl ?? '') || a.orderIndex - b.orderIndex,
+    );
 
   const sections: string[] = [];
 

@@ -1,6 +1,9 @@
-import { LinkupClient, TextSearchResult } from 'linkup-sdk';
+import { LinkupClient, type TextSearchResult } from 'linkup-sdk';
 import { env } from '@/env';
-import { WEBSEARCH_RESULTS_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  WEBSERACH_RESULT_CONTENT_LENGTH_LIMIT,
+  WEBSEARCH_RESULTS_LIMIT,
+} from '@/configuration-text-inputs/const';
 
 /**
  * Performs a web search using the Linkup API and returns text search results.
@@ -25,5 +28,14 @@ export async function searchWeb(query: string): Promise<TextSearchResult[]> {
     outputType: 'searchResults',
   });
 
-  return (searchResults.results as TextSearchResult[]).slice(0, WEBSEARCH_RESULTS_LIMIT);
+  if (!Array.isArray(searchResults.results)) {
+    return [];
+  }
+
+  return (searchResults.results as TextSearchResult[])
+    .slice(0, WEBSEARCH_RESULTS_LIMIT)
+    .map((result) => ({
+      ...result,
+      content: result.content.slice(0, WEBSERACH_RESULT_CONTENT_LENGTH_LIMIT),
+    }));
 }

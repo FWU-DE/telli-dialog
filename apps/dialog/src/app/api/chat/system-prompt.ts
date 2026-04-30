@@ -13,7 +13,7 @@ import {
   SUGGESTION_GUIDELINES,
   TOOL_GUIDELINES,
 } from '../utils/system-prompt';
-import { TextSearchResult } from 'linkup-sdk';
+import type { TextSearchResult } from 'linkup-sdk';
 
 function constructTelliSystemPrompt(
   chunks: RetrievedChunk[],
