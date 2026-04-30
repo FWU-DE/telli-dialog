@@ -4,6 +4,7 @@ import {
   WEBSEARCH_RESULT_CONTENT_LENGTH_LIMIT,
   WEBSEARCH_RESULTS_LIMIT,
 } from '@/configuration-text-inputs/const';
+import { logError } from '@shared/logging';
 
 /**
  * Performs a web search using the Linkup API and returns text search results.
@@ -18,24 +19,29 @@ export async function searchWeb(query: string): Promise<TextSearchResult[]> {
     return [];
   }
 
-  const linkupClient = new LinkupClient({
-    apiKey: env.linkupApiKey,
-  });
+  try {
+    const linkupClient = new LinkupClient({
+      apiKey: env.linkupApiKey,
+    });
 
-  const searchResults = await linkupClient.search({
-    query: query,
-    depth: 'standard',
-    outputType: 'searchResults',
-  });
+    const searchResults = await linkupClient.search({
+      query: query,
+      depth: 'standard',
+      outputType: 'searchResults',
+    });
 
-  if (!Array.isArray(searchResults.results)) {
+    if (!Array.isArray(searchResults.results)) {
+      return [];
+    }
+
+    return (searchResults.results as TextSearchResult[])
+      .slice(0, WEBSEARCH_RESULTS_LIMIT)
+      .map((result) => ({
+        ...result,
+        content: result.content.slice(0, WEBSEARCH_RESULT_CONTENT_LENGTH_LIMIT),
+      }));
+  } catch (error) {
+    logError('Error during web search', error);
     return [];
   }
-
-  return (searchResults.results as TextSearchResult[])
-    .slice(0, WEBSEARCH_RESULTS_LIMIT)
-    .map((result) => ({
-      ...result,
-      content: result.content.slice(0, WEBSEARCH_RESULT_CONTENT_LENGTH_LIMIT),
-    }));
 }
