@@ -1,5 +1,9 @@
 import NextAuth, { NextAuthResult } from 'next-auth';
-import { handleVidisJWTCallback, validateAndSyncVidisUser, vidisConfig } from './providers/vidis';
+import {
+  handleVidisJWTCallback,
+  validateAndSyncVidisUser,
+  vidisConfig,
+} from './providers/vidis-provider';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext, userAndContextSchema } from './types';
 import { logDebug, logError, logInfo, logWarning } from '@shared/logging';

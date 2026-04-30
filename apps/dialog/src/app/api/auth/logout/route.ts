@@ -2,7 +2,7 @@ import { auth } from '@/auth';
 import { logError, logInfo, logWarning } from '@shared/logging';
 import { NextResponse } from 'next/server';
 import { LOGOUT_CALLBACK_URL } from '../const';
-import { VIDIS_LOGOUT_URL } from '@/auth/providers/vidis';
+import { VIDIS_LOGOUT_URL } from '@/auth/providers/vidis-provider';
 import { LOGIN_PAGE_URL } from '@/app/(unauth)/login/const';
 
 function handleEmptyToken() {
