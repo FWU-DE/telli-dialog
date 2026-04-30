@@ -20,13 +20,13 @@ export async function handleVidisJWTCallback({
   const parsedProfile = vidisProfileSchema.parse(profile);
   const parsedAccount = vidisAccountSchema.parse(account);
 
-  const syncedUser = await dbGetUserById({ userId: parsedProfile.sub });
-  if (!syncedUser) {
+  const existingUser = await dbGetUserById({ userId: parsedProfile.sub });
+  if (!existingUser) {
     throw new Error('Could not find synchronized VIDIS user');
   }
 
-  token.userId = syncedUser.id;
-  token.email = syncedUser.email;
+  token.userId = existingUser.id;
+  token.email = existingUser.email;
   token.id_token = parsedAccount.id_token;
   token.hasCompletedTraining = parsedProfile.is_ai_chat_eligible ?? false;
   return token;

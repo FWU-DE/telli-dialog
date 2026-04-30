@@ -78,7 +78,7 @@ describe('vidis provider', () => {
       expect(mockDbUpdateUserById).not.toHaveBeenCalled();
     });
 
-    it('should return auth error when federal state changed for existing user', async () => {
+    it('should update an existing user when federal state changed', async () => {
       mockDbGetFederalStateById.mockResolvedValue({ id: 'DE-TEST' });
       mockDbGetUserById.mockResolvedValue({
         id: 'user-123',
@@ -90,9 +90,17 @@ describe('vidis provider', () => {
 
       const result = await validateAndSyncVidisUser(buildValidProfile());
 
-      expect(result).toEqual({ success: false, authError: 'federal_state_changed' });
+      expect(result).toEqual({ success: true });
       expect(mockDbCreateUser).not.toHaveBeenCalled();
-      expect(mockDbUpdateUserById).not.toHaveBeenCalled();
+      expect(mockDbUpdateUserById).toHaveBeenCalledWith({
+        id: 'user-123',
+        email: 'user-123@vidis.schule',
+        firstName: '',
+        lastName: '',
+        schoolIds: ['school-123'],
+        federalStateId: 'DE-TEST',
+        userRole: 'teacher',
+      });
     });
 
     it('should update an existing user without changing federal state', async () => {

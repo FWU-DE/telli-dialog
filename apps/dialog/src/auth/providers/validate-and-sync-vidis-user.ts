@@ -21,14 +21,6 @@ export async function validateAndSyncVidisUser(profile: unknown): Promise<VidisS
   }
 
   const existingUser = await dbGetUserById({ userId: parsedProfile.sub });
-  if (
-    existingUser &&
-    existingUser.federalStateId &&
-    existingUser.federalStateId !== federalState.id
-  ) {
-    return { success: false, authError: 'federal_state_changed' };
-  }
-
   const schoolIds = normalizeVidisSchoolIds(parsedProfile.schulkennung);
   const userRole = vidisRoleToUserRole(parsedProfile.rolle.trim());
 
@@ -52,7 +44,7 @@ export async function validateAndSyncVidisUser(profile: unknown): Promise<VidisS
     lastName: existingUser.lastName,
     email: existingUser.email,
     schoolIds,
-    federalStateId: existingUser.federalStateId ?? federalState.id,
+    federalStateId: federalState.id,
     userRole,
   });
 
