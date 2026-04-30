@@ -52,6 +52,7 @@ export default function SharingSection<T extends FieldValues>({
                 label={t('school')}
                 tooltip={t('school-tooltip')}
                 checked={field.value as boolean}
+                testId="school-sharing-checkbox"
                 onCheckedChange={(value) => {
                   field.onChange(value);
                   onShareChange?.();

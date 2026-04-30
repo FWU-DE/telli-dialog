@@ -1,6 +1,36 @@
 import { expect, Page } from '@playwright/test';
 import { waitForAutosave } from './utils';
 
+export async function createAssistant(page: Page) {
+  await page.goto('/assistants');
+  await page.waitForURL('/assistants');
+  const createButton = page.getByTestId('assistant-create-button');
+  await expect(createButton).toBeVisible();
+  await createButton.click();
+  await page.waitForURL('/assistants/editor/**');
+}
+
+async function confirmDelete(page: Page) {
+  const deleteConfirmButton = page.getByTestId('custom-chat-confirm-button').first();
+  await expect(deleteConfirmButton).toBeVisible();
+  await deleteConfirmButton.click();
+}
+
+export async function deleteAssistant(page: Page, name: string) {
+  const card = page.getByTestId('entity-card').filter({ hasText: name }).first();
+  await expect(card).toBeVisible({ timeout: 15000 });
+  await card.getByTestId('entity-link').click();
+  await page.waitForURL('/assistants/editor/**');
+  await deleteAssistantFromDetailPage(page);
+}
+
+export async function deleteAssistantFromDetailPage(page: Page) {
+  const deleteButton = page.getByTestId('custom-chat-delete-button').first();
+  await expect(deleteButton).toBeVisible();
+  await deleteButton.click();
+  await confirmDelete(page);
+}
+
 export async function configureAssistant(
   page: Page,
   data?: {
@@ -45,14 +75,4 @@ export async function configureAssistant(
   }
 
   await waitForAutosave(page);
-}
-
-export async function deleteAssistant(page: Page, name: string) {
-  const card = page.getByTestId('entity-card').filter({ hasText: name }).first();
-  await expect(card).toBeVisible({ timeout: 15000 });
-  await card.getByTestId('entity-link').click();
-  await page.waitForURL('/assistants/editor/**');
-  const deleteButton = page.getByTestId('custom-chat-delete-button').first();
-  await expect(deleteButton).toBeVisible();
-  await deleteButton.click();
 }

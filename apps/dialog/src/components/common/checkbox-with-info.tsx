@@ -8,6 +8,7 @@ type CheckboxWithInfoProps = {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;
+  testId?: string;
 };
 
 export default function CheckboxWithInfo({
@@ -16,6 +17,7 @@ export default function CheckboxWithInfo({
   checked,
   onCheckedChange,
   disabled,
+  testId,
 }: CheckboxWithInfoProps) {
   return (
     <div className="flex items-center gap-1">
@@ -24,6 +26,7 @@ export default function CheckboxWithInfo({
         checked={checked}
         onCheckedChange={onCheckedChange}
         disabled={disabled}
+        data-testid={testId}
       />
       <InfoTooltip tooltip={tooltip} ariaLabel={tooltip} />
     </div>

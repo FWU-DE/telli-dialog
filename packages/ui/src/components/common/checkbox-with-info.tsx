@@ -12,6 +12,7 @@ type CheckboxWithInfoProps<
   control: Control<TFieldValues>;
   disabled?: boolean;
   onCheckedChange?: (checked: boolean) => void;
+  testId?: string;
 };
 
 export default function CheckboxWithInfo<
@@ -24,6 +25,7 @@ export default function CheckboxWithInfo<
   tooltip,
   disabled,
   onCheckedChange,
+  testId,
 }: CheckboxWithInfoProps<TFieldValues, TName>) {
   return (
     <div className="flex items-center gap-1">
@@ -35,6 +37,7 @@ export default function CheckboxWithInfo<
             <Checkbox
               id={field.name + '-checkbox'}
               aria-label={label}
+              data-testid={testId}
               checked={field.value}
               onCheckedChange={(checked) => {
                 field.onChange(checked);

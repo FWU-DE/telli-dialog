@@ -4,12 +4,14 @@ import { waitForAutosave } from './utils';
 export async function createLearningScenario(page: Page) {
   await page.goto('/learning-scenarios');
   await page.waitForURL('/learning-scenarios');
-  await page.getByRole('button', { name: 'Lernszenario erstellen' }).click();
-  await page.waitForURL('/learning-scenarios/**');
+  const createButton = page.getByTestId('learning-scenario-create-button');
+  await expect(createButton).toBeVisible();
+  await createButton.click();
+  await page.waitForURL('/learning-scenarios/editor/**');
 }
 
 async function confirmDelete(page: Page) {
-  const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
+  const deleteConfirmButton = page.getByTestId('custom-chat-confirm-button').first();
   await expect(deleteConfirmButton).toBeVisible();
   await deleteConfirmButton.click();
 }

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
-import { configureCharacter } from '../../utils/character';
+import { configureCharacter, createCharacter } from '../../utils/character';
 import { waitForAutosave } from '../../utils/utils';
 import { nanoid } from 'nanoid';
 
@@ -12,50 +12,25 @@ test.describe('share character school-wide', () => {
   test.beforeAll(async ({ browser }) => {
     // Create character as teacher (shared to school1)
     let page = await browser.newPage({ storageState: AUTH_FILES.teacher });
-    await page.goto('/characters');
-    await page.waitForURL('/characters');
-    const createButton = page.getByRole('button', { name: 'Dialogpartner erstellen' });
-    await expect(createButton).toBeVisible();
-    await createButton.click();
-    await page.waitForURL('/characters/editor/**');
-    await configureCharacter(page, {
-      name: characterTeacher,
-      description: 'Created by teacher',
-      instructions: 'Teacher character',
-    });
-    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await createCharacter(page);
+    await configureCharacter(page, { name: characterTeacher });
+    await page.getByTestId('school-sharing-checkbox').click();
     await waitForAutosave(page);
     await page.close();
 
     // Create character as teacher2 (shared to school1 & school2)
     page = await browser.newPage({ storageState: AUTH_FILES.teacher2 });
-    await page.goto('/characters');
-    await page.waitForURL('/characters');
-    await expect(page.getByRole('button', { name: 'Dialogpartner erstellen' })).toBeVisible();
-    await page.getByRole('button', { name: 'Dialogpartner erstellen' }).click();
-    await page.waitForURL('/characters/editor/**');
-    await configureCharacter(page, {
-      name: characterTeacher2,
-      description: 'Created by teacher2',
-      instructions: 'Teacher2 character',
-    });
-    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await createCharacter(page);
+    await configureCharacter(page, { name: characterTeacher2 });
+    await page.getByTestId('school-sharing-checkbox').click();
     await waitForAutosave(page);
     await page.close();
 
     // Create character as teacher3 (shared to school2 & school3)
     page = await browser.newPage({ storageState: AUTH_FILES.teacher3 });
-    await page.goto('/characters');
-    await page.waitForURL('/characters');
-    await expect(page.getByRole('button', { name: 'Dialogpartner erstellen' })).toBeVisible();
-    await page.getByRole('button', { name: 'Dialogpartner erstellen' }).click();
-    await page.waitForURL('/characters/editor/**');
-    await configureCharacter(page, {
-      name: characterTeacher3,
-      description: 'Created by teacher3',
-      instructions: 'Teacher3 character',
-    });
-    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await createCharacter(page);
+    await configureCharacter(page, { name: characterTeacher3 });
+    await page.getByTestId('school-sharing-checkbox').click();
     await waitForAutosave(page);
     await page.close();
   });

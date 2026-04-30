@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
-import { configureAssistant } from '../../utils/assistant';
+import { configureAssistant, createAssistant } from '../../utils/assistant';
 import { waitForAutosave } from '../../utils/utils';
 import { nanoid } from 'nanoid';
 
@@ -12,50 +12,35 @@ test.describe('share assistant school-wide', () => {
   test.beforeAll(async ({ browser }) => {
     // Create assistant as teacher (shared to school1)
     let page = await browser.newPage({ storageState: AUTH_FILES.teacher });
-    await page.goto('/assistants');
-    await page.waitForURL('/assistants');
-    const createButton = page.getByRole('button', { name: 'Assistent erstellen' });
-    await expect(createButton).toBeVisible();
-    await createButton.click();
-    await page.waitForURL('/assistants/editor/**');
-    await configureAssistant(page, {
-      name: assistantTeacher,
-      description: 'Created by teacher',
-      instructions: 'Teacher assistant',
-    });
-    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await createAssistant(page);
+    await configureAssistant(page, { name: assistantTeacher });
+    await page.getByTestId('school-sharing-checkbox').click();
     await waitForAutosave(page);
     await page.close();
 
     // Create assistant as teacher2 (shared to school1 & school2)
     page = await browser.newPage({ storageState: AUTH_FILES.teacher2 });
-    await page.goto('/assistants');
-    await page.waitForURL('/assistants');
-    await expect(page.getByRole('button', { name: 'Assistent erstellen' })).toBeVisible();
-    await page.getByRole('button', { name: 'Assistent erstellen' }).click();
-    await page.waitForURL('/assistants/editor/**');
+    await createAssistant(page);
+    await configureAssistant(page, { name: assistantTeacher2 });
     await configureAssistant(page, {
       name: assistantTeacher2,
       description: 'Created by teacher2',
       instructions: 'Teacher2 assistant',
     });
-    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await page.getByTestId('school-sharing-checkbox').click();
     await waitForAutosave(page);
     await page.close();
 
     // Create assistant as teacher3 (shared to school2 & school3)
     page = await browser.newPage({ storageState: AUTH_FILES.teacher3 });
-    await page.goto('/assistants');
-    await page.waitForURL('/assistants');
-    await expect(page.getByRole('button', { name: 'Assistent erstellen' })).toBeVisible();
-    await page.getByRole('button', { name: 'Assistent erstellen' }).click();
-    await page.waitForURL('/assistants/editor/**');
+    await createAssistant(page);
+    await configureAssistant(page, { name: assistantTeacher3 });
     await configureAssistant(page, {
       name: assistantTeacher3,
       description: 'Created by teacher3',
       instructions: 'Teacher3 assistant',
     });
-    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await page.getByTestId('school-sharing-checkbox').click();
     await waitForAutosave(page);
     await page.close();
   });

@@ -14,7 +14,7 @@ test.describe('share learning scenario school-wide', () => {
     let page = await browser.newPage({ storageState: AUTH_FILES.teacher });
     await createLearningScenario(page);
     await configureLearningScenario(page, { name: learningScenarioTeacher });
-    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await page.getByTestId('school-sharing-checkbox').click();
     await waitForAutosave(page);
     await page.close();
 
@@ -22,7 +22,7 @@ test.describe('share learning scenario school-wide', () => {
     page = await browser.newPage({ storageState: AUTH_FILES.teacher2 });
     await createLearningScenario(page);
     await configureLearningScenario(page, { name: learningScenarioTeacher2 });
-    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await page.getByTestId('school-sharing-checkbox').click();
     await waitForAutosave(page);
     await page.close();
 
@@ -30,7 +30,7 @@ test.describe('share learning scenario school-wide', () => {
     page = await browser.newPage({ storageState: AUTH_FILES.teacher3 });
     await createLearningScenario(page);
     await configureLearningScenario(page, { name: learningScenarioTeacher3 });
-    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await page.getByTestId('school-sharing-checkbox').click();
     await waitForAutosave(page);
     await page.close();
   });
