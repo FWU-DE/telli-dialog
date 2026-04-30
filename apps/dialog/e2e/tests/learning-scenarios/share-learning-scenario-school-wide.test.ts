@@ -4,9 +4,9 @@ import { configureLearningScenario, createLearningScenario } from '../../utils/l
 import { waitForAutosave } from '../../utils/utils';
 import { nanoid } from 'nanoid';
 
-const learningScenarioTeacher = 'Absolutismus unter Ludwig XIV - teacher - ' + nanoid(8);
-const learningScenarioTeacher2 = 'Absolutismus unter Ludwig XIV - teacher2 - ' + nanoid(8);
-const learningScenarioTeacher3 = 'Absolutismus unter Ludwig XIV - teacher3 - ' + nanoid(8);
+const learningScenarioTeacher = 'Scenario by teacher - ' + nanoid(8);
+const learningScenarioTeacher2 = 'Scenario by teacher2 - ' + nanoid(8);
+const learningScenarioTeacher3 = 'Scenario by teacher3 - ' + nanoid(8);
 
 test.describe('share learning scenario school-wide', () => {
   test.beforeAll(async ({ browser }) => {
