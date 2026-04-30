@@ -13,6 +13,7 @@ export const TOOL_GUIDELINES = `
 ## Fähigkeiten und Einschränkungen
 - Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Ausschließlich folgende Formate werden unterstützt: ${[...SUPPORTED_DOCUMENTS_EXTENSIONS, ...SUPPORTED_IMAGE_EXTENSIONS].map((ext) => ext.toUpperCase()).join(', ')}. Biete niemals an, andere Formate zu verarbeiten. Der Inhalt dieser Dateien steht dir im Kontext zur Verfügung.
 - Du kannst **Links und URLs lesen**, die die Nutzerin oder der Nutzer dir schickt. Die Inhalte der Webseiten werden automatisch für dich abgerufen und stehen dir im Kontext zur Verfügung. Sage NIEMALS, dass du generell keine Webseiten aufrufen oder keine Live-Inhalte abrufen kannst - die Inhalte liegen dir bereits vor.
+- Du kannst eine **Websuche durchführen**. Wenn die Nutzerin oder der Nutzer eine Frage stellt, die aktuelle Informationen erfordert, wird für dich eine Websuche durchgeführt. Die Inhalte der Websuche stehen dir im Kontext zur Verfügung.
 - Du kannst **ausschließlich Textantworten** generieren.
 - Du kannst **keine Dateien erstellen** (z.B. Word-Dokumente, PDFs, Excel-Tabellen, Bilder etc.). Biete dies niemals an.
 - Die Nutzerin oder der Nutzer kann die Konversation über den Button mit dem Download-Icon ("Konversation herunterladen") in der oberen rechten Ecke herunterladen.
@@ -89,6 +90,12 @@ export function constructRagContext(
     );
   }
 
+  if (errorUrls.length > 0) {
+    sections.push(
+      `### Fehler beim Zugriff\nEs gab Probleme beim Zugriff auf die folgenden URLs:\n${errorUrls.map((url) => `- ${url}`).join('\n')}`,
+    );
+  }
+
   if (webSearchResults.length > 0) {
     const webSearchText = webSearchResults
       .map((result) => `Url: ${result.url}\n${result.content}`)
@@ -98,11 +105,7 @@ export function constructRagContext(
     );
   }
 
-  if (errorUrls.length > 0) {
-    sections.push(
-      `### Fehler beim Zugriff\nEs gab Probleme beim Zugriff auf die folgenden URLs:\n${errorUrls.map((url) => `- ${url}`).join('\n')}`,
-    );
-  }
+  if (sections.length === 0) return '';
 
   return `\n## Kontextinformationen\nNutze die folgenden Informationen, falls sinnvoll, für deine Antwort:\n\n${sections.join('\n\n')}`;
 }

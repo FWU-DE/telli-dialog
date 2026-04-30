@@ -1,7 +1,7 @@
 import { LinkupClient, type TextSearchResult } from 'linkup-sdk';
 import { env } from '@/env';
 import {
-  WEBSERACH_RESULT_CONTENT_LENGTH_LIMIT,
+  WEBSEARCH_RESULT_CONTENT_LENGTH_LIMIT,
   WEBSEARCH_RESULTS_LIMIT,
 } from '@/configuration-text-inputs/const';
 
@@ -36,6 +36,6 @@ export async function searchWeb(query: string): Promise<TextSearchResult[]> {
     .slice(0, WEBSEARCH_RESULTS_LIMIT)
     .map((result) => ({
       ...result,
-      content: result.content.slice(0, WEBSERACH_RESULT_CONTENT_LENGTH_LIMIT),
+      content: result.content.slice(0, WEBSEARCH_RESULT_CONTENT_LENGTH_LIMIT),
     }));
 }
