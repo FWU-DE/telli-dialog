@@ -399,7 +399,7 @@ describe('character-service', () => {
       ).rejects.toThrow(ForbiddenError);
     });
 
-    it('should throw ForbiddenError when user can only unshare a character they started sharing - unshareCharacter', async () => {
+    it('should throw NotFoundError when there is no active sharing to unshare - unshareCharacter', async () => {
       (
         dbGetSharedCharacterConversations as MockedFunction<
           typeof dbGetSharedCharacterConversations
@@ -412,6 +412,49 @@ describe('character-service', () => {
           user: mockUser('teacher'),
         }),
       ).rejects.toThrow(ForbiddenError);
+    });
+  });
+
+  describe('shareCharacter - duplicate share', () => {
+    const userId = generateUUID();
+    const characterId = generateUUID();
+    const user = { ...mockUser('teacher'), id: userId };
+    const existingShare = {
+      id: generateUUID(),
+      characterId,
+      userId,
+      telliPointsLimit: 50,
+      maxUsageTimeLimit: 60,
+      inviteCode: 'ABCD1234',
+      startedAt: new Date(),
+      manuallyStoppedAt: null,
+    };
+
+    beforeEach(() => {
+      const mockCharacter: Partial<CharacterSelectModel> = {
+        id: characterId,
+        userId,
+        accessLevel: 'private',
+      };
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        mockCharacter as never,
+      );
+      (
+        dbGetSharedCharacterConversations as MockedFunction<
+          typeof dbGetSharedCharacterConversations
+        >
+      ).mockResolvedValue([existingShare] as never);
+    });
+
+    it('throws when there is already an active share', async () => {
+      await expect(
+        shareCharacter({
+          characterId,
+          user,
+          telliPointsPercentageLimit: 10,
+          usageTimeLimitMinutes: 60,
+        }),
+      ).rejects.toThrow('There can only be one active share at a time');
     });
   });
 

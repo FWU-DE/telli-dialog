@@ -4,6 +4,7 @@ import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { MAX_WEBSEARCH_SOURCES_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
 import { ChatMessage } from '../chat/actions';
+import { dbGetUserById } from '@shared/db/functions/user';
 
 // Extract unique URLs from message content
 function extractUniqueUrls(content: string): string[] {
@@ -21,8 +22,11 @@ async function getAttachedLinks(
     return assistant?.attachedLinks.filter((l) => l !== '') ?? [];
   }
   if (characterId) {
-    const character = await dbGetCharacterByIdWithShareData({ characterId, user: { id: userId } });
-    return character?.attachedLinks.filter((l) => l !== '') ?? [];
+    const user = await dbGetUserById({ userId });
+    if (user) {
+      const character = await dbGetCharacterByIdWithShareData({ characterId, user });
+      return character?.attachedLinks.filter((l) => l !== '') ?? [];
+    }
   }
   return null;
 }

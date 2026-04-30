@@ -629,6 +629,82 @@ describe('learning-scenario-service', () => {
     });
   });
 
+  describe('unshareLearningScenario - NotFoundError when no active share', () => {
+    const learningScenarioId = generateUUID();
+    const user = mockUser('teacher');
+    beforeEach(() => {
+      (
+        dbGetSharedLearningScenarioConversations as MockedFunction<
+          typeof dbGetSharedLearningScenarioConversations
+        >
+      ).mockResolvedValue([] as never);
+    });
+
+    it('throws NotFoundError when the teacher has no active share to stop', async () => {
+      await expect(unshareLearningScenario({ learningScenarioId, user })).rejects.toThrow(
+        NotFoundError,
+      );
+    });
+  });
+
+  describe('shareLearningScenario - success', () => {
+    const userId = generateUUID();
+    const learningScenarioId = generateUUID();
+    const user = { ...mockUser(), id: userId };
+    const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
+      id: learningScenarioId,
+      userId,
+      accessLevel: 'private',
+      hasLinkAccess: false,
+      name: 'Test Scenario',
+    };
+    const newShare = {
+      id: generateUUID(),
+      learningScenarioId,
+      userId,
+      telliPointsLimit: 50,
+      maxUsageTimeLimit: 60,
+      inviteCode: 'ABCD1234',
+      startedAt: new Date(),
+      manuallyStoppedAt: null,
+    };
+
+    beforeEach(() => {
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(mockLearningScenario as never);
+      (
+        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdOptionalShareData
+        >
+      ).mockResolvedValue(mockLearningScenario as never);
+      (
+        dbCreateLearningScenarioShare as MockedFunction<typeof dbCreateLearningScenarioShare>
+      ).mockResolvedValue(newShare as never);
+      (
+        dbGetSharedLearningScenarioConversations as MockedFunction<
+          typeof dbGetSharedLearningScenarioConversations
+        >
+      ).mockResolvedValue([] as never);
+    });
+
+    it('throws an error when there is already an active share', async () => {
+      (
+        dbGetSharedLearningScenarioConversations as MockedFunction<
+          typeof dbGetSharedLearningScenarioConversations
+        >
+      ).mockResolvedValue([newShare] as never);
+
+      await expect(
+        shareLearningScenario({
+          learningScenarioId,
+          data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
+          user,
+        }),
+      ).rejects.toThrow('There can only be one active share at a time');
+    });
+  });
+
   describe('learning scenario discovery filters', () => {
     const user = mockUser('teacher');
     const scenarios = [{ id: generateUUID(), name: 'Scenario 1' } as LearningScenarioSelectModel];

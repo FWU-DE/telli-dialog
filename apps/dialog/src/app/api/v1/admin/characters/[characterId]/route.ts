@@ -67,7 +67,7 @@ export async function PATCH(
 
       const result = await shareCharacter({
         characterId,
-        user: { id: user.id, userRole: user.userRole, schoolIds: user.schoolIds },
+        user,
         telliPointsPercentageLimit,
         usageTimeLimitMinutes,
       });

@@ -158,7 +158,7 @@ export async function dbUpsertAssistant({
     .returning();
 
   if (!insertedAssistant) return undefined;
-  return { ...insertedAssistant, ownerSchoolIds: [] };
+  return dbGetAssistantById({ assistantId: insertedAssistant.id });
 }
 
 export async function dbUpdateAssistant({
@@ -175,7 +175,7 @@ export async function dbUpdateAssistant({
     .returning();
 
   if (!updatedAssistant) return undefined;
-  return { ...updatedAssistant, ownerSchoolIds: [] };
+  return dbGetAssistantById({ assistantId: updatedAssistant.id });
 }
 
 export async function dbDeleteAssistant({ assistantId }: { assistantId: string }) {

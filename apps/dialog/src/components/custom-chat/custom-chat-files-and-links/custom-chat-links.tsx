@@ -13,7 +13,7 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { useToast } from '@/components/common/toast';
-import { ingestWebContentAction } from '@/components/forms/actions';
+import { ingestWebContentAction } from '@/components/custom-chat/custom-chat-files-and-links/actions';
 import { useTranslations } from 'next-intl';
 
 export type CustomChatLinksProps = {
