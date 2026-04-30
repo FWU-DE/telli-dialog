@@ -411,7 +411,7 @@ describe('character-service', () => {
           characterId: generateUUID(),
           user: mockUser('teacher'),
         }),
-      ).rejects.toThrow(ForbiddenError);
+      ).rejects.toThrow(NotFoundError);
     });
   });
 
