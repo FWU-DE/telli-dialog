@@ -33,7 +33,7 @@ function getBusinessFieldErrors(profile: z.infer<typeof vidisProfileSchema>): st
 
 /**
  * The profile returned by VIDIS must contain certain fields
- * like federalState, role, school, etc.
+ * like federalState, role, schoolIds, etc.
  * This function checks if all mandatory fields are present in the profile.
  * If not, it returns which fields are missing from the zod error.
  *
@@ -59,6 +59,9 @@ export function validateOidcProfile(profile: unknown): OidcValidationResult {
 
 /**
  * Generates an error URL with the missing field names as search params.
+ * @param fieldErrors - An array of missing field names
+ * @param authError - An optional authentication error code
+ * @returns A URL string pointing to the login error page with query parameters
  */
 export function generateErrorUrl(fieldErrors: string[], authError?: AuthErrorCode) {
   if (fieldErrors.length === 0 && !authError) {
@@ -81,6 +84,9 @@ const profileSearchParamsSchema = z.object({
   auth_error: authErrorCodeSchema.optional(),
 });
 
+/**
+ * Parses the URL search params to extract field errors.
+ */
 export function getFieldErrorsFromUrl(
   searchParams: Record<string, string | string[] | undefined>,
 ): string[] {
