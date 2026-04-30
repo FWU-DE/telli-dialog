@@ -3,7 +3,7 @@
 import SharedChatLoginForm from '../../(authed)/(dialog)/learning-scenarios/_components/shared-chat-login-form';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { signIn } from 'next-auth/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import TelliLogo from '@/components/icons/logo';
 import { cn } from '@/utils/tailwind';
 import { useSearchParams } from 'next/navigation';
@@ -12,6 +12,12 @@ import { getSafeCallbackUrl } from '@/auth/callback-url';
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = getSafeCallbackUrl(searchParams.get('callbackUrl'));
+
+  useEffect(() => {
+    // Clear sessionStorage on login to reset the per-session state (e.g., dismissed info banners).
+    // All logout paths redirect to the login page, making it the single place to clear state from the previous session.
+    window.sessionStorage.clear();
+  }, []);
 
   return (
     <main className="w-full flex flex-col justify-center items-center max-w-72 mx-auto py-4 h-full">
