@@ -8,11 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/learning-scenarios/[learningScenarioId]'>) {
   const { learningScenarioId } = await props.params;
-  const { user, federalState } = await requireAuth();
-  const userAndContext = {
-    ...user,
-    federalState,
-  };
+  const { user } = await requireAuth();
 
   const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
     learningScenarioId,
@@ -23,7 +19,7 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
   const initialLinks = learningScenario.attachedLinks.map((url) => ({ link: url }));
 
   return (
-    <DefaultPageLayout userAndContext={userAndContext}>
+    <DefaultPageLayout>
       <LearningScenarioView
         learningScenario={learningScenario}
         fileMappings={relatedFiles}

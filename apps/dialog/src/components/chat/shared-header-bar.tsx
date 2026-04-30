@@ -33,7 +33,7 @@ export function SharedChatHeader({
   const { isBelow } = useBreakpoints();
   const tCommon = useTranslations('common');
 
-  const showCompressedHeader = isBelow[reductionBreakpoint];
+  const showCompactHeader = isBelow[reductionBreakpoint];
 
   const deleteChatElement = (
     <DestructiveActionButton
@@ -45,9 +45,9 @@ export function SharedChatHeader({
       triggerButtonClassName="text-primary"
       actionFn={handleOpenNewChat}
     >
-      <span className="flex items-center gap-1">
-        <TrashIcon className="size-8" solid={true} />
-        {showCompressedHeader ? tCommon('delete') : ''}
+      <span className="flex items-center gap-2">
+        <TrashIcon className="size-5" solid={true} />
+        {showCompactHeader ? tCommon('delete') : ''}
       </span>
     </DestructiveActionButton>
   );
@@ -59,7 +59,7 @@ export function SharedChatHeader({
         isBelow[reductionBreakpoint] && 'justify-start',
       )}
     >
-      {!showCompressedHeader && deleteChatElement}
+      {!showCompactHeader && deleteChatElement}
       <div className="grow"></div>
       {
         <span className="flex justify-start text-xl text-ellipsis truncate items-center gap-2">
@@ -77,7 +77,7 @@ export function SharedChatHeader({
       }
       <div className="grow"></div>
 
-      {!showCompressedHeader ? (
+      {!showCompactHeader ? (
         <>
           <DownloadSharedConversationButton
             conversationMessages={messages}

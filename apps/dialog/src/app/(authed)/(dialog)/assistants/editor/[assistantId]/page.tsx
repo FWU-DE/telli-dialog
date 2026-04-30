@@ -8,11 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/assistants/editor/[assistantId]'>) {
   const { assistantId } = await props.params;
-  const { user, federalState } = await requireAuth();
-  const userAndContext = {
-    ...user,
-    federalState,
-  };
+  const { user } = await requireAuth();
 
   const { assistant, fileMappings, pictureUrl } = await getAssistantByUser({
     assistantId: assistantId,
@@ -25,7 +21,7 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
     .map((url) => ({ link: url }));
 
   return (
-    <DefaultPageLayout userAndContext={userAndContext}>
+    <DefaultPageLayout header={{ headerType: 'form' }}>
       <AssistantEdit
         assistant={assistant}
         relatedFiles={fileMappings}

@@ -5,14 +5,10 @@ import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
-  const { user, federalState } = await requireAuth();
-  const userAndContext = {
-    ...user,
-    federalState,
-  };
+  const { user } = await requireAuth();
 
   return (
-    <DefaultPageLayout userAndContext={userAndContext}>
+    <DefaultPageLayout>
       <LearningScenarioOverview currentUserId={user.id} />
     </DefaultPageLayout>
   );

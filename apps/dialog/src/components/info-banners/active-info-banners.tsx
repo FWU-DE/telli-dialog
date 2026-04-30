@@ -62,21 +62,24 @@ function persistDismissedInfoBannerId(infoBannerId: string) {
 }
 
 function useDismissedInfoBannerIds() {
-  const dismissedInfoBannerIdsSnapshot = useSyncExternalStore(
+  const snapshot = useSyncExternalStore(
     subscribeToDismissedInfoBanners,
     () => getStoredInfoBannerIdsSnapshot(DISMISSED_INFO_BANNERS_STORAGE_KEY),
-    () => EMPTY_DISMISSED_INFO_BANNERS_SNAPSHOT,
+    () => null,
   );
 
-  return parseInfoBannerIds(dismissedInfoBannerIdsSnapshot);
+  return snapshot === null ? null : parseInfoBannerIds(snapshot);
 }
 
 export default function ActiveInfoBanners({ infoBanners }: { infoBanners: InfoBanner[] }) {
   const dismissedInfoBannerIds = useDismissedInfoBannerIds();
   const tInfoBanner = useTranslations('info-banner');
 
-  const dismissedIds = new Set(dismissedInfoBannerIds);
-  const currentInfoBanner = infoBanners.find((infoBanner) => !dismissedIds.has(infoBanner.id));
+  const dismissedIds = new Set(dismissedInfoBannerIds ?? []);
+  const currentInfoBanner =
+    dismissedInfoBannerIds !== null
+      ? infoBanners.find((infoBanner) => !dismissedIds.has(infoBanner.id))
+      : undefined;
   const currentInfoBannerId = currentInfoBanner?.id ?? null;
 
   useEffect(() => {
