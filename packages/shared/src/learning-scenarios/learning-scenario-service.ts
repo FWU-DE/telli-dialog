@@ -284,7 +284,7 @@ export async function shareLearningScenario({
   requireTeacherRole(user.userRole);
 
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user);
-  await verifyReadAccess({
+  verifyReadAccess({
     item: learningScenario,
     user,
   });
@@ -376,7 +376,7 @@ export async function getLearningScenario({
   });
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
 
-  await verifyReadAccess({ item: learningScenario, user });
+  verifyReadAccess({ item: learningScenario, user });
 
   const relatedFiles = await getFilesForLearningScenario({
     learningScenarioId,
@@ -406,7 +406,7 @@ export async function getFilesForLearningScenario({
   checkParameterUUID(learningScenarioId);
   requireTeacherRole(user.userRole);
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user);
-  await verifyReadAccess({
+  verifyReadAccess({
     item: learningScenario,
     user,
   });
@@ -636,7 +636,7 @@ export async function createNewLearningScenarioFromTemplate({
   checkParameterUUID(originalLearningScenarioId);
   requireTeacherRole(user.userRole);
   const { learningScenario } = await getLearningScenarioInfo(originalLearningScenarioId, user);
-  await verifyReadAccess({
+  verifyReadAccess({
     item: learningScenario,
     user,
   });
@@ -668,7 +668,7 @@ export async function downloadFileFromLearningScenario({
   checkParameterUUID(learningScenarioId);
   requireTeacherRole(user.userRole);
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user);
-  await verifyReadAccess({
+  verifyReadAccess({
     item: learningScenario,
     user,
   });

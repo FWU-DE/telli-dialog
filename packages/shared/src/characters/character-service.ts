@@ -191,7 +191,7 @@ export const fetchFileMappings = async ({
   checkParameterUUID(characterId);
   // Authorization check
   const { character } = await getCharacterInfo(characterId, user.id);
-  await verifyReadAccess({
+  verifyReadAccess({
     item: character,
     user,
   });
@@ -360,7 +360,7 @@ export const shareCharacter = async ({
   requireTeacherRole(user.userRole);
 
   const { character } = await getCharacterInfo(characterId, user.id);
-  await verifyReadAccess({
+  verifyReadAccess({
     item: character,
     user,
   });
@@ -474,7 +474,7 @@ export const getCharacterForChatSession = async ({
   checkParameterUUID(characterId);
   const character = await dbGetCharacterById({ characterId });
   if (!character) throw new NotFoundError('Character not found');
-  await verifyReadAccess({
+  verifyReadAccess({
     item: character,
     user,
   });
@@ -507,7 +507,7 @@ export const getCharacterForEditView = async ({
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdOptionalShareData({ characterId, user });
   if (!character) throw new NotFoundError('Character not found');
-  await verifyReadAccess({ item: character, user });
+  verifyReadAccess({ item: character, user });
 
   const relatedFiles = await fetchFileMappings({
     characterId,
@@ -713,7 +713,7 @@ export async function downloadFileFromCharacter({
   requireTeacherRole(user.userRole);
   const { character } = await getCharacterInfo(characterId, user.id);
   if (!character) throw new NotFoundError('Character not found');
-  await verifyReadAccess({
+  verifyReadAccess({
     item: character,
     user,
   });

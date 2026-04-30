@@ -73,7 +73,7 @@ export async function getAssistantByUser({
 }> {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  await verifyReadAccess({
+  verifyReadAccess({
     item: assistant,
     user,
   });
@@ -106,7 +106,7 @@ export async function getAssistantForNewChat({
   const assistant = await dbGetAssistantById({
     assistantId,
   });
-  await verifyReadAccess({
+  verifyReadAccess({
     item: assistant,
     user,
   });
@@ -329,7 +329,7 @@ export async function getFileMappings({
 }): Promise<FileModel[]> {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  await verifyReadAccess({
+  verifyReadAccess({
     item: assistant,
     user,
   });
@@ -538,7 +538,7 @@ export async function downloadFileFromAssistant({
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  await verifyReadAccess({
+  verifyReadAccess({
     item: assistant,
     user,
   });

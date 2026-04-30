@@ -9,7 +9,7 @@ type AuthorizedItem = {
   ownerSchoolIds?: string[];
 };
 
-export async function verifyReadAccess<T extends AuthorizedItem>({
+export function verifyReadAccess<T extends AuthorizedItem>({
   item,
   user,
 }: {
