@@ -1,10 +1,14 @@
 import NextAuth, { NextAuthResult } from 'next-auth';
-import { handleVidisJWTCallback, vidisConfig } from './providers/vidis';
+import {
+  handleVidisJWTCallback,
+  validateAndSyncVidisUser,
+  vidisConfig,
+} from './providers/vidis-provider';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext, userAndContextSchema } from './types';
 import { logDebug, logError, logInfo, logWarning } from '@shared/logging';
 import { sessionBlockList } from './session';
-import { validateOidcProfile, generateErrorUrl } from '@shared/auth/authentication-service';
+import { generateErrorUrl } from '@shared/auth/authentication-service';
 
 declare module 'next-auth' {
   interface Session {
@@ -48,10 +52,15 @@ const result = NextAuth({
     async signIn({ profile }) {
       // during sign in we check if the profile contains all mandatory fields like federalState, role, school, etc.
 
-      const profileResult = validateOidcProfile(profile);
-      if (!profileResult.success) {
-        return generateErrorUrl(profileResult.fieldErrors);
+      const signInResult = await validateAndSyncVidisUser(profile);
+      if (!signInResult.success) {
+        if ('fieldErrors' in signInResult) {
+          return generateErrorUrl(signInResult.fieldErrors);
+        }
+
+        return generateErrorUrl([], signInResult.authError);
       }
+
       return true;
     },
     async jwt({ token, account, profile, trigger }) {

@@ -1,9 +1,10 @@
-import { dbGetOrCreateVidisUser } from '@telli/shared/db/functions/vidis';
+import { dbGetUserById } from '@telli/shared/db/functions/user';
 import { env } from '@/env';
-import { Account, NextAuthConfig, Profile } from 'next-auth';
 import { customFetch } from 'next-auth';
-import { JWT } from 'next-auth/jwt';
-import { vidisAccountSchema, vidisProfileSchema } from '@telli/shared/auth/vidis';
+import type { Account, NextAuthConfig, Profile } from 'next-auth';
+import type { JWT } from 'next-auth/jwt';
+import { vidisAccountSchema, vidisProfileSchema } from './vidis-schema';
+export { validateAndSyncVidisUser } from './validate-and-sync-vidis-user';
 
 export const VIDIS_LOGOUT_URL = new URL(env.vidisIssuerUri + '/protocol/openid-connect/logout');
 
@@ -19,14 +20,13 @@ export async function handleVidisJWTCallback({
   const parsedProfile = vidisProfileSchema.parse(profile);
   const parsedAccount = vidisAccountSchema.parse(account);
 
-  const createdUser = await dbGetOrCreateVidisUser({ ...parsedProfile });
-
-  if (createdUser === undefined) {
-    throw new Error('Could not create user');
+  const existingUser = await dbGetUserById({ userId: parsedProfile.sub });
+  if (!existingUser) {
+    throw new Error('Could not find synchronized VIDIS user');
   }
 
-  token.userId = createdUser.id;
-  token.email = createdUser.email;
+  token.userId = existingUser.id;
+  token.email = existingUser.email;
   token.id_token = parsedAccount.id_token;
   token.hasCompletedTraining = parsedProfile.is_ai_chat_eligible ?? false;
   return token;

@@ -1,6 +1,6 @@
 import LogoutButton from '@/app/(authed)/logout-button';
 import WarningIcon from '@/components/icons/warning-icon';
-import { getFieldErrorsFromUrl } from '@shared/auth/authentication-service';
+import { getAuthErrorFromUrl, getFieldErrorsFromUrl } from '@shared/auth/authentication-service';
 import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
@@ -12,7 +12,9 @@ const fieldNameMappings = {
 };
 
 export default async function Page(props: PageProps<'/login/error'>) {
-  const missingFieldsInProfile = getFieldErrorsFromUrl(await props.searchParams);
+  const searchParams = await props.searchParams;
+  const missingFieldsInProfile = getFieldErrorsFromUrl(searchParams);
+  const authError = getAuthErrorFromUrl(searchParams);
   const t = await getTranslations('authentication.login-error');
 
   return (
@@ -20,6 +22,8 @@ export default async function Page(props: PageProps<'/login/error'>) {
       <div className="p-6 flex flex-col gap-4 items-center rounded-xl border bg-light-gray max-w-fit">
         <WarningIcon />
         <div>{t('description')}</div>
+        {authError === 'federal_state_not_found' ? <div>{t('federal-state-not-found')}</div> : null}
+        {authError === 'federal_state_changed' ? <div>{t('federal-state-changed')}</div> : null}
         <ul>
           {missingFieldsInProfile.map((field) => {
             return (
