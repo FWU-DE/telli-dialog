@@ -25,7 +25,16 @@ describe('authentication-service', () => {
     it('should return success true for valid profile', () => {
       const profile = buildValidProfile();
       const result = validateOidcProfile(profile);
-      expect(result).toEqual({ success: true });
+      expect(result).toEqual({
+        success: true,
+        value: {
+          bundesland: profile.bundesland,
+          rolle: profile.rolle,
+          schulkennung: profile.schulkennung,
+          sid: profile.sid,
+          sub: profile.sub,
+        },
+      });
     });
 
     it('should return missing fields for invalid profile', () => {
