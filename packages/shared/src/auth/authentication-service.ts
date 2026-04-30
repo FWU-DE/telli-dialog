@@ -1,9 +1,18 @@
 import z from 'zod';
-import { vidisProfileSchema } from './vidis';
 import { normalizeVidisSchoolIds } from '../db/functions/vidis';
 
 const authErrorCodeSchema = z.enum(['federal_state_not_found', 'federal_state_changed']);
 export type AuthErrorCode = z.infer<typeof authErrorCodeSchema>;
+
+const vidisProfileSchema = z.object({
+  sub: z.string(),
+  sid: z.string(),
+  is_ai_chat_eligible: z.boolean().optional(),
+  rolle: z.string(),
+  schulkennung: z.string().or(z.array(z.string())),
+  bundesland: z.string(),
+});
+export type OidcProfile = z.infer<typeof vidisProfileSchema>;
 
 type OidcValidationResult =
   | { success: true; value: z.infer<typeof vidisProfileSchema> }

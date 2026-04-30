@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { VidisProfile } from '@shared/auth/vidis';
 import {
   generateErrorUrl,
   getAuthErrorFromUrl,
   getFieldErrorsFromUrl,
+  type OidcProfile,
   validateOidcProfile,
 } from './authentication-service';
 
-const buildValidProfile = (overrides: Partial<VidisProfile> = {}): VidisProfile => ({
+const buildValidProfile = (overrides: Partial<OidcProfile> = {}): OidcProfile => ({
   sub: 'user-123',
   sid: 'session-123',
   rolle: 'LEHR',

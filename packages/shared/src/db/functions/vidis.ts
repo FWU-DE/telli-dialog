@@ -1,5 +1,6 @@
-import { VidisUserInfo } from '../../auth/vidis';
 import { UserSchoolRole } from '../schema';
+
+type VidisSchoolIds = string | string[];
 
 export function vidisRoleToUserSchoolRole(role: string): UserSchoolRole {
   switch (role) {
@@ -14,7 +15,7 @@ export function vidisRoleToUserSchoolRole(role: string): UserSchoolRole {
   }
 }
 
-export function normalizeVidisSchoolIds(schulkennung: VidisUserInfo['schulkennung']): string[] {
+export function normalizeVidisSchoolIds(schulkennung: VidisSchoolIds): string[] {
   const schoolIds = typeof schulkennung === 'string' ? [schulkennung] : schulkennung;
   return schoolIds.map((schoolId) => schoolId.trim()).filter((schoolId) => schoolId.length > 0);
 }

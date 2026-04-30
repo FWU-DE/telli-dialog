@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { VidisProfile } from '@shared/auth/vidis';
+import type { VidisProfile } from './vidis-schema';
 import { validateAndSyncVidisUser } from './validate-and-sync-vidis-user';
 
 const { mockDbGetFederalStateById, mockDbGetUserById, mockDbCreateUser, mockDbUpdateUserById } =
