@@ -248,6 +248,12 @@ export function FederalStateView(props: FederalStateViewProps) {
             description="Erlaubt die Nutzung der Bildgenerierungsfunktion."
             control={control}
           />
+          <FormFieldCheckbox
+            name="featureToggles.isWebSearchEnabled"
+            label="Websuche aktivieren"
+            description="Erlaubt die Nutzung der Websuchfunktion."
+            control={control}
+          />
           <FormField
             name="designConfiguration"
             label="Design Konfiguration"

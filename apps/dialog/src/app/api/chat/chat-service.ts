@@ -142,7 +142,10 @@ export async function sendChatMessage({
   });
 
   // Web search
-  const webSearchResults = await searchWeb(userMessage.content);
+  const webSearchResults = await searchWeb(
+    userMessage.content,
+    user.federalState.featureToggles?.isWebSearchEnabled,
+  );
 
   // Save user message to DB
   await dbInsertChatContent({
