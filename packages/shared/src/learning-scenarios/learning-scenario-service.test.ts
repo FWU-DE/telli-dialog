@@ -4,6 +4,9 @@ import {
   deleteLearningScenario,
   downloadFileFromLearningScenario,
   getFilesForLearningScenario,
+  getLearningScenariosByAccessLevel,
+  getLearningScenariosByOverviewFilter,
+  getLearningScenariosForUser,
   getLearningScenario,
   getSharedLearningScenario,
   linkFileToLearningScenario,
@@ -15,10 +18,15 @@ import {
   uploadAvatarPictureForLearningScenario,
 } from './learning-scenario-service';
 import {
+  dbGetAllAccessibleLearningScenarios,
+  dbGetAllLearningScenariosByUser,
   dbCreateLearningScenarioShare,
+  dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
   dbGetLearningScenarioByIdOptionalShareData,
   dbGetLearningScenarioByIdWithShareData,
+  dbGetLearningScenariosByAssociatedSchools,
+  dbGetLearningScenariosByUser,
   dbGetSharedLearningScenarioConversations,
 } from '../db/functions/learning-scenario';
 import { dbGetFileForLearningScenario, dbGetFilesForLearningScenario } from '../db/functions/files';
@@ -30,10 +38,15 @@ import { UserModel } from '@shared/auth/user-model';
 import { getReadOnlySignedUrl, uploadFileToS3 } from '../s3';
 
 vi.mock('../db/functions/learning-scenario', () => ({
+  dbGetAllAccessibleLearningScenarios: vi.fn(),
+  dbGetAllLearningScenariosByUser: vi.fn(),
   dbCreateLearningScenarioShare: vi.fn(),
+  dbGetGlobalLearningScenarios: vi.fn(),
   dbGetLearningScenarioById: vi.fn(),
   dbGetLearningScenarioByIdOptionalShareData: vi.fn(),
   dbGetLearningScenarioByIdWithShareData: vi.fn(),
+  dbGetLearningScenariosByAssociatedSchools: vi.fn(),
+  dbGetLearningScenariosByUser: vi.fn(),
   dbGetSharedLearningScenarioConversations: vi.fn(),
 }));
 vi.mock('./learning-scenario-admin-service', () => ({
@@ -75,18 +88,15 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
 function buildFunctionList(
   {
     learningScenarioId,
-    schoolId,
     user,
   }: {
     learningScenarioId?: string;
-    schoolId?: string;
     user?: UserModel;
   },
   ...modes: ('read' | 'write' | 'unshare' | 'read-by-invite-code')[]
 ) {
   const fileId = generateUUID();
   learningScenarioId ??= generateUUID();
-  schoolId ??= generateUUID();
   user ??= mockUser();
 
   const writeAccess = [
@@ -150,7 +160,6 @@ function buildFunctionList(
       testFunction: () =>
         getLearningScenario({
           learningScenarioId,
-          schoolIds: [schoolId],
           user,
         }),
     },
@@ -159,7 +168,6 @@ function buildFunctionList(
       testFunction: () =>
         createNewLearningScenarioFromTemplate({
           originalLearningScenarioId: learningScenarioId,
-          schoolId,
           user,
         }),
     },
@@ -169,7 +177,6 @@ function buildFunctionList(
         shareLearningScenario({
           data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
           learningScenarioId,
-          schoolIds: [schoolId],
           user,
         }),
     },
@@ -179,7 +186,6 @@ function buildFunctionList(
         downloadFileFromLearningScenario({
           learningScenarioId,
           fileId,
-          schoolIds: [schoolId],
           user,
         }),
     },
@@ -190,7 +196,7 @@ function buildFunctionList(
       testFunction: () =>
         getSharedLearningScenario({
           learningScenarioId,
-          userId: user.id,
+          user,
         }),
     },
   ];
@@ -220,16 +226,10 @@ describe('learning-scenario-service', () => {
 
   describe('NotFoundError scenarios', () => {
     const learningScenarioId = generateUUID();
-    const schoolId = generateUUID();
     const user = mockUser();
 
     it.each(
-      buildFunctionList(
-        { learningScenarioId, schoolId, user },
-        'read',
-        'write',
-        'read-by-invite-code',
-      ),
+      buildFunctionList({ learningScenarioId, user }, 'read', 'write', 'read-by-invite-code'),
     )(
       'should throw NotFoundError when learning scenario does not exist - $functionName',
       async ({ testFunction }) => {
@@ -289,20 +289,14 @@ describe('learning-scenario-service', () => {
     });
 
     describe('accessLevel=school and user not in same school', () => {
-      const differentUser = { ...mockUser(), schoolId: generateUUID() };
+      const differentUser = { ...mockUser(), schoolIds: ['viewer-school-id'] };
 
       beforeEach(() => {
         mockLearningScenario.accessLevel = 'school';
-        mockLearningScenario.schoolId = generateUUID();
+        mockLearningScenario.ownerSchoolIds = ['owner-school-id'];
       });
 
-      it.each(
-        buildFunctionList(
-          { learningScenarioId, schoolId: differentUser.schoolId, user: differentUser },
-          'read',
-          'write',
-        ),
-      )(
+      it.each(buildFunctionList({ learningScenarioId, user: differentUser }, 'read', 'write'))(
         'should throw ForbiddenError when school shared but user is not in the same school - $functionName',
         async ({ testFunction }) => {
           await expect(testFunction()).rejects.toThrow(ForbiddenError);
@@ -369,9 +363,7 @@ describe('learning-scenario-service', () => {
   describe('Link sharing bypass scenarios', () => {
     const learningScenarioId = generateUUID();
     const ownerUserId = generateUUID();
-    const ownerSchoolId = generateUUID();
     const differentUser = mockUser();
-    const differentSchoolId = generateUUID();
 
     describe('should allow access when hasLinkAccess is true - bypassing normal restrictions', () => {
       it.each([
@@ -387,7 +379,6 @@ describe('learning-scenario-service', () => {
         const mockLearningScenario = {
           id: learningScenarioId,
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel,
           hasLinkAccess: true,
         };
@@ -412,7 +403,6 @@ describe('learning-scenario-service', () => {
         const result = await getLearningScenario({
           learningScenarioId,
           user: differentUser,
-          schoolIds: [differentSchoolId],
         });
 
         expect(result.learningScenario).toBe(mockLearningScenario);
@@ -430,7 +420,6 @@ describe('learning-scenario-service', () => {
       ])('getFilesForLearningScenario - $description', async ({ accessLevel }) => {
         const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel,
           hasLinkAccess: true,
         };
@@ -447,7 +436,6 @@ describe('learning-scenario-service', () => {
           getFilesForLearningScenario({
             learningScenarioId,
             user: differentUser,
-            schoolIds: [differentSchoolId],
           }),
         ).resolves.not.toThrow();
       });
@@ -458,7 +446,6 @@ describe('learning-scenario-service', () => {
         const mockLearningScenario = {
           id: learningScenarioId,
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel: 'private' as const,
           hasLinkAccess: false,
         };
@@ -473,7 +460,6 @@ describe('learning-scenario-service', () => {
           getLearningScenario({
             learningScenarioId,
             user: differentUser,
-            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -481,7 +467,6 @@ describe('learning-scenario-service', () => {
       it('getFilesForLearningScenario - private learning scenario without link sharing', async () => {
         const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel: 'private',
           hasLinkAccess: false,
         };
@@ -494,7 +479,6 @@ describe('learning-scenario-service', () => {
           getFilesForLearningScenario({
             learningScenarioId,
             user: differentUser,
-            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -503,7 +487,7 @@ describe('learning-scenario-service', () => {
 
   describe('Success scenarios', () => {
     const userId = generateUUID();
-    const schoolId = generateUUID();
+    const sharedSchoolId = generateUUID();
     const learningScenarioId = generateUUID();
     let mockLearningScenario: Partial<LearningScenarioSelectModel>;
 
@@ -514,7 +498,6 @@ describe('learning-scenario-service', () => {
         id: learningScenarioId,
         name: 'Test Scenario',
         modelId: generateUUID(),
-        schoolId,
         userId,
       };
       (
@@ -570,13 +553,14 @@ describe('learning-scenario-service', () => {
     });
 
     describe('shared with school', () => {
-      const differentUser = { ...mockUser(), schoolId };
+      const differentUser = { ...mockUser(), schoolIds: [sharedSchoolId] };
 
       beforeEach(() => {
         mockLearningScenario.accessLevel = 'school';
+        mockLearningScenario.ownerSchoolIds = [sharedSchoolId];
       });
 
-      it.each(buildFunctionList({ learningScenarioId, schoolId, user: differentUser }, 'read'))(
+      it.each(buildFunctionList({ learningScenarioId, user: differentUser }, 'read'))(
         'should not throw when shared with school - $functionName',
         async ({ testFunction }) => {
           await expect(testFunction()).resolves.not.toThrow();
@@ -645,10 +629,9 @@ describe('learning-scenario-service', () => {
     });
   });
 
-  describe('unshareLearningScenario – NotFoundError when no active share', () => {
+  describe('unshareLearningScenario - NotFoundError when no active share', () => {
     const learningScenarioId = generateUUID();
     const user = mockUser('teacher');
-
     beforeEach(() => {
       (
         dbGetSharedLearningScenarioConversations as MockedFunction<
@@ -664,7 +647,7 @@ describe('learning-scenario-service', () => {
     });
   });
 
-  describe('shareLearningScenario – success', () => {
+  describe('shareLearningScenario - success', () => {
     const userId = generateUUID();
     const learningScenarioId = generateUUID();
     const user = { ...mockUser(), id: userId };
@@ -719,6 +702,110 @@ describe('learning-scenario-service', () => {
           user,
         }),
       ).rejects.toThrow('There can only be one active share at a time');
+    });
+  });
+
+  describe('learning scenario discovery filters', () => {
+    const user = mockUser('teacher');
+    const scenarios = [{ id: generateUUID(), name: 'Scenario 1' } as LearningScenarioSelectModel];
+
+    it('filters out unnamed scenarios and enriches with picture URLs', async () => {
+      const namedScenario = {
+        id: generateUUID(),
+        name: 'Visible scenario',
+        pictureId: 'shared-chats/a/picture.png',
+      } as LearningScenarioSelectModel;
+      const unnamedScenario = {
+        id: generateUUID(),
+        name: '',
+        pictureId: 'shared-chats/b/picture.png',
+      } as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenariosByUser as MockedFunction<typeof dbGetLearningScenariosByUser>
+      ).mockResolvedValue([namedScenario, unnamedScenario] as never);
+      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
+        'https://signed-url',
+      );
+
+      const result = await getLearningScenariosForUser({ user });
+
+      expect(dbGetLearningScenariosByUser).toHaveBeenCalledWith({ user });
+      expect(result).toEqual([
+        {
+          ...namedScenario,
+          maybeSignedPictureUrl: 'https://signed-url',
+        },
+      ]);
+    });
+
+    it.each([
+      {
+        accessLevel: 'global' as const,
+        expectedMock: dbGetGlobalLearningScenarios,
+      },
+      {
+        accessLevel: 'school' as const,
+        expectedMock: dbGetLearningScenariosByAssociatedSchools,
+      },
+      {
+        accessLevel: 'private' as const,
+        expectedMock: dbGetLearningScenariosByUser,
+      },
+    ])(
+      'routes accessLevel=$accessLevel to the correct db function',
+      async ({ accessLevel, expectedMock }) => {
+        (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(scenarios as never);
+
+        const result = await getLearningScenariosByAccessLevel({ accessLevel, user });
+
+        expect(result).toEqual(scenarios);
+        expect(expectedMock).toHaveBeenCalledWith({ user });
+      },
+    );
+
+    it('returns an empty list for unsupported access levels', async () => {
+      const result = await getLearningScenariosByAccessLevel({
+        accessLevel: 'invalid' as never,
+        user,
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('routes filter=all to dbGetAllAccessibleLearningScenarios', async () => {
+      (
+        dbGetAllAccessibleLearningScenarios as MockedFunction<
+          typeof dbGetAllAccessibleLearningScenarios
+        >
+      ).mockResolvedValue(scenarios as never);
+
+      const result = await getLearningScenariosByOverviewFilter({ filter: 'all', user });
+
+      expect(result).toEqual(scenarios);
+      expect(dbGetAllAccessibleLearningScenarios).toHaveBeenCalledWith({ user });
+    });
+
+    it.each([
+      { filter: 'mine' as const, expectedMock: dbGetAllLearningScenariosByUser },
+      { filter: 'official' as const, expectedMock: dbGetGlobalLearningScenarios },
+      { filter: 'school' as const, expectedMock: dbGetLearningScenariosByAssociatedSchools },
+    ])('routes filter=$filter to the correct db function', async ({ filter, expectedMock }) => {
+      (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(scenarios as never);
+
+      const result = await getLearningScenariosByOverviewFilter({ filter, user });
+
+      expect(result).toEqual(scenarios);
+      expect(expectedMock).toHaveBeenCalledWith({ user });
+    });
+
+    it('returns an empty list for unsupported overview filters', async () => {
+      const result = await getLearningScenariosByOverviewFilter({
+        filter: 'invalid' as never,
+        user,
+      });
+
+      expect(result).toEqual([]);
     });
   });
 });

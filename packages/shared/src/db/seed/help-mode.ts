@@ -11,7 +11,6 @@ const hilfeModusGpt: AssistantInsertModel & { id: string } = {
   promptSuggestions: [],
   description: null,
   pictureId: null,
-  schoolId: null,
   instructions: null,
 };
 

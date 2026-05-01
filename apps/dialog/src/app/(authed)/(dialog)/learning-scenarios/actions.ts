@@ -21,7 +21,6 @@ export async function createNewLearningScenarioAction({ modelId }: { modelId: st
   return runServerAction(createNewLearningScenario)({
     modelId,
     user,
-    schoolId: user.schoolIds?.[0] ?? '',
   });
 }
 
@@ -34,12 +33,9 @@ export async function createNewLearningScenarioFromTemplateAction({
 }) {
   const { user } = await requireAuth();
 
-  // Todo: Will be implemented in TD-701
   return runServerAction(createNewLearningScenarioFromTemplate)({
     originalLearningScenarioId: templateId,
     user,
-    schoolId: user.schoolIds?.[0] ?? '',
-    schoolIds: user.schoolIds ?? [],
     duplicateLearningScenarioName,
   });
 }
@@ -71,7 +67,6 @@ export async function downloadFileFromLearningScenarioAction({
   return runServerAction(downloadFileFromLearningScenario)({
     learningScenarioId,
     fileId,
-    schoolIds: user.schoolIds ?? [],
     user,
   });
 }

@@ -63,7 +63,6 @@ test('teacher can delete assistant with chat', async ({ page }) => {
 
   await deleteAssistant(page, assistantName);
 
-  await page.getByTestId('custom-chat-confirm-button').first().click();
   await waitForToast(page, 'Der Assistent wurde erfolgreich gelöscht.');
   await page.waitForURL('/assistants**');
   await expect(page.getByRole('heading', { name: assistantName }).first()).not.toBeVisible();

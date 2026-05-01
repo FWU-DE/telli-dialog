@@ -57,6 +57,7 @@ export default function CustomShareSection<T extends FieldValues>({
               control={control}
               label={t('school')}
               tooltip={t('school-tooltip')}
+              testId="school-sharing-checkbox"
               onCheckedChange={(checked) => {
                 onShareChange?.({ name: schoolSharingName, checked });
               }}

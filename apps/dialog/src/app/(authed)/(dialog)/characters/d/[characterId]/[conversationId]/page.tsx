@@ -42,8 +42,7 @@ export default async function Page(
     }),
     getCharacterForChatSession({
       characterId: params.characterId,
-      userId: user.id,
-      schoolIds: user.schoolIds ?? [],
+      user,
     }),
   ]).catch(handleErrorInServerComponent);
 

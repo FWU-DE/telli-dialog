@@ -42,6 +42,7 @@ import { NotFoundError } from '@shared/error';
 import { copyFileInS3 } from '@shared/s3';
 import { generateUUID } from '@shared/utils/uuid';
 import path from 'node:path';
+import { UserModel } from '@shared/auth/user-model';
 
 const templateTypeMap: Record<string, TemplateTypes> = {
   custom: 'assistant',
@@ -489,7 +490,6 @@ export async function copyRelatedTemplateFiles(
  * @param originalId - The ID of the source assistant to copy
  * @param accessLevel - The access level for the new assistant
  * @param userId - The user ID to assign to the new assistant
- * @param schoolId - The school ID to assign to the new assistant
  * @param duplicateAssistantName - Optional name for the new assistant, defaults to source name if not provided
  * @returns Promise resolving to the newly created assistant object
  * @throws Error if source assistant is not found or assistant creation fails
@@ -497,8 +497,7 @@ export async function copyRelatedTemplateFiles(
 export async function copyAssistant(
   originalId: string,
   accessLevel: AccessLevel,
-  userId: string,
-  schoolId: string | null,
+  user: Pick<UserModel, 'id'>,
   duplicateAssistantName?: string,
 ) {
   const sourceAssistant = await dbGetAssistantById({ assistantId: originalId });
@@ -512,8 +511,7 @@ export async function copyAssistant(
     id: undefined,
     originalAssistantId: originalId,
     accessLevel,
-    userId,
-    schoolId,
+    userId: user.id,
     isDeleted: false,
     hasLinkAccess: false, // Reset sharing settings for new template
   };
@@ -536,7 +534,7 @@ export async function copyAssistant(
  * @throws Error if source assistant is not found or template creation fails
  */
 async function createAssistantTemplate(originalId: string) {
-  return copyAssistant(originalId, 'global', DUMMY_USER_ID, null);
+  return copyAssistant(originalId, 'global', { id: DUMMY_USER_ID });
 }
 
 /**
@@ -546,8 +544,7 @@ async function createAssistantTemplate(originalId: string) {
  *
  * @param originalId - The ID of the source character to copy
  * @param accessLevel - The access level for the new character
- * @param userId - The user ID to assign to the new character
- * @param schoolId - The school ID to assign to the new character
+ * @param user - The user ID to assign to the new character
  * @param duplicateCharacterName - Optional custom name for the new character. If not provided, uses the source character's name.
  * @returns Promise resolving to the newly created character object
  * @throws Error if source character is not found or character creation fails
@@ -555,8 +552,7 @@ async function createAssistantTemplate(originalId: string) {
 export async function copyCharacter(
   originalId: string,
   accessLevel: AccessLevel,
-  userId: string,
-  schoolId: string | null,
+  user: Pick<UserModel, 'id'>,
   duplicateCharacterName?: string,
 ) {
   const sourceCharacter = await dbGetCharacterById({ characterId: originalId });
@@ -570,8 +566,7 @@ export async function copyCharacter(
     id: undefined,
     originalCharacterId: originalId,
     accessLevel,
-    userId,
-    schoolId,
+    userId: user.id,
     isDeleted: false,
     hasLinkAccess: false, // Reset sharing settings for new template
   };
@@ -594,7 +589,7 @@ export async function copyCharacter(
  * @throws Error if source character is not found or template creation fails
  */
 async function createCharacterTemplate(originalId: string) {
-  return copyCharacter(originalId, 'global', DUMMY_USER_ID, null);
+  return copyCharacter(originalId, 'global', { id: DUMMY_USER_ID });
 }
 
 /**
@@ -602,19 +597,19 @@ async function createCharacterTemplate(originalId: string) {
  * @param originalId - The id of the source learning scenario to create a template from.
  */
 async function createLearningScenarioTemplate(originalId: string) {
-  return copyLearningScenario(originalId, DUMMY_USER_ID);
+  return copyLearningScenario(originalId, { id: DUMMY_USER_ID });
 }
 
 /**
  * Creates a new global learning scenario template based on an existing learning scenario.
  *
  * @param learningScenarioId - The id of the source learning scenario to copy
- * @param userId - The user id that is the owner of the new learning scenario
+ * @param user - The user that is the owner of the new learning scenario
  * @returns
  */
 async function copyLearningScenario(
   learningScenarioId: string,
-  userId: string,
+  user: Pick<UserModel, 'id'>,
   duplicateLearningScenarioName?: string,
 ) {
   const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
@@ -626,8 +621,7 @@ async function copyLearningScenario(
   copy.id = generateUUID();
   copy.accessLevel = 'global';
   copy.isDeleted = false;
-  copy.schoolId = null;
-  copy.userId = userId;
+  copy.userId = user.id;
   copy.originalLearningScenarioId = learningScenarioId;
   copy.hasLinkAccess = false; // Reset sharing settings for new template
   copy.name = (duplicateLearningScenarioName ?? learningScenario.name).substring(

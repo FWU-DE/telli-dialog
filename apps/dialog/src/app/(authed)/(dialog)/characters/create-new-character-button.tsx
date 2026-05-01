@@ -28,7 +28,7 @@ export function CreateNewCharacterButton() {
   }
 
   return (
-    <Button type="button" onClick={handleNewCharacter}>
+    <Button type="button" onClick={handleNewCharacter} data-testid="character-create-button">
       <PlusIcon className="size-5" />
       {t('form.create-character')}
     </Button>

@@ -58,7 +58,6 @@ export async function shareLearningScenarioAction({
     learningScenarioId,
     user,
     data,
-    schoolIds: user.schoolIds ?? [],
   });
 }
 

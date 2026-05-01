@@ -1,10 +1,10 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { FileUploadIcon } from '../icons/file-upload-icons/file-upload-tray-icon';
+import { FileUploadIcon } from '../../icons/file-upload-icons/file-upload-tray-icon';
 import { useTranslations } from 'next-intl';
-import { handleSingleFile, UploadFileButtonProps } from '../chat/upload-file-button';
+import { handleSingleFile, UploadFileButtonProps } from '../../chat/upload-file-button';
 import { useSession } from 'next-auth/react';
-import { useToast } from '../common/toast';
-import { RichText } from '../common/rich-text';
+import { useToast } from '../../common/toast';
+import { RichText } from '../../common/rich-text';
 import { SUPPORTED_DOCUMENTS_EXTENSIONS } from '@/const';
 import { validateFileExtentsion as validateFileExtension } from '@/utils/files/generic';
 import { NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT } from '@/configuration-text-inputs/const';

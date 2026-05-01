@@ -22,7 +22,7 @@ export default function CreateNewAssistantButton() {
   }
 
   return (
-    <Button type="button" onClick={handleNewGPT}>
+    <Button type="button" onClick={handleNewGPT} data-testid="assistant-create-button">
       <PlusIcon className="size-5" />
       {t('form.create-gpt')}
     </Button>

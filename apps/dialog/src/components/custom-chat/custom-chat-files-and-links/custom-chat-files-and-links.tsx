@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/Card';
 import { CustomChatFiles, CustomChatFilesProps } from './custom-chat-files';
-import { CustomChatHeading2 } from './custom-chat-heading2';
+import { CustomChatHeading2 } from '../custom-chat-heading2';
 import { CustomChatLinks, CustomChatLinksProps } from './custom-chat-links';
 import { useTranslations } from 'next-intl';
 import { SUPPORTED_DOCUMENTS_EXTENSIONS } from '@/const';

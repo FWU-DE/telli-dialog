@@ -129,8 +129,7 @@ describe('template-service', () => {
       const result = await copyAssistant(
         originalId,
         'private',
-        'user-1',
-        'school-1',
+        { id: 'user-1' },
         'Duplicated assistant',
       );
 
@@ -141,7 +140,6 @@ describe('template-service', () => {
           originalAssistantId: originalId,
           accessLevel: 'private',
           userId: 'user-1',
-          schoolId: 'school-1',
           isDeleted: false,
           hasLinkAccess: false,
         }),
@@ -163,12 +161,11 @@ describe('template-service', () => {
         upsertedAssistant as never,
       );
 
-      await copyAssistant('assistant-origin', 'global', 'user-1', null);
+      await copyAssistant('assistant-origin', 'global', { id: 'user-1' });
 
       expect(dbUpsertAssistant).toHaveBeenCalledWith({
         assistant: expect.objectContaining({
           name: 'Source assistant name',
-          schoolId: null,
           accessLevel: 'global',
         }),
       });
@@ -179,7 +176,7 @@ describe('template-service', () => {
         undefined as never,
       );
 
-      await expect(copyAssistant('missing-id', 'private', 'user-1', 'school-1')).rejects.toThrow(
+      await expect(copyAssistant('missing-id', 'private', { id: 'user-1' })).rejects.toThrow(
         'Assistent nicht gefunden',
       );
     });
@@ -193,9 +190,9 @@ describe('template-service', () => {
         {} as never,
       );
 
-      await expect(
-        copyAssistant('assistant-origin', 'private', 'user-1', 'school-1'),
-      ).rejects.toThrow('Fehler beim Erstellen des Assistenten');
+      await expect(copyAssistant('assistant-origin', 'private', { id: 'user-1' })).rejects.toThrow(
+        'Fehler beim Erstellen des Assistenten',
+      );
     });
   });
 
@@ -220,8 +217,7 @@ describe('template-service', () => {
       const result = await copyCharacter(
         originalId,
         'private',
-        'user-1',
-        'school-1',
+        { id: 'user-1' },
         'Duplicated character',
       );
 
@@ -232,7 +228,6 @@ describe('template-service', () => {
           originalCharacterId: originalId,
           accessLevel: 'private',
           userId: 'user-1',
-          schoolId: 'school-1',
           isDeleted: false,
           hasLinkAccess: false,
         }),
@@ -254,12 +249,11 @@ describe('template-service', () => {
         createdCharacter,
       ] as never);
 
-      await copyCharacter('character-origin', 'global', 'user-1', null);
+      await copyCharacter('character-origin', 'global', { id: 'user-1' });
 
       expect(dbCreateCharacter).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'Source character name',
-          schoolId: null,
           accessLevel: 'global',
         }),
       );
@@ -280,7 +274,7 @@ describe('template-service', () => {
         createdCharacter,
       ] as never);
 
-      await copyCharacter('character-origin', 'private', 'user-1', 'school-1', longName);
+      await copyCharacter('character-origin', 'private', { id: 'user-1' }, longName);
 
       expect(dbCreateCharacter).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -294,7 +288,7 @@ describe('template-service', () => {
         undefined as never,
       );
 
-      await expect(copyCharacter('missing-id', 'private', 'user-1', 'school-1')).rejects.toThrow(
+      await expect(copyCharacter('missing-id', 'private', { id: 'user-1' })).rejects.toThrow(
         'Dialogpartner nicht gefunden',
       );
     });
@@ -308,9 +302,9 @@ describe('template-service', () => {
         [] as never,
       );
 
-      await expect(
-        copyCharacter('character-origin', 'private', 'user-1', 'school-1'),
-      ).rejects.toThrow('Fehler beim Erstellen des Dialogpartners');
+      await expect(copyCharacter('character-origin', 'private', { id: 'user-1' })).rejects.toThrow(
+        'Fehler beim Erstellen des Dialogpartners',
+      );
     });
   });
 
