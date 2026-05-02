@@ -3,7 +3,6 @@
 import SharedChatLoginForm from '../../(authed)/(dialog)/learning-scenarios/_components/shared-chat-login-form';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { signIn } from 'next-auth/react';
-import React from 'react';
 import TelliLogo from '@/components/icons/logo';
 import { cn } from '@/utils/tailwind';
 import { useSearchParams } from 'next/navigation';

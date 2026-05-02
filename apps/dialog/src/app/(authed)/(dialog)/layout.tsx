@@ -1,4 +1,4 @@
-import { getUser, userHasCompletedTraining } from '@/auth/utils';
+import { getUser, getValidSession, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -6,8 +6,6 @@ import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
-
-export const dynamic = 'force-dynamic';
 import TermsConditionsModal from '@/components/modals/terms-conditions-initial';
 import { federalStateDisclaimers, VERSION } from '@/components/modals/const';
 import { setUserAcceptConditions } from './actions';
@@ -21,8 +19,11 @@ import SessionWatcher from '@/auth/SessionWatcher';
 import { getActiveBannersForUser } from '@shared/info-banners/info-banner-service';
 import { DialogWrapper } from '@/components/layout/dialog-header';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
+  const { sessionId } = await getValidSession();
   const user = await getUser();
   if (!user.federalState.hasApiKeyAssigned) throw new Error(t('no-api-key'));
 
@@ -52,7 +53,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     (user.versionAcceptedConditions === null || user.versionAcceptedConditions < VERSION);
 
   return (
-    <SessionWatcher redirectTo="/api/auth/logout-callback">
+    <SessionWatcher redirectTo="/api/auth/logout-callback" loginSessionId={sessionId}>
       <FederalStateProvider federalState={federalState}>
         <SidebarProvider className="min-h-0">
           <LlmModelsProvider
