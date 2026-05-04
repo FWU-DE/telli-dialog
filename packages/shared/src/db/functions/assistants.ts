@@ -157,7 +157,7 @@ export async function dbUpsertAssistant({
     })
     .returning();
 
-  if (!insertedAssistant) return undefined;
+  if (!insertedAssistant) throw new Error('Could not insert or update assistant');
   return dbGetAssistantById({ assistantId: insertedAssistant.id });
 }
 
@@ -174,7 +174,7 @@ export async function dbUpdateAssistant({
     .where(eq(assistantTable.id, assistantId))
     .returning();
 
-  if (!updatedAssistant) return undefined;
+  if (!updatedAssistant) throw new Error('Could not update assistant');
   return dbGetAssistantById({ assistantId: updatedAssistant.id });
 }
 

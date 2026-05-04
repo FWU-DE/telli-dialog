@@ -40,7 +40,6 @@ import { UserModel } from '@shared/auth/user-model';
  * When multiple non-expired rows exist, `DISTINCT ON (character_id) ORDER BY started_at DESC`
  * ensures only the most-recent row is returned, preventing duplicate entity rows in JOINs.
  */
-
 function latestActiveCharacterShare(user: Pick<UserModel, 'id'>) {
   return db
     .selectDistinctOn([sharedCharacterConversation.characterId], {
@@ -80,10 +79,10 @@ function baseCharacterQuery() {
   return db
     .select({
       ...getTableColumns(characterTable),
-      ownerSchoolIds: sql<string[]>`coalesce(${userTable.schoolIds}, '{}'::text[])`,
+      ownerSchoolIds: userTable.schoolIds,
     })
     .from(characterTable)
-    .leftJoin(userTable, eq(characterTable.userId, userTable.id));
+    .innerJoin(userTable, eq(characterTable.userId, userTable.id));
 }
 
 function baseCharacterWithShareQuery(activeShare: ReturnType<typeof latestActiveCharacterShare>) {
@@ -96,10 +95,10 @@ function baseCharacterWithShareQuery(activeShare: ReturnType<typeof latestActive
       startedAt: activeShare.startedAt,
       manuallyStoppedAt: activeShare.manuallyStoppedAt,
       startedBy: activeShare.userId,
-      ownerSchoolIds: sql<string[]>`coalesce(${userTable.schoolIds}, '{}'::text[])`,
+      ownerSchoolIds: userTable.schoolIds,
     })
     .from(characterTable)
-    .leftJoin(userTable, eq(characterTable.userId, userTable.id));
+    .innerJoin(userTable, eq(characterTable.userId, userTable.id));
 }
 
 /**
@@ -422,10 +421,10 @@ export async function dbGetCharacterByIdAndInviteCode({
       startedAt: sharedCharacterConversation.startedAt,
       manuallyStoppedAt: sharedCharacterConversation.manuallyStoppedAt,
       startedBy: sharedCharacterConversation.userId,
-      ownerSchoolIds: sql<string[]>`coalesce(${userTable.schoolIds}, '{}'::text[])`,
+      ownerSchoolIds: userTable.schoolIds,
     })
     .from(characterTable)
-    .leftJoin(userTable, eq(characterTable.userId, userTable.id))
+    .innerJoin(userTable, eq(characterTable.userId, userTable.id))
     .innerJoin(
       sharedCharacterConversation,
       eq(sharedCharacterConversation.characterId, characterTable.id),

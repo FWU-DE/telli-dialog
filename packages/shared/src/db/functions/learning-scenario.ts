@@ -83,10 +83,10 @@ function baseLearningScenarioQuery() {
   return db
     .select({
       ...getTableColumns(learningScenarioTable),
-      ownerSchoolIds: sql<string[]>`coalesce(${userTable.schoolIds}, '{}'::text[])`,
+      ownerSchoolIds: userTable.schoolIds,
     })
     .from(learningScenarioTable)
-    .leftJoin(userTable, eq(learningScenarioTable.userId, userTable.id));
+    .innerJoin(userTable, eq(learningScenarioTable.userId, userTable.id));
 }
 
 function baseLearningScenarioWithShareQuery(
@@ -101,10 +101,10 @@ function baseLearningScenarioWithShareQuery(
       startedAt: activeShare.startedAt,
       manuallyStoppedAt: activeShare.manuallyStoppedAt,
       startedBy: activeShare.userId,
-      ownerSchoolIds: sql<string[]>`coalesce(${userTable.schoolIds}, '{}'::text[])`,
+      ownerSchoolIds: userTable.schoolIds,
     })
     .from(learningScenarioTable)
-    .leftJoin(userTable, eq(learningScenarioTable.userId, userTable.id));
+    .innerJoin(userTable, eq(learningScenarioTable.userId, userTable.id));
 }
 
 export function dbGetGlobalLearningScenarios({
@@ -156,10 +156,6 @@ export async function dbGetLearningScenariosByAssociatedSchools({
       and(
         eq(learningScenarioTable.accessLevel, 'school'),
         arrayOverlaps(userTable.schoolIds, user.schoolIds),
-        or(
-          eq(sharedLearningScenarioTable.userId, user.id),
-          isNull(sharedLearningScenarioTable.userId),
-        ),
       ),
     )
     .orderBy(desc(learningScenarioTable.createdAt));
@@ -301,10 +297,10 @@ export async function dbGetLearningScenarioByIdAndInviteCode({
       startedAt: sharedLearningScenarioTable.startedAt,
       manuallyStoppedAt: sharedLearningScenarioTable.manuallyStoppedAt,
       startedBy: sharedLearningScenarioTable.userId,
-      ownerSchoolIds: sql<string[]>`coalesce(${userTable.schoolIds}, '{}'::text[])`,
+      ownerSchoolIds: userTable.schoolIds,
     })
     .from(learningScenarioTable)
-    .leftJoin(userTable, eq(learningScenarioTable.userId, userTable.id))
+    .innerJoin(userTable, eq(learningScenarioTable.userId, userTable.id))
     .innerJoin(
       sharedLearningScenarioTable,
       and(
