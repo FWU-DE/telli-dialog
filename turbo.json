@@ -20,7 +20,6 @@
     "API_KEY",
     "API_URL",
     "ENCRYPTION_KEY",
-    "NEXTAUTH_URL",
     "RABBITMQ_URI",
     "NEXT_RUNTIME",
     "VALKEY_URL",
