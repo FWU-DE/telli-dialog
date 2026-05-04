@@ -197,6 +197,7 @@ export async function sendChatMessage({
     federalState: user.federalState,
     chunks,
     errorUrls,
+    webSearchResults,
   });
 
   // Check if the model supports images based on supportedImageFormats

@@ -1,5 +1,6 @@
 import { SUPPORTED_DOCUMENTS_EXTENSIONS, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
 import { RetrievedChunk } from '../rag/types';
+import type { TextSearchResult } from 'linkup-sdk';
 
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien
@@ -12,6 +13,7 @@ export const TOOL_GUIDELINES = `
 ## Fähigkeiten und Einschränkungen
 - Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Ausschließlich folgende Formate werden unterstützt: ${[...SUPPORTED_DOCUMENTS_EXTENSIONS, ...SUPPORTED_IMAGE_EXTENSIONS].map((ext) => ext.toUpperCase()).join(', ')}. Biete niemals an, andere Formate zu verarbeiten. Der Inhalt dieser Dateien steht dir im Kontext zur Verfügung.
 - Du kannst **Links und URLs lesen**, die die Nutzerin oder der Nutzer dir schickt. Die Inhalte der Webseiten werden automatisch für dich abgerufen und stehen dir im Kontext zur Verfügung. Sage NIEMALS, dass du generell keine Webseiten aufrufen oder keine Live-Inhalte abrufen kannst - die Inhalte liegen dir bereits vor.
+- Du kannst eine **Websuche durchführen**. Wenn die Nutzerin oder der Nutzer eine Frage stellt, die aktuelle Informationen erfordert, wird für dich eine Websuche durchgeführt. Die Inhalte der Websuche stehen dir im Kontext zur Verfügung.
 - Du kannst **ausschließlich Textantworten** generieren.
 - Du kannst **keine Dateien erstellen** (z.B. Word-Dokumente, PDFs, Excel-Tabellen, Bilder etc.). Biete dies niemals an.
 - Die Nutzerin oder der Nutzer kann die Konversation über den Button mit dem Download-Icon ("Konversation herunterladen") in der oberen rechten Ecke herunterladen.
@@ -45,28 +47,67 @@ Wenn du möchtest, kann ich jetzt Folgendes tun:
 👉 Sag mir kurz: A, B oder C
 \`\`\``;
 
-export function constructRagContext(chunks: RetrievedChunk[], errorUrls: string[] = []) {
-  if (chunks.length === 0 && errorUrls.length === 0) return '';
+export function constructRagContext(
+  chunks: RetrievedChunk[],
+  errorUrls: string[] = [],
+  webSearchResults: TextSearchResult[] = [],
+) {
+  if (chunks.length === 0 && errorUrls.length === 0 && webSearchResults.length === 0) return '';
 
-  const chunkTexts = chunks
-    .map((chunk) => {
-      if (chunk.sourceType === 'webpage') {
-        return `Url: ${chunk.sourceUrl} - Abschnitt: ${chunk.orderIndex + 1}\n${chunk.content}`;
-      }
-      return `${chunk.fileName ? `Dateiname: ${chunk.fileName} - Abschnitt: ${chunk.orderIndex + 1}\n` : ''}${chunk.content}`;
-    })
-    .join('\n\n');
+  const fileChunks = chunks
+    .filter((chunk) => chunk.sourceType === 'file')
+    .sort(
+      (a, b) => (a.fileName ?? '').localeCompare(b.fileName ?? '') || a.orderIndex - b.orderIndex,
+    );
+  const webpageChunks = chunks
+    .filter((chunk) => chunk.sourceType === 'webpage')
+    .sort(
+      (a, b) => (a.sourceUrl ?? '').localeCompare(b.sourceUrl ?? '') || a.orderIndex - b.orderIndex,
+    );
 
-  const errorText =
-    errorUrls.length > 0
-      ? `\n\n## Es gab Probleme beim Zugriff auf die folgenden URLs:\n${errorUrls
-          .map((url) => `- ${url}`)
-          .join('\n')}`
-      : '';
+  const sections: string[] = [];
 
-  return `
-## Die folgenden Inhalte stammen aus Dateien oder Links, die der Nutzer bereitgestellt hat. Nutze diese Informationen, falls sinnvoll, für deine Antwort:
-${chunkTexts}${errorText}`;
+  if (fileChunks.length > 0) {
+    const fileTexts = fileChunks
+      .map(
+        (chunk) =>
+          `${chunk.fileName ? `Dateiname: ${chunk.fileName} - Abschnitt: ${chunk.orderIndex + 1}\n` : ''}${chunk.content}`,
+      )
+      .join('\n\n');
+    sections.push(
+      `### Hochgeladene Dateien\nDie folgenden Inhalte stammen aus Dateien, die für den Chat bereitgestellt wurden:\n\n${fileTexts}`,
+    );
+  }
+
+  if (webpageChunks.length > 0) {
+    const linkTexts = webpageChunks
+      .map(
+        (chunk) => `Url: ${chunk.sourceUrl} - Abschnitt: ${chunk.orderIndex + 1}\n${chunk.content}`,
+      )
+      .join('\n\n');
+    sections.push(
+      `### Verlinkte Webseiten\nDie folgenden Inhalte stammen aus Links, die zum Chat gehören:\n\n${linkTexts}`,
+    );
+  }
+
+  if (errorUrls.length > 0) {
+    sections.push(
+      `### Fehler beim Zugriff\nEs gab Probleme beim Zugriff auf die folgenden URLs:\n${errorUrls.map((url) => `- ${url}`).join('\n')}`,
+    );
+  }
+
+  if (webSearchResults.length > 0) {
+    const webSearchText = webSearchResults
+      .map((result) => `Url: ${result.url}\n${result.content}`)
+      .join('\n\n');
+    sections.push(
+      `### Websuche\nDie folgenden Inhalte stammen aus einer live Websuche:\n\n${webSearchText}`,
+    );
+  }
+
+  if (sections.length === 0) return '';
+
+  return `\n## Kontextinformationen\nNutze die folgenden Informationen, falls sinnvoll, für deine Antwort:\n\n${sections.join('\n\n')}`;
 }
 
 // Helper to format optional fields in a list

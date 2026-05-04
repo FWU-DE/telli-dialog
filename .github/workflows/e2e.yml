@@ -54,7 +54,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db
-      NEXTAUTH_URL: http://localhost:3000
+      AUTH_URL: http://localhost:3000
       RABBITMQ_URI: amqp://user:password@127.0.0.1:5672
       VALKEY_URL: redis://127.0.0.1:6379/0
       VIDIS_CLIENT_ID: telli-e2e-client

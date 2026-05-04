@@ -9,7 +9,7 @@ import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
-import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
 import type { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import type { WebsearchSource } from '@shared/db/types';
 import { useRouter } from 'next/navigation';
