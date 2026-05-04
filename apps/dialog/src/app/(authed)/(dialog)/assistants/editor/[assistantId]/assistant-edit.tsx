@@ -39,7 +39,7 @@ import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-imag
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
-import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
 import { WebsearchSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';

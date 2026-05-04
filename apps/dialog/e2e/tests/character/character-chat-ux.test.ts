@@ -62,9 +62,6 @@ test.describe('character chat UX', () => {
       await page.goto('/characters');
       await page.waitForURL('/characters');
       await deleteCharacter(page, characterName);
-      const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
-      await expect(deleteConfirmButton).toBeVisible();
-      await deleteConfirmButton.click();
       await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
     } finally {
       await page.close();

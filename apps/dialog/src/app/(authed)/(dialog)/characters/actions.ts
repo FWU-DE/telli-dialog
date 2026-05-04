@@ -22,7 +22,6 @@ export async function createNewCharacterAction({
   return runServerAction(createNewCharacter)({
     federalStateId: federalState.id,
     modelId: modelId,
-    schoolId: user.schoolIds?.[0] ?? '',
     user,
     templateId,
     duplicateCharacterName,
@@ -41,7 +40,6 @@ export async function downloadFileFromCharacterAction({
   return runServerAction(downloadFileFromCharacter)({
     characterId,
     fileId,
-    schoolIds: user.schoolIds ?? [],
     user,
   });
 }

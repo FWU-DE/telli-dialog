@@ -18,6 +18,7 @@ export const E2E_FEDERAL_STATE = 'DE-TEST';
 export const AUTH_FILES = {
   teacher: path.resolve(process.cwd(), '.playwright-auth/teacher.json'),
   teacher2: path.resolve(process.cwd(), '.playwright-auth/teacher2.json'),
+  teacher3: path.resolve(process.cwd(), '.playwright-auth/teacher3.json'),
 };
 
 export const LLM_MODELS_FILE = path.resolve(process.cwd(), '.playwright-auth/llm-models.json');
