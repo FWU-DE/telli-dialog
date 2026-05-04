@@ -31,6 +31,8 @@
     "copy": "Kopieren",
     "edit": "Bearbeiten",
     "copy-clipboard": "In die Zwischenablage kopieren",
+    "message-download": "Antwort herunterladen",
+    "message-download-error": "Der Download der Antwort ist fehlgeschlagen.",
     "regenerate-message": "Antwort erneut generieren",
     "image-load-failed": "Bild konnte nicht geladen werden",
     "rate-limit-error": "Das bereitgestellte Budget an telli-Points wurde aufgebraucht.",

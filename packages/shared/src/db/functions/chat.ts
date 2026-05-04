@@ -65,6 +65,31 @@ export async function dbGetConversationMessages({
   return cleanedMessages;
 }
 
+export async function dbGetConversationMessageById({
+  userId,
+  conversationId,
+  messageId,
+}: {
+  userId: string;
+  conversationId: string;
+  messageId: string;
+}): Promise<ConversationMessageModel | undefined> {
+  const [message] = await db
+    .select()
+    .from(conversationMessageTable)
+    .innerJoin(conversationTable, eq(conversationMessageTable.conversationId, conversationTable.id))
+    .where(
+      and(
+        eq(conversationMessageTable.id, messageId),
+        eq(conversationMessageTable.conversationId, conversationId),
+        eq(conversationTable.userId, userId),
+        isNull(conversationMessageTable.deletedAt),
+      ),
+    );
+
+  return message?.conversation_message;
+}
+
 export async function dbInsertChatContent(chatContent: InsertConversationMessageModel) {
   return (
     await db.insert(conversationMessageTable).values(chatContent).onConflictDoNothing().returning()

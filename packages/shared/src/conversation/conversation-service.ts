@@ -1,5 +1,6 @@
 import {
   dbGetConversationById,
+  dbGetConversationMessageById,
   dbGetConversationMessages,
   dbGetConversations,
   dbUpdateConversationTitle,
@@ -8,7 +9,7 @@ import {
   dbDeleteConversationByIdAndUserId,
   dbDoesInviteCodeExist,
 } from '@shared/db/functions/conversation';
-import { ConversationModel } from '@shared/db/types';
+import { ConversationMessageModel, ConversationModel } from '@shared/db/types';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 
 /**
@@ -116,6 +117,67 @@ export async function getConversationAndMessagesForExport({
     conversation,
     messages,
   };
+}
+
+/**
+ * Authenticated user wants to download a single conversation message.
+ * Verifies that the conversation belongs to the user and that the message is part of it.
+ */
+export async function getConversationMessageForExport({
+  conversationId,
+  messageId,
+  userId,
+}: {
+  conversationId: string;
+  messageId: string;
+  userId: string;
+}) {
+  const conversation = await getConversation({ conversationId, userId });
+  const message = await dbGetConversationMessageById({
+    conversationId,
+    messageId,
+    userId,
+  });
+
+  if (message === undefined) {
+    throw new NotFoundError('Conversation message not found');
+  }
+
+  const conversationMessages = await getConversationMessages({ conversationId, userId });
+  const messages = getMessagesForConversationMessageExport({
+    conversationMessages,
+    message,
+  });
+
+  return {
+    conversation,
+    message,
+    messages,
+  };
+}
+
+export function getMessagesForConversationMessageExport({
+  conversationMessages,
+  message,
+}: {
+  conversationMessages: ConversationMessageModel[];
+  message: ConversationMessageModel;
+}) {
+  const messageIndex = conversationMessages.findIndex(
+    (conversationMessage) => conversationMessage.id === message.id,
+  );
+
+  if (message.role !== 'assistant' || messageIndex <= 0) {
+    return [message];
+  }
+
+  return [
+    ...conversationMessages
+      .slice(0, messageIndex)
+      .filter((conversationMessage) => conversationMessage.role === 'user')
+      .slice(-1),
+    message,
+  ];
 }
 
 /**

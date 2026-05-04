@@ -14,6 +14,7 @@ import { isImageFile } from '@/utils/files/generic';
 import { type UIMessage, type ChatStatus } from '@/types/chat';
 import { ReactNode } from 'react';
 import { WebsearchSource } from '@shared/db/types';
+import DownloadConversationMessageButton from './download-conversation-message-button';
 
 // Re-export for consumers
 export type { PendingFileModel };
@@ -28,6 +29,8 @@ export function ChatBox({
   isLastNonUser,
   isLoading,
   regenerateMessage,
+  conversationId,
+  exportGptName,
   status,
 }: {
   assistantIcon?: ReactNode;
@@ -39,6 +42,8 @@ export function ChatBox({
   isLastNonUser: boolean;
   isLoading: boolean;
   regenerateMessage: () => void;
+  conversationId?: string;
+  exportGptName?: string;
   status: ChatStatus;
 }) {
   const tCommon = useTranslations('common');
@@ -116,6 +121,13 @@ export function ChatBox({
     isLastNonUser && status !== 'streaming' ? (
       <div className="flex items-center gap-1 mt-1">
         <TelliClipboardButton text={children.content} className="w-5 h-5" />
+        {children.role === 'assistant' && conversationId !== undefined && (
+          <DownloadConversationMessageButton
+            conversationId={conversationId}
+            messageId={children.id}
+            gptName={exportGptName}
+          />
+        )}
         <button
           title={tCommon('regenerate-message')}
           type="button"

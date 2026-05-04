@@ -14,6 +14,7 @@ import { logError } from '@shared/logging';
 import { dbGetModelByName } from '@shared/db/functions/llm-model';
 
 const USER_FULL_NAME = 'Nutzer/in';
+const DEFAULT_CONVERSATION_NAME = 'Konversation';
 
 export async function generateConversationDocxFile({
   conversation,
@@ -69,6 +70,67 @@ export async function generateConversationDocxFile({
   }
 }
 
+export async function generateConversationMessageDocxFile({
+  conversation,
+  messages,
+  gptName,
+}: {
+  conversation: ConversationModel;
+  messages: ConversationMessageModel[];
+  gptName: string;
+}): Promise<ArrayBuffer | undefined> {
+  try {
+    const targetMessage = messages[messages.length - 1];
+
+    if (targetMessage === undefined) {
+      return undefined;
+    }
+
+    const conversationMetadata = getConversationMessageMetadata({
+      conversation,
+      message: targetMessage,
+    });
+
+    const messageParagraphs = getConversationMessages({
+      messages,
+      gptName,
+      userFullName: USER_FULL_NAME,
+    });
+
+    let modelDisplayName = targetMessage.modelName ?? gptName;
+    if (targetMessage.role === 'assistant' && targetMessage.modelName) {
+      const modelDbEntry = await dbGetModelByName(targetMessage.modelName);
+      if (modelDbEntry?.displayName) {
+        modelDisplayName = modelDbEntry.displayName;
+      }
+    }
+
+    if (targetMessage.role === 'assistant') {
+      messageParagraphs.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `Generiert von telli unter Nutzung von ${modelDisplayName}`,
+              italics: true,
+              size: 18,
+              color: '666666',
+            }),
+          ],
+          spacing: { before: 400 },
+        }),
+      );
+    }
+
+    const doc = buildDocxDocument({ conversationMetadata, messageParagraphs });
+    const buffer = await Packer.toArrayBuffer(doc);
+
+    return buffer;
+  } catch (error) {
+    logError('Error generating conversation message .docx file', error);
+    return undefined;
+  }
+}
+
 function getConversationMetadata({ conversation }: { conversation: ConversationModel }) {
   return [
     new Paragraph({
@@ -86,7 +148,39 @@ function getConversationMetadata({ conversation }: { conversation: ConversationM
   ];
 }
 
-type SectionType = Paragraph | Table;
+function getConversationMessageMetadata({
+  conversation,
+  message,
+}: {
+  conversation: ConversationModel;
+  message: ConversationMessageModel;
+}) {
+  return [
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: getConversationMessageExportTitle({
+            conversationName: conversation.name,
+            role: message.role,
+          }),
+          bold: true,
+          size: 40,
+        }),
+      ],
+    }),
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: `Erstellt am: ${formatDateToGermanTimestamp(message.createdAt)} Uhr`,
+          size: 22,
+        }),
+      ],
+    }),
+    new Paragraph({}),
+  ];
+}
+
+export type SectionType = Paragraph | Table;
 function getConversationMessages({
   messages,
   gptName,
@@ -111,7 +205,46 @@ function getConversationMessages({
   ]);
 }
 
-function buildDocxDocument({
+export function getConversationMessageExportTitle({
+  conversationName,
+  role,
+}: {
+  conversationName: string | null;
+  role: ConversationMessageModel['role'];
+}) {
+  const safeConversationName = getSafeConversationName(conversationName);
+
+  if (role === 'assistant') {
+    return `Antwort aus Konversation: ${safeConversationName}`;
+  }
+
+  return `Nachricht aus Konversation: ${safeConversationName}`;
+}
+
+export function generateMessageFileName({
+  conversationName,
+  gptName,
+  createdAt,
+}: {
+  conversationName: string | null;
+  gptName: string;
+  createdAt: Date;
+}) {
+  const formattedDate = createdAt.toISOString().split('T')[0];
+  const safeConversationName = getSafeConversationName(conversationName);
+
+  return `${formattedDate} ${gptName} Antwort aus ${safeConversationName}.docx`;
+}
+
+function getSafeConversationName(conversationName: string | null) {
+  if (conversationName === null || conversationName.trim() === '') {
+    return DEFAULT_CONVERSATION_NAME;
+  }
+
+  return conversationName;
+}
+
+export function buildDocxDocument({
   conversationMetadata,
   messageParagraphs,
 }: {

@@ -228,6 +228,7 @@ export async function sendChatMessage({
         async ({ usage, priceInCents }) => {
           // Save assistant message to DB
           await dbInsertChatContent({
+            id: assistantMessageId,
             content: fullText,
             role: 'assistant',
             userId: user.id,
