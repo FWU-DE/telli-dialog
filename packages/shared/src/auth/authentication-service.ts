@@ -1,7 +1,7 @@
 import z from 'zod';
 import { normalizeVidisSchoolIds } from '../db/functions/vidis';
 
-const authErrorCodeSchema = z.enum(['federal_state_not_found', 'federal_state_changed']);
+const authErrorCodeSchema = z.enum(['federal_state_not_found']);
 export type AuthErrorCode = z.infer<typeof authErrorCodeSchema>;
 
 const vidisProfileSchema = z.object({

@@ -83,8 +83,8 @@ describe('authentication-service', () => {
     });
 
     it('should generate URL with field and auth errors', () => {
-      const errorUrl = generateErrorUrl(['rolle'], 'federal_state_changed');
-      expect(errorUrl).toBe('/login/error?profile_error=rolle&auth_error=federal_state_changed');
+      const errorUrl = generateErrorUrl(['rolle'], 'federal_state_not_found');
+      expect(errorUrl).toBe('/login/error?profile_error=rolle&auth_error=federal_state_not_found');
     });
 
     it('should generate empty error URL if no missing fields are provided', () => {

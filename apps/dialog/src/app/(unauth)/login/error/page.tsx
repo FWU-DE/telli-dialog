@@ -23,7 +23,6 @@ export default async function Page(props: PageProps<'/login/error'>) {
         <WarningIcon />
         <div>{t('description')}</div>
         {authError === 'federal_state_not_found' ? <div>{t('federal-state-not-found')}</div> : null}
-        {authError === 'federal_state_changed' ? <div>{t('federal-state-changed')}</div> : null}
         <ul>
           {missingFieldsInProfile.map((field) => {
             return (
