@@ -8,15 +8,30 @@ import { type UserAndContext } from '@/auth/types';
 import Link from 'next/link';
 import { IMPRESSUM_URL, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from './const';
 import { useTranslations } from 'next-intl';
-import DotsHorizontalIcon from '@/components/icons/dots-horizontal';
 import { usePortalContainer } from '@ui/components/portal-container';
 import { Button } from '@ui/components/Button';
-import { DotsThreeIcon} from '@phosphor-icons/react';
+import { DotsThreeIcon } from '@phosphor-icons/react';
 
 function MenuActionRow({ action }: { action: React.ReactNode }) {
+  const contentRef = React.useRef<HTMLDivElement>(null);
+
+  function handleSelect(event: Event) {
+    const childElement = contentRef.current?.querySelector<HTMLElement>(
+      'button, a, [role="button"]',
+    );
+
+    if (childElement) {
+      event.preventDefault();
+      childElement.click();
+    }
+  }
+
   return (
-    <DropdownMenu.Item>
-      <div className="flex p-2 pl-4 [&_button]:h-auto [&_button]:justify-start [&_button]:border-none [&_button]:bg-transparent [&_button]:px-0 [&_button]:py-0 [&_button]:flex-row [&_button]:gap-2 [&_button]:text-base [&_button]:font-normal [&_button:hover]:bg-transparent [&_button:hover]:underline [&_button:hover]:text-primary">
+    <DropdownMenu.Item onSelect={handleSelect}>
+      <div
+        ref={contentRef}
+        className="flex p-2 pl-4 [&_button]:h-auto [&_button]:justify-start [&_button]:border-none [&_button]:bg-transparent [&_button]:px-0 [&_button]:py-0 [&_button]:flex-row [&_button]:gap-2 [&_button]:text-base [&_button]:font-normal [&_button:hover]:bg-transparent [&_button:hover]:underline [&_button:hover]:text-primary"
+      >
         {action}
       </div>
     </DropdownMenu.Item>
@@ -82,7 +97,7 @@ export default function ProfileMenu({ userAndContext }: { userAndContext?: UserA
         <DropdownMenu.Content
           align="end"
           sideOffset={10}
-          className="z-20 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
+          className="z-300 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
         >
           <ProfileMenuContent userAndContext={userAndContext} />
         </DropdownMenu.Content>
@@ -105,22 +120,20 @@ export function ThreeDotsProfileMenu({
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <Button
+        <button
           type="button"
-          variant="ghost"
-          size="icon-round"
           aria-label="More actions"
-          className="flex items-center justify-center focus:outline-hidden group hover:bg-muted dark:hover:bg-muted/50 min-w-8 text-primary hover:text-primary"
           title="More actions"
+          className="size-10 rounded-full inline-flex items-center justify-center text-primary hover:bg-muted dark:hover:bg-muted/50 focus:outline-hidden focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           <DotsThreeIcon weight="bold" className="size-6" />
-        </Button>
+        </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal container={container}>
         <DropdownMenu.Content
           align="end"
           sideOffset={10}
-          className="z-20 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
+          className="z-300 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
         >
           {deleteButtonJSX && <MenuActionRow action={deleteButtonJSX} />}
           {downloadButtonJSX && <MenuActionRow action={downloadButtonJSX} />}
