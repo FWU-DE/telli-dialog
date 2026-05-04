@@ -172,7 +172,6 @@ services:
       # Authentication
       # IMPORTANT: Change AUTH_SECRET in production! Generate with: openssl rand -base64 32
       AUTH_SECRET: telli-default-secret-please-change-in-production-use-openssl-rand-base64-32
-      NEXTAUTH_URL: http://localhost:3000
 
       # Keycloak
       VIDIS_CLIENT_ID: telli-dev-client
@@ -239,7 +238,6 @@ services:
       # Authentication
       # IMPORTANT: Change AUTH_SECRET in production! Generate with: openssl rand -base64 32
       AUTH_SECRET: telli-default-secret-please-change-in-production-use-openssl-rand-base64-32
-      NEXTAUTH_URL: http://localhost:3001
 
       # Keycloak
       KEYCLOAK_CLIENT_ID: telli-dev-client

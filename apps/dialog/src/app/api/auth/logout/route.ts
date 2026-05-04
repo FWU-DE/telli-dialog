@@ -1,20 +1,21 @@
 import { auth } from '@/auth';
 import { logError, logInfo, logWarning } from '@shared/logging';
-import { NextResponse } from 'next/server';
-import { LOGOUT_CALLBACK_URL } from '../const';
+import { NextRequest, NextResponse } from 'next/server';
 import { VIDIS_LOGOUT_URL } from '@/auth/providers/vidis';
-import { LOGIN_PAGE_URL } from '@/app/(unauth)/login/const';
 
-function handleEmptyToken() {
+function handleEmptyToken(request: NextRequest) {
   logWarning('No valid token found, redirecting to logout-callback url');
-  return NextResponse.redirect(LOGOUT_CALLBACK_URL);
+  return NextResponse.redirect(new URL('/api/auth/logout-callback', request.url));
 }
 
-function redirectToIDP(idToken: string) {
+function redirectToIDP(request: NextRequest, idToken: string) {
   logInfo('Redirect to IDP with token for logout');
   const logoutUrl = new URL(VIDIS_LOGOUT_URL); // create a new URL object to avoid mutating the existing one
   logoutUrl.searchParams.append('id_token_hint', idToken);
-  logoutUrl.searchParams.append('post_logout_redirect_uri', LOGOUT_CALLBACK_URL.toString());
+  logoutUrl.searchParams.append(
+    'post_logout_redirect_uri',
+    new URL('/api/auth/logout-callback', request.url).toString(),
+  );
   return NextResponse.redirect(logoutUrl);
 }
 
@@ -23,13 +24,13 @@ function redirectToIDP(idToken: string) {
  * If a valid JWT token is available, we redirect to the IDP to logout current session.
  * If no token is available, we simply redirect to the logout_callback url for cleanup.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth();
-    if (session?.idToken) return redirectToIDP(session?.idToken);
-    return handleEmptyToken();
+    if (session?.idToken) return redirectToIDP(request, session?.idToken);
+    return handleEmptyToken(request);
   } catch (error) {
     logError('Error during logout', error);
-    return NextResponse.redirect(LOGIN_PAGE_URL);
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 }

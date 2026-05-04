@@ -6,7 +6,6 @@ import { type UserAndContext } from './types';
 import { dbGetUserAndFederalStateByUserId } from '@shared/db/functions/school';
 import { FederalStateSelectModel } from '@shared/db/schema';
 import { FederalStateModel } from '@shared/federal-states/types';
-import { LOGOUT_URL } from '@/app/api/auth/const';
 import { getSafeCallbackUrl } from './callback-url';
 
 export { getSafeCallbackUrl };
@@ -54,7 +53,7 @@ export async function getUser(): Promise<UserAndContext> {
   const session = await getValidSession();
 
   if (session.user === undefined) {
-    redirect(LOGOUT_URL.toString());
+    redirect('/api/auth/logout');
   }
 
   return session.user;
