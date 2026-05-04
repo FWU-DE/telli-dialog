@@ -20,7 +20,7 @@ export function constructIonosImageGenerationFn(llmModel: AiModel): ImageGenerat
       model,
       prompt,
       n: 1,
-      size: '1024x1024',
+      size: '1024*1024',
       response_format: 'b64_json',
     });
 
