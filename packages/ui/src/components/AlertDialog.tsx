@@ -167,6 +167,83 @@ function AlertDialogCancel({
   );
 }
 
+type ConfirmAlertDialogVariant = React.ComponentProps<typeof Button>['variant'];
+
+export type ConfirmAlertDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  confirmLabel: React.ReactNode;
+  cancelLabel: React.ReactNode;
+  confirmVariant?: ConfirmAlertDialogVariant;
+  onConfirm: () => void | Promise<void>;
+};
+
+/**
+ * Reusable confirmation dialog. Render once at a stable parent (e.g. a page
+ * or section component) and toggle via `open`. Designed to be triggered from
+ * places where embedding an AlertDialog directly is problematic — most
+ * notably inside Radix DropdownMenu items, where nesting another focus-trap
+ * primitive causes the menu to stay open after confirming.
+ *
+ * Pair with `useConfirmAlertDialog` for ergonomic open/handler wiring.
+ */
+function ConfirmAlertDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  confirmVariant = 'destructive',
+  onConfirm,
+}: ConfirmAlertDialogProps) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+        </AlertDialogHeader>
+        {description !== undefined && (
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        )}
+        <AlertDialogFooter>
+          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogAction variant={confirmVariant} onClick={() => onConfirm()}>
+            {confirmLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+export type UseConfirmAlertDialogResult = {
+  dialogProps: Pick<ConfirmAlertDialogProps, 'open' | 'onOpenChange' | 'onConfirm'>;
+  confirm: (onConfirm: () => void | Promise<void>) => void;
+};
+
+function useConfirmAlertDialog(): UseConfirmAlertDialogResult {
+  const [open, setOpen] = React.useState(false);
+  const onConfirmRef = React.useRef<() => void | Promise<void>>(() => {});
+
+  const confirm = React.useCallback((onConfirm: () => void | Promise<void>) => {
+    onConfirmRef.current = onConfirm;
+    setOpen(true);
+  }, []);
+
+  const handleConfirm = React.useCallback(() => {
+    void onConfirmRef.current();
+    setOpen(false);
+  }, []);
+
+  return {
+    dialogProps: { open, onOpenChange: setOpen, onConfirm: handleConfirm },
+    confirm,
+  };
+}
+
 export {
   AlertDialog,
   AlertDialogAction,
@@ -180,4 +257,6 @@ export {
   AlertDialogPortal,
   AlertDialogTitle,
   AlertDialogTrigger,
+  ConfirmAlertDialog,
+  useConfirmAlertDialog,
 };
