@@ -32,7 +32,7 @@ import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
-import { searchWeb } from './websearch';
+import { searchWeb, isWebSearchNeeded } from './websearch';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -141,8 +141,13 @@ export async function sendChatMessage({
     federalStateId: user.federalState.id,
   });
 
-  // Web search
-  const webSearchResults = await searchWeb(userMessage.content);
+  // Web search (only if the auxiliary LLM determines it is needed)
+  const needsWebSearch = await isWebSearchNeeded({
+    query: userMessage.content,
+    modelId: auxiliaryModel.id,
+    apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
+  });
+  const webSearchResults = needsWebSearch ? await searchWeb(userMessage.content) : [];
 
   // Save user message to DB
   await dbInsertChatContent({
