@@ -29,7 +29,11 @@ export function CreateNewLearningScenarioButton() {
   }
 
   return (
-    <Button type="button" onClick={handleNewLearningScenario}>
+    <Button
+      type="button"
+      onClick={handleNewLearningScenario}
+      data-testid="learning-scenario-create-button"
+    >
       <PlusIcon className="size-5" />
       {t('form.button-create')}
     </Button>

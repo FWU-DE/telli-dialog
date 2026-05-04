@@ -99,9 +99,6 @@ test('teacher can delete character with initial message', async ({ page }) => {
 
   await deleteCharacter(page, characterName);
 
-  const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
-  await expect(deleteConfirmButton).toBeVisible();
-  await deleteConfirmButton.click();
   await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
   await expect(page.getByRole('heading', { name: characterName }).first()).not.toBeVisible();
 });

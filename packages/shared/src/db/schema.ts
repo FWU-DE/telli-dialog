@@ -377,7 +377,6 @@ export const characterTable = pgTable(
     initialMessage: text('initial_message'),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
-    schoolId: text('school_id'),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
       .defaultNow()
@@ -390,7 +389,7 @@ export const characterTable = pgTable(
     isDeleted: boolean('is_deleted').notNull().default(false),
     originalCharacterId: uuid('original_character_id'),
   },
-  (table) => [index().on(table.userId), index().on(table.schoolId)],
+  (table) => [index().on(table.userId)],
 );
 
 export const characterSelectSchema = createSelectSchema(characterTable)
@@ -399,6 +398,7 @@ export const characterSelectSchema = createSelectSchema(characterTable)
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
+    ownerSchoolIds: z.array(z.string()),
   });
 export const characterInsertSchema = createInsertSchema(characterTable)
   .omit({
@@ -590,7 +590,6 @@ export const learningScenarioTable = pgTable(
       .notNull(),
     isDeleted: boolean('is_deleted').notNull().default(false),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
-    schoolId: text('school_id'),
     originalLearningScenarioId: uuid('original_learning_scenario_id'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
   },
@@ -603,6 +602,7 @@ export const learningScenarioSelectSchema = createSelectSchema(learningScenarioT
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
+    ownerSchoolIds: z.array(z.string()),
   });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
   .omit({
@@ -969,7 +969,6 @@ export const assistantTable = pgTable(
       .defaultNow()
       .$onUpdateFn(() => new Date())
       .notNull(),
-    schoolId: text('school_id'),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     pictureId: text('picture_id'),
@@ -986,13 +985,14 @@ export const assistantTable = pgTable(
     isDeleted: boolean('is_deleted').notNull().default(false),
     originalAssistantId: uuid('original_assistant_id'),
   },
-  (table) => [index().on(table.userId), index().on(table.schoolId)],
+  (table) => [index().on(table.userId)],
 );
 
 export const assistantSelectSchema = createSelectSchema(assistantTable).extend({
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   accessLevel: accessLevelSchema,
+  ownerSchoolIds: z.array(z.string()),
 });
 export const assistantInsertSchema = createInsertSchema(assistantTable)
   .omit({ id: true, createdAt: true, updatedAt: true })
@@ -1002,7 +1002,6 @@ export const assistantInsertSchema = createInsertSchema(assistantTable)
 export const assistantUpdateSchema = createUpdateSchema(assistantTable)
   .omit({
     userId: true,
-    schoolId: true,
     createdAt: true,
     updatedAt: true,
   })

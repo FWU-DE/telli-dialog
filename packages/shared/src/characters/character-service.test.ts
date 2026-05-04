@@ -5,8 +5,10 @@ import {
   deleteFileMappingAndEntity,
   downloadFileFromCharacter,
   fetchFileMappings,
+  getCharacterByAccessLevel,
   getCharacterForChatSession,
   getCharacterForEditView,
+  getCharactersByOverviewFilter,
   getSharedCharacter,
   linkFileToCharacter,
   shareCharacter,
@@ -16,9 +18,14 @@ import {
   uploadAvatarPictureForCharacter,
 } from './character-service';
 import {
+  dbGetAllAccessibleCharacters,
+  dbGetAllCharactersByUser,
   dbGetCharacterById,
   dbGetCharacterByIdOptionalShareData,
   dbGetCharacterByIdWithShareData,
+  dbGetCharactersByAssociatedSchools,
+  dbGetCharactersByUser,
+  dbGetGlobalCharacters,
   dbGetSharedCharacterConversations,
 } from '../db/functions/character';
 import { dbGetRelatedCharacterFiles } from '../db/functions/files';
@@ -35,13 +42,15 @@ import {
 
 vi.mock('../db/functions/character', () => ({
   dbGetSharedCharacterConversations: vi.fn(),
+  dbGetAllAccessibleCharacters: vi.fn(),
+  dbGetAllCharactersByUser: vi.fn(),
   dbGetCharacterById: vi.fn(),
   dbGetCharacterByIdAndUserId: vi.fn(),
   dbGetCharacterByIdOptionalShareData: vi.fn(),
   dbGetCharacterByIdWithShareData: vi.fn(),
-  dbDeleteCharacterByIdAndUserId: vi.fn(),
-  dbGetCharactersBySchoolId: vi.fn(),
-  dbGetCharactersByUserId: vi.fn(),
+  dbDeleteCharacterByIdAndUser: vi.fn(),
+  dbGetCharactersByAssociatedSchools: vi.fn(),
+  dbGetCharactersByUser: vi.fn(),
   dbGetGlobalCharacters: vi.fn(),
 }));
 vi.mock('../db/functions/files', () => ({
@@ -102,7 +111,6 @@ describe('character-service', () => {
           downloadFileFromCharacter({
             characterId: generateUUID(),
             fileId: generateUUID(),
-            schoolIds: [generateUUID()],
             user: mockUser(),
           }),
       },
@@ -125,7 +133,7 @@ describe('character-service', () => {
       await expect(
         uploadAvatarPictureForCharacter({
           characterId: generateUUID(),
-          userId: 'user-id',
+          user: { id: 'user-id' },
           croppedImageBlob: new Blob(),
         }),
       ).rejects.toThrow(NotFoundError);
@@ -170,7 +178,7 @@ describe('character-service', () => {
           deleteFileMappingAndEntity({
             characterId: generateUUID(),
             fileId: generateUUID(),
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
           }),
       },
       {
@@ -178,7 +186,7 @@ describe('character-service', () => {
         testFunction: () =>
           linkFileToCharacter({
             characterId: generateUUID(),
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
             fileId: generateUUID(),
           }),
       },
@@ -187,7 +195,7 @@ describe('character-service', () => {
         testFunction: () =>
           updateCharacter({
             id: generateUUID(),
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
             name: 'new-name',
           }),
       },
@@ -196,7 +204,7 @@ describe('character-service', () => {
         testFunction: () =>
           deleteCharacter({
             characterId: generateUUID(),
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
           }),
       },
       {
@@ -204,7 +212,7 @@ describe('character-service', () => {
         testFunction: () =>
           uploadAvatarPictureForCharacter({
             characterId: generateUUID(),
-            userId: 'different-user-id',
+            user: { id: 'different-user-id' },
             croppedImageBlob: new Blob(),
           }),
       },
@@ -231,7 +239,7 @@ describe('character-service', () => {
       await expect(
         updateCharacterAccessLevel({
           characterId: generateUUID(),
-          userId: userId,
+          user: { id: userId },
           accessLevel: 'global',
         }),
       ).rejects.toThrow(ForbiddenError);
@@ -251,7 +259,7 @@ describe('character-service', () => {
       await expect(
         updateCharacterAccessLevel({
           characterId: generateUUID(),
-          userId: 'different-user-id',
+          user: { id: 'different-user-id' },
           accessLevel: 'school',
         }),
       ).rejects.toThrow(ForbiddenError);
@@ -271,8 +279,7 @@ describe('character-service', () => {
       await expect(
         fetchFileMappings({
           characterId: generateUUID(),
-          userId: 'different-user-id',
-          schoolIds: ['school-id'],
+          user: mockUser(),
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -281,7 +288,6 @@ describe('character-service', () => {
       const userId = generateUUID();
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
-        schoolId: 'school-1',
         accessLevel: 'school',
       };
 
@@ -292,10 +298,34 @@ describe('character-service', () => {
       await expect(
         fetchFileMappings({
           characterId: generateUUID(),
-          userId: 'different-user-id',
-          schoolIds: ['different-school-id'],
+          user: mockUser(),
         }),
       ).rejects.toThrow(ForbiddenError);
+    });
+    it('should allow access when character access level is school and users share school - fetchFileMappings', async () => {
+      const characterId = generateUUID();
+      const ownerUserId = generateUUID();
+
+      const mockCharacter: Partial<CharacterSelectModel> = {
+        userId: ownerUserId,
+        accessLevel: 'school',
+        ownerSchoolIds: ['shared-school-id'],
+      };
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        mockCharacter as never,
+      );
+      (
+        dbGetRelatedCharacterFiles as MockedFunction<typeof dbGetRelatedCharacterFiles>
+      ).mockResolvedValue([]);
+
+      const viewerUser = { ...mockUser(), schoolIds: ['shared-school-id'] };
+      await expect(
+        fetchFileMappings({
+          characterId,
+          user: viewerUser,
+        }),
+      ).resolves.toEqual([]);
     });
   });
 
@@ -353,7 +383,6 @@ describe('character-service', () => {
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
         accessLevel: 'school',
-        schoolId: 'school-1',
       };
 
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
@@ -366,7 +395,6 @@ describe('character-service', () => {
           user: mockUser('teacher'),
           telliPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
-          schoolIds: ['different-school-id'],
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -387,7 +415,7 @@ describe('character-service', () => {
     });
   });
 
-  describe('shareCharacter – duplicate share', () => {
+  describe('shareCharacter - duplicate share', () => {
     const userId = generateUUID();
     const characterId = generateUUID();
     const user = { ...mockUser('teacher'), id: userId };
@@ -432,7 +460,6 @@ describe('character-service', () => {
 
   describe('createNewCharacter', () => {
     const federalStateId = generateUUID();
-    const schoolId = generateUUID();
     const templateId = generateUUID();
     const duplicateCharacterName = 'Copied Character';
 
@@ -457,7 +484,6 @@ describe('character-service', () => {
 
       const result = await createNewCharacter({
         federalStateId,
-        schoolId,
         templateId,
         user: mockUser('teacher'),
         duplicateCharacterName,
@@ -466,8 +492,7 @@ describe('character-service', () => {
       expect(copyCharacter).toHaveBeenCalledWith(
         templateId,
         'private',
-        expect.any(String),
-        schoolId,
+        expect.objectContaining({ id: expect.any(String) }),
         duplicateCharacterName,
       );
       expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
@@ -504,12 +529,11 @@ describe('character-service', () => {
 
       const result = await createNewCharacter({
         federalStateId,
-        schoolId,
         templateId,
         user: mockUser('teacher'),
       });
 
-      expect(result).toEqual(updatedCharacter);
+      expect(result).toEqual({ ...updatedCharacter, ownerSchoolIds: expect.any(Array) });
     });
   });
 
@@ -521,7 +545,7 @@ describe('character-service', () => {
           deleteFileMappingAndEntity({
             characterId: 'invalid-uuid',
             fileId: generateUUID(),
-            userId: 'user-id',
+            user: { id: 'user-id' },
           }),
       },
       {
@@ -529,8 +553,7 @@ describe('character-service', () => {
         testFunction: () =>
           fetchFileMappings({
             characterId: 'invalid-uuid',
-            userId: 'user-id',
-            schoolIds: ['school-id'],
+            user: mockUser(),
           }),
       },
       {
@@ -538,7 +561,7 @@ describe('character-service', () => {
         testFunction: () =>
           linkFileToCharacter({
             characterId: 'invalid-uuid',
-            userId: 'user-id',
+            user: { id: 'user-id' },
             fileId: generateUUID(),
           }),
       },
@@ -547,7 +570,7 @@ describe('character-service', () => {
         testFunction: () =>
           updateCharacter({
             id: 'invalid-uuid',
-            userId: 'user-id',
+            user: { id: 'user-id' },
             name: 'new-name',
           }),
       },
@@ -556,7 +579,7 @@ describe('character-service', () => {
         testFunction: () =>
           deleteCharacter({
             characterId: 'invalid-uuid',
-            userId: 'user-id',
+            user: { id: 'user-id' },
           }),
       },
       {
@@ -572,7 +595,7 @@ describe('character-service', () => {
         testFunction: () =>
           uploadAvatarPictureForCharacter({
             characterId: 'invalid-uuid',
-            userId: 'user-id',
+            user: { id: 'user-id' },
             croppedImageBlob: new Blob(),
           }),
       },
@@ -587,9 +610,6 @@ describe('character-service', () => {
   describe('Link sharing bypass scenarios', () => {
     const characterId = generateUUID();
     const ownerUserId = generateUUID();
-    const ownerSchoolId = generateUUID();
-    const differentUserId = generateUUID();
-    const differentSchoolId = generateUUID();
 
     describe('should allow access when hasLinkAccess is true - bypassing normal restrictions', () => {
       it.each([
@@ -605,7 +625,6 @@ describe('character-service', () => {
         const mockCharacter = {
           id: characterId,
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel,
           hasLinkAccess: true,
         };
@@ -617,8 +636,7 @@ describe('character-service', () => {
         // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getCharacterForChatSession({
           characterId,
-          userId: differentUserId,
-          schoolIds: [differentSchoolId],
+          user: mockUser(),
         });
 
         expect(result).toBe(mockCharacter);
@@ -637,7 +655,6 @@ describe('character-service', () => {
         const mockCharacter = {
           id: characterId,
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel,
           hasLinkAccess: true,
         };
@@ -661,13 +678,31 @@ describe('character-service', () => {
         // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getCharacterForEditView({
           characterId,
-          userId: differentUserId,
-          schoolIds: [differentSchoolId],
+          user: mockUser(),
         });
 
         expect(result.character).toBe(mockCharacter);
       });
+      it('getCharacterForChatSession - school character without link sharing but shared school', async () => {
+        const mockCharacter = {
+          id: characterId,
+          userId: ownerUserId,
+          accessLevel: 'school' as const,
+          hasLinkAccess: false,
+          ownerSchoolIds: ['shared-school-id'],
+        };
 
+        (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+          mockCharacter as never,
+        );
+
+        const result = await getCharacterForChatSession({
+          characterId,
+          user: { ...mockUser(), schoolIds: ['shared-school-id'] },
+        });
+
+        expect(result).toBe(mockCharacter);
+      });
       it.each([
         {
           accessLevel: 'private' as const,
@@ -680,7 +715,6 @@ describe('character-service', () => {
       ])('fetchFileMappings - $description', async ({ accessLevel }) => {
         const mockCharacter: Partial<CharacterSelectModel> = {
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel,
           hasLinkAccess: true,
         };
@@ -696,8 +730,7 @@ describe('character-service', () => {
         await expect(
           fetchFileMappings({
             characterId,
-            userId: differentUserId,
-            schoolIds: [differentSchoolId],
+            user: mockUser(),
           }),
         ).resolves.not.toThrow();
       });
@@ -708,7 +741,6 @@ describe('character-service', () => {
         const mockCharacter = {
           id: characterId,
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel: 'private' as const,
           hasLinkAccess: false,
         };
@@ -720,8 +752,7 @@ describe('character-service', () => {
         await expect(
           getCharacterForChatSession({
             characterId,
-            userId: differentUserId,
-            schoolIds: [differentSchoolId],
+            user: mockUser(),
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -730,7 +761,6 @@ describe('character-service', () => {
         const mockCharacter = {
           id: characterId,
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel: 'private' as const,
           hasLinkAccess: false,
         };
@@ -744,8 +774,7 @@ describe('character-service', () => {
         await expect(
           getCharacterForEditView({
             characterId,
-            userId: differentUserId,
-            schoolIds: [differentSchoolId],
+            user: mockUser(),
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -753,7 +782,6 @@ describe('character-service', () => {
       it('fetchFileMappings - private character without link sharing', async () => {
         const mockCharacter: Partial<CharacterSelectModel> = {
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel: 'private',
           hasLinkAccess: false,
         };
@@ -765,11 +793,84 @@ describe('character-service', () => {
         await expect(
           fetchFileMappings({
             characterId,
-            userId: differentUserId,
-            schoolIds: [differentSchoolId],
+            user: mockUser(),
           }),
         ).rejects.toThrow(ForbiddenError);
       });
+    });
+  });
+
+  describe('character discovery filters', () => {
+    const user = mockUser('teacher');
+    const characters = [{ id: generateUUID() } as CharacterSelectModel];
+
+    it.each([
+      {
+        accessLevel: 'global' as const,
+        expectedMock: dbGetGlobalCharacters,
+      },
+      {
+        accessLevel: 'school' as const,
+        expectedMock: dbGetCharactersByAssociatedSchools,
+      },
+      {
+        accessLevel: 'private' as const,
+        expectedMock: dbGetCharactersByUser,
+      },
+    ])(
+      'routes accessLevel=$accessLevel to the correct db function',
+      async ({ accessLevel, expectedMock }) => {
+        (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(
+          characters as never,
+        );
+
+        const result = await getCharacterByAccessLevel({ accessLevel, user });
+
+        expect(result).toEqual(characters);
+        expect(expectedMock).toHaveBeenCalledWith({ user });
+      },
+    );
+
+    it('returns an empty list for unsupported access levels', async () => {
+      const result = await getCharacterByAccessLevel({
+        accessLevel: 'invalid' as never,
+        user,
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('routes filter=all to dbGetAllAccessibleCharacters', async () => {
+      (
+        dbGetAllAccessibleCharacters as MockedFunction<typeof dbGetAllAccessibleCharacters>
+      ).mockResolvedValue(characters as never);
+
+      const result = await getCharactersByOverviewFilter({ filter: 'all', user });
+
+      expect(result).toEqual(characters);
+      expect(dbGetAllAccessibleCharacters).toHaveBeenCalledWith({ user });
+    });
+
+    it.each([
+      { filter: 'mine' as const, expectedMock: dbGetAllCharactersByUser },
+      { filter: 'official' as const, expectedMock: dbGetGlobalCharacters },
+      { filter: 'school' as const, expectedMock: dbGetCharactersByAssociatedSchools },
+    ])('routes filter=$filter to the correct db function', async ({ filter, expectedMock }) => {
+      (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(characters as never);
+
+      const result = await getCharactersByOverviewFilter({ filter, user });
+
+      expect(result).toEqual(characters);
+      expect(expectedMock).toHaveBeenCalledWith({ user });
+    });
+
+    it('returns an empty list for unsupported overview filters', async () => {
+      const result = await getCharactersByOverviewFilter({
+        filter: 'invalid' as never,
+        user,
+      });
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -801,7 +902,7 @@ describe('character-service', () => {
     it('should upload avatar, update db and return picturePath and signedUrl', async () => {
       const result = await uploadAvatarPictureForCharacter({
         characterId,
-        userId,
+        user: { id: userId },
         croppedImageBlob: new Blob(['data'], { type: 'image/png' }),
       });
 

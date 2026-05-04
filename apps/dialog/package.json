@@ -29,8 +29,8 @@
     "k6:run:cloud": "k6 cloud run -e LOADTEST_USERNAME=$LOADTEST_USERNAME -e LOADTEST_PASSWORD=$LOADTEST_PASSWORD -e LOADTEST_IDP_HINT=$LOADTEST_IDP_HINT -e LOADTEST_BASE_URL=$LOADTEST_BASE_URL"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1036.0",
-    "@aws-sdk/s3-request-presigner": "3.1036.0",
+    "@aws-sdk/client-s3": "3.1037.0",
+    "@aws-sdk/s3-request-presigner": "3.1037.0",
     "@deutschlandgpt/core": "0.1.5",
     "@hookform/resolvers": "5.2.2",
     "@langchain/textsplitters": "1.0.1",
@@ -45,7 +45,7 @@
     "@radix-ui/react-tooltip": "1.2.8",
     "@sentry/nextjs": "10.50.0",
     "@t3-oss/env-nextjs": "0.13.11",
-    "@tanstack/react-query": "5.100.1",
+    "@tanstack/react-query": "5.100.5",
     "@tanstack/react-virtual": "3.13.24",
     "@telli/ai-core": "workspace:*",
     "@telli/shared": "workspace:*",
@@ -78,7 +78,7 @@
     "rabbitmq-client": "5.0.8",
     "react": "19.2.5",
     "react-dom": "19.2.5",
-    "react-hook-form": "7.73.1",
+    "react-hook-form": "7.74.0",
     "react-image-crop": "11.0.10",
     "react-markdown": "10.1.0",
     "react-syntax-highlighter": "16.1.1",
@@ -94,7 +94,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.11.2",
-    "@dotenvx/dotenvx": "1.62.0",
+    "@dotenvx/dotenvx": "1.63.0",
     "@eslint/eslintrc": "3.3.5",
     "@playwright/test": "1.59.1",
     "@tailwindcss/postcss": "4.2.4",
