@@ -225,15 +225,18 @@ export function generateMessageFileName({
   conversationName,
   gptName,
   createdAt,
+  role,
 }: {
   conversationName: string | null;
   gptName: string;
   createdAt: Date;
+  role: ConversationMessageModel['role'];
 }) {
   const formattedDate = createdAt.toISOString().split('T')[0];
   const safeConversationName = getSafeConversationName(conversationName);
+  const messageType = role === 'assistant' ? 'Antwort' : 'Nachricht';
 
-  return `${formattedDate} ${gptName} Antwort aus ${safeConversationName}.docx`;
+  return `${formattedDate} ${gptName} ${messageType} aus ${safeConversationName}.docx`;
 }
 
 function getSafeConversationName(conversationName: string | null) {
