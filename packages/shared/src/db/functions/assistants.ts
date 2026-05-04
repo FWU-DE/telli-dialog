@@ -87,9 +87,7 @@ export async function dbGetGptsByAssociatedSchools({
 }: {
   user: Pick<UserModel, 'schoolIds'>;
 }): Promise<AssistantSelectModel[]> {
-  const requesterSchoolIds = user.schoolIds ?? [];
-
-  if (requesterSchoolIds.length === 0) {
+  if (user.schoolIds.length === 0) {
     return [];
   }
 
@@ -97,7 +95,7 @@ export async function dbGetGptsByAssociatedSchools({
     .where(
       and(
         eq(assistantTable.accessLevel, 'school'),
-        arrayOverlaps(userTable.schoolIds, requesterSchoolIds),
+        arrayOverlaps(userTable.schoolIds, user.schoolIds),
       ),
     )
     .orderBy(desc(assistantTable.createdAt));
@@ -120,8 +118,6 @@ export async function dbGetAssistantByIdOrAssociatedSchool({
   assistantId: string;
   user: Pick<UserModel, 'id' | 'schoolIds'>;
 }) {
-  const requesterSchoolIds = user.schoolIds ?? [];
-
   const [assistant] = await baseAssistantQuery().where(
     or(
       and(
@@ -129,11 +125,11 @@ export async function dbGetAssistantByIdOrAssociatedSchool({
         eq(assistantTable.userId, user.id),
         eq(assistantTable.accessLevel, 'private'),
       ),
-      requesterSchoolIds.length > 0
+      user.schoolIds.length > 0
         ? and(
             eq(assistantTable.id, assistantId),
             eq(assistantTable.accessLevel, 'school'),
-            arrayOverlaps(userTable.schoolIds, requesterSchoolIds),
+            arrayOverlaps(userTable.schoolIds, user.schoolIds),
           )
         : undefined,
       eq(assistantTable.accessLevel, 'global'),

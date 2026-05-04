@@ -257,8 +257,7 @@ export async function dbGetCharactersByAssociatedSchools({
 }: {
   user: Pick<UserModel, 'id' | 'schoolIds'>;
 }): Promise<CharacterOptionalShareDataModel[]> {
-  const schoolIds = user.schoolIds ?? [];
-  if (schoolIds.length === 0) {
+  if (user.schoolIds.length === 0) {
     return [];
   }
 
@@ -266,7 +265,10 @@ export async function dbGetCharactersByAssociatedSchools({
   const characters = await baseCharacterWithShareQuery(activeShare)
     .leftJoin(activeShare, eq(activeShare.characterId, characterTable.id))
     .where(
-      and(arrayOverlaps(userTable.schoolIds, schoolIds), eq(characterTable.accessLevel, 'school')),
+      and(
+        arrayOverlaps(userTable.schoolIds, user.schoolIds),
+        eq(characterTable.accessLevel, 'school'),
+      ),
     )
     .orderBy(desc(characterTable.createdAt));
 
