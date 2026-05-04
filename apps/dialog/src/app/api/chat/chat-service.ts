@@ -141,15 +141,16 @@ export async function sendChatMessage({
     federalStateId: user.federalState.id,
   });
 
-  // Web search (only if the auxiliary LLM determines it is needed)
-  const needsWebSearch = await isWebSearchNeeded({
-    query: userMessage.content,
-    modelId: auxiliaryModel.id,
-    apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
-  });
-  const webSearchResults = needsWebSearch
-    ? await searchWeb(userMessage.content, user.federalState.featureToggles?.isWebSearchEnabled)
-    : [];
+  // Web search
+  const isWebSearchEnabled = user.federalState.featureToggles?.isWebSearchEnabled ?? false;
+  const needsWebSearch =
+    isWebSearchEnabled &&
+    (await isWebSearchNeeded({
+      query: userMessage.content,
+      modelId: auxiliaryModel.id,
+      apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
+    }));
+  const webSearchResults = needsWebSearch ? await searchWeb(userMessage.content) : [];
 
   // Save user message to DB
   await dbInsertChatContent({

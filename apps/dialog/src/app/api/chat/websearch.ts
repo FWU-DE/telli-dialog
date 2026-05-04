@@ -55,14 +55,10 @@ Antworte "nein", wenn die Frage:
  * Search results can be used in the rag context of the system prompt.
  *
  * @param query The search query string.
- * @param isWebSearchEnabled Flag indicating if web search is enabled for the user's federal state.
  * @returns An array of text search results from the Linkup API.
  */
-export async function searchWeb(
-  query: string,
-  isWebSearchEnabled: boolean | undefined,
-): Promise<TextSearchResult[]> {
-  if (!isWebSearchEnabled || !env.linkupApiKey) {
+export async function searchWeb(query: string): Promise<TextSearchResult[]> {
+  if (!env.linkupApiKey) {
     return [];
   }
 
