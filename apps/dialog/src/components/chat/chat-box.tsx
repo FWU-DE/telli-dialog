@@ -19,6 +19,7 @@ import {
   WebSearchSourcesPanel,
   useWebSearchSourcesDisclosure,
 } from './sources/web-search-sources';
+import DownloadConversationMessageButton from './download-conversation-message-button';
 
 // Re-export for consumers
 export type { PendingFileModel };

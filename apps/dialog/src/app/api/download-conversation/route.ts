@@ -73,6 +73,7 @@ export async function GET(req: NextRequest) {
         conversationName: conversation.name,
         gptName,
         createdAt: message.createdAt,
+        role: message.role, // Hinzufügen des fehlenden role-Properties
       });
     }
 
