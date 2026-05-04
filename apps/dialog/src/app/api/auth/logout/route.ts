@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { logError, logInfo, logWarning } from '@shared/logging';
 import { NextRequest, NextResponse } from 'next/server';
-import { VIDIS_LOGOUT_URL } from '@/auth/providers/vidis';
+import { VIDIS_LOGOUT_URL } from '@/auth/providers/vidis-provider';
 
 function handleEmptyToken(request: NextRequest) {
   logWarning('No valid token found, redirecting to logout-callback url');

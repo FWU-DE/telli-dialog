@@ -37,6 +37,7 @@ export default function EntityCard({
     >
       <Link
         href={href}
+        prefetch={false}
         aria-label={name}
         data-card-link
         className="flex items-center gap-4 grow min-w-0 p-4 outline-none"
@@ -79,7 +80,7 @@ export default function EntityCard({
               size="icon-round"
               className="mx-4"
             >
-              <Link href={chatHref} aria-label={tCommon('new-chat')}>
+              <Link href={chatHref} prefetch={false} aria-label={tCommon('new-chat')}>
                 <ChatTextIcon aria-hidden="true" className="size-6   text-primary" />
               </Link>
             </Button>

@@ -8,6 +8,7 @@ import { Session } from 'next-auth';
 import { SessionProvider } from 'next-auth/react';
 import { ThemeProvider as NextThemeProvider } from '@ui/components/theme-provider';
 import { TooltipProvider } from '@ui/components/Tooltip';
+import SessionClearer from '@/auth/SessionClearer';
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ export default function ClientProvider({
           >
             <ThemeProvider designConfiguration={designConfiguration}>
               <SessionProvider session={session} refetchInterval={60} refetchOnWindowFocus>
+                <SessionClearer />
                 {children}
               </SessionProvider>
             </ThemeProvider>

@@ -1,5 +1,5 @@
 import { ForbiddenError } from '@shared/error';
-import { AccessLevel, UserSchoolRole } from '@shared/db/schema';
+import { AccessLevel, UserRole } from '@shared/db/schema';
 import { UserModel } from './user-model';
 
 type AuthorizedItem = {
@@ -46,7 +46,7 @@ export function verifyWriteAccess<T extends AuthorizedItem>({
   throw new ForbiddenError('Not authorized for write access');
 }
 
-export function requireTeacherRole(userRole: UserSchoolRole) {
+export function requireTeacherRole(userRole: UserRole) {
   // allow teacher role
   if (userRole === 'teacher') return;
 
