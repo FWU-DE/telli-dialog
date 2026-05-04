@@ -1,3 +1,5 @@
+'use client';
+
 import useBreakpoints from '../hooks/use-breakpoints';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
@@ -52,6 +54,7 @@ export function SharedChatHeader({
           size="icon-round"
           className="text-primary"
           onClick={openDeleteConfirm}
+          data-testid="custom-chat-delete-button"
         >
           <TrashSimpleIcon className="size-5 text-primary" />
         </Button>
@@ -94,7 +97,11 @@ export function SharedChatHeader({
             />
           }
           deleteButtonJSX={
-            <Button variant="ghost" onClick={openDeleteConfirm}>
+            <Button
+              variant="ghost"
+              onClick={openDeleteConfirm}
+              data-testid="custom-chat-delete-button"
+            >
               <TrashSimpleIcon className="size-5 text-primary" />
               {tCommon('delete')}
             </Button>

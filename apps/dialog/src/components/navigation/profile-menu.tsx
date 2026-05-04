@@ -123,6 +123,7 @@ export function ThreeDotsProfileMenu({
         <Button
           variant="ghost"
           size="icon-round"
+          type="button"
           aria-label="More actions"
           title="More actions"
           className="text-primary"

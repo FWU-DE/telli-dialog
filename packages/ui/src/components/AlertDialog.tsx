@@ -233,9 +233,13 @@ function useConfirmAlertDialog(): UseConfirmAlertDialogResult {
     setOpen(true);
   }, []);
 
-  const handleConfirm = React.useCallback(() => {
-    void onConfirmRef.current();
-    setOpen(false);
+  const handleConfirm = React.useCallback(async () => {
+    try {
+      await onConfirmRef.current();
+      setOpen(false);
+    } catch {
+      // Keep the dialog open when confirmation fails.
+    }
   }, []);
 
   return {
