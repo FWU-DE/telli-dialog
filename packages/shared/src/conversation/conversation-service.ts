@@ -3,6 +3,7 @@ import {
   dbGetConversationMessageById,
   dbGetConversationMessages,
   dbGetConversations,
+  dbGetPrecedingUserMessage,
   dbUpdateConversationTitle,
 } from '@shared/db/functions/chat';
 import {
@@ -143,41 +144,23 @@ export async function getConversationMessageForExport({
     throw new NotFoundError('Conversation message not found');
   }
 
-  const conversationMessages = await getConversationMessages({ conversationId, userId });
-  const messages = getMessagesForConversationMessageExport({
-    conversationMessages,
-    message,
-  });
+  let messages: ConversationMessageModel[];
+  if (message.role === 'assistant') {
+    const precedingUserMessage = await dbGetPrecedingUserMessage({
+      conversationId,
+      userId,
+      beforeOrderNumber: message.orderNumber,
+    });
+    messages = precedingUserMessage ? [precedingUserMessage, message] : [message];
+  } else {
+    messages = [message];
+  }
 
   return {
     conversation,
     message,
     messages,
   };
-}
-
-export function getMessagesForConversationMessageExport({
-  conversationMessages,
-  message,
-}: {
-  conversationMessages: ConversationMessageModel[];
-  message: ConversationMessageModel;
-}) {
-  const messageIndex = conversationMessages.findIndex(
-    (conversationMessage) => conversationMessage.id === message.id,
-  );
-
-  if (message.role !== 'assistant' || messageIndex <= 0) {
-    return [message];
-  }
-
-  return [
-    ...conversationMessages
-      .slice(0, messageIndex)
-      .filter((conversationMessage) => conversationMessage.role === 'user')
-      .slice(-1),
-    message,
-  ];
 }
 
 /**

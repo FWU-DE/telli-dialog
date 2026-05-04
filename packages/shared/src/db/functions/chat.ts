@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, isNull, lt } from 'drizzle-orm';
 import { db } from '..';
 import { conversationMessageTable, conversationTable } from '../schema';
 import { ConversationMessageModel, InsertConversationMessageModel } from '../types';
@@ -135,6 +135,34 @@ export async function dbUpdateConversationTitle({
     .returning();
 
   return updatedRow;
+}
+
+export async function dbGetPrecedingUserMessage({
+  userId,
+  conversationId,
+  beforeOrderNumber,
+}: {
+  userId: string;
+  conversationId: string;
+  beforeOrderNumber: number;
+}): Promise<ConversationMessageModel | undefined> {
+  const [message] = await db
+    .select()
+    .from(conversationMessageTable)
+    .innerJoin(conversationTable, eq(conversationMessageTable.conversationId, conversationTable.id))
+    .where(
+      and(
+        eq(conversationMessageTable.conversationId, conversationId),
+        eq(conversationTable.userId, userId),
+        eq(conversationMessageTable.role, 'user'),
+        lt(conversationMessageTable.orderNumber, beforeOrderNumber),
+        isNull(conversationMessageTable.deletedAt),
+      ),
+    )
+    .orderBy(desc(conversationMessageTable.orderNumber), desc(conversationMessageTable.createdAt))
+    .limit(1);
+
+  return message?.conversation_message;
 }
 
 export async function dbDeleteConversation(conversationId: string) {
