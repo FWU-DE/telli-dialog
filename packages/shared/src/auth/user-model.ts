@@ -1,4 +1,4 @@
-import { userSchoolRoleSchema, userSelectSchema } from '@shared/db/schema';
+import { userRoleSchema, userSelectSchema } from '@shared/db/schema';
 import z from 'zod';
 
 // Because of data privacy, personal data is omitted
@@ -9,7 +9,8 @@ export const userSchema = userSelectSchema
     email: true,
   })
   .extend({
-    userRole: userSchoolRoleSchema,
+    federalStateId: z.string(),
+    userRole: userRoleSchema,
   });
 
 export type UserModel = z.infer<typeof userSchema>;

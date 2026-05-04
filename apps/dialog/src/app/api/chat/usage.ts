@@ -28,15 +28,11 @@ export async function sharedChatHasReachedTelliPointsLimit({
   user: UserAndContext | undefined;
   sharedChat: LearningScenarioWithShareDataModel;
 }) {
-  if (user === undefined || user.school === undefined || user.federalState === undefined) {
+  if (user === undefined || user.federalState === undefined) {
     return true;
   }
 
   if (sharedChatHasExpired(sharedChat)) {
-    return true;
-  }
-
-  if (sharedChat.startedAt === null || sharedChat.maxUsageTimeLimit === null) {
     return true;
   }
 
@@ -47,8 +43,7 @@ export async function sharedChatHasReachedTelliPointsLimit({
   });
 
   if (
-    user.school.userRole === 'teacher' &&
-    sharedChat.telliPointsLimit !== null &&
+    user.userRole === 'teacher' &&
     sharedChatUsageInCent <
       (await calculateSharedChatLimitInCent(user, sharedChat.telliPointsLimit))
   ) {
@@ -65,15 +60,11 @@ export async function sharedCharacterChatHasReachedTelliPointsLimit({
   user: UserAndContext | undefined;
   character: CharacterWithShareDataModel;
 }) {
-  if (user === undefined || user.school === undefined || user.federalState === undefined) {
+  if (user === undefined || user.federalState === undefined) {
     return true;
   }
 
   if (sharedChatHasExpired(character)) {
-    return true;
-  }
-
-  if (character.startedAt === null || character.maxUsageTimeLimit === null) {
     return true;
   }
 
@@ -84,8 +75,7 @@ export async function sharedCharacterChatHasReachedTelliPointsLimit({
   });
 
   if (
-    user.school.userRole === 'teacher' &&
-    character.telliPointsLimit !== null &&
+    user.userRole === 'teacher' &&
     characterUsageInCent < (await calculateSharedChatLimitInCent(user, character.telliPointsLimit))
   ) {
     return false;
@@ -97,13 +87,19 @@ export async function sharedCharacterChatHasReachedTelliPointsLimit({
 export function sharedChatHasExpired({
   startedAt,
   maxUsageTimeLimit,
+  manuallyStoppedAt,
 }: {
-  startedAt: Date | null;
-  maxUsageTimeLimit: number | null;
+  startedAt: Date;
+  maxUsageTimeLimit: number;
+  manuallyStoppedAt?: Date | null;
 }) {
-  const timeLeft = calculateTimeLeft({ startedAt, maxUsageTimeLimit });
+  // Manually stopped by the user
+  if (manuallyStoppedAt) {
+    return true;
+  }
 
-  if (startedAt === null || timeLeft < 1 || maxUsageTimeLimit === null) {
+  const timeLeft = calculateTimeLeft({ startedAt, maxUsageTimeLimit });
+  if (timeLeft < 1) {
     // the shared chat is no viable anymore so the limit is reached
     return true;
   }
@@ -115,7 +111,7 @@ export async function userHasReachedTelliPointsLimit({
 }: {
   user: UserAndContext | undefined;
 }) {
-  if (user === undefined || user.school === undefined || user.federalState === undefined) {
+  if (user === undefined || user.federalState === undefined) {
     return false;
   }
 

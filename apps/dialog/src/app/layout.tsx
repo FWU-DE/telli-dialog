@@ -24,7 +24,7 @@ const barlow = Barlow({
 
 export async function generateMetadata(): Promise<Metadata> {
   const maybeUser = await getMaybeUser();
-  const [, federalState] = await dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId);
+  const [, federalState] = await dbGetFederalStateByIdWithResult(maybeUser?.federalStateId);
   const favicon = federalState?.pictureUrls?.favicon;
   const faviconPreSignedUrl = favicon
     ? await getReadOnlySignedUrl({ key: favicon, options: { expiresIn: SEVEN_DAYS } })
@@ -50,7 +50,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   const fullSession =
     maybeUser !== null && maybeSession !== null ? { ...maybeSession, user: maybeUser } : null;
-  const [, federalState] = await dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId);
+  const [, federalState] = await dbGetFederalStateByIdWithResult(maybeUser?.federalStateId);
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
 
   const { inlineScript } = buildPublicConfig();

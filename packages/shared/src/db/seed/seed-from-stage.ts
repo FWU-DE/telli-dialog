@@ -3,11 +3,9 @@ import {
   federalStateTable,
   llmModelTable,
   federalStateLlmModelMappingTable,
-  schoolTable,
   FederalStateSelectModel,
   LlmModelSelectModel,
   FederalStateLlmModelMappingSelectModel,
-  SchoolSelectModel,
 } from '../schema';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
@@ -38,10 +36,6 @@ async function getFederalStates(): Promise<FederalStateSelectModel[]> {
   return await stageDb.select().from(federalStateTable);
 }
 
-async function getSchools(): Promise<SchoolSelectModel[]> {
-  return await stageDb.select().from(schoolTable);
-}
-
 async function getLlmModels(): Promise<LlmModelSelectModel[]> {
   return await stageDb.select().from(llmModelTable);
 }
@@ -59,11 +53,6 @@ async function seedDatabase() {
     await localDb
       .insert(federalStateTable)
       .values(await getFederalStates())
-      .onConflictDoNothing();
-
-    await localDb
-      .insert(schoolTable)
-      .values(await getSchools())
       .onConflictDoNothing();
 
     await localDb

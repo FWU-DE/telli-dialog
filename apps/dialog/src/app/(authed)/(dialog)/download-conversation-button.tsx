@@ -6,12 +6,14 @@ import Spinner from '@/components/icons/spinner';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { Button } from '@ui/components/Button';
+import { cn } from '@/utils/tailwind';
 
 type DownloadConversationButtonProps = {
   conversationId: string;
   characterName?: string;
   disabled: boolean;
   showText?: boolean;
+  className?: string;
 };
 
 export default function DownloadConversationButton({
@@ -19,6 +21,7 @@ export default function DownloadConversationButton({
   characterName,
   disabled = true,
   showText = false,
+  className,
 }: DownloadConversationButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const toast = useToast();
@@ -67,12 +70,12 @@ export default function DownloadConversationButton({
     <Button
       variant="ghost"
       size="icon-round"
-      className="text-primary"
+      className={cn('text-primary', className)}
       title={t('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}
     >
-      {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-8" />}
+      {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-5" />}
       {showText && tCommon('conversation-download')}
     </Button>
   );

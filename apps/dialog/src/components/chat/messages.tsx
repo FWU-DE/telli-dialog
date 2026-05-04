@@ -48,7 +48,7 @@ export function Messages({
           conversationId={conversationId}
           exportGptName={exportGptName}
           assistantIcon={assistantIcon}
-          websources={webSourceMapping?.get(message.id)}
+          websources={message.role === 'user' ? webSourceMapping?.get(message.id) : undefined}
           status={status}
         >
           {message}

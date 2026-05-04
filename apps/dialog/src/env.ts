@@ -9,7 +9,6 @@ export const env = createEnv({
     authSecret: z.string(),
     databaseUrl: z.string(),
     encryptionKey: z.string(),
-    nextauthUrl: z.url(),
     otcBucketName: z.string(),
     otcSecretAccessKey: z.string(),
     otcAccessKeyId: z.string(),
@@ -19,6 +18,7 @@ export const env = createEnv({
     vidisClientSecret: z.string(),
     vidisIssuerUri: z.string(),
     crawl4AIUrl: z.url().default('http://localhost:11235'),
+    linkupApiKey: z.string().optional(),
   },
   runtimeEnv: {
     apiKey: process.env.API_KEY,
@@ -26,7 +26,6 @@ export const env = createEnv({
     authSecret: process.env.AUTH_SECRET,
     databaseUrl: process.env.DATABASE_URL,
     encryptionKey: process.env.ENCRYPTION_KEY,
-    nextauthUrl: process.env.NEXTAUTH_URL,
     otcBucketName: process.env.OTC_BUCKET_NAME,
     otcSecretAccessKey: process.env.OTC_SECRET_ACCESS_KEY,
     otcAccessKeyId: process.env.OTC_ACCESS_KEY_ID,
@@ -36,5 +35,6 @@ export const env = createEnv({
     vidisClientSecret: process.env.VIDIS_CLIENT_SECRET,
     vidisIssuerUri: process.env.VIDIS_ISSUER_URI,
     crawl4AIUrl: process.env.CRAWL4AI_URL,
+    linkupApiKey: process.env.LINKUP_API_KEY,
   },
 });

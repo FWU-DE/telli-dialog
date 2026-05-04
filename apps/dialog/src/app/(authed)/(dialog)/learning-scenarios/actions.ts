@@ -16,12 +16,11 @@ export async function deleteLearningScenarioAction({ id }: { id: string }) {
 }
 
 export async function createNewLearningScenarioAction({ modelId }: { modelId: string }) {
-  const { user, school } = await requireAuth();
+  const { user } = await requireAuth();
 
   return runServerAction(createNewLearningScenario)({
     modelId,
     user,
-    schoolId: school.id,
   });
 }
 
@@ -32,12 +31,11 @@ export async function createNewLearningScenarioFromTemplateAction({
   templateId: string;
   duplicateLearningScenarioName?: string;
 }) {
-  const { user, school } = await requireAuth();
+  const { user } = await requireAuth();
 
   return runServerAction(createNewLearningScenarioFromTemplate)({
     originalLearningScenarioId: templateId,
     user,
-    schoolId: school.id,
     duplicateLearningScenarioName,
   });
 }
@@ -64,12 +62,11 @@ export async function downloadFileFromLearningScenarioAction({
   learningScenarioId: string;
   fileId: string;
 }) {
-  const { user, school } = await requireAuth();
+  const { user } = await requireAuth();
 
   return runServerAction(downloadFileFromLearningScenario)({
     learningScenarioId,
     fileId,
-    schoolId: school.id,
     user,
   });
 }

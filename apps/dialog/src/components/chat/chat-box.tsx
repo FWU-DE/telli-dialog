@@ -14,7 +14,11 @@ import { isImageFile } from '@/utils/files/generic';
 import { type UIMessage, type ChatStatus } from '@/types/chat';
 import { ReactNode } from 'react';
 import { WebsearchSource } from '@shared/db/types';
-import DownloadConversationMessageButton from './download-conversation-message-button';
+import {
+  WebSearchSourcesButton,
+  WebSearchSourcesPanel,
+  useWebSearchSourcesDisclosure,
+} from './sources/web-search-sources';
 
 // Re-export for consumers
 export type { PendingFileModel };
@@ -48,6 +52,12 @@ export function ChatBox({
 }) {
   const tCommon = useTranslations('common');
   const { isAtLeast } = useBreakpoints();
+  const {
+    isOpen: isAssistantSourcesOpen,
+    panelRef,
+    openOrScrollIntoView,
+    toggleOpen,
+  } = useWebSearchSourcesDisclosure();
 
   const userClassName =
     children.role === 'user'
@@ -61,12 +71,14 @@ export function ChatBox({
   const allFiles = dbFiles ?? pendingFiles;
   const hasFiles = allFiles !== undefined && allFiles.length > 0;
 
-  const urls = children.role === 'user' ? (parseHyperlinks(children.content) ?? []) : [];
-  const websearchSources = [...(websources ?? [])];
+  const parsedUrls = children.role === 'user' ? (parseHyperlinks(children.content) ?? []) : [];
+  const userWebsearchSources = children.role === 'user' ? [...(websources ?? [])] : [];
+  const assistantWebsearchSources =
+    children.role === 'assistant' ? (children.webSearchResults ?? []) : [];
 
-  for (const url of urls) {
-    if (websearchSources.find((source) => source.link === url) === undefined) {
-      websearchSources.push({ link: url });
+  for (const url of parsedUrls) {
+    if (userWebsearchSources.find((source) => source.link === url) === undefined) {
+      userWebsearchSources.push({ link: url });
     }
   }
 
@@ -101,13 +113,13 @@ export function ChatBox({
       </div>
     ) : null;
 
-  const maybeWebpageCard =
-    websearchSources.length > 0 && (!isLoading || !isLastNonUser) ? (
+  const maybeUserWebpageCard =
+    userWebsearchSources.length > 0 && (!isLoading || !isLastNonUser) ? (
       <div
         className="relative flex flex-wrap text-ellipsis gap-2 self-end mt-1 mb-2 w-[70%]"
         dir="rtl"
       >
-        {websearchSources?.map((source, sourceIndex) => {
+        {userWebsearchSources.map((source, sourceIndex) => {
           return (
             <Citation className="p-0" key={`user-link-${index}-${sourceIndex}`} source={source} />
           );
@@ -115,7 +127,23 @@ export function ChatBox({
       </div>
     ) : null;
 
-  const margin = allFiles !== undefined || websearchSources.length > 0 ? 'm-0 mt-4' : 'm-4';
+  const maybeAssistantSources =
+    assistantWebsearchSources.length > 0 ? (
+      <WebSearchSourcesPanel
+        sources={assistantWebsearchSources}
+        isOpen={isAssistantSourcesOpen}
+        onToggle={toggleOpen}
+        panelId={`assistant-web-sources-${children.id}`}
+        panelRef={panelRef}
+      />
+    ) : null;
+
+  const margin =
+    allFiles !== undefined ||
+    userWebsearchSources.length > 0 ||
+    assistantWebsearchSources.length > 0
+      ? 'm-0 mt-4'
+      : 'm-4';
 
   const maybeShowMessageIcons =
     isLastNonUser && status !== 'streaming' ? (
@@ -138,6 +166,12 @@ export function ChatBox({
             <ReloadIcon className="w-5 h-5" />
           </div>
         </button>
+        {assistantWebsearchSources.length > 0 && (
+          <WebSearchSourcesButton
+            panelId={`assistant-web-sources-${children.id}`}
+            onClick={openOrScrollIntoView}
+          />
+        )}
       </div>
     ) : null;
 
@@ -149,14 +183,20 @@ export function ChatBox({
         <div aria-label={`${children.role} message ${Math.floor(index / 2 + 1)}`}>
           <div className={cn('flex', isAtLeast.sm ? 'flex-row' : 'flex-col')}>
             {children.role === 'assistant' && assistantIcon}
-            <div className="flex flex-col items-start gap-2">
+            <div
+              className={cn(
+                'flex flex-col items-start gap-2',
+                children.role === 'assistant' && 'w-full',
+              )}
+            >
+              {maybeAssistantSources}
               {messageContent}
               {maybeShowMessageIcons}
             </div>
           </div>
         </div>
       </div>
-      {maybeWebpageCard}
+      {maybeUserWebpageCard}
       {maybeFileAttachment}
     </>
   );

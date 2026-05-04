@@ -6,7 +6,7 @@ import { initSwagger } from '@/swagger';
 import * as http from 'node:http';
 
 async function buildApp(opts?: FastifyHttpOptions<http.Server>) {
-  const app = fastify(opts);
+  const app = fastify({ trustProxy: true, ...opts });
 
   app.register(fastifyGracefulShutdown);
 

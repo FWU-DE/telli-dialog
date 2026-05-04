@@ -1,5 +1,4 @@
 import { auth } from '@/auth';
-import { SchoolSelectModel, schoolSelectSchema } from '@shared/db/schema';
 import { UserModel, userSchema } from '@shared/auth/user-model';
 import { FederalStateModel, federalStateSchema } from '@shared/federal-states/types';
 import { headers } from 'next/headers';
@@ -7,7 +6,6 @@ import { redirectToLogin } from './utils';
 
 export async function requireAuth(): Promise<{
   user: UserModel;
-  school: SchoolSelectModel;
   federalState: FederalStateModel;
 }> {
   const session = await auth();
@@ -17,11 +15,7 @@ export async function requireAuth(): Promise<{
     redirectToLogin(pathname);
   }
 
-  const user = userSchema.parse({ ...session.user, userRole: session.user?.school?.userRole });
-  const school = schoolSelectSchema.parse(session.user?.school);
-  const federalState = federalStateSchema.parse({
-    ...session.user?.federalState,
-    hasApiKeyAssigned: session.user?.hasApiKeyAssigned,
-  });
-  return { user: user, school: school, federalState: federalState };
+  const user = userSchema.parse(session.user);
+  const federalState = federalStateSchema.parse(session.user?.federalState);
+  return { user: user, federalState: federalState };
 }

@@ -21,5 +21,6 @@ export function convertMessageModelToMessage(
       role: message.role as 'user' | 'assistant' | 'system',
       content: message.content,
       createdAt: message.createdAt,
+      webSearchResults: message.webSearchResults ?? undefined,
     }));
 }

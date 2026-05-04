@@ -28,6 +28,7 @@ import { UserModel } from '@shared/auth/user-model';
 import { ChatHistory } from './chat-history';
 import Link from 'next/link';
 import { Button } from '@ui/components/Button';
+import { useState } from 'react';
 
 type AppSidebarProps = {
   federalState: FederalStateModel;
@@ -44,6 +45,7 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const { toggleSidebar, open } = useSidebar();
   const t = useTranslations('sidebar');
+  const [sidebarContentEl, setSidebarContentEl] = useState<HTMLDivElement | null>(null);
 
   return (
     <Sidebar>
@@ -65,7 +67,7 @@ export function AppSidebar({
             </Button>
           </div>
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent ref={setSidebarContentEl}>
           <SidebarGroup>
             <nav aria-label={t('aria.main-navigation')}>
               <SidebarMenu>
@@ -117,7 +119,7 @@ export function AppSidebar({
           </SidebarGroup>
 
           <SidebarGroup className="mt-4">
-            <ChatHistory />
+            <ChatHistory scrollContainer={sidebarContentEl} />
           </SidebarGroup>
         </SidebarContent>
       </div>

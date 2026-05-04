@@ -16,12 +16,12 @@ export async function createNewCharacterAction({
   templateId?: string;
   duplicateCharacterName?: string;
 }) {
-  const { user, school, federalState } = await requireAuth();
+  const { user, federalState } = await requireAuth();
 
+  // Todo: Will be implemented in TD-701
   return runServerAction(createNewCharacter)({
     federalStateId: federalState.id,
     modelId: modelId,
-    schoolId: school.id,
     user,
     templateId,
     duplicateCharacterName,
@@ -35,12 +35,11 @@ export async function downloadFileFromCharacterAction({
   characterId: string;
   fileId: string;
 }) {
-  const { user, school } = await requireAuth();
+  const { user } = await requireAuth();
 
   return runServerAction(downloadFileFromCharacter)({
     characterId,
     fileId,
-    schoolId: school.id,
     user,
   });
 }

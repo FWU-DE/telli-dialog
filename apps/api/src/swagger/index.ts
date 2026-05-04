@@ -14,7 +14,7 @@ export async function initSwagger(fastify: FastifyInstance) {
       },
       servers: [
         {
-          url: env.apiBaseUrl,
+          url: '/',
           description: env.apiName,
         },
       ],
@@ -28,7 +28,7 @@ export async function initSwagger(fastify: FastifyInstance) {
         },
       },
       externalDocs: {
-        url: env.apiBaseUrl,
+        url: '/',
         description: 'Find more info here',
       },
     },
@@ -41,10 +41,14 @@ export async function initSwagger(fastify: FastifyInstance) {
       deepLinking: false,
     },
     staticCSP: true,
-    transformSpecification: (swaggerObject) => {
+    transformSpecification: (swaggerObject, req) => {
       // load OpenApi document from relative location to prevent CSP issues
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       swaggerObject.servers[0].url = '/';
+      // Derive the API's public base URL from the incoming request.
+      // req.protocol and req.hostname are proxy-aware when trustProxy is enabled.
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      swaggerObject.externalDocs.url = `${req.protocol}://${req.hostname}`;
       return swaggerObject;
     },
   });

@@ -2,20 +2,17 @@ import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAssistantByUser } from '@shared/assistants/assistant-service';
 import { AssistantEdit } from './assistant-edit';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/assistants/editor/[assistantId]'>) {
   const { assistantId } = await props.params;
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user } = await requireAuth();
 
   const { assistant, fileMappings, pictureUrl } = await getAssistantByUser({
     assistantId: assistantId,
-    schoolId: school.id,
-    userId: user.id,
+    user,
   }).catch(handleErrorInServerComponent);
 
   const initialLinks = assistant.attachedLinks
@@ -23,7 +20,7 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
     .map((url) => ({ link: url }));
 
   return (
-    <DefaultPageLayout userAndContext={userAndContext}>
+    <DefaultPageLayout header={{ headerType: 'form' }}>
       <AssistantEdit
         assistant={assistant}
         relatedFiles={fileMappings}

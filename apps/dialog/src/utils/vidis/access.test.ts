@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { checkProductAccess } from './access';
 import { UserAndContext } from '@/auth/types';
-import { UserSelectModel, UserSchoolRole } from '@shared/db/schema';
+import { UserSelectModel, UserRole } from '@shared/db/schema';
 import { ObscuredFederalState } from '@/auth/utils';
 
 describe('checkProductAccess', () => {
@@ -24,16 +24,16 @@ describe('checkProductAccess', () => {
       isCustomGptEnabled: true,
       isSharedChatEnabled: true,
       isShareTemplateWithSchoolEnabled: true,
-      isNewUiDesignEnabled: true,
     },
     pictureUrls: null,
+    hasApiKeyAssigned: true,
   };
 
   const baseSchool = {
     id: 'school-1',
     createdAt: baseDate,
     federalStateId: 'DE-BY',
-    userRole: 'teacher' as UserSchoolRole,
+    userRole: 'teacher' as UserRole,
   };
 
   const baseUser = {
@@ -44,14 +44,15 @@ describe('checkProductAccess', () => {
     createdAt: new Date(),
     lastUsedModel: null,
     versionAcceptedConditions: null,
+    schoolIds: [baseSchool.id],
+    federalStateId: baseSchool.federalStateId,
+    userRole: baseSchool.userRole,
   } satisfies UserSelectModel;
 
   it('should allow access when all conditions are met', () => {
     const context: UserAndContext = {
       ...baseUser,
       federalState: baseFederalState,
-      school: baseSchool,
-      hasApiKeyAssigned: true,
     };
 
     const result = checkProductAccess({ ...context, hasCompletedTraining: true });
@@ -68,11 +69,7 @@ describe('checkProductAccess', () => {
           isStudentAccessEnabled: false,
         },
       },
-      school: {
-        ...baseSchool,
-        userRole: 'student',
-      },
-      hasApiKeyAssigned: true,
+      userRole: 'student',
     };
 
     const result = checkProductAccess({ ...context, hasCompletedTraining: true });
@@ -93,11 +90,7 @@ describe('checkProductAccess', () => {
           isStudentAccessEnabled: true,
         },
       },
-      school: {
-        ...baseSchool,
-        userRole: 'student',
-      },
-      hasApiKeyAssigned: true,
+      userRole: 'student',
     };
 
     const result = checkProductAccess({ ...context, hasCompletedTraining: true });
@@ -111,8 +104,6 @@ describe('checkProductAccess', () => {
         ...baseFederalState,
         mandatoryCertificationTeacher: true,
       },
-      school: baseSchool,
-      hasApiKeyAssigned: true,
     };
 
     const result = checkProductAccess({ ...context, hasCompletedTraining: false });
@@ -133,8 +124,6 @@ describe('checkProductAccess', () => {
         mandatoryCertificationTeacher: true,
         trainingLink,
       },
-      school: baseSchool,
-      hasApiKeyAssigned: true,
     };
 
     const result = checkProductAccess({ ...context, hasCompletedTraining: true });
@@ -156,11 +145,7 @@ describe('checkProductAccess', () => {
         },
         mandatoryCertificationTeacher: true,
       },
-      school: {
-        ...baseSchool,
-        userRole: 'student',
-      },
-      hasApiKeyAssigned: true,
+      userRole: 'student',
     };
 
     const result = checkProductAccess({ ...context, hasCompletedTraining: true });
@@ -181,11 +166,7 @@ describe('checkProductAccess', () => {
         },
         mandatoryCertificationTeacher: true,
       },
-      school: {
-        ...baseSchool,
-        userRole: 'student',
-      },
-      hasApiKeyAssigned: true,
+      userRole: 'student',
     };
 
     // We're testing the implementation detail that training is not checked for students
@@ -205,11 +186,7 @@ describe('checkProductAccess', () => {
       const context: UserAndContext = {
         ...baseUser,
         federalState: baseFederalState,
-        school: {
-          ...baseSchool,
-          userRole: role,
-        },
-        hasApiKeyAssigned: true,
+        userRole: role,
       };
 
       const result = checkProductAccess({ ...context, hasCompletedTraining: true });
@@ -235,11 +212,7 @@ describe('checkProductAccess', () => {
             isStudentAccessEnabled: state.studentAccess,
           },
         },
-        school: {
-          ...baseSchool,
-          userRole: 'student',
-        },
-        hasApiKeyAssigned: true,
+        userRole: 'student',
       };
 
       const result = checkProductAccess({ ...context, hasCompletedTraining: true });

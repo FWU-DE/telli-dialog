@@ -10,9 +10,7 @@ import { parseHyperlinks } from '@/utils/web-search/parsing';
 import Logo from '@/components/common/logo';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { requireAuth } from '@/auth/requireAuth';
-import { ChatHeaderBar } from '@/components/chat/header-bar';
 import { WebsearchSource } from '@shared/db/types';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
@@ -24,8 +22,11 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   const { conversationId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
 
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+  };
 
   const conversationObject = await dbGetConversationAndMessages({
     conversationId,
@@ -68,12 +69,14 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
       defaultLlmModelByCookie={currentModel}
       initialDownloadConversationEnabled={convertedMessages.length > 0}
     >
-      <ChatHeaderBar
-        chatId={conversation.id}
-        downloadConversationEnabled={convertedMessages.length > 0}
-        userAndContext={userAndContext}
-      />
-      <DefaultPageLayout>
+      <DefaultPageLayout
+        header={{
+          headerType: 'chat',
+          chatId: conversation.id,
+          downloadConversationEnabled: convertedMessages.length > 0,
+          userAndContext,
+        }}
+      >
         <Chat
           id={conversation.id}
           initialMessages={convertedMessages}

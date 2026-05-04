@@ -101,6 +101,8 @@ Only write tests when the user asks for them.
 
 ## Verification Commands
 
-- After making any file changes, run `pnpm format`, then `pnpm lint`, and then `pnpm test` from the repository root.
-- Treat formatting, lint, and test issues as blocking: fix problems when possible before finishing.
+- After making any file changes, run the `verify` task from `.vscode/tasks.json` which runs format, lint, check-types and test.
+- Alternatively, run `pnpm format`, then `pnpm lint`, `pnpm check-types`, and `pnpm test` individually from the repository root.
+- **Always check the exit code**: An exit code of 0 indicates success, while any non-zero exit code (1, 2, etc.) indicates an error. Do not rely solely on summary messages, as cached outputs may report "successful" even when a package has failed.
+- Treat formatting, lint, type checking, and test issues as blocking: fix problems when possible before finishing.
 - If verification cannot be run (for example, due to missing dependencies or environment limitations), clearly report that.

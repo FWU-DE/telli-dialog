@@ -248,12 +248,6 @@ export function FederalStateView(props: FederalStateViewProps) {
             description="Erlaubt die Nutzung der Bildgenerierungsfunktion."
             control={control}
           />
-          <FormFieldCheckbox
-            name="featureToggles.isNewUiDesignEnabled"
-            label="Neues UI Design aktivieren"
-            description="Erlaubt die Nutzung des neuen UI Designs."
-            control={control}
-          />
           <FormField
             name="designConfiguration"
             label="Design Konfiguration"

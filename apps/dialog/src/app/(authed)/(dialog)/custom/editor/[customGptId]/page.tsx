@@ -16,12 +16,11 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
   const { customGptId: assistantId } = await props.params;
   const { create } = parseSearchParams(searchParamsSchema, await props.searchParams);
 
-  const { user, school } = await requireAuth();
+  const { user } = await requireAuth();
 
   const { assistant } = await getAssistantByUser({
     assistantId,
-    schoolId: school.id,
-    userId: user.id,
+    user,
   }).catch(handleErrorInServerComponent);
 
   const readOnly = assistant.userId !== user.id;

@@ -172,7 +172,6 @@ export const defaultTemplates: Omit<CharacterInsertModel, 'modelId'>[] = [
     restrictions: 'Er soll nicht vom Thema abweichen.',
 
     gradeLevel: '',
-    schoolId: null,
     accessLevel: 'global',
     schoolType: '',
     pictureId: 'characters/_templates/Goethe_Static',
@@ -218,7 +217,6 @@ export const defaultLearningScenario: Omit<LearningScenarioInsertModel, 'modelId
     pictureId: 'shared-chats/_templates/AI-Lernszenario_Static',
 
     gradeLevel: '',
-    schoolId: null,
     schoolType: '',
     subject: '',
   },
