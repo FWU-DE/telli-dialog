@@ -4,7 +4,7 @@ import {
   WEBSEARCH_RESULT_CONTENT_LENGTH_LIMIT,
   WEBSEARCH_RESULTS_LIMIT,
 } from '@/configuration-text-inputs/const';
-import { logError, logWarning } from '@shared/logging';
+import { logError } from '@shared/logging';
 
 /**
  * Performs a web search using the Linkup API and returns text search results.
@@ -18,12 +18,7 @@ export async function searchWeb(
   query: string,
   isWebSearchEnabled: boolean | undefined,
 ): Promise<TextSearchResult[]> {
-  if (!isWebSearchEnabled) {
-    return [];
-  }
-
-  if (!env.linkupApiKey) {
-    logWarning('Web search is enabled but LINKUP_API_KEY is not set');
+  if (!isWebSearchEnabled || !env.linkupApiKey) {
     return [];
   }
 
