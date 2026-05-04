@@ -1,4 +1,3 @@
-import { LOGIN_PAGE_URL } from '@/app/(unauth)/login/const';
 import { logError } from '@shared/logging';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -13,7 +12,7 @@ const SECURE_SESSION_COOKIE_NAME = `__Secure-${SESSION_COOKIE_NAME}`; // Used wh
  */
 export async function GET(request: NextRequest) {
   try {
-    const response = NextResponse.redirect(LOGIN_PAGE_URL);
+    const response = NextResponse.redirect(new URL('/login', request.url));
     const cookieNames = request.cookies
       .getAll()
       .map((cookie) => cookie.name)
@@ -33,6 +32,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     logError('Error during logout-callback', error);
-    return NextResponse.redirect(LOGIN_PAGE_URL);
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 }

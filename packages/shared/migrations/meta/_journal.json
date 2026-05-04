@@ -463,6 +463,13 @@
       "when": 1777500996650,
       "tag": "0065_striped_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1777534269152,
+      "tag": "0066_living_mockingbird",
+      "breakpoints": true
     }
   ]
 }

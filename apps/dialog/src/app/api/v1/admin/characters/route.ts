@@ -2,7 +2,9 @@ import { handleErrorInRoute } from '@/error/handle-error-in-route';
 import { validateApiKeyByHeaders } from '@/utils/validation';
 import { getCharacters } from '@shared/characters/character-service';
 import { dbCreateCharacter } from '@shared/db/functions/character';
+import { dbGetUserById } from '@shared/db/functions/user';
 import { characterInsertSchema, characterSelectSchema } from '@shared/db/schema';
+import { NotFoundError } from '@shared/error/not-found-error';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 
@@ -10,7 +12,6 @@ import { z } from 'zod';
 const getCharactersSchema = characterSelectSchema
   .pick({
     userId: true,
-    schoolId: true,
   })
   .extend({ schoolId: z.string() });
 
@@ -19,12 +20,13 @@ export async function GET(request: NextRequest) {
     validateApiKeyByHeaders(request.headers);
 
     const searchParams = request.nextUrl.searchParams;
-    const { userId, schoolId } = getCharactersSchema.parse(Object.fromEntries(searchParams));
+    const { userId } = getCharactersSchema.parse(Object.fromEntries(searchParams));
 
-    const characters = await getCharacters({
-      schoolIds: [schoolId],
-      userId,
-    });
+    const user = await dbGetUserById({ userId });
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+    const characters = await getCharacters({ user });
 
     return Response.json(characters);
   } catch (error) {

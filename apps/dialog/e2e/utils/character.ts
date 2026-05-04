@@ -3,16 +3,15 @@ import { waitForAutosave } from './utils';
 
 export async function createCharacter(page: Page) {
   await page.goto('/characters');
-  await page.waitForURL('/characters**');
-  await page.getByRole('button', { name: 'Dialogpartner erstellen' }).click();
+  await page.waitForURL('/characters');
+  const createButton = page.getByTestId('character-create-button');
+  await expect(createButton).toBeVisible();
+  await createButton.click();
   await page.waitForURL('/characters/editor/**');
 }
 
-export async function deleteCharacterFromDetailPage(page: Page) {
-  const deleteButton = page.getByTestId('custom-chat-delete-button').first();
-  await expect(deleteButton).toBeVisible();
-  await deleteButton.click();
-  const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
+async function confirmDelete(page: Page) {
+  const deleteConfirmButton = page.getByTestId('custom-chat-confirm-button').first();
   await expect(deleteConfirmButton).toBeVisible();
   await deleteConfirmButton.click();
 }
@@ -22,9 +21,14 @@ export async function deleteCharacter(page: Page, name: string) {
   await expect(card).toBeVisible({ timeout: 15000 });
   await card.getByTestId('entity-link').click();
   await page.waitForURL('/characters/editor/**');
+  await deleteCharacterFromDetailPage(page);
+}
+
+export async function deleteCharacterFromDetailPage(page: Page) {
   const deleteButton = page.getByTestId('custom-chat-delete-button').first();
   await expect(deleteButton).toBeVisible();
   await deleteButton.click();
+  await confirmDelete(page);
 }
 
 export async function configureCharacter(

@@ -11,7 +11,6 @@ export const env = createEnv({
   server: {
     appVersion: z.string().default('0.0.0'),
     apiName: z.string().default('Telli API'),
-    apiBaseUrl: z.string().default('http://127.0.0.1:3002'),
     apiKey: z.string(),
     databaseUrl: z.string(),
     logLevel: z
@@ -36,7 +35,6 @@ export const env = createEnv({
   runtimeEnv: {
     appVersion: process.env.APP_VERSION,
     apiName: process.env.API_NAME,
-    apiBaseUrl: process.env.API_BASE_URL,
     apiKey: process.env.API_KEY,
     databaseUrl: process.env.API_DATABASE_URL,
     logLevel: process.env.LOG_LEVEL,
