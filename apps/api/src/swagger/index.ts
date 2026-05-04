@@ -43,15 +43,12 @@ export async function initSwagger(fastify: FastifyInstance) {
     staticCSP: true,
     transformSpecification: (swaggerObject, req) => {
       // load OpenApi document from relative location to prevent CSP issues
-      // load OpenApi document from relative location to prevent CSP issues
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       swaggerObject.servers[0].url = '/';
       // Derive the API's public base URL from the incoming request.
+      // req.protocol and req.hostname are proxy-aware when trustProxy is enabled.
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      swaggerObject.externalDocs.url = new URL(
-        req.url,
-        `${req.protocol}://${req.headers.host}`,
-      ).origin;
+      swaggerObject.externalDocs.url = `${req.protocol}://${req.hostname}`;
       return swaggerObject;
     },
   });
