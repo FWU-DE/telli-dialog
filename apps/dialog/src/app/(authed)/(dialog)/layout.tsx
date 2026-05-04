@@ -1,4 +1,4 @@
-import { getUser, getValidSession, userHasCompletedTraining } from '@/auth/utils';
+import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -23,7 +23,6 @@ export const dynamic = 'force-dynamic';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
-  const { sessionId } = await getValidSession();
   const user = await getUser();
   if (!user.federalState.hasApiKeyAssigned) throw new Error(t('no-api-key'));
 
@@ -53,7 +52,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     (user.versionAcceptedConditions === null || user.versionAcceptedConditions < VERSION);
 
   return (
-    <SessionWatcher redirectTo="/api/auth/logout-callback" loginSessionId={sessionId}>
+    <SessionWatcher redirectTo="/api/auth/logout-callback">
       <FederalStateProvider federalState={federalState}>
         <SidebarProvider className="min-h-0">
           <LlmModelsProvider
