@@ -88,7 +88,6 @@ export default function EntityCard({
           totalTime={(shareInfo?.maxUsageTimeLimit ?? 0) * 60}
           className={cn('shrink-0 text-sm min-w-0 px-2 py-1', !chatHref && 'mr-4')}
           stopWatchClassName="w-4 h-4"
-          ariaLabel={t('countdown-timer-label')}
         />
       )}
 

@@ -3,21 +3,21 @@
 import { cn } from '@/utils/tailwind';
 import StopWatchIcon from '@/components/icons/stopwatch';
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 type CountDownTimerProps = {
   leftTime: number;
   totalTime: number;
   className?: string;
   stopWatchClassName?: string;
-  ariaLabel?: string;
 };
 export default function CountDownTimer({
   leftTime,
   totalTime,
   className,
   stopWatchClassName,
-  ariaLabel,
 }: CountDownTimerProps) {
+  const t = useTranslations('sharing');
   const [timeRemaining, setTimeRemaining] = React.useState(leftTime);
 
   React.useEffect(() => {
@@ -39,7 +39,7 @@ export default function CountDownTimer({
     <div
       data-testid="countdown-timer"
       role="timer"
-      aria-label={ariaLabel}
+      aria-label={t('countdown-timer-label')}
       className={cn(
         'flex gap-2 items-center min-w-36 px-4 py-2 rounded-xl justify-center',
         className,
