@@ -102,7 +102,7 @@ export function CustomChatShareWithLearners({
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 mb-5">
       <CustomChatHeading2 text={t('title')} />
       <Card>
         <CardContent>
