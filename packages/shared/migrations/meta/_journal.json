@@ -470,6 +470,13 @@
       "when": 1777534269152,
       "tag": "0066_living_mockingbird",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1777959011913,
+      "tag": "0067_puzzling_lizard",
+      "breakpoints": true
     }
   ]
 }
