@@ -24,7 +24,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: ['**/isolated/**', '**/real-llm/**', /.*api.test.ts/],
+      testIgnore: ['**/isolated/**', '**/external-services/**', /.*api.test.ts/],
       use: {
         ...devices['Desktop Chrome'],
         permissions: ['clipboard-read', 'clipboard-write'],
@@ -32,7 +32,7 @@ export default defineConfig({
     },
     {
       name: 'firefox',
-      testIgnore: ['**/isolated/**', '**/real-llm/**', /.*api.test.ts/],
+      testIgnore: ['**/isolated/**', '**/external-services/**', /.*api.test.ts/],
       use: {
         ...devices['Desktop Firefox'],
         // Firefox can be flaky in CI, so we slow it down and increase timeouts to improve stability
@@ -47,8 +47,8 @@ export default defineConfig({
       fullyParallel: true,
     },
     {
-      name: 'real-llm',
-      testMatch: '**/real-llm/**/*.test.ts',
+      name: 'external-services',
+      testMatch: '**/external-services/**/*.test.ts',
       use: {
         ...devices['Desktop Chrome'],
         permissions: ['clipboard-read', 'clipboard-write'],
