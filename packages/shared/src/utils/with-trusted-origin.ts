@@ -12,9 +12,15 @@ import { NextRequest } from 'next/server';
  * rewrites the URL before reaching this handler, so there is no conflict.
  */
 export function withTrustedOrigin(req: NextRequest): NextRequest {
-  const proto = req.headers.get('x-forwarded-proto');
-  const host = req.headers.get('x-forwarded-host');
+  const forwardedProto = req.headers.get('x-forwarded-proto');
+  const forwardedHost = req.headers.get('x-forwarded-host');
+  if (!forwardedProto || !forwardedHost) return req;
+
+  const proto = forwardedProto.split(',')[0]?.trim();
+  const host = forwardedHost.split(',')[0]?.trim();
+
   if (!proto || !host) return req;
+  if (proto !== 'http' && proto !== 'https') return req;
 
   const trustedOrigin = `${proto}://${host}`;
   const { href, origin } = req.nextUrl;
