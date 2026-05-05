@@ -32,7 +32,7 @@ test.describe('cleanup', () => {
     await db.transaction(async (tx) => {
       const [user] = await tx
         .insert(userTable)
-        .values({ firstName: '', lastName: '', email: generateUUID() })
+        .values({ schoolIds: [], userRole: 'student' })
         .returning();
       if (!user) {
         throw new Error('Failed to create user');

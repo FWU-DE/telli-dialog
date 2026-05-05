@@ -1,12 +1,12 @@
 'use client';
 
-import WebDownloadIcon from '@/components/icons/web-download';
 import React from 'react';
 import Spinner from '@/components/icons/spinner';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { type ChatMessage as Message } from '@/types/chat';
 import { Button } from '@ui/components/Button';
+import { BoxArrowDownIcon } from '@phosphor-icons/react';
 
 type DownloadConversationButtonProps = {
   conversationMessages: Message[];
@@ -85,7 +85,11 @@ export default function DownloadSharedConversationButton({
         disabled={disabled}
       >
         <div className="flex items-center gap-1">
-          {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-5" />}
+          {isLoading ? (
+            <Spinner className="p-2 size-8" />
+          ) : (
+            <BoxArrowDownIcon className="size-6 text-primary" />
+          )}
           {showText && tCommon('conversation-download')}
         </div>
       </Button>
@@ -101,7 +105,11 @@ export default function DownloadSharedConversationButton({
       onClick={handleDownload}
       disabled={disabled}
     >
-      {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-5" />}
+      {isLoading ? (
+        <Spinner className="p-2 size-8" />
+      ) : (
+        <BoxArrowDownIcon className="size-6 text-primary" />
+      )}
       {showText && tCommon('conversation-download')}
     </Button>
   );
