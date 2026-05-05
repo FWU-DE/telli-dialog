@@ -33,6 +33,7 @@ import { UserAndContext } from '@/auth/types';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { searchWeb, isWebSearchNeeded } from './websearch';
+import { env } from '@/env';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -145,6 +146,7 @@ export async function sendChatMessage({
   const isWebSearchEnabled = user.federalState.featureToggles?.isWebSearchEnabled ?? false;
   const needsWebSearch =
     isWebSearchEnabled &&
+    env.linkupApiKey &&
     (await isWebSearchNeeded({
       query: userMessage.content,
       modelId: auxiliaryModel.id,

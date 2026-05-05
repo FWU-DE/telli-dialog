@@ -56,6 +56,10 @@ Beispiele:
         { role: 'user', content: query },
       ],
       apiKeyId,
+      {
+        maxTokens: 3,
+        temperature: 0,
+      },
     );
 
     return text.trim().toLowerCase().startsWith('ja');
