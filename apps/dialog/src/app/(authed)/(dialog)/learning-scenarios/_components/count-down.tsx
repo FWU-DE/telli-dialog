@@ -6,19 +6,19 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 
 type CountDownTimerProps = {
-  leftTime: number;
-  totalTime: number;
+  leftTimeInSeconds: number;
+  totalTimeInMinutes: number;
   className?: string;
   stopWatchClassName?: string;
 };
 export default function CountDownTimer({
-  leftTime,
-  totalTime,
+  leftTimeInSeconds,
+  totalTimeInMinutes,
   className,
   stopWatchClassName,
 }: CountDownTimerProps) {
   const t = useTranslations('sharing');
-  const [timeRemaining, setTimeRemaining] = React.useState(leftTime);
+  const [timeRemaining, setTimeRemaining] = React.useState(Math.max(leftTimeInSeconds, 0));
 
   React.useEffect(() => {
     const timer = setInterval(() => {
@@ -31,9 +31,9 @@ export default function CountDownTimer({
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [leftTime]);
+  }, [leftTimeInSeconds]);
 
-  const textClassName = getColorByLeftAndTotalTime({ leftTime, totalTime });
+  const textClassName = getColorByLeftAndTotalTime({ leftTimeInSeconds, totalTimeInMinutes });
 
   return (
     <div
@@ -67,8 +67,12 @@ function formatTime(totalSeconds: number) {
   }
 }
 
-function getColorByLeftAndTotalTime({ leftTime, totalTime }: CountDownTimerProps) {
-  const percentage = leftTime / totalTime;
+function getColorByLeftAndTotalTime({
+  leftTimeInSeconds,
+  totalTimeInMinutes,
+}: CountDownTimerProps) {
+  const totalTimeInSeconds = totalTimeInMinutes * 60;
+  const percentage = leftTimeInSeconds / totalTimeInSeconds;
 
   if (percentage > 0.2) {
     return 'text-[#00594f] bg-[#6CE9D70D]';
