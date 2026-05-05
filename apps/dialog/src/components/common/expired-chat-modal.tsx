@@ -36,10 +36,10 @@ export default function ExpiredChatModal({
           <AlertDialogTitle>
             <StopWatchDoneIcon className="text-dark-red" />
           </AlertDialogTitle>
+          <AlertDialogDescription className="text-3xl w-full text-center">
+            {t('expired-modal-description')}
+          </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogDescription className="text-3xl w-full text-center">
-          {t('expired-modal-description')}
-        </AlertDialogDescription>
         <AlertDialogFooter className="items-center sm:justify-center">
           {/* If the shared chat has expired, the messages are gone, so there is no way atm to download the conversation. */}
           {hasUserMessages && (

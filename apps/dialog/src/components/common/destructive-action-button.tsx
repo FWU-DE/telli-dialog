@@ -65,8 +65,8 @@ export default function DestructiveActionButton({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{modalTitle}</AlertDialogTitle>
+          <AlertDialogDescription>{modalDescription}</AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogDescription>{modalDescription}</AlertDialogDescription>
         <AlertDialogFooter>
           <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
           <AlertDialogAction
