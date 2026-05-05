@@ -5,7 +5,6 @@ import StopWatchIcon from '@/components/icons/stopwatch';
 import React from 'react';
 
 type CountDownTimerProps = {
-  id?: string;
   leftTime: number;
   totalTime: number;
   className?: string;
@@ -13,7 +12,6 @@ type CountDownTimerProps = {
   ariaLabel?: string;
 };
 export default function CountDownTimer({
-  id,
   leftTime,
   totalTime,
   className,
@@ -39,7 +37,7 @@ export default function CountDownTimer({
 
   return (
     <div
-      id={id}
+      data-testid="countdown-timer"
       role="timer"
       aria-label={ariaLabel}
       className={cn(
