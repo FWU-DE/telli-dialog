@@ -14,10 +14,14 @@ test.describe.configure({ mode: 'parallel' });
 const llmModels: string[] = JSON.parse(fs.readFileSync(LLM_MODELS_FILE, 'utf-8'));
 
 llmModels.forEach((modelName) => {
-  test(`${modelName} responds to a simple prompt`, { tag: '@real-llm' }, async ({ page }) => {
-    await page.goto('/');
-    await selectDifferentModel(page, modelName);
-    await sendMessage(page, 'Antworte mit genau dem Wort "OK".');
-    await expect(page.getByLabel('assistant message 1')).toContainText('OK');
-  });
+  test(
+    `${modelName} responds to a simple prompt`,
+    { tag: '@external-services' },
+    async ({ page }) => {
+      await page.goto('/');
+      await selectDifferentModel(page, modelName);
+      await sendMessage(page, 'Antworte mit genau dem Wort "OK".');
+      await expect(page.getByLabel('assistant message 1')).toContainText('OK');
+    },
+  );
 });

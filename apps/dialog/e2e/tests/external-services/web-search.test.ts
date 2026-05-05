@@ -4,7 +4,7 @@ import { sendMessage } from '../../utils/chat';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
-test('should successfully perform web search', { tag: '@real-llm' }, async ({ page }) => {
+test('should successfully perform web search', { tag: '@external-services' }, async ({ page }) => {
   await page.goto('/');
 
   const websearchToggle = page.getByRole('button', { name: 'Internetquellen' });
