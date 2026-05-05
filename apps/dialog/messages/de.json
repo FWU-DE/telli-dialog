@@ -619,6 +619,7 @@
     "sort-name-asc": "Alphabetisch A-Z",
     "sort-name-desc": "Alphabetisch Z-A",
     "close": "Schließen",
-    "chat": "Chatten"
+    "chat": "Chatten",
+    "countdown-timer-label": "Verbleibende Freigabezeit"
   }
 }

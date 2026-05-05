@@ -5,16 +5,20 @@ import StopWatchIcon from '@/components/icons/stopwatch';
 import React from 'react';
 
 type CountDownTimerProps = {
+  id?: string;
   leftTime: number;
   totalTime: number;
   className?: string;
   stopWatchClassName?: string;
+  ariaLabel?: string;
 };
 export default function CountDownTimer({
+  id,
   leftTime,
   totalTime,
   className,
   stopWatchClassName,
+  ariaLabel,
 }: CountDownTimerProps) {
   const [timeRemaining, setTimeRemaining] = React.useState(leftTime);
 
@@ -35,7 +39,9 @@ export default function CountDownTimer({
 
   return (
     <div
-      id="countdown-timer"
+      id={id}
+      role="timer"
+      aria-label={ariaLabel}
       className={cn(
         'flex gap-2 items-center min-w-36 px-4 py-2 rounded-xl justify-center',
         className,
@@ -43,7 +49,7 @@ export default function CountDownTimer({
       )}
     >
       <StopWatchIcon className={stopWatchClassName} />
-      <span>{formatTime(timeRemaining)}</span>
+      <span aria-hidden="true">{formatTime(timeRemaining)}</span>
     </div>
   );
 }

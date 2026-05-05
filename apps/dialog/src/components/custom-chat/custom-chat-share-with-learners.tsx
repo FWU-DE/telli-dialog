@@ -174,7 +174,7 @@ export function CustomChatShareWithLearners({
             {sharedChatActive && (
               <CountDownTimer
                 leftTime={sharedChatTimeLeft}
-                totalTime={maxUsageTimeLimit ?? 0}
+                totalTime={(maxUsageTimeLimit ?? 0) * 60}
                 stopWatchClassName="w-4 h-4"
               />
             )}

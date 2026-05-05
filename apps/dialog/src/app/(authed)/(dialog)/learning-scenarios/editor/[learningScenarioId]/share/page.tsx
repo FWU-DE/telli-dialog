@@ -50,8 +50,9 @@ export default async function Page(
       <div className="mx-auto mt-10 sm:mt-16 flex flex-col justify-center items-center text-center w-full">
         <h1 className="text-4xl sm:text-7xl font-medium mb-10 sm:mb-16">{t('join')}</h1>
         <CountDownTimer
+          id="countdown-timer"
           leftTime={Math.max(leftTime, 0)}
-          totalTime={learningScenario.maxUsageTimeLimit}
+          totalTime={(learningScenario.maxUsageTimeLimit ?? 0) * 60}
           stopWatchClassName="w-8 h-8"
         />
         <main className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">
