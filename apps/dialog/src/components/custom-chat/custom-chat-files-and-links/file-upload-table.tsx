@@ -14,7 +14,7 @@ import { useToast } from '../../common/toast';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
 import { ServerActionResult } from '@shared/actions/server-action-result';
-import { TrashIcon, TrashSimpleIcon } from '@phosphor-icons/react';
+import { TrashSimpleIcon } from '@phosphor-icons/react';
 
 type FilesTableProps = {
   files: FileModel[];
