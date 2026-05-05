@@ -23,7 +23,7 @@ export default async function Page(
 
   const learningScenario = await getSharedLearningScenario({
     learningScenarioId: learningScenarioId,
-    userId: user.id,
+    user,
   }).catch(handleErrorInServerComponent);
 
   if (!learningScenario.inviteCode) {

@@ -193,7 +193,6 @@ jobs:
         env:
           CI: true
           DE_TEST_API_KEY: ${{ env.DE_TEST_API_KEY }}
-          API_BASE_URL: http://localhost:3002
 
       - name: Upload Playwright reports (dialog)
         uses: actions/upload-artifact@v7

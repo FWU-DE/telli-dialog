@@ -2,12 +2,12 @@ import useBreakpoints from '../hooks/use-breakpoints';
 import { useTranslations } from 'next-intl';
 import DestructiveActionButton from '../common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
-import TrashIcon from '../icons/trash';
 import DownloadSharedConversationButton from '@/app/(unauth)/ua/download-shared-conversation-button';
 import Image from 'next/image';
 import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import { type ChatMessage as Message } from '@/types/chat';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
+import { TrashSimpleIcon } from '@phosphor-icons/react';
 
 export function SharedChatHeader({
   chatActive,
@@ -46,7 +46,7 @@ export function SharedChatHeader({
       actionFn={handleOpenNewChat}
     >
       <span className="flex items-center gap-2">
-        <TrashIcon className="size-5" solid={true} />
+        <TrashSimpleIcon className="size-5 text-primary" />
         {showCompactHeader ? tCommon('delete') : ''}
       </span>
     </DestructiveActionButton>

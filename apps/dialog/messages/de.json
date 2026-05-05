@@ -481,7 +481,8 @@
   },
   "authentication": {
     "login-error": {
-      "description": "Login nicht möglich. Folgende Informationen müssen mit dem Profil übertragen werden:"
+      "description": "Login nicht möglich. Folgende Informationen müssen mit dem Profil übertragen werden:",
+      "federal-state-not-found": "Das übermittelte Bundesland wurde nicht gefunden."
     }
   },
   "custom-chat": {

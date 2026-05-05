@@ -4,17 +4,17 @@ import { FileModel } from '@shared/db/schema';
 import React from 'react';
 
 import { isNotNull } from '@shared/utils/guard';
-import Spinner from '../icons/spinner';
-import CrossIcon from '../icons/cross';
-import { LocalFileState } from '../chat/send-message-form';
-import { getFileIconByFileExtension } from '../icons/file-upload-icons/file-icons-dict';
+import Spinner from '../../icons/spinner';
+import CrossIcon from '../../icons/cross';
+import { LocalFileState } from '../../chat/send-message-form';
+import { getFileIconByFileExtension } from '../../icons/file-upload-icons/file-icons-dict';
 import { formatBytes, getFileNameAndFileExtention, hexToRGBA } from '@/utils/files/generic';
-import { FileStatus } from '../chat/upload-file-button';
-import TrashIcon from '../icons/trash';
-import { useToast } from '../common/toast';
+import { FileStatus } from '../../chat/upload-file-button';
+import { useToast } from '../../common/toast';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
 import { ServerActionResult } from '@shared/actions/server-action-result';
+import { TrashSimpleIcon } from '@phosphor-icons/react';
 
 type FilesTableProps = {
   files: FileModel[];
@@ -121,7 +121,7 @@ export default function FilesTable({
                       confirmText={t('delete.confirm')}
                       actionFn={() => handleDeleteFile(id)}
                     >
-                      <TrashIcon className="size-8" />
+                      <TrashSimpleIcon className="size-6 text-primary" />
                       <span className="sr-only">{t('delete.button')}</span>
                     </DestructiveActionButton>
                   )}

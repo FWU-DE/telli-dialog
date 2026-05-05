@@ -29,7 +29,7 @@ export async function updateCharacterAccessLevelAction({
   return runServerAction(updateCharacterAccessLevel)({
     characterId,
     accessLevel,
-    userId: user.id,
+    user,
   });
 }
 
@@ -37,7 +37,7 @@ export async function updateCharacterAction(character: UpdateCharacterActionMode
   const { user } = await requireAuth();
 
   return runServerAction(updateCharacter)({
-    userId: user.id,
+    user,
     ...character,
   });
 }
@@ -47,7 +47,7 @@ export async function deleteCharacterAction({ characterId }: { characterId: stri
 
   return runServerAction(deleteCharacter)({
     characterId,
-    userId: user.id,
+    user,
   });
 }
 
@@ -63,7 +63,6 @@ export async function shareCharacterAction({
     telliPointsPercentageLimit: telliPointsPercentageLimit,
     usageTimeLimitMinutes: usageTimeLimit,
     user: user,
-    schoolIds: user.schoolIds ?? [],
   });
 }
 
@@ -88,7 +87,7 @@ export async function deleteFileMappingAndEntityAction({
   return runServerAction(deleteFileMappingAndEntity)({
     characterId,
     fileId,
-    userId: user.id,
+    user,
   });
 }
 
@@ -101,7 +100,7 @@ export async function linkFileToCharacterAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(linkFileToCharacter)({ fileId, characterId, userId: user.id });
+  return runServerAction(linkFileToCharacter)({ fileId, characterId, user });
 }
 
 export async function uploadAvatarPictureForCharacterAction({
@@ -116,7 +115,7 @@ export async function uploadAvatarPictureForCharacterAction({
   return runServerAction(uploadAvatarPictureForCharacter)({
     characterId,
     croppedImageBlob,
-    userId: user.id,
+    user,
   });
 }
 
@@ -132,7 +131,6 @@ export async function downloadFileFromCharacterAction({
   return runServerAction(downloadFileFromCharacter)({
     characterId,
     fileId,
-    schoolIds: user.schoolIds ?? [],
     user,
   });
 }

@@ -1,12 +1,12 @@
 'use client';
 
-import WebDownloadIcon from '@/components/icons/web-download';
 import React from 'react';
 import Spinner from '@/components/icons/spinner';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { Button } from '@ui/components/Button';
 import { cn } from '@/utils/tailwind';
+import { BoxArrowDownIcon } from '@phosphor-icons/react';
 
 type DownloadConversationButtonProps = {
   conversationId: string;
@@ -75,7 +75,11 @@ export default function DownloadConversationButton({
       onClick={handleDownload}
       disabled={disabled}
     >
-      {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-5" />}
+      {isLoading ? (
+        <Spinner className="p-2 size-8" />
+      ) : (
+        <BoxArrowDownIcon className="size-6 text-primary" />
+      )}
       {showText && tCommon('conversation-download')}
     </Button>
   );

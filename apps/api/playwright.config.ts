@@ -20,7 +20,7 @@ export default defineConfig({
   reporter: [['html', { outputFolder: './playwright-report' }], ['list']],
   timeout: 60_000,
   use: {
-    baseURL: process.env.API_BASE_URL ?? 'http://localhost:3002',
+    baseURL: `http://localhost:${process.env.PORT ?? '3002'}`,
   },
   projects: [
     {
