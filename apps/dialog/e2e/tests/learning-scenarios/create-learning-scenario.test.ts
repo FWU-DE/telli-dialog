@@ -55,7 +55,7 @@ test.describe('create, share, chat, delete', () => {
     const countDown = page.getByTestId('countdown-timer');
     await expect(countDown).toBeVisible();
 
-    const qrCode = page.getByTestId('#qr-code');
+    const qrCode = page.getByTestId('qr-code');
     await expect(qrCode).toBeVisible();
 
     // verify countdown is also shown on the overview list

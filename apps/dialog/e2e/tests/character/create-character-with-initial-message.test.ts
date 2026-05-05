@@ -53,7 +53,7 @@ test('teacher can create character with initial message and verify it appears in
   const countDown = page.getByTestId('countdown-timer');
   await expect(countDown).toBeVisible();
 
-  const qrCode = page.getByTestId('#qr-code');
+  const qrCode = page.getByTestId('qr-code');
   await expect(qrCode).toBeVisible();
 
   // join chat as teacher to test the initial message
