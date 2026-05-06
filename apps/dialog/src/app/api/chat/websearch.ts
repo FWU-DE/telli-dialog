@@ -1,4 +1,5 @@
 import { LinkupClient, type TextSearchResult } from 'linkup-sdk';
+import { generateTextWithBilling } from '@telli/ai-core';
 import { env } from '@/env';
 import {
   WEBSEARCH_RESULT_CONTENT_LENGTH_LIMIT,
@@ -6,19 +7,77 @@ import {
 } from '@/configuration-text-inputs/const';
 import { logError } from '@shared/logging';
 
+export async function isWebSearchNeeded({
+  query,
+  modelId,
+  apiKeyId,
+}: {
+  query: string;
+  modelId: string;
+  apiKeyId: string;
+}): Promise<boolean> {
+  try {
+    const { text } = await generateTextWithBilling(
+      modelId,
+      [
+        {
+          role: 'system',
+          content: `Du bist ein Routing-Assistent, der entscheidet, ob eine Nutzerfrage eine Websuche erfordert.
+
+Antworte mit genau einem Wort: "ja" oder "nein". Keine Erklärung.
+
+Antworte "ja", wenn die Frage:
+- Nach aktuellen Ereignissen, Nachrichten oder neuesten Informationen fragt
+- Zeitbezüge wie "heute", "gestern", "diese Woche", "aktuell" enthält
+- Aktuelle Daten erfordert (z.B. Wetter, Aktienkurse, Sportergebnisse)
+- Sich auf bestimmte Webseiten, Artikel oder Online-Ressourcen bezieht
+- Fakten über Personen, Unternehmen oder Produkte betrifft, die sich ändern können
+- Informationen nach deinem Wissensstand erfordert
+
+Antworte "nein", wenn die Frage:
+- Eine allgemeine Wissensfrage ist, die keine aktuellen Informationen erfordert
+- Um Hilfe bei Code, Mathematik, Schreiben oder kreativen Aufgaben bittet
+- Eine persönliche oder alltägliche Frage ist
+- Mit allgemeinem Wissen beantwortet werden kann
+- Eine Zusammenfassung oder Umformulierung von bereits gegebenem Text verlangt
+- Keinen sinnvollen Inhalt hat (zufällige Zeichen, unverständlicher Text)
+
+Im Zweifel antworte "ja".
+
+Beispiele:
+- "Was ist Photosynthese?" → nein
+- "Wer hat gestern das Spiel gewonnen?" → ja
+- "Schreibe mir ein Gedicht über Katzen" → nein
+- "Was kostet das iPhone 17?" → ja
+- "Erkläre mir den Satz des Pythagoras" → nein
+- "Was sind die neuesten Nachrichten zu KI?" → ja
+- "hskjdfhskjdf" → nein`,
+        },
+        { role: 'user', content: query },
+      ],
+      apiKeyId,
+      {
+        maxTokens: 3,
+        temperature: 0,
+      },
+    );
+
+    return text.trim().toLowerCase().startsWith('ja');
+  } catch (error) {
+    logError('Error determining web search necessity, skipping web search:', error);
+    return false;
+  }
+}
+
 /**
  * Performs a web search using the Linkup API and returns text search results.
  * Search results can be used in the rag context of the system prompt.
  *
  * @param query The search query string.
- * @param isWebSearchEnabled Flag indicating if web search is enabled for the user's federal state.
  * @returns An array of text search results from the Linkup API.
  */
-export async function searchWeb(
-  query: string,
-  isWebSearchEnabled: boolean | undefined,
-): Promise<TextSearchResult[]> {
-  if (!isWebSearchEnabled || !env.linkupApiKey) {
+export async function searchWeb(query: string): Promise<TextSearchResult[]> {
+  if (!env.linkupApiKey) {
     return [];
   }
 

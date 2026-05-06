@@ -4,7 +4,7 @@ import { waitForToast } from '../../utils/utils';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
-test.fixme('can generate an image and copy it to clipboard', async ({ page }) => {
+test('can generate an image and copy it to clipboard', async ({ page }) => {
   // navigate to image generation
   await page.goto('/image-generation');
   await page.waitForURL('/image-generation**');

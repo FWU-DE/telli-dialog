@@ -45,6 +45,7 @@
   },
   "sharing": {
     "label": "Freigabe",
+    "countdown-timer-label": "Verbleibende Freigabezeit",
     "school": "Schulintern",
     "school-tooltip": "Wird schulintern sicht- und kopierbar. \nZu beachten: Eine Lehrkraft kann mehreren Schulen zugehörig sein. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "community": "Community",

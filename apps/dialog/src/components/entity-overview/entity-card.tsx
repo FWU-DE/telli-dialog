@@ -9,6 +9,14 @@ import { useTranslations } from 'next-intl';
 import { ChatTextIcon, ImageSquareIcon } from '@phosphor-icons/react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
 import { Button } from '@ui/components/Button';
+import CountDownTimer from '@/app/(authed)/(dialog)/learning-scenarios/_components/count-down';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
+
+type ShareInfo = {
+  startedAt: Date | null;
+  maxUsageTimeLimit: number | null;
+  manuallyStoppedAt?: Date | null;
+};
 
 type EntityCardProps = {
   name: string;
@@ -17,6 +25,7 @@ type EntityCardProps = {
   isOwned: boolean;
   href: string;
   chatHref?: string;
+  shareInfo?: ShareInfo;
 };
 
 export default function EntityCard({
@@ -26,7 +35,10 @@ export default function EntityCard({
   isOwned,
   href,
   chatHref,
+  shareInfo,
 }: EntityCardProps) {
+  const sharedChatTimeLeft = shareInfo ? calculateTimeLeft(shareInfo) : -1;
+  const sharedChatActive = sharedChatTimeLeft > 0;
   const t = useTranslations('entity-overview');
   const tCommon = useTranslations('common');
 
@@ -69,6 +81,15 @@ export default function EntityCard({
           )}
         </div>
       </Link>
+
+      {sharedChatActive && (
+        <CountDownTimer
+          leftTimeInSeconds={sharedChatTimeLeft}
+          totalTimeInMinutes={shareInfo?.maxUsageTimeLimit ?? 0}
+          className={cn('shrink-0 text-sm min-w-0 px-2 py-1', !chatHref && 'mr-4')}
+          stopWatchClassName="w-4 h-4"
+        />
+      )}
 
       {chatHref && (
         <Tooltip>

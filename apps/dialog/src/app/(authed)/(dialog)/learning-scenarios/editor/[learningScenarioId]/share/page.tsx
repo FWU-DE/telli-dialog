@@ -50,8 +50,8 @@ export default async function Page(
       <div className="mx-auto mt-10 sm:mt-16 flex flex-col justify-center items-center text-center w-full">
         <h1 className="text-4xl sm:text-7xl font-medium mb-10 sm:mb-16">{t('join')}</h1>
         <CountDownTimer
-          leftTime={Math.max(leftTime, 0)}
-          totalTime={learningScenario.maxUsageTimeLimit}
+          leftTimeInSeconds={leftTime}
+          totalTimeInMinutes={learningScenario.maxUsageTimeLimit}
           stopWatchClassName="w-8 h-8"
         />
         <main className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">
@@ -67,7 +67,7 @@ export default async function Page(
             <div className="flex flex-col items-center gap-4">
               <p className="text-2xl sm:text-3xl">{t('enter-code')}</p>
               <div className="flex items-center gap-2">
-                <p id="join-code" className="text-3xl sm:text-5xl text-primary font-bold">
+                <p data-testid="join-code" className="text-3xl sm:text-5xl text-primary font-bold">
                   {formattedInviteCode}
                 </p>
                 <TelliClipboardButton
@@ -85,7 +85,11 @@ export default async function Page(
           <div className="hidden sm:block w-1 border-r" />
           <section className="flex flex-col justify-between items-center gap-8 sm:gap-12">
             <h2 className="text-2xl sm:text-3xl text-center">{t('use-qr')}</h2>
-            <QRCodeSVG id="qr-code" className="w-64 h-64 sm:w-100 sm:h-100" value={shareUrl} />
+            <QRCodeSVG
+              data-testid="qr-code"
+              className="w-64 h-64 sm:w-100 sm:h-100"
+              value={shareUrl}
+            />
           </section>
         </main>
       </div>
