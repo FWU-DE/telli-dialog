@@ -24,7 +24,7 @@ export function ImageGenerationInputBox({
           /* eslint-disable-next-line jsx-a11y/no-autofocus */
           autoFocus
           placeholder={tImageGeneration('placeholder')}
-          className="w-full text-base focus:outline-hidden bg-transparent max-h-40 sm:max-h-60 overflow-y-auto placeholder-black py-3 px-4"
+          className="w-full text-base focus:outline-hidden bg-transparent max-h-40 sm:max-h-60 overflow-y-auto placeholder:text-muted-foreground py-3 px-4"
           onChange={handleInputChange}
           value={input}
           maxLength={CHAT_MESSAGE_LENGTH_LIMIT}

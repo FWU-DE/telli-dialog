@@ -155,7 +155,7 @@ export function ChatInputBox({
             /* eslint-disable-next-line jsx-a11y/no-autofocus */
             autoFocus
             placeholder={tCommon('send-message-placeholder')}
-            className="w-full text-base focus:outline-hidden max-h-40 sm:max-h-60 overflow-y-auto placeholder-black p-2"
+            className="w-full text-base focus:outline-hidden max-h-40 sm:max-h-60 overflow-y-auto placeholder:text-muted-foreground p-2"
             onChange={handleInputChange}
             value={input}
             onKeyDown={handleSubmitOnEnter}
