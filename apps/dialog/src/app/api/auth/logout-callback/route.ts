@@ -1,4 +1,5 @@
 import { logError } from '@shared/logging';
+import { withTrustedOrigin } from '@shared/utils/with-trusted-origin';
 import { NextRequest, NextResponse } from 'next/server';
 
 const SESSION_COOKIE_NAME = 'authjs.session-token';
@@ -11,8 +12,10 @@ const SECURE_SESSION_COOKIE_NAME = `__Secure-${SESSION_COOKIE_NAME}`; // Used wh
  * Therefore, we clear all cookies that start with the session cookie name.
  */
 export async function GET(request: NextRequest) {
+  const trustedRequest = withTrustedOrigin(request);
+
   try {
-    const response = NextResponse.redirect(new URL('/login', request.url));
+    const response = NextResponse.redirect(new URL('/login', trustedRequest.url));
     const cookieNames = request.cookies
       .getAll()
       .map((cookie) => cookie.name)
@@ -32,6 +35,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     logError('Error during logout-callback', error);
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL('/login', trustedRequest.url));
   }
 }

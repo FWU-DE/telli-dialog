@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
 import { logError, logInfo, logWarning } from '@shared/logging';
+import { withTrustedOrigin } from '@shared/utils/with-trusted-origin';
 import { NextRequest, NextResponse } from 'next/server';
 import { VIDIS_LOGOUT_URL } from '@/auth/providers/vidis-provider';
 
@@ -25,12 +26,14 @@ function redirectToIDP(request: NextRequest, idToken: string) {
  * If no token is available, we simply redirect to the logout_callback url for cleanup.
  */
 export async function GET(request: NextRequest) {
+  const trustedRequest = withTrustedOrigin(request);
+
   try {
     const session = await auth();
-    if (session?.idToken) return redirectToIDP(request, session?.idToken);
-    return handleEmptyToken(request);
+    if (session?.idToken) return redirectToIDP(trustedRequest, session?.idToken);
+    return handleEmptyToken(trustedRequest);
   } catch (error) {
     logError('Error during logout', error);
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL('/login', trustedRequest.url));
   }
 }
