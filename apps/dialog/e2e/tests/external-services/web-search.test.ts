@@ -7,7 +7,7 @@ test.use({ storageState: AUTH_FILES.teacher });
 test('should successfully perform web search', { tag: '@external-services' }, async ({ page }) => {
   await page.goto('/');
 
-  const websearchToggle = page.getByRole('button', { name: 'Internetquellen' });
+  const websearchToggle = page.getByRole('button', { name: 'Internetquellen', exact: true });
 
   // send a message that does not require web search
   await sendMessage(page, 'Hallo');
