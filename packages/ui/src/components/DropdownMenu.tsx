@@ -17,6 +17,8 @@ function DropdownMenuPortal({
 }
 
 function DropdownMenuTrigger({
+  onPointerDown,
+  onClick,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
   // Workaround for bug in radix-ui, see: https://github.com/radix-ui/primitives/issues/1912#issuecomment-3012347343
@@ -29,6 +31,7 @@ function DropdownMenuTrigger({
         if (e.detail !== 1738) {
           e.preventDefault();
         }
+        onPointerDown?.(e);
       }}
       onClick={(event) => {
         event.currentTarget.dispatchEvent(
@@ -38,6 +41,7 @@ function DropdownMenuTrigger({
             detail: 1738,
           }),
         );
+        onClick?.(event);
       }}
       data-slot="dropdown-menu-trigger"
       {...props}
