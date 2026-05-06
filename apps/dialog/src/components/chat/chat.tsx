@@ -24,7 +24,7 @@ import { AssistantIcon } from './assistant-icon';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { getConversationPath } from '@/utils/chat/path';
 import { Messages, type PendingFileModel } from './messages';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 type ChatProps = {
@@ -36,7 +36,7 @@ type ChatProps = {
   promptSuggestions?: string[];
   initialFileMapping?: Map<string, FileModel[]>;
   enableFileUpload: boolean;
-  webSourceMapping?: Map<string, WebsearchSource[]>;
+  webSourceMapping?: Map<string, WebSource[]>;
   logoElement: ReactNode;
 };
 

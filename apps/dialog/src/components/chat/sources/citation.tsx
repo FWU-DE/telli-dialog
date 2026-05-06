@@ -6,22 +6,22 @@ import SearchIcon from '@/components/icons/search';
 import { getDisplayUrl } from '@/utils/web-search/parsing';
 import { openInNewTab } from '@/utils/navigation/router';
 import Spinner from '@/components/icons/spinner';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 
 function truncateText(text: string, maxLength: number) {
   return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
 }
 
 export default function Citation({
-  source,
+  webSource,
   className,
   isLoading = false,
 }: {
-  source: WebsearchSource;
+  webSource: WebSource;
   className?: string;
   isLoading?: boolean;
 }) {
-  const displayUrl = getDisplayUrl(source.link);
+  const displayUrl = getDisplayUrl(webSource.link);
   const displayTitle = truncateText(displayUrl, 30);
 
   return (
@@ -36,11 +36,11 @@ export default function Citation({
         }}
         role="button"
         tabIndex={0}
-        onClick={() => openInNewTab(source.link)}
+        onClick={() => openInNewTab(webSource.link)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            openInNewTab(source.link);
+            openInNewTab(webSource.link);
           }
         }}
       >
@@ -59,11 +59,11 @@ export default function Citation({
               'p-2 flex flex-col border-0 bg-white w-60 cursor-pointer text-start citation overflow-hidden',
             )}
           >
-            {!source.error && (
+            {!webSource.error && (
               <span
                 role="button"
                 aria-hidden="true"
-                onClick={() => openInNewTab(source.link)}
+                onClick={() => openInNewTab(webSource.link)}
                 // overwrite direction from parent
                 dir="ltr"
               >

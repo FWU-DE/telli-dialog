@@ -1,11 +1,11 @@
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 import { z } from 'zod';
 
-const websearchSourceSchema = z.object({
+const webSourceSchema = z.object({
   name: z.string().optional(),
   link: z.string(),
   content: z.string().optional(),
   error: z.boolean().optional(),
-}) satisfies z.ZodType<WebsearchSource>;
+}) satisfies z.ZodType<WebSource>;
 
-export const formLinks = z.array(websearchSourceSchema);
+export const formLinks = z.array(webSourceSchema);

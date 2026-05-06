@@ -1,7 +1,7 @@
 import { requireAuth } from '@/auth/requireAuth';
 import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 import { LearningScenarioEdit } from './learning-scenario-edit';
 import { redirect } from 'next/navigation';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
@@ -31,7 +31,7 @@ export default async function Page(
         ({
           link: url,
           error: false,
-        }) as WebsearchSource,
+        }) as WebSource,
     );
 
   return (

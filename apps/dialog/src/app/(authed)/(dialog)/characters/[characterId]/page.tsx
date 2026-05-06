@@ -1,7 +1,7 @@
 import { getCharacterForEditView } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 import { CharacterView } from './character-view';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
@@ -23,7 +23,7 @@ export default async function Page(props: PageProps<'/characters/[characterId]'>
         ({
           link: url,
           error: false,
-        }) as WebsearchSource,
+        }) as WebSource,
     );
 
   return (

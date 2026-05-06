@@ -6,7 +6,7 @@ import { Input } from '@ui/components/Input';
 import { Button } from '@ui/components/Button';
 import { Spinner } from '@ui/components/Spinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 import { parseHyperlinks, getDisplayUrl } from '@/utils/web-search/parsing';
 import {
   NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT,
@@ -17,13 +17,13 @@ import { ingestWebContentAction } from '@/components/custom-chat/custom-chat-fil
 import { useTranslations } from 'next-intl';
 
 export type CustomChatLinksProps = {
-  initialLinks: WebsearchSource[];
+  initialLinks: WebSource[];
   // If onLinksChange is undefined, the component will be in read-only mode
   onLinksChange?: (links: string[]) => Promise<{ success: boolean }>;
 };
 
 export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinksProps) {
-  const [links, setLinks] = React.useState<WebsearchSource[]>(initialLinks);
+  const [links, setLinks] = React.useState<WebSource[]>(initialLinks);
   const [currentLink, setCurrentLink] = React.useState('');
   const [processingLinks, setProcessingLinks] = React.useState<Set<string>>(new Set());
   const toast = useToast();
@@ -53,7 +53,7 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
       return;
     }
 
-    const newLink: WebsearchSource = { link: normalizedLink };
+    const newLink: WebSource = { link: normalizedLink };
     const updatedLinks = [...links, newLink];
     setLinks(updatedLinks);
     setCurrentLink('');

@@ -43,7 +43,7 @@ export type LlmModelPriceMetadata =
       pricePerImageInCent: number;
     };
 
-export type WebsearchSource = {
+export type WebSource = {
   name?: string;
   link: string;
   content?: string;

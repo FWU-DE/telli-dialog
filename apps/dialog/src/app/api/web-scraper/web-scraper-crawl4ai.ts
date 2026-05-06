@@ -1,9 +1,9 @@
-import { SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import { WEB_SCRAPE_RESULT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import { logWarning } from '@shared/logging';
 import { env } from '@/env';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 
 interface Crawl4AIResult {
   url: string;
@@ -35,7 +35,7 @@ interface Crawl4AIResponse {
  * @param url The URL to fetch and parse.
  * @returns The most important information from the page in markdown format.
  */
-export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> {
+export async function webScraperCrawl4AI(url: string): Promise<WebSource> {
   const t = await getTranslations('websearch');
 
   try {
@@ -113,7 +113,7 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
       result.metadata?.['og:title'] || result.metadata?.title || t('placeholders.unknown-title');
 
     // Trim content
-    const trimmedContent = markdownContent.substring(0, SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT);
+    const trimmedContent = markdownContent.substring(0, WEB_SCRAPE_RESULT_LENGTH_LIMIT);
 
     return {
       content: trimmedContent,

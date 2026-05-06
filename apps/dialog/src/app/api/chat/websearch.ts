@@ -2,7 +2,7 @@ import { LinkupClient, type TextSearchResult } from 'linkup-sdk';
 import { generateTextWithBilling } from '@telli/ai-core';
 import { env } from '@/env';
 import {
-  WEBSEARCH_RESULT_CONTENT_LENGTH_LIMIT,
+  WEBSEARCH_RESULT_LENGTH_LIMIT,
   WEBSEARCH_RESULTS_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { logError } from '@shared/logging';
@@ -100,7 +100,7 @@ export async function searchWeb(query: string): Promise<TextSearchResult[]> {
       .slice(0, WEBSEARCH_RESULTS_LIMIT)
       .map((result) => ({
         ...result,
-        content: result.content.slice(0, WEBSEARCH_RESULT_CONTENT_LENGTH_LIMIT),
+        content: result.content.slice(0, WEBSEARCH_RESULT_LENGTH_LIMIT),
       }));
   } catch (error) {
     logError('Error during web search', error);

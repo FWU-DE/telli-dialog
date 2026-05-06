@@ -1,20 +1,32 @@
+// UI
 export const TEXT_INPUT_FIELDS_LENGTH_LIMIT = 500;
 export const TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS = 10000;
 export const CHAT_MESSAGE_LENGTH_LIMIT = 6000;
 export const SMALL_TEXT_INPUT_FIELDS_LIMIT = 50;
 export const TOTAL_CHAT_LENGTH_LIMIT = 60_000; // Maximum total characters in chat history (~40 DIN A4 pages)
-export const TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT = 30_000; // Maximum total characters from websearch content (~20 DIN A4 pages)
-export const SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT = 6000; // Maximum total characters from a single websearch content (~4 DIN A4 pages)
+
+// Web scraper
+export const WEB_SCRAPE_RESULT_LENGTH_LIMIT = 6000; // Maximum total characters from a single web scrape result (~4 DIN A4 pages)
+export const MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION = 5; // Maximum number of URLs to scrape per conversation
+
+// Chat history
 export const KEEP_RECENT_MESSAGES = 30; // Number of recent messages to keep in chat history
 export const KEEP_FIRST_MESSAGES = 2; // Number of first messages to keep in chat history
+
+// RAG
 export const CHUNK_SIZE = 2500; // Number of characters per chunk when splitting text for RAG. Typical sweet spot to balance context richness with retrieval relevance
 export const VECTOR_SEARCH_LIMIT = 10; // Number of chunks to retrieve. One chunk is approximately 300 words or 400-500 tokens
+
+// Web search
 export const WEBSEARCH_RESULTS_LIMIT = 5; // Number of websearch results to include in the RAG context
-export const WEBSEARCH_RESULT_CONTENT_LENGTH_LIMIT = 2500; // Maximum characters to include from each websearch result
+export const WEBSEARCH_RESULT_LENGTH_LIMIT = 2500; // Maximum characters to include from each websearch result
+
+// Attachments
 export const NUMBER_OF_FILES_LIMIT = 20; // Maximum number of files that can be attached to a chat
 export const NUMBER_OF_IMAGES_LIMIT = 5;
 export const NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT = 5; // Maximum number of files that can be attached to a shared chat
 export const NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT = 5; // Maximum number of links that can be attached to a shared chat
-export const MAX_WEBSEARCH_SOURCES_PER_CONVERSATION = 5; // Maximum number of websearch sources to scrape per conversation
+
+// Example prompts
 export const NUMBER_OF_EXAMPLE_PROMPTS_LIMIT = 10; // Maximum number of example prompts that can be added to an assistant
 export const EXAMPLE_PROMPT_LENGTH_LIMIT = 500; // Maximum length of an example prompt in characters

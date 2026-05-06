@@ -1,5 +1,5 @@
 import { dbChunksExistForSourceUrls, dbInsertWebChunks } from '@shared/db/functions/files';
-import { webScraper } from '../webpage-content/search-web';
+import { webScraper } from '../web-scraper/web-scraper';
 import { chunkAndEmbed } from './rag-service';
 
 /**

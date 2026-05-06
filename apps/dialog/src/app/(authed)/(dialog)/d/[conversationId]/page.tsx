@@ -11,7 +11,7 @@ import Logo from '@/components/common/logo';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
@@ -49,17 +49,17 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
     searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
   const convertedMessages = convertMessageModelToMessage(messages);
-  const webSourceMapping = new Map<string, WebsearchSource[]>();
+  const webSourceMapping = new Map<string, WebSource[]>();
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
 
   // prepare urls for citations
   for (const message of messages.filter((msg) => msg.role === 'user')) {
     const urls = parseHyperlinks(message.content);
     if (urls && urls.length > 0) {
-      const websearchSources: WebsearchSource[] = urls.map((url) => ({
+      const webSources: WebSource[] = urls.map((url) => ({
         link: url,
       }));
-      webSourceMapping.set(message.id, websearchSources);
+      webSourceMapping.set(message.id, webSources);
     }
   }
 
