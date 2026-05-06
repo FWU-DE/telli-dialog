@@ -17,5 +17,5 @@
     "lib": "@telli/ui/lib",
     "types": "@telli/ui/types"
   },
-  "iconLibrary": "lucide-react"
+  "iconLibrary": "@phosphor-icons/react"
 }
