@@ -4,14 +4,7 @@ import { useEffect, useState, useTransition } from 'react';
 import z from 'zod';
 import { toast } from 'sonner';
 import { Button } from '@ui/components/Button';
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@ui/components/Card';
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@ui/components/Card';
 import { Input } from '@ui/components/Input';
 import {
   Table,
