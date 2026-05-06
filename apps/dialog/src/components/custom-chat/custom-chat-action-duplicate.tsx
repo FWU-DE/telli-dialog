@@ -15,7 +15,7 @@ export function CustomChatActionDuplicate({ onClick }: { onClick: () => void }) 
         </Button>
       }
       title={t('duplicate-dialog.title')}
-      content={t('duplicate-dialog.description')}
+      description={t('duplicate-dialog.description')}
       cancelLabel={t('duplicate-dialog.cancel')}
       confirmLabel={t('duplicate-dialog.confirm')}
       confirmTestId="custom-chat-confirm-button"

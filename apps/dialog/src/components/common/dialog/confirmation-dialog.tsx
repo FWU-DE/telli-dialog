@@ -2,11 +2,13 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import { Button } from '@telli/ui/components/Button';
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -16,8 +18,10 @@ import {
 type ConfirmationDialogProps = {
   trigger: React.ReactElement;
   title: React.ReactNode;
+  description: React.ReactNode;
   content?: React.ReactNode;
   confirmLabel: React.ReactNode;
+  confirmVariant?: React.ComponentProps<typeof Button>['variant'];
   cancelLabel?: React.ReactNode;
   confirmTestId?: string;
   cancelTestId?: string;
@@ -28,8 +32,10 @@ type ConfirmationDialogProps = {
 export function ConfirmationDialog({
   trigger,
   title,
+  description,
   content,
   confirmLabel,
+  confirmVariant = 'default',
   cancelLabel,
   confirmTestId,
   cancelTestId,
@@ -64,13 +70,18 @@ export function ConfirmationDialog({
   }, [onConfirm]);
 
   return (
-    <AlertDialog open={open} onOpenChange={handleOpenChange}>
+    <AlertDialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      aria-describedby="confirmation-dialog-message"
+    >
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
-        {content !== undefined && <div className="overflow-y-auto">{content}</div>}
+        {content && <div className="overflow-y-auto">{content}</div>}
         <AlertDialogFooter>
           <AlertDialogCancel
             data-testid={cancelTestId}
@@ -80,9 +91,12 @@ export function ConfirmationDialog({
             {cancelLabel ?? t('cancel')}
           </AlertDialogCancel>
           <AlertDialogAction
+            variant={confirmVariant}
             data-testid={confirmTestId}
             disabled={isConfirming}
-            onClick={() => void handleConfirm()}
+            onClick={() => {
+              void handleConfirm();
+            }}
           >
             {confirmLabel}
           </AlertDialogAction>
