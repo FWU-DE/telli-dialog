@@ -1,6 +1,8 @@
 import NextAuth, { NextAuthResult } from 'next-auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
+import { NextResponse } from 'next/server';
 import { env } from '@/consts/env';
+import { withTrustedOrigin } from '@shared/utils/with-trusted-origin';
 
 declare module 'next-auth' {
   interface Session {
@@ -24,9 +26,17 @@ const result = NextAuth({
     async signIn() {
       return true;
     },
-    async authorized({ auth }) {
-      // Logged in users are authenticated, otherwise redirect to login page
-      return !!auth;
+    async authorized({ auth, request }) {
+      if (auth) {
+        return true;
+      }
+
+      const trustedRequest = withTrustedOrigin(request);
+      const signInUrl = new URL('/api/auth/signin', trustedRequest.url);
+      const relativeCallbackUrl = `${trustedRequest.nextUrl.pathname}${trustedRequest.nextUrl.search}`;
+      signInUrl.searchParams.set('callbackUrl', relativeCallbackUrl || '/');
+
+      return NextResponse.redirect(signInUrl);
     },
     async jwt({ token, account }) {
       // Capture idToken from account during sign-in
