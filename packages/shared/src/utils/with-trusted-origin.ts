@@ -26,10 +26,10 @@ export function withTrustedOrigin(req: NextRequest): NextRequest {
   if (!proto || !host) return req;
   if (proto !== 'http' && proto !== 'https') return req;
 
-  const authUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL;
-  if (authUrl) {
+  const configuredAuthUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL;
+  if (configuredAuthUrl) {
     try {
-      const configuredHost = new URL(authUrl).host;
+      const configuredHost = new URL(configuredAuthUrl).host;
       if (host !== configuredHost) {
         logWarning(
           'withTrustedOrigin: forwarded host does not match configured AUTH_URL, ignoring forwarded headers',
@@ -39,7 +39,7 @@ export function withTrustedOrigin(req: NextRequest): NextRequest {
       }
     } catch {
       logWarning('withTrustedOrigin: failed to parse AUTH_URL, ignoring forwarded headers', {
-        authUrl,
+        authUrl: configuredAuthUrl,
       });
       return req;
     }
