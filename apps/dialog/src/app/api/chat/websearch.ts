@@ -6,6 +6,8 @@ import {
   WEBSEARCH_RESULTS_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { logError } from '@shared/logging';
+import { dbInsertConversationToolCallUsage } from '@shared/db/functions/token-usage';
+import { dbGetToolCallCostByName } from '@shared/db/functions/tool-call';
 
 export async function isWebSearchNeeded({
   query,
@@ -76,7 +78,15 @@ Beispiele:
  * @param query The search query string.
  * @returns An array of text search results from the Linkup API.
  */
-export async function searchWeb(query: string): Promise<TextSearchResult[]> {
+export async function searchWeb({
+  query,
+  conversationId,
+  userId,
+}: {
+  query: string;
+  conversationId: string;
+  userId: string;
+}): Promise<TextSearchResult[]> {
   if (!env.linkupApiKey) {
     return [];
   }
@@ -85,11 +95,19 @@ export async function searchWeb(query: string): Promise<TextSearchResult[]> {
     const linkupClient = new LinkupClient({
       apiKey: env.linkupApiKey,
     });
+    const toolCallCostPromise = dbGetToolCallCostByName('web_search');
 
     const searchResults = await linkupClient.search({
       query: query,
       depth: 'standard',
       outputType: 'searchResults',
+    });
+
+    await dbInsertConversationToolCallUsage({
+      toolCallName: 'web_search',
+      conversationId,
+      userId,
+      costsInCent: (await toolCallCostPromise).costsInCent,
     });
 
     if (!Array.isArray(searchResults.results)) {

@@ -15,7 +15,11 @@ import {
   vector,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import { type DesignConfiguration, type LlmModelPriceMetadata } from './types';
+import {
+  type DesignConfiguration,
+  type LlmModelPriceMetadata,
+  type WebSearchResult,
+} from './types';
 import {
   conversationRoleSchema,
   conversationTypeSchema,
@@ -23,7 +27,6 @@ import {
 } from '../utils/chat';
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
-import type { TextSearchResult } from 'linkup-sdk';
 
 // can be expanded to include other metadata of other file types
 export type FileMetadata = {
@@ -140,7 +143,7 @@ export const conversationMessageTable = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
     parameters: json('parameters').$type<ConversationMessageParameters>(),
-    webSearchResults: json('web_search_results').$type<TextSearchResult[]>(),
+    webSearchResults: json('web_search_results').$type<WebSearchResult[]>(),
   },
   (table) => [index().on(table.conversationId), index().on(table.userId)],
 );
@@ -735,6 +738,42 @@ export type LearningScenarioOptionalShareDataModel = z.infer<
   typeof learningScenarioOptionalShareDataModel
 >;
 
+export const toolCallNameSchema = z.enum(['web_search']);
+export const toolCallNameEnum = pgEnum('tool_call_name', toolCallNameSchema.enum);
+export type ToolCallName = z.infer<typeof toolCallNameSchema>;
+
+export const toolCallCostTable = pgTable('tool_call_cost', {
+  toolCallName: toolCallNameEnum('tool_call_name').primaryKey(),
+  costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
+  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+    .defaultNow()
+    .$onUpdateFn(() => new Date())
+    .notNull(),
+});
+
+export const toolCallCostSelectSchema = createSelectSchema(toolCallCostTable).extend({
+  toolCallName: toolCallNameSchema,
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+});
+export const toolCallCostInsertSchema = createInsertSchema(toolCallCostTable).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+export const toolCallCostUpdateSchema = createUpdateSchema(toolCallCostTable)
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    toolCallName: toolCallNameSchema,
+  });
+
+export type ToolCallCostSelectModel = z.infer<typeof toolCallCostSelectSchema>;
+export type ToolCallCostInsertModel = z.infer<typeof toolCallCostInsertSchema>;
+export type ToolCallCostUpdateModel = z.infer<typeof toolCallCostUpdateSchema>;
+
 /**
  * Schema for table shared_learning_scenario_usage_tracking
  */
@@ -742,7 +781,8 @@ export const sharedLearningScenarioUsageTracking = pgTable(
   'shared_learning_scenario_usage_tracking',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    modelId: uuid('model_id').notNull(),
+    modelId: uuid('model_id'),
+    toolCallName: toolCallNameEnum('tool_call_name'),
     // learningScenarioId is not a FK, because usage tracking must be kept even when the learning scenario is deleted
     learningScenarioId: uuid('learning_scenario_id').notNull(),
     userId: uuid('user_id').notNull(),
@@ -770,17 +810,23 @@ export const sharedLearningScenarioUsageTracking = pgTable(
 export const sharedLearningScenarioUsageTrackingSelectSchema = createSelectSchema(
   sharedLearningScenarioUsageTracking,
 ).extend({
+  toolCallName: toolCallNameSchema.nullable(),
   createdAt: z.coerce.date(),
 });
 export const sharedLearningScenarioUsageTrackingInsertSchema = createInsertSchema(
   sharedLearningScenarioUsageTracking,
-).omit({ id: true, createdAt: true });
+)
+  .omit({ id: true, createdAt: true })
+  .extend({
+    toolCallName: toolCallNameSchema.nullable().optional(),
+  });
 export const sharedLearningScenarioUsageTrackingUpdateSchema = createUpdateSchema(
   sharedLearningScenarioUsageTracking,
 )
   .omit({ createdAt: true })
   .extend({
     id: z.string(),
+    toolCallName: toolCallNameSchema.nullable().optional(),
   });
 
 export type SharedLearningScenarioUsageTrackingSelectModel = z.infer<
@@ -800,9 +846,8 @@ export const conversationUsageTracking = pgTable(
   'conversation_usage_tracking',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    modelId: uuid('model_id')
-      .notNull()
-      .references(() => llmModelTable.id),
+    modelId: uuid('model_id').references(() => llmModelTable.id),
+    toolCallName: toolCallNameEnum('tool_call_name'),
     // this rows will be kept forever even if conversations are deleted, therefore we cannot enforce a foreign key constaint here
     conversationId: uuid('conversation_id').notNull(),
     // for easier tracking we add a user_id here to make less joins as this table will contain a lot of entries
@@ -823,15 +868,19 @@ export const conversationUsageTracking = pgTable(
 export const conversationUsageTrackingSelectSchema = createSelectSchema(
   conversationUsageTracking,
 ).extend({
+  toolCallName: toolCallNameSchema.nullable(),
   createdAt: z.coerce.date(),
 });
-export const conversationUsageTrackingInsertSchema = createInsertSchema(
-  conversationUsageTracking,
-).omit({ id: true, createdAt: true });
+export const conversationUsageTrackingInsertSchema = createInsertSchema(conversationUsageTracking)
+  .omit({ id: true, createdAt: true })
+  .extend({
+    toolCallName: toolCallNameSchema.nullable().optional(),
+  });
 export const conversationUsageTrackingUpdateSchema = createUpdateSchema(conversationUsageTracking)
   .omit({ createdAt: true })
   .extend({
     id: z.string(),
+    toolCallName: toolCallNameSchema.nullable().optional(),
   });
 
 export type ConversationUsageTrackingSelectModel = z.infer<
@@ -913,9 +962,8 @@ export const sharedCharacterChatUsageTrackingTable = pgTable(
   'shared_character_chat_usage_tracking',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    modelId: uuid('model_id')
-      .notNull()
-      .references(() => llmModelTable.id),
+    modelId: uuid('model_id').references(() => llmModelTable.id),
+    toolCallName: toolCallNameEnum('tool_call_name'),
     characterId: uuid('character_id').notNull(),
     userId: uuid('user_id').notNull(),
     completionTokens: integer('completion_tokens').notNull(),
@@ -929,17 +977,23 @@ export const sharedCharacterChatUsageTrackingTable = pgTable(
 export const sharedCharacterChatUsageTrackingSelectSchema = createSelectSchema(
   sharedCharacterChatUsageTrackingTable,
 ).extend({
+  toolCallName: toolCallNameSchema.nullable(),
   createdAt: z.coerce.date(),
 });
 export const sharedCharacterChatUsageTrackingInsertSchema = createInsertSchema(
   sharedCharacterChatUsageTrackingTable,
-).omit({ id: true, createdAt: true });
+)
+  .omit({ id: true, createdAt: true })
+  .extend({
+    toolCallName: toolCallNameSchema.nullable().optional(),
+  });
 export const sharedCharacterChatUsageTrackingUpdateSchema = createUpdateSchema(
   sharedCharacterChatUsageTrackingTable,
 )
   .omit({ createdAt: true })
   .extend({
     id: z.string(),
+    toolCallName: toolCallNameSchema.nullable().optional(),
   });
 
 export type SharedCharacterChatUsageTrackingSelectModel = z.infer<

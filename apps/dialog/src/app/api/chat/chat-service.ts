@@ -152,7 +152,13 @@ export async function sendChatMessage({
       modelId: auxiliaryModel.id,
       apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
     }));
-  const webSearchResults = needsWebSearch ? await searchWeb(userMessage.content) : [];
+  const webSearchResults = needsWebSearch
+    ? await searchWeb({
+        query: userMessage.content,
+        conversationId: conversation.id,
+        userId: user.id,
+      })
+    : [];
 
   // Save user message to DB
   await dbInsertChatContent({
