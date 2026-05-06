@@ -14,6 +14,7 @@ import {
   DialogDescription,
   DialogClose,
   DialogFooter,
+  DialogHeader,
 } from '@telli/ui/components/Dialog';
 import { Button } from '@telli/ui/components/Button';
 import { FilterTabs } from '@telli/ui/components/FilterTabs';
@@ -92,13 +93,13 @@ export default function EntityOverview({
                   <InfoIcon className="size-8" aria-hidden="true" />
                 </Button>
               </DialogTrigger>
-              <DialogContent showCloseButton={false} className="overflow-hidden">
-                <div className="min-h-0 overflow-y-auto">
+              <DialogContent>
+                <DialogHeader>
                   <DialogTitle>{title}</DialogTitle>
                   <DialogDescription asChild>
                     <div>{infoTooltip}</div>
                   </DialogDescription>
-                </div>
+                </DialogHeader>
 
                 <DialogFooter>
                   <DialogClose asChild>

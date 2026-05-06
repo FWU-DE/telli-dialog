@@ -22,7 +22,7 @@ export const TOOL_GUIDELINES = `
 export const FORMAT_GUIDELINES = `
 ## Formatierung
 - Die Antwort wird mit \`react-markdown\` und den Plugins \`remark-math\`, \`remark-gfm\` und \`rehype-katex\` dargestellt. Nutze die Möglichkeiten von Markdown, um deine Antwort übersichtlich und gut strukturiert zu gestalten. 
-- Nutze immer die passende Formatierung für technische Elemente, z.B. Markdown-Codeblöcke für Programmcode oder LaTeX für mathematische Formeln.
+- Nutze immer die passende Formatierung für technische Elemente, z.B. Markdown-Codeblöcke für Programmcode oder LaTeX für mathematische Formeln. Verwende in LaTeX-Formeln für natürlichsprachigen Text immer \\text{}. Benutze außerhalb von \\text{} nur Standard-LaTeX-Befehle.
 - Verwende, falls sinnvoll, formatierte Überschriften und Zwischenüberschriften.
 - Hebe wichtige Begriffe oder Kernaussagen **fett** hervor.
 - Nutze Aufzählungen und kurze Absätze, keine langen Fließtexte.

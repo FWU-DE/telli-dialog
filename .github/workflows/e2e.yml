@@ -182,6 +182,7 @@ jobs:
           NEXT_TELEMETRY_DISABLED: 1
           TURBO_TELEMETRY_DISABLED: 1
           NODE_ENV: test
+          LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
 
       - name: Run E2E tests (dialog)
         run: pnpm --filter telli-dialog e2e
