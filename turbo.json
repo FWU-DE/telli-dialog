@@ -48,8 +48,6 @@
     "PORT",
     "SENTRY_PROFILE_SESSION_SAMPLE_RATE",
     "STAGE_DATABASE_URL",
-    "AUTH_URL",
-    "NEXTAUTH_URL",
     "LOG_LEVEL"
   ],
   "tasks": {

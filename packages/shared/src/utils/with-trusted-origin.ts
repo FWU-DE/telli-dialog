@@ -1,4 +1,3 @@
-import { logWarning } from '@shared/logging';
 import { NextRequest } from 'next/server';
 
 /**
@@ -11,9 +10,6 @@ import { NextRequest } from 'next/server';
  *
  * When AUTH_URL is set (e.g. in CI), next-auth's own reqWithEnvURL already
  * rewrites the URL before reaching this handler, so there is no conflict.
- *
- * The forwarded host is validated against AUTH_URL (when configured) to prevent
- * open-redirect attacks caused by spoofed x-forwarded-host headers.
  */
 export function withTrustedOrigin(req: NextRequest): NextRequest {
   const forwardedProto = req.headers.get('x-forwarded-proto');
@@ -25,25 +21,6 @@ export function withTrustedOrigin(req: NextRequest): NextRequest {
 
   if (!proto || !host) return req;
   if (proto !== 'http' && proto !== 'https') return req;
-
-  const configuredAuthUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL;
-  if (configuredAuthUrl) {
-    try {
-      const configuredHost = new URL(configuredAuthUrl).host;
-      if (host !== configuredHost) {
-        logWarning(
-          'withTrustedOrigin: forwarded host does not match configured AUTH_URL, ignoring forwarded headers',
-          { forwardedHost: host, configuredHost },
-        );
-        return req;
-      }
-    } catch {
-      logWarning('withTrustedOrigin: failed to parse AUTH_URL, ignoring forwarded headers', {
-        authUrl: configuredAuthUrl,
-      });
-      return req;
-    }
-  }
 
   const trustedOrigin = `${proto}://${host}`;
   const { href, origin } = req.nextUrl;
