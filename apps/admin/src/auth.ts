@@ -2,6 +2,12 @@ import NextAuth, { NextAuthResult } from 'next-auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
 import { env } from '@/consts/env';
 
+declare module 'next-auth' {
+  interface Session {
+    idToken?: string; // needed for logout at identity provider (keycloak)
+  }
+}
+
 // Default provider for stage and prod
 const keycloakProvider = KeycloakProvider({
   // https://next-auth.js.org/configuration/providers/oauth#userinfo-option
@@ -22,10 +28,18 @@ const result = NextAuth({
       // Logged in users are authenticated, otherwise redirect to login page
       return !!auth;
     },
-    async jwt({ token }) {
+    async jwt({ token, account }) {
+      // Capture idToken from account during sign-in
+      if (account?.id_token) {
+        token.id_token = account.id_token;
+      }
       return token;
     },
-    async session({ session }) {
+    async session({ session, token }) {
+      // Pass idToken from token to session for logout flow
+      if (token?.id_token) {
+        session.idToken = token.id_token as string;
+      }
       return session;
     },
   },

@@ -28,7 +28,7 @@ export function CustomChatShareInfo({
   };
 
   return (
-    <div className="flex items-center px-6 py-4 justify-between text-base font-medium rounded-xl bg-secondary/30">
+    <div className="flex items-center mb-5 px-6 py-4 justify-between text-base font-medium rounded-xl bg-secondary/30">
       <span>{info}</span>
       <a
         href={href}

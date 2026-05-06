@@ -1,12 +1,15 @@
+'use client';
+
 import useBreakpoints from '../hooks/use-breakpoints';
 import { useTranslations } from 'next-intl';
-import DestructiveActionButton from '../common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
 import DownloadSharedConversationButton from '@/app/(unauth)/ua/download-shared-conversation-button';
 import Image from 'next/image';
 import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import { type ChatMessage as Message } from '@/types/chat';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
+import { ConfirmAlertDialog, useConfirmAlertDialog } from '@ui/components/AlertDialog';
+import { Button } from '@ui/components/Button';
 import { TrashSimpleIcon } from '@phosphor-icons/react';
 
 export function SharedChatHeader({
@@ -32,25 +35,11 @@ export function SharedChatHeader({
 }) {
   const { isBelow } = useBreakpoints();
   const tCommon = useTranslations('common');
+  const { dialogProps: deleteDialogProps, confirm: confirmDelete } = useConfirmAlertDialog();
 
   const showCompactHeader = isBelow[reductionBreakpoint];
 
-  const deleteChatElement = (
-    <DestructiveActionButton
-      triggerButtonVariant="ghost"
-      triggerButtonSize="icon-round"
-      modalTitle={t('delete-chat-modal-title')}
-      confirmText={t('delete-chat-modal-confirm-button')}
-      modalDescription={t('delete-chat-modal-description')}
-      triggerButtonClassName="text-primary"
-      actionFn={handleOpenNewChat}
-    >
-      <span className="flex items-center gap-2">
-        <TrashSimpleIcon className="size-5 text-primary" />
-        {showCompactHeader ? tCommon('delete') : ''}
-      </span>
-    </DestructiveActionButton>
-  );
+  const openDeleteConfirm = () => confirmDelete(handleOpenNewChat);
 
   return (
     <header
@@ -59,22 +48,30 @@ export function SharedChatHeader({
         isBelow[reductionBreakpoint] && 'justify-start',
       )}
     >
-      {!showCompactHeader && deleteChatElement}
+      {!showCompactHeader && (
+        <Button
+          variant="ghost"
+          size="icon-round"
+          className="text-primary"
+          onClick={openDeleteConfirm}
+          data-testid="custom-chat-delete-button"
+        >
+          <TrashSimpleIcon className="size-5 text-primary" />
+        </Button>
+      )}
       <div className="grow"></div>
-      {
-        <span className="flex justify-start text-xl text-ellipsis truncate items-center gap-2">
-          {dialogStarted && imageSource && (
-            <Image
-              src={imageSource ?? ''}
-              alt={title}
-              width={30}
-              height={30}
-              className="rounded-enterprise-sm"
-            />
-          )}
-          {dialogStarted && <span className="truncate">{title}</span>}
-        </span>
-      }
+      <span className="flex justify-start text-xl text-ellipsis truncate items-center gap-2">
+        {dialogStarted && imageSource && (
+          <Image
+            src={imageSource ?? ''}
+            alt={title}
+            width={30}
+            height={30}
+            className="rounded-enterprise-sm"
+          />
+        )}
+        {dialogStarted && <span className="truncate">{title}</span>}
+      </span>
       <div className="grow"></div>
 
       {!showCompactHeader ? (
@@ -99,9 +96,25 @@ export function SharedChatHeader({
               inviteCode={inviteCode}
             />
           }
-          deleteButtonJSX={deleteChatElement}
+          deleteButtonJSX={
+            <Button
+              variant="ghost"
+              onClick={openDeleteConfirm}
+              data-testid="custom-chat-delete-button"
+            >
+              <TrashSimpleIcon className="size-5 text-primary" />
+              {tCommon('delete')}
+            </Button>
+          }
         />
       )}
+      <ConfirmAlertDialog
+        title={t('delete-chat-modal-title')}
+        description={t('delete-chat-modal-description')}
+        confirmLabel={t('delete-chat-modal-confirm-button')}
+        cancelLabel={tCommon('cancel')}
+        {...deleteDialogProps}
+      />
     </header>
   );
 }

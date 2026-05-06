@@ -26,8 +26,8 @@ export default function ProductAccessModal({ children, modalTitle }: ProductAcce
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{modalTitle}</AlertDialogTitle>
+          <AlertDialogDescription>{children}</AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogDescription>{children}</AlertDialogDescription>
         <AlertDialogFooter>
           <AlertDialogAction
             variant="outline"

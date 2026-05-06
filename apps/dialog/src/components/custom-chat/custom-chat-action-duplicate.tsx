@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@ui/components/Dialog';
@@ -29,8 +30,10 @@ export function CustomChatActionDuplicate({ onClick }: { onClick: () => void }) 
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogTitle>{t('duplicate-dialog.title')}</DialogTitle>
-        <DialogDescription>{t('duplicate-dialog.description')}</DialogDescription>
+        <DialogHeader>
+          <DialogTitle>{t('duplicate-dialog.title')}</DialogTitle>
+          <DialogDescription>{t('duplicate-dialog.description')}</DialogDescription>
+        </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" type="button">

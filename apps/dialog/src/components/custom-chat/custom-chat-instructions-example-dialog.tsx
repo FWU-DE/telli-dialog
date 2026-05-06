@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@ui/components/Dialog';
@@ -38,11 +39,11 @@ export function CustomChatInstructionsExampleDialog({
           <CaretRightIcon className="size-3.5 text-primary ml-1" />
         </Button>
       </DialogTrigger>
-      <DialogContent showCloseButton={false} className="overflow-hidden">
-        <div className="min-h-0 overflow-y-auto">
+      <DialogContent>
+        <DialogHeader>
           <DialogTitle className="mb-2">{t('title')}</DialogTitle>
           <DialogDescription asChild>{descriptionContent}</DialogDescription>
-        </div>
+        </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button">{t('close')}</Button>

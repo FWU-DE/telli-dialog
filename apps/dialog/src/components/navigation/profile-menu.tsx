@@ -120,14 +120,16 @@ export function ThreeDotsProfileMenu({
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <button
+        <Button
+          variant="ghost"
+          size="icon-round"
           type="button"
           aria-label="More actions"
           title="More actions"
-          className="size-10 rounded-full inline-flex items-center justify-center text-primary hover:bg-muted dark:hover:bg-muted/50 focus:outline-hidden focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="text-primary"
         >
           <DotsThreeIcon weight="bold" className="size-6" />
-        </button>
+        </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal container={container}>
         <DropdownMenu.Content

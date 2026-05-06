@@ -1,8 +1,8 @@
 import { auth } from '@/auth';
+import { env } from '@/consts/env';
 import { logError, logInfo, logWarning } from '@shared/logging';
 import { withTrustedOrigin } from '@shared/utils/with-trusted-origin';
 import { NextRequest, NextResponse } from 'next/server';
-import { VIDIS_LOGOUT_URL } from '@/auth/providers/vidis-provider';
 
 function handleEmptyToken(request: NextRequest) {
   logWarning('No valid token found, redirecting to logout-callback url');
@@ -11,7 +11,7 @@ function handleEmptyToken(request: NextRequest) {
 
 function redirectToIDP(request: NextRequest, idToken: string) {
   logInfo('Redirect to IDP with token for logout');
-  const logoutUrl = new URL(VIDIS_LOGOUT_URL); // create a new URL object to avoid mutating the existing one
+  const logoutUrl = new URL(`${env.keycloakIssuer}/protocol/openid-connect/logout`);
   logoutUrl.searchParams.append('id_token_hint', idToken);
   logoutUrl.searchParams.append(
     'post_logout_redirect_uri',
