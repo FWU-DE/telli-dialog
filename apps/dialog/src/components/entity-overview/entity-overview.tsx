@@ -93,7 +93,7 @@ export default function EntityOverview({
                   <InfoIcon className="size-8" aria-hidden="true" />
                 </Button>
               </DialogTrigger>
-              <DialogContent showCloseButton={false} className="overflow-hidden">
+              <DialogContent>
                 <DialogHeader>
                   <DialogTitle>{title}</DialogTitle>
                   <DialogDescription asChild>
