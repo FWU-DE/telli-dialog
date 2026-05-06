@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -16,11 +17,12 @@ import { Button } from '@telli/ui/components/Button';
 type InfoDialogProps = {
   trigger: React.ReactElement;
   title: React.ReactNode;
-  content: React.ReactNode;
+  description?: React.ReactNode;
+  content?: React.ReactNode;
   closeLabel?: React.ReactNode;
 };
 
-export function InfoDialog({ trigger, title, content, closeLabel }: InfoDialogProps) {
+export function InfoDialog({ trigger, title, description, content, closeLabel }: InfoDialogProps) {
   const [open, setOpen] = React.useState(false);
   const t = useTranslations('common');
 
@@ -30,8 +32,11 @@ export function InfoDialog({ trigger, title, content, closeLabel }: InfoDialogPr
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
+          <DialogDescription className={description ? '' : 'sr-only'}>
+            {description}
+          </DialogDescription>
         </DialogHeader>
-        <div className="overflow-y-auto">{content}</div>
+        {content && <div className="overflow-y-auto">{content}</div>}
         <DialogFooter>
           <DialogClose asChild>
             <Button>{closeLabel ?? t('close')}</Button>
