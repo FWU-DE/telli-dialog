@@ -1,19 +1,10 @@
 'use client';
 
-import { ReactElement, useState } from 'react';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@ui/components/Dialog';
+import { ReactElement } from 'react';
 import { Button } from '@ui/components/Button';
 import { useTranslations } from 'next-intl';
 import { CaretRightIcon } from '@phosphor-icons/react';
+import { InfoDialog } from '../common/dialog';
 
 type CustomChatInstructionsExampleDialogProps = {
   descriptionContent: ReactElement;
@@ -22,13 +13,11 @@ type CustomChatInstructionsExampleDialogProps = {
 export function CustomChatInstructionsExampleDialog({
   descriptionContent,
 }: CustomChatInstructionsExampleDialogProps) {
-  const [open, setOpen] = useState(false);
-
   const t = useTranslations('custom-chat.instructions-example');
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <InfoDialog
+      trigger={
         <Button
           variant="link"
           type="button"
@@ -38,18 +27,9 @@ export function CustomChatInstructionsExampleDialog({
           {t('button')}
           <CaretRightIcon className="size-3.5 text-primary ml-1" />
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="mb-2">{t('title')}</DialogTitle>
-          <DialogDescription asChild>{descriptionContent}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button">{t('close')}</Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      }
+      title={t('title')}
+      content={descriptionContent}
+    />
   );
 }
