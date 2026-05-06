@@ -15,7 +15,8 @@
     "hooks": "@telli/ui/hooks",
     "utils": "@telli/ui/lib/utils",
     "lib": "@telli/ui/lib",
-    "types": "@telli/ui/types"
+    "types": "@telli/ui/types",
+    "ui": "@telli/ui/components/ui"
   },
   "iconLibrary": "@phosphor-icons/react"
 }
