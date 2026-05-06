@@ -24,7 +24,7 @@ test.describe('POST /v1/images/generations', () => {
     expect(body).toHaveProperty('error');
   });
 
-  test.fixme('generates an image from a prompt', async ({ request }) => {
+  test('generates an image from a prompt', async ({ request }) => {
     const imageModel = await getImageModel(request);
 
     const response = await request.post('/v1/images/generations', {

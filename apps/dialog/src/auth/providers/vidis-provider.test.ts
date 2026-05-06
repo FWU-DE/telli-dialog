@@ -68,9 +68,6 @@ describe('vidis provider', () => {
       expect(result).toEqual({ success: true });
       expect(mockDbCreateUser).toHaveBeenCalledWith({
         id: 'user-123',
-        firstName: '',
-        lastName: '',
-        email: 'user-123@vidis.schule',
         schoolIds: ['A', 'B'],
         federalStateId: 'DE-TEST',
         userRole: 'teacher',
@@ -82,9 +79,6 @@ describe('vidis provider', () => {
       mockDbGetFederalStateById.mockResolvedValue({ id: 'DE-TEST' });
       mockDbGetUserById.mockResolvedValue({
         id: 'user-123',
-        email: 'user-123@vidis.schule',
-        firstName: '',
-        lastName: '',
         federalStateId: 'BY',
       });
 
@@ -94,9 +88,6 @@ describe('vidis provider', () => {
       expect(mockDbCreateUser).not.toHaveBeenCalled();
       expect(mockDbUpdateUserById).toHaveBeenCalledWith({
         id: 'user-123',
-        email: 'user-123@vidis.schule',
-        firstName: '',
-        lastName: '',
         schoolIds: ['school-123'],
         federalStateId: 'DE-TEST',
         userRole: 'teacher',
@@ -107,9 +98,6 @@ describe('vidis provider', () => {
       mockDbGetFederalStateById.mockResolvedValue({ id: 'DE-TEST' });
       mockDbGetUserById.mockResolvedValue({
         id: 'user-123',
-        email: 'existing@vidis.schule',
-        firstName: 'First',
-        lastName: 'Last',
         federalStateId: 'DE-TEST',
       });
 
@@ -120,9 +108,6 @@ describe('vidis provider', () => {
       expect(result).toEqual({ success: true });
       expect(mockDbUpdateUserById).toHaveBeenCalledWith({
         id: 'user-123',
-        email: 'existing@vidis.schule',
-        firstName: 'First',
-        lastName: 'Last',
         schoolIds: ['school-1'],
         federalStateId: 'DE-TEST',
         userRole: 'student',

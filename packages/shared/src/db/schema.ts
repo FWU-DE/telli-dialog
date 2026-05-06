@@ -40,9 +40,6 @@ export type UserRole = z.infer<typeof userRoleSchema>;
  */
 export const userTable = pgTable('user_entity', {
   id: uuid('id').defaultRandom().primaryKey(),
-  firstName: text('first_name').notNull(),
-  lastName: text('last_name').notNull(),
-  email: text('email').notNull().unique(),
   lastUsedModel: text('last_used_model'),
   versionAcceptedConditions: integer(),
   schoolIds: text('school_ids')
@@ -178,6 +175,7 @@ export const federalStateFeatureTogglesSchema = z.object({
   isCustomGptEnabled: z.boolean().default(true),
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
   isImageGenerationEnabled: z.boolean().optional(),
+  isWebSearchEnabled: z.boolean().optional(),
 });
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
 

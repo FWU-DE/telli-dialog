@@ -57,6 +57,11 @@ function transformToFederalStateEditForm(federalState: FederalStateModel): Feder
   return {
     ...federalState,
     // Only transform the fields that need UI-specific formatting
+    featureToggles: {
+      ...federalState.featureToggles,
+      isImageGenerationEnabled: federalState.featureToggles.isImageGenerationEnabled ?? false,
+      isWebSearchEnabled: federalState.featureToggles.isWebSearchEnabled ?? false,
+    },
     supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
     designConfiguration: federalState.designConfiguration
       ? JSON.stringify(federalState.designConfiguration, null, 2)
@@ -246,6 +251,12 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="featureToggles.isImageGenerationEnabled"
             label="Bildgenerierung aktivieren"
             description="Erlaubt die Nutzung der Bildgenerierungsfunktion."
+            control={control}
+          />
+          <FormFieldCheckbox
+            name="featureToggles.isWebSearchEnabled"
+            label="Websuche aktivieren"
+            description="Erlaubt die Nutzung der Websuchfunktion."
             control={control}
           />
           <FormField

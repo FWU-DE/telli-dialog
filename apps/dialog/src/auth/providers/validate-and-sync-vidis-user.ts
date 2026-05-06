@@ -27,9 +27,6 @@ export async function validateAndSyncVidisUser(profile: unknown): Promise<VidisS
   if (!existingUser) {
     await dbCreateUser({
       id: parsedProfile.sub,
-      firstName: '',
-      lastName: '',
-      email: `${parsedProfile.sub}@vidis.schule`,
       schoolIds,
       federalStateId: federalState.id,
       userRole,
@@ -40,9 +37,6 @@ export async function validateAndSyncVidisUser(profile: unknown): Promise<VidisS
 
   await dbUpdateUserById({
     id: existingUser.id,
-    firstName: existingUser.firstName,
-    lastName: existingUser.lastName,
-    email: existingUser.email,
     schoolIds,
     federalStateId: federalState.id,
     userRole,

@@ -3,20 +3,22 @@
 import { cn } from '@/utils/tailwind';
 import StopWatchIcon from '@/components/icons/stopwatch';
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 type CountDownTimerProps = {
-  leftTime: number;
-  totalTime: number;
+  leftTimeInSeconds: number;
+  totalTimeInMinutes: number;
   className?: string;
   stopWatchClassName?: string;
 };
 export default function CountDownTimer({
-  leftTime,
-  totalTime,
+  leftTimeInSeconds,
+  totalTimeInMinutes,
   className,
   stopWatchClassName,
 }: CountDownTimerProps) {
-  const [timeRemaining, setTimeRemaining] = React.useState(leftTime);
+  const t = useTranslations('sharing');
+  const [timeRemaining, setTimeRemaining] = React.useState(Math.max(leftTimeInSeconds, 0));
 
   React.useEffect(() => {
     const timer = setInterval(() => {
@@ -29,13 +31,15 @@ export default function CountDownTimer({
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [leftTime]);
+  }, [leftTimeInSeconds]);
 
-  const textClassName = getColorByLeftAndTotalTime({ leftTime, totalTime });
+  const textClassName = getColorByLeftAndTotalTime({ leftTimeInSeconds, totalTimeInMinutes });
 
   return (
     <div
-      id="countdown-timer"
+      data-testid="countdown-timer"
+      role="timer"
+      aria-label={t('countdown-timer-label')}
       className={cn(
         'flex gap-2 items-center min-w-36 px-4 py-2 rounded-xl justify-center',
         className,
@@ -43,7 +47,7 @@ export default function CountDownTimer({
       )}
     >
       <StopWatchIcon className={stopWatchClassName} />
-      <span>{formatTime(timeRemaining)}</span>
+      <span aria-hidden="true">{formatTime(timeRemaining)}</span>
     </div>
   );
 }
@@ -63,8 +67,12 @@ function formatTime(totalSeconds: number) {
   }
 }
 
-function getColorByLeftAndTotalTime({ leftTime, totalTime }: CountDownTimerProps) {
-  const percentage = leftTime / totalTime;
+function getColorByLeftAndTotalTime({
+  leftTimeInSeconds,
+  totalTimeInMinutes,
+}: CountDownTimerProps) {
+  const totalTimeInSeconds = totalTimeInMinutes * 60;
+  const percentage = leftTimeInSeconds / totalTimeInSeconds;
 
   if (percentage > 0.2) {
     return 'text-[#00594f] bg-[#6CE9D70D]';
