@@ -1,17 +1,35 @@
 'use client';
 
-import { startTransition, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import type { OverviewFilter } from '@shared/overview-filter';
+import { overviewFilterSchema } from '@shared/overview-filter';
 
 type EntityType = 'characters' | 'learning-scenarios' | 'assistants';
 
-const VALID_FILTERS: OverviewFilter[] = ['all', 'mine', 'official', 'school'];
-
 function parseFilter(value: string | null): OverviewFilter | null {
-  if (value && (VALID_FILTERS as string[]).includes(value)) {
-    return value as OverviewFilter;
+  const result = overviewFilterSchema.safeParse(value);
+  return result.success ? result.data : null;
+}
+
+function resolveInitialFilter(sessionStorageKey: string): OverviewFilter {
+  const stored = sessionStorage.getItem(sessionStorageKey);
+  if (stored) {
+    return parseFilter(stored) ?? 'all';
   }
-  return null;
+  // Legacy bookmark support: read URL param once on mount
+  const urlFilter = parseFilter(new URLSearchParams(window.location.search).get('filter'));
+  if (urlFilter) {
+    sessionStorage.setItem(sessionStorageKey, urlFilter);
+    return urlFilter;
+  }
+  return 'all';
 }
 
 /**
@@ -27,43 +45,34 @@ export function useOverviewFilter(
   entityType: EntityType,
   onLoad: (filter: OverviewFilter) => Promise<void>,
 ): [OverviewFilter, (filter: OverviewFilter) => Promise<void>, boolean] {
-  const [filter, setFilterState] = useState<OverviewFilter>('all');
+  const sessionStorageKey = `overview-filter-${entityType}`;
+  // useSyncExternalStore provides the sessionStorage value synchronously on the client
+  // and 'all' as a server snapshot, preventing SSR crashes without hydration mismatches.
+  const sessionStorageFilter = useSyncExternalStore<OverviewFilter>(
+    () => () => {},
+    () => resolveInitialFilter(sessionStorageKey),
+    () => 'all',
+  );
+  // manualFilter holds user-initiated changes; null means "use sessionStorageFilter"
+  const [manualFilter, setManualFilter] = useState<OverviewFilter | null>(null);
+  const filter = manualFilter ?? sessionStorageFilter;
   const [isLoading, setIsLoading] = useState(true);
   const onLoadRef = useRef(onLoad);
-  const sessionStorageKey = `overview-filter-${entityType}`;
 
   useEffect(() => {
     onLoadRef.current = onLoad;
   });
 
-  // Determine initial filter and perform initial load on mount
+  // Perform initial load on mount
   useEffect(() => {
-    let initialFilter: OverviewFilter = 'all';
-
-    const stored = sessionStorage.getItem(sessionStorageKey);
-    if (stored) {
-      initialFilter = parseFilter(stored) ?? 'all';
-    } else {
-      // Legacy bookmark support: read URL param once on mount
-      const urlFilter = parseFilter(new URLSearchParams(window.location.search).get('filter'));
-      if (urlFilter) {
-        initialFilter = urlFilter;
-        sessionStorage.setItem(sessionStorageKey, initialFilter);
-      }
-    }
-
-    startTransition(() => {
-      setFilterState(initialFilter);
-      setIsLoading(true);
-    });
-    onLoadRef.current(initialFilter).finally(() => startTransition(() => setIsLoading(false)));
+    onLoadRef.current(filter).finally(() => startTransition(() => setIsLoading(false)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setFilter = useCallback(
     async (newFilter: OverviewFilter) => {
       sessionStorage.setItem(sessionStorageKey, newFilter);
-      setFilterState(newFilter);
+      setManualFilter(newFilter);
       setIsLoading(true);
       try {
         await onLoadRef.current(newFilter);
