@@ -11,7 +11,8 @@ const getWindowWidth = () => {
   if (typeof window !== 'undefined') {
     return window.innerWidth;
   }
-  return 0;
+  // Default to desktop width on server (1024px) to match typical client-side rendering
+  return 1024;
 };
 
 export default function useBreakpoints() {

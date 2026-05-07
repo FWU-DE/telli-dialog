@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { InfoIcon } from '@phosphor-icons/react';
+import { InfoIcon } from 'lucide-react';
 import { Tooltip as TooltipPrimitive } from 'radix-ui';
 
 import { DEFAULT_TOOLTIP_DELAY_DURATION, DEFAULT_SCROLLING_TOOLTIP_DELAY_DURATION } from './const';

@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@ui/components/Button';
 import { useToast } from '@/components/common/toast';
 import WebDownloadIcon from '@/components/icons/web-download';
+import Spinner from '@/components/icons/spinner';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type DownloadConversationMessageButtonProps = {
   conversationId: string;
@@ -56,17 +58,29 @@ export default function DownloadConversationMessageButton({
   const label = tCommon('message-download');
 
   return (
-    <Button
-      variant="ghost"
-      size="icon-xs"
-      type="button"
-      onClick={handleDownload}
-      disabled={isLoading}
-      aria-label={label}
-      className="text-primary"
-    >
-      <WebDownloadIcon className="size-4" />
-    </Button>
+    <TooltipProvider delayDuration={0}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            type="button"
+            onClick={handleDownload}
+            disabled={isLoading}
+            aria-label={label}
+            title={label}
+            className="text-primary"
+          >
+            {isLoading ? (
+              <Spinner className="p-1 size-5" />
+            ) : (
+              <WebDownloadIcon className="size-5" />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{label}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
