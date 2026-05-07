@@ -6,16 +6,6 @@ import { useTranslations } from 'next-intl';
 import { Input } from '@telli/ui/components/Input';
 import { MagnifyingGlassIcon, InfoIcon, XCircleIcon } from '@phosphor-icons/react';
 import { useFederalState } from '@/components/providers/federal-state-provider';
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
-  DialogFooter,
-  DialogHeader,
-} from '@telli/ui/components/Dialog';
 import { Button } from '@telli/ui/components/Button';
 import { FilterTabs } from '@telli/ui/components/FilterTabs';
 import {
@@ -25,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@telli/ui/components/Select';
+import { InfoDialog } from '@/components/common/dialog';
 import { isSortOption, SortOption } from './utils';
 
 type EntityOverviewProps = {
@@ -52,7 +43,6 @@ export default function EntityOverview({
 }: EntityOverviewProps) {
   const [searchInput, setSearchInput] = React.useState('');
   const [sortBy, setSortBy] = React.useState<SortOption>('date-desc');
-  const [infoDialogOpen, setInfoDialogOpen] = React.useState(false);
   const federalState = useFederalState();
   const t = useTranslations('entity-overview');
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
@@ -81,33 +71,21 @@ export default function EntityOverview({
         <div className="pt-6">
           <div className="flex items-end gap-2 mb-6">
             <h1 className="text-3xl">{title}</h1>
-            <Dialog open={infoDialogOpen} onOpenChange={setInfoDialogOpen}>
-              <DialogTrigger asChild>
+            <InfoDialog
+              title={title}
+              content={infoTooltip}
+              trigger={
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon-round"
-                  className="text-primary size-8"
+                  className="text-primary"
                   aria-label={t('info-tooltip-label')}
                 >
                   <InfoIcon className="size-8" aria-hidden="true" />
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{title}</DialogTitle>
-                  <DialogDescription asChild>
-                    <div>{infoTooltip}</div>
-                  </DialogDescription>
-                </DialogHeader>
-
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button>{t('close')}</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+              }
+            />
           </div>
 
           <div className="flex flex-wrap-reverse justify-between gap-2 mb-4">

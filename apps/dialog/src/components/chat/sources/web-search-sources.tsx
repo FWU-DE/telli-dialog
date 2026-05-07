@@ -139,7 +139,6 @@ export function WebSearchSourcesButton({
       aria-controls={panelId}
       variant={'ghost'}
       size={'icon'}
-      className="hover:bg-secondary/30"
     >
       <GlobeSimpleIcon className="size-4" />
     </Button>

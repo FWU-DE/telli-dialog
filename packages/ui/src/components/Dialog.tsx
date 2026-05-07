@@ -56,7 +56,7 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           'bg-background flex flex-col gap-8 p-8 pt-6 rounded-2xl shadow-lg',
-          'fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl max-h-[85vh] overflow-y-auto',
+          'fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl max-h-[85vh]',
           'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 duration-200',
           className,
         )}
@@ -78,11 +78,7 @@ function DialogContent({
 
 function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div
-      data-slot="dialog-header"
-      className={cn('flex flex-col gap-4 overflow-hidden', className)}
-      {...props}
-    />
+    <div data-slot="dialog-header" className={cn('flex flex-col gap-4', className)} {...props} />
   );
 }
 

@@ -6,6 +6,7 @@
   },
   "common": {
     "logout": "Abmelden",
+    "close": "Schließen",
     "delete": "Löschen",
     "cancel": "Abbrechen",
     "continue": "Weiter",

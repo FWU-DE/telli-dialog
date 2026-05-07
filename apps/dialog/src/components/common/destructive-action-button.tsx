@@ -1,18 +1,8 @@
 import React from 'react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@ui/components/AlertDialog';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Button } from '@ui/components/Button';
+import { ConfirmationDialog } from './dialog';
 
 type DestructiveActionButtonProps = {
   triggerButtonVariant?: React.ComponentProps<typeof Button>['variant'];
@@ -45,8 +35,8 @@ export default function DestructiveActionButton({
   }
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
+    <ConfirmationDialog
+      trigger={
         <Button
           variant={triggerButtonVariant}
           size={triggerButtonSize}
@@ -61,27 +51,17 @@ export default function DestructiveActionButton({
         >
           {children}
         </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{modalTitle}</AlertDialogTitle>
-          <AlertDialogDescription>{modalDescription}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={(event) => {
-              event.stopPropagation();
-              actionFn();
-              refetchConversations();
-            }}
-            data-testid="custom-chat-confirm-button"
-          >
-            {confirmText ?? t('delete')}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      }
+      title={modalTitle}
+      description={modalDescription}
+      confirmLabel={confirmText ?? t('delete')}
+      confirmVariant="destructive"
+      cancelLabel={t('cancel')}
+      confirmTestId="custom-chat-confirm-button"
+      onConfirm={() => {
+        actionFn();
+        refetchConversations();
+      }}
+    />
   );
 }

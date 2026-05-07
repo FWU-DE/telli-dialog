@@ -1,57 +1,25 @@
-import { useState } from 'react';
 import { CopyIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@ui/components/Dialog';
 import { useTranslations } from 'next-intl';
+import { ConfirmationDialog } from '../common/dialog';
 
 export function CustomChatActionDuplicate({ onClick }: { onClick: () => void }) {
-  const [open, setOpen] = useState(false);
   const t = useTranslations('custom-chat');
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          onClick={() => setOpen(true)}
-          data-testid="custom-chat-duplicate-button"
-        >
+    <ConfirmationDialog
+      trigger={
+        <Button variant="outline" type="button" data-testid="custom-chat-duplicate-button">
           <CopyIcon className="size-5" />
           {t('duplicate')}
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('duplicate-dialog.title')}</DialogTitle>
-          <DialogDescription>{t('duplicate-dialog.description')}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline" type="button">
-              {t('duplicate-dialog.cancel')}
-            </Button>
-          </DialogClose>
-          <Button
-            type="button"
-            onClick={() => {
-              onClick();
-              setOpen(false);
-            }}
-            data-testid="custom-chat-confirm-button"
-          >
-            {t('duplicate-dialog.confirm')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      }
+      title={t('duplicate-dialog.title')}
+      description={t('duplicate-dialog.description')}
+      cancelLabel={t('duplicate-dialog.cancel')}
+      confirmLabel={t('duplicate-dialog.confirm')}
+      confirmTestId="custom-chat-confirm-button"
+      onConfirm={onClick}
+    />
   );
 }

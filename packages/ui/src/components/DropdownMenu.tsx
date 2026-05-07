@@ -17,9 +17,36 @@ function DropdownMenuPortal({
 }
 
 function DropdownMenuTrigger({
+  onPointerDown,
+  onClick,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
-  return <DropdownMenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />;
+  // Workaround for bug in radix-ui, see: https://github.com/radix-ui/primitives/issues/1912#issuecomment-3012347343
+  // Fix: suppress the native `pointerdown` (to prevent opening on touch), then
+  // re-dispatch a synthetic `pointerdown` from the `click` handler so Radix picks it up.
+  // The magic detail value `1738` is used to distinguish the synthetic event from a real one, avoiding an infinite loop.
+  return (
+    <DropdownMenuPrimitive.Trigger
+      onPointerDown={(e) => {
+        if (e.detail !== 1738) {
+          e.preventDefault();
+        }
+        onPointerDown?.(e);
+      }}
+      onClick={(event) => {
+        event.currentTarget.dispatchEvent(
+          new PointerEvent('pointerdown', {
+            bubbles: true,
+            cancelable: true,
+            detail: 1738,
+          }),
+        );
+        onClick?.(event);
+      }}
+      data-slot="dropdown-menu-trigger"
+      {...props}
+    />
+  );
 }
 
 function DropdownMenuContent({
