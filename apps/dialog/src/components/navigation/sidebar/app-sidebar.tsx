@@ -19,7 +19,7 @@ import {
   useSidebar,
 } from '@telli/ui/components/Sidebar';
 import { AppMenuItem } from './app-menu-item';
-import TelliLogo from '@/components/icons/logo';
+import LogoWithName from '@/assets/logo-with-name.svg';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { useTranslations } from 'next-intl';
 import { MyTelliPoints } from './my-telli-points';
@@ -53,7 +53,7 @@ export function AppSidebar({
         <SidebarHeader>
           <div className="p-2 flex justify-end gap-2">
             <Link href="/" aria-hidden="true" tabIndex={-1} className="mr-auto rounded">
-              <TelliLogo className="h-7 text-primary" />
+              <LogoWithName className="h-7 text-primary" />
             </Link>
             <Button
               variant="toggle"

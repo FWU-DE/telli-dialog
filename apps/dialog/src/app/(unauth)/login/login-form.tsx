@@ -15,7 +15,7 @@ export default function LoginForm() {
   return (
     <main className="w-full flex flex-col justify-center items-center max-w-72 mx-auto py-4 h-full">
       <div className="my-auto flex flex-col items-center w-full">
-        <LogoWithName className="text-primary my-8 sm:my-16 w-40" />
+        <LogoWithName className="text-primary my-8 sm:my-16 h-13" />
         <SharedChatLoginForm />
         <div className="flex gap-2 items-center w-full justify-center py-8">
           <hr className="grow border-t border-gray-200" />
