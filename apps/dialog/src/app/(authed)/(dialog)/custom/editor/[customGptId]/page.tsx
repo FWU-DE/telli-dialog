@@ -20,8 +20,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
 
   const { assistant } = await getAssistantByUser({
     assistantId,
-    schoolIds: user.schoolIds ?? [],
-    userId: user.id,
+    user,
   }).catch(handleErrorInServerComponent);
 
   const readOnly = assistant.userId !== user.id;

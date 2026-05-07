@@ -32,7 +32,8 @@ import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
-//import { searchWeb } from './websearch';
+import { searchWeb, isWebSearchNeeded } from './websearch';
+import { env } from '@/env';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -142,7 +143,16 @@ export async function sendChatMessage({
   });
 
   // Web search
-  //const webSearchResults = await searchWeb(userMessage.content);
+  const isWebSearchEnabled = user.federalState.featureToggles?.isWebSearchEnabled ?? false;
+  const needsWebSearch =
+    isWebSearchEnabled &&
+    env.linkupApiKey &&
+    (await isWebSearchNeeded({
+      query: userMessage.content,
+      modelId: auxiliaryModel.id,
+      apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
+    }));
+  const webSearchResults = needsWebSearch ? await searchWeb(userMessage.content) : [];
 
   // Save user message to DB
   await dbInsertChatContent({
@@ -197,6 +207,7 @@ export async function sendChatMessage({
     federalState: user.federalState,
     chunks,
     errorUrls,
+    webSearchResults,
   });
 
   // Check if the model supports images based on supportedImageFormats
@@ -238,6 +249,7 @@ export async function sendChatMessage({
             orderNumber: messages.length + 2,
             modelName: definedModel.name,
             conversationId: conversation.id,
+            webSearchResults,
           });
 
           // Generate title if needed
@@ -307,5 +319,6 @@ export async function sendChatMessage({
   return {
     stream,
     messageId: assistantMessageId,
+    webSearchResults,
   };
 }

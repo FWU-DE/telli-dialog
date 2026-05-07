@@ -15,7 +15,7 @@ import {
   vector,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
+import { type DesignConfiguration, type LlmModelPriceMetadata } from './types';
 import {
   conversationRoleSchema,
   conversationTypeSchema,
@@ -23,6 +23,7 @@ import {
 } from '../utils/chat';
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
+import type { TextSearchResult } from 'linkup-sdk';
 
 // can be expanded to include other metadata of other file types
 export type FileMetadata = {
@@ -30,18 +31,15 @@ export type FileMetadata = {
   height?: number;
 };
 
-export const userSchoolRoleSchema = z.enum(['student', 'teacher']);
-export const userSchoolRoleEnum = pgEnum('user_school_role', userSchoolRoleSchema.enum);
-export type UserSchoolRole = z.infer<typeof userSchoolRoleSchema>;
+export const userRoleSchema = z.enum(['student', 'teacher']);
+export const userRoleEnum = pgEnum('user_school_role', userRoleSchema.enum);
+export type UserRole = z.infer<typeof userRoleSchema>;
 
 /**
  * Schema for table user_entity
  */
 export const userTable = pgTable('user_entity', {
   id: uuid('id').defaultRandom().primaryKey(),
-  firstName: text('first_name').notNull(),
-  lastName: text('last_name').notNull(),
-  email: text('email').notNull().unique(),
   lastUsedModel: text('last_used_model'),
   versionAcceptedConditions: integer(),
   schoolIds: text('school_ids')
@@ -49,7 +47,7 @@ export const userTable = pgTable('user_entity', {
     .notNull()
     .default(sql`'{}'::text[]`),
   federalStateId: text('federal_state_id').references(() => federalStateTable.id),
-  userRole: userSchoolRoleEnum('user_role').notNull().default('student'),
+  userRole: userRoleEnum('user_role').notNull().default('student'),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -142,6 +140,7 @@ export const conversationMessageTable = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
     parameters: json('parameters').$type<ConversationMessageParameters>(),
+    webSearchResults: json('web_search_results').$type<TextSearchResult[]>(),
   },
   (table) => [index().on(table.conversationId), index().on(table.userId)],
 );
@@ -176,6 +175,7 @@ export const federalStateFeatureTogglesSchema = z.object({
   isCustomGptEnabled: z.boolean().default(true),
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
   isImageGenerationEnabled: z.boolean().optional(),
+  isWebSearchEnabled: z.boolean().optional(),
 });
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
 
@@ -375,7 +375,6 @@ export const characterTable = pgTable(
     initialMessage: text('initial_message'),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
-    schoolId: text('school_id'),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
       .defaultNow()
@@ -388,7 +387,7 @@ export const characterTable = pgTable(
     isDeleted: boolean('is_deleted').notNull().default(false),
     originalCharacterId: uuid('original_character_id'),
   },
-  (table) => [index().on(table.userId), index().on(table.schoolId)],
+  (table) => [index().on(table.userId)],
 );
 
 export const characterSelectSchema = createSelectSchema(characterTable)
@@ -397,6 +396,7 @@ export const characterSelectSchema = createSelectSchema(characterTable)
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
+    ownerSchoolIds: z.array(z.string()),
   });
 export const characterInsertSchema = createInsertSchema(characterTable)
   .omit({
@@ -588,7 +588,6 @@ export const learningScenarioTable = pgTable(
       .notNull(),
     isDeleted: boolean('is_deleted').notNull().default(false),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
-    schoolId: text('school_id'),
     originalLearningScenarioId: uuid('original_learning_scenario_id'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
   },
@@ -601,6 +600,7 @@ export const learningScenarioSelectSchema = createSelectSchema(learningScenarioT
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
+    ownerSchoolIds: z.array(z.string()),
   });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
   .omit({
@@ -673,13 +673,13 @@ export const sharedLearningScenarioTable = pgTable(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
-    telliPointsLimit: integer('telli_points_limit'),
-    maxUsageTimeLimit: integer('max_usage_time_limit'),
-    inviteCode: text('invite_code').unique(),
-    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow(),
+    telliPointsLimit: integer('telli_points_limit').notNull(),
+    maxUsageTimeLimit: integer('max_usage_time_limit').notNull(),
+    inviteCode: text('invite_code').unique().notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+    manuallyStoppedAt: timestamp('manually_stopped_at', { withTimezone: true }),
   },
   (table) => [
-    unique().on(table.learningScenarioId, table.userId),
     foreignKey({
       columns: [table.learningScenarioId],
       foreignColumns: [learningScenarioTable.id],
@@ -693,7 +693,8 @@ export const sharedLearningScenarioTable = pgTable(
 export const sharedLearningScenarioSelectSchema = createSelectSchema(
   sharedLearningScenarioTable,
 ).extend({
-  startedAt: z.coerce.date().nullable(),
+  startedAt: z.coerce.date(),
+  manuallyStoppedAt: z.coerce.date().nullable(),
 });
 export const sharedLearningScenarioInsertSchema = createInsertSchema(
   sharedLearningScenarioTable,
@@ -701,6 +702,7 @@ export const sharedLearningScenarioInsertSchema = createInsertSchema(
   id: true,
   inviteCode: true,
   startedAt: true,
+  manuallyStoppedAt: true,
 });
 export const sharedLearningScenarioUpdateSchema = createUpdateSchema(sharedLearningScenarioTable)
   .omit({ learningScenarioId: true, userId: true, startedAt: true })
@@ -721,7 +723,11 @@ export const learningScenarioWithShareDataModel = learningScenarioSelectSchema.a
 );
 export const learningScenarioOptionalShareDataModel = learningScenarioSelectSchema.and(
   sharedLearningScenarioTransformedSchema.extend({
+    inviteCode: z.string().nullable(),
+    maxUsageTimeLimit: z.number().nullable(),
+    startedAt: z.coerce.date().nullable(),
     startedBy: z.string().nullable(),
+    telliPointsLimit: z.number().nullable(),
   }),
 );
 export type LearningScenarioWithShareDataModel = z.infer<typeof learningScenarioWithShareDataModel>;
@@ -841,26 +847,24 @@ export type ConversationUsageTrackingUpdateModel = z.infer<
 /**
  * Schema for table shared_character_conversation
  */
-export const sharedCharacterConversation = pgTable(
-  'shared_character_conversation',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    characterId: uuid('character_id').notNull(),
-    userId: uuid('user_id')
-      .references(() => userTable.id)
-      .notNull(),
-    telliPointsLimit: integer('telli_points_limit'),
-    maxUsageTimeLimit: integer('max_usage_time_limit'),
-    inviteCode: text('invite_code').unique(),
-    startedAt: timestamp('started_at', { withTimezone: true }),
-  },
-  (table) => [unique().on(table.characterId, table.userId)],
-);
+export const sharedCharacterConversation = pgTable('shared_character_conversation', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  characterId: uuid('character_id').notNull(),
+  userId: uuid('user_id')
+    .references(() => userTable.id)
+    .notNull(),
+  telliPointsLimit: integer('telli_points_limit').notNull(),
+  maxUsageTimeLimit: integer('max_usage_time_limit').notNull(),
+  inviteCode: text('invite_code').unique().notNull(),
+  startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+  manuallyStoppedAt: timestamp('manually_stopped_at', { withTimezone: true }),
+});
 
 export const sharedCharacterConversationSelectSchema = createSelectSchema(
   sharedCharacterConversation,
 ).extend({
-  startedAt: z.coerce.date().nullable(),
+  startedAt: z.coerce.date(),
+  manuallyStoppedAt: z.coerce.date().nullable(),
 });
 export const sharedCharacterConversationInsertSchema = createInsertSchema(
   sharedCharacterConversation,
@@ -892,7 +896,11 @@ export const characterWithShareDataModel = characterSelectSchema.and(
 );
 export const characterOptionalShareDataModel = characterSelectSchema.and(
   sharedCharacterTransformedSchema.extend({
+    inviteCode: z.string().nullable(),
+    maxUsageTimeLimit: z.number().nullable(),
+    startedAt: z.coerce.date().nullable(),
     startedBy: z.string().nullable(),
+    telliPointsLimit: z.number().nullable(),
   }),
 );
 export type CharacterWithShareDataModel = z.infer<typeof characterWithShareDataModel>;
@@ -959,7 +967,6 @@ export const assistantTable = pgTable(
       .defaultNow()
       .$onUpdateFn(() => new Date())
       .notNull(),
-    schoolId: text('school_id'),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     pictureId: text('picture_id'),
@@ -976,13 +983,14 @@ export const assistantTable = pgTable(
     isDeleted: boolean('is_deleted').notNull().default(false),
     originalAssistantId: uuid('original_assistant_id'),
   },
-  (table) => [index().on(table.userId), index().on(table.schoolId)],
+  (table) => [index().on(table.userId)],
 );
 
 export const assistantSelectSchema = createSelectSchema(assistantTable).extend({
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   accessLevel: accessLevelSchema,
+  ownerSchoolIds: z.array(z.string()),
 });
 export const assistantInsertSchema = createInsertSchema(assistantTable)
   .omit({ id: true, createdAt: true, updatedAt: true })
@@ -992,7 +1000,6 @@ export const assistantInsertSchema = createInsertSchema(assistantTable)
 export const assistantUpdateSchema = createUpdateSchema(assistantTable)
   .omit({
     userId: true,
-    schoolId: true,
     createdAt: true,
     updatedAt: true,
   })

@@ -54,7 +54,9 @@ function AlertDialogContent({
         data-slot="alert-dialog-content"
         data-size={size}
         className={cn(
-          'group/alert-dialog-content fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-8 rounded-2xl border bg-background p-8 shadow-lg duration-200 data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-lg',
+          'bg-background grid gap-8 p-8 pt-6 rounded-2xl shadow-lg',
+          'fixed top-[50%] left-[50%] z-50 w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%]',
+          'group/alert-dialog-content duration-200 data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-lg',
           className,
         )}
         {...props}
@@ -68,7 +70,7 @@ function AlertDialogHeader({ className, ...props }: React.ComponentProps<'div'>)
     <div
       data-slot="alert-dialog-header"
       className={cn(
-        'grid grid-rows-[auto_1fr] place-items-center text-center has-data-[slot=alert-dialog-media]:grid-rows-[auto_auto_1fr] has-data-[slot=alert-dialog-media]:gap-x-6 sm:group-data-[size=default]/alert-dialog-content:place-items-start sm:group-data-[size=default]/alert-dialog-content:text-left sm:group-data-[size=default]/alert-dialog-content:has-data-[slot=alert-dialog-media]:grid-rows-[auto_1fr]',
+        'grid gap-0 has-[>:nth-child(2)]:gap-4 place-items-center text-center has-data-[slot=alert-dialog-media]:grid-rows-[auto_auto_1fr] has-data-[slot=alert-dialog-media]:gap-x-6 sm:group-data-[size=default]/alert-dialog-content:place-items-start sm:group-data-[size=default]/alert-dialog-content:text-left sm:group-data-[size=default]/alert-dialog-content:has-data-[slot=alert-dialog-media]:grid-rows-[auto_1fr]',
         className,
       )}
       {...props}
@@ -112,7 +114,7 @@ function AlertDialogDescription({
   return (
     <AlertDialogPrimitive.Description
       data-slot="alert-dialog-description"
-      className={cn('text-foreground', className)}
+      className={cn('text-foreground overflow-hidden', className)}
       {...props}
     />
   );
@@ -167,6 +169,87 @@ function AlertDialogCancel({
   );
 }
 
+type ConfirmAlertDialogVariant = React.ComponentProps<typeof Button>['variant'];
+
+export type ConfirmAlertDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  confirmLabel: React.ReactNode;
+  cancelLabel: React.ReactNode;
+  confirmVariant?: ConfirmAlertDialogVariant;
+  onConfirm: () => void | Promise<void>;
+};
+
+/**
+ * Reusable confirmation dialog. Render once at a stable parent (e.g. a page
+ * or section component) and toggle via `open`. Designed to be triggered from
+ * places where embedding an AlertDialog directly is problematic — most
+ * notably inside Radix DropdownMenu items, where nesting another focus-trap
+ * primitive causes the menu to stay open after confirming.
+ *
+ * Pair with `useConfirmAlertDialog` for ergonomic open/handler wiring.
+ */
+function ConfirmAlertDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  confirmVariant = 'destructive',
+  onConfirm,
+}: ConfirmAlertDialogProps) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+        </AlertDialogHeader>
+        {description !== undefined && (
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        )}
+        <AlertDialogFooter>
+          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogAction variant={confirmVariant} onClick={() => onConfirm()}>
+            {confirmLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+export type UseConfirmAlertDialogResult = {
+  dialogProps: Pick<ConfirmAlertDialogProps, 'open' | 'onOpenChange' | 'onConfirm'>;
+  confirm: (onConfirm: () => void | Promise<void>) => void;
+};
+
+function useConfirmAlertDialog(): UseConfirmAlertDialogResult {
+  const [open, setOpen] = React.useState(false);
+  const onConfirmRef = React.useRef<() => void | Promise<void>>(() => {});
+
+  const confirm = React.useCallback((onConfirm: () => void | Promise<void>) => {
+    onConfirmRef.current = onConfirm;
+    setOpen(true);
+  }, []);
+
+  const handleConfirm = React.useCallback(async () => {
+    try {
+      await onConfirmRef.current();
+      setOpen(false);
+    } catch {
+      // Keep the dialog open when confirmation fails.
+    }
+  }, []);
+
+  return {
+    dialogProps: { open, onOpenChange: setOpen, onConfirm: handleConfirm },
+    confirm,
+  };
+}
+
 export {
   AlertDialog,
   AlertDialogAction,
@@ -180,4 +263,6 @@ export {
   AlertDialogPortal,
   AlertDialogTitle,
   AlertDialogTrigger,
+  ConfirmAlertDialog,
+  useConfirmAlertDialog,
 };

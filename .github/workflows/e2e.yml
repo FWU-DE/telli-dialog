@@ -54,7 +54,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db
-      NEXTAUTH_URL: http://localhost:3000
+      AUTH_URL: http://localhost:3000
       RABBITMQ_URI: amqp://user:password@127.0.0.1:5672
       VALKEY_URL: redis://127.0.0.1:6379/0
       VIDIS_CLIENT_ID: telli-e2e-client
@@ -182,6 +182,7 @@ jobs:
           NEXT_TELEMETRY_DISABLED: 1
           TURBO_TELEMETRY_DISABLED: 1
           NODE_ENV: test
+          LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
 
       - name: Run E2E tests (dialog)
         run: pnpm --filter telli-dialog e2e
@@ -193,7 +194,6 @@ jobs:
         env:
           CI: true
           DE_TEST_API_KEY: ${{ env.DE_TEST_API_KEY }}
-          API_BASE_URL: http://localhost:3002
 
       - name: Upload Playwright reports (dialog)
         uses: actions/upload-artifact@v7

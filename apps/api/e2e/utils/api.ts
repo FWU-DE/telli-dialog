@@ -10,7 +10,7 @@ export const authorizationHeader = {
   Authorization: `Bearer ${API_KEY}`,
 };
 
-export const baseURL = process.env.API_BASE_URL ?? 'http://localhost:3002';
+export const baseURL = `http://localhost:${process.env.PORT ?? '3002'}`;
 
 type ApiModel = {
   name: string;

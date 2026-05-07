@@ -3,14 +3,10 @@ import RedeemVoucherPage from './redeem-voucher-page';
 import { requireAuth } from '@/auth/requireAuth';
 
 export default async function Page() {
-  const { user, federalState } = await requireAuth();
-  const userAndContext = {
-    ...user,
-    federalState,
-  };
+  await requireAuth();
 
   return (
-    <DefaultPageLayout userAndContext={userAndContext}>
+    <DefaultPageLayout>
       <RedeemVoucherPage />
     </DefaultPageLayout>
   );

@@ -8,20 +8,15 @@ export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/assistants/[assistantId]'>) {
   const { assistantId } = await props.params;
-  const { user, federalState } = await requireAuth();
-  const userAndContext = {
-    ...user,
-    federalState,
-  };
+  const { user } = await requireAuth();
 
   const { assistant, fileMappings, pictureUrl } = await getAssistantByUser({
     assistantId: assistantId,
-    schoolIds: user.schoolIds ?? [],
-    userId: user.id,
+    user,
   }).catch(handleErrorInServerComponent);
 
   return (
-    <DefaultPageLayout userAndContext={userAndContext}>
+    <DefaultPageLayout>
       <AssistantView assistant={assistant} fileMappings={fileMappings} pictureUrl={pictureUrl} />
     </DefaultPageLayout>
   );

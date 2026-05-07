@@ -10,16 +10,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]'>) {
   const { characterId } = await props.params;
-  const { user, federalState } = await requireAuth();
-  const userAndContext = {
-    ...user,
-    federalState,
-  };
+  const { user } = await requireAuth();
 
   const { character, relatedFiles, maybeSignedPictureUrl } = await getCharacterForEditView({
     characterId,
-    userId: user.id,
-    schoolIds: user.schoolIds ?? [],
+    user,
   }).catch(handleErrorInServerComponent);
 
   const initialLinks = character.attachedLinks
@@ -39,7 +34,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   }
 
   return (
-    <DefaultPageLayout userAndContext={userAndContext}>
+    <DefaultPageLayout header={{ headerType: 'form' }}>
       <CharacterEdit
         character={character}
         relatedFiles={relatedFiles}

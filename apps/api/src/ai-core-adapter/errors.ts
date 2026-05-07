@@ -14,7 +14,7 @@ import type { FastifyReply } from 'fastify';
 export function handleAiCoreError(reply: FastifyReply, error: unknown): boolean {
   if (InvalidModelError.is(error)) {
     reply.status(404).send({
-      error: (error as Error).message,
+      error: error.message,
     });
     return true;
   }
@@ -37,7 +37,7 @@ export function handleAiCoreError(reply: FastifyReply, error: unknown): boolean 
     reply.log.error(error, 'Provider configuration error');
     reply.status(500).send({
       error: 'Provider configuration error',
-      details: (error as Error).message,
+      details: error.message,
     });
     return true;
   }
@@ -46,7 +46,7 @@ export function handleAiCoreError(reply: FastifyReply, error: unknown): boolean 
     reply.log.error(error, 'AI generation error');
 
     // Check for quota exceeded message (thrown as AiGenerationError in billing checks)
-    if ((error as Error).message.includes('exceeded its monthly quota')) {
+    if (error.message.includes('exceeded its monthly quota')) {
       reply.status(429).send({
         error: 'You have reached the price limit',
       });
@@ -55,7 +55,7 @@ export function handleAiCoreError(reply: FastifyReply, error: unknown): boolean 
 
     reply.status(500).send({
       error: 'An error occurred',
-      details: (error as Error).message,
+      details: error.message,
     });
     return true;
   }

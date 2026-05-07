@@ -12,15 +12,10 @@ export default async function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]'>,
 ) {
   const { learningScenarioId } = await props.params;
-  const { user, federalState } = await requireAuth();
-  const userAndContext = {
-    ...user,
-    federalState,
-  };
+  const { user } = await requireAuth();
 
   const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
     learningScenarioId: learningScenarioId,
-    schoolIds: user.schoolIds ?? [],
     user,
   }).catch(handleErrorInServerComponent);
   const readOnly = user.id !== learningScenario.userId;
@@ -40,7 +35,7 @@ export default async function Page(
     );
 
   return (
-    <DefaultPageLayout userAndContext={userAndContext}>
+    <DefaultPageLayout header={{ headerType: 'form' }}>
       <LearningScenarioEdit
         learningScenario={learningScenario}
         relatedFiles={relatedFiles}

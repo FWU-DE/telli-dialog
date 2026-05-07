@@ -1,23 +1,22 @@
 'use client';
 
-import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
-import type { UserAndContext } from '@/auth/types';
-import type { ReactNode } from 'react';
-import ProfileMenu from '../navigation/profile-menu';
-import { ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
+import {
+  CustomChatFormState,
+  type CustomChatFormStateProps,
+} from '@/components/custom-chat/custom-chat-form-state';
 
 type CustomChatHeaderProps = {
-  userAndContext: UserAndContext;
-  children?: ReactNode;
+  showFormState?: boolean;
+  formStateProps?: CustomChatFormStateProps;
 };
 
-export default function CustomChatHeader({ userAndContext, children }: CustomChatHeaderProps) {
+export default function CustomChatHeader({
+  showFormState = false,
+  formStateProps,
+}: CustomChatHeaderProps) {
   return (
-    <HeaderPortal>
-      <ToggleSidebarButton />
-      <div className="grow"></div>
-      {children ? <div className="flex items-center gap-4">{children}</div> : null}
-      <ProfileMenu userAndContext={userAndContext} />
-    </HeaderPortal>
+    <div className="flex items-center justify-end gap-4">
+      {showFormState && formStateProps ? <CustomChatFormState {...formStateProps} /> : null}
+    </div>
   );
 }

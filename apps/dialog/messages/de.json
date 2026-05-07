@@ -6,6 +6,7 @@
   },
   "common": {
     "logout": "Abmelden",
+    "close": "Schließen",
     "delete": "Löschen",
     "cancel": "Abbrechen",
     "continue": "Weiter",
@@ -45,6 +46,7 @@
   },
   "sharing": {
     "label": "Freigabe",
+    "countdown-timer-label": "Verbleibende Freigabezeit",
     "school": "Schulintern",
     "school-tooltip": "Wird schulintern sicht- und kopierbar. \nZu beachten: Eine Lehrkraft kann mehreren Schulen zugehörig sein. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "community": "Community",
@@ -98,6 +100,12 @@
     },
     "action": {
       "delete": "Link entfernen"
+    },
+    "results": {
+      "title": "Internetquellen",
+      "show": "Internetquellen einblenden",
+      "toggle": "Internetquellen ein-/ausblenden",
+      "open-source": "Quelle öffnen: {source}"
     },
     "toasts": {
       "error-loading-page": "Verarbeitung des Links fehlgeschlagen"
@@ -211,7 +219,7 @@
     "description-placeholder": "Neuer Schüler in einer DaZ-Klasse",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
     "instructions-label": "Instruktionen",
-    "instructions-placeholder": "<b>SIMULIERTE PERSON</b>\nDu bist Emre, ein neuer Mitschüler in einer Klasse für Deutsch als Zweitsprache.\n\n<b>ZIELGRUPPE</b>\nDu unterhältst dich mit Lernenden einer Klasse für Deutsch als Zweitsprache (5. Jahrgangsstufe, Mittelschule). Euer Deutsch-Sprachniveau ist A1 GER.\n\n<b>KONTEXT</b>\nIhr lernt euch gegenseitig kennen (Alter, Hobbys, Familie). Du fragst auch nach Informationen über die neue Schule, z.B. Fächer, Stundenplan, Räume, Mittagessen, Busfahrplan.\n\n<b>VERHALTEN</b>\nSei authentisch. Antworte ausschließlich auf dem Niveau A1. Bilde nur einfache Sätze. Formuliere in Alltagssprache. Bleibe thematisch in der Lebenswelt eines 10-Jährigen.",
+    "instructions-placeholder": "<b>Simulierte Person</b>\nDu bist Emre, ein neuer Mitschüler in einer Klasse für Deutsch als Zweitsprache.\n\n<b>Zielgruppe</b>\nDu unterhältst dich mit Lernenden einer Klasse für Deutsch als Zweitsprache (5. Jahrgangsstufe, Mittelschule). Euer Deutsch-Sprachniveau ist A1 GER.\n\n<b>Kontext</b>\nIhr lernt euch gegenseitig kennen (Alter, Hobbys, Familie). Du fragst auch nach Informationen über die neue Schule, z.B. Fächer, Stundenplan, Räume, Mittagessen, Busfahrplan.\n\n<b>Verhalten</b>\nSei authentisch. Antworte ausschließlich auf dem Niveau A1. Bilde nur einfache Sätze. Formuliere in Alltagssprache. Bleibe thematisch in der Lebenswelt eines 10-Jährigen.",
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "initial-message-label": "Einstiegsfrage",
     "initial-message-placeholder": "Hallo! Ich bin Emre. Alles klar bei dir?",
@@ -219,7 +227,7 @@
     "initial-message-tooltip": "Mit welcher Einstiegsfrage soll der Dialogpartner die Lernenden begrüßen?",
     "sharing-info": "Dieser Dialogpartner ist für andere freigegeben.",
     "sharing-settings": "Freigabe-Einstellungen",
-    "delete-modal-title": "Dialogpartner löschen",
+    "delete-modal-title": "Dialogpartner löschen?",
     "delete-modal-description": "Soll der Dialogpartner wirklich gelöscht werden?",
     "configuration-heading": "Details",
     "name-label": "Name des Dialogpartners",
@@ -341,7 +349,7 @@
     "configuration-heading": "Details",
     "sharing-info": "Dieses Lernszenario ist für andere freigegeben.",
     "sharing-settings": "Freigabe-Einstellungen",
-    "delete-modal-title": "Lernszenario löschen",
+    "delete-modal-title": "Lernszenario löschen?",
     "delete-modal-description": "Soll das Lernszenario wirklich gelöscht werden?",
     "duplicate-name-format-string": "Duplikat von {sourceName}",
     "author-label": "Erstellt von",
@@ -472,7 +480,8 @@
   },
   "authentication": {
     "login-error": {
-      "description": "Login nicht möglich. Folgende Informationen müssen mit dem Profil übertragen werden:"
+      "description": "Login nicht möglich. Folgende Informationen müssen mit dem Profil übertragen werden:",
+      "federal-state-not-found": "Das übermittelte Bundesland wurde nicht gefunden."
     }
   },
   "custom-chat": {
@@ -581,7 +590,7 @@
     "sharing-info": "Dieser Assistent ist für andere freigegeben.",
     "sharing-settings": "Freigabe-Einstellungen",
     "delete-button": "Löschen",
-    "delete-modal-title": "Assistent löschen",
+    "delete-modal-title": "Assistent löschen?",
     "delete-modal-description": "Soll der Assistent wirklich gelöscht werden?",
     "delete-modal-cancel-button": "Abbrechen",
     "duplicate-name-format-string": "Duplikat von {sourceName}",

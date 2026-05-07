@@ -91,9 +91,6 @@ test.describe('costs', () => {
     const [insertedUser] = await db
       .insert(userTable)
       .values({
-        firstName: 'test',
-        lastName: 'user',
-        email: `${generateRandomString(8)}@example.com`,
         lastUsedModel: user.lastUsedModel,
         versionAcceptedConditions: user.versionAcceptedConditions,
         schoolIds: user.schoolIds,
@@ -116,6 +113,7 @@ test.describe('costs', () => {
       modelId: model.id,
       inviteCode: generateRandomString(8),
       startedAt: new Date(),
+      manuallyStoppedAt: null,
       startedBy: user.id,
     };
 
@@ -180,9 +178,6 @@ test.describe('costs', () => {
     const [insertedUser] = await db
       .insert(userTable)
       .values({
-        firstName: 'test',
-        lastName: 'user',
-        email: `${generateRandomString(8)}@example.com`,
         lastUsedModel: user.lastUsedModel,
         versionAcceptedConditions: user.versionAcceptedConditions,
         schoolIds: user.schoolIds,
@@ -200,9 +195,9 @@ test.describe('costs', () => {
       ...mockCharacter(),
       userId: user.id,
       modelId: model.id,
-      schoolId: 'test_school1',
       accessLevel: 'private' as const,
       startedAt: new Date(),
+      manuallyStoppedAt: null,
       telliPointsLimit: telliPointsLimit,
       maxUsageTimeLimit: maxUsageTimeLimit,
       inviteCode: generateRandomString(8),

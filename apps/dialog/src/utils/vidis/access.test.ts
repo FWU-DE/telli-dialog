@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { checkProductAccess } from './access';
 import { UserAndContext } from '@/auth/types';
-import { UserSelectModel, UserSchoolRole } from '@shared/db/schema';
+import { UserSelectModel, UserRole } from '@shared/db/schema';
 import { ObscuredFederalState } from '@/auth/utils';
 
 describe('checkProductAccess', () => {
@@ -33,14 +33,11 @@ describe('checkProductAccess', () => {
     id: 'school-1',
     createdAt: baseDate,
     federalStateId: 'DE-BY',
-    userRole: 'teacher' as UserSchoolRole,
+    userRole: 'teacher' as UserRole,
   };
 
   const baseUser = {
     id: 'user-1',
-    email: 'user-1@vidis.schule',
-    firstName: '',
-    lastName: '',
     createdAt: new Date(),
     lastUsedModel: null,
     versionAcceptedConditions: null,

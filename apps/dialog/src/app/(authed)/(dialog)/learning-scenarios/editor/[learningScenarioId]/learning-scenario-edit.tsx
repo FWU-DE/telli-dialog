@@ -18,7 +18,6 @@ import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
-import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { useRouter } from 'next/navigation';
 import {
   removeFileFromLearningScenarioAction,
@@ -41,7 +40,7 @@ import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-imag
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
-import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
 import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
 import { WebsearchSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
@@ -312,16 +311,13 @@ export function LearningScenarioEdit({
     </CustomChatActions>
   );
 
-  const headerContent = useMemo(
-    () => (
-      <CustomChatFormState isDirty={isDirty} isSubmitting={isSaving} hasSaveError={hasSaveError} />
-    ),
-    [isDirty, isSaving, hasSaveError],
-  );
-
   return (
     <>
-      <CustomChatHeaderContent>{headerContent}</CustomChatHeaderContent>
+      <CustomChatHeaderContent
+        isDirty={isDirty}
+        isSubmitting={isSaving}
+        hasSaveError={hasSaveError}
+      />
       <CustomChatLayoutContainer>
         <BackButton
           href="/learning-scenarios"
@@ -344,8 +340,10 @@ export function LearningScenarioEdit({
         )}
 
         <CustomChatShareWithLearners
-          startedAt={learningScenario.startedAt ?? null}
-          maxUsageTimeLimit={learningScenario.maxUsageTimeLimit ?? null}
+          startedAt={learningScenario.startedAt}
+          manuallyStoppedAt={learningScenario.manuallyStoppedAt}
+          maxUsageTimeLimit={learningScenario.maxUsageTimeLimit}
+          telliPointsLimit={learningScenario.telliPointsLimit}
           pointsPercentageValues={telliPointsPercentageValues}
           usageTimeValues={usageTimeValuesInMinutes}
           onShare={async (data) =>

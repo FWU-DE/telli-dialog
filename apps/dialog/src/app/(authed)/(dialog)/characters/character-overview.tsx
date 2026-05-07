@@ -61,6 +61,7 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
               isOwned={isOwned}
               href={isOwned ? `/characters/editor/${character.id}` : `/characters/${character.id}`}
               chatHref={`/characters/d/${character.id}`}
+              shareInfo={character}
             />
           );
         });

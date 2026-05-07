@@ -9,6 +9,14 @@ import { useTranslations } from 'next-intl';
 import { ChatTextIcon, ImageSquareIcon } from '@phosphor-icons/react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
 import { Button } from '@ui/components/Button';
+import CountDownTimer from '@/app/(authed)/(dialog)/learning-scenarios/_components/count-down';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
+
+type ShareInfo = {
+  startedAt: Date | null;
+  maxUsageTimeLimit: number | null;
+  manuallyStoppedAt?: Date | null;
+};
 
 type EntityCardProps = {
   name: string;
@@ -17,6 +25,7 @@ type EntityCardProps = {
   isOwned: boolean;
   href: string;
   chatHref?: string;
+  shareInfo?: ShareInfo;
 };
 
 export default function EntityCard({
@@ -26,7 +35,10 @@ export default function EntityCard({
   isOwned,
   href,
   chatHref,
+  shareInfo,
 }: EntityCardProps) {
+  const sharedChatTimeLeft = shareInfo ? calculateTimeLeft(shareInfo) : -1;
+  const sharedChatActive = sharedChatTimeLeft > 0;
   const t = useTranslations('entity-overview');
   const tCommon = useTranslations('common');
 
@@ -37,6 +49,7 @@ export default function EntityCard({
     >
       <Link
         href={href}
+        prefetch={false}
         aria-label={name}
         data-card-link
         className="flex items-center gap-4 grow min-w-0 p-4 outline-none"
@@ -58,7 +71,7 @@ export default function EntityCard({
           <div className="flex items-center gap-2">
             <h2 className={cn('font-medium leading-none py-0.5', truncateClassName)}>{name}</h2>
             {isOwned && (
-              <span className="hidden sm:inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary shrink-0 uppercase tracking-wider">
+              <span className="inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary shrink-0 uppercase tracking-wider">
                 {t('badge-mine')}
               </span>
             )}
@@ -68,6 +81,15 @@ export default function EntityCard({
           )}
         </div>
       </Link>
+
+      {sharedChatActive && (
+        <CountDownTimer
+          leftTimeInSeconds={sharedChatTimeLeft}
+          totalTimeInMinutes={shareInfo?.maxUsageTimeLimit ?? 0}
+          className={cn('shrink-0 text-sm min-w-0 px-2 py-1', !chatHref && 'mr-4')}
+          stopWatchClassName="w-4 h-4"
+        />
+      )}
 
       {chatHref && (
         <Tooltip>
@@ -79,7 +101,7 @@ export default function EntityCard({
               size="icon-round"
               className="mx-4"
             >
-              <Link href={chatHref} aria-label={tCommon('new-chat')}>
+              <Link href={chatHref} prefetch={false} aria-label={tCommon('new-chat')}>
                 <ChatTextIcon aria-hidden="true" className="size-6   text-primary" />
               </Link>
             </Button>

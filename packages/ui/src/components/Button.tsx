@@ -16,7 +16,7 @@ const buttonVariants = cva(
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
         ghost:
-          'hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground disabled:text-gray-400 disabled:bg-transparent',
+          'text-primary hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground disabled:text-gray-400 disabled:bg-transparent',
         toggle:
           'hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 disabled:text-gray-400 disabled:bg-transparent',
         destructive:
@@ -45,20 +45,21 @@ const buttonVariants = cva(
   },
 );
 
-function Button({
-  className,
-  variant = 'default',
-  size = 'default',
-  asChild = false,
-  ...props
-}: React.ComponentProps<'button'> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
+const Button = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentProps<'button'> &
+    VariantProps<typeof buttonVariants> & {
+      asChild?: boolean;
+    }
+>(function Button(
+  { className, variant = 'default', size = 'default', asChild = false, ...props },
+  ref,
+) {
   const Comp = asChild ? Slot.Root : 'button';
 
   return (
     <Comp
+      ref={ref}
       data-slot="button"
       data-variant={variant}
       data-size={size}
@@ -66,6 +67,8 @@ function Button({
       {...props}
     />
   );
-}
+});
+
+Button.displayName = 'Button';
 
 export { Button, buttonVariants };

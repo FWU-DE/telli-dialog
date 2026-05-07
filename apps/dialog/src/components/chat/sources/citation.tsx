@@ -5,7 +5,6 @@ import { cn } from '@/utils/tailwind';
 import SearchIcon from '@/components/icons/search';
 import { getDisplayUrl } from '@/utils/web-search/parsing';
 import { openInNewTab } from '@/utils/navigation/router';
-import TrashIcon from '@/components/icons/trash';
 import Spinner from '@/components/icons/spinner';
 import { WebsearchSource } from '@shared/db/types';
 
@@ -15,12 +14,10 @@ function truncateText(text: string, maxLength: number) {
 
 export default function Citation({
   source,
-  handleDelete,
   className,
   isLoading = false,
 }: {
   source: WebsearchSource;
-  handleDelete?: () => void;
   className?: string;
   isLoading?: boolean;
 }) {
@@ -79,18 +76,6 @@ export default function Citation({
           <div className="p-1">
             <Spinner className="size-4" />
           </div>
-        )}
-        {!isLoading && handleDelete !== undefined && (
-          <button
-            type="button"
-            className="text-gray-500 text-sm h-fit"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDelete?.();
-            }}
-          >
-            <TrashIcon className="w-6 h-6 text-primary" fillOnHover />
-          </button>
         )}
       </div>
     </TooltipProvider>
