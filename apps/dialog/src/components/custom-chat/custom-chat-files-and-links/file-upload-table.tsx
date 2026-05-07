@@ -79,7 +79,7 @@ export default function FilesTable({
           return (
             <div
               key={id}
-              className="flex items-center justify-between gap-4 border-b last:border-b-0 border-[#D9D9D9] p-2"
+              className="flex items-center justify-between gap-4 border-b border-border last:border-b-0 p-2"
             >
               <div className="flex gap-2 items-center flex-1 min-w-0">
                 {status === 'processed' && (
@@ -90,7 +90,7 @@ export default function FilesTable({
                 )}
                 {status === 'uploading' && <Spinner className="w-9 h-9 p-1.5 shrink-0" />}
                 {status === 'failed' && (
-                  <CrossIcon className="w-9 h-9 p-1.5 text-red-500 shrink-0" />
+                  <CrossIcon className="w-9 h-9 p-1.5 text-destructive shrink-0" />
                 )}
                 <div className="flex flex-col min-w-0">
                   <span className="text-sm font-medium truncate">{fileStem}</span>
@@ -99,7 +99,7 @@ export default function FilesTable({
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-sm whitespace-nowrap">{formatBytes(size)}</span>
                 {status === 'uploading' && (
-                  <span className="text-sm text-gray-500">{t('upload.uploading')}</span>
+                  <span className="text-sm text-muted-foreground">{t('upload.uploading')}</span>
                 )}
                 {status === 'processed' && onDownloadFile && (
                   <DownloadFileButton fileId={id} onDownloadFile={onDownloadFile} />
