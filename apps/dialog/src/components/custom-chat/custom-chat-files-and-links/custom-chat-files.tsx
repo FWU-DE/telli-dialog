@@ -44,15 +44,18 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
     }
   };
 
+  const activeAdditionalFilesCount = Array.from(additionalFiles.values()).filter(
+    (file) => file.status !== 'failed',
+  ).length;
+  const totalFileCount = currentFiles.length + activeAdditionalFilesCount;
+
   return (
     <>
       {onFileUploaded && (
         <FileDrop
           setFiles={setAdditionalFiles}
-          disabled={
-            currentFiles.length + additionalFiles.size >= NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT
-          }
-          countOfFiles={currentFiles.length + additionalFiles.size}
+          disabled={totalFileCount >= NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT}
+          countOfFiles={totalFileCount}
           onFileUploaded={onFileUploaded}
           showUploadConfirmation={true}
         />

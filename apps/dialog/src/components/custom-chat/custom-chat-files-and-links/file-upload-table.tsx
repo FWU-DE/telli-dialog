@@ -69,67 +69,60 @@ export default function FilesTable({
     status: FileStatus;
   }[];
   return (
-    <table className={cn('w-full', className)}>
-      {/* <thead>
-        <tr className="font-normal bg-light-gray w-full text-sm">
-          <th className="font-medium text-left py-3 text-dark-gray pl-3">Name</th>
-          <th className="font-medium text-left py-3 text-dark-gray">Dateigröße</th>
-          <th className="font-medium text-center py-3 text-dark-gray min-w-20"></th>
-        </tr>
-      </thead> */}
-      <tbody>
-        {mergedFiles
-          .filter(({ status }) => status !== 'failed')
-          .map(({ id, fileName, size, status }) => {
-            const [fileStem, extention] = getFileNameAndFileExtention(fileName);
-            const { Icon, fillColor } = getFileIconByFileExtension(extention);
+    <div className={cn('w-full', className)}>
+      {mergedFiles
+        .filter(({ status }) => status !== 'failed')
+        .map(({ id, fileName, size, status }) => {
+          const [fileStem, extension] = getFileNameAndFileExtention(fileName);
+          const { Icon, fillColor } = getFileIconByFileExtension(extension);
 
-            return (
-              <tr
-                key={id}
-                className="flex items-center justify-between gap-4 border-b last:border-b-0 border-[#D9D9D9] p-2"
-              >
-                <td className="flex gap-2 items-center flex-1">
-                  {status === 'processed' && (
-                    <Icon
-                      className="w-9 h-9 p-1.5"
-                      style={{ background: hexToRGBA(fillColor, 0.05) }}
-                    />
-                  )}
-                  {status === 'uploading' && <Spinner className="w-9 h-9 p-1.5" />}
-                  {status === 'failed' && <CrossIcon className="w-9 h-9 p-1.5 text-red-500" />}
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">{fileStem}</span>
-                  </div>
-                </td>
-                <td className="flex items-center gap-2 ml-auto">
-                  <span className="text-sm whitespace-nowrap">{formatBytes(size)}</span>
-                  {status === 'uploading' && (
-                    <span className="text-sm text-gray-500">{t('upload.uploading')}</span>
-                  )}
-                  {status === 'processed' && onDownloadFile && (
-                    <DownloadFileButton fileId={id} onDownloadFile={onDownloadFile} />
-                  )}
-                  {status === 'processed' && !readOnly && (
-                    <DestructiveActionButton
-                      aria-label={t('delete.button')}
-                      modalDescription={t('delete.modal-description')}
-                      triggerButtonVariant="ghost"
-                      triggerButtonSize="icon-round"
-                      triggerButtonClassName="text-primary"
-                      modalTitle={t('delete.modal-title')}
-                      confirmText={t('delete.confirm')}
-                      actionFn={() => handleDeleteFile(id)}
-                    >
-                      <TrashSimpleIcon className="size-6 text-primary" />
-                      <span className="sr-only">{t('delete.button')}</span>
-                    </DestructiveActionButton>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-      </tbody>
-    </table>
+          return (
+            <div
+              key={id}
+              className="flex items-center justify-between gap-4 border-b border-border last:border-b-0 p-2"
+            >
+              <div className="flex gap-2 items-center flex-1 min-w-0">
+                {status === 'processed' && (
+                  <Icon
+                    className="w-9 h-9 p-1.5 shrink-0"
+                    style={{ background: hexToRGBA(fillColor, 0.05) }}
+                  />
+                )}
+                {status === 'uploading' && <Spinner className="w-9 h-9 p-1.5 shrink-0" />}
+                {status === 'failed' && (
+                  <CrossIcon className="w-9 h-9 p-1.5 text-destructive shrink-0" />
+                )}
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-medium truncate">{fileStem}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-sm whitespace-nowrap">{formatBytes(size)}</span>
+                {status === 'uploading' && (
+                  <span className="text-sm text-muted-foreground">{t('upload.uploading')}</span>
+                )}
+                {status === 'processed' && onDownloadFile && (
+                  <DownloadFileButton fileId={id} onDownloadFile={onDownloadFile} />
+                )}
+                {status === 'processed' && !readOnly && (
+                  <DestructiveActionButton
+                    aria-label={t('delete.button')}
+                    modalDescription={t('delete.modal-description')}
+                    triggerButtonVariant="ghost"
+                    triggerButtonSize="icon-round"
+                    triggerButtonClassName="text-primary"
+                    modalTitle={t('delete.modal-title')}
+                    confirmText={t('delete.confirm')}
+                    actionFn={() => handleDeleteFile(id)}
+                  >
+                    <TrashSimpleIcon className="size-6 text-primary" />
+                    <span className="sr-only">{t('delete.button')}</span>
+                  </DestructiveActionButton>
+                )}
+              </div>
+            </div>
+          );
+        })}
+    </div>
   );
 }
