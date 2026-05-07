@@ -11,7 +11,7 @@ import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
 import type { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
-import type { WebsearchSource } from '@shared/db/types';
+import type { WebSource } from '@shared/db/types';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
@@ -41,7 +41,7 @@ export function LearningScenarioView({
   learningScenario: LearningScenarioOptionalShareDataModel;
   fileMappings: FileModel[];
   pictureUrl: string | undefined;
-  initialLinks: WebsearchSource[];
+  initialLinks: WebSource[];
 }) {
   const router = useRouter();
   const toast = useToast();

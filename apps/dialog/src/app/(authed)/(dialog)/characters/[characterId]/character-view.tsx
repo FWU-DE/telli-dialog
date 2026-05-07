@@ -1,7 +1,7 @@
 'use client';
 
 import { CharacterOptionalShareDataModel, FileModel } from '@shared/db/schema';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
@@ -40,7 +40,7 @@ export function CharacterView({
 }: {
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
-  initialLinks: WebsearchSource[];
+  initialLinks: WebSource[];
   avatarPictureUrl?: string;
 }) {
   const router = useRouter();

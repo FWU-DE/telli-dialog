@@ -1,11 +1,11 @@
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 
 /**
- * Get a default error source for a websearch source
+ * Get a default error source for a web source
  * @param link - The link associated with the error source
- * @returns A default error source for a websearch source
+ * @returns A default error source for a web source
  */
-export function defaultErrorSource(link: string): WebsearchSource {
+export function defaultErrorSource(link: string): WebSource {
   return {
     error: true,
     link: link,

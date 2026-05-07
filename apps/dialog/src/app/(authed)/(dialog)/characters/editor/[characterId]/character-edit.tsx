@@ -4,7 +4,7 @@ import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { CharacterOptionalShareDataModel, FileModel } from '@shared/db/schema';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 import { useTranslations } from 'next-intl';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -110,7 +110,7 @@ export function CharacterEdit({
 }: {
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
-  initialLinks: WebsearchSource[];
+  initialLinks: WebSource[];
   avatarPictureUrl?: string;
 }) {
   useForceReloadOnBrowserBackButton();

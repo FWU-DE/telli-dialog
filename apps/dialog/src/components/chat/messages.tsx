@@ -2,7 +2,7 @@ import { type UIMessage, type ChatStatus } from '@/types/chat';
 import { ChatBox, type PendingFileModel } from './chat-box';
 import LoadingAnimation from './loading-animation';
 import { FileModel } from '@shared/db/schema';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 
 // Re-export for consumers that import from this file
 export type { ChatStatus, PendingFileModel };
@@ -16,7 +16,7 @@ interface MessagesProps {
   containerClassName: string;
   fileMapping?: Map<string, FileModel[]>;
   pendingFileMapping?: Map<string, PendingFileModel[]>;
-  webSourceMapping?: Map<string, WebsearchSource[]>;
+  webSourceMapping?: Map<string, WebSource[]>;
 }
 
 export function Messages({
@@ -42,7 +42,7 @@ export function Messages({
           isLoading={isLoading}
           regenerateMessage={reload}
           assistantIcon={assistantIcon}
-          websources={message.role === 'user' ? webSourceMapping?.get(message.id) : undefined}
+          webSources={message.role === 'user' ? webSourceMapping?.get(message.id) : undefined}
           status={status}
         >
           {message}

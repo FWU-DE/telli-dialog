@@ -42,7 +42,7 @@ import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-b
 import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
 import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
@@ -110,7 +110,7 @@ export function LearningScenarioEdit({
 }: {
   learningScenario: LearningScenarioOptionalShareDataModel;
   relatedFiles: FileModel[];
-  initialLinks: WebsearchSource[];
+  initialLinks: WebSource[];
   avatarPictureUrl?: string;
 }) {
   useForceReloadOnBrowserBackButton();

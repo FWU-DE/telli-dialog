@@ -1,7 +1,7 @@
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { dbGetAssistantById } from '@shared/db/functions/assistants';
-import { MAX_WEBSEARCH_SOURCES_PER_CONVERSATION } from '@/configuration-text-inputs/const';
+import { MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
 import { ChatMessage } from '../chat/actions';
 import { dbGetUserById } from '@shared/db/functions/user';
@@ -41,7 +41,7 @@ async function getAttachedLinks(
  * @param characterId The ID of the character, if applicable.
  * @param user The user and context information.
  * @param messages The conversation history messages.
- * @returns The aggregated websearch sources.
+ * @returns The aggregated URLs.
  */
 export async function extractUrls(
   assistantId: string | undefined,
@@ -64,7 +64,7 @@ export async function extractUrls(
 
   const urls = [...new Set([...(attachedLinks ?? []), ...userMessageUrls])].slice(
     0,
-    MAX_WEBSEARCH_SOURCES_PER_CONVERSATION,
+    MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION,
   );
 
   return urls;

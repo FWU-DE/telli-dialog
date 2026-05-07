@@ -1,7 +1,7 @@
-import { webScraperCrawl4AI } from './search-web-crawl4ai';
-import { webScraperReadability } from './search-web-readability';
+import { webScraperCrawl4AI } from './web-scraper-crawl4ai';
+import { webScraperReadability } from './web-scraper-readability';
 import { logError, logWarning } from '@shared/logging';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 import {
   incrementCrawl4aiSuccessCounter,
   incrementReadabilitySuccessCounter,
@@ -16,7 +16,7 @@ const ALLOWED_PROTOCOLS = ['http:', 'https:'];
  * @param url The URL to fetch and parse.
  * @returns The most important information from the page.
  */
-export async function webScraper(url: string): Promise<WebsearchSource> {
+export async function webScraper(url: string): Promise<WebSource> {
   try {
     const urlObj = new URL(url);
     if (!ALLOWED_PROTOCOLS.includes(urlObj.protocol)) {

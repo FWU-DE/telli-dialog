@@ -13,7 +13,7 @@ import useBreakpoints from '../hooks/use-breakpoints';
 import { isImageFile } from '@/utils/files/generic';
 import { type UIMessage, type ChatStatus } from '@/types/chat';
 import { ReactNode } from 'react';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 import {
   WebSearchSourcesButton,
   WebSearchSourcesPanel,
@@ -29,7 +29,7 @@ export function ChatBox({
   fileMapping,
   pendingFileMapping,
   index,
-  websources,
+  webSources,
   isLastNonUser,
   isLoading,
   regenerateMessage,
@@ -40,7 +40,7 @@ export function ChatBox({
   fileMapping?: Map<string, FileModel[]>;
   pendingFileMapping?: Map<string, PendingFileModel[]>;
   index: number;
-  websources?: WebsearchSource[];
+  webSources?: WebSource[];
   isLastNonUser: boolean;
   isLoading: boolean;
   regenerateMessage: () => void;
@@ -68,13 +68,13 @@ export function ChatBox({
   const hasFiles = allFiles !== undefined && allFiles.length > 0;
 
   const parsedUrls = children.role === 'user' ? (parseHyperlinks(children.content) ?? []) : [];
-  const userWebsearchSources = children.role === 'user' ? [...(websources ?? [])] : [];
-  const assistantWebsearchSources =
+  const userWebSources = children.role === 'user' ? [...(webSources ?? [])] : [];
+  const assistantWebSearchSources =
     children.role === 'assistant' ? (children.webSearchResults ?? []) : [];
 
   for (const url of parsedUrls) {
-    if (userWebsearchSources.find((source) => source.link === url) === undefined) {
-      userWebsearchSources.push({ link: url });
+    if (userWebSources.find((source) => source.link === url) === undefined) {
+      userWebSources.push({ link: url });
     }
   }
 
@@ -109,24 +109,28 @@ export function ChatBox({
       </div>
     ) : null;
 
-  const maybeUserWebpageCard =
-    userWebsearchSources.length > 0 && (!isLoading || !isLastNonUser) ? (
+  const maybeUserWebSources =
+    userWebSources.length > 0 && (!isLoading || !isLastNonUser) ? (
       <div
         className="relative flex flex-wrap text-ellipsis gap-2 self-end mt-1 mb-2 w-[70%]"
         dir="rtl"
       >
-        {userWebsearchSources.map((source, sourceIndex) => {
+        {userWebSources.map((webSource, sourceIndex) => {
           return (
-            <Citation className="p-0" key={`user-link-${index}-${sourceIndex}`} source={source} />
+            <Citation
+              className="p-0"
+              key={`user-link-${index}-${sourceIndex}`}
+              webSource={webSource}
+            />
           );
         })}
       </div>
     ) : null;
 
-  const maybeAssistantSources =
-    assistantWebsearchSources.length > 0 ? (
+  const maybeAssistantWebSearchSources =
+    assistantWebSearchSources.length > 0 ? (
       <WebSearchSourcesPanel
-        sources={assistantWebsearchSources}
+        sources={assistantWebSearchSources}
         isOpen={isAssistantSourcesOpen}
         onToggle={toggleOpen}
         panelId={`assistant-web-sources-${children.id}`}
@@ -135,9 +139,7 @@ export function ChatBox({
     ) : null;
 
   const margin =
-    allFiles !== undefined ||
-    userWebsearchSources.length > 0 ||
-    assistantWebsearchSources.length > 0
+    allFiles !== undefined || userWebSources.length > 0 || assistantWebSearchSources.length > 0
       ? 'm-0 mt-4'
       : 'm-4';
 
@@ -155,7 +157,7 @@ export function ChatBox({
             <ReloadIcon className="w-5 h-5" />
           </div>
         </button>
-        {assistantWebsearchSources.length > 0 && (
+        {assistantWebSearchSources.length > 0 && (
           <WebSearchSourcesButton
             panelId={`assistant-web-sources-${children.id}`}
             onClick={openOrScrollIntoView}
@@ -178,14 +180,14 @@ export function ChatBox({
                 children.role === 'assistant' && 'w-full',
               )}
             >
-              {maybeAssistantSources}
+              {maybeAssistantWebSearchSources}
               {messageContent}
               {maybeShowMessageIcons}
             </div>
           </div>
         </div>
       </div>
-      {maybeUserWebpageCard}
+      {maybeUserWebSources}
       {maybeFileAttachment}
     </>
   );

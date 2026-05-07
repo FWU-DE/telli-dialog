@@ -1,12 +1,12 @@
 import { Readability } from '@mozilla/readability';
 import { JSDOM, VirtualConsole } from 'jsdom';
-import { SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import { WEB_SCRAPE_RESULT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import he from 'he';
 import { logDebug, logError, logInfo, logWarning } from '@shared/logging';
 import { isBinaryFile } from 'isbinaryfile';
-import { WebsearchSource } from '@shared/db/types';
+import { WebSource } from '@shared/db/types';
 
 const headers = {
   'User-Agent':
@@ -19,7 +19,7 @@ const headers = {
  * @param url The URL to fetch and parse.
  * @returns A summary of the most important information from the page.
  */
-export async function webScraperReadability(url: string): Promise<WebsearchSource> {
+export async function webScraperReadability(url: string): Promise<WebSource> {
   const t = await getTranslations('websearch');
   let response: Response;
 
@@ -77,7 +77,7 @@ export async function webScraperReadability(url: string): Promise<WebsearchSourc
 
   // Normalize and clean the content (reduce all whitespace to single spaces)
   const normalizedInfo = info.normalize('NFC').trim().replace(/\s+/g, ' ');
-  const trimmedInfo = normalizedInfo.substring(0, SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT);
+  const trimmedInfo = normalizedInfo.substring(0, WEB_SCRAPE_RESULT_LENGTH_LIMIT);
 
   return {
     content: trimmedInfo,
