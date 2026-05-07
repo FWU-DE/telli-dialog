@@ -112,7 +112,7 @@ export function AppSidebar({
 
           <SidebarGroup className="mt-2">
             <MyTelliPoints
-              text={t('telli-points')}
+              text={t('token-points')}
               currentModelCosts={currentModelCosts}
               userPriceLimit={userPriceLimit}
             />
