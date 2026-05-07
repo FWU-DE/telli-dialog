@@ -1,13 +1,41 @@
-import { LinkupClient, type TextSearchResult } from 'linkup-sdk';
+import { LinkupClient } from 'linkup-sdk';
 import { generateTextWithBilling } from '@telli/ai-core';
 import { env } from '@/env';
 import {
   WEBSEARCH_RESULT_LENGTH_LIMIT,
   WEBSEARCH_RESULTS_LIMIT,
 } from '@/configuration-text-inputs/const';
+import type { WebSearchResult } from '@shared/db/types';
 import { logError } from '@shared/logging';
 import { dbInsertConversationToolCallUsage } from '@shared/db/functions/token-usage';
 import { dbGetToolCallCostByName } from '@shared/db/functions/tool-call';
+
+async function recordWebSearchUsage({
+  conversationId,
+  userId,
+}: {
+  conversationId: string;
+  userId: string;
+}) {
+  let costsInCent = 0;
+
+  try {
+    costsInCent = (await dbGetToolCallCostByName('web_search')).costsInCent;
+  } catch (error) {
+    logError('Error loading web search tool call cost, using 0 cent fallback.', error);
+  }
+
+  try {
+    await dbInsertConversationToolCallUsage({
+      toolCallName: 'web_search',
+      conversationId,
+      userId,
+      costsInCent,
+    });
+  } catch (error) {
+    logError('Error recording web search usage billing.', error);
+  }
+}
 
 export async function isWebSearchNeeded({
   query,
@@ -86,7 +114,7 @@ export async function searchWeb({
   query: string;
   conversationId: string;
   userId: string;
-}): Promise<TextSearchResult[]> {
+}): Promise<WebSearchResult[]> {
   if (!env.linkupApiKey) {
     return [];
   }
@@ -95,7 +123,6 @@ export async function searchWeb({
     const linkupClient = new LinkupClient({
       apiKey: env.linkupApiKey,
     });
-    const toolCallCostPromise = dbGetToolCallCostByName('web_search');
 
     const searchResults = await linkupClient.search({
       query: query,
@@ -103,18 +130,25 @@ export async function searchWeb({
       outputType: 'searchResults',
     });
 
-    await dbInsertConversationToolCallUsage({
-      toolCallName: 'web_search',
+    const results = Array.isArray(searchResults.results)
+      ? (searchResults.results as WebSearchResult[])
+          .slice(0, WEBSEARCH_RESULTS_LIMIT)
+          .map((result) => ({
+            ...result,
+            content: result.content.slice(0, WEBSEARCH_RESULT_CONTENT_LENGTH_LIMIT),
+          }))
+      : [];
+
+    await recordWebSearchUsage({
       conversationId,
       userId,
-      costsInCent: (await toolCallCostPromise).costsInCent,
     });
 
     if (!Array.isArray(searchResults.results)) {
       return [];
     }
 
-    return (searchResults.results as TextSearchResult[])
+    return (searchResults.results as WebSearchResult[])
       .slice(0, WEBSEARCH_RESULTS_LIMIT)
       .map((result) => ({
         ...result,

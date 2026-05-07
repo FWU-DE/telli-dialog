@@ -1,4 +1,4 @@
-import { type ToolCallName, toolCallCostSelectSchema, toolCallNameSchema } from '@shared/db/schema';
+import { toolCallCostSelectSchema, toolCallNameSchema } from '@shared/db/schema';
 import z from 'zod';
 
 export const toolCallCostSchema = toolCallCostSelectSchema;
@@ -43,10 +43,3 @@ export const updateToolCallCostSchema = z.object({
 });
 export type UpdateToolCallCostInput = z.infer<typeof updateToolCallCostSchema>;
 export type UpdateToolCallCostPayload = z.input<typeof updateToolCallCostSchema>;
-
-export function getToolCallLabel(toolCallName: ToolCallName) {
-  switch (toolCallName) {
-    case 'web_search':
-      return 'Websuche';
-  }
-}

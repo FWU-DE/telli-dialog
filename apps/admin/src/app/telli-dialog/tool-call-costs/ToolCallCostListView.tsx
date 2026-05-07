@@ -15,13 +15,20 @@ import {
   TableRow,
 } from '@ui/components/Table';
 import {
-  getToolCallLabel,
   type ToolCallCost,
   type UpdateToolCallCostInput,
   type UpdateToolCallCostPayload,
   updateToolCallCostSchema,
 } from '@shared/tool-call-costs/tool-call-cost';
 import { getToolCallCostsAction, updateToolCallCostAction } from './actions';
+
+const TOOL_CALL_LABELS: Record<ToolCallCost['toolCallName'], string> = {
+  web_search: 'Websuche',
+};
+
+function getToolCallLabel(toolCallName: ToolCallCost['toolCallName']) {
+  return TOOL_CALL_LABELS[toolCallName];
+}
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Ein unbekannter Fehler ist aufgetreten.';
