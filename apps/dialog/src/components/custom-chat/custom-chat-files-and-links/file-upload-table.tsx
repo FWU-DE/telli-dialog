@@ -73,8 +73,8 @@ export default function FilesTable({
       {mergedFiles
         .filter(({ status }) => status !== 'failed')
         .map(({ id, fileName, size, status }) => {
-          const [fileStem, extention] = getFileNameAndFileExtention(fileName);
-          const { Icon, fillColor } = getFileIconByFileExtension(extention);
+          const [fileStem, extension] = getFileNameAndFileExtention(fileName);
+          const { Icon, fillColor } = getFileIconByFileExtension(extension);
 
           return (
             <div
