@@ -14,7 +14,7 @@ import { buildPublicConfig } from '@shared/sentry/public-config';
 import { cn } from '@/utils/tailwind';
 import { getReadOnlySignedUrl } from '@shared/s3';
 import { SEVEN_DAYS } from '@shared/s3/const';
-import telliIcon from '@/assets/telli.svg';
+import logoIcon from '@/assets/logo.svg';
 import appleTouchIcon from '@/assets/apple-touch-icon.png';
 
 const barlow = Barlow({
@@ -34,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: !!federalState?.telliName ? federalState?.telliName : 'telli',
     description: 'Der datenschutzkonforme KI-Chatbot für die Schule',
     icons: {
-      icon: faviconPreSignedUrl ?? telliIcon.src,
+      icon: faviconPreSignedUrl ?? logoIcon.src,
       apple: appleTouchIcon.src,
     },
   };

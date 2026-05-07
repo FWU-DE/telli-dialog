@@ -1,12 +1,12 @@
 import type { MetadataRoute } from 'next';
-import telliIcon from '@/assets/telli.svg';
+import logoIcon from '@/assets/logo.svg';
 import appleTouchIcon from '@/assets/apple-touch-icon.png';
 import iconMaskable from '@/assets/icon-maskable.png';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'telli',
-    short_name: 'telli',
+    name: 'AIS.chat',
+    short_name: 'AIS.chat',
     description: 'Der datenschutzkonforme KI-Chatbot für die Schule',
     categories: ['education'],
     start_url: '/',
@@ -16,7 +16,7 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#fff',
     icons: [
       {
-        src: telliIcon.src,
+        src: logoIcon.src,
         sizes: 'any',
         type: 'image/svg+xml',
         purpose: 'any',
