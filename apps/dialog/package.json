@@ -97,6 +97,7 @@
     "@dotenvx/dotenvx": "1.63.0",
     "@eslint/eslintrc": "3.3.5",
     "@playwright/test": "1.59.1",
+    "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "4.2.4",
     "@telli/typescript-config": "workspace:*",
     "@types/he": "1.2.3",

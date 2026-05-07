@@ -14,7 +14,7 @@ import { buildPublicConfig } from '@shared/sentry/public-config';
 import { cn } from '@/utils/tailwind';
 import { getReadOnlySignedUrl } from '@shared/s3';
 import { SEVEN_DAYS } from '@shared/s3/const';
-import logoIcon from '@/assets/logo.svg';
+import logoIcon from '@/assets/logo-only.svg?url';
 import appleTouchIcon from '@/assets/apple-touch-icon.png';
 
 const barlow = Barlow({

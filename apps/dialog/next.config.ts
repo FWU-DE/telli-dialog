@@ -1,7 +1,6 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
-import path from 'path';
 
 const isDevBuild = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
 
@@ -55,6 +54,33 @@ const baseNextConfig: NextConfig = {
     // Speed up dev builds by pre-bundling heavy packages instead of re-resolving on every HMR
     optimizePackageImports: ['@telli/ui', '@telli/shared', '@telli/ai-core'],
   },
+  turbopack: {
+    rules: {
+      // Treat plain SVG imports as React components and `?url` imports as asset URLs.
+      '*.svg': [
+        {
+          condition: {
+            all: [{ not: 'foreign' }, { query: /url/ }],
+          },
+          type: 'asset',
+        },
+        {
+          condition: {
+            all: [{ not: 'foreign' }, { not: { query: /url/ } }],
+          },
+          loaders: [
+            {
+              loader: '@svgr/webpack',
+              options: {
+                exportType: 'default',
+              },
+            },
+          ],
+          as: '*.js',
+        },
+      ],
+    },
+  },
   async redirects() {
     return [
       {
@@ -88,14 +114,6 @@ const baseNextConfig: NextConfig = {
         permanent: true,
       },
     ];
-  },
-  webpack: (config) => {
-    // Ensure proper module resolution for path aliases
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname, './src'),
-    };
-    return config;
   },
 } satisfies NextConfig;
 

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import logoIcon from '@/assets/logo.svg';
+import logoIcon from '@/assets/logo-only.svg?url';
 import appleTouchIcon from '@/assets/apple-touch-icon.png';
 import iconMaskable from '@/assets/icon-maskable.png';
 
