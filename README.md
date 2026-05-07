@@ -4,7 +4,7 @@
 
 This guide helps you run telli using pre-built Docker images with minimal configuration.
 
-> [!CAUTION]
+> [!NOTE]
 > The Docker Compose setup and credentials described in this section are intended **only for local exploration and testing**.
 > They use hard-coded default secrets and users and are **not safe for production deployments**.
 
@@ -211,10 +211,7 @@ The e2e tests are integrated into the pipeline and run on every pull request.
 ## Load Tests
 
 If you need to run load tests, you need to install `k6`.
-
-```sh
-brew install k6
-```
+See the [official install guide](https://grafana.com/docs/k6/latest/set-up/install-k6/) for your platform.
 
 ## More
 
@@ -224,52 +221,3 @@ For information about the project structure, see [here](./docs/structure.md).
 ## Security issues
 
 Please see [SECURITY.md](SECURITY.md) for guidance on reporting security-related issues.
-
-## Configurations by Federal State
-
-There are several functionalities to customize look and functionality for each federal state:
-
-### Access Flags
-
-- **student_access**:  
-  Whether students are allowed to login.
-  This value is configured in the SQL column federal_state/student_access.
-
-### Feature Flags
-
-These are hidden in the sidebar, but the routes are still accessible.
-
-- **enableCharacters**:  
-  Whether custom characters (Dialogpartner) are enabled for teachers.
-  This value is configured in the SQL column federal_state/enable_characters.
-
-- **enableSharedChats**:  
-  Whether shared school chats (Lernszenario) are enabled for teachers.
-  This value is configured in the SQL column federal_state/enable_shared_chats.
-
-- **enableCustomGpt**:  
-  Whether customGpts (Assistenten) are enabled for teachers.
-  This value is configured in the SQL column federal_state/enable_custom_gpts.
-
-### Whitelabel
-
-All whitelabel configurations can be set up in the telli-admin interface.
-Custom designs and titles for federal states:
-
-- **telliName**:  
-  Custom name appearing in the sidebar and as website title.
-  This value is configured in the SQL column `federal_state/telli_name`.
-
-- **logos**:  
-  The logo and favicon are stored in the S3 Bucket and referenced from the SQL column `federal_state/picture_urls`:
-
-  ```
-  {
-    "logo": "whitelabels/Federal-State-ID/logo.svg",
-    "favicon": "whitelabels/Federal-State-ID/favicon.svg"
-  }
-  ```
-
-- **design configuration**:  
-  Custom color palette for buttons, icons, etc. (see Figma designs).  
-  This value is configured in the SQL column `federal_state/design_configuration`.

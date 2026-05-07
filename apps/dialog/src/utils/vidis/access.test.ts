@@ -38,9 +38,6 @@ describe('checkProductAccess', () => {
 
   const baseUser = {
     id: 'user-1',
-    email: 'user-1@vidis.schule',
-    firstName: '',
-    lastName: '',
     createdAt: new Date(),
     lastUsedModel: null,
     versionAcceptedConditions: null,

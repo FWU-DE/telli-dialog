@@ -48,12 +48,12 @@ test('teacher can create character with initial message and verify it appears in
   await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
 
   await page.waitForURL('/characters/editor/**/share');
-  const code = await page.locator('#join-code').textContent();
+  const code = await page.getByTestId('join-code').textContent();
 
-  const countDown = page.locator('#countdown-timer');
+  const countDown = page.getByTestId('countdown-timer');
   await expect(countDown).toBeVisible();
 
-  const qrCode = page.locator('#qr-code');
+  const qrCode = page.getByTestId('qr-code');
   await expect(qrCode).toBeVisible();
 
   // join chat as teacher to test the initial message

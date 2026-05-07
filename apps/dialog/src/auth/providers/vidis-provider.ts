@@ -26,7 +26,6 @@ export async function handleVidisJWTCallback({
   }
 
   token.userId = existingUser.id;
-  token.email = existingUser.email;
   token.id_token = parsedAccount.id_token;
   token.hasCompletedTraining = parsedProfile.is_ai_chat_eligible ?? false;
   return token;

@@ -49,13 +49,20 @@ test.describe('create, share, chat, delete', () => {
     await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
 
     await page.waitForURL('/characters/editor/**/share');
-    const code = await page.locator('#join-code').textContent();
+    const code = await page.getByTestId('join-code').textContent();
 
-    const countDown = page.locator('#countdown-timer');
+    const countDown = page.getByTestId('countdown-timer');
     await expect(countDown).toBeVisible();
 
-    const qrCode = page.locator('#qr-code');
+    const qrCode = page.getByTestId('qr-code');
     await expect(qrCode).toBeVisible();
+
+    // verify countdown is also shown on the overview list
+    await page.goto('/characters');
+    await page.waitForURL('/characters**');
+    const card = page.getByTestId('entity-card').filter({ hasText: characterName }).first();
+    await expect(card).toBeVisible();
+    await expect(card.getByRole('timer')).toBeVisible();
 
     // join chat as teacher
     await page.goto('/logout');

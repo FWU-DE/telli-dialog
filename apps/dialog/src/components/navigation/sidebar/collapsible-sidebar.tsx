@@ -1,9 +1,8 @@
 'use client';
 
 import { useSidebar } from '@telli/ui/components/Sidebar';
-import NewDialogIcon from '@/components/icons/sidebar/new-dialog';
 import { useRouter } from 'next/navigation';
-import { SidebarSimpleIcon } from '@phosphor-icons/react';
+import { PlusSquareIcon, SidebarSimpleIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
 
 export function ToggleSidebarButton({ forceVisibility = false }: { forceVisibility?: boolean }) {
@@ -17,11 +16,10 @@ export function ToggleSidebarButton({ forceVisibility = false }: { forceVisibili
       variant="ghost"
       size="icon-round"
       title="Sidebar"
-      className="text-primary"
       onClick={toggleSidebar}
       aria-label="sidebar-toggle-close"
     >
-      <SidebarSimpleIcon className="size-6" />
+      <SidebarSimpleIcon className="size-6 text-primary" />
     </Button>
   );
 }
@@ -49,7 +47,7 @@ export function NewChatButton({ forceVisibility = false }: { forceVisibility?: b
       aria-label="Neuer Chat"
       title="Neuer Chat"
     >
-      <NewDialogIcon className="size-8" />
+      <PlusSquareIcon className="size-6 text-primary" />
     </Button>
   );
 }
