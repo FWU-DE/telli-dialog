@@ -20,21 +20,21 @@ export const ROUTES = {
     projectDetails: (organizationId: string, projectId: string) =>
       `/organizations/${organizationId}/projects/${projectId}`,
   },
-  dialog: {
-    apiKey: (federalStateId: string) => `/telli-dialog/federal-states/${federalStateId}/api-key`,
-    page: '/telli-dialog',
-    federalStates: `/telli-dialog/federal-states`,
+  app: {
+    apiKey: (federalStateId: string) => `/ais-chat-app/federal-states/${federalStateId}/api-key`,
+    page: '/ais-chat-app',
+    federalStates: `/ais-chat-app/federal-states`,
     federalStateDetails: (federalStateId: string) =>
-      `/telli-dialog/federal-states/${federalStateId}`,
-    infoBanners: '/telli-dialog/info-banners',
-    infoBannerNew: '/telli-dialog/info-banners/new',
-    infoBannerDetails: (infoBannerId: string) => `/telli-dialog/info-banners/${infoBannerId}`,
-    templates: '/telli-dialog/templates',
+      `/ais-chat-app/federal-states/${federalStateId}`,
+    infoBanners: '/ais-chat-app/info-banners',
+    infoBannerNew: '/ais-chat-app/info-banners/new',
+    infoBannerDetails: (infoBannerId: string) => `/ais-chat-app/info-banners/${infoBannerId}`,
+    templates: '/ais-chat-app/templates',
     template: (templateType: TemplateTypes, templateId: string) =>
-      `/telli-dialog/templates/${templateType}/${templateId}`,
-    vouchers: (federalStateId: string) => `/telli-dialog/federal-states/${federalStateId}/vouchers`,
+      `/ais-chat-app/templates/${templateType}/${templateId}`,
+    vouchers: (federalStateId: string) => `/ais-chat-app/federal-states/${federalStateId}/vouchers`,
     voucherNew: (federalStateId: string) =>
-      `/telli-dialog/federal-states/${federalStateId}/vouchers/new`,
-    modelRefresh: '/telli-dialog/model-refresh',
+      `/ais-chat-app/federal-states/${federalStateId}/vouchers/new`,
+    modelRefresh: '/ais-chat-app/model-refresh',
   },
 };

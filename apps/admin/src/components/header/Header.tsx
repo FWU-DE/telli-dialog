@@ -8,15 +8,15 @@ export function Header() {
     <header className="flex gap-6 items-center">
       <Link href={ROUTES.home} className="flex-none">
         <Button variant="link" className="text-xl font-bold">
-          telli-admin
+          AIS.chat-admin
         </Button>
       </Link>
       <div className="flex-1 flex flex-row gap-4">
         <Link href={ROUTES.api.organizations}>
-          <Button variant={'link'}>telli-api</Button>
+          <Button variant={'link'}>AIS.chat-api</Button>
         </Link>
-        <Link href={ROUTES.dialog.page}>
-          <Button variant={'link'}>telli-dialog</Button>
+        <Link href={ROUTES.app.page}>
+          <Button variant={'link'}>AIS.chat-app</Button>
         </Link>
       </div>
       <div className="flex-none">
