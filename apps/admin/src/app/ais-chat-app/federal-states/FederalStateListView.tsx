@@ -89,7 +89,7 @@ export default function FederalStateListView() {
               {federalStates.map((federalState) => (
                 <TableRow key={federalState.id}>
                   <TableCell>{federalState.id}</TableCell>
-                  <TableCell>{federalState.telliName}</TableCell>
+                  <TableCell>{federalState.appName}</TableCell>
                   <TableCell>{federalState.createdAt.toLocaleString()}</TableCell>
                   <TableCell>
                     <Link href={ROUTES.app.federalStateDetails(federalState.id)}>

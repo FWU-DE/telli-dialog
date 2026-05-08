@@ -61,7 +61,7 @@ function latestActiveLearningScenarioShare(user: Pick<UserModel, 'id'>) {
 /**
  * Returns a subquery that selects the single most-recent share per learning scenario for a given
  * user, regardless of whether it is active or expired. Used to surface the last share's settings
- * (telliPointsLimit, maxUsageTimeLimit) as defaults when no active share exists.
+ * (tokenPointsLimit, maxUsageTimeLimit) as defaults when no active share exists.
  */
 function latestLearningScenarioShare(
   user: Pick<UserModel, 'id'>,
@@ -95,7 +95,7 @@ function baseLearningScenarioWithShareQuery(
   return db
     .select({
       ...getTableColumns(learningScenarioTable),
-      telliPointsLimit: activeShare.telliPointsLimit,
+      tokenPointsLimit: activeShare.tokenPointsLimit,
       inviteCode: activeShare.inviteCode,
       maxUsageTimeLimit: activeShare.maxUsageTimeLimit,
       startedAt: activeShare.startedAt,
@@ -291,7 +291,7 @@ export async function dbGetLearningScenarioByIdAndInviteCode({
   const [row] = await db
     .select({
       ...getTableColumns(learningScenarioTable),
-      telliPointsLimit: sharedLearningScenarioTable.telliPointsLimit,
+      tokenPointsLimit: sharedLearningScenarioTable.tokenPointsLimit,
       inviteCode: sharedLearningScenarioTable.inviteCode,
       maxUsageTimeLimit: sharedLearningScenarioTable.maxUsageTimeLimit,
       startedAt: sharedLearningScenarioTable.startedAt,
@@ -421,14 +421,14 @@ export function dbGetSharedLearningScenarioConversations({
 export async function dbCreateLearningScenarioShare({
   user,
   learningScenarioId,
-  telliPointsLimit,
+  tokenPointsLimit,
   maxUsageTimeLimit,
   inviteCode,
   startedAt,
 }: {
   user: Pick<UserModel, 'id'>;
   learningScenarioId: string;
-  telliPointsLimit: number;
+  tokenPointsLimit: number;
   maxUsageTimeLimit: number;
   inviteCode: string;
   startedAt: Date;
@@ -439,7 +439,7 @@ export async function dbCreateLearningScenarioShare({
       userId: user.id,
       learningScenarioId,
       maxUsageTimeLimit,
-      telliPointsLimit,
+      tokenPointsLimit,
       inviteCode,
       startedAt,
     })

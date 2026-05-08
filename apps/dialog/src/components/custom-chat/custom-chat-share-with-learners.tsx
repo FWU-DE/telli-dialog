@@ -31,7 +31,7 @@ interface CustomChatShareWithLearnersProps {
   startedAt: Date | null;
   manuallyStoppedAt: Date | null;
   maxUsageTimeLimit: number | null;
-  telliPointsLimit: number | null;
+  tokenPointsLimit: number | null;
   pointsPercentageValues: number[];
   usageTimeValues: number[];
   onShare: (data: z.infer<typeof shareFormSchema>) => Promise<{ success: boolean }>;
@@ -44,7 +44,7 @@ export function CustomChatShareWithLearners({
   startedAt,
   manuallyStoppedAt,
   maxUsageTimeLimit,
-  telliPointsLimit,
+  tokenPointsLimit,
   pointsPercentageValues,
   usageTimeValues,
   onShare,
@@ -68,7 +68,7 @@ export function CustomChatShareWithLearners({
   const { getValues: getValuesShare, setValue: setShareValue } = useForm({
     resolver: zodResolver(shareFormSchema),
     defaultValues: {
-      telliPointsPercentageLimit: telliPointsLimit ?? 10,
+      telliPointsPercentageLimit: tokenPointsLimit ?? 10,
       usageTimeLimit: maxUsageTimeLimit ?? 45,
     },
   });

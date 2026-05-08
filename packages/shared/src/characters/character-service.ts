@@ -376,7 +376,7 @@ export const shareCharacter = async ({
   const activeShares = await dbGetSharedCharacterConversations({ characterId, user });
   if (activeShares.length > 0) throw new Error('There can only be one active share at a time');
 
-  const telliPointsLimit = telliPointsPercentageLimit;
+  const tokenPointsLimit = telliPointsPercentageLimit;
   const maxUsageTimeLimit = usageTimeLimitMinutes;
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
@@ -385,7 +385,7 @@ export const shareCharacter = async ({
     .values({
       userId: user.id,
       characterId,
-      telliPointsLimit,
+      tokenPointsLimit,
       maxUsageTimeLimit,
       inviteCode,
       startedAt,

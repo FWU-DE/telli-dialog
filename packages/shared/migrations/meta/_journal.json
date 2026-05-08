@@ -477,6 +477,13 @@
       "when": 1777959011913,
       "tag": "0067_puzzling_lizard",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1778234487887,
+      "tag": "0068_same_psynapse",
+      "breakpoints": true
     }
   ]
 }

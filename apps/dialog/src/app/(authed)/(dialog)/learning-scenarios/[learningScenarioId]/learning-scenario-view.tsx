@@ -106,7 +106,7 @@ export function LearningScenarioView({
         startedAt={learningScenario.startedAt}
         manuallyStoppedAt={learningScenario.manuallyStoppedAt}
         maxUsageTimeLimit={learningScenario.maxUsageTimeLimit}
-        telliPointsLimit={learningScenario.telliPointsLimit}
+        tokenPointsLimit={learningScenario.tokenPointsLimit}
         pointsPercentageValues={telliPointsPercentageValues}
         usageTimeValues={usageTimeValuesInMinutes}
         onShare={handleShareLearningScenario}

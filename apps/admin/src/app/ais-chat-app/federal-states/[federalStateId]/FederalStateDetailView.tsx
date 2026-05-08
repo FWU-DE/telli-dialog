@@ -172,7 +172,7 @@ export function FederalStateView(props: FederalStateViewProps) {
             control={control}
           />
           <FormField
-            name="telliName"
+            name="appName"
             label="Name"
             description="Beschreibender Name für das Bundesland."
             control={control}

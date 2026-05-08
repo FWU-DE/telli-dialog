@@ -423,7 +423,7 @@ describe('character-service', () => {
       id: generateUUID(),
       characterId,
       userId,
-      telliPointsLimit: 50,
+      tokenPointsLimit: 50,
       maxUsageTimeLimit: 60,
       inviteCode: 'ABCD1234',
       startedAt: new Date(),

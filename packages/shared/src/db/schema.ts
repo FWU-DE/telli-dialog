@@ -199,7 +199,7 @@ export const federalStateTable = pgTable('federal_state', {
   trainingLink: text('training_link'),
   // whitelabel configuration
   designConfiguration: json('design_configuration').$type<DesignConfiguration>(),
-  telliName: text('telli_name'),
+  appName: text('app_name'),
   pictureUrls: json('picture_urls').$type<FederalStatePictureUrls>(),
   // feature toggles
   featureToggles: json('feature_toggles').$type<FederalStateFeatureToggles>().notNull(),
@@ -673,7 +673,7 @@ export const sharedLearningScenarioTable = pgTable(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
-    telliPointsLimit: integer('telli_points_limit').notNull(),
+    tokenPointsLimit: integer('token_points_limit').notNull(),
     maxUsageTimeLimit: integer('max_usage_time_limit').notNull(),
     inviteCode: text('invite_code').unique().notNull(),
     startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
@@ -727,7 +727,7 @@ export const learningScenarioOptionalShareDataModel = learningScenarioSelectSche
     maxUsageTimeLimit: z.number().nullable(),
     startedAt: z.coerce.date().nullable(),
     startedBy: z.string().nullable(),
-    telliPointsLimit: z.number().nullable(),
+    tokenPointsLimit: z.number().nullable(),
   }),
 );
 export type LearningScenarioWithShareDataModel = z.infer<typeof learningScenarioWithShareDataModel>;
@@ -853,7 +853,7 @@ export const sharedCharacterConversation = pgTable('shared_character_conversatio
   userId: uuid('user_id')
     .references(() => userTable.id)
     .notNull(),
-  telliPointsLimit: integer('telli_points_limit').notNull(),
+  tokenPointsLimit: integer('token_points_limit').notNull(),
   maxUsageTimeLimit: integer('max_usage_time_limit').notNull(),
   inviteCode: text('invite_code').unique().notNull(),
   startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
@@ -900,7 +900,7 @@ export const characterOptionalShareDataModel = characterSelectSchema.and(
     maxUsageTimeLimit: z.number().nullable(),
     startedAt: z.coerce.date().nullable(),
     startedBy: z.string().nullable(),
-    telliPointsLimit: z.number().nullable(),
+    tokenPointsLimit: z.number().nullable(),
   }),
 );
 export type CharacterWithShareDataModel = z.infer<typeof characterWithShareDataModel>;

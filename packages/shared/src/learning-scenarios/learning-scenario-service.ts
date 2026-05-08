@@ -306,7 +306,7 @@ export async function shareLearningScenario({
     learningScenarioId,
     inviteCode,
     startedAt,
-    telliPointsLimit: parsedValues.telliPointsPercentageLimit,
+    tokenPointsLimit: parsedValues.telliPointsPercentageLimit,
     maxUsageTimeLimit: parsedValues.usageTimeLimit,
   });
 

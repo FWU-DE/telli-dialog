@@ -32,7 +32,7 @@ export const mockUserAndContext = (): UserAndContext => {
       supportContacts: null,
       trainingLink: null,
       designConfiguration: null,
-      telliName: null,
+      appName: null,
       featureToggles: {
         isStudentAccessEnabled: false,
         isCharacterEnabled: false,
