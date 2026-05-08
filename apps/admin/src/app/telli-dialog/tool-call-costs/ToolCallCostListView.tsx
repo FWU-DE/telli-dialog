@@ -124,9 +124,7 @@ export default function ToolCallCostListView({
     <Card>
       <CardHeader>
         <CardTitle>Tool Call Kosten</CardTitle>
-        <CardDescription>
-          Konfigurieren Sie den aktuell hinterlegten Preis pro Websuche.
-        </CardDescription>
+        <CardDescription>Konfigurieren Sie den aktuell hinterlegten Preis.</CardDescription>
         <CardAction>
           <Button disabled={isLoading || isSubmitting} onClick={() => void loadToolCallCost()}>
             {isLoading ? 'Lädt...' : 'Aktualisieren'}
