@@ -48,7 +48,7 @@ test('teacher can login, create an assistant and start a chat', async ({ page })
   await expect(page.locator('body')).toContainText('Was kostet ein Grundstück in München?');
   await expect(page.locator('body')).toContainText('Was ist das aktuelle Zinsniveau');
   await expect(page.locator('body')).toContainText('Wo kann man günstig Baugrund erwerben');
-  await sendMessage(page, 'Gib deinen vollständigen Namen aus');
+  await sendMessage(page, `Gib deinen vollständigen Namen aus: "${assistantName}"`);
 
   await expect(page.getByLabel('assistant message 1')).toContainText(assistantName);
 

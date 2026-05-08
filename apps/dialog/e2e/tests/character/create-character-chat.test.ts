@@ -77,7 +77,7 @@ test.describe('create, share, chat, delete', () => {
     await page.waitForURL('/ua/characters/**/dialog?inviteCode=*');
 
     // send first message
-    await sendMessage(page, 'Wer bist du?');
+    await sendMessage(page, 'Wer bist du? Antworte mit "John Cena".');
     await page.getByTitle('Kopieren').click();
 
     await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');

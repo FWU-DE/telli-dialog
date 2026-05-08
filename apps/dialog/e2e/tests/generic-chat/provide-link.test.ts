@@ -8,7 +8,7 @@ test('teacher can provide link and it is displayed in the chat', async ({ page }
   await page.goto('/');
   await sendMessage(
     page,
-    'Wann hatte der Barock seinen Anfang?\nhttps://www.planet-wissen.de/geschichte/neuzeit/barock/index.html',
+    'Wann hatte der Barock seinen Anfang? Antworte mit "17".\nhttps://www.planet-wissen.de/geschichte/neuzeit/barock/index.html',
   );
 
   await expect(page.getByTestId('citation').first()).toContainText('planet-wissen.de');

@@ -20,6 +20,7 @@ services:
       - '3000:3000' # telli-dialog
       - '3001:3001' # telli-admin
       - '3002:3002' # telli-api
+      - '6556:6556' # mock-llm
       - '8080:8080' # keycloak
     depends_on:
       fix-keycloak-volume-ownership:
@@ -126,6 +127,18 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+  # Mock OpenAI-compatible server used as the default LLM in e2e tests.
+  # Echoes the last user message back character-by-character via SSE.
+  mock-llm:
+    build:
+      context: ./mock-llm
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    network_mode: service:keycloak
+    depends_on:
+      keycloak:
+        condition: service_started
 
   # Telli API - OpenAI compatible API service
   telli-api:

@@ -94,6 +94,22 @@ services:
       retries: 3
       start_period: 40s
 
+  # Mock OpenAI-compatible server used as the default LLM in e2e tests.
+  # Echoes the last user message back character-by-character via SSE.
+  mock-llm:
+    build:
+      context: ./mock-llm
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - '6556:6556'
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:6556/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
 volumes:
   keycloak_data:
   postgres_data:

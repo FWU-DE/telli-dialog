@@ -119,7 +119,7 @@ test.describe('create, share, chat, delete', () => {
     await expect(startButton).toBeVisible();
     await startButton.click();
 
-    await sendMessage(page, 'Über wen lernen wir hier?');
+    await sendMessage(page, 'Über wen lernen wir hier? Antworte mit "Ludwig XIV".');
 
     await expect(page.getByLabel('assistant message 1')).toContainText('Ludwig XIV');
 

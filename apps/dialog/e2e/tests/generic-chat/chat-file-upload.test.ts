@@ -27,7 +27,10 @@ test('should successfully upload a file and get response about its contents', as
   await expect(page.locator('form').getByRole('img').nth(1)).toBeVisible();
 
   // Send message about file contents
-  await sendMessage(page, 'Wie heißt die Hauptperson die in dieser Datei genannt wird?');
+  await sendMessage(
+    page,
+    'Wie heißt die Hauptperson die in dieser Datei genannt wird? Antworte mit "Napoleon Bonaparte".',
+  );
 
   // Verify the response contains the expected content
   const assistantMessage = page.getByLabel('assistant message 1');
