@@ -101,6 +101,7 @@ services:
       context: ./mock-llm
       dockerfile: Dockerfile
     restart: unless-stopped
+    profiles: ['mock-llm']
     ports:
       - '6556:6556'
     healthcheck:

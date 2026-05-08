@@ -135,6 +135,7 @@ services:
       context: ./mock-llm
       dockerfile: Dockerfile
     restart: unless-stopped
+    profiles: ['mock-llm']
     network_mode: service:keycloak
     depends_on:
       keycloak:
