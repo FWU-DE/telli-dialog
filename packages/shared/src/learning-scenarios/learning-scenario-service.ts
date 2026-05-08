@@ -48,7 +48,7 @@ import {
   verifyReadAccess,
   verifyWriteAccess,
 } from '@shared/auth/authorization-service';
-import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
+import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 
 export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel & {

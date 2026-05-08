@@ -15,12 +15,12 @@ COPY . .
 # setup pnpm and pnpm install in order to install turbo in the correct version
 RUN corepack enable && corepack prepare
 # Use a hoisted node_modules layout so runtime resolution works with our build output:
-# - tsup bundles internal workspace packages (e.g. @telli/*) into the API bundle
+# - tsup bundles internal workspace packages (e.g. @ais-chat/*) into the API bundle
 # - any third‑party deps imported by those bundled packages (e.g. drizzle-orm) must be resolvable
 #   from the API's module resolution paths, i.e. /app/node_modules when running in the container
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile --dev --shamefully-hoist --prefer-offline
-RUN pnpm turbo prune telli-api --docker
+RUN pnpm turbo prune ais-chat-api --docker
 
 FROM builder-base AS builder
 WORKDIR /app

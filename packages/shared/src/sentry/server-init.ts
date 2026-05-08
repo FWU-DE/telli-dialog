@@ -8,7 +8,7 @@ import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { SentrySampler, SentrySpanProcessor } from '@sentry/opentelemetry';
-import { scrubSentryEvent } from '@telli/shared-core/sentry/scrub';
+import { scrubSentryEvent } from '@ais-chat/shared-core/sentry/scrub';
 import { env } from './env';
 
 /**

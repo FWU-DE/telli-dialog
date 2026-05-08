@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@telli/ui/components/Button';
+import { Button } from '@ais-chat/ui/components/Button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@telli/ui/components/AlertDialog';
+} from '@ais-chat/ui/components/AlertDialog';
 
 type ConfirmationDialogProps = {
   trigger: React.ReactElement;

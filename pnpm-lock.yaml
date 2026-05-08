@@ -13,7 +13,7 @@ importers:
 
   .:
     devDependencies:
-      '@telli/typescript-config':
+      '@ais-chat/typescript-config':
         specifier: workspace:*
         version: link:packages/typescript-config
       prettier:
@@ -25,6 +25,15 @@ importers:
 
   apps/admin:
     dependencies:
+      '@ais-chat/api-database':
+        specifier: workspace:*
+        version: link:../../packages/api-database
+      '@ais-chat/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@ais-chat/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@aws-sdk/client-s3':
         specifier: 3.1037.0
         version: 3.1037.0
@@ -43,15 +52,6 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: 0.13.11
         version: 0.13.11(typescript@6.0.3)(zod@4.3.6)
-      '@telli/api-database':
-        specifier: workspace:*
-        version: link:../../packages/api-database
-      '@telli/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
-      '@telli/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       lucide-react:
         specifier: 1.11.0
         version: 1.11.0(react@19.2.5)
@@ -89,12 +89,12 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
+      '@ais-chat/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
       '@eslint/eslintrc':
         specifier: 3.3.5
         version: 3.3.5
-      '@telli/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
       '@types/node':
         specifier: 24.12.2
         version: 24.12.2
@@ -146,6 +146,15 @@ importers:
 
   apps/api:
     dependencies:
+      '@ais-chat/ai-core':
+        specifier: workspace:*
+        version: link:../../packages/ai-core
+      '@ais-chat/api-database':
+        specifier: workspace:*
+        version: link:../../packages/api-database
+      '@ais-chat/shared-core':
+        specifier: workspace:*
+        version: link:../../packages/shared-core
       '@fastify/cors':
         specifier: 11.2.0
         version: 11.2.0
@@ -200,15 +209,6 @@ importers:
       '@t3-oss/env-core':
         specifier: 0.13.11
         version: 0.13.11(typescript@6.0.3)(zod@4.3.6)
-      '@telli/ai-core':
-        specifier: workspace:*
-        version: link:../../packages/ai-core
-      '@telli/api-database':
-        specifier: workspace:*
-        version: link:../../packages/api-database
-      '@telli/shared-core':
-        specifier: workspace:*
-        version: link:../../packages/shared-core
       dotenv:
         specifier: 17.4.2
         version: 17.4.2
@@ -228,6 +228,9 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
+      '@ais-chat/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
       '@eslint/js':
         specifier: 9.39.2
         version: 9.39.2
@@ -237,9 +240,6 @@ importers:
       '@sentry/esbuild-plugin':
         specifier: 5.2.0
         version: 5.2.0
-      '@telli/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
       '@types/node':
         specifier: 24.12.2
         version: 24.12.2
@@ -273,6 +273,15 @@ importers:
 
   apps/dialog:
     dependencies:
+      '@ais-chat/ai-core':
+        specifier: workspace:*
+        version: link:../../packages/ai-core
+      '@ais-chat/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@ais-chat/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@aws-sdk/client-s3':
         specifier: 3.1037.0
         version: 3.1037.0
@@ -327,15 +336,6 @@ importers:
       '@tanstack/react-virtual':
         specifier: 3.13.24
         version: 3.13.24(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@telli/ai-core':
-        specifier: workspace:*
-        version: link:../../packages/ai-core
-      '@telli/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
-      '@telli/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -460,6 +460,9 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
+      '@ais-chat/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
       '@axe-core/playwright':
         specifier: 4.11.2
         version: 4.11.2(playwright-core@1.59.1)
@@ -478,9 +481,6 @@ importers:
       '@tailwindcss/postcss':
         specifier: 4.2.4
         version: 4.2.4
-      '@telli/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
       '@types/he':
         specifier: 1.2.3
         version: 1.2.3
@@ -568,7 +568,7 @@ importers:
 
   packages/ai-core:
     dependencies:
-      '@telli/api-database':
+      '@ais-chat/api-database':
         specifier: workspace:*
         version: link:../api-database
       google-auth-library:
@@ -587,6 +587,9 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
+      '@ais-chat/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       '@eslint/eslintrc':
         specifier: 3.3.5
         version: 3.3.5
@@ -596,9 +599,6 @@ importers:
       '@t3-oss/env-core':
         specifier: 0.13.11
         version: 0.13.11(typescript@6.0.3)(zod@4.3.6)
-      '@telli/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
       '@types/node':
         specifier: 24.12.2
         version: 24.12.2
@@ -666,12 +666,12 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
+      '@ais-chat/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       '@eslint/js':
         specifier: 9.39.2
         version: 9.39.2
-      '@telli/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
       '@types/node':
         specifier: 24.12.2
         version: 24.12.2
@@ -702,6 +702,12 @@ importers:
 
   packages/shared:
     dependencies:
+      '@ais-chat/ai-core':
+        specifier: workspace:*
+        version: link:../ai-core
+      '@ais-chat/shared-core':
+        specifier: workspace:*
+        version: link:../shared-core
       '@aws-sdk/client-s3':
         specifier: 3.1037.0
         version: 3.1037.0
@@ -747,12 +753,6 @@ importers:
       '@t3-oss/env-core':
         specifier: 0.13.11
         version: 0.13.11(typescript@6.0.3)(zod@4.3.6)
-      '@telli/ai-core':
-        specifier: workspace:*
-        version: link:../ai-core
-      '@telli/shared-core':
-        specifier: workspace:*
-        version: link:../shared-core
       drizzle-kit:
         specifier: 0.31.10
         version: 0.31.10
@@ -781,15 +781,15 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
+      '@ais-chat/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       '@eslint/eslintrc':
         specifier: 3.3.5
         version: 3.3.5
       '@eslint/js':
         specifier: 9.39.2
         version: 9.39.2
-      '@telli/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
       '@types/node':
         specifier: 24.12.2
         version: 24.12.2
@@ -842,12 +842,12 @@ importers:
         specifier: 10.50.0
         version: 10.50.0
     devDependencies:
+      '@ais-chat/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       '@eslint/js':
         specifier: 9.39.4
         version: 9.39.4
-      '@telli/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
       '@types/node':
         specifier: 24.12.2
         version: 24.12.2
@@ -902,15 +902,15 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
+      '@ais-chat/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       '@eslint/eslintrc':
         specifier: 3.3.5
         version: 3.3.5
       '@tailwindcss/postcss':
         specifier: 4.2.4
         version: 4.2.4
-      '@telli/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
       '@turbo/gen':
         specifier: 2.9.6
         version: 2.9.6(@types/node@25.6.0)

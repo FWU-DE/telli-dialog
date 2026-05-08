@@ -1,7 +1,7 @@
 import {
   dbGetAllModelMappingsForApiKey,
   dbUpdateModelMappingsForApiKey,
-} from '@telli/api-database';
+} from '@ais-chat/api-database';
 import { logInfo } from '@shared/logging';
 
 export async function getModelApiKeyMappings(

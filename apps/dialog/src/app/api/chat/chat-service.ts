@@ -2,7 +2,7 @@ import {
   generateTextStreamWithBilling,
   type Message as AiCoreMessage,
   TelliPointsExceededError,
-} from '@telli/ai-core';
+} from '@ais-chat/ai-core';
 import { createTextStream } from '@/utils/streaming';
 import { userHasReachedTelliPointsLimit } from './usage';
 import { getModelAndApiKeyWithResult, getAuxiliaryModel } from '../utils/utils';

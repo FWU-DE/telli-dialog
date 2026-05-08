@@ -6,11 +6,11 @@ const isDevBuild = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === '
 const baseNextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: [
-    '@telli/ui',
-    '@telli/shared',
-    '@telli/shared-core',
-    '@telli/api-database',
-    '@telli/ai-core',
+    '@ais-chat/ui',
+    '@ais-chat/shared',
+    '@ais-chat/shared-core',
+    '@ais-chat/api-database',
+    '@ais-chat/ai-core',
     'import-in-the-middle',
     '@t3-oss/env-nextjs',
     '@t3-oss/env-core',
@@ -27,7 +27,7 @@ const baseNextConfig: NextConfig = {
   experimental: {
     useCache: true,
     // Speed up dev builds by pre-bundling heavy packages instead of re-resolving on every HMR
-    optimizePackageImports: ['@telli/ui', '@telli/shared', '@telli/ai-core'],
+    optimizePackageImports: ['@ais-chat/ui', '@ais-chat/shared', '@ais-chat/ai-core'],
   },
 };
 

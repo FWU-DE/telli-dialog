@@ -4,7 +4,7 @@ import {
   RateLimitExceededError,
   ResponsibleAIError,
   ProviderConfigurationError,
-} from '@telli/ai-core/errors';
+} from '@ais-chat/ai-core/errors';
 import type { FastifyReply } from 'fastify';
 
 /**

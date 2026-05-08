@@ -1,7 +1,7 @@
 import { ImageAttachment } from '@/utils/files/types';
 import { logError } from '@shared/logging';
 import { type ChatMessage as Message } from '@/types/chat';
-import { generateTextWithBilling } from '@telli/ai-core';
+import { generateTextWithBilling } from '@ais-chat/ai-core';
 
 /**
  * Format messages to include images for models that support vision

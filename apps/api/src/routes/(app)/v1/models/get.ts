@@ -1,5 +1,5 @@
 import { validateApiKey } from '@/routes/utils';
-import { dbGetModelsByApiKeyId } from '@telli/api-database';
+import { dbGetModelsByApiKeyId } from '@ais-chat/api-database';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { obscureModels } from './utils';
 

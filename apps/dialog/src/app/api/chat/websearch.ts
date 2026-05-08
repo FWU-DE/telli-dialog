@@ -1,5 +1,5 @@
 import { LinkupClient, type TextSearchResult } from 'linkup-sdk';
-import { generateTextWithBilling } from '@telli/ai-core';
+import { generateTextWithBilling } from '@ais-chat/ai-core';
 import { env } from '@/env';
 import {
   WEBSEARCH_RESULT_LENGTH_LIMIT,

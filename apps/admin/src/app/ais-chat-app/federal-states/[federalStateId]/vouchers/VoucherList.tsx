@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@ui/components/Table';
-import { Voucher } from '@telli/shared/vouchers/voucher';
+import { Voucher } from '@ais-chat/shared/vouchers/voucher';
 import { revokeVoucherAction } from './actions';
 import { Button } from '@ui/components/Button';
 import { BusinessError } from '@shared/error';

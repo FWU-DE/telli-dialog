@@ -1,4 +1,4 @@
-import { generateImageByNameWithBilling } from '@telli/ai-core';
+import { generateImageByNameWithBilling } from '@ais-chat/ai-core';
 import type OpenAI from 'openai';
 
 /**

@@ -1,4 +1,4 @@
-# @telli/ai-core
+# @ais-chat/ai-core
 
 A package for communicating with AI providers and LLMs.
 

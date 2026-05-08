@@ -1,5 +1,5 @@
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions.js';
-import type { Message, ChatAttachment } from '@telli/ai-core';
+import type { Message, ChatAttachment } from '@ais-chat/ai-core';
 
 const extensionToMime: Record<string, string> = {
   png: 'image/png',

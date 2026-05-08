@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { validateAdminApiKey } from '../../../utils';
-import { dbGetProjectsWithApiKeys } from '@telli/api-database';
+import { dbGetProjectsWithApiKeys } from '@ais-chat/api-database';
 import z from 'zod';
 import {
   convertToCSV,

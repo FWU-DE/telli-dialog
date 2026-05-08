@@ -6,7 +6,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '@telli/ui/components/Sidebar';
+} from '@ais-chat/ui/components/Sidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -1,4 +1,4 @@
-import { dbCreateUser, dbGetUserById, dbUpdateUserById } from '@telli/shared/db/functions/user';
+import { dbCreateUser, dbGetUserById, dbUpdateUserById } from '@ais-chat/shared/db/functions/user';
 import { dbGetFederalStateById } from '@shared/db/functions/federal-state';
 import { AuthErrorCode, validateOidcProfile } from '@shared/auth/authentication-service';
 import { normalizeVidisSchoolIds, vidisRoleToUserRole } from '@shared/db/functions/vidis';

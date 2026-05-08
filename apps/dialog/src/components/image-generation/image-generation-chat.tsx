@@ -14,7 +14,7 @@ import { getReadOnlySignedUrlAction } from '@/app/api/file-operations/actions';
 import { FileModel } from '@shared/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { logError } from '@shared/logging';
-import { ResponsibleAIError } from '@telli/ai-core/errors';
+import { ResponsibleAIError } from '@ais-chat/ai-core/errors';
 import Image from 'next/image';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
 

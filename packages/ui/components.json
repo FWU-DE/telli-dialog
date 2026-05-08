@@ -11,11 +11,11 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "@telli/ui/components",
-    "hooks": "@telli/ui/hooks",
-    "utils": "@telli/ui/lib/utils",
-    "lib": "@telli/ui/lib",
-    "types": "@telli/ui/types"
+    "components": "@ais-chat/ui/components",
+    "hooks": "@ais-chat/ui/hooks",
+    "utils": "@ais-chat/ui/lib/utils",
+    "lib": "@ais-chat/ui/lib",
+    "types": "@ais-chat/ui/types"
   },
   "iconLibrary": "lucide-react"
 }

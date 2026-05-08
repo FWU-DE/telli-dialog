@@ -1,5 +1,5 @@
 {
-  "name": "@telli/api-database",
+  "name": "@ais-chat/api-database",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@eslint/js": "9.39.2",
-    "@telli/typescript-config": "workspace:*",
+    "@ais-chat/typescript-config": "workspace:*",
     "@types/node": "24.12.2",
     "@types/pg": "8.20.0",
     "dotenv-cli": "11.0.0",

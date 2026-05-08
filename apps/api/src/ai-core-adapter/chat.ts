@@ -1,8 +1,11 @@
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions.js';
 import type OpenAI from 'openai';
-import { generateTextByNameWithBilling, generateTextStreamByNameWithBilling } from '@telli/ai-core';
-import type { TokenUsage } from '@telli/ai-core';
-import { ResponsibleAIError } from '@telli/ai-core/errors';
+import {
+  generateTextByNameWithBilling,
+  generateTextStreamByNameWithBilling,
+} from '@ais-chat/ai-core';
+import type { TokenUsage } from '@ais-chat/ai-core';
+import { ResponsibleAIError } from '@ais-chat/ai-core/errors';
 import { convertToAiCoreMessages } from './messages';
 
 /**

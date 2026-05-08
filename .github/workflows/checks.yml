@@ -140,7 +140,7 @@ jobs:
           restore-keys: |
             turbo-test-${{ runner.os }}-
       - name: Run api database migrations
-        run: pnpm --filter @telli/api-database run db:migrate
+        run: pnpm --filter @ais-chat/api-database run db:migrate
       - name: Check unit tests
         run: pnpm run test:coverage
 

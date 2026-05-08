@@ -16,7 +16,7 @@ vi.mock('@shared/db/functions/federal-state', () => ({
   dbGetFederalStateById: mockDbGetFederalStateById,
 }));
 
-vi.mock('@telli/shared/db/functions/user', () => ({
+vi.mock('@ais-chat/shared/db/functions/user', () => ({
   dbGetUserById: mockDbGetUserById,
   dbCreateUser: mockDbCreateUser,
   dbUpdateUserById: mockDbUpdateUserById,
