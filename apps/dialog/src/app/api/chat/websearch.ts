@@ -5,7 +5,7 @@ import {
   WEBSEARCH_RESULT_LENGTH_LIMIT,
   WEBSEARCH_RESULTS_LIMIT,
 } from '@/configuration-text-inputs/const';
-import type { WebSearchResult } from '@shared/db/types';
+import type { WebSearchResult } from '@shared/db/schema';
 import { logError } from '@shared/logging';
 import { dbInsertConversationToolCallUsage } from '@shared/db/functions/token-usage';
 import { dbGetToolCallCostByName } from '@shared/db/functions/tool-call';

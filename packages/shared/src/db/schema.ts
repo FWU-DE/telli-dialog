@@ -15,11 +15,7 @@ import {
   vector,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import {
-  type DesignConfiguration,
-  type LlmModelPriceMetadata,
-  type WebSearchResult,
-} from './types';
+import { type DesignConfiguration, type LlmModelPriceMetadata } from './types';
 import {
   conversationRoleSchema,
   conversationTypeSchema,
@@ -126,6 +122,14 @@ export const conversationMessageParametersSchema = z.object({
 
 export type ConversationMessageParameters = z.infer<typeof conversationMessageParametersSchema>;
 
+type ConversationMessageWebSearchResult = {
+  type: 'text';
+  name: string;
+  url: string;
+  content: string;
+  favicon: string;
+};
+
 export const conversationMessageTable = pgTable(
   'conversation_message',
   {
@@ -143,7 +147,7 @@ export const conversationMessageTable = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
     parameters: json('parameters').$type<ConversationMessageParameters>(),
-    webSearchResults: json('web_search_results').$type<WebSearchResult[]>(),
+    webSearchResults: json('web_search_results').$type<ConversationMessageWebSearchResult[]>(),
   },
   (table) => [index().on(table.conversationId), index().on(table.userId)],
 );
@@ -167,6 +171,7 @@ export const conversationMessageUpdateSchema = createUpdateSchema(conversationMe
 export type ConversationMessageSelectModel = z.infer<typeof conversationMessageSelectSchema>;
 export type ConversationMessageInsertModel = z.infer<typeof conversationMessageInsertSchema>;
 export type ConversationMessageUpdateModel = z.infer<typeof conversationMessageUpdateSchema>;
+export type WebSearchResult = ConversationMessageWebSearchResult;
 
 /**
  * Schema for table federal_state
@@ -781,6 +786,7 @@ export const sharedLearningScenarioUsageTracking = pgTable(
   'shared_learning_scenario_usage_tracking',
   {
     id: uuid('id').defaultRandom().primaryKey(),
+    // Exactly one billing source is stored per row: either a model call or a tool call.
     modelId: uuid('model_id'),
     toolCallName: toolCallNameEnum('tool_call_name'),
     // learningScenarioId is not a FK, because usage tracking must be kept even when the learning scenario is deleted
@@ -846,6 +852,7 @@ export const conversationUsageTracking = pgTable(
   'conversation_usage_tracking',
   {
     id: uuid('id').defaultRandom().primaryKey(),
+    // Exactly one billing source is stored per row: either a model call or a tool call.
     modelId: uuid('model_id').references(() => llmModelTable.id),
     toolCallName: toolCallNameEnum('tool_call_name'),
     // this rows will be kept forever even if conversations are deleted, therefore we cannot enforce a foreign key constaint here
@@ -962,6 +969,7 @@ export const sharedCharacterChatUsageTrackingTable = pgTable(
   'shared_character_chat_usage_tracking',
   {
     id: uuid('id').defaultRandom().primaryKey(),
+    // Exactly one billing source is stored per row: either a model call or a tool call.
     modelId: uuid('model_id').references(() => llmModelTable.id),
     toolCallName: toolCallNameEnum('tool_call_name'),
     characterId: uuid('character_id').notNull(),

@@ -1,88 +1,87 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import z from 'zod';
 import { toast } from 'sonner';
 import { Button } from '@ui/components/Button';
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@ui/components/Card';
-import { Input } from '@ui/components/Input';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@ui/components/Table';
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@ui/components/Card';
+import { Field, FieldDescription, FieldError, FieldLabel } from '@ui/components/Field';
+import { Input } from '@ui/components/Input';
+import { FormErrorDisplay } from '@/components/FormErrorDisplay';
+import type { ToolCallName } from '@shared/db/schema';
 import {
   type ToolCallCost,
   type UpdateToolCallCostInput,
   type UpdateToolCallCostPayload,
   updateToolCallCostSchema,
 } from '@shared/tool-call-costs/tool-call-cost';
-import { getToolCallCostsAction, updateToolCallCostAction } from './actions';
+import { getToolCallCostAction, updateToolCallCostAction } from './actions';
 
-const TOOL_CALL_LABELS: Record<ToolCallCost['toolCallName'], string> = {
-  web_search: 'Websuche',
+const TOOL_CALL_NAME: ToolCallName = 'web_search';
+const TOOL_CALL_LABEL = 'Websuche';
+
+type ToolCallCostListViewProps = {
+  initialToolCallCost: ToolCallCost | null;
+  initialLoadError?: string | null;
 };
-
-function getToolCallLabel(toolCallName: ToolCallCost['toolCallName']) {
-  return TOOL_CALL_LABELS[toolCallName];
-}
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Ein unbekannter Fehler ist aufgetreten.';
 }
 
-function mapDraftValues(toolCallCosts: ToolCallCost[]) {
-  return Object.fromEntries(
-    toolCallCosts.map((toolCallCost) => [
-      toolCallCost.toolCallName,
-      String(toolCallCost.costsInCent),
-    ]),
-  );
-}
+export default function ToolCallCostListView({
+  initialToolCallCost,
+  initialLoadError = null,
+}: ToolCallCostListViewProps) {
+  const [toolCallCost, setToolCallCost] = useState<ToolCallCost | null>(initialToolCallCost);
+  const [loadError, setLoadError] = useState<string | null>(initialLoadError);
+  const [isLoading, setIsLoading] = useState(false);
+  const {
+    control,
+    register,
+    reset,
+    handleSubmit,
+    setError,
+    clearErrors,
+    formState: { errors, isSubmitting },
+  } = useForm<UpdateToolCallCostPayload>({
+    defaultValues: {
+      toolCallName: initialToolCallCost?.toolCallName ?? TOOL_CALL_NAME,
+      costsInCent: initialToolCallCost ? String(initialToolCallCost.costsInCent) : '',
+    },
+  });
 
-export default function ToolCallCostListView() {
-  const [toolCallCosts, setToolCallCosts] = useState<ToolCallCost[]>([]);
-  const [draftCosts, setDraftCosts] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
-  const [savingToolCallName, setSavingToolCallName] = useState<ToolCallCost['toolCallName'] | null>(
-    null,
-  );
-  const [isPending, startTransition] = useTransition();
+  async function loadToolCallCost() {
+    setIsLoading(true);
 
-  function loadToolCallCosts() {
-    startTransition(async () => {
-      try {
-        setError(null);
-        const loadedToolCallCosts = await getToolCallCostsAction();
-        setToolCallCosts(loadedToolCallCosts);
-        setDraftCosts(mapDraftValues(loadedToolCallCosts));
-      } catch (loadError) {
-        const errorMessage = getErrorMessage(loadError);
-        setError(errorMessage);
-        toast.error(`Fehler beim Laden der Tool Call Kosten: ${errorMessage}`);
-      }
-    });
+    try {
+      clearErrors();
+      setLoadError(null);
+      const loadedToolCallCost = await getToolCallCostAction(TOOL_CALL_NAME);
+      setToolCallCost(loadedToolCallCost);
+      reset({
+        toolCallName: loadedToolCallCost.toolCallName,
+        costsInCent: String(loadedToolCallCost.costsInCent),
+      });
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      setLoadError(errorMessage);
+      toast.error(`Fehler beim Laden der Tool Call Kosten: ${errorMessage}`);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
-  useEffect(() => {
-    loadToolCallCosts();
-  }, []);
-
-  function updateDraftValue(toolCallName: ToolCallCost['toolCallName'], value: string) {
-    setDraftCosts((currentDraftCosts) => ({
-      ...currentDraftCosts,
-      [toolCallName]: value,
-    }));
-  }
-
-  function handleSave(toolCallName: ToolCallCost['toolCallName']) {
-    const payload: UpdateToolCallCostPayload = {
-      toolCallName,
-      costsInCent: draftCosts[toolCallName] ?? '',
-    };
+  async function onSubmit(payload: UpdateToolCallCostPayload) {
+    clearErrors();
 
     let values: UpdateToolCallCostInput;
 
@@ -90,10 +89,14 @@ export default function ToolCallCostListView() {
       values = updateToolCallCostSchema.parse(payload);
     } catch (validationError) {
       if (validationError instanceof z.ZodError) {
-        toast.error(
+        const errorMessage =
           validationError.issues[0]?.message ??
-            'Bitte geben Sie einen gültigen Preis ab 0 Cent ein.',
-        );
+          'Bitte geben Sie einen gültigen Preis ab 0 Cent ein.';
+        setError('costsInCent', {
+          type: 'manual',
+          message: errorMessage,
+        });
+        toast.error(errorMessage);
         return;
       }
 
@@ -101,98 +104,104 @@ export default function ToolCallCostListView() {
       return;
     }
 
-    setSavingToolCallName(toolCallName);
-
-    startTransition(async () => {
-      try {
-        setError(null);
-        const updatedToolCallCost = await updateToolCallCostAction(values);
-
-        setToolCallCosts((currentToolCallCosts) =>
-          currentToolCallCosts.map((toolCallCost) =>
-            toolCallCost.toolCallName === updatedToolCallCost.toolCallName
-              ? updatedToolCallCost
-              : toolCallCost,
-          ),
-        );
-        setDraftCosts((currentDraftCosts) => ({
-          ...currentDraftCosts,
-          [updatedToolCallCost.toolCallName]: String(updatedToolCallCost.costsInCent),
-        }));
-        toast.success('Tool Call Kosten erfolgreich aktualisiert.');
-      } catch (saveError) {
-        const errorMessage = getErrorMessage(saveError);
-        setError(errorMessage);
-        toast.error(`Fehler beim Speichern der Tool Call Kosten: ${errorMessage}`);
-      } finally {
-        setSavingToolCallName(null);
-      }
-    });
+    try {
+      setLoadError(null);
+      const updatedToolCallCost = await updateToolCallCostAction(values);
+      setToolCallCost(updatedToolCallCost);
+      reset({
+        toolCallName: updatedToolCallCost.toolCallName,
+        costsInCent: String(updatedToolCallCost.costsInCent),
+      });
+      toast.success('Tool Call Kosten erfolgreich aktualisiert.');
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      setLoadError(errorMessage);
+      toast.error(`Fehler beim Speichern der Tool Call Kosten: ${errorMessage}`);
+    }
   }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Tool Call Kosten</CardTitle>
+        <CardDescription>
+          Konfigurieren Sie den aktuell hinterlegten Preis pro Websuche.
+        </CardDescription>
         <CardAction>
-          <Button disabled={isPending} onClick={loadToolCallCosts}>
-            {isPending && savingToolCallName === null ? 'Lädt...' : 'Aktualisieren'}
+          <Button disabled={isLoading || isSubmitting} onClick={() => void loadToolCallCost()}>
+            {isLoading ? 'Lädt...' : 'Aktualisieren'}
           </Button>
         </CardAction>
       </CardHeader>
       <CardContent>
-        {error && (
+        {loadError && (
           <div className="mb-4 rounded border border-red-400 bg-red-100 p-3 text-red-700">
-            {error}
+            {loadError}
           </div>
         )}
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Schlüssel</TableHead>
-              <TableHead>Kosten pro Aufruf (Cent)</TableHead>
-              <TableHead>Zuletzt aktualisiert</TableHead>
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {toolCallCosts.map((toolCallCost) => {
-              const isSavingCurrentRow =
-                isPending && savingToolCallName === toolCallCost.toolCallName;
+        <FormErrorDisplay errors={errors} />
 
-              return (
-                <TableRow key={toolCallCost.toolCallName}>
-                  <TableCell>{getToolCallLabel(toolCallCost.toolCallName)}</TableCell>
-                  <TableCell>{toolCallCost.toolCallName}</TableCell>
-                  <TableCell className="w-72">
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      showCharacterCount={false}
-                      value={draftCosts[toolCallCost.toolCallName] ?? ''}
-                      onChange={(event) =>
-                        updateDraftValue(toolCallCost.toolCallName, event.currentTarget.value)
-                      }
-                      disabled={isSavingCurrentRow}
-                    />
-                  </TableCell>
-                  <TableCell>{toolCallCost.updatedAt.toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Button
-                      disabled={isSavingCurrentRow}
-                      onClick={() => handleSave(toolCallCost.toolCallName)}
-                    >
-                      {isSavingCurrentRow ? 'Speichert...' : 'Speichern'}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <form
+          className="flex flex-col gap-6"
+          onSubmit={handleSubmit(onSubmit)}
+          inert={isLoading || isSubmitting}
+        >
+          <input type="hidden" {...register('toolCallName')} />
+
+          <dl className="grid gap-4 rounded-lg border border-border p-4 md:grid-cols-3">
+            <div className="space-y-1">
+              <dt className="text-sm text-muted-foreground">Name</dt>
+              <dd className="font-medium">{TOOL_CALL_LABEL}</dd>
+            </div>
+            <div className="space-y-1">
+              <dt className="text-sm text-muted-foreground">Schlüssel</dt>
+              <dd className="font-medium">{toolCallCost?.toolCallName ?? TOOL_CALL_NAME}</dd>
+            </div>
+            <div className="space-y-1">
+              <dt className="text-sm text-muted-foreground">Zuletzt aktualisiert</dt>
+              <dd className="font-medium">
+                {toolCallCost ? toolCallCost.updatedAt.toLocaleString() : 'Noch nicht geladen'}
+              </dd>
+            </div>
+          </dl>
+
+          <Controller
+            name="costsInCent"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name} required>
+                  Kosten pro Aufruf (Cent)
+                </FieldLabel>
+                <FieldDescription>
+                  Dieser Wert wird für jede abgerechnete Websuche gespeichert.
+                </FieldDescription>
+                <Input
+                  id={field.name}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  showCharacterCount={false}
+                  value={
+                    typeof field.value === 'number' ? String(field.value) : (field.value ?? '')
+                  }
+                  onChange={(event) => field.onChange(event.currentTarget.value)}
+                  onBlur={field.onBlur}
+                  disabled={isLoading || isSubmitting}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isLoading || isSubmitting}>
+              {isSubmitting ? 'Speichert...' : 'Speichern'}
+            </Button>
+          </div>
+        </form>
       </CardContent>
     </Card>
   );

@@ -13,7 +13,7 @@ import {
   SUGGESTION_GUIDELINES,
   TOOL_GUIDELINES,
 } from '../utils/system-prompt';
-import type { WebSearchResult } from '@shared/db/types';
+import type { WebSearchResult } from '@shared/db/schema';
 
 function constructTelliSystemPrompt(
   chunks: RetrievedChunk[],

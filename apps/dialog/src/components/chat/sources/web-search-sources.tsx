@@ -4,7 +4,7 @@ import { CaretRightIcon, GlobeSimpleIcon } from '@phosphor-icons/react';
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
-import type { WebSearchResult } from '@shared/db/types';
+import type { WebSearchResult } from '@shared/db/schema';
 import { Button } from '@ui/components/Button';
 
 function getSourceTitle(source: WebSearchResult) {

@@ -1,5 +1,5 @@
 import type { SharedChatExpiredError, TelliPointsExceededError } from '@telli/ai-core/errors';
-import type { WebSearchResult } from '@shared/db/types';
+import type { WebSearchResult } from '@shared/db/schema';
 
 /**
  * Serialized error that can be safely transmitted across the Server Action boundary.
