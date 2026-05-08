@@ -4,8 +4,8 @@ import { sendMessage } from '../../utils/chat';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
-// Test is flaky.
-test.skip(
+// Test is flaky --> TD-1226
+test.fixme(
   'should successfully perform web search',
   { tag: '@external-services' },
   async ({ page }) => {
