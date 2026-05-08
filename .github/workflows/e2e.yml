@@ -133,7 +133,6 @@ jobs:
             elapsed=$((elapsed + 1))
           done
         env:
-          API_DATABASE_URL: ${{ env.API_DATABASE_URL }}
           PORT: 3002
 
       - name: Seed telli-api database
@@ -170,7 +169,7 @@ jobs:
           cp -a .next/static .next/standalone/apps/dialog/.next/
           cp -a public .next/standalone/apps/dialog/
           cd .next/standalone
-          node ./apps/dialog/server.js > /tmp/telli-dialog.log &
+          node ./apps/dialog/server.js > /tmp/telli-dialog.log 2>&1 &
         env:
           NEXT_TELEMETRY_DISABLED: 1
           TURBO_TELEMETRY_DISABLED: 1
