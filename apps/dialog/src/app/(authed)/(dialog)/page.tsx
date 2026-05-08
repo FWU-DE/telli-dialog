@@ -35,11 +35,13 @@ export default async function Page() {
       defaultLlmModelByCookie={userAndContext.lastUsedModel ?? DEFAULT_CHAT_MODEL}
     >
       <DefaultPageLayout
-        header={{
-          headerType: 'chat',
-          chatId: id,
-          downloadConversationEnabled: false,
-          userAndContext,
+        layoutConfig={{
+          layout: 'chat',
+          headerConfig: {
+            chatId: id,
+            downloadConversationEnabled: false,
+            userAndContext,
+          },
         }}
       >
         <Chat

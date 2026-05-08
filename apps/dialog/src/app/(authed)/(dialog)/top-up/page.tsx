@@ -6,7 +6,7 @@ export default async function Page() {
   await requireAuth();
 
   return (
-    <DefaultPageLayout>
+    <DefaultPageLayout layoutConfig={{ layout: 'default' }}>
       <RedeemVoucherPage />
     </DefaultPageLayout>
   );

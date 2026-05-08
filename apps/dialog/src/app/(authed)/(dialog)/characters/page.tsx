@@ -8,7 +8,7 @@ export default async function Page() {
   const { user } = await requireAuth();
 
   return (
-    <DefaultPageLayout>
+    <DefaultPageLayout layoutConfig={{ layout: 'default' }}>
       <CharacterOverview currentUserId={user.id} />
     </DefaultPageLayout>
   );
