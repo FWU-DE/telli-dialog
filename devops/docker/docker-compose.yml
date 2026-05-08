@@ -1,8 +1,8 @@
-name: telli-local
+name: ais-chat-local
 
 services:
   # Keycloak for authentication (PRIMARY NETWORK HOST)
-  # telli containers share this network namespace via network_mode: "service:keycloak"
+  # Containers share this network namespace via network_mode: "service:keycloak"
   # This is required to access keycloak using the same URL from within the container and the browser
   keycloak:
     image: quay.io/keycloak/keycloak:26.6.1
@@ -17,9 +17,9 @@ services:
       - keycloak_data:/opt/keycloak/data/h2
       - ./keycloak:/opt/keycloak/data/import
     ports:
-      - '3000:3000' # telli-dialog
-      - '3001:3001' # telli-admin
-      - '3002:3002' # telli-api
+      - '3000:3000' # ais-chat-app
+      - '3001:3001' # ais-chat-admin
+      - '3002:3002' # ais-chat-api
       - '8080:8080' # keycloak
     depends_on:
       fix-keycloak-volume-ownership:
@@ -127,17 +127,17 @@ services:
       retries: 3
       start_period: 30s
 
-  # Telli API - OpenAI compatible API service
-  telli-api:
-    image: ghcr.io/fwu-de/telli-api:latest
+  # AIS.chat API - OpenAI compatible API service
+  ais-chat-api:
+    image: ghcr.io/fwu-de/ais-chat-api:latest
     restart: unless-stopped
     environment:
       # Database
       DATABASE_URL: postgresql://telli:test1234@postgres:5432/telli_api_db
 
       # API Configuration
-      API_NAME: telli
-      API_KEY: telli-api_api-key
+      API_NAME: ais-chat
+      API_KEY: ais-chat-api_api-key
       PORT: 3002
 
       # Logging
@@ -157,20 +157,20 @@ services:
       keycloak:
         condition: service_started
 
-  # Telli Dialog - Main user-facing application
-  telli-dialog:
-    image: ghcr.io/fwu-de/telli-dialog:latest
+  # AIS.chat App - Main user-facing application
+  ais-chat-app:
+    image: ghcr.io/fwu-de/ais-chat-app:latest
     restart: unless-stopped
     environment:
       # Application
       HOSTNAME: 0.0.0.0
       PORT: 3000
-      API_KEY: telli-dialog_api-key
+      API_KEY: ais-chat-app_api-key
       NODE_ENV: development
 
       # Authentication
       # IMPORTANT: Change AUTH_SECRET in production! Generate with: openssl rand -base64 32
-      AUTH_SECRET: telli-default-secret-please-change-in-production-use-openssl-rand-base64-32
+      AUTH_SECRET: ais-chat-default-secret-please-change-in-production-use-openssl-rand-base64-32
 
       # Keycloak
       VIDIS_CLIENT_ID: telli-dev-client
@@ -189,7 +189,7 @@ services:
       # RabbitMQ for reporting
       RABBITMQ_URI: amqp://user:password@rabbitmq:5672
 
-      # Telli API connection
+      # AIS.chat API connection
       API_URL: http://localhost:3002
 
       # Crawl4AI
@@ -200,7 +200,7 @@ services:
       OTC_SECRET_ACCESS_KEY: rustfsadmin123
       OTC_ACCESS_KEY_ID: rustfsadmin
       OTC_S3_HOSTNAME: http://rustfs:9000
-      OTC_BUCKET_NAME: telli
+      OTC_BUCKET_NAME: ais-chat
 
       # Encryption key for sensitive data (IMPORTANT: Change in production!)
       ENCRYPTION_KEY: default-encryption-key-change-in-production
@@ -225,9 +225,9 @@ services:
       keycloak:
         condition: service_started
 
-  # Telli Admin - Administration interface
-  telli-admin:
-    image: ghcr.io/fwu-de/telli-admin:latest
+  # AIS.chat Admin - Administration interface
+  ais-chat-admin:
+    image: ghcr.io/fwu-de/ais-chat-admin:latest
     restart: unless-stopped
     environment:
       # Application
@@ -236,20 +236,20 @@ services:
 
       # Authentication
       # IMPORTANT: Change AUTH_SECRET in production! Generate with: openssl rand -base64 32
-      AUTH_SECRET: telli-default-secret-please-change-in-production-use-openssl-rand-base64-32
+      AUTH_SECRET: ais-chat-default-secret-please-change-in-production-use-openssl-rand-base64-32
 
       # Keycloak
       KEYCLOAK_CLIENT_ID: telli-dev-client
       KEYCLOAK_CLIENT_SECRET: ClientSecret
       KEYCLOAK_ISSUER: http://localhost:8080/realms/telli-local
 
-      # telli-dialog
+      # AIS.chat app
       DATABASE_URL: postgresql://telli:test1234@postgres:5432/telli_dialog_db
       ENCRYPTION_KEY: default-encryption-key-change-in-production
 
-      # telli-api
+      # AIS.chat api
       API_DATABASE_URL: postgresql://telli:test1234@postgres:5432/telli_api_db
-      API_KEY: telli-api_api-key
+      API_KEY: ais-chat-api_api-key
       API_URL: http://localhost:3002
       # Note: DB_CACHE_TTL_SECONDS should NOT be set in admin app
 
@@ -263,7 +263,7 @@ services:
         condition: service_started
 
   # Initialization container
-  telli-init:
+  ais-chat-init:
     image: alpine:3.23.4
     restart: no
     environment:
@@ -280,20 +280,20 @@ services:
       LLM_GPT5NANO_BASE_URL: PLACEHOLDER_BASE_URL
     command: >
       sh -c "
-        echo '=== Starting Telli Initialization ==='
+        echo '=== Starting AIS.chat Initialization ==='
 
         echo '=== Installing s3cmd ==='
         apk add --no-cache s3cmd
 
-        echo '=== Creating S3 bucket: telli ==='
-        s3cmd --access_key=rustfsadmin --secret_key=rustfsadmin123 --host=rustfs:9000 --host-bucket='rustfs:9000/%(bucket)' --region=us-east-1 --no-ssl --no-check-certificate mb s3://telli
+        echo '=== Creating S3 bucket: ais-chat ==='
+        s3cmd --access_key=rustfsadmin --secret_key=rustfsadmin123 --host=rustfs:9000 --host-bucket='rustfs:9000/%(bucket)' --region=us-east-1 --no-ssl --no-check-certificate mb s3://ais-chat
 
         echo '=== Seeding telli_api_db ==='
         apk add --no-cache postgresql-client
         PGPASSWORD=test1234 psql -h postgres -U telli -d telli_api_db -c \"INSERT INTO organization (name) SELECT 'LOCAL' WHERE NOT EXISTS (SELECT 1 FROM organization);\"
-        # Remaining seeding is done manually via telli-admin interface
+        # Remaining seeding is done manually via ais-chat-admin interface
 
-        echo '=== Telli initialization completed successfully ==='
+        echo '=== AIS.chat initialization completed successfully ==='
       "
     network_mode: service:keycloak
     depends_on:
@@ -303,9 +303,9 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_started
-      telli-api:
+      ais-chat-api:
         condition: service_healthy
-      telli-dialog:
+      ais-chat-app:
         condition: service_healthy
 
 volumes:
