@@ -17,11 +17,6 @@
     "llm-model": "Sprachmodell",
     "current-language-model": "Aktuelles Sprachmodell",
     "no-language-model-available": "Kein Sprachmodell verfügbar",
-    "today": "Heute",
-    "yesterday": "Gestern",
-    "this-week": "In den letzten 7 Tagen",
-    "past": "Ältere",
-    "minutes": "Minuten",
     "conversation-download": "Konversation herunterladen",
     "send-message-placeholder": "Wie kann ich Dir helfen?",
     "information-disclaimer": "AIS.chat kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",
@@ -49,8 +44,6 @@
     "countdown-timer-label": "Verbleibende Freigabezeit",
     "school": "Schulintern",
     "school-tooltip": "Wird schulintern sicht- und kopierbar. \nZu beachten: Eine Lehrkraft kann mehreren Schulen zugehörig sein. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
-    "community": "Community",
-    "community-tooltip": "Wird als Community-Vorlage sicht- und kopierbar.\n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "link": "Via Link",
     "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit AIS.chat-Zugang. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "copy-link": "Link kopieren",
@@ -65,9 +58,6 @@
     "aria": {
       "main-navigation": "Hauptnavigation",
       "chat-history": "Chat-Verlauf",
-      "home-link": "Startseite",
-      "toggle-light-theme": "Helles Design aktivieren",
-      "toggle-dark-theme": "Dunkles Design aktivieren",
       "close-sidebar": "Seitenleiste schließen",
       "open-sidebar": "Seitenleiste öffnen"
     },
@@ -90,8 +80,7 @@
     "chats-error": "Etwas ist schiefgelaufen...",
     "chats-reload": "Dialoge neu laden",
     "untitled-conversation": "Neue Konversation",
-    "search-clear": "Suche löschen",
-    "help-mode": "Hilfe"
+    "search-clear": "Suche löschen"
   },
   "websearch": {
     "placeholders": {
@@ -147,67 +136,6 @@
     "chat-placeholder": "Wie kann ich helfen?",
     "faq-link": "[FAQ Seite](https://ais-chat.schule/faq/)",
     "support-addresses-concat": "oder"
-  },
-  "custom-gpt": {
-    "title": "Assistenten",
-    "description": "Die Assistenten erleichtern den Lehrkräften den schulischen Alltag. Sie können je nach Situation individuell konfiguriert werden. Bereits fertige Assistenten stehen als Vorlagen sofort nutzbar zur Verfügung. Diese können in den eigenen Bereich kopiert und dann wunschgemäß angepasst werden.",
-    "info-dialog": "<b>Was sind Assistenten?</b>\nAssistenten erleichtern Lehrkräften den schulischen Alltag. Sie können für wiederkehrende Tätigkeiten konfiguriert werden, individuell auf die eigenen Fächer, Jahrgangsstufen oder Arbeitskontexte angepasst. Einmal mit dem entsprechenden Hintergrundwissen angereichert und erstellt, liefert jeder Assistent Vorschläge, Impulse und Ideen, die für das gesamte Schuljahr und darüber hinaus genutzt werden können.\n\nLehrkräfte können bereits konfigurierte Vorlagen nutzen und selbst eigene Assistenten erstellen.\n\n<b>Zielgruppe:</b>\nLehrkräfte",
-    "visibility-global": "Vorlagen",
-    "visibility-school": "Schulintern",
-    "visibility-private": "Für mich",
-    "search-placeholder": "Assistent suchen...",
-    "form": {
-      "all-gpts": "Alle Assistenten",
-      "restriction-private": "Keine Freigabe",
-      "restriction-school": "schulintern freigeben",
-      "delete-gpt": "Assistenten löschen",
-      "final-delete-gpt": "Assistent endgültig löschen",
-      "create-gpt": "Assistent erstellen",
-      "gpt-name-placeholder": "Stundenplanung",
-      "gpt-description-label": "Wie kann der Assistent kurz beschrieben werden?",
-      "gpt-description-placeholder": "Stunden planen - Materialien erstellen - Impulse erhalten",
-      "gpt-specification-label": "Welche konkreten Funktionen soll der Assistent erfüllen?",
-      "gpt-specification-placeholder": "Hilf mir, meine Stunden strukturiert zu gliedern, klare Lernziele zu definieren und einen sinnvollen Ablauf festzulegen. Liefere 2-3 Impulse für einen motivierenden Stundeneinstieg. Schlage relevante Materialien, digitale Tools und weiterführende Ressourcen vor, die zur Vertiefung des Lernstoffs beitragen können und stelle dies übersichtlich dar. Liefere schnell umsetzbare Ideen. Schlage primär Methoden vor, die die Lernenden aktivieren. Falls dir Informationen fehlen, dann frage nach der Jahrgangsstufe, der Schulart, dem Fach, dem Bundesland sowie nach dem konkreten Thema. Bitte um Information, wie viel Vorwissen bereits vorhanden ist. Antworte erst, wenn du alle Informationen hast. Sei kreativ und biete auch Alternativvorschläge an.",
-      "gpt-visibility-label": "Für wen soll der Dialogpartner freigegeben werden?",
-      "gpt-name-label": "Wie soll dieser Assistent heißen?",
-      "prompt-suggestions-label": "Promptvorschläge hinzufügen?",
-      "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
-      "prompt-suggestions-delete-button": "Promptvorschlag {index} löschen",
-      "prompt-suggestions-description": "Es können bis zu zehn Vorschläge hinzugefügt werden, die oberhalb des Eingabefelds angezeigt werden.",
-      "prompt-suggestion-placeholder": "Erstelle einen Stundenvorschlag für das Fach Deutsch zum Thema Fake News für die 8. Jahrgangsstufe.",
-      "suggestions-used": "Vorschläge",
-      "gpt-delete-description": "Beim Löschen des Assistenten werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
-      "gpt-delete-modal-description": "Soll der Assistent wirklich gelöscht werden? Dabei werden alle mit diesem Assistenten verbundenen Konversationen unwiderruflich gelöscht.",
-      "copy-page": {
-        "title": "Assistent in eigenen Bereich kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht, wenn die Seite verlassen wird. Um den Assistenten anzupassen, muss er zuvor in den privaten Bereich kopiert werden.",
-        "copy-template": "Assistent bearbeiten"
-      },
-      "additional-assets-label": "Hintergrundwissen",
-      "additional-assets-content": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Der Assistent bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
-      "attached-files-label": "Welche Dateien dienen der KI als Grundlage?",
-      "attached-links-label": "Welche Webquellen dienen der KI als Grundlage?",
-      "attached-links-placeholder": "Web-Link",
-      "add-link": "Link hinzufügen"
-    },
-    "toasts": {
-      "create-toast-success": "Der Assistent wurde erfolgreich erstellt.",
-      "create-toast-error": "Der Assistent konnte nicht erstellt werden.",
-      "share-toast-success": "Assistent erfolgreich geteilt.",
-      "share-toast-error": "Etwas ist beim Teilen des Assistenten schief gelaufen.",
-      "stop-share-toast-success": "Assistent wird nicht mehr geteilt.",
-      "stop-share-toast-error": "Etwas ist beim Beenden des Teilens schief gelaufen.",
-      "delete-toast-success": "Der Assistent wurde erfolgreich gelöscht.",
-      "delete-toast-error": "Der Assistent konnte nicht gelöscht werden.",
-      "edit-toast-success": "Der Assistent wurde erfolgreich aktualisiert.",
-      "edit-toast-error": "Etwas ist beim Aktualisieren des Assistenten schief gelaufen.",
-      "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
-      "too-many-suggestions": "Das Limit von 10 Vorschlägen wurde erreicht",
-      "empty-url": "Es wurde kein Link eingegeben.",
-      "duplicate-url": "Dieser Link wurde bereits hinzugefügt.",
-      "invalid-url": "Der eingegebene Link ist ungültig.",
-      "scrape-error": "Der Link konnte nicht verarbeitet werden."
-    }
   },
   "characters": {
     "character": "Dialogpartner",
@@ -558,6 +486,10 @@
     }
   },
   "assistants": {
+    "title": "Assistenten",
+    "search-placeholder": "Assistent suchen...",
+    "info-dialog": "<b>Was sind Assistenten?</b>\nAssistenten erleichtern Lehrkräften den schulischen Alltag. Sie können für wiederkehrende Tätigkeiten konfiguriert werden, individuell auf die eigenen Fächer, Jahrgangsstufen oder Arbeitskontexte angepasst. Einmal mit dem entsprechenden Hintergrundwissen angereichert und erstellt, liefert jeder Assistent Vorschläge, Impulse und Ideen, die für das gesamte Schuljahr und darüber hinaus genutzt werden können.\n\nLehrkräfte können bereits konfigurierte Vorlagen nutzen und selbst eigene Assistenten erstellen.\n\n<b>Zielgruppe:</b>\nLehrkräfte",
+    "create-button": "Assistent erstellen",
     "back-button": "Assistenten",
     "back-button-aria-label": "Zurück zu den Assistenten",
     "name-label": "Name des Assistenten",

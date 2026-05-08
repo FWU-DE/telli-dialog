@@ -17,7 +17,7 @@ type AssistantOverviewProps = {
 };
 
 export default function AssistantOverview({ currentUserId }: AssistantOverviewProps) {
-  const t = useTranslations('custom-gpt');
+  const t = useTranslations('assistants');
   const [visibleAssistants, setVisibleAssistants] = useState<AssistantWithImage[]>([]);
 
   const fetchAssistants = useCallback(async (filter: OverviewFilter) => {
