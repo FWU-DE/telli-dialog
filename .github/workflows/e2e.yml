@@ -70,6 +70,9 @@ jobs:
       OTC_ACCESS_KEY_ID: ${{ secrets.OTC_ACCESS_KEY_ID }}
       OTC_S3_HOSTNAME: ${{ secrets.OTC_S3_HOSTNAME }}
       OTC_BUCKET_NAME: ${{ secrets.OTC_BUCKET_NAME }}
+      # Disable telemetry
+      NEXT_TELEMETRY_DISABLED: 1
+      TURBO_TELEMETRY_DISABLED: 1
 
     steps:
       - name: Checkout code
@@ -171,8 +174,6 @@ jobs:
           cd .next/standalone
           node ./apps/dialog/server.js > /tmp/telli-dialog.log 2>&1 &
         env:
-          NEXT_TELEMETRY_DISABLED: 1
-          TURBO_TELEMETRY_DISABLED: 1
           NODE_ENV: test
           LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
 
