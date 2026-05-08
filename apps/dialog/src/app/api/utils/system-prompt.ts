@@ -31,7 +31,7 @@ export const FORMAT_GUIDELINES = `
 
 export const SUGGESTION_GUIDELINES = `
 ## Vorschläge und Rückfragen
-Beende die Antwort, falls sinnvoll, mit einer passenden Rückfrage oder hilfreichen Vorschlägen, um den User zu inspirieren. 
+Solltest du passende Rückfragen oder hilfreiche Vorschläge haben, um den User zu inspirieren, beende die Antwort damit.
 Bei einfachen Fragen erstelle nur einen Vorschlag. Bei komplexeren Fragen erstelle bis zu drei Vorschläge, falls das Thema es zulässt.
 Biete nie mehr als drei Vorschläge an. 
 Bei einem Vorschlag: markiere die wichtigsten Begriffe **fett**. 
