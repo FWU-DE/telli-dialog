@@ -45,10 +45,9 @@ import {
   copyRelatedTemplateFiles,
 } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
-import { addDays } from '@shared/utils/date';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq, inArray, lt } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
 import {
@@ -601,22 +600,6 @@ export const getCharacterInfo = async (
     character,
   };
 };
-
-/**
- * Cleans up characters with empty names from the database.
- * Attention: This is an admin function that does not check any authorization!
- *
- * Note: linked files will be unlinked but removed separately by `dbDeleteDanglingFiles`
- *
- * @returns number of deleted characters in db
- */
-export async function cleanupCharacters() {
-  const result = await db
-    .delete(characterTable)
-    .where(and(eq(characterTable.name, ''), lt(characterTable.createdAt, addDays(new Date(), -1))))
-    .returning();
-  return result.length;
-}
 
 export async function uploadAvatarPictureForCharacter({
   characterId,

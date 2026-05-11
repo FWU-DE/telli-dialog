@@ -38,9 +38,8 @@ import {
   copyRelatedTemplateFiles,
 } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
-import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq, lt } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
 import { verifyReadAccess, verifyWriteAccess } from '@shared/auth/authorization-service';
@@ -443,23 +442,6 @@ export async function deleteAssistant({
   await deleteMessageAttachments(relatedFiles.map((file) => file.id));
 
   return deletedAssistant;
-}
-
-/**
- * Cleans up custom gpts with empty names from the database.
- *
- * CAUTION: This is an admin function that does not check any authorization!
- *
- * Note: linked files will be unlinked but removed separately by `dbDeleteDanglingFiles`
- *
- * @returns number of deleted custom gpts in db.
- */
-export async function cleanupAssistants() {
-  const result = await db
-    .delete(assistantTable)
-    .where(and(eq(assistantTable.name, ''), lt(assistantTable.createdAt, addDays(new Date(), -1))))
-    .returning();
-  return result.length;
 }
 
 export async function uploadAvatarPictureForAssistant({
