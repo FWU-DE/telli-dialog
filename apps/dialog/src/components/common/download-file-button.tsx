@@ -1,3 +1,5 @@
+'use client';
+
 import { DownloadSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useTranslations } from 'next-intl';

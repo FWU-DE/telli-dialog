@@ -20,7 +20,7 @@ export default async function Page(props: PageProps<'/login/error'>) {
   return (
     <div className="flex justify-center min-h-screen items-center">
       <div className="p-6 flex flex-col gap-4 items-center rounded-xl border bg-light-gray max-w-fit">
-        <WarningIcon className="size-12 text-primary" />
+        <WarningIcon className="size-12 text-primary" aria-hidden="true" />
         <div>{t('description')}</div>
         {authError === 'federal_state_not_found' ? <div>{t('federal-state-not-found')}</div> : null}
         <ul>
