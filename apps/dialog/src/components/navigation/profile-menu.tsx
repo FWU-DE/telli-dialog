@@ -15,15 +15,12 @@ import { DotsThreeIcon } from '@phosphor-icons/react';
 function MenuActionRow({ action }: { action: React.ReactNode }) {
   const contentRef = React.useRef<HTMLDivElement>(null);
 
-  function handleSelect(event: Event) {
+  function handleSelect() {
     const childElement = contentRef.current?.querySelector<HTMLElement>(
       'button, a, [role="button"]',
     );
 
-    if (childElement) {
-      event.preventDefault();
-      childElement.click();
-    }
+    childElement?.click();
   }
 
   return (

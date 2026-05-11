@@ -29,8 +29,15 @@ export default function DownloadSharedConversationButton({
   inviteCode,
 }: DownloadConversationButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
+  const isMountedRef = React.useRef(true);
   const toast = useToast();
   const tCommon = useTranslations('common');
+
+  React.useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   async function handleDownload() {
     if (disabled) {
@@ -70,7 +77,9 @@ export default function DownloadSharedConversationButton({
     } catch {
       toast.error('Der Download der Konversation ist fehlgeschlagen.');
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
   }
 

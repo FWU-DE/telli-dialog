@@ -62,7 +62,7 @@
     "ioredis": "5.10.1",
     "isbinaryfile": "6.0.0",
     "jose": "6.2.3",
-    "jsdom": "26.1.0",
+    "jsdom": "29.1.1",
     "katex": "0.16.45",
     "linkup-sdk": "2.7.0",
     "mammoth": "1.12.0",
