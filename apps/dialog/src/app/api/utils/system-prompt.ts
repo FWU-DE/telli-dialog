@@ -1,6 +1,6 @@
 import { SUPPORTED_DOCUMENTS_EXTENSIONS, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
 import { RetrievedChunk } from '../rag/types';
-import type { WebSearchResult } from '@shared/db/types';
+import type { WebSearchResult } from '@shared/db/schema';
 
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien

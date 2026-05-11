@@ -130,15 +130,6 @@ export async function searchWeb({
       outputType: 'searchResults',
     });
 
-    const results = Array.isArray(searchResults.results)
-      ? (searchResults.results as WebSearchResult[])
-          .slice(0, WEBSEARCH_RESULTS_LIMIT)
-          .map((result) => ({
-            ...result,
-            content: result.content.slice(0, WEBSEARCH_RESULT_CONTENT_LENGTH_LIMIT),
-          }))
-      : [];
-
     await recordWebSearchUsage({
       conversationId,
       userId,

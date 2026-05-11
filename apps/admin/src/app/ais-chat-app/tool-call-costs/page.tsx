@@ -1,6 +1,6 @@
 import TwoColumnLayout from '@/components/layout/TwoColumnLayout';
 import { getToolCallCostByName } from '@shared/tool-call-costs/tool-call-cost-service';
-import { TelliDialogSidebar } from '../TelliDialogSidebar';
+import { AdminAppSidebar } from '../AdminAppSidebar';
 import ToolCallCostListView from './ToolCallCostListView';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,7 @@ export default async function ToolCallCostsPage() {
 
   return (
     <TwoColumnLayout
-      sidebar={<TelliDialogSidebar />}
+      sidebar={<AdminAppSidebar />}
       page={
         <ToolCallCostListView
           initialToolCallCost={initialToolCallCost}
