@@ -13,12 +13,12 @@ import {
   SUGGESTION_GUIDELINES,
   TOOL_GUIDELINES,
 } from '../utils/system-prompt';
-import type { TextSearchResult } from 'linkup-sdk';
+import type { WebSearchResult } from '@shared/db/schema';
 
 function constructTelliSystemPrompt(
   chunks: RetrievedChunk[],
   errorUrls: string[],
-  webSearchResults: TextSearchResult[],
+  webSearchResults: WebSearchResult[],
 ) {
   const ragContext = constructRagContext(chunks, errorUrls, webSearchResults);
 
@@ -135,7 +135,7 @@ export async function constructChatSystemPrompt({
   federalState: ObscuredFederalState;
   chunks: RetrievedChunk[];
   errorUrls: string[];
-  webSearchResults: TextSearchResult[];
+  webSearchResults: WebSearchResult[];
 }) {
   if (characterId !== undefined) {
     const character = await dbGetCharacterById({ characterId });

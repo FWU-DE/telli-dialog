@@ -1,11 +1,41 @@
-import { LinkupClient, type TextSearchResult } from 'linkup-sdk';
+import { LinkupClient } from 'linkup-sdk';
 import { generateTextWithBilling } from '@telli/ai-core';
 import { env } from '@/env';
 import {
   WEBSEARCH_RESULT_LENGTH_LIMIT,
   WEBSEARCH_RESULTS_LIMIT,
 } from '@/configuration-text-inputs/const';
+import type { WebSearchResult } from '@shared/db/schema';
 import { logError } from '@shared/logging';
+import { dbInsertConversationToolCallUsage } from '@shared/db/functions/token-usage';
+import { dbGetToolCallCostByName } from '@shared/db/functions/tool-call';
+
+async function recordWebSearchUsage({
+  conversationId,
+  userId,
+}: {
+  conversationId: string;
+  userId: string;
+}) {
+  let costsInCent = 0;
+
+  try {
+    costsInCent = (await dbGetToolCallCostByName('web_search')).costsInCent;
+  } catch (error) {
+    logError('Error loading web search tool call cost, using 0 cent fallback.', error);
+  }
+
+  try {
+    await dbInsertConversationToolCallUsage({
+      toolCallName: 'web_search',
+      conversationId,
+      userId,
+      costsInCent,
+    });
+  } catch (error) {
+    logError('Error recording web search usage billing.', error);
+  }
+}
 
 export async function isWebSearchNeeded({
   query,
@@ -76,7 +106,15 @@ Beispiele:
  * @param query The search query string.
  * @returns An array of text search results from the Linkup API.
  */
-export async function searchWeb(query: string): Promise<TextSearchResult[]> {
+export async function searchWeb({
+  query,
+  conversationId,
+  userId,
+}: {
+  query: string;
+  conversationId: string;
+  userId: string;
+}): Promise<WebSearchResult[]> {
   if (!env.linkupApiKey) {
     return [];
   }
@@ -92,11 +130,16 @@ export async function searchWeb(query: string): Promise<TextSearchResult[]> {
       outputType: 'searchResults',
     });
 
+    await recordWebSearchUsage({
+      conversationId,
+      userId,
+    });
+
     if (!Array.isArray(searchResults.results)) {
       return [];
     }
 
-    return (searchResults.results as TextSearchResult[])
+    return (searchResults.results as WebSearchResult[])
       .slice(0, WEBSEARCH_RESULTS_LIMIT)
       .map((result) => ({
         ...result,
