@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { DefaultPageLayoutSelector } from '@/components/layout/default-page-layout-client';
+import { PageLayoutSelector } from '@/components/layout/page-layout-selector';
 import type { UserAndContext } from '@/auth/types';
 
 export type DefaultPageLayoutConfig =
@@ -17,9 +17,6 @@ export type DefaultPageLayoutConfig =
     }
   | {
       layout: 'form';
-    }
-  | {
-      layout: 'default';
     };
 
 export function DefaultPageLayout({
@@ -29,7 +26,5 @@ export function DefaultPageLayout({
   children: ReactNode;
   layoutConfig?: DefaultPageLayoutConfig;
 }) {
-  return (
-    <DefaultPageLayoutSelector layoutType={layoutConfig}>{children}</DefaultPageLayoutSelector>
-  );
+  return <PageLayoutSelector layoutType={layoutConfig}>{children}</PageLayoutSelector>;
 }
