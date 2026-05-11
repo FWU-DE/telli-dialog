@@ -60,7 +60,7 @@ export default async function Page(props: PageProps) {
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider defaultImageStyle={lastUsedStyleInChat}>
-        <DefaultPageLayout header={{ headerType: 'image' }}>
+        <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
           <div className="flex flex-col h-full">
             <div className="flex-1 overflow-auto">
               <ImageGenerationChat
