@@ -9,6 +9,7 @@ import type { WebSearchResult } from '@shared/db/schema';
 import { logError } from '@shared/logging';
 import { dbInsertConversationToolCallUsage } from '@shared/db/functions/token-usage';
 import { dbGetToolCallCostByName } from '@shared/db/functions/tool-call';
+import { formatDateToGermanTimestamp } from '@shared/utils/date';
 
 async function recordWebSearchUsage({
   conversationId,
@@ -46,7 +47,7 @@ export async function isWebSearchNeeded({
   modelId: string;
   apiKeyId: string;
 }): Promise<{ needed: boolean; query: string }> {
-  const recentMessages = messages.slice(-3);
+  const recentMessages = messages.slice(-5);
 
   try {
     const { text } = await generateTextWithBilling(
@@ -55,7 +56,7 @@ export async function isWebSearchNeeded({
         {
           role: 'system',
           content: `Du bist ein Routing-Assistent, der entscheidet, ob eine Nutzerfrage eine Websuche erfordert.
-
+Heute ist der ${formatDateToGermanTimestamp(new Date())}.
 Dir wird ein Gesprächsverlauf mit den letzten Nachrichten gegeben. Entscheide anhand des Kontexts, ob die letzte Nutzerfrage eine Websuche erfordert.
 
 Antwortformat:
