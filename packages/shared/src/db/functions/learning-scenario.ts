@@ -11,8 +11,6 @@ import {
 } from 'drizzle-orm';
 import { db } from '..';
 import {
-  conversationMessageTable,
-  conversationTable,
   fileTable,
   LearningScenarioFileMapping,
   LearningScenarioOptionalShareDataModel,
@@ -350,25 +348,6 @@ export async function dbDeleteLearningScenarioByIdAndUser({
       .select({ id: LearningScenarioFileMapping.fileId })
       .from(LearningScenarioFileMapping)
       .where(eq(LearningScenarioFileMapping.learningScenarioId, learningScenario.id));
-
-    const conversations = await tx
-      .select({ id: conversationTable.id })
-      .from(conversationTable)
-      // TODO: customGptId is wrong! replace with learningScenarioId, once it's available
-      .where(eq(conversationTable.assistantId, learningScenario.id));
-
-    if (conversations.length > 0) {
-      await tx.delete(conversationMessageTable).where(
-        inArray(
-          conversationMessageTable.conversationId,
-          conversations.map((c) => c.id),
-        ),
-      );
-    }
-    // TODO: customGptId is wrong! replace with learningScenarioId, once it's available
-    await tx
-      .delete(conversationTable)
-      .where(eq(conversationTable.assistantId, learningScenario.id));
     await tx
       .delete(LearningScenarioFileMapping)
       .where(eq(LearningScenarioFileMapping.learningScenarioId, learningScenario.id));
