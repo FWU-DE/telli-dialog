@@ -1,5 +1,5 @@
 import LogoutButton from '@/app/(authed)/logout-button';
-import WarningIcon from '@/components/icons/warning-icon';
+import { WarningIcon } from '@phosphor-icons/react/dist/ssr';
 import { getAuthErrorFromUrl, getFieldErrorsFromUrl } from '@shared/auth/authentication-service';
 import { getTranslations } from 'next-intl/server';
 
@@ -20,7 +20,7 @@ export default async function Page(props: PageProps<'/login/error'>) {
   return (
     <div className="flex justify-center min-h-screen items-center">
       <div className="p-6 flex flex-col gap-4 items-center rounded-xl border bg-light-gray max-w-fit">
-        <WarningIcon />
+        <WarningIcon className="size-12 text-primary" />
         <div>{t('description')}</div>
         {authError === 'federal_state_not_found' ? <div>{t('federal-state-not-found')}</div> : null}
         <ul>
