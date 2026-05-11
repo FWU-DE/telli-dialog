@@ -47,7 +47,7 @@ export async function isWebSearchNeeded({
   modelId: string;
   apiKeyId: string;
 }): Promise<{ needed: boolean; query: string }> {
-  const recentMessages = messages.slice(-5);
+  const recentMessages = messages.slice(-5).filter((message) => message.role !== 'system');
 
   try {
     const { text } = await generateTextWithBilling(
@@ -101,7 +101,7 @@ Beispiele:
       ],
       apiKeyId,
       {
-        maxTokens: 60, // one token is rougtly 0.75 words, so 60 tokens are roughly 45 words, which is more than enough for a concise search query
+        maxTokens: 60, // one token is ~0.75 words, so 60 tokens are ~45 words, which is more than enough for a search query
         temperature: 0,
       },
     );
