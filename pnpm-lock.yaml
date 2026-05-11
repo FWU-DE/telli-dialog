@@ -52,15 +52,6 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: 0.13.11
         version: 0.13.11(typescript@6.0.3)(zod@4.4.2)
-      '@telli/api-database':
-        specifier: workspace:*
-        version: link:../../packages/api-database
-      '@telli/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
-      '@telli/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       lucide-react:
         specifier: 1.14.0
         version: 1.14.0(react@19.2.5)
@@ -218,15 +209,6 @@ importers:
       '@t3-oss/env-core':
         specifier: 0.13.11
         version: 0.13.11(typescript@6.0.3)(zod@4.4.2)
-      '@telli/ai-core':
-        specifier: workspace:*
-        version: link:../../packages/ai-core
-      '@telli/api-database':
-        specifier: workspace:*
-        version: link:../../packages/api-database
-      '@telli/shared-core':
-        specifier: workspace:*
-        version: link:../../packages/shared-core
       dotenv:
         specifier: 17.4.2
         version: 17.4.2
@@ -258,9 +240,6 @@ importers:
       '@sentry/esbuild-plugin':
         specifier: 5.2.1
         version: 5.2.1
-      '@telli/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
       '@types/node':
         specifier: 24.12.2
         version: 24.12.2
@@ -620,9 +599,6 @@ importers:
       '@t3-oss/env-core':
         specifier: 0.13.11
         version: 0.13.11(typescript@6.0.3)(zod@4.4.2)
-      '@telli/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
       '@types/node':
         specifier: 24.12.2
         version: 24.12.2
@@ -777,12 +753,6 @@ importers:
       '@t3-oss/env-core':
         specifier: 0.13.11
         version: 0.13.11(typescript@6.0.3)(zod@4.4.2)
-      '@telli/ai-core':
-        specifier: workspace:*
-        version: link:../ai-core
-      '@telli/shared-core':
-        specifier: workspace:*
-        version: link:../shared-core
       drizzle-kit:
         specifier: 0.31.10
         version: 0.31.10
