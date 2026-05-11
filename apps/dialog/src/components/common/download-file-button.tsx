@@ -1,4 +1,4 @@
-import { DownloadSimpleIcon } from '@phosphor-icons/react/dist/icons/DownloadSimple';
+import { DownloadSimpleIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import Spinner from '../icons/spinner';

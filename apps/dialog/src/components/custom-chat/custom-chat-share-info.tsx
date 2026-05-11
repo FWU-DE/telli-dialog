@@ -1,6 +1,6 @@
 'use client';
 
-import { CaretRightIcon } from '@phosphor-icons/react/dist/icons/CaretRight';
+import { CaretRightIcon } from '@phosphor-icons/react';
 
 export function CustomChatShareInfo({
   href,
