@@ -60,7 +60,7 @@ function latestActiveCharacterShare(user: Pick<UserModel, 'id'>) {
 /**
  * Returns a subquery that selects the single most-recent share per character for a given user,
  * regardless of whether it is active or expired. Used to surface the last share's settings
- * (telliPointsLimit, maxUsageTimeLimit) as defaults when no active share exists.
+ * (tokenPointsLimit, maxUsageTimeLimit) as defaults when no active share exists.
  */
 function latestCharacterShare(
   user: Pick<UserModel, 'id'>,
@@ -89,7 +89,7 @@ function baseCharacterWithShareQuery(activeShare: ReturnType<typeof latestActive
   return db
     .select({
       ...getTableColumns(characterTable),
-      telliPointsLimit: activeShare.telliPointsLimit,
+      tokenPointsLimit: activeShare.tokenPointsLimit,
       inviteCode: activeShare.inviteCode,
       maxUsageTimeLimit: activeShare.maxUsageTimeLimit,
       startedAt: activeShare.startedAt,
@@ -417,7 +417,7 @@ export async function dbGetCharacterByIdAndInviteCode({
   const [row] = await db
     .select({
       ...getTableColumns(characterTable),
-      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
+      tokenPointsLimit: sharedCharacterConversation.tokenPointsLimit,
       inviteCode: sharedCharacterConversation.inviteCode,
       maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
       startedAt: sharedCharacterConversation.startedAt,

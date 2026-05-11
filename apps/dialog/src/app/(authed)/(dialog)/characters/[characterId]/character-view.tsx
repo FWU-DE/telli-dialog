@@ -91,7 +91,7 @@ export function CharacterView({
         startedAt={character.startedAt}
         manuallyStoppedAt={character.manuallyStoppedAt}
         maxUsageTimeLimit={character.maxUsageTimeLimit}
-        telliPointsLimit={character.telliPointsLimit}
+        tokenPointsLimit={character.tokenPointsLimit}
         pointsPercentageValues={telliPointsPercentageValues}
         usageTimeValues={usageTimeValuesInMinutes}
         onShare={async (data) => {

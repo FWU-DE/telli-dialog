@@ -1,6 +1,6 @@
 import { SUPPORTED_DOCUMENTS_EXTENSIONS, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
 import { RetrievedChunk } from '../rag/types';
-import type { TextSearchResult } from 'linkup-sdk';
+import type { WebSearchResult } from '@shared/db/schema';
 
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien
@@ -50,7 +50,7 @@ Wenn du möchtest, kann ich jetzt Folgendes tun:
 export function constructRagContext(
   chunks: RetrievedChunk[],
   errorUrls: string[] = [],
-  webSearchResults: TextSearchResult[] = [],
+  webSearchResults: WebSearchResult[] = [],
 ) {
   if (chunks.length === 0 && errorUrls.length === 0 && webSearchResults.length === 0) return '';
 

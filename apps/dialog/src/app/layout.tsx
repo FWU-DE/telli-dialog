@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
     : undefined;
 
   return {
-    title: !!federalState?.telliName ? federalState?.telliName : 'telli',
+    title: !!federalState?.appName ? federalState?.appName : 'AIS.chat',
     description: 'Der datenschutzkonforme KI-Chatbot für die Schule',
     icons: {
       icon: faviconPreSignedUrl ?? logoIcon.src,

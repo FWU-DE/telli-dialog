@@ -10,7 +10,7 @@ import { PlusIcon } from '@phosphor-icons/react';
 export default function CreateNewAssistantButton() {
   const router = useRouter();
   const toast = useToast();
-  const t = useTranslations('custom-gpt');
+  const t = useTranslations('assistants');
 
   async function handleNewGPT() {
     const createResult = await createNewAssistantAction({});
@@ -24,7 +24,7 @@ export default function CreateNewAssistantButton() {
   return (
     <Button type="button" onClick={handleNewGPT} data-testid="assistant-create-button">
       <PlusIcon className="size-5" />
-      {t('form.create-gpt')}
+      {t('create-button')}
     </Button>
   );
 }

@@ -45,7 +45,7 @@ export async function sharedChatHasReachedTelliPointsLimit({
   if (
     user.userRole === 'teacher' &&
     sharedChatUsageInCent <
-      (await calculateSharedChatLimitInCent(user, sharedChat.telliPointsLimit))
+      (await calculateSharedChatLimitInCent(user, sharedChat.tokenPointsLimit))
   ) {
     return false;
   }
@@ -76,7 +76,7 @@ export async function sharedCharacterChatHasReachedTelliPointsLimit({
 
   if (
     user.userRole === 'teacher' &&
-    characterUsageInCent < (await calculateSharedChatLimitInCent(user, character.telliPointsLimit))
+    characterUsageInCent < (await calculateSharedChatLimitInCent(user, character.tokenPointsLimit))
   ) {
     return false;
   }

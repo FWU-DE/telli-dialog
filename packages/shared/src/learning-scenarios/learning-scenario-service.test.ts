@@ -662,7 +662,7 @@ describe('learning-scenario-service', () => {
       id: generateUUID(),
       learningScenarioId,
       userId,
-      telliPointsLimit: 50,
+      tokenPointsLimit: 50,
       maxUsageTimeLimit: 60,
       inviteCode: 'ABCD1234',
       startedAt: new Date(),

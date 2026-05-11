@@ -17,7 +17,7 @@ describe('checkProductAccess', () => {
     supportContacts: null,
     trainingLink: null,
     designConfiguration: null,
-    telliName: 'telli',
+    appName: 'AIS.chat',
     featureToggles: {
       isStudentAccessEnabled: true,
       isCharacterEnabled: true,

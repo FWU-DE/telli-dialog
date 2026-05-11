@@ -81,7 +81,7 @@ test.describe('costs', () => {
   test('shared chat - should correctly compute telli points limit', async () => {
     const maxUsageTimeLimit = 45;
     const teacherPriceLimit = 1000; // 1000 cents
-    const telliPointsLimit = 10; // 10% = 100 cents
+    const tokenPointsLimit = 10; // 10% = 100 cents
 
     let user = mockUserAndContext();
     user = {
@@ -107,7 +107,7 @@ test.describe('costs', () => {
     // create shared learning scenario
     const sharedLearningScenario: LearningScenarioWithShareDataModel = {
       ...mockLearningScenario(),
-      telliPointsLimit: telliPointsLimit,
+      tokenPointsLimit: tokenPointsLimit,
       maxUsageTimeLimit: maxUsageTimeLimit,
       userId: user.id,
       modelId: model.id,
@@ -168,7 +168,7 @@ test.describe('costs', () => {
   test('shared character chat - should correctly compute telli points limit', async () => {
     const maxUsageTimeLimit = 45;
     const teacherPriceLimit = 1000; // 1000 cents
-    const telliPointsLimit = 10; // 10% = 100 cents
+    const tokenPointsLimit = 10; // 10% = 100 cents
 
     let user = mockUserAndContext();
     user = {
@@ -198,7 +198,7 @@ test.describe('costs', () => {
       accessLevel: 'private' as const,
       startedAt: new Date(),
       manuallyStoppedAt: null,
-      telliPointsLimit: telliPointsLimit,
+      tokenPointsLimit: tokenPointsLimit,
       maxUsageTimeLimit: maxUsageTimeLimit,
       inviteCode: generateRandomString(8),
       startedBy: user.id,

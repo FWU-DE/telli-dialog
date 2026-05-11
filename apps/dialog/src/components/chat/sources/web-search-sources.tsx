@@ -4,14 +4,14 @@ import { CaretRightIcon, GlobeSimpleIcon } from '@phosphor-icons/react';
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
-import type { TextSearchResult } from 'linkup-sdk';
+import type { WebSearchResult } from '@shared/db/schema';
 import { Button } from '@ui/components/Button';
 
-function getSourceTitle(source: TextSearchResult) {
+function getSourceTitle(source: WebSearchResult) {
   return source.name.trim() || getSourceDomain(source);
 }
 
-function getSourceDomain(source: TextSearchResult) {
+function getSourceDomain(source: WebSearchResult) {
   const url = source.url;
 
   try {
@@ -63,7 +63,7 @@ export function WebSearchSourcesPanel({
   panelId,
   panelRef,
 }: {
-  sources: TextSearchResult[];
+  sources: WebSearchResult[];
   isOpen: boolean;
   onToggle: () => void;
   panelId: string;

@@ -29,17 +29,17 @@ jobs:
     strategy:
       matrix:
         include:
-          - image_name: telli-api
+          - image_name: ais-chat-api
             dockerfile: apps/api/Dockerfile
-            image_ref: ghcr.io/fwu-de/telli-api
+            image_ref: ghcr.io/fwu-de/ais-chat-api
             sentry_project: ${{ vars.SENTRY_PROJECT_API }}
-          - image_name: telli-dialog
+          - image_name: ais-chat-app
             dockerfile: apps/dialog/Dockerfile
-            image_ref: ghcr.io/fwu-de/telli-dialog
+            image_ref: ghcr.io/fwu-de/ais-chat-app
             sentry_project: ${{ vars.SENTRY_PROJECT_DIALOG }}
-          - image_name: telli-admin
+          - image_name: ais-chat-admin
             dockerfile: apps/admin/Dockerfile
-            image_ref: ghcr.io/fwu-de/telli-admin
+            image_ref: ghcr.io/fwu-de/ais-chat-admin
             sentry_project: ${{ vars.SENTRY_PROJECT_ADMIN }}
 
     steps:
