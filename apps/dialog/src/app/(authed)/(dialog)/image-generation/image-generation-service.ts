@@ -1,11 +1,11 @@
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
-import { userHasReachedTelliPointsLimit } from '@/app/api/chat/usage';
+import { userHasReachedTokenPointsLimit } from '@/app/api/chat/usage';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { dbGetModelByIdAndFederalStateId } from '@shared/db/functions/llm-model';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
-import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
-import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
+import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
+import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { dbInsertChatContent, dbGetOrCreateConversation } from '@shared/db/functions/chat';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { logError } from '@shared/logging';
@@ -230,12 +230,12 @@ export async function generateImage({
     userId: user.id,
   });
 
-  const telliPointsLimitReached = await userHasReachedTelliPointsLimit({ user });
+  const tokenPointsLimitReached = await userHasReachedTokenPointsLimit({ user });
 
-  if (telliPointsLimitReached) {
+  if (tokenPointsLimitReached) {
     if (conversation) {
       await sendRabbitmqEvent(
-        constructTelliBudgetExceededEvent({
+        constructTokenBudgetExceededEvent({
           anonymous: false,
           user,
           conversation,
@@ -243,7 +243,7 @@ export async function generateImage({
       );
     }
 
-    throw new Error('User has reached telli points limit.');
+    throw new Error('User has reached token points limit.');
   }
 
   try {
@@ -268,7 +268,7 @@ export async function generateImage({
     if (conversation) {
       // Send RabbitMQ event for successful image generation
       await sendRabbitmqEvent(
-        constructTelliNewMessageEvent({
+        constructNewMessageEvent({
           user,
           promptTokens: 0, // Images don't use tokens
           completionTokens: 0, // Images don't use tokens

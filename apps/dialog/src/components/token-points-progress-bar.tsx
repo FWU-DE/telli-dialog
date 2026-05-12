@@ -1,10 +1,10 @@
-type TelliPointsProgressBarProps = {
+type TokenPointsProgressBarProps = {
   percentage: number;
 };
 
-export default function TelliPointsProgressBar({
+export default function TokenPointsProgressBar({
   percentage: _percentage,
-}: TelliPointsProgressBarProps) {
+}: TokenPointsProgressBarProps) {
   const percentage = Math.max(Math.ceil(_percentage), 0);
 
   function getColorByProgress() {

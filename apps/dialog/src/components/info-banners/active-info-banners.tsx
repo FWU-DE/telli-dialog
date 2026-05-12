@@ -11,7 +11,7 @@ import { cn } from '@/utils/tailwind';
 
 const DISMISSED_INFO_BANNERS_STORAGE_KEY = 'dismissed-info-banner-ids';
 const TRACKED_INFO_BANNERS_STORAGE_KEY = 'tracked-info-banner-ids';
-const DISMISSED_INFO_BANNERS_EVENT = 'telli:info-banner-dismissed';
+const DISMISSED_INFO_BANNERS_EVENT = 'ais-chat:info-banner-dismissed';
 const EMPTY_DISMISSED_INFO_BANNERS_SNAPSHOT = '[]';
 const pendingTrackedInfoBannerIds = new Set<string>();
 

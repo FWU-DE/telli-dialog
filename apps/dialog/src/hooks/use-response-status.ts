@@ -1,5 +1,5 @@
 import { logError } from '@shared/logging';
-import { SharedChatExpiredError, TelliPointsExceededError } from '@ais-chat/ai-core/errors';
+import { SharedChatExpiredError, TokenPointsExceededError } from '@ais-chat/ai-core/errors';
 import { useTranslations } from 'next-intl';
 import { useState, useCallback } from 'react';
 
@@ -10,7 +10,7 @@ export function useCheckStatusCode() {
   const [isChatExpired, setIsChatExpired] = useState(false);
 
   const handleError = useCallback((error: Error) => {
-    if (TelliPointsExceededError.is(error)) {
+    if (TokenPointsExceededError.is(error)) {
       setError(new Error(t('rate-limit-error')));
     } else if (SharedChatExpiredError.is(error)) {
       setIsChatExpired(true);

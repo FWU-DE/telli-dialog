@@ -32,7 +32,7 @@ export const patchCharacterSchema = z.object({
   shareCharacter: z
     .object({
       userId: z.string(),
-      telliPointsPercentageLimit: z.number(),
+      tokenPointsPercentageLimit: z.number(),
       usageTimeLimitMinutes: z.number(),
     })
     .optional(),
@@ -57,7 +57,7 @@ export async function PATCH(
     const patchCharacterValues = patchCharacterSchema.parse(requestBody);
     // share character
     if (patchCharacterValues.shareCharacter) {
-      const { telliPointsPercentageLimit, usageTimeLimitMinutes, userId } =
+      const { tokenPointsPercentageLimit, usageTimeLimitMinutes, userId } =
         patchCharacterValues.shareCharacter;
 
       const user = await dbGetUserById({ userId });
@@ -68,7 +68,7 @@ export async function PATCH(
       const result = await shareCharacter({
         characterId,
         user,
-        telliPointsPercentageLimit,
+        tokenPointsPercentageLimit,
         usageTimeLimitMinutes,
       });
       return Response.json(result);

@@ -24,7 +24,7 @@ import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
 import {
-  telliPointsPercentageValues,
+  tokenPointsPercentageValues,
   usageTimeValuesInMinutes,
 } from '../editor/[learningScenarioId]/schema';
 import {
@@ -107,7 +107,7 @@ export function LearningScenarioView({
         manuallyStoppedAt={learningScenario.manuallyStoppedAt}
         maxUsageTimeLimit={learningScenario.maxUsageTimeLimit}
         tokenPointsLimit={learningScenario.tokenPointsLimit}
-        pointsPercentageValues={telliPointsPercentageValues}
+        pointsPercentageValues={tokenPointsPercentageValues}
         usageTimeValues={usageTimeValuesInMinutes}
         onShare={handleShareLearningScenario}
         onUnshare={handleUnshareLearningScenario}

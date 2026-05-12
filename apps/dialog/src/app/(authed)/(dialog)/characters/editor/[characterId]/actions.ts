@@ -53,14 +53,14 @@ export async function deleteCharacterAction({ characterId }: { characterId: stri
 
 export async function shareCharacterAction({
   id,
-  telliPointsPercentageLimit,
+  tokenPointsPercentageLimit,
   usageTimeLimit,
 }: { id: string } & SharedConversationShareFormValues) {
   const { user } = await requireAuth();
 
   return runServerAction(shareCharacter)({
     characterId: id,
-    telliPointsPercentageLimit: telliPointsPercentageLimit,
+    tokenPointsPercentageLimit,
     usageTimeLimitMinutes: usageTimeLimit,
     user: user,
   });

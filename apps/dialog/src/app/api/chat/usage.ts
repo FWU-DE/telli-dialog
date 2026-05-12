@@ -4,24 +4,24 @@ import { type UserAndContext } from '@/auth/types';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
-} from '@shared/db/functions/telli-points';
+} from '@shared/db/functions/token-points';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 
 /**
  * Calculates the shared chat limit in cents
  * @param user - The user and context
- * @param telliPointsPercentageLimit - The percentage limit (e.g., 10 for 10%)
+ * @param tokenPointsPercentageLimit - The percentage limit (e.g., 10 for 10%)
  * @returns The calculated limit in cents
  */
 async function calculateSharedChatLimitInCent(
   user: UserAndContext,
-  telliPointsPercentageLimit: number,
+  tokenPointsPercentageLimit: number,
 ): Promise<number> {
   const priceLimitInCent = await getPriceLimitInCentByUser(user);
-  return ((priceLimitInCent ?? 0) * telliPointsPercentageLimit) / 100;
+  return ((priceLimitInCent ?? 0) * tokenPointsPercentageLimit) / 100;
 }
 
-export async function sharedChatHasReachedTelliPointsLimit({
+export async function sharedChatHasReachedTokenPointsLimit({
   user,
   sharedChat,
 }: {
@@ -53,7 +53,7 @@ export async function sharedChatHasReachedTelliPointsLimit({
   return true;
 }
 
-export async function sharedCharacterChatHasReachedTelliPointsLimit({
+export async function sharedCharacterChatHasReachedTokenPointsLimit({
   user,
   character,
 }: {
@@ -106,7 +106,7 @@ export function sharedChatHasExpired({
   return false;
 }
 
-export async function userHasReachedTelliPointsLimit({
+export async function userHasReachedTokenPointsLimit({
   user,
 }: {
   user: UserAndContext | undefined;

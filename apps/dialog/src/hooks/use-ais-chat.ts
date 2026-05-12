@@ -61,7 +61,7 @@ function lastUserMessage(messages: ChatMessage[]): ChatMessage | null {
  * Custom hook to manage chat state and streaming.
  * Replaces the Vercel AI SDK's useChat hook with Server Actions.
  */
-export function useTelliChat({
+export function useAisChat({
   initialMessages = [],
   modelId,
   sendMessage,

@@ -7,7 +7,7 @@ import { cn } from '@/utils/tailwind';
 import { useSearchParams } from 'next/navigation';
 import { useCustomPathname } from '@/hooks/use-custom-pathname';
 import { iconClassName } from '@/utils/tailwind/icon';
-import { Badge } from '../common/badge';
+import { Badge } from './badge';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
 
 type ModelSelectProps = {

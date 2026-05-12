@@ -15,5 +15,5 @@ export function openInNewTab(url: string) {
  */
 export function navigateWithoutRefresh(path: string) {
   window.history.replaceState(window.history.state, '', path);
-  window.dispatchEvent(new Event('telli:pathnameChange'));
+  window.dispatchEvent(new Event('ais-chat:pathnameChange'));
 }

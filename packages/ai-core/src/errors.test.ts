@@ -5,7 +5,7 @@ import {
   RateLimitExceededError,
   InvalidModelError,
   ProviderConfigurationError,
-  TelliPointsExceededError,
+  TokenPointsExceededError,
   SharedChatExpiredError,
 } from './errors';
 
@@ -87,24 +87,24 @@ describe('ProviderConfigurationError', () => {
   });
 });
 
-describe('TelliPointsExceededError', () => {
+describe('TokenPointsExceededError', () => {
   it('should create an error with the correct name and message', () => {
-    const error = new TelliPointsExceededError('Points exceeded');
-    expect(error.name).toBe('TelliPointsExceededError');
+    const error = new TokenPointsExceededError('Points exceeded');
+    expect(error.name).toBe('TokenPointsExceededError');
     expect(error.message).toBe('Points exceeded');
     expect(error).toBeInstanceOf(AiGenerationError);
   });
 
   it('should use the default message when none is provided', () => {
-    const error = new TelliPointsExceededError();
-    expect(error.message).toBe('User has reached Telli points limit');
+    const error = new TokenPointsExceededError();
+    expect(error.message).toBe('User has reached token points limit');
   });
 
-  it('should correctly identify TelliPointsExceededError instances', () => {
-    const error = new TelliPointsExceededError('Test');
-    expect(TelliPointsExceededError.is(error)).toBe(true);
-    expect(TelliPointsExceededError.is(new AiGenerationError('Test'))).toBe(false);
-    expect(TelliPointsExceededError.is(new Error('Test'))).toBe(false);
+  it('should correctly identify TokenPointsExceededError instances', () => {
+    const error = new TokenPointsExceededError('Test');
+    expect(TokenPointsExceededError.is(error)).toBe(true);
+    expect(TokenPointsExceededError.is(new AiGenerationError('Test'))).toBe(false);
+    expect(TokenPointsExceededError.is(new Error('Test'))).toBe(false);
   });
 });
 

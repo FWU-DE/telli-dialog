@@ -42,7 +42,7 @@ test('teacher can create shared chat with web sources, student can join chat and
   if (await stopSharingButton.isVisible()) {
     await stopSharingButton.click();
   }
-  await page.getByTestId('telli-points-select').click();
+  await page.getByTestId('token-points-select').click();
   await page.getByRole('option', { name: '50 %' }).click();
   await page.getByTestId('usage-time-select').click();
   await page.getByRole('option', { name: '30 Minuten' }).click();

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const telliNewChatMessageEventSchema = z.object({
+export const NewChatMessageEventSchema = z.object({
   event_type: z.literal('telli_new_chat_message'),
   pseudonym_id: z.string(),
   chat_id: z.string(),
@@ -14,9 +14,9 @@ export const telliNewChatMessageEventSchema = z.object({
   chat_type: z.string(),
   timestamp: z.coerce.date(),
 });
-export type TelliNewChatMessageEventType = z.infer<typeof telliNewChatMessageEventSchema>;
+export type NewChatMessageEventType = z.infer<typeof NewChatMessageEventSchema>;
 
-export const telliMonthlyTokenBudgetExceededEventSchema = z.object({
+export const MonthlyTokenBudgetExceededEventSchema = z.object({
   event_type: z.literal('telli_monthly_token_budget_exceeded'),
   pseudonym_id: z.string(),
   federal_state: z.string(),
@@ -24,6 +24,6 @@ export const telliMonthlyTokenBudgetExceededEventSchema = z.object({
   user_role: z.string(),
   timestamp: z.coerce.date(),
 });
-export type TelliMonthlyTokenBudgetExceededEventType = z.infer<
-  typeof telliMonthlyTokenBudgetExceededEventSchema
+export type MonthlyTokenBudgetExceededEventType = z.infer<
+  typeof MonthlyTokenBudgetExceededEventSchema
 >;

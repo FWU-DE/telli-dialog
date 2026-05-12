@@ -5,7 +5,7 @@ vi.mock('@/app/school', () => ({
   getPriceLimitInCentByUser: vi.fn(),
 }));
 
-vi.mock('@shared/db/functions/telli-points', () => ({
+vi.mock('@shared/db/functions/token-points', () => ({
   dbGetSharedChatUsageInCentBySharedChatId: vi.fn(),
   dbGetSharedCharacterChatUsageInCentByCharacterId: vi.fn(),
 }));

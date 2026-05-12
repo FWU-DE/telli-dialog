@@ -85,17 +85,17 @@ export class ProviderConfigurationError extends AiGenerationError {
 }
 
 /**
- * Error thrown when the user has exceeded their Telli points limit.
+ * Error thrown when the user has exceeded their token points limit.
  */
-export class TelliPointsExceededError extends AiGenerationError {
-  constructor(message: string = 'User has reached Telli points limit') {
+export class TokenPointsExceededError extends AiGenerationError {
+  constructor(message: string = 'User has reached token points limit') {
     super(message);
-    this.name = 'TelliPointsExceededError';
+    this.name = 'TokenPointsExceededError';
   }
 
-  static is(error: unknown): error is TelliPointsExceededError {
+  static is(error: unknown): error is TokenPointsExceededError {
     if (error && typeof error === 'object') {
-      return 'name' in error && error.name === 'TelliPointsExceededError';
+      return 'name' in error && error.name === 'TokenPointsExceededError';
     }
     return false;
   }

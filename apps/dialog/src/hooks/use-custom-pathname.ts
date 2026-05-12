@@ -3,12 +3,12 @@ import { usePathname } from 'next/navigation';
 
 function subscribe(callback: () => void) {
   // listen for event from `navigateWithoutRefresh`
-  window.addEventListener('telli:pathnameChange', callback);
+  window.addEventListener('ais-chat:pathnameChange', callback);
   // popstate is for back/forward navigation
   window.addEventListener('popstate', callback);
 
   return () => {
-    window.removeEventListener('telli:pathnameChange', callback);
+    window.removeEventListener('ais-chat:pathnameChange', callback);
     window.removeEventListener('popstate', callback);
   };
 }

@@ -349,7 +349,7 @@ describe('character-service', () => {
           shareCharacter({
             characterId: generateUUID(),
             user: mockUser('student'),
-            telliPointsPercentageLimit: 10,
+            tokenPointsPercentageLimit: 10,
             usageTimeLimitMinutes: 60,
           }),
         reason: 'only teachers can share a character',
@@ -372,7 +372,7 @@ describe('character-service', () => {
         shareCharacter({
           characterId: generateUUID(),
           user: mockUser('teacher'),
-          telliPointsPercentageLimit: 10,
+          tokenPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
         }),
       ).rejects.toThrow(ForbiddenError);
@@ -393,7 +393,7 @@ describe('character-service', () => {
         shareCharacter({
           characterId: generateUUID(),
           user: mockUser('teacher'),
-          telliPointsPercentageLimit: 10,
+          tokenPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
         }),
       ).rejects.toThrow(ForbiddenError);
@@ -451,7 +451,7 @@ describe('character-service', () => {
         shareCharacter({
           characterId,
           user,
-          telliPointsPercentageLimit: 10,
+          tokenPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
         }),
       ).rejects.toThrow('There can only be one active share at a time');

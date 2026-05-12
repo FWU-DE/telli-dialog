@@ -35,19 +35,19 @@ export class SharedCharacterProxy {
   shareCharacter({
     characterId,
     userId,
-    telliPointsPercentageLimit,
+    tokenPointsPercentageLimit,
     usageTimeLimitMinutes,
   }: {
     characterId: string;
     userId: string;
-    telliPointsPercentageLimit: number;
+    tokenPointsPercentageLimit: number;
     usageTimeLimitMinutes: number;
   }) {
     const url = `/api/v1/admin/characters/${characterId}`;
     const payload: PatchCharacterSchema = {
       shareCharacter: {
         userId,
-        telliPointsPercentageLimit,
+        tokenPointsPercentageLimit,
         usageTimeLimitMinutes,
       },
     };

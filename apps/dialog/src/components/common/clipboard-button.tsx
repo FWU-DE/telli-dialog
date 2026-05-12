@@ -7,17 +7,17 @@ import { ClipboardButton } from '@deutschlandgpt/core';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
 
-type TelliClipboardButtonProps = {
+type CustomClipboardButtonProps = {
   text: string;
   className?: string;
   outerDivClassName?: string;
 };
 
-export default function TelliClipboardButton({
+export default function CustomClipboardButton({
   text,
   className,
   outerDivClassName,
-}: TelliClipboardButtonProps) {
+}: CustomClipboardButtonProps) {
   return (
     <ClipboardButton
       text={text}

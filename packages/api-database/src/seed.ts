@@ -26,7 +26,7 @@ const gpt5nanoBaseUrl = process.env.LLM_GPT5NANO_BASE_URL ?? 'PLACEHOLDER_BASE_U
 
 // All prices are rough estimates, probably outdated and just for mocking purposes
 // Static ids are used to ensure that the models are not created again
-// the ids are taken from the staging/production database for interoperability to be able to connect to local telli api or staging
+// the ids are taken from the staging/production database for interoperability to be able to connect to local AIS.chat api or staging
 const DEFAULT_MODELS: LlmInsertModel[] = [
   {
     id: 'b870b74d-7458-4dcf-99f6-ace83ef514f4',

@@ -2,7 +2,7 @@ import {
   dbGetCharacterSharedChatsUsageInCentByUserId,
   dbGetChatsUsageInCentByUserId,
   dbGetLearningScenarioUsageInCentByUserId,
-} from '@shared/db/functions/telli-points';
+} from '@shared/db/functions/token-points';
 import { type UserAndContext } from '@/auth/types';
 import { dbGetCreditIncreaseForCurrentMonth } from '@shared/db/functions/voucher';
 

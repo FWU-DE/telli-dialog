@@ -1,7 +1,7 @@
 import { UserAndContext } from '@/auth/types';
 import { ConversationModel } from '@shared/db/types';
 import { CharacterSelectModel, LearningScenarioSelectModel } from '@shared/db/schema';
-import { TelliNewChatMessageEventType } from '../schema';
+import { NewChatMessageEventType } from '../schema';
 import { hashWithoutSalt } from '@/utils/crypto';
 
 type CommonProps = {
@@ -24,7 +24,7 @@ type FunctionProps =
       character: CharacterSelectModel;
     } & CommonProps);
 
-export function constructTelliNewMessageEvent(props: FunctionProps): TelliNewChatMessageEventType {
+export function constructNewMessageEvent(props: FunctionProps): NewChatMessageEventType {
   const commonObjectProps = {
     event_type: 'telli_new_chat_message' as const,
     school_id: props.user.schoolIds?.[0] ?? '',

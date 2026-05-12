@@ -12,13 +12,13 @@ import {
 import { getPriceInCentByUser } from '@/app/school';
 import { UserAndContext } from '@/auth/types';
 import {
-  sharedCharacterChatHasReachedTelliPointsLimit,
-  sharedChatHasReachedTelliPointsLimit,
+  sharedCharacterChatHasReachedTokenPointsLimit,
+  sharedChatHasReachedTokenPointsLimit,
 } from '@/app/api/chat/usage';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
-} from '@shared/db/functions/telli-points';
+} from '@shared/db/functions/token-points';
 import {
   mockCharacter,
   mockConversationUsage,
@@ -78,7 +78,7 @@ test.describe('costs', () => {
     expect(priceInCent).toBe(0);
   });
 
-  test('shared chat - should correctly compute telli points limit', async () => {
+  test('shared chat - should correctly compute token points limit', async () => {
     const maxUsageTimeLimit = 45;
     const teacherPriceLimit = 1000; // 1000 cents
     const tokenPointsLimit = 10; // 10% = 100 cents
@@ -138,7 +138,7 @@ test.describe('costs', () => {
 
     expect(sharedChatUsageInCent).toBe(90);
 
-    let hasReachedLimit = await sharedChatHasReachedTelliPointsLimit({
+    let hasReachedLimit = await sharedChatHasReachedTokenPointsLimit({
       user: user,
       sharedChat: sharedLearningScenario,
     });
@@ -156,7 +156,7 @@ test.describe('costs', () => {
     };
     await db.insert(sharedLearningScenarioUsageTracking).values(sharedSchoolConversationUsage);
 
-    hasReachedLimit = await sharedChatHasReachedTelliPointsLimit({
+    hasReachedLimit = await sharedChatHasReachedTokenPointsLimit({
       user: user,
       sharedChat: sharedLearningScenario,
     });
@@ -165,7 +165,7 @@ test.describe('costs', () => {
     expect(hasReachedLimit).toBe(true);
   });
 
-  test('shared character chat - should correctly compute telli points limit', async () => {
+  test('shared character chat - should correctly compute token points limit', async () => {
     const maxUsageTimeLimit = 45;
     const teacherPriceLimit = 1000; // 1000 cents
     const tokenPointsLimit = 10; // 10% = 100 cents
@@ -225,7 +225,7 @@ test.describe('costs', () => {
 
     expect(sharedChatUsageInCent).toBe(90);
 
-    let hasReachedLimit = await sharedCharacterChatHasReachedTelliPointsLimit({
+    let hasReachedLimit = await sharedCharacterChatHasReachedTokenPointsLimit({
       user: user,
       character: character!,
     });
@@ -243,7 +243,7 @@ test.describe('costs', () => {
     };
     await db.insert(sharedCharacterChatUsageTrackingTable).values(sharedCharacterChatUsage);
 
-    hasReachedLimit = await sharedCharacterChatHasReachedTelliPointsLimit({
+    hasReachedLimit = await sharedCharacterChatHasReachedTokenPointsLimit({
       user: user,
       character: character,
     });

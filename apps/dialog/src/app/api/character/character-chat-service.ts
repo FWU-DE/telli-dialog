@@ -1,16 +1,16 @@
 import {
   generateTextStreamWithBilling,
   type Message as AiCoreMessage,
-  TelliPointsExceededError,
+  TokenPointsExceededError,
   SharedChatExpiredError,
 } from '@ais-chat/ai-core';
 import { createTextStream } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import {
-  sharedCharacterChatHasReachedTelliPointsLimit,
+  sharedCharacterChatHasReachedTokenPointsLimit,
   sharedChatHasExpired,
-  userHasReachedTelliPointsLimit,
+  userHasReachedTokenPointsLimit,
 } from '../chat/usage';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
 import {
@@ -19,8 +19,8 @@ import {
 } from '@shared/db/functions/character';
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
-import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
-import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
+import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
+import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructCharacterSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, limitChatHistory } from '../chat/utils';
 import { retrieveChunks } from '../rag/rag-service';
@@ -101,17 +101,17 @@ export async function sendCharacterMessage({
   }
 
   // Check limits
-  const [sharedChatLimitReached, telliPointsLimitReached] = await Promise.all([
-    sharedCharacterChatHasReachedTelliPointsLimit({
+  const [sharedChatLimitReached, tokenPointsLimitReached] = await Promise.all([
+    sharedCharacterChatHasReachedTokenPointsLimit({
       user: teacherUserAndContext,
       character,
     }),
-    userHasReachedTelliPointsLimit({ user: teacherUserAndContext }),
+    userHasReachedTokenPointsLimit({ user: teacherUserAndContext }),
   ]);
 
-  if (telliPointsLimitReached) {
+  if (tokenPointsLimitReached) {
     await sendRabbitmqEvent(
-      constructTelliBudgetExceededEvent({
+      constructTokenBudgetExceededEvent({
         anonymous: true,
         user: teacherUserAndContext,
         character,
@@ -119,8 +119,8 @@ export async function sendCharacterMessage({
     );
   }
 
-  if (sharedChatLimitReached || telliPointsLimitReached) {
-    return createErrorResult(new TelliPointsExceededError());
+  if (sharedChatLimitReached || tokenPointsLimitReached) {
+    return createErrorResult(new TokenPointsExceededError());
   }
 
   // Get related files and web sources
@@ -193,7 +193,7 @@ export async function sendCharacterMessage({
           });
 
           await sendRabbitmqEvent(
-            constructTelliNewMessageEvent({
+            constructNewMessageEvent({
               user: teacherUserAndContext,
               promptTokens,
               completionTokens,

@@ -1,9 +1,9 @@
 ---
 name: e2e-testing
-description: Generate, update, or debug Playwright end-to-end tests for the telli-dialog monorepo. Use this when asked to create e2e tests, update existing e2e tests, or write integration tests using Playwright.
+description: Generate, update, or debug Playwright end-to-end tests for the ais-chat-app monorepo. Use this when asked to create e2e tests, update existing e2e tests, or write integration tests using Playwright.
 ---
 
-# E2E Test Generation for telli-dialog
+# E2E Test Generation for ais-chat-app
 
 You are an expert at writing Playwright end-to-end tests for this monorepo. Follow these instructions carefully.
 

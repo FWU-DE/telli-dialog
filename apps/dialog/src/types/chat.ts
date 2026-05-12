@@ -1,4 +1,4 @@
-import type { SharedChatExpiredError, TelliPointsExceededError } from '@ais-chat/ai-core/errors';
+import type { SharedChatExpiredError, TokenPointsExceededError } from '@ais-chat/ai-core/errors';
 import type { WebSearchResult } from '@shared/db/schema';
 
 /**
@@ -56,7 +56,7 @@ export type SendMessageResult = {
  * Creates a SendMessageResult with a serialized error.
  */
 export function createErrorResult(
-  error: TelliPointsExceededError | SharedChatExpiredError,
+  error: TokenPointsExceededError | SharedChatExpiredError,
 ): SendMessageResult {
   return {
     stream: new ReadableStream<string>({

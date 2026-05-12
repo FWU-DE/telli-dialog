@@ -43,7 +43,7 @@ test.describe('create, share, chat, delete', () => {
       await stopSharingButton.click();
     }
     // test share page
-    await page.getByTestId('telli-points-select').click();
+    await page.getByTestId('token-points-select').click();
     await page.getByRole('option', { name: '50 %' }).click();
     await page.getByTestId('usage-time-select').click();
     await page.getByRole('option', { name: '30 Minuten' }).click();
@@ -92,7 +92,7 @@ test.describe('create, share, chat, delete', () => {
       await stopSharingButton.click();
     }
     // test share page
-    await page.getByTestId('telli-points-select').click();
+    await page.getByTestId('token-points-select').click();
     await page.getByRole('option', { name: '25 %' }).click();
     await page.getByTestId('usage-time-select').click();
     await page.getByRole('option', { name: '30 Minuten' }).click();
