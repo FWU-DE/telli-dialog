@@ -19,7 +19,7 @@ type TermsConditionsModalProps = {
 } & React.ComponentProps<'button'>;
 
 /** This skips the scroll finishing check, to avoid the user from having to scroll to the bottom of the page to accept the terms and conditions. */
-const SCROLL_EXCEESING_TOLERANCE = 0.2;
+const SCROLL_EXCEEDING_TOLERANCE = 0.2;
 const STANDARD_REM_SIZE = 16;
 
 export default function TermsConditionsModal({
@@ -55,7 +55,7 @@ export default function TermsConditionsModal({
         startTransition(() => setScrollFinished(true));
       } else {
         const overflow = div.scrollHeight - div.clientHeight;
-        const shouldBeFinished = overflow <= div.scrollHeight * SCROLL_EXCEESING_TOLERANCE;
+        const shouldBeFinished = overflow <= div.scrollHeight * SCROLL_EXCEEDING_TOLERANCE;
         startTransition(() => setScrollFinished(shouldBeFinished));
       }
     }
@@ -69,7 +69,7 @@ export default function TermsConditionsModal({
     const overflow = div.scrollHeight - div.clientHeight;
     // If the overflow is less than 20% of the total height or the scrollTop is less than one line, set the scrollFinished state to true
     setScrollFinished(
-      overflow <= div.scrollHeight * SCROLL_EXCEESING_TOLERANCE ||
+      overflow <= div.scrollHeight * SCROLL_EXCEEDING_TOLERANCE ||
         div.scrollHeight - div.scrollTop - div.clientHeight <= STANDARD_REM_SIZE,
     );
   };

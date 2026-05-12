@@ -29,24 +29,6 @@ const baseNextConfig: NextConfig = {
     dangerouslyAllowSVG: true,
     // Set recommended security headers to prevent XSS with SVGs
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    // Note: the remotePatterns is a build-time configuration; environment variables cannot be used to construct the hostname
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'telli-development.obs.eu-nl.otc.t-systems.com',
-        port: '',
-      },
-      {
-        protocol: 'https',
-        hostname: 'telli-staging.obs.eu-nl.otc.t-systems.com',
-        port: '',
-      },
-      {
-        protocol: 'https',
-        hostname: 'telli-production.obs.eu-nl.otc.t-systems.com',
-        port: '',
-      },
-    ],
   },
   productionBrowserSourceMaps: !isDevBuild,
   experimental: {

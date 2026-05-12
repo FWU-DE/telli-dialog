@@ -68,6 +68,7 @@ export function SharedChatHeader({
             width={30}
             height={30}
             className="rounded-enterprise-sm"
+            unoptimized
           />
         )}
         {dialogStarted && <span className="truncate">{title}</span>}

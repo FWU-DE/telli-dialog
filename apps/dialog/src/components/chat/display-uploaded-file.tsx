@@ -71,7 +71,7 @@ export default function DisplayUploadedFile({
               height={200}
               loading="eager"
               className="w-full h-full object-cover"
-              unoptimized={true} // Since we're using signed URLs from S3
+              unoptimized // Since we're using signed URLs from S3
             />
           ) : status === 'uploading' || isLoading ? (
             <Spinner className="w-[56px] h-5" />

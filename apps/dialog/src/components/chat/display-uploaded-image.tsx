@@ -97,7 +97,7 @@ export default function DisplayUploadedImage({
           height={200}
           loading="eager"
           className="w-full h-auto max-h-48 object-cover rounded-enterprise-md"
-          unoptimized={true} // Since we're using signed URLs from S3
+          unoptimized // Since we're using signed URLs from S3
         />
         {showBanner && (
           <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2 rounded-enterprise-md">
