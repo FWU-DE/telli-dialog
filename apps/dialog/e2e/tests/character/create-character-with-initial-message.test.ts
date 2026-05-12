@@ -41,7 +41,7 @@ test('teacher can create character with initial message and verify it appears in
   await page.waitForURL('/characters/editor/**');
 
   // test share page
-  await page.getByTestId('telli-points-select').click();
+  await page.getByTestId('token-points-select').click();
   await page.getByRole('option', { name: '50 %' }).click();
   await page.getByTestId('usage-time-select').click();
   await page.getByRole('option', { name: '45 Minuten' }).click();

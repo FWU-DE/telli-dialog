@@ -175,7 +175,7 @@ function buildFunctionList(
       functionName: shareLearningScenario.name,
       testFunction: () =>
         shareLearningScenario({
-          data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
+          data: { tokenPointsPercentageLimit: 50, usageTimeLimit: 60 },
           learningScenarioId,
           user,
         }),
@@ -698,7 +698,7 @@ describe('learning-scenario-service', () => {
       await expect(
         shareLearningScenario({
           learningScenarioId,
-          data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
+          data: { tokenPointsPercentageLimit: 50, usageTimeLimit: 60 },
           user,
         }),
       ).rejects.toThrow('There can only be one active share at a time');

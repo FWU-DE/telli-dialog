@@ -78,5 +78,5 @@ async function handleStartupError(err: unknown) {
   process.exit(1);
 }
 
-// telli-api is compiled to CommonJS and therefore cannot use top-level await
+// ais-chat-api is compiled to CommonJS and therefore cannot use top-level await
 main().catch(handleStartupError);

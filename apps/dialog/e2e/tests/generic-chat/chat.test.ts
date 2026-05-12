@@ -26,7 +26,7 @@ test('should copy response to clipboard', async ({ page }) => {
   const assistantMessage = page.getByLabel('assistant message 1');
   await expect(assistantMessage).toBeVisible();
 
-  await page.getByTitle('Kopieren').click();
+  await page.getByTestId('copy-to-clipboard').click();
   const text = await assistantMessage.innerText();
   const clipboardContent = await page.evaluate(() => navigator.clipboard.readText());
   expect(clipboardContent).toBe(text);

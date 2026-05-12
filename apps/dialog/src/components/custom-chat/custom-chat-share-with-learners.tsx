@@ -23,7 +23,7 @@ import { RichText } from '../common/rich-text';
 import { z } from 'zod';
 
 const shareFormSchema = z.object({
-  telliPointsPercentageLimit: z.coerce.number(),
+  tokenPointsPercentageLimit: z.coerce.number(),
   usageTimeLimit: z.coerce.number(),
 });
 
@@ -68,7 +68,7 @@ export function CustomChatShareWithLearners({
   const { getValues: getValuesShare, setValue: setShareValue } = useForm({
     resolver: zodResolver(shareFormSchema),
     defaultValues: {
-      telliPointsPercentageLimit: tokenPointsLimit ?? 10,
+      tokenPointsPercentageLimit: tokenPointsLimit ?? 10,
       usageTimeLimit: maxUsageTimeLimit ?? 45,
     },
   });
@@ -114,13 +114,13 @@ export function CustomChatShareWithLearners({
               <Field>
                 <FieldLabel>{t('token-points')}</FieldLabel>
                 <Select
-                  defaultValue={String(getValuesShare('telliPointsPercentageLimit'))}
+                  defaultValue={String(getValuesShare('tokenPointsPercentageLimit'))}
                   onValueChange={(value) =>
-                    setShareValue('telliPointsPercentageLimit', Number(value))
+                    setShareValue('tokenPointsPercentageLimit', Number(value))
                   }
                   disabled={sharedChatActive}
                 >
-                  <SelectTrigger aria-label={t('token-points')} data-testid="telli-points-select">
+                  <SelectTrigger aria-label={t('token-points')} data-testid="token-points-select">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

@@ -22,7 +22,7 @@ import { AppMenuItem } from './app-menu-item';
 import LogoWithName from '@/assets/logo-with-name.svg';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { useTranslations } from 'next-intl';
-import { MyTelliPoints } from './my-telli-points';
+import { MyTokenPoints } from './my-token-points';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { UserModel } from '@shared/auth/user-model';
 import { ChatHistory } from './chat-history';
@@ -111,7 +111,7 @@ export function AppSidebar({
           </SidebarGroup>
 
           <SidebarGroup className="mt-2">
-            <MyTelliPoints
+            <MyTokenPoints
               text={t('token-points')}
               currentModelCosts={currentModelCosts}
               userPriceLimit={userPriceLimit}

@@ -68,7 +68,7 @@ export function FederalStateUpdateApiKey(props: FederalStateUpdateApiKeyProps) {
           <FormField
             name="decryptedApiKey"
             label="API Key"
-            description="Der neue, unverschlüsselte API Key der in telli-api generiert wurde."
+            description="Der neue, unverschlüsselte API Key der in ais-chat-api generiert wurde."
             control={control}
           />
           <CardAction>

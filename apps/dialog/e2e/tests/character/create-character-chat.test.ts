@@ -35,14 +35,14 @@ test.describe('create, share, chat, delete', () => {
     await page.goto('/characters');
 
     // check if created with the correct name
-    const dialogChatName = page.getByText(characterName).first();
-    await expect(dialogChatName).toBeVisible();
-    await dialogChatName.click();
+    const chatName = page.getByText(characterName).first();
+    await expect(chatName).toBeVisible();
+    await chatName.click();
 
     await page.waitForURL('/characters/editor/**');
 
     // test share page
-    await page.getByTestId('telli-points-select').click();
+    await page.getByTestId('token-points-select').click();
     await page.getByRole('option', { name: '50 %' }).click();
     await page.getByTestId('usage-time-select').click();
     await page.getByRole('option', { name: '45 Minuten' }).click();
@@ -78,7 +78,7 @@ test.describe('create, share, chat, delete', () => {
 
     // send first message
     await sendMessage(page, 'Wer bist du?');
-    await page.getByTitle('Kopieren').click();
+    await page.getByTestId('copy-to-clipboard').click();
 
     await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');
 

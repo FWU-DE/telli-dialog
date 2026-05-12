@@ -258,7 +258,7 @@ export async function updateLearningScenarioAccessLevel({
 }
 
 export const learningScenarioShareValuesSchema = z.object({
-  telliPointsPercentageLimit: z.number().min(1).max(100),
+  tokenPointsPercentageLimit: z.number().min(1).max(100),
   usageTimeLimit: z
     .number()
     .min(30)
@@ -306,7 +306,7 @@ export async function shareLearningScenario({
     learningScenarioId,
     inviteCode,
     startedAt,
-    tokenPointsLimit: parsedValues.telliPointsPercentageLimit,
+    tokenPointsLimit: parsedValues.tokenPointsPercentageLimit,
     maxUsageTimeLimit: parsedValues.usageTimeLimit,
   });
 

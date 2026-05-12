@@ -2,7 +2,7 @@ import { headers } from 'next/headers';
 
 export async function getHostByHeaders(_headers?: Headers | undefined) {
   const headersList = _headers ?? (await headers());
-  return headersList.get('host')?.toString() ?? 'dialog.deutschlandgpt.de';
+  return headersList.get('host')?.toString() ?? '';
 }
 
 export async function getBaseUrlByHeaders(_headers?: Headers | undefined) {

@@ -1,7 +1,7 @@
 import { FileModel } from '@shared/db/schema';
 import DisplayUploadedFile from './display-uploaded-file';
 import DisplayUploadedImage, { type PendingFileModel } from './display-uploaded-image';
-import TelliClipboardButton from '../common/clipboard-button';
+import CopyToClipboardButton from '../common/clipboard-button';
 import ReloadIcon from '../icons/reload';
 import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
@@ -146,7 +146,7 @@ export function ChatBox({
   const maybeShowMessageIcons =
     isLastNonUser && status !== 'streaming' ? (
       <div className="flex items-center gap-1 mt-1">
-        <TelliClipboardButton text={children.content} className="w-5 h-5" />
+        <CopyToClipboardButton text={children.content} className="size-5" />
         <button
           title={tCommon('regenerate-message')}
           type="button"

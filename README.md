@@ -1,8 +1,8 @@
-# telli dialog
+# AIS.chat
 
 ## Self-Hosted / Quick Start
 
-This guide helps you run telli using pre-built Docker images with minimal configuration.
+This guide helps you run AIS.chat using pre-built Docker images with minimal configuration.
 
 > [!NOTE]
 > The Docker Compose setup and credentials described in this section are intended **only for local exploration and testing**.
@@ -35,15 +35,15 @@ This guide helps you run telli using pre-built Docker images with minimal config
    - **Keycloak**: http://localhost:8080 (credentials: `admin` / `admin`)
    - **RustFS Console**: http://localhost:9001 (S3-compatible storage, credentials: `rustfsadmin` / `rustfsadmin123`)
 
-4. **Configure the application using telli-admin:**
+4. **Configure the application using ais-chat-admin:**
    - Navigate to the admin app at http://localhost:3001
    - Login with teacher credentials (username: `teacher`, password: `password`)
-   - In `telli-api` section:
+   - In `ais-chat-api` section:
      - Create your LLM models
      - Create Projects (i.e., federal states) and assign the models to them.
        The federal states `DE-TEST` must exist. Others can be created optionally.
      - Create API Key(s) for the project(s) you created and copy the key.
-   - In `telli-dialog` section:
+   - In `ais-chat-app` section:
      - Create at least the `DE-TEST` federal state and assign the corresponding API Key to it.
      - Configure settings as needed.
 
@@ -72,7 +72,7 @@ docker compose -f devops/docker/docker-compose.yml down -v
 
 ## Local Development (from source)
 
-This section is for developers who want to run telli from source code.
+This section is for developers who want to run AIS.chat from source code.
 
 ### Requirements
 
@@ -143,7 +143,7 @@ If you start with a fresh database, apply migrations and seed both databases; ot
 pnpm db:migrate
 ```
 
-Add api keys in your `.env.local` files for all federal states that you want to seed. These keys are used to fetch the available LLM models from the telli-api (e.g. `DE_BY_API_KEY` for Bavaria). If you previously seeded the api database, use the resulting API key.
+Add api keys in your `.env.local` files for all federal states that you want to seed. These keys are used to fetch the available LLM models from the ais-chat-api (e.g. `DE_BY_API_KEY` for Bavaria). If you previously seeded the api database, use the resulting API key.
 
 The api database seed also requires LLM provider credentials for the models it creates locally. Add these to `apps/api/.env.local`:
 

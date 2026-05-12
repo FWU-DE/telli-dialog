@@ -8,11 +8,11 @@ The main user-facing web application. A Next.js app with the app router used by 
 
 ## [`/apps/admin`](/apps/admin)
 
-The admin web application. A Next.js app that allows admins to configure telli-api and telli-dialog (federal state settings, models, etc.).
+The admin web application. A Next.js app that allows admins to configure ais-chat-api and ais-chat-app (federal state settings, models, etc.).
 
 ## [`/apps/api`](/apps/api)
 
-The telli proxy API. A Fastify REST API that acts as a proxy to LLM providers, handling billing and access control. Swagger docs are served at `/docs`.
+The AIS.chat proxy API. A Fastify REST API that acts as a proxy to LLM providers, handling billing and access control. Swagger docs are served at `/docs`.
 
 ## [`/packages/shared`](/packages/shared)
 
@@ -22,7 +22,7 @@ Contains the dialog database schema, Drizzle ORM configuration, database access 
 Key contents:
 
 - `src/db/` — Schema definitions, migrations, seed scripts, and database access functions
-- `src/knotenpunkt/` — Client for calling the telli-api service to access LLM providers (completions, embeddings, images). Note: ai-core now reads model configuration directly from the database, but still uses knotenpunkt to make requests to the telli-api service.
+- `src/knotenpunkt/` — Client for calling the ais-chat-api service to access LLM providers (completions, embeddings, images). Note: ai-core now reads model configuration directly from the database, but still uses knotenpunkt to make requests to the ais-chat-api service.
 - `src/s3/` — S3-compatible storage utilities
 - `src/logging/` — Shared logging helpers
 

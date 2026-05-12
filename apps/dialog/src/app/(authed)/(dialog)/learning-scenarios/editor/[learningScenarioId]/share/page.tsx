@@ -6,7 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import CountDownTimer from '../../../_components/count-down';
 import { QRCodeSVG } from 'qrcode.react';
-import TelliClipboardButton from '@/components/common/clipboard-button';
+import CopyToClipboardButton from '@/components/common/clipboard-button';
 import { getSharedLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import { requireAuth } from '@/auth/requireAuth';
@@ -70,10 +70,7 @@ export default async function Page(
                 <p data-testid="join-code" className="text-3xl sm:text-5xl text-primary font-bold">
                   {formattedInviteCode}
                 </p>
-                <TelliClipboardButton
-                  text={formattedInviteCode}
-                  className="w-7 h-7 sm:w-9 sm:h-9"
-                />
+                <CopyToClipboardButton text={formattedInviteCode} className="size-7 sm:size-9" />
               </div>
             </div>
             <Button asChild className="mt-10 sm:mt-16">

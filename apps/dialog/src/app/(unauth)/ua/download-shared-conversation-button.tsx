@@ -65,7 +65,7 @@ export default function DownloadSharedConversationButton({
       const fileName =
         encodedFileName !== undefined
           ? decodeURIComponent(encodedFileName)
-          : `Konversation_telli.docx`;
+          : `Konversation_AIS.chat.docx`;
 
       if (!response.ok) {
         throw new Error('Failed to download the document');

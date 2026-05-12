@@ -10,7 +10,7 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
   server: {
     appVersion: z.string().default('0.0.0'),
-    apiName: z.string().default('Telli API'),
+    apiName: z.string().default('AIS.chat API'),
     apiKey: z.string(),
     databaseUrl: z.string(),
     logLevel: z

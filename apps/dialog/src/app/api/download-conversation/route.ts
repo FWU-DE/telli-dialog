@@ -8,7 +8,7 @@ import { handleErrorInRoute } from '@/error/handle-error-in-route';
 
 export const dynamic = 'force-dynamic';
 
-const DEFAULT_GPT_NAME = 'telli';
+const DEFAULT_GPT_NAME = 'AIS.chat';
 
 const downloadConversationParamsSchema = z.object({
   conversationId: z.string(),

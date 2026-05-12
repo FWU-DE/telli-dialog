@@ -51,7 +51,7 @@ export default function ModelRefreshView() {
         <CardHeader>
           <CardTitle>LLM-Modelle aktualisieren</CardTitle>
           <CardDescription>
-            Aktualisiert die verfügbaren LLM-Modelle für alle Bundesländer, anhand der Telli-API.
+            Aktualisiert die verfügbaren LLM-Modelle für alle Bundesländer, anhand der AIS.chat-API.
           </CardDescription>
           <CardAction>
             <Button

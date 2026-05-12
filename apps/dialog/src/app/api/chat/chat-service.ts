@@ -1,10 +1,10 @@
 import {
   generateTextStreamWithBilling,
   type Message as AiCoreMessage,
-  TelliPointsExceededError,
+  TokenPointsExceededError,
 } from '@ais-chat/ai-core';
 import { createTextStream } from '@/utils/streaming';
-import { userHasReachedTelliPointsLimit } from './usage';
+import { userHasReachedTokenPointsLimit } from './usage';
 import { getModelAndApiKeyWithResult, getAuxiliaryModel } from '../utils/utils';
 import {
   dbGetConversationAndMessages,
@@ -16,8 +16,8 @@ import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
 import { dbGetAttachedFileByEntityId, linkFilesToConversation } from '@shared/db/functions/files';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
-import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
-import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
+import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
+import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructChatSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, getChatTitle, limitChatHistory } from './utils';
 import { retrieveChunks } from '../rag/rag-service';
@@ -119,15 +119,15 @@ export async function sendChatMessage({
   }
 
   // Check budget limit after we have the conversation for proper event tracking
-  if (await userHasReachedTelliPointsLimit({ user })) {
+  if (await userHasReachedTokenPointsLimit({ user })) {
     await sendRabbitmqEvent(
-      constructTelliBudgetExceededEvent({
+      constructTokenBudgetExceededEvent({
         anonymous: false,
         user,
         conversation,
       }),
     );
-    return createErrorResult(new TelliPointsExceededError());
+    return createErrorResult(new TokenPointsExceededError());
   }
 
   // Get the user message (last message should be from user)
@@ -287,7 +287,7 @@ export async function sendChatMessage({
 
           // Send event
           await sendRabbitmqEvent(
-            constructTelliNewMessageEvent({
+            constructNewMessageEvent({
               user,
               promptTokens,
               completionTokens,

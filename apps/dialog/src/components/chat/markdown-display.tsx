@@ -8,7 +8,7 @@ import RemarkMathPlugin from 'remark-math';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { cn } from '@/utils/tailwind';
-import TelliClipboardButton from '../common/clipboard-button';
+import CopyToClipboardButton from '../common/clipboard-button';
 
 type MarkdownDisplayProps = {
   children: string;
@@ -228,7 +228,7 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
                 <div className="flex items-center justify-center bg-gray-300 py-2 px-2 text-vidis-hover-purple">
                   <span>{language}</span>
                   <div className="grow" />
-                  <TelliClipboardButton text={sanitizedText} />
+                  <CopyToClipboardButton text={sanitizedText} />
                 </div>
                 <SyntaxHighlighter
                   // @ts-expect-error wrong typing

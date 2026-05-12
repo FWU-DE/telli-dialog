@@ -2,11 +2,11 @@
 
 import { useCallback } from 'react';
 import {
-  useTelliChat,
+  useAisChat,
   type ChatMessage,
   type SendMessageFn,
   type UseChatReturn,
-} from './use-telli-chat';
+} from './use-ais-chat';
 import { sendChatMessageAction } from '@/app/api/chat/actions';
 import { sendCharacterMessageAction } from '@/app/api/character/actions';
 import { sendSharedChatMessageAction } from '@/app/api/shared-chat/actions';
@@ -44,7 +44,7 @@ export function useMainChat(options: {
     [conversationId, characterId, assistantId],
   );
 
-  return useTelliChat({
+  return useAisChat({
     sendMessage,
     ...rest,
   });
@@ -75,7 +75,7 @@ export function useCharacterChat(options: {
     [characterId, inviteCode],
   );
 
-  return useTelliChat({
+  return useAisChat({
     sendMessage,
     ...rest,
   });
@@ -106,7 +106,7 @@ export function useSharedChat(options: {
     [sharedChatId, inviteCode],
   );
 
-  return useTelliChat({
+  return useAisChat({
     sendMessage,
     ...rest,
   });

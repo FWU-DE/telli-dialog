@@ -49,7 +49,7 @@ export async function generateConversationDocxFile({
       new Paragraph({
         children: [
           new TextRun({
-            text: `Generiert von telli unter Nutzung von ${modelDisplayName}`,
+            text: `Generiert von AIS.chat unter Nutzung von ${modelDisplayName}`,
             italics: true,
             size: 18,
             color: '666666',

@@ -57,7 +57,7 @@ export function setup(): TestSetupParams {
     const { inviteCode } = sharedCharacterProxy.shareCharacter({
       characterId: character.id,
       userId: character.userId,
-      telliPointsPercentageLimit: 100,
+      tokenPointsPercentageLimit: 100,
       usageTimeLimitMinutes: 60,
     });
 

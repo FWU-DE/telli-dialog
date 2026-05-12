@@ -15,7 +15,7 @@ import {
 } from '../utils/system-prompt';
 import type { WebSearchResult } from '@shared/db/schema';
 
-function constructTelliSystemPrompt(
+function constructAisChatSystemPrompt(
   chunks: RetrievedChunk[],
   errorUrls: string[],
   webSearchResults: WebSearchResult[],
@@ -167,5 +167,5 @@ export async function constructChatSystemPrompt({
     }
   }
 
-  return constructTelliSystemPrompt(chunks, errorUrls, webSearchResults);
+  return constructAisChatSystemPrompt(chunks, errorUrls, webSearchResults);
 }

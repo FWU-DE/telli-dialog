@@ -14,7 +14,7 @@ type AccessResult =
       hasAccess: true;
     };
 /**
- * Checks if a user has access to the telli product based on their role, training requirements,
+ * Checks if a user has access to the AIS.chat product based on their role, training requirements,
  * and federal state configuration.
  */
 export function checkProductAccess({
@@ -29,7 +29,7 @@ export function checkProductAccess({
       hasAccess: false,
       errorMessage: (
         <p>
-          Tut uns leid, du kannst telli als Schüler oder Schülerin noch nicht außerhalb des
+          Tut uns leid, du kannst AIS.chat als Schüler oder Schülerin noch nicht außerhalb des
           Unterrichts nutzen. Bitte wende dich an deine Lehrkraft, wenn du den KI-Chat gerne
           gemeinsam mit der Klasse verwenden möchtest.
         </p>
@@ -53,7 +53,7 @@ export function checkProductAccess({
       hasAccess: false,
       errorMessage: (
         <div className="flex flex-col gap-2">
-          <p>{`Tut uns leid, du kannst telli noch nicht nutzen, da du die in ${getFederalStateNameById(federalState.id)} dafür vorgeschriebene Schulung noch nicht besucht hast.`}</p>
+          <p>{`Tut uns leid, du kannst AIS.chat noch nicht nutzen, da du die in ${getFederalStateNameById(federalState.id)} dafür vorgeschriebene Schulung noch nicht besucht hast.`}</p>
           {federalState.trainingLink && (
             <p>
               Weitere Informationen, bzw. die Möglichkeit die Schulung jetzt zu absolvieren, findest

@@ -47,7 +47,7 @@ import CustomShareSection from '@/components/custom-chat/custom-chat-share-secti
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
-import { telliPointsPercentageValues, usageTimeValuesInMinutes } from './schema';
+import { tokenPointsPercentageValues, usageTimeValuesInMinutes } from './schema';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
@@ -344,7 +344,7 @@ export function LearningScenarioEdit({
           manuallyStoppedAt={learningScenario.manuallyStoppedAt}
           maxUsageTimeLimit={learningScenario.maxUsageTimeLimit}
           tokenPointsLimit={learningScenario.tokenPointsLimit}
-          pointsPercentageValues={telliPointsPercentageValues}
+          pointsPercentageValues={tokenPointsPercentageValues}
           usageTimeValues={usageTimeValuesInMinutes}
           onShare={async (data) =>
             await shareLearningScenarioAction({

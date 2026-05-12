@@ -28,7 +28,7 @@ import {
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
 import {
-  telliPointsPercentageValues,
+  tokenPointsPercentageValues,
   usageTimeValuesInMinutes,
 } from '../../learning-scenarios/editor/[learningScenarioId]/schema';
 
@@ -92,12 +92,12 @@ export function CharacterView({
         manuallyStoppedAt={character.manuallyStoppedAt}
         maxUsageTimeLimit={character.maxUsageTimeLimit}
         tokenPointsLimit={character.tokenPointsLimit}
-        pointsPercentageValues={telliPointsPercentageValues}
+        pointsPercentageValues={tokenPointsPercentageValues}
         usageTimeValues={usageTimeValuesInMinutes}
         onShare={async (data) => {
           const result = await shareCharacterAction({
             id: character.id,
-            telliPointsPercentageLimit: data.telliPointsPercentageLimit,
+            tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
             usageTimeLimit: data.usageTimeLimit,
           });
           return result;

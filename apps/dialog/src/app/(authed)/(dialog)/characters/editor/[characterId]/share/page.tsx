@@ -6,7 +6,7 @@ import Footer from '@/components/navigation/footer';
 import CountDownTimer from '@/app/(authed)/(dialog)/learning-scenarios/_components/count-down';
 import { QRCodeSVG } from 'qrcode.react';
 import { getTranslations } from 'next-intl/server';
-import TelliClipboardButton from '@/components/common/clipboard-button';
+import CopyToClipboardButton from '@/components/common/clipboard-button';
 import { requireAuth } from '@/auth/requireAuth';
 import { getSharedCharacter } from '@shared/characters/character-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
@@ -66,10 +66,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
                 <p data-testid="join-code" className="text-3xl sm:text-5xl text-primary font-bold">
                   {formattedInviteCode}
                 </p>
-                <TelliClipboardButton
-                  text={formattedInviteCode}
-                  className="w-7 h-7 sm:w-9 sm:h-9"
-                />
+                <CopyToClipboardButton text={formattedInviteCode} className="size-7 sm:size-9" />
               </div>
             </div>
             <Button asChild className="mt-10 sm:mt-16">

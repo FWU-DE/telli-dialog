@@ -29,7 +29,7 @@ import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
 import {
-  telliPointsPercentageValues,
+  tokenPointsPercentageValues,
   usageTimeValuesInMinutes,
 } from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
@@ -333,12 +333,12 @@ export function CharacterEdit({
           manuallyStoppedAt={character.manuallyStoppedAt}
           maxUsageTimeLimit={character.maxUsageTimeLimit}
           tokenPointsLimit={character.tokenPointsLimit}
-          pointsPercentageValues={telliPointsPercentageValues}
+          pointsPercentageValues={tokenPointsPercentageValues}
           usageTimeValues={usageTimeValuesInMinutes}
           onShare={async (data) => {
             const result = await shareCharacterAction({
               id: character.id,
-              telliPointsPercentageLimit: data.telliPointsPercentageLimit,
+              tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
               usageTimeLimit: data.usageTimeLimit,
             });
             return result;

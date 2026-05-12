@@ -37,7 +37,7 @@ export default function CookieModal() {
   return (
     <dialog ref={dialogRef}>
       <div className="max-w-3xl p-10">
-        <h1 className="text-xl font-medium">telli verwendet Cookies</h1>
+        <h1 className="text-xl font-medium">AIS.chat verwendet Cookies</h1>
         <p className="mt-8">
           Diese Anwendung verwendet Cookies, wie in den{' '}
           <Link href={privacyPolicyLink} prefetch={false} target="_blank" className="underline">

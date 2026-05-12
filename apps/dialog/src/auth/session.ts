@@ -1,7 +1,7 @@
 import { logError } from '@shared/logging';
 import { valkey } from '@shared/valkey';
 
-const SESSION_PREFIX = 'telli:dialog:session:';
+const SESSION_PREFIX = 'ais-chat:app:session:';
 const TIME_TO_LIVE_SECONDS = 60 * 60 * 24; // remove blocklist items automatically after 24 hours
 
 /** List of outdated sessions because user logged out elsewhere. */

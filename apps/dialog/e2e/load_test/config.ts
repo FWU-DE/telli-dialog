@@ -1,4 +1,4 @@
-export const BASE_URL = __ENV.LOADTEST_BASE_URL || 'https://chat-staging.telli.schule';
+export const BASE_URL = __ENV.LOADTEST_BASE_URL || 'https://app-staging.ais-chat.schule';
 //export const BASE_URL = 'http://localhost:3000';
 
 export const WAIT_TIMES_IN_MS = {

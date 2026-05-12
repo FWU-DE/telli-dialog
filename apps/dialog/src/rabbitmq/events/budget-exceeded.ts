@@ -1,7 +1,7 @@
 import { UserAndContext } from '@/auth/types';
 import { ConversationModel } from '@shared/db/types';
 import { CharacterSelectModel, LearningScenarioSelectModel } from '@shared/db/schema';
-import { TelliMonthlyTokenBudgetExceededEventType } from '../schema';
+import { MonthlyTokenBudgetExceededEventType } from '../schema';
 import { hashWithoutSalt } from '@/utils/crypto';
 
 type CommonProps = {
@@ -20,9 +20,9 @@ type FunctionProps =
       character: CharacterSelectModel;
     } & CommonProps);
 
-export function constructTelliBudgetExceededEvent(
+export function constructTokenBudgetExceededEvent(
   props: FunctionProps,
-): TelliMonthlyTokenBudgetExceededEventType {
+): MonthlyTokenBudgetExceededEventType {
   return {
     event_type: 'telli_monthly_token_budget_exceeded' as const,
     pseudonym_id: hashWithoutSalt(props.user.id),
