@@ -3,8 +3,10 @@
 import type { UserAndContext } from '@/auth/types';
 import ProfileMenu, { ThreeDotsProfileMenu } from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
+import { useCustomPathname } from '@/hooks/use-custom-pathname';
 import {
   createContext,
+  useEffect,
   ReactNode,
   useCallback,
   useContext,
@@ -118,12 +120,21 @@ export function DialogWrapper({
   userAndContext?: UserAndContext;
   infoBanners?: InfoBanner[];
 }) {
+  const pathname = useCustomPathname();
+  const mainScrollContainerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    mainScrollContainerRef.current?.scrollTo({ top: 0 });
+  }, [pathname]);
+
   return (
     <DialogHeaderProvider>
       <div className="relative flex flex-col h-dvh w-dvw overflow-hidden bg-background-2">
         {infoBanners !== undefined && <ActiveInfoBanners infoBanners={infoBanners} />}
         <DialogHeader userAndContext={userAndContext} />
-        <main className="min-h-0 w-full mx-auto flex-1 overflow-auto">{children}</main>
+        <main ref={mainScrollContainerRef} className="min-h-0 w-full mx-auto flex-1 overflow-auto">
+          {children}
+        </main>
       </div>
     </DialogHeaderProvider>
   );
