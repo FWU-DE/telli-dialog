@@ -3,8 +3,7 @@
   <defs>
     <style>
       .cls-1 {
-        /* #46217e is a fallback for environments where --primary is not defined, e.g. in the IDE */
-        fill: var(--primary, #46217e);
+        fill: currentColor;
       }
     </style>
   </defs>
