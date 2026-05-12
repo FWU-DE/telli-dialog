@@ -26,7 +26,7 @@ export default async function ImageGenerationPage() {
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider>
-        <DefaultPageLayout header={{ headerType: 'image' }}>
+        <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
           <div className="flex flex-col h-full">
             <div className="flex-1 overflow-auto">
               <ImageGenerationChat />
