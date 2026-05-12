@@ -2,7 +2,7 @@
 
 This document provides an overview of the top-level directories in the project with brief explanations of their purpose and contents.
 
-## [`/apps/app`](/apps/app)
+## [`/apps/dialog`](/apps/dialog)
 
 The main user-facing web application. A Next.js app with the app router used by students and teachers.
 

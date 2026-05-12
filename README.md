@@ -2,7 +2,7 @@
 
 ## Self-Hosted / Quick Start
 
-This guide helps you run AIS-chat using pre-built Docker images with minimal configuration.
+This guide helps you run AIS.chat using pre-built Docker images with minimal configuration.
 
 > [!NOTE]
 > The Docker Compose setup and credentials described in this section are intended **only for local exploration and testing**.

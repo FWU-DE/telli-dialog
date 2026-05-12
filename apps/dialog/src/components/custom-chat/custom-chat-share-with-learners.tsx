@@ -120,7 +120,7 @@ export function CustomChatShareWithLearners({
                   }
                   disabled={sharedChatActive}
                 >
-                  <SelectTrigger aria-label={t('token-points')} data-testid="telli-points-select">
+                  <SelectTrigger aria-label={t('token-points')} data-testid="token-points-select">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
