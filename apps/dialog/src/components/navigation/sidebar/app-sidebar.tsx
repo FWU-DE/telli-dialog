@@ -17,7 +17,7 @@ import {
   SidebarMenu,
   SidebarSeparator,
   useSidebar,
-} from '@telli/ui/components/Sidebar';
+} from '@ais-chat/ui/components/Sidebar';
 import { AppMenuItem } from './app-menu-item';
 import LogoWithName from '@/assets/logo-with-name.svg';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';

@@ -11,8 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@telli/ui/components/Dialog';
-import { Button } from '@telli/ui/components/Button';
+} from '@ais-chat/ui/components/Dialog';
+import { Button } from '@ais-chat/ui/components/Button';
 
 type InfoDialogProps = {
   trigger: React.ReactElement;

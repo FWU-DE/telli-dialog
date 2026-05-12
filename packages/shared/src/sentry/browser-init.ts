@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 import { getPublicConfig } from './public-config';
-import { scrubSentryEvent } from '@telli/shared-core/sentry/scrub';
+import { scrubSentryEvent } from '@ais-chat/shared-core/sentry/scrub';
 
 /**
  * Initializes Sentry on the browser.

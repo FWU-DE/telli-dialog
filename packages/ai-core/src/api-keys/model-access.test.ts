@@ -3,11 +3,11 @@ import { hasAccessToModel } from './model-access';
 import type { AiModel } from '../images/types';
 
 // Mock the api-database functions
-vi.mock('@telli/api-database', () => ({
+vi.mock('@ais-chat/api-database', () => ({
   dbHasApiKeyAccessToModel: vi.fn(),
 }));
 
-import { dbHasApiKeyAccessToModel } from '@telli/api-database';
+import { dbHasApiKeyAccessToModel } from '@ais-chat/api-database';
 
 const mockDbHasApiKeyAccessToModel = vi.mocked(dbHasApiKeyAccessToModel);
 

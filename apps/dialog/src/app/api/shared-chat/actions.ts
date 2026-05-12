@@ -2,7 +2,7 @@
 import { requireValidInviteCode } from '@/auth/requireValidInviteCode';
 import { sendSharedChatMessage } from './shared-chat-service';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
-import { SharedChatExpiredError } from '@telli/ai-core/errors';
+import { SharedChatExpiredError } from '@ais-chat/ai-core/errors';
 
 export type { ChatMessage, SendMessageResult } from '@/types/chat';
 

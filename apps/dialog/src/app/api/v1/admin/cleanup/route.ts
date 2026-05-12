@@ -1,9 +1,9 @@
 import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 import { NextRequest, NextResponse } from 'next/server';
 import { logError, logInfo } from '@shared/logging';
-import { cleanupCharacters } from '@shared/characters/character-service';
+import { cleanupCharacters } from '@shared/characters/character-admin-service';
 import { cleanupLearningScenarios } from '@shared/learning-scenarios/learning-scenario-admin-service';
-import { cleanupAssistants } from '@shared/assistants/assistant-service';
+import { cleanupAssistants } from '@shared/assistants/assistant-admin-service';
 import { cleanupWebChunks } from '@/app/api/rag/cleanupWebChunks';
 
 export async function DELETE(req: NextRequest) {

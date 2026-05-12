@@ -74,8 +74,8 @@ export const conversationTable = pgTable(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
-    characterId: uuid('character_id').references(() => characterTable.id),
-    assistantId: uuid('assistant_id').references(() => assistantTable.id),
+    characterId: uuid('character_id').references(() => characterTable.id, { onDelete: 'cascade' }),
+    assistantId: uuid('assistant_id').references(() => assistantTable.id, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
     type: conversationTypeEnum('type').notNull().default('chat'),
@@ -136,7 +136,7 @@ export const conversationMessageTable = pgTable(
     id: uuid('id').defaultRandom().primaryKey(),
     content: text('content').notNull(),
     conversationId: uuid('conversation_id')
-      .references(() => conversationTable.id)
+      .references(() => conversationTable.id, { onDelete: 'cascade' })
       .notNull(),
     modelName: text('model_name').notNull(),
     userId: uuid('user_id')

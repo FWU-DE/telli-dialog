@@ -1,4 +1,4 @@
-import type { SharedChatExpiredError, TelliPointsExceededError } from '@telli/ai-core/errors';
+import type { SharedChatExpiredError, TelliPointsExceededError } from '@ais-chat/ai-core/errors';
 import type { WebSearchResult } from '@shared/db/schema';
 
 /**

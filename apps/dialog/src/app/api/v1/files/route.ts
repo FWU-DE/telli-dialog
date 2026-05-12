@@ -1,6 +1,6 @@
 import { getUser } from '@/auth/utils';
 import { getFileExtension } from '@/utils/files/generic';
-import { cnanoid } from '@telli/shared/random/randomService';
+import { cnanoid } from '@ais-chat/shared/random/randomService';
 import { NextRequest, NextResponse } from 'next/server';
 import { extractFile } from '../../file-operations/extract-file';
 import { chunkAndEmbed } from '../../rag/rag-service';

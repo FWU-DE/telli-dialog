@@ -2,7 +2,7 @@ import { logError } from '@shared/logging';
 import { ServerActionResult } from './server-action-result';
 import { BusinessError } from '@shared/error/business-error';
 import { UnexpectedError } from '@shared/error/unexpected-error';
-import { AiGenerationError } from '@telli/ai-core/errors';
+import { AiGenerationError } from '@ais-chat/ai-core/errors';
 
 // Helper function to serialize error objects for client transmission
 function serializeError(error: BusinessError) {

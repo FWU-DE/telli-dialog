@@ -5,7 +5,7 @@ import { CSVLink } from 'react-csv';
 import { toast } from 'sonner';
 import { Input } from '@ui/components/Input';
 import { Textarea } from '@ui/components/Textarea';
-import { Voucher, CreateVoucherParams } from '@telli/shared/vouchers/voucher';
+import { Voucher, CreateVoucherParams } from '@ais-chat/shared/vouchers/voucher';
 import { Button } from '@ui/components/Button';
 import VoucherList from '../VoucherList';
 import { BusinessError } from '@shared/error';

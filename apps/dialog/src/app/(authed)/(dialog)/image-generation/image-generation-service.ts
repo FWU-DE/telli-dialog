@@ -9,7 +9,7 @@ import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { dbInsertChatContent, dbGetOrCreateConversation } from '@shared/db/functions/chat';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { logError } from '@shared/logging';
-import { generateImageWithBilling } from '@telli/ai-core';
+import { generateImageWithBilling } from '@ais-chat/ai-core';
 import { LlmModelSelectModel } from '@shared/db/schema';
 import { ImageStyle } from '@shared/utils/chat';
 import { generateUUID } from '@shared/utils/uuid';

@@ -51,7 +51,7 @@ Follow the instructions below when generating or modifying code.
 - Use client components only when needed (state, events, browser APIs).
 - Keep components small and reusable.
 - Prefer composition over complex props.
-- Prefer shadcn components from @telli/ui before creating custom UI components.
+- Prefer shadcn components from @ais-chat/ui before creating custom UI components.
 - Follow the patterns used by shadcn components.
 - Take accessibility into account when designing UI components.
 - Ensure that components are responsive.

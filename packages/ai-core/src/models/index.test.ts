@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getImageModelById } from './index';
 
 // Mock the api-database functions
-vi.mock('@telli/api-database', () => ({
+vi.mock('@ais-chat/api-database', () => ({
   dbGetModelById: vi.fn(),
 }));
 
-import { dbGetModelById } from '@telli/api-database';
+import { dbGetModelById } from '@ais-chat/api-database';
 
 const mockDbGetModelById = vi.mocked(dbGetModelById);
 

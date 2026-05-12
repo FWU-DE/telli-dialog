@@ -119,30 +119,30 @@ jobs:
             playwright-${{ runner.os }}-
 
       - name: Install Playwright browsers
-        run: pnpm --filter telli-dialog exec playwright install chromium firefox
+        run: pnpm --filter ais-chat-app exec playwright install chromium firefox
 
-      - name: Start telli-api
+      - name: Start ais-chat-api
         run: |
-          pnpm --filter telli-api dev > /tmp/telli-api.log 2>&1 &
+          pnpm --filter ais-chat-api dev > /tmp/ais-chat-api.log 2>&1 &
           timeout=60
           elapsed=0
           until wget -qO- http://localhost:3002/health > /dev/null 2>&1; do
             if [ $elapsed -ge $timeout ]; then
-              echo "telli-api did not become ready within ${timeout}s"
+              echo "ais-chat-api did not become ready within ${timeout}s"
               exit 1
             fi
-            echo "$(date) - waiting for telli-api to be ready"
+            echo "$(date) - waiting for ais-chat-api to be ready"
             sleep 1
             elapsed=$((elapsed + 1))
           done
         env:
           PORT: 3002
 
-      - name: Seed telli-api database
+      - name: Seed ais-chat-api database
         # db:seed will print the generated API KEY on the console
-        # The output is captured in GITHUB_ENV for seeding telli-dialog
+        # The output is captured in GITHUB_ENV for seeding ais-chat-app
         run: |
-          pnpm --filter @telli/api-database db:seed | tee /tmp/out.txt
+          pnpm --filter @ais-chat/api-database db:seed | tee /tmp/out.txt
           grep -E '^DE_[A-Z0-9_]*_API_KEY=' /tmp/out.txt >> "$GITHUB_ENV"
         env:
           LLM_IONOS_API_KEY: ${{ secrets.LLM_IONOS_API_KEY }}
@@ -153,7 +153,7 @@ jobs:
           LLM_GPT5NANO_BASE_URL: ${{ secrets.LLM_GPT5NANO_BASE_URL }}
 
       - name: Run migrations and seed database (if applicable)
-        run: pnpm --filter @telli/shared db:migrate && pnpm --filter @telli/shared db:seed
+        run: pnpm --filter @ais-chat/shared db:migrate && pnpm --filter @ais-chat/shared db:seed
 
       - name: Cache turbo build cache
         uses: actions/cache@v5
@@ -166,29 +166,29 @@ jobs:
       # Build and start the app the same way as in the prod container (Next.js standalone)
       - name: Start application
         run: |
-          pnpm --filter telli-dialog build:envless
+          pnpm --filter ais-chat-app build:envless
           cd apps/dialog
           mkdir -p .next/standalone/apps/dialog/.next
           cp -a .next/static .next/standalone/apps/dialog/.next/
           cp -a public .next/standalone/apps/dialog/
           cd .next/standalone
-          node ./apps/dialog/server.js > /tmp/telli-dialog.log 2>&1 &
+          node ./apps/dialog/server.js > /tmp/ais-chat-app.log 2>&1 &
         env:
           NODE_ENV: test
           LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
 
-      - name: Run E2E tests (dialog)
-        run: pnpm --filter telli-dialog e2e
+      - name: Run E2E tests (app)
+        run: pnpm --filter ais-chat-app e2e
         env:
           CI: true
 
       - name: Run E2E tests (api)
-        run: pnpm --filter telli-api e2e
+        run: pnpm --filter ais-chat-api e2e
         env:
           CI: true
           DE_TEST_API_KEY: ${{ env.DE_TEST_API_KEY }}
 
-      - name: Upload Playwright reports (dialog)
+      - name: Upload Playwright reports (app)
         uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -204,17 +204,17 @@ jobs:
           path: apps/api/playwright-report
           retention-days: 30
 
-      - name: Print telli-api logs
+      - name: Print ais-chat-api logs
         if: always()
         run: |
-          echo "=== telli-api logs ==="
-          cat /tmp/telli-api.log || true
+          echo "=== ais-chat-api logs ==="
+          cat /tmp/ais-chat-api.log || true
 
-      - name: Print telli-dialog logs
+      - name: Print ais-chat-app logs
         if: always()
         run: |
-          echo "=== telli-dialog logs ==="
-          cat /tmp/telli-dialog.log || true
+          echo "=== ais-chat-app logs ==="
+          cat /tmp/ais-chat-app.log || true
 
       - name: Print crawl4ai logs
         if: always()

@@ -35,7 +35,7 @@ export default async function Page(
     );
 
   return (
-    <DefaultPageLayout header={{ headerType: 'form' }}>
+    <DefaultPageLayout layoutConfig={{ layout: 'form' }}>
       <LearningScenarioEdit
         learningScenario={learningScenario}
         relatedFiles={relatedFiles}

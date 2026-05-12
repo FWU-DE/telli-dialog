@@ -1,4 +1,4 @@
-import { ApiKeyModel, getUsageInCentByApiKeyId, ProjectModel } from '@telli/api-database';
+import { ApiKeyModel, getUsageInCentByApiKeyId, ProjectModel } from '@ais-chat/api-database';
 import { logger } from '@/logger';
 
 type CostReportRow = {

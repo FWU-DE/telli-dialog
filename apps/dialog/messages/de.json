@@ -460,6 +460,7 @@
     "share-with-learners": {
       "title": "Mit Lernenden teilen",
       "description": "<b>Wie viel des monatlichen Tokenvolumens</b> soll durch diesen Chat maximal verbraucht und <b>wie lange</b> darf er aktiv benutzt werden?",
+      "token-points": "Tokenvolumen",
       "max-usage": "Maximale Nutzungszeit",
       "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",

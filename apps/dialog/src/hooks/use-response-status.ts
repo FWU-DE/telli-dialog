@@ -1,5 +1,5 @@
 import { logError } from '@shared/logging';
-import { SharedChatExpiredError, TelliPointsExceededError } from '@telli/ai-core/errors';
+import { SharedChatExpiredError, TelliPointsExceededError } from '@ais-chat/ai-core/errors';
 import { useTranslations } from 'next-intl';
 import { useState, useCallback } from 'react';
 

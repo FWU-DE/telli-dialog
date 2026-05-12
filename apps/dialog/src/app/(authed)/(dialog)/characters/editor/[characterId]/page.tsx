@@ -34,7 +34,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   }
 
   return (
-    <DefaultPageLayout header={{ headerType: 'form' }}>
+    <DefaultPageLayout layoutConfig={{ layout: 'form' }}>
       <CharacterEdit
         character={character}
         relatedFiles={relatedFiles}

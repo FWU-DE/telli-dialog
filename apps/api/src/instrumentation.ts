@@ -11,7 +11,7 @@ import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { SentrySampler, SentrySpanProcessor } from '@sentry/opentelemetry';
-import { scrubSentryEvent } from '@telli/shared-core/sentry/scrub';
+import { scrubSentryEvent } from '@ais-chat/shared-core/sentry/scrub';
 import { env } from '@/env';
 import { logger } from '@/logger';
 

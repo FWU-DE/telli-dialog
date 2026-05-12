@@ -1,35 +1,30 @@
 import { ReactNode } from 'react';
-import { DefaultPageLayoutClient } from '@/components/layout/default-page-layout-client';
+import { PageLayoutSelector } from '@/components/layout/page-layout-selector';
 import type { UserAndContext } from '@/auth/types';
 
-export type DefaultPageLayoutHeaderConfig =
+export type DefaultPageLayoutConfig =
   | {
-      headerType: 'chat';
-      chatId: string;
-      downloadConversationEnabled: boolean;
-      userAndContext: UserAndContext;
-      title?: string;
+      layout: 'chat';
+      headerConfig: {
+        chatId: string;
+        downloadConversationEnabled: boolean;
+        userAndContext: UserAndContext;
+        title?: string;
+      };
     }
   | {
-      headerType: 'image';
+      layout: 'image';
     }
   | {
-      headerType: 'form';
-    }
-  | {
-      headerType?: undefined;
+      layout: 'form';
     };
 
 export function DefaultPageLayout({
   children,
-  header,
+  layoutConfig,
 }: {
   children: ReactNode;
-  header?: DefaultPageLayoutHeaderConfig;
+  layoutConfig?: DefaultPageLayoutConfig;
 }) {
-  return (
-    <DefaultPageLayoutClient header={header}>
-      <div className="data-page-layout h-full max-w-5xl mx-auto px-6 pb-8">{children}</div>
-    </DefaultPageLayoutClient>
-  );
+  return <PageLayoutSelector layoutType={layoutConfig}>{children}</PageLayoutSelector>;
 }

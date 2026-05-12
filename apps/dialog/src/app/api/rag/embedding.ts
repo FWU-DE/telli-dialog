@@ -1,4 +1,4 @@
-import { generateEmbeddingsWithBilling } from '@telli/ai-core';
+import { generateEmbeddingsWithBilling } from '@ais-chat/ai-core';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { dbGetModelByName } from '@shared/db/functions/llm-model';
 import { EMBEDDING_BATCH_SIZE, EMBEDDING_MAX_CONCURRENT_REQUESTS } from '@/const';

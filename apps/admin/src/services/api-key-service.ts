@@ -3,7 +3,7 @@ import {
   dbGetApiKey,
   dbCreateJustTheApiKey,
   dbUpdateApiKey,
-} from '@telli/api-database';
+} from '@ais-chat/api-database';
 import { CreateApiKey, UpdateApiKey } from '../types/api-key';
 import { logInfo } from '@shared/logging';
 

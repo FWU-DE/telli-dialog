@@ -5,8 +5,8 @@ import { fetchLlmModels } from '../../knotenpunkt';
 import { dbGetFederalStateWithDecryptedApiKey } from '../functions/federal-state';
 import { dbUpsertLlmModelsByModelsAndFederalStateId } from '../functions/llm-model';
 import { env } from '../../env';
-import { env as aiEnv } from '@telli/ai-core/env';
-import { lookupApiKeys } from '@telli/ai-core/api-keys/lookup';
+import { env as aiEnv } from '@ais-chat/ai-core/env';
+import { lookupApiKeys } from '@ais-chat/ai-core/api-keys/lookup';
 
 export async function insertFederalStates({ skip = true }: { skip: boolean }) {
   if (skip) return;

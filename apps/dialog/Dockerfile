@@ -16,7 +16,7 @@ COPY . .
 # setup pnpm and pnpm install in order to install turbo in the correct version
 RUN corepack enable && corepack prepare
 RUN pnpm install --frozen-lockfile --dev
-RUN pnpm turbo prune telli-dialog --docker
+RUN pnpm turbo prune ais-chat-app --docker
 
 # Build the project
 FROM base AS builder

@@ -1,4 +1,4 @@
-import { dbGetUserById } from '@telli/shared/db/functions/user';
+import { dbGetUserById } from '@ais-chat/shared/db/functions/user';
 import { env } from '@/env';
 import { customFetch } from 'next-auth';
 import type { Account, NextAuthConfig, Profile } from 'next-auth';

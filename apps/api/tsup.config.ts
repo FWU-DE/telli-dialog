@@ -11,12 +11,12 @@ export default defineConfig({
   // externalize all imports at runtime so OTel can patch them.
   external: [/.*/],
   // Important:
-  // We bundle all workspace packages (e.g. @telli/*) into the API bundle.
+  // We bundle all workspace packages (e.g. @ais-chat/*) into the API bundle.
   // Any third‑party modules imported from those packages must therefore be
   // resolvable from the API's runtime node_modules (not from packages/*/node_modules),
   // otherwise Node will fail at runtime.
   noExternal: [
-    /@telli\//,
+    /@ais-chat\//,
     /^@\//,
     /^\./,
     // injected by Sentry plugin; must be bundled or Node will try to require it at runtime

@@ -1,6 +1,6 @@
 'use client';
 
-import { useSidebar } from '@telli/ui/components/Sidebar';
+import { useSidebar } from '@ais-chat/ui/components/Sidebar';
 import { useRouter } from 'next/navigation';
 import { PlusSquareIcon, SidebarSimpleIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';

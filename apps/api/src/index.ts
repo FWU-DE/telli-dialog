@@ -6,7 +6,7 @@ import * as Sentry from '@sentry/node';
 import buildApp from './app';
 import { env } from './env';
 import path from 'node:path';
-import { db, migrateWithLock } from '@telli/api-database';
+import { db, migrateWithLock } from '@ais-chat/api-database';
 import { logger } from './logger';
 
 async function runDatabaseMigration() {

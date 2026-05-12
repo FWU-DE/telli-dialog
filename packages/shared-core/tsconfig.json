@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@telli/typescript-config/base.json",
+  "extends": "@ais-chat/typescript-config/base.json",
   "include": ["."],
   "compilerOptions": {
     "esModuleInterop": true,

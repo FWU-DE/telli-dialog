@@ -3,7 +3,7 @@ import {
   type Message as AiCoreMessage,
   TelliPointsExceededError,
   SharedChatExpiredError,
-} from '@telli/ai-core';
+} from '@ais-chat/ai-core';
 import { createTextStream } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';

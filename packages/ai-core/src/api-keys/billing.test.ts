@@ -3,7 +3,7 @@ import { billImageGenerationUsageToApiKey, isApiKeyOverQuota } from './billing';
 import type { AiModel } from '../images/types';
 
 // Mock the api-database functions
-vi.mock('@telli/api-database', () => ({
+vi.mock('@ais-chat/api-database', () => ({
   dbCreateImageGenerationUsage: vi.fn(),
   dbGetApiKeyLimit: vi.fn(),
   dbGetCompletionUsageCostsSinceStartOfCurrentMonth: vi.fn(),
@@ -15,7 +15,7 @@ import {
   dbGetApiKeyLimit,
   dbGetCompletionUsageCostsSinceStartOfCurrentMonth,
   dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth,
-} from '@telli/api-database';
+} from '@ais-chat/api-database';
 
 const mockDbCreateImageGenerationUsage = vi.mocked(dbCreateImageGenerationUsage);
 const mockDbGetApiKeyLimit = vi.mocked(dbGetApiKeyLimit);
