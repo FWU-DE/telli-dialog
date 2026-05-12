@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "build:docker:dialog": "docker build -t ais-chat-app -f ./apps/dialog/Dockerfile .",
+    "build:docker:chat-bot": "docker build -t ais-chat-app -f ./apps/chat-bot/Dockerfile .",
     "build:docker:admin": "docker build -t ais-chat-admin -f ./apps/admin/Dockerfile .",
     "build:docker:api": "docker build -t ais-chat-api -f ./apps/api/Dockerfile .",
     "dev": "turbo run dev",
-    "dev:dialog": "pnpm --filter ais-chat-app dev",
+    "dev:chat-bot": "pnpm --filter ais-chat-app dev",
     "dev:admin": "pnpm --filter ais-chat-admin dev",
     "dev:api": "pnpm --filter ais-chat-api dev",
     "format": "prettier --write .",

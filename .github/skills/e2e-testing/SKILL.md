@@ -11,18 +11,18 @@ You are an expert at writing Playwright end-to-end tests for this monorepo. Foll
 
 This is a pnpm monorepo with three apps:
 
-| App               | Path           | E2E location                                          | Playwright config                                      |
-| ----------------- | -------------- | ----------------------------------------------------- | ------------------------------------------------------ |
-| dialog (main app) | `apps/dialog/` | `apps/dialog/e2e/`                                    | `apps/dialog/playwright.config.ts`                     |
-| api               | `apps/api/`    | `apps/api/e2e/`                                       | `apps/api/playwright.config.ts`                        |
-| admin             | `apps/admin/`  | _(no e2e tests yet — create under `apps/admin/e2e/`)_ | _(create `apps/admin/playwright.config.ts` if needed)_ |
+| App                 | Path             | E2E location                                          | Playwright config                                      |
+| ------------------- | ---------------- | ----------------------------------------------------- | ------------------------------------------------------ |
+| chat-bot (main app) | `apps/chat-bot/` | `apps/chat-bot/e2e/`                                  | `apps/chat-bot/playwright.config.ts`                   |
+| api                 | `apps/api/`      | `apps/api/e2e/`                                       | `apps/api/playwright.config.ts`                        |
+| admin               | `apps/admin/`    | _(no e2e tests yet — create under `apps/admin/e2e/`)_ | _(create `apps/admin/playwright.config.ts` if needed)_ |
 
-E2E tests for the **dialog** and **api** apps are already established. For **admin**, if asked to create e2e tests, mirror the existing structure and patterns.
+E2E tests for the **chat-bot** and **api** apps are already established. For **admin**, if asked to create e2e tests, mirror the existing structure and patterns.
 
-## Dialog E2E Folder Layout
+## Chat-Bot E2E Folder Layout
 
 ```
-apps/dialog/e2e/
+apps/chat-bot/e2e/
 ├── global-setup.ts      # Runs once before all tests — logs in each user and saves auth state
 ├── fixtures/            # Test fixture files (e.g. images for upload)
 ├── utils/               # Shared test helpers (login, chat, character, etc.)
@@ -207,7 +207,7 @@ const characterName = 'My Character ' + nanoid(8);
 
 ### Existing utility functions
 
-**Always reuse existing helpers** instead of reimplementing their logic. Check the utility files in `apps/dialog/e2e/utils/` and `apps/api/e2e/utils/` for available helpers — each function is documented with JSDoc comments.
+**Always reuse existing helpers** instead of reimplementing their logic. Check the utility files in `apps/chat-bot/e2e/utils/` and `apps/api/e2e/utils/` for available helpers — each function is documented with JSDoc comments.
 
 Key utility files:
 
@@ -303,11 +303,11 @@ API tests can import from `@shared/db` and `@shared/db/schema` to read/write tes
 
 ### Configuration
 
-See `apps/dialog/playwright.config.ts` for the dialog app's Playwright configuration.
+See `apps/chat-bot/playwright.config.ts` for the chat-bot app's Playwright configuration.
 
 ### Running tests
 
-From `apps/dialog/`:
+From `apps/chat-bot/`:
 
 ```sh
 pnpm e2e          # headless
@@ -320,9 +320,9 @@ pnpm e2e:api      # API tests only
 
 The admin app has no e2e setup yet. If asked to create e2e tests:
 
-1. Create the folder structure mirroring `apps/dialog/e2e/` or `apps/api/e2e/` (i.e. `e2e/tests/`, `e2e/utils/`).
+1. Create the folder structure mirroring `apps/chat-bot/e2e/` or `apps/api/e2e/` (i.e. `e2e/tests/`, `e2e/utils/`).
 2. Create a `playwright.config.ts` adapted for the admin app's port and test directory.
-3. Reuse patterns and conventions from dialog and api tests.
+3. Reuse patterns and conventions from chat-bot and api tests.
 4. Add e2e scripts to the app's `package.json` (e.g. `"e2e": "playwright test"`).
 5. Document what you created.
 

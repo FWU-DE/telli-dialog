@@ -167,12 +167,12 @@ jobs:
       - name: Start application
         run: |
           pnpm --filter ais-chat-app build:envless
-          cd apps/dialog
-          mkdir -p .next/standalone/apps/dialog/.next
-          cp -a .next/static .next/standalone/apps/dialog/.next/
-          cp -a public .next/standalone/apps/dialog/
+          cd apps/chat-bot
+          mkdir -p .next/standalone/apps/chat-bot/.next
+          cp -a .next/static .next/standalone/apps/chat-bot/.next/
+          cp -a public .next/standalone/apps/chat-bot/
           cd .next/standalone
-          node ./apps/dialog/server.js > /tmp/ais-chat-app.log 2>&1 &
+          node ./apps/chat-bot/server.js > /tmp/ais-chat-app.log 2>&1 &
         env:
           NODE_ENV: test
           LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
@@ -193,7 +193,7 @@ jobs:
         if: always()
         with:
           name: playwright-report
-          path: apps/dialog/playwright-report
+          path: apps/chat-bot/playwright-report
           retention-days: 30
 
       - name: Upload Playwright reports (api)

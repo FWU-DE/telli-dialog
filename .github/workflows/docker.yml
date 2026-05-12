@@ -34,7 +34,7 @@ jobs:
             image_ref: ghcr.io/fwu-de/ais-chat-api
             sentry_project: ${{ vars.SENTRY_PROJECT_API }}
           - image_name: ais-chat-app
-            dockerfile: apps/dialog/Dockerfile
+            dockerfile: apps/chat-bot/Dockerfile
             image_ref: ghcr.io/fwu-de/ais-chat-app
             sentry_project: ${{ vars.SENTRY_PROJECT_DIALOG }}
           - image_name: ais-chat-admin

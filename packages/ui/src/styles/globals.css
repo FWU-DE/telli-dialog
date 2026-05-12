@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @source "../";
 @source "../../../../apps/admin/src";
-@source "../../../../apps/dialog/src";
+@source "../../../../apps/chat-bot/src";
 @plugin "tailwindcss-animate";
 @custom-variant dark (&:where(.dark, .dark *));
 
