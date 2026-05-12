@@ -17,6 +17,7 @@ import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
+import { CustomChatWebSearchReadonly } from '@/components/custom-chat/custom-chat-web-search-readonly';
 
 export function AssistantView({
   assistant,
@@ -107,6 +108,8 @@ export function AssistantView({
         initialLinks={assistant.attachedLinks.map((l) => ({ link: l }))}
         onDownloadFile={handleDownloadFile}
       />
+
+      {assistant.isWebSearchEnabled && <CustomChatWebSearchReadonly />}
     </CustomChatLayoutContainer>
   );
 }
