@@ -78,7 +78,7 @@ test.describe('create, share, chat, delete', () => {
 
     // send first message
     await sendMessage(page, 'Wer bist du?');
-    await page.getByTitle('Kopieren').click();
+    await page.getByTestId('copy-to-clipboard').click();
 
     await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');
 

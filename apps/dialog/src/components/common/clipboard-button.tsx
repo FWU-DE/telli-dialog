@@ -44,6 +44,7 @@ export default function CopyToClipboardButton({ text, className }: CopyToClipboa
       variant="ghost"
       size="icon-round"
       aria-label={t('copy-clipboard')}
+      data-testid="copy-to-clipboard"
       onClick={handleCopy}
       className="text-primary"
     >
