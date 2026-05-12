@@ -9,7 +9,11 @@ import { Button } from '@ui/components/Button';
 import AvatarCropModal from './custom-chat-avatar-crop-modal';
 import Image from 'next/image';
 import { AVATAR_MAX_SIZE } from '@/const';
-import { AvatarUploadResult } from '../crop-uploaded-image/crop-image-and-upload-button';
+
+type AvatarUploadResult = {
+  picturePath: string;
+  signedUrl?: string;
+};
 
 export function CustomChatImageUpload({
   avatarPictureUrl,
