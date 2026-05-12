@@ -56,13 +56,13 @@ jobs:
       DATABASE_URL: postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db
       RABBITMQ_URI: amqp://user:password@127.0.0.1:5672
       VALKEY_URL: redis://127.0.0.1:6379/0
-      VIDIS_CLIENT_ID: telli-e2e-client
+      VIDIS_CLIENT_ID: ais-chat-e2e-client
       VIDIS_CLIENT_SECRET: ClientSecret-e2e
-      VIDIS_ISSUER_URI: http://localhost:8080/realms/telli-local
+      VIDIS_ISSUER_URI: http://localhost:8080/realms/ais-chat-local
       API_DATABASE_URL: postgresql://telli_api_db:test1234@127.0.0.1:6543/telli_api_db
       API_URL: http://localhost:3002
-      API_KEY: ApiKeyForTelliApiAdminApi
-      ENCRYPTION_KEY: EncryptionKeyForEncryptedApiKeysToTelliApi
+      API_KEY: ApiKeyForAISChatApiAdminApi
+      ENCRYPTION_KEY: EncryptionKeyForEncryptedApiKeysToAISChatApi
       # Auth.js secret
       AUTH_SECRET: 'yN1a0lQ77RgeEQam5DvGaddbdUDQoxswK+21FmEqBPs='
       # S3 Storage

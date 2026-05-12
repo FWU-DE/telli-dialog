@@ -51,7 +51,7 @@ This guide helps you run telli using pre-built Docker images with minimal config
 
    Use any of the predefined users from the Keycloak realm configuration:
    - Username: `teacher` / Password: `password` (teacher)
-   - See [telli-local-realm.json](devops/docker/keycloak/telli-local-realm.json) for all available users
+   - See [ais-chat-local-realm.json](devops/docker/keycloak/ais-chat-local-realm.json) for all available users
 
 ### Customization
 
@@ -171,7 +171,7 @@ pnpm dev
 ### Keycloak
 
 Keycloak is used for logins both locally and in e2e tests.
-The realm, client and several predefined users are configured in [telli-local-realm.json](devops/docker/keycloak/telli-local-realm.json).
+The realm, client and several predefined users are configured in [ais-chat-local-realm.json](devops/docker/keycloak/ais-chat-local-realm.json).
 Users are defined at the bottom of the json.
 
 The json is imported once when starting keycloak, but only if the realm does not yet exist.

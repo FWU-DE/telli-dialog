@@ -6,7 +6,7 @@ export async function login(
   password = 'password',
   options?: {
     /**
-     * Whether to use the `vidis_idp_hint=telli-local` query param to navigate directly to the login provider.
+     * Whether to use the `vidis_idp_hint=ais-chat-local` query param to navigate directly to the login provider.
      * Defaults to `true`.
      */
     idpHint?: boolean;
@@ -35,7 +35,7 @@ export async function login(
 
   try {
     if (idpHint) {
-      await page.goto('/login?vidis_idp_hint=telli-local');
+      await page.goto('/login?vidis_idp_hint=ais-chat-local');
     } else {
       await page.goto('/login');
     }

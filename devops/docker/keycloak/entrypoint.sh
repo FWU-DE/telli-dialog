@@ -3,7 +3,7 @@
 export() {
   kill $PID
   echo "Exporting realm and users..."
-  /opt/keycloak/bin/kc.sh export --dir /opt/keycloak/data/import/export --users same_file --realm telli-local
+  /opt/keycloak/bin/kc.sh export --dir /opt/keycloak/data/import/export --users same_file --realm ais-chat-local
 }
 
 trap 'export' SIGTERM
