@@ -179,7 +179,7 @@ export default function ImageGenerationChat({
                 loading="eager"
                 unoptimized // Since we're using signed URLs from S3
                 crossOrigin="anonymous" // Needed for clipboard copy to work
-                onLoadingComplete={() => setIsImageReady(true)}
+                onLoad={() => setIsImageReady(true)}
               />
               <ImageActionButtons
                 imageRef={imageRef}

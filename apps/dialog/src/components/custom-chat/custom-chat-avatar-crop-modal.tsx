@@ -108,11 +108,13 @@ export default function AvatarCropModal({
               src={imageSrc}
               width={500}
               height={500}
-              onLoadingComplete={(img) => {
-                imageRef.current = img;
-                onImageLoad(img.naturalWidth, img.naturalHeight);
+              onLoad={({ currentTarget: img }) => {
+                if (img instanceof HTMLImageElement) {
+                  imageRef.current = img;
+                  onImageLoad(img.naturalWidth, img.naturalHeight);
+                }
               }}
-              className="object-contain max-w-full max-h-[80vh]"
+              className="object-contain max-w-full max-h-[80vh] h-auto"
             />
           </ReactCrop>
           <div className="flex justify-end gap-2 mt-4">
