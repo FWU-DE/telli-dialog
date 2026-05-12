@@ -3,7 +3,7 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { XIcon } from '@phosphor-icons/react';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { useTranslations } from 'next-intl';
 import type { InfoBanner } from '@shared/info-banners/info-banner';
 import { trackInfoBannerViewAction } from '@/app/(authed)/(chat-bot)/actions';

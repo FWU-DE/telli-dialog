@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Session } from 'next-auth';
 import { SessionProvider } from 'next-auth/react';
 import { ThemeProvider as NextThemeProvider } from '@ui/components/theme-provider';
-import { TooltipProvider } from '@ui/components/Tooltip';
+import { TooltipProvider } from '@ui/components/tooltip';
 import SessionClearer from '@/auth/SessionClearer';
 
 const queryClient = new QueryClient();

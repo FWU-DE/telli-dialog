@@ -8,8 +8,8 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
-import { Card, CardContent } from '@ui/components/Card';
-import { FieldGroup } from '@ui/components/Field';
+import { Card, CardContent } from '@ui/components/card';
+import { FieldGroup } from '@ui/components/field';
 import { useForm, useWatch } from 'react-hook-form';
 import { useCallback, useMemo, useRef } from 'react';
 import z from 'zod';

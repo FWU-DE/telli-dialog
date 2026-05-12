@@ -4,7 +4,7 @@ import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { createNewAssistantAction } from './actions';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { PlusIcon } from '@phosphor-icons/react';
 
 export default function CreateNewAssistantButton() {

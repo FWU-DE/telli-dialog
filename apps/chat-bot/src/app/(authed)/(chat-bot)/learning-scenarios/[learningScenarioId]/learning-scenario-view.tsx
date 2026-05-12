@@ -19,7 +19,7 @@ import {
   createNewLearningScenarioFromTemplateAction,
   downloadFileFromLearningScenarioAction,
 } from '../actions';
-import { Card, CardContent } from '@ui/components/Card';
+import { Card, CardContent } from '@ui/components/card';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';

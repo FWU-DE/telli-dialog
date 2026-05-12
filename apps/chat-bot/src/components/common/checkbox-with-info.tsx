@@ -1,6 +1,6 @@
 import React from 'react';
 import Checkbox from '@/components/common/checkbox';
-import { InfoTooltip } from '@ui/components/Tooltip';
+import { InfoTooltip } from '@ui/components/tooltip';
 
 type CheckboxWithInfoProps = {
   label: string;

@@ -10,7 +10,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@ui/components/AlertDialog';
+} from '@ui/components/alert-dialog';
 
 const LOGOUT_URL = '/api/auth/logout';
 

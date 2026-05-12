@@ -7,8 +7,8 @@ import { truncateClassName } from '@/utils/tailwind/truncate';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { useTranslations } from 'next-intl';
 import { ChatTextIcon, ImageSquareIcon } from '@phosphor-icons/react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
-import { Button } from '@ui/components/Button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/tooltip';
+import { Button } from '@ui/components/button';
 import CountDownTimer from '@/app/(authed)/(chat-bot)/learning-scenarios/_components/count-down';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 

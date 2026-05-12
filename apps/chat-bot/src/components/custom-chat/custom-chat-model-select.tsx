@@ -9,7 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@ui/components/Select';
+} from '@ui/components/select';
 
 type CustomChatModelSelectProps = {
   models: LlmModelSelectModel[];

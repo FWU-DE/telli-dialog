@@ -34,8 +34,8 @@ import {
 } from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
-import { FieldGroup } from '@ui/components/Field';
-import { Card, CardContent } from '@ui/components/Card';
+import { FieldGroup } from '@ui/components/field';
+import { Card, CardContent } from '@ui/components/card';
 import {
   SMALL_TEXT_INPUT_FIELDS_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,

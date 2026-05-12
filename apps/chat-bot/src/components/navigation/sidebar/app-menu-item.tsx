@@ -1,7 +1,7 @@
 'use client';
 
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
-import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@ais-chat/ui/components/Sidebar';
+import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@ais-chat/ui/components/sidebar';
 import Link from 'next/link';
 import { useCustomPathname } from '@/hooks/use-custom-pathname';
 import { cloneElement, type ReactElement } from 'react';

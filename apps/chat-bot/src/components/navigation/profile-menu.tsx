@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { IMPRESSUM_URL, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from './const';
 import { useTranslations } from 'next-intl';
 import { usePortalContainer } from '@ui/components/portal-container';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { DotsThreeIcon } from '@phosphor-icons/react';
 
 function MenuActionRow({ action }: { action: React.ReactNode }) {

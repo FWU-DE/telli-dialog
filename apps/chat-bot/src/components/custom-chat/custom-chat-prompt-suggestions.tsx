@@ -7,11 +7,11 @@ import {
 import { useEffect, useRef } from 'react';
 import { Control, useFieldArray, useWatch } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/tooltip';
 import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { AssistantFormValues } from '@/app/(authed)/(chat-bot)/assistants/editor/[assistantId]/assistant-edit';
 import { FormField } from '@ui/components/form/FormField';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 
 type WithPromptSuggestions = {
   promptSuggestions: { value: string }[];

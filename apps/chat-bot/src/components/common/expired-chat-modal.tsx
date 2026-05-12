@@ -13,7 +13,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@ui/components/AlertDialog';
+} from '@ui/components/alert-dialog';
 
 type ExpiredChatModalProps = {
   conversationMessages: Message[];

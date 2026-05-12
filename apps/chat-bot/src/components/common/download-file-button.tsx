@@ -7,7 +7,7 @@ import Spinner from '../icons/spinner';
 import { useToast } from './toast';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { openInNewTab } from '@/utils/navigation/router';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 
 type DownloadFileButtonProps = {
   fileId: string;

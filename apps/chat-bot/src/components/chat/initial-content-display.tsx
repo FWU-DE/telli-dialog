@@ -1,6 +1,6 @@
 import MarkdownDisplay from './markdown-display';
 import AvatarPicture from '../common/avatar-picture';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 
 export function InitialChatContentDisplay({
   title,

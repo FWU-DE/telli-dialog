@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 import AutoResizeTextarea from '../common/auto-resize-textarea';
 import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { ChangeEvent, FormEvent } from 'react';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 
 export function ImageGenerationInputBox({
   isLoading,

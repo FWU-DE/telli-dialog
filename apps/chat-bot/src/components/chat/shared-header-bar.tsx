@@ -8,8 +8,8 @@ import Image from 'next/image';
 import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import { type ChatMessage as Message } from '@/types/chat';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
-import { ConfirmAlertDialog, useConfirmAlertDialog } from '@ui/components/AlertDialog';
-import { Button } from '@ui/components/Button';
+import { ConfirmAlertDialog, useConfirmAlertDialog } from '@ui/components/alert-dialog';
+import { Button } from '@ui/components/button';
 import { TrashSimpleIcon } from '@phosphor-icons/react';
 
 export function SharedChatHeader({

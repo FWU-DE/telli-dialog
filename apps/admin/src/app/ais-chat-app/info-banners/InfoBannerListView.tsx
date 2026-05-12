@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import {
   Card,
   CardAction,
@@ -12,7 +12,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@ui/components/Card';
+} from '@ui/components/card';
 import {
   Table,
   TableBody,
@@ -20,7 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@ui/components/Table';
+} from '@ui/components/table';
 import { ROUTES } from '@/consts/routes';
 import { getInfoBannersAction } from './actions';
 import type { InfoBanner } from '@shared/info-banners/info-banner';

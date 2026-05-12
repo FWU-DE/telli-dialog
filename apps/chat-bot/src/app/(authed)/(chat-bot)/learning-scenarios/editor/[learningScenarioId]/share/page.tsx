@@ -1,7 +1,7 @@
 import SidebarCloseIcon from '@/components/icons/sidebar-close';
 import Footer from '@/components/navigation/footer';
 import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import CountDownTimer from '../../../_components/count-down';

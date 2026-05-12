@@ -1,5 +1,5 @@
 import { TemplateModel } from '@shared/templates/template';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/Card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/card';
 import { getTemplateTypeName } from '../../templateTypeName';
 
 export type TemplateInfoCardProps = {

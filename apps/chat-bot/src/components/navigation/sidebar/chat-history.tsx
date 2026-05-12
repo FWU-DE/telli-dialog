@@ -12,12 +12,12 @@ import { useRouter } from 'next/navigation';
 import { useCustomPathname } from '@/hooks/use-custom-pathname';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { SidebarGroup, SidebarMenu } from '@ui/components/Sidebar';
+import { SidebarGroup, SidebarMenu } from '@ui/components/sidebar';
 import { ChatHistoryItem } from './chat-history-item';
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/components/InputGroup';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/components/input-group';
 import { MagnifyingGlassIcon, XCircleIcon } from '@phosphor-icons/react';
-import { Button } from '@ui/components/Button';
-import { Spinner } from '@ui/components/Spinner';
+import { Button } from '@ui/components/button';
+import { Spinner } from '@ui/components/spinner';
 
 /**
  * ChatHistory component handles rendering a virtual-scrolled list of conversations.

@@ -1,4 +1,4 @@
-import { InfoTooltip } from '@ui/components/Tooltip';
+import { InfoTooltip } from '@ui/components/tooltip';
 
 export function CustomChatHeading2({ text, tooltip }: { text: string; tooltip?: string }) {
   return (

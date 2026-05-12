@@ -1,5 +1,5 @@
 import { CheckCircleIcon, SpinnerIcon, WarningCircleIcon } from '@phosphor-icons/react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/tooltip';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 

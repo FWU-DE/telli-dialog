@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@ui/components/Table';
+} from '@ui/components/table';
 
 export async function OrganizationListView() {
   const organizations = await getOrganizations();

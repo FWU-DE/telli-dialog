@@ -7,16 +7,16 @@ import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
-import { Card, CardContent } from '@ui/components/Card';
-import { Field, FieldLabel } from '@ui/components/Field';
+import { Card, CardContent } from '@ui/components/card';
+import { Field, FieldLabel } from '@ui/components/field';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@ui/components/Select';
-import { Button } from '@ui/components/Button';
+} from '@ui/components/select';
+import { Button } from '@ui/components/button';
 import { ShareFatIcon, StopIcon } from '@phosphor-icons/react';
 import CountDownTimer from '../../app/(authed)/(chat-bot)/learning-scenarios/_components/count-down';
 import { RichText } from '../common/rich-text';

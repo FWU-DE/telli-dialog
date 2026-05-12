@@ -8,7 +8,7 @@ import { RichText } from '../../common/rich-text';
 import { SUPPORTED_DOCUMENTS_EXTENSIONS } from '@/const';
 import { validateFileExtentsion as validateFileExtension } from '@/utils/files/generic';
 import { NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT } from '@/configuration-text-inputs/const';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 
 export function FileDrop({
   onFileUploaded,

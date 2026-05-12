@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/card';
 import { CustomChatFiles, CustomChatFilesProps } from './custom-chat-files';
 import { CustomChatHeading2 } from '../custom-chat-heading2';
 import { CustomChatLinks, CustomChatLinksProps } from './custom-chat-links';

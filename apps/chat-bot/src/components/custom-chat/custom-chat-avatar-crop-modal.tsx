@@ -6,8 +6,8 @@ import 'react-image-crop/dist/ReactCrop.css';
 import Image from 'next/image';
 import { CompressionOptions, getCroppedImageBlob } from '@/utils/files/image-utils';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/Card';
-import { Button } from '@ui/components/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/card';
+import { Button } from '@ui/components/button';
 import { useToast } from '../common/toast';
 
 type AvatarCropModalProps = {

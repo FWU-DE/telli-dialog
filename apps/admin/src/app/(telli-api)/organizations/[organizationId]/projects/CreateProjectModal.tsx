@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Button } from '@ui/components/Button';
-import { Input } from '@ui/components/Input';
-import { Label } from '@ui/components/Label';
+import { Button } from '@ui/components/button';
+import { Input } from '@ui/components/input';
+import { Label } from '@ui/components/label';
 import { toast } from 'sonner';
 import { createProjectAction } from './actions';
 

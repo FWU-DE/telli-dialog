@@ -5,7 +5,7 @@ import Spinner from '@/components/icons/spinner';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { type ChatMessage as Message } from '@/types/chat';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { BoxArrowDownIcon } from '@phosphor-icons/react';
 
 type DownloadConversationButtonProps = {

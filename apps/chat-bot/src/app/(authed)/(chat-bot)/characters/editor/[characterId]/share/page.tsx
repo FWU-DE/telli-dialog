@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import SidebarCloseIcon from '@/components/icons/sidebar-close';
 import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
 import Footer from '@/components/navigation/footer';

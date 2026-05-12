@@ -3,18 +3,18 @@
 import React from 'react';
 import { OverviewFilter, overviewFilterSchema } from '@shared/overview-filter';
 import { useTranslations } from 'next-intl';
-import { Input } from '@ais-chat/ui/components/Input';
+import { Input } from '@ais-chat/ui/components/input';
 import { MagnifyingGlassIcon, InfoIcon, XCircleIcon } from '@phosphor-icons/react';
 import { useFederalState } from '@/components/providers/federal-state-provider';
-import { Button } from '@ais-chat/ui/components/Button';
-import { FilterTabs } from '@ais-chat/ui/components/FilterTabs';
+import { Button } from '@ais-chat/ui/components/button';
+import { FilterTabs } from '@ais-chat/ui/components/filter-tabs';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@ais-chat/ui/components/Select';
+} from '@ais-chat/ui/components/select';
 import { InfoDialog } from '@/components/common/dialog';
 import { isSortOption, SortOption } from './utils';
 

@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
 
 import { cn } from '../lib/utils';
-import { Button } from './Button';
+import { Button } from './button';
 import { XIcon } from 'lucide-react';
 import { usePortalContainer } from './portal-container';
 

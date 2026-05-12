@@ -1,5 +1,5 @@
 import { ChatTextIcon } from '@phosphor-icons/react';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { useTranslations } from 'next-intl';
 
 export function CustomChatActionUse({ onClick }: { onClick: () => void }) {

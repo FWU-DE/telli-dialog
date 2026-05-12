@@ -3,7 +3,7 @@
 import CheckIcon from '../icons/check';
 import React from 'react';
 import ClipboardLightIcon from '../icons/clipboard-light';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { useTranslations } from 'next-intl';
 
 type CopyToClipboardButtonProps = {

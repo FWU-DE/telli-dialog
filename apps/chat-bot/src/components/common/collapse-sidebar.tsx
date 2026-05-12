@@ -4,7 +4,7 @@ import {
   SIDEBAR_COOKIE_MAX_AGE,
   SIDEBAR_COOKIE_NAME,
   useSidebar,
-} from '@ais-chat/ui/components/Sidebar';
+} from '@ais-chat/ui/components/sidebar';
 import { useEffect, useRef } from 'react';
 
 /**

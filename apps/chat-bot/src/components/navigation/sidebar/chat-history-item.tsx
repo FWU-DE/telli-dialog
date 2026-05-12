@@ -6,13 +6,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '@ais-chat/ui/components/Sidebar';
+} from '@ais-chat/ui/components/sidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@ui/components/DropdownMenu';
+} from '@ui/components/dropdown-menu';
 import Link from 'next/link';
 import { useCustomPathname } from '@/hooks/use-custom-pathname';
 import { cloneElement, type ReactElement, useEffect, useRef, useState } from 'react';
@@ -30,7 +30,7 @@ import {
 import { useForm } from 'react-hook-form';
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Input } from '@ui/components/Input';
+import { Input } from '@ui/components/input';
 import { useTranslations } from 'next-intl';
 
 const renameChatHistorySchema = z.object({

@@ -4,7 +4,7 @@ import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { createNewLearningScenarioAction } from './actions';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { PlusIcon } from '@phosphor-icons/react';
 
 export function CreateNewLearningScenarioButton() {

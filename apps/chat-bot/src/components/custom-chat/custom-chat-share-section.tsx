@@ -7,8 +7,8 @@ import { LinkIcon } from '@phosphor-icons/react';
 import { Control, FieldValues, Path, useWatch } from 'react-hook-form';
 import { useFederalState } from '../providers/federal-state-provider';
 import { CustomChatHeading2 } from './custom-chat-heading2';
-import { Card, CardRow } from '@ui/components/Card';
-import { Button } from '@ui/components/Button';
+import { Card, CardRow } from '@ui/components/card';
+import { Button } from '@ui/components/button';
 
 type CustomShareSectionProps<T extends FieldValues> = {
   control: Control<T>;

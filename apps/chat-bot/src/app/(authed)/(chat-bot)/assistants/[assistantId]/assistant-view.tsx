@@ -12,7 +12,7 @@ import { createNewAssistantAction, downloadFileFromAssistantAction } from '../ac
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-update';
-import { Card, CardContent } from '@ui/components/Card';
+import { Card, CardContent } from '@ui/components/card';
 import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';

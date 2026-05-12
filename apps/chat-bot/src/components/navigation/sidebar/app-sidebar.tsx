@@ -17,7 +17,7 @@ import {
   SidebarMenu,
   SidebarSeparator,
   useSidebar,
-} from '@ais-chat/ui/components/Sidebar';
+} from '@ais-chat/ui/components/sidebar';
 import { AppMenuItem } from './app-menu-item';
 import LogoWithName from '@/assets/logo-with-name.svg';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
@@ -27,7 +27,7 @@ import { FederalStateModel } from '@shared/federal-states/types';
 import { UserModel } from '@shared/auth/user-model';
 import { ChatHistory } from './chat-history';
 import Link from 'next/link';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { useState } from 'react';
 
 type AppSidebarProps = {

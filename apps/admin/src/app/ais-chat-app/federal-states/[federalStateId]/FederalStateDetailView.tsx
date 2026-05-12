@@ -1,5 +1,5 @@
 'use client';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateFederalStateAction } from './actions';
@@ -10,7 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@ui/components/Card';
+} from '@ui/components/card';
 import { FormField } from '@ui/components/form/FormField';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
 import { FormFieldArray } from '@/components/form/FormFieldArray';

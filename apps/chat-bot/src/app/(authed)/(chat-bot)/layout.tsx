@@ -14,7 +14,7 @@ import { getTranslations } from 'next-intl/server';
 import { getFederalStateById } from '@shared/federal-states/federal-state-service';
 import { FederalStateProvider } from '@/components/providers/federal-state-provider';
 import AppSidebar from '@/components/navigation/sidebar/app-sidebar';
-import { SidebarProvider } from '@ais-chat/ui/components/Sidebar';
+import { SidebarProvider } from '@ais-chat/ui/components/sidebar';
 import SessionWatcher from '@/auth/SessionWatcher';
 import { getActiveBannersForUser } from '@shared/info-banners/info-banner-service';
 import { DialogWrapper } from '@/components/layout/dialog-header';

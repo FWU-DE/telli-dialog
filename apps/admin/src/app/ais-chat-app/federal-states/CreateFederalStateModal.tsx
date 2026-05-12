@@ -1,5 +1,5 @@
 'use client';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createFederalStateAction } from './[federalStateId]/actions';

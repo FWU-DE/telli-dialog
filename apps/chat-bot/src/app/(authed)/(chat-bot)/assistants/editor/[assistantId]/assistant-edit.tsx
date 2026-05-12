@@ -9,8 +9,8 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AssistantSelectModel, FileModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
-import { Card, CardContent } from '@ui/components/Card';
-import { FieldGroup } from '@ui/components/Field';
+import { Card, CardContent } from '@ui/components/card';
+import { FieldGroup } from '@ui/components/field';
 import { FormField } from '@ui/components/form/FormField';
 import { useRouter } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';

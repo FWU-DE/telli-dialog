@@ -1,7 +1,7 @@
 'use client';
 
 import { CaretLeftIcon } from '@phosphor-icons/react';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { useRouter } from 'next/navigation';
 
 type BackButtonProps = {

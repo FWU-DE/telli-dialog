@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@ui/components/Button';
-import { Input } from '@ui/components/Input';
-import { Label } from '@ui/components/Label';
+import { Button } from '@ui/components/button';
+import { Input } from '@ui/components/input';
+import { Label } from '@ui/components/label';
 import { createTemplateFromUrlAction } from './actions';
 
 type CreateTemplateModalProps = {

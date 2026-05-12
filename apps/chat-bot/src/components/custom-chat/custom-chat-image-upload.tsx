@@ -1,11 +1,11 @@
-import { Card, CardContent } from '@ui/components/Card';
+import { Card, CardContent } from '@ui/components/card';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { useTranslations } from 'next-intl';
 import React from 'react';
 import { useToast } from '../common/toast';
-import { Input } from '@ui/components/Input';
+import { Input } from '@ui/components/input';
 import { ImageSquareIcon, UploadIcon } from '@phosphor-icons/react';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import AvatarCropModal from './custom-chat-avatar-crop-modal';
 import Image from 'next/image';
 import { AVATAR_MAX_SIZE } from '@/const';

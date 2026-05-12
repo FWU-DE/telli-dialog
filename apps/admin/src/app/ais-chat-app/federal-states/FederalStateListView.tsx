@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@ui/components/Table';
+} from '@ui/components/table';
 import {
   Card,
   CardAction,
@@ -19,8 +19,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@ui/components/Card';
-import { Button } from '@ui/components/Button';
+} from '@ui/components/card';
+import { Button } from '@ui/components/button';
 import { Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { ROUTES } from '@/consts/routes';

@@ -1,6 +1,6 @@
-import { Checkbox } from '../Checkbox';
+import { Checkbox } from '../checkbox';
 import { Control, Controller, FieldPath, FieldValues } from 'react-hook-form';
-import { Field, FieldError, FieldLabel } from '../Field';
+import { Field, FieldError, FieldLabel } from '../field';
 
 type CheckboxWithInfoProps<
   TFieldValues extends FieldValues = FieldValues,

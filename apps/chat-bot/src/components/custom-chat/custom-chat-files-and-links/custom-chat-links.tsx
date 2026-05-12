@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
-import { Input } from '@ui/components/Input';
-import { Button } from '@ui/components/Button';
-import { Spinner } from '@ui/components/Spinner';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
+import { Input } from '@ui/components/input';
+import { Button } from '@ui/components/button';
+import { Spinner } from '@ui/components/spinner';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/tooltip';
 import { WebSource } from '@shared/db/types';
 import { parseHyperlinks, getDisplayUrl } from '@/utils/web-search/parsing';
 import {
