@@ -144,17 +144,18 @@ export async function sendChatMessage({
 
   // Web search
   const isWebSearchEnabled = user.federalState.featureToggles?.isWebSearchEnabled ?? false;
-  const needsWebSearch =
-    isWebSearchEnabled &&
-    env.linkupApiKey &&
-    (await isWebSearchNeeded({
-      query: userMessage.content,
-      modelId: auxiliaryModel.id,
-      apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
-    }));
-  const webSearchResults = needsWebSearch
+  const webSearchDecision =
+    isWebSearchEnabled && env.linkupApiKey
+      ? await isWebSearchNeeded({
+          messages,
+          modelId: auxiliaryModel.id,
+          apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
+        })
+      : { needed: false, query: '' };
+
+  const webSearchResults = webSearchDecision.needed
     ? await searchWeb({
-        query: userMessage.content,
+        query: webSearchDecision.query,
         conversationId: conversation.id,
         userId: user.id,
       })

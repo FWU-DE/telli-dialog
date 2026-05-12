@@ -1,7 +1,6 @@
 import { db } from '..';
 import { and, arrayOverlaps, desc, eq, getTableColumns, inArray, or, sql } from 'drizzle-orm';
 import {
-  conversationMessageTable,
   conversationTable,
   AssistantFileMapping,
   type AssistantInsertModel,
@@ -176,21 +175,6 @@ export async function dbUpdateAssistant({
 
 export async function dbDeleteAssistant({ assistantId }: { assistantId: string }) {
   await db.transaction(async (tx) => {
-    const assistantConversations = await tx
-      .select()
-      .from(conversationTable)
-      .where(eq(conversationTable.assistantId, assistantId));
-
-    if (assistantConversations.length > 0) {
-      await Promise.all(
-        assistantConversations.map(async (conversation) => {
-          await tx
-            .delete(conversationMessageTable)
-            .where(eq(conversationMessageTable.conversationId, conversation.id));
-        }),
-      );
-    }
-
     await tx.delete(conversationTable).where(eq(conversationTable.assistantId, assistantId));
     await tx.delete(assistantTable).where(eq(assistantTable.id, assistantId));
   });
@@ -217,20 +201,6 @@ export async function dbDeleteAssistantByIdAndUser({
       .select({ id: AssistantFileMapping.fileId })
       .from(AssistantFileMapping)
       .where(eq(AssistantFileMapping.assistantId, assistant.id));
-
-    const conversations = await tx
-      .select({ id: conversationTable.id })
-      .from(conversationTable)
-      .where(eq(conversationTable.assistantId, assistant.id));
-
-    if (conversations.length > 0) {
-      await tx.delete(conversationMessageTable).where(
-        inArray(
-          conversationMessageTable.conversationId,
-          conversations.map((c) => c.id),
-        ),
-      );
-    }
     await tx.delete(conversationTable).where(eq(conversationTable.assistantId, assistant.id));
     await tx.delete(AssistantFileMapping).where(eq(AssistantFileMapping.assistantId, assistant.id));
     await tx.delete(fileTable).where(

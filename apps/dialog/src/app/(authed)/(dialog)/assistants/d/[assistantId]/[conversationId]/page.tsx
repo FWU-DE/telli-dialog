@@ -55,12 +55,14 @@ export default async function Page(
       initialDownloadConversationEnabled={chatMessages.length > 0}
     >
       <DefaultPageLayout
-        header={{
-          headerType: 'chat',
-          chatId: conversation.id,
-          title: assistant.name,
-          downloadConversationEnabled: chatMessages.length > 0,
-          userAndContext,
+        layoutConfig={{
+          layout: 'chat',
+          headerConfig: {
+            chatId: conversation.id,
+            title: assistant.name,
+            downloadConversationEnabled: chatMessages.length > 0,
+            userAndContext,
+          },
         }}
       >
         <Chat

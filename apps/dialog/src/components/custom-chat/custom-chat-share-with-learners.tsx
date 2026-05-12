@@ -112,7 +112,7 @@ export function CustomChatShareWithLearners({
           <div className="flex flex-wrap gap-4 items-end">
             <div className="whitespace-nowrap flex-1">
               <Field>
-                <FieldLabel>token-Points</FieldLabel>
+                <FieldLabel>{t('token-points')}</FieldLabel>
                 <Select
                   defaultValue={String(getValuesShare('tokenPointsPercentageLimit'))}
                   onValueChange={(value) =>
@@ -120,7 +120,7 @@ export function CustomChatShareWithLearners({
                   }
                   disabled={sharedChatActive}
                 >
-                  <SelectTrigger aria-label="token-Points" data-testid="token-points-select">
+                  <SelectTrigger aria-label={t('token-points')} data-testid="telli-points-select">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

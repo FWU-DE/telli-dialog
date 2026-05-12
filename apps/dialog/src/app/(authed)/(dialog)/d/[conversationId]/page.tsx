@@ -70,11 +70,13 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
       initialDownloadConversationEnabled={convertedMessages.length > 0}
     >
       <DefaultPageLayout
-        header={{
-          headerType: 'chat',
-          chatId: conversation.id,
-          downloadConversationEnabled: convertedMessages.length > 0,
-          userAndContext,
+        layoutConfig={{
+          layout: 'chat',
+          headerConfig: {
+            chatId: conversation.id,
+            downloadConversationEnabled: convertedMessages.length > 0,
+            userAndContext,
+          },
         }}
       >
         <Chat

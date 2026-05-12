@@ -18,7 +18,6 @@ import {
   characterTable,
   characterTemplateMappingTable,
   CharacterWithShareDataModel,
-  conversationMessageTable,
   conversationTable,
   fileTable,
   SharedCharacterChatUsageTrackingInsertModel,
@@ -369,20 +368,6 @@ export async function dbDeleteCharacterByIdAndUser({
       .select({ id: CharacterFileMapping.fileId })
       .from(CharacterFileMapping)
       .where(eq(CharacterFileMapping.characterId, character.id));
-
-    const conversations = await tx
-      .select({ id: conversationTable.id })
-      .from(conversationTable)
-      .where(eq(conversationTable.characterId, character.id));
-
-    if (conversations.length > 0) {
-      await tx.delete(conversationMessageTable).where(
-        inArray(
-          conversationMessageTable.conversationId,
-          conversations.map((c) => c.id),
-        ),
-      );
-    }
     await tx.delete(conversationTable).where(eq(conversationTable.characterId, character.id));
     await tx.delete(CharacterFileMapping).where(eq(CharacterFileMapping.characterId, character.id));
     await tx.delete(fileTable).where(

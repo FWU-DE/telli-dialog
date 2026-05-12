@@ -100,9 +100,8 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={cn(className)}
+                className={cn('text-primary', className)}
                 style={{
-                  color: '#46217E',
                   textDecoration: 'underline',
                   textUnderlineOffset: '4px',
                 }}

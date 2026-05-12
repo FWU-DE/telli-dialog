@@ -7,6 +7,8 @@ import {
   chunkTable,
   AssistantFileMapping,
   assistantTable,
+  conversationMessageTable,
+  conversationTable,
   fileTable,
   LearningScenarioFileMapping,
   learningScenarioTable,
@@ -113,6 +115,12 @@ test.describe('cleanup', () => {
       .where(eq(characterTable.id, oldCharacter.id));
     expect(resultDeleted).toHaveLength(0);
 
+    const conversationDeleted = await db
+      .select()
+      .from(conversationTable)
+      .where(eq(conversationTable.characterId, oldCharacter.id));
+    expect(conversationDeleted).toHaveLength(0);
+
     const resultExisting = await db
       .select()
       .from(characterTable)
@@ -142,6 +150,12 @@ test.describe('cleanup', () => {
       .from(assistantTable)
       .where(eq(assistantTable.id, oldAssistant.id));
     expect(resultDeleted).toHaveLength(0);
+
+    const conversationDeleted = await db
+      .select()
+      .from(conversationTable)
+      .where(eq(conversationTable.assistantId, oldAssistant.id));
+    expect(conversationDeleted).toHaveLength(0);
 
     const resultExisting = await db
       .select()
@@ -205,11 +219,12 @@ async function createLearningScenario(
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const characterInsertSchema = createInsertSchema(characterTable).omit({ accessLevel: true });
 async function createCharacter(data?: Partial<z.infer<typeof characterInsertSchema>>) {
+  const userId = data?.userId ?? generateUUID();
   const [character] = await db
     .insert(characterTable)
     .values({
       name: '',
-      userId: generateUUID(),
+      userId,
       description: '',
       modelId: generateUUID(),
       ...data,
@@ -222,18 +237,21 @@ async function createCharacter(data?: Partial<z.infer<typeof characterInsertSche
   const fileId = await createFile();
   await db.insert(CharacterFileMapping).values({ characterId: character.id, fileId });
 
+  await createConversationWithMessage({ userId, characterId: character.id });
+
   return character;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const assistantInsertSchema = createInsertSchema(assistantTable).omit({ accessLevel: true });
 async function createAssistant(data?: Partial<z.infer<typeof assistantInsertSchema>>) {
+  const userId = data?.userId ?? generateUUID();
   const [assistant] = await db
     .insert(assistantTable)
     .values({
       name: '',
       systemPrompt: '',
-      userId: generateUUID(),
+      userId,
       ...data,
     })
     .returning();
@@ -244,7 +262,36 @@ async function createAssistant(data?: Partial<z.infer<typeof assistantInsertSche
   const fileId = await createFile();
   await db.insert(AssistantFileMapping).values({ assistantId: assistant.id, fileId });
 
+  await createConversationWithMessage({ userId, assistantId: assistant.id });
+
   return assistant;
+}
+
+async function createConversationWithMessage({
+  userId,
+  characterId,
+  assistantId,
+}: {
+  userId: string;
+  characterId?: string;
+  assistantId?: string;
+}) {
+  const [conversation] = await db
+    .insert(conversationTable)
+    .values({ userId, characterId, assistantId })
+    .returning();
+  if (!conversation) {
+    throw new Error('failed to create conversation');
+  }
+
+  await db.insert(conversationMessageTable).values({
+    content: 'test message',
+    conversationId: conversation.id,
+    modelName: 'test-model',
+    userId,
+    role: 'user',
+    orderNumber: 0,
+  });
 }
 
 async function createFile() {
