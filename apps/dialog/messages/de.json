@@ -484,6 +484,10 @@
       "button": "Beispiel anzeigen",
       "title": "Instruktionen: Beispielhafter Inhalt",
       "close": "Schließen"
+    },
+    "web-search": {
+      "heading": "Websuche",
+      "heading-tooltip": "Falls aktiviert, sucht telli automatisch im Internet, sofern aktuelle Informationen nötig sind."
     }
   },
   "assistants": {

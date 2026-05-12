@@ -1031,6 +1031,7 @@ export const assistantTable = pgTable(
       .notNull(),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
+    isWebSearchEnabled: boolean('is_web_search_enabled').notNull().default(false),
     pictureId: text('picture_id'),
     description: text('description'),
     instructions: text('instructions'),
