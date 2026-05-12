@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { BoxArrowDownIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
 import { useToast } from '@/components/common/toast';
-import WebDownloadIcon from '@/components/icons/web-download';
 import Spinner from '@/components/icons/spinner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -74,7 +74,7 @@ export default function DownloadConversationMessageButton({
             {isLoading ? (
               <Spinner className="p-1 size-5" />
             ) : (
-              <WebDownloadIcon className="size-5" />
+              <BoxArrowDownIcon className="size-5" />
             )}
           </Button>
         </TooltipTrigger>
