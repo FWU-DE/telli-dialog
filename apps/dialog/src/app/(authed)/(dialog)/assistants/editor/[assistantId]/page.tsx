@@ -20,7 +20,7 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
     .map((url) => ({ link: url }));
 
   return (
-    <DefaultPageLayout header={{ headerType: 'form' }}>
+    <DefaultPageLayout layoutConfig={{ layout: 'form' }}>
       <AssistantEdit
         assistant={assistant}
         relatedFiles={fileMappings}

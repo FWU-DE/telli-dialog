@@ -1,5 +1,5 @@
 import { LinkupClient } from 'linkup-sdk';
-import { generateTextWithBilling } from '@telli/ai-core';
+import { generateTextWithBilling, type Message } from '@telli/ai-core';
 import { env } from '@/env';
 import {
   WEBSEARCH_RESULT_LENGTH_LIMIT,
@@ -9,6 +9,7 @@ import type { WebSearchResult } from '@shared/db/schema';
 import { logError } from '@shared/logging';
 import { dbInsertConversationToolCallUsage } from '@shared/db/functions/token-usage';
 import { dbGetToolCallCostByName } from '@shared/db/functions/tool-call';
+import { formatDateToGermanTimestamp } from '@shared/utils/date';
 
 async function recordWebSearchUsage({
   conversationId,
@@ -38,14 +39,16 @@ async function recordWebSearchUsage({
 }
 
 export async function isWebSearchNeeded({
-  query,
+  messages,
   modelId,
   apiKeyId,
 }: {
-  query: string;
+  messages: Message[];
   modelId: string;
   apiKeyId: string;
-}): Promise<boolean> {
+}): Promise<{ needed: boolean; query: string }> {
+  const recentMessages = messages.slice(-5).filter((message) => message.role !== 'system');
+
   try {
     const { text } = await generateTextWithBilling(
       modelId,
@@ -53,8 +56,18 @@ export async function isWebSearchNeeded({
         {
           role: 'system',
           content: `Du bist ein Routing-Assistent, der entscheidet, ob eine Nutzerfrage eine Websuche erfordert.
+Heute ist der ${formatDateToGermanTimestamp(new Date())}.
+Dir wird ein Gesprächsverlauf mit den letzten Nachrichten gegeben. Entscheide anhand des Kontexts, ob die letzte Nutzerfrage eine Websuche erfordert.
 
-Antworte mit genau einem Wort: "ja" oder "nein". Keine Erklärung.
+Antwortformat:
+- Falls keine Websuche nötig ist: Antworte nur mit "nein".
+- Falls eine Websuche nötig ist: Antworte mit "ja:" gefolgt von einer optimierten Suchanfrage in der Sprache des Nutzers.
+
+Die Suchanfrage soll:
+- Kurz und prägnant sein (max. 10 Wörter)
+- In derselben Sprache wie die Nutzerfrage verfasst sein
+- Alle relevanten Begriffe aus dem Kontext enthalten
+- Eigenständig verständlich sein (keine Pronomen wie "es", "das", "dazu")
 
 Antworte "ja", wenn die Frage:
 - Nach aktuellen Ereignissen, Nachrichten oder neuesten Informationen fragt
@@ -72,30 +85,46 @@ Antworte "nein", wenn die Frage:
 - Eine Zusammenfassung oder Umformulierung von bereits gegebenem Text verlangt
 - Keinen sinnvollen Inhalt hat (zufällige Zeichen, unverständlicher Text)
 
-Im Zweifel antworte "ja".
+Im Zweifel antworte mit "ja:" und einer passenden Suchanfrage.
 
 Beispiele:
 - "Was ist Photosynthese?" → nein
-- "Wer hat gestern das Spiel gewonnen?" → ja
+- "Wer hat gestern das Fußballspiel gewonnen?" → ja: Fußball Spielergebnis gestern
 - "Schreibe mir ein Gedicht über Katzen" → nein
-- "Was kostet das iPhone 17?" → ja
+- "Was kostet das iPhone 17?" → ja: iPhone 17 Preis aktuell
 - "Erkläre mir den Satz des Pythagoras" → nein
-- "Was sind die neuesten Nachrichten zu KI?" → ja
-- "hskjdfhskjdf" → nein`,
+- "Was sind die neuesten Nachrichten zu KI?" → ja: neueste Nachrichten künstliche Intelligenz
+- "hskjdfhskjdf" → nein
+- User: "Erzähl mir über Tesla" / Assistent: "Tesla ist..." / User: "Und wie steht die Aktie?" → ja: Tesla Aktienkurs aktuell`,
         },
-        { role: 'user', content: query },
+        ...recentMessages,
       ],
       apiKeyId,
       {
-        maxTokens: 3,
+        maxTokens: 60, // one token is ~0.75 words, so 60 tokens are ~45 words, which is more than enough for a search query
         temperature: 0,
       },
     );
 
-    return text.trim().toLowerCase().startsWith('ja');
+    const trimmed = text.trim().toLowerCase();
+
+    if (!trimmed.startsWith('ja')) {
+      return { needed: false, query: '' };
+    }
+
+    const colonIndex = text.indexOf(':');
+    const query = colonIndex !== -1 ? text.slice(colonIndex + 1).trim() : '';
+
+    // fallback to last user message if the model indicates a web search is needed but doesn't provide a query
+    if (!query) {
+      const lastUserMessage = recentMessages.findLast((m) => m.role === 'user');
+      return { needed: true, query: lastUserMessage?.content ?? '' };
+    }
+
+    return { needed: true, query };
   } catch (error) {
     logError('Error determining web search necessity, skipping web search:', error);
-    return false;
+    return { needed: false, query: '' };
   }
 }
 

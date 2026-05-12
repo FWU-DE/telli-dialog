@@ -51,12 +51,14 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <DefaultPageLayout
-        header={{
-          headerType: 'chat',
-          chatId: id,
-          title: character.name,
-          downloadConversationEnabled: false,
-          userAndContext,
+        layoutConfig={{
+          layout: 'chat',
+          headerConfig: {
+            chatId: id,
+            title: character.name,
+            downloadConversationEnabled: false,
+            userAndContext,
+          },
         }}
       >
         <Chat
