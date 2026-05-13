@@ -37,8 +37,9 @@ function constructAssistantSystemPrompt(
   assistant: AssistantSelectModel,
   chunks: RetrievedChunk[],
   errorUrls: string[],
+  webSearchResults: WebSearchResult[] = [],
 ) {
-  const ragContext = constructRagContext(chunks, errorUrls);
+  const ragContext = constructRagContext(chunks, errorUrls, webSearchResults);
 
   return `Du bist ein hilfreicher Assistent, der in einer Schule eingesetzt wird, um eine Lehrkraft zu unterstützen. Dein Name ist ${assistant.name}.
 
@@ -163,7 +164,7 @@ export async function constructChatSystemPrompt({
         errorUrls,
       });
     } else {
-      return constructAssistantSystemPrompt(assistant, chunks, errorUrls);
+      return constructAssistantSystemPrompt(assistant, chunks, errorUrls, webSearchResults);
     }
   }
 
