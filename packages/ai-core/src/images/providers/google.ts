@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/core';
 import { GoogleAuth } from 'google-auth-library';
-import { ImageGenerationFn, AiModel } from '../types';
+import type { AiModel, ImageGenerationFn } from '../types';
 import { AiGenerationError, ProviderConfigurationError, ResponsibleAIError } from '../../errors';
 
 interface GoogleClientConfig {

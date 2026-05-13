@@ -1,6 +1,6 @@
 import { instrumentOpenAiClient } from '@sentry/core';
 import OpenAI from 'openai';
-import type { AiModel, TextStreamFn, TextGenerationFn, TokenUsage } from '../types';
+import type { AiModel, TextGenerationFn, TextStreamFn, TokenUsage } from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { toOpenAIMessages, toOpenAIResponsesInput } from '../utils';
 

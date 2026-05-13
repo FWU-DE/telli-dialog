@@ -1,6 +1,6 @@
 import { instrumentOpenAiClient } from '@sentry/core';
 import OpenAI from 'openai';
-import { ImageGenerationFn, AiModel } from '../types';
+import type { AiModel, ImageGenerationFn } from '../types';
 import { AiGenerationError } from '../../errors';
 
 export function constructIonosImageGenerationFn(llmModel: AiModel): ImageGenerationFn {

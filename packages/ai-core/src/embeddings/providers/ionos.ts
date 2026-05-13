@@ -1,5 +1,5 @@
 import { OpenAI as OpenAIv4 } from 'openaiv4';
-import { AiModel, EmbeddingGenerationFn } from '../types';
+import type { AiModel, EmbeddingGenerationFn } from '../types';
 import { ProviderConfigurationError } from '../../errors';
 
 export function constructIonosEmbeddingGenerationFn(model: AiModel): EmbeddingGenerationFn {
