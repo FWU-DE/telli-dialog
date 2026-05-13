@@ -336,4 +336,18 @@ describe('chatWithImageEditAssistant', () => {
     const messages = mockGenerateText.mock.calls[0]![1];
     expect(messages.every((m) => !m.attachments?.length)).toBe(true);
   });
+
+  it('does NOT include image when imageUrl is completely malformed (new URL throws)', async () => {
+    mockGetAuxiliaryModel.mockResolvedValue(mockVisionModel as never);
+
+    await chatWithImageEditAssistant({
+      messages: [],
+      originalPrompt: 'a castle',
+      imageUrl: 'not-a-valid-url',
+      federalStateId: 'fs-1',
+    });
+
+    const messages = mockGenerateText.mock.calls[0]![1];
+    expect(messages.every((m) => !m.attachments?.length)).toBe(true);
+  });
 });
