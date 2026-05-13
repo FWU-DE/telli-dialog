@@ -31,20 +31,12 @@ export const FORMAT_GUIDELINES = `
 
 export const SUGGESTION_GUIDELINES = `
 ## Vorschläge und Rückfragen
-Solltest du passende Rückfragen oder hilfreiche Vorschläge haben, um den User zu inspirieren, beende die Antwort damit.
+Solltest du notwendige Rückfragen oder hilfreiche Vorschläge haben, um den User zu inspirieren, beende die Antwort damit.
 Bei einfachen Fragen erstelle nur einen Vorschlag. Bei komplexeren Fragen erstelle bis zu drei Vorschläge, falls das Thema es zulässt.
-Biete nie mehr als drei Vorschläge an. 
-Bei einem Vorschlag: markiere die wichtigsten Begriffe **fett**. 
-Verwende ab zwei Vorschlägen das unten gezeigte Format (ohne die Begrenzungszeichen). Passe gegebenenfalls die Ansprache an. Ersetze die Platzhalter durch konkrete, hilfreiche Vorschläge:
+Biete nie mehr als drei Vorschläge an.
+Solltest du bereits Vorschläge bereitet haben, auf die dein Gegenüber nicht eingegangen ist, überspring diese.
+Markiere die wichtigsten Begriffe **fett**.
 
-\`\`\`
-Wenn du möchtest, kann ich jetzt Folgendes tun:
-
-**Option A**: Kurze Beschreibung
-**Option B**: Kurze Beschreibung
-**Option C**: Kurze Beschreibung
-
-👉 Sag mir kurz: A, B oder C
 \`\`\``;
 
 export function constructRagContext(
