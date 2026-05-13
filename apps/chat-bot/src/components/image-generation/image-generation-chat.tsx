@@ -152,6 +152,7 @@ export default function ImageGenerationChat({
             onOpenChange={setAssistantOpen}
             onPromptGenerated={(prompt) => setInput(prompt)}
             onSubmitPrompt={(prompt) => void generateImage(prompt)}
+            onInsertPrompt={(prompt) => setInput(prompt)}
             initialPrompt={input}
           />
           <ImageEditAssistant

@@ -67,6 +67,7 @@ interface ImageAssistantProps {
   onOpenChange: (open: boolean) => void;
   onPromptGenerated: (prompt: string) => void;
   onSubmitPrompt?: (prompt: string) => void;
+  onInsertPrompt?: (prompt: string) => void;
   initialPrompt?: string;
 }
 
@@ -75,6 +76,7 @@ export function ImageAssistant({
   onOpenChange,
   onPromptGenerated,
   onSubmitPrompt,
+  onInsertPrompt,
   initialPrompt,
 }: ImageAssistantProps) {
   const t = useTranslations('image-generation');
@@ -210,6 +212,19 @@ export function ImageAssistant({
                       >
                         {t('assistant-use-prompt')}
                       </Button>
+                      {onInsertPrompt && (
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            onInsertPrompt(finalPrompt);
+                            onOpenChange(false);
+                          }}
+                          size="sm"
+                          className="mt-2 w-full"
+                        >
+                          {t('assistant-insert-prompt')}
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>

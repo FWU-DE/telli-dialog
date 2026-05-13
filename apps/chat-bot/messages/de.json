@@ -410,6 +410,7 @@
     "assistant-description": "Ich führe dich Schritt für Schritt zu einem guten Bildprompt.",
     "assistant-input-placeholder": "Deine Antwort...",
     "assistant-use-prompt": "Prompt verwenden & Bild generieren",
+    "assistant-insert-prompt": "Prompt einfügen und weiter bearbeiten",
     "assistant-generated-prompt-label": "Dein Bildprompt:",
     "assistant-error": "Der Assistent konnte keine Antwort generieren. Bitte versuche es erneut.",
     "assistant-send": "Senden",
