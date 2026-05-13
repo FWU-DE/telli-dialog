@@ -213,6 +213,22 @@ The e2e tests are integrated into the pipeline and run on every pull request.
 If you need to run load tests, you need to install `k6`.
 See the [official install guide](https://grafana.com/docs/k6/latest/set-up/install-k6/) for your platform.
 
+## Updating Agent Skills
+
+Installed coding-agent skills are stored in `.agents/skills/`, and the resolved source/hash is tracked in `skills-lock.json`.
+
+To update a skill (for example `shadcn`):
+
+1. Install or update the skill from the upstream source:
+
+   ```sh
+   pnpx skills install shadcn/ui
+   ```
+
+2. Review changes in `.agents/skills/shadcn/`.
+3. Confirm `skills-lock.json` was updated consistently.
+4. Commit the skill files and `skills-lock.json` in the same commit.
+
 ## More
 
 You can find more docs in the [./docs](./docs) folder.
