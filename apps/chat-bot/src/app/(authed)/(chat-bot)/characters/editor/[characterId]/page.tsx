@@ -5,8 +5,17 @@ import { WebSource } from '@shared/db/types';
 import { CharacterEdit } from './character-edit';
 import { redirect } from 'next/navigation';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import { type Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('characters.page-titles');
+  return {
+    title: t('edit'),
+  };
+}
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]'>) {
   const { characterId } = await props.params;
