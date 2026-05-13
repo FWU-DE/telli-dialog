@@ -120,7 +120,7 @@ To delete only the keycloak data, shutdown all containers and delete the volume:
 
 ```sh
 docker compose -f devops/docker/docker-compose.local.yml down
-docker volume rm keycloak_data
+docker volume rm ais-chat_keycloak_data
 ```
 
 ### Database
