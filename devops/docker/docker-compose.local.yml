@@ -46,7 +46,7 @@ services:
       - keycloak_data:/opt/keycloak/data/h2
       - ./keycloak:/opt/keycloak/data/import
     ports:
-      - '8080:8080'
+      - '${KEYCLOAK_HOST_PORT:-8080}:8080'
     restart: unless-stopped
     depends_on:
       fix-keycloak-volume-ownership:
@@ -67,8 +67,8 @@ services:
       RABBITMQ_DEFAULT_PASS: password
       RABBITMQ_DEFAULT_USER: user
     ports:
-      - '5672:5672'
-      - '15672:15672'
+      - '${RABBITMQ_AMQP_HOST_PORT:-5672}:5672'
+      - '${RABBITMQ_MGMT_HOST_PORT:-15672}:15672'
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', 'ping']
       interval: 30s

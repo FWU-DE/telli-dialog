@@ -88,6 +88,7 @@ nvm use # sets up the node version
 corepack enable # sets up the proper package manager
 corepack prepare
 pnpm i # installs the dependencies
+pnpm approve-builds --all # approve native build scripts (esbuild, swc, sharp, …)
 ```
 
 ### Environment variables
@@ -107,6 +108,95 @@ For local development spin up all required services using docker compose:
 
 ```sh
 docker compose -f devops/docker/docker-compose.local.yml up -d
+```
+
+#### Port conflicts
+
+Keycloak defaults to port `8080` and RabbitMQ to `5672`. If these conflict with other local services, create `devops/docker/.env` and override the host ports:
+
+```sh
+# devops/docker/.env  (gitignored)
+KEYCLOAK_HOST_PORT=8081
+RABBITMQ_AMQP_HOST_PORT=5673
+RABBITMQ_MGMT_HOST_PORT=15673
+```
+
+Update the matching variables in `apps/chat-bot/.env.local` and `apps/admin/.env.local` accordingly (e.g. `VIDIS_BASE_URI=http://localhost:8081/…`).
+
+#### Valkey image requires GHCR authentication
+
+The `ghcr.io/valkey-io/valkey:8` image may fail to pull without `docker login ghcr.io`. As a drop-in replacement, create `devops/docker/docker-compose.local.override.yml`:
+
+```yaml
+services:
+  valkey:
+    image: redis:7-alpine
+```
+
+Then pass both files to every compose command:
+
+```sh
+docker compose -f devops/docker/docker-compose.local.yml \
+               -f devops/docker/docker-compose.local.override.yml up -d
+```
+
+#### Local S3 storage (RustFS) for file uploads and image generation
+
+`docker-compose.local.yml` does not include an S3-compatible server. If your development involves file uploads or image generation, add RustFS to the override file:
+
+```yaml
+# devops/docker/docker-compose.local.override.yml
+services:
+  valkey:
+    image: redis:7-alpine   # keep this if also replacing valkey
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    restart: unless-stopped
+    environment:
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
+      RUSTFS_CONSOLE_ENABLE: 'true'
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfsadmin123
+      RUSTFS_VOLUMES: /data
+    volumes:
+      - rustfs_data:/data
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+
+volumes:
+  rustfs_data:
+```
+
+Set these in `apps/chat-bot/.env.local`:
+
+```sh
+OTC_S3_HOSTNAME=http://localhost:9000
+OTC_ACCESS_KEY_ID=rustfsadmin
+OTC_SECRET_ACCESS_KEY=rustfsadmin123
+OTC_BUCKET_NAME=ais-chat
+```
+
+After starting RustFS, create the bucket and allow public GET access so images render in the browser:
+
+```sh
+aws --endpoint-url http://localhost:9000 \
+    --region us-east-1 \
+    s3 mb s3://ais-chat
+
+aws --endpoint-url http://localhost:9000 \
+    --region us-east-1 \
+    s3api put-bucket-policy --bucket ais-chat \
+    --policy '{
+      "Version":"2012-10-17",
+      "Statement":[{
+        "Effect":"Allow","Principal":"*",
+        "Action":"s3:GetObject",
+        "Resource":"arn:aws:s3:::ais-chat/*"
+      }]
+    }'
 ```
 
 To remove all data and start from scratch, you can stop and remove the container and its volume.
@@ -143,24 +233,41 @@ If you start with a fresh database, apply migrations and seed both databases; ot
 pnpm db:migrate
 ```
 
-Add api keys in your `.env.local` files for all federal states that you want to seed. These keys are used to fetch the available LLM models from the ais-chat-api (e.g. `DE_BY_API_KEY` for Bavaria). If you previously seeded the api database, use the resulting API key.
-
-The api database seed also requires LLM provider credentials for the models it creates locally. Add these to `apps/api/.env.local`:
+The api database seed requires LLM provider credentials for the models it creates. Add these to `apps/api/.env.local`:
 
 ```sh
 LLM_IONOS_API_KEY=...
-LLM_IONOS_BASE_URL=...
+LLM_IONOS_BASE_URL=...      # e.g. https://openai.inference.de-txl.ionos.com/v1
 LLM_GPT4OMINI_API_KEY=...
-LLM_GPT4OMINI_BASE_URL=...
+LLM_GPT4OMINI_BASE_URL=...  # full Azure deployment URL incl. api-version query param
 LLM_GPT5NANO_API_KEY=...
 LLM_GPT5NANO_BASE_URL=...
 ```
 
-Without these, placeholder values are used and the models will not work until real keys are configured.
+Without these, placeholder values are used and the models will not work until real keys are configured via the admin UI.
+
+Also add `API_KEY` to `apps/chat-bot/.env.local` — it must match the value set in `apps/api/.env.local`:
 
 ```sh
-pnpm db:seed
+API_KEY=<same-value-as-in-apps/api/.env.local>
 ```
+
+> **Important:** the root `pnpm db:seed` does not load `.env.local`. Run the two seeds separately for local development:
+>
+> ```sh
+> # 1. Seed the API database (prints a DE_TEST_API_KEY=sk_… line — save it)
+> pnpm --filter @ais-chat/api-database db:seed
+>
+> # 2. Start the dev server first, then seed app_db (requires the API to be running)
+> pnpm dev &
+> pnpm --filter @ais-chat/shared db:seed:local
+> ```
+>
+> Add the printed key to `apps/chat-bot/.env.local`:
+>
+> ```sh
+> DE_TEST_API_KEY=sk_...
+> ```
 
 You can now start the application from the root directory:
 
