@@ -27,7 +27,9 @@ export default async function ImageGenerationPage() {
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider>
-        <ImageAssistantProvider isEnabled={federalState.featureToggles.isImageAssistantEnabled ?? false}>
+        <ImageAssistantProvider
+          isEnabled={federalState.featureToggles.isImageAssistantEnabled ?? false}
+        >
           <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
             <div className="flex flex-col h-full">
               <div className="flex-1 overflow-auto">

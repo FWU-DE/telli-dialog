@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Sheet,
@@ -50,7 +50,12 @@ function parseAssistantMessage(content: string): ParsedMessage {
   if (optionsIdx !== -1) {
     const raw = text.slice(optionsIdx + OPTIONS_MARKER.length).trim();
     const firstLine = raw.split('\n')[0] ?? '';
-    options.push(...firstLine.split('|').map((o) => o.trim()).filter(Boolean));
+    options.push(
+      ...firstLine
+        .split('|')
+        .map((o) => o.trim())
+        .filter(Boolean),
+    );
     text = text.slice(0, optionsIdx).trim();
   }
 
@@ -85,24 +90,11 @@ export function ImageEditAssistant({
     }
   }, [messages, isLoading]);
 
-  useEffect(() => {
-    if (open && messages.length === 0) {
-      void kickOff();
-    }
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) {
-      setMessages([]);
-      setInput('');
-      setError(null);
-      setIsLoading(false);
-    }
-  }, [open]);
-
-  async function kickOff() {
-    setIsLoading(true);
+  const kickOff = useCallback(async () => {
+    setMessages([]);
+    setInput('');
     setError(null);
+    setIsLoading(true);
     const result = await imageEditAssistantAction([], { originalPrompt, imageUrl });
     if (result.success) {
       setMessages([{ role: 'assistant', content: result.value }]);
@@ -110,7 +102,14 @@ export function ImageEditAssistant({
       setError(t('assistant-error'));
     }
     setIsLoading(false);
-  }
+  }, [originalPrompt, imageUrl, t]);
+
+  useEffect(() => {
+    if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void kickOff();
+    }
+  }, [open, kickOff]);
 
   async function sendMessage(text: string) {
     const trimmed = text.trim();
@@ -181,9 +180,7 @@ export function ImageEditAssistant({
                           </button>
                         ))}
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {t('assistant-or-type-own')}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{t('assistant-or-type-own')}</p>
                     </div>
                   )}
                   {finalPrompt && (
@@ -191,9 +188,7 @@ export function ImageEditAssistant({
                       <p className="text-xs font-semibold text-primary mb-1.5">
                         {t('assistant-generated-prompt-label')}
                       </p>
-                      <p className="text-sm leading-relaxed">
-                        {displayPrompt ?? finalPrompt}
-                      </p>
+                      <p className="text-sm leading-relaxed">{displayPrompt ?? finalPrompt}</p>
                       {displayPrompt && (
                         <details className="mt-2">
                           <summary className="text-xs text-muted-foreground cursor-pointer select-none">

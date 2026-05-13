@@ -38,8 +38,11 @@ export default function ImageGenerationChat({
   const { selectedStyle } = useImageStyle();
   const tImageGeneration = useTranslations('image-generation');
 
-  const { isOpen: assistantOpen, setIsOpen: setAssistantOpen, isEnabled: isAssistantEnabled } =
-    useImageAssistant();
+  const {
+    isOpen: assistantOpen,
+    setIsOpen: setAssistantOpen,
+    isEnabled: isAssistantEnabled,
+  } = useImageAssistant();
   const [input, setInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [lastPrompt, setLastPrompt] = useState('');

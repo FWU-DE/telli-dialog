@@ -22,9 +22,11 @@ async function openAssistantAndWaitForResponse(page: Page, buttonName: string) {
   const sheet = page.getByRole('dialog');
   await expect(sheet).toBeVisible();
   // wait for the loading spinner to disappear (LLM responded)
-  await expect(sheet.locator('svg').filter({ has: page.locator('[class*="animate"]') })).toBeHidden({
-    timeout: 30000,
-  });
+  await expect(sheet.locator('svg').filter({ has: page.locator('[class*="animate"]') })).toBeHidden(
+    {
+      timeout: 30000,
+    },
+  );
   return sheet;
 }
 
@@ -76,8 +78,10 @@ test('image assistant - asks to reuse existing input text', async ({ page }) => 
   await expect(yesChip).toBeVisible();
   await yesChip.click();
 
-  // Assistant should now follow up with a targeted question
-  expect(await sheet.locator('.bg-muted').count()).toBeGreaterThanOrEqual(2);
+  // Wait for assistant to respond with a follow-up question
+  await expect
+    .poll(() => sheet.locator('.bg-muted').count(), { timeout: 30000 })
+    .toBeGreaterThanOrEqual(2);
 });
 
 // ── Test 3: edit assistant after image generation ──────────────────────────
@@ -113,5 +117,7 @@ test('edit assistant - opens and starts conversation after image generation', as
   await sheet.getByRole('button', { name: 'Senden' }).click();
 
   // Wait for the assistant to respond again
-  expect(await sheet.locator('.bg-muted').count()).toBeGreaterThanOrEqual(2);
+  await expect
+    .poll(() => sheet.locator('.bg-muted').count(), { timeout: 30000 })
+    .toBeGreaterThanOrEqual(2);
 });

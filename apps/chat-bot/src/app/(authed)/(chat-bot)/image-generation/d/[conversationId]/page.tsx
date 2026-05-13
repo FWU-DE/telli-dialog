@@ -61,7 +61,9 @@ export default async function Page(props: PageProps) {
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider defaultImageStyle={lastUsedStyleInChat}>
-        <ImageAssistantProvider isEnabled={federalState.featureToggles.isImageAssistantEnabled ?? false}>
+        <ImageAssistantProvider
+          isEnabled={federalState.featureToggles.isImageAssistantEnabled ?? false}
+        >
           <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
             <div className="flex flex-col h-full">
               <div className="flex-1 overflow-auto">

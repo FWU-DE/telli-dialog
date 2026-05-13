@@ -9,7 +9,7 @@ export async function imageEditAssistantAction(
   messages: AssistantMessage[],
   context: { originalPrompt: string; imageUrl?: string },
 ) {
-  const { user, federalState } = await requireAuth();
+  const { federalState } = await requireAuth();
   if (!(federalState.featureToggles.isImageAssistantEnabled ?? false)) {
     throw new ForbiddenError('Image assistant is not enabled for this federal state');
   }

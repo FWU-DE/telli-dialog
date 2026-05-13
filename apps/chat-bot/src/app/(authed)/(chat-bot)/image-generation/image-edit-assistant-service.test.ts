@@ -37,7 +37,11 @@ const mockGenerateText = vi.mocked(generateTextWithBilling);
 const mockFederalState = { id: 'fs-1', apiKeyId: 'key-1' };
 const mockTextOnlyModel = { id: 'model-1', name: 'gpt-mini', supportedImageFormats: null };
 const mockVisionModel = { id: 'model-2', name: 'gpt-4o', supportedImageFormats: ['png', 'jpg'] };
-const successResponse = { text: 'Edit response', usage: { promptTokens: 10, completionTokens: 20, totalTokens: 30 }, priceInCents: 0 };
+const successResponse = {
+  text: 'Edit response',
+  usage: { promptTokens: 10, completionTokens: 20, totalTokens: 30 },
+  priceInCents: 0,
+};
 
 function makeFetchMock(overrides?: { ok?: boolean; contentType?: string; byteLength?: number }) {
   const { ok = true, contentType = 'image/png', byteLength = 1024 } = overrides ?? {};

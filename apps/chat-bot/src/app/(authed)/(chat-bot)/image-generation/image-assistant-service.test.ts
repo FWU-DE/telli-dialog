@@ -29,7 +29,11 @@ describe('chatWithImageAssistant', () => {
     vi.clearAllMocks();
     mockGetFederalState.mockResolvedValue([null, mockFederalState] as never);
     mockGetAuxiliaryModel.mockResolvedValue(mockModel as never);
-    mockGenerateText.mockResolvedValue({ text: 'Response text', usage: { promptTokens: 10, completionTokens: 20, totalTokens: 30 }, priceInCents: 0 });
+    mockGenerateText.mockResolvedValue({
+      text: 'Response text',
+      usage: { promptTokens: 10, completionTokens: 20, totalTokens: 30 },
+      priceInCents: 0,
+    });
   });
 
   it('should return the LLM response text', async () => {
@@ -56,23 +60,26 @@ describe('chatWithImageAssistant', () => {
     expect(apiKeyId).toBe('key-1');
     expect(messages[0]).toMatchObject({ role: 'system' });
     expect(messages[messages.length - 2]).toMatchObject({ role: 'user', content: 'Ein Drache' });
-    expect(messages[messages.length - 1]).toMatchObject({ role: 'assistant', content: 'Welchen Stil?' });
+    expect(messages[messages.length - 1]).toMatchObject({
+      role: 'assistant',
+      content: 'Welchen Stil?',
+    });
   });
 
   it('should throw when federal state has no API key', async () => {
     mockGetFederalState.mockResolvedValue([null, { ...mockFederalState, apiKeyId: null }] as never);
 
-    await expect(
-      chatWithImageAssistant({ messages: [], federalStateId: 'fs-1' }),
-    ).rejects.toThrow('Federal state has no API key assigned');
+    await expect(chatWithImageAssistant({ messages: [], federalStateId: 'fs-1' })).rejects.toThrow(
+      'Federal state has no API key assigned',
+    );
   });
 
   it('should throw when federal state lookup fails', async () => {
     mockGetFederalState.mockResolvedValue([new Error('DB error'), null] as never);
 
-    await expect(
-      chatWithImageAssistant({ messages: [], federalStateId: 'fs-1' }),
-    ).rejects.toThrow('DB error');
+    await expect(chatWithImageAssistant({ messages: [], federalStateId: 'fs-1' })).rejects.toThrow(
+      'DB error',
+    );
   });
 
   it('should use the auxiliary model', async () => {
@@ -146,9 +153,9 @@ describe('chatWithImageAssistant', () => {
   it('should propagate errors from generateTextWithBilling', async () => {
     mockGenerateText.mockRejectedValue(new Error('quota exceeded'));
 
-    await expect(
-      chatWithImageAssistant({ messages: [], federalStateId: 'fs-1' }),
-    ).rejects.toThrow('quota exceeded');
+    await expect(chatWithImageAssistant({ messages: [], federalStateId: 'fs-1' })).rejects.toThrow(
+      'quota exceeded',
+    );
   });
 
   it('should use base system prompt when initialPrompt is empty', async () => {
