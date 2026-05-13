@@ -133,8 +133,8 @@ The project uses two separate PostgreSQL databases:
 Check that you can access the local postgresql databases:
 
 ```sh
-psql "postgresql://ais-chat:test1234@127.0.0.1:5432/app_db"
-psql "postgresql://ais-chat:test1234@127.0.0.1:5433/api_db"
+psql "postgresql://admin:test1234@127.0.0.1:5432/app_db"
+psql "postgresql://admin:test1234@127.0.0.1:5433/api_db"
 ```
 
 If you start with a fresh database, apply migrations and seed both databases; otherwise the application will not work.
