@@ -147,7 +147,7 @@ export function ChatHistory({ scrollContainer }: { scrollContainer: HTMLDivEleme
                 >
                   <XCircleIcon
                     weight={isClearPressed ? 'fill' : 'regular'}
-                    className=" size-4 text-sidebar-input-foreground"
+                    className="size-4 text-sidebar-input-foreground group-hover/button:text-foreground transition-colors "
                   />
                 </Button>
               </>
