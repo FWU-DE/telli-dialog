@@ -2,6 +2,7 @@
 
 import { requireAuth } from '@/auth/requireAuth';
 import { runServerAction } from '@shared/actions/run-server-action';
+import { ForbiddenError } from '@shared/error/forbidden-error';
 import { chatWithImageEditAssistant, type AssistantMessage } from './image-edit-assistant-service';
 
 export async function imageEditAssistantAction(
@@ -9,11 +10,13 @@ export async function imageEditAssistantAction(
   context: { originalPrompt: string; imageUrl?: string },
 ) {
   const { user, federalState } = await requireAuth();
+  if (!(federalState.featureToggles.isImageAssistantEnabled ?? false)) {
+    throw new ForbiddenError('Image assistant is not enabled for this federal state');
+  }
   return runServerAction(chatWithImageEditAssistant)({
     messages,
     originalPrompt: context.originalPrompt,
     imageUrl: context.imageUrl,
-    userId: user.id,
     federalStateId: federalState.id,
   });
 }

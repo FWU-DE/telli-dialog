@@ -50,7 +50,6 @@ export async function chatWithImageAssistant({
 }: {
   messages: AssistantMessage[];
   initialPrompt?: string;
-  userId: string;
   federalStateId: string;
 }): Promise<string> {
   const [[error, federalState], auxiliaryModel] = await Promise.all([

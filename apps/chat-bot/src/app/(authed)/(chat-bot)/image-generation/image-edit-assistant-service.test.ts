@@ -61,7 +61,6 @@ describe('chatWithImageEditAssistant', () => {
     const result = await chatWithImageEditAssistant({
       messages: [],
       originalPrompt: 'a castle',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -72,7 +71,6 @@ describe('chatWithImageEditAssistant', () => {
     await chatWithImageEditAssistant({
       messages: [],
       originalPrompt: 'ancient castle at sunset',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -84,7 +82,6 @@ describe('chatWithImageEditAssistant', () => {
     await chatWithImageEditAssistant({
       messages: [],
       originalPrompt: '<script>alert(1)</script>',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -98,7 +95,6 @@ describe('chatWithImageEditAssistant', () => {
     await chatWithImageEditAssistant({
       messages: [],
       originalPrompt: longPrompt,
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -111,7 +107,6 @@ describe('chatWithImageEditAssistant', () => {
     await chatWithImageEditAssistant({
       messages: [{ role: 'user', content: longContent }],
       originalPrompt: 'a castle',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -128,7 +123,6 @@ describe('chatWithImageEditAssistant', () => {
     await chatWithImageEditAssistant({
       messages: manyMessages,
       originalPrompt: 'a castle',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -145,7 +139,6 @@ describe('chatWithImageEditAssistant', () => {
     await chatWithImageEditAssistant({
       messages: injected,
       originalPrompt: 'a castle',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -163,7 +156,6 @@ describe('chatWithImageEditAssistant', () => {
       messages: [],
       originalPrompt: 'a castle',
       imageUrl: 'https://example.com/image.png',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -178,7 +170,6 @@ describe('chatWithImageEditAssistant', () => {
       messages: [],
       originalPrompt: 'a castle',
       imageUrl: 'https://example.com/image.png',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -195,7 +186,6 @@ describe('chatWithImageEditAssistant', () => {
       messages: [],
       originalPrompt: 'a castle',
       imageUrl: undefined,
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -211,7 +201,6 @@ describe('chatWithImageEditAssistant', () => {
       messages: [],
       originalPrompt: 'a castle',
       imageUrl: 'https://example.com/image.png',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -227,7 +216,6 @@ describe('chatWithImageEditAssistant', () => {
       messages: [],
       originalPrompt: 'a castle',
       imageUrl: 'https://example.com/image.png',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -253,7 +241,6 @@ describe('chatWithImageEditAssistant', () => {
         messages: [],
         originalPrompt: 'a castle',
         imageUrl: blockedUrl,
-        userId: 'user-1',
         federalStateId: 'fs-1',
       });
 
@@ -269,7 +256,6 @@ describe('chatWithImageEditAssistant', () => {
       messages: [{ role: 'assistant', content: 'Was möchtest du ändern?' }],
       originalPrompt: 'a castle',
       imageUrl: 'https://example.com/image.png',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -279,11 +265,19 @@ describe('chatWithImageEditAssistant', () => {
     expect(messages[2]?.content).toBe('Was möchtest du ändern?');
   });
 
+  it('throws when federal state lookup fails', async () => {
+    mockGetFederalState.mockResolvedValue([new Error('DB error'), null] as never);
+
+    await expect(
+      chatWithImageEditAssistant({ messages: [], originalPrompt: 'a', federalStateId: 'fs-1' }),
+    ).rejects.toThrow('DB error');
+  });
+
   it('throws when federal state has no API key', async () => {
     mockGetFederalState.mockResolvedValue([null, { ...mockFederalState, apiKeyId: null }] as never);
 
     await expect(
-      chatWithImageEditAssistant({ messages: [], originalPrompt: 'a', userId: 'u', federalStateId: 'fs-1' }),
+      chatWithImageEditAssistant({ messages: [], originalPrompt: 'a', federalStateId: 'fs-1' }),
     ).rejects.toThrow('Federal state has no API key assigned');
   });
 
@@ -291,7 +285,7 @@ describe('chatWithImageEditAssistant', () => {
     mockGenerateText.mockRejectedValue(new Error('quota exceeded'));
 
     await expect(
-      chatWithImageEditAssistant({ messages: [], originalPrompt: 'a', userId: 'u', federalStateId: 'fs-1' }),
+      chatWithImageEditAssistant({ messages: [], originalPrompt: 'a', federalStateId: 'fs-1' }),
     ).rejects.toThrow('quota exceeded');
   });
 
@@ -303,7 +297,6 @@ describe('chatWithImageEditAssistant', () => {
       messages: [],
       originalPrompt: 'a castle',
       imageUrl: 'https://example.com/image.png',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -319,7 +312,6 @@ describe('chatWithImageEditAssistant', () => {
       messages: [],
       originalPrompt: 'a castle',
       imageUrl: 'https://example.com/image.png',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 
@@ -334,7 +326,6 @@ describe('chatWithImageEditAssistant', () => {
       messages: [],
       originalPrompt: 'a castle',
       imageUrl: 'file:///etc/passwd',
-      userId: 'user-1',
       federalStateId: 'fs-1',
     });
 

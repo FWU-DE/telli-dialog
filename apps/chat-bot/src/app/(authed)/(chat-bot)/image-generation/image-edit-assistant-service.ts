@@ -19,10 +19,16 @@ function isAllowedImageUrl(url: string): boolean {
     // Allow localhost for local dev (MinIO) and any non-private hostname in prod
     const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
     const isPrivate =
+      hostname === '0.0.0.0' ||
       /^10\./.test(hostname) ||
       /^192\.168\./.test(hostname) ||
       /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) ||
-      hostname === '169.254.169.254';
+      hostname === '169.254.169.254' ||
+      // IPv6 loopback and private ranges
+      hostname === '[::1]' ||
+      /^\[fe[89ab][0-9a-f]:/i.test(hostname) || // fe80::/10 link-local
+      /^\[fc[0-9a-f]{2}:/i.test(hostname) || // fc00::/7 ULA
+      /^\[fd[0-9a-f]{2}:/i.test(hostname); // fc00::/7 ULA (fd range)
     return isLocal || !isPrivate;
   } catch {
     return false;
@@ -84,7 +90,6 @@ export async function chatWithImageEditAssistant({
   messages: AssistantMessage[];
   originalPrompt: string;
   imageUrl?: string;
-  userId: string;
   federalStateId: string;
 }): Promise<string> {
   const [[error, federalState], auxiliaryModel] = await Promise.all([
