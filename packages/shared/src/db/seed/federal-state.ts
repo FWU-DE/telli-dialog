@@ -170,5 +170,6 @@ export const FEDERAL_STATES = FEDERAL_STATE_DEFINITIONS.filter((state) => {
     isShareTemplateWithSchoolEnabled: true,
     isImageGenerationEnabled: true,
     isWebSearchEnabled: true,
+    isImageAssistantEnabled: true,
   },
 })) satisfies Array<Omit<FederalStateInsertModel, 'organizationId'>>;
