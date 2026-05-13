@@ -404,7 +404,22 @@
     "copy-prompt-success": "Prompt in die Zwischenablage kopiert",
     "copy-prompt-error": "Prompt konnte nicht kopiert werden",
     "copy-image-tooltip": "Bild kopieren",
-    "copy-prompt-tooltip": "Prompt kopieren"
+    "copy-prompt-tooltip": "Prompt kopieren",
+    "assistant-hint": "Beim Prompt brauchst du Hilfe? Bildassistenten nutzen →",
+    "assistant-title": "Bildassistent",
+    "assistant-description": "Ich führe dich Schritt für Schritt zu einem guten Bildprompt.",
+    "assistant-input-placeholder": "Deine Antwort...",
+    "assistant-use-prompt": "Prompt verwenden & Bild generieren",
+    "assistant-generated-prompt-label": "Dein Bildprompt:",
+    "assistant-error": "Der Assistent konnte keine Antwort generieren. Bitte versuche es erneut.",
+    "assistant-send": "Senden",
+    "assistant-or-type-own": "Oder tippe deine eigene Antwort unten ein ↓",
+    "assistant-show-english-prompt": "Englischen Prompt anzeigen",
+    "assistant-hint-button": "Prompt-Assistent",
+    "edit-assistant-title": "Bild anpassen",
+    "edit-assistant-description": "Ich helfe dir, dein Bild durch einen verbesserten Prompt zu verfeinern.",
+    "edit-assistant-button": "Bild anpassen",
+    "edit-assistant-loading": "Analysiere dein Bild…"
   },
   "authentication": {
     "login-error": {

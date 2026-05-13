@@ -160,10 +160,10 @@ export async function handleImageGeneration({
       attachment: false,
     });
 
-    // Return the image URL
     return {
       imageUrl: signedUrl,
       conversationId,
+      imageKey: key,
     };
   } catch (error) {
     if (conversationId) {
