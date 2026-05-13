@@ -155,4 +155,18 @@ describe('chatWithImageAssistant', () => {
       chatWithImageAssistant({ messages: [], userId: 'user-1', federalStateId: 'fs-1' }),
     ).rejects.toThrow('quota exceeded');
   });
+
+  it('should use base system prompt when initialPrompt is empty', async () => {
+    await chatWithImageAssistant({ messages: [], initialPrompt: '', userId: 'user-1', federalStateId: 'fs-1' });
+
+    const systemMsg = mockGenerateText.mock.calls[0]![1][0];
+    expect(systemMsg?.content).not.toContain('existing_input');
+  });
+
+  it('should use base system prompt when initialPrompt is only whitespace', async () => {
+    await chatWithImageAssistant({ messages: [], initialPrompt: '   ', userId: 'user-1', federalStateId: 'fs-1' });
+
+    const systemMsg = mockGenerateText.mock.calls[0]![1][0];
+    expect(systemMsg?.content).not.toContain('existing_input');
+  });
 });

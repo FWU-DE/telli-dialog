@@ -294,4 +294,51 @@ describe('chatWithImageEditAssistant', () => {
       chatWithImageEditAssistant({ messages: [], originalPrompt: 'a', userId: 'u', federalStateId: 'fs-1' }),
     ).rejects.toThrow('quota exceeded');
   });
+
+  it('does NOT include image when fetch returns a non-200 response', async () => {
+    mockGetAuxiliaryModel.mockResolvedValue(mockVisionModel as never);
+    vi.stubGlobal('fetch', makeFetchMock({ ok: false }));
+
+    await chatWithImageEditAssistant({
+      messages: [],
+      originalPrompt: 'a castle',
+      imageUrl: 'https://example.com/image.png',
+      userId: 'user-1',
+      federalStateId: 'fs-1',
+    });
+
+    const messages = mockGenerateText.mock.calls[0]![1];
+    expect(messages.every((m) => !m.attachments?.length)).toBe(true);
+  });
+
+  it('does NOT include image when fetch throws a network error', async () => {
+    mockGetAuxiliaryModel.mockResolvedValue(mockVisionModel as never);
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
+
+    await chatWithImageEditAssistant({
+      messages: [],
+      originalPrompt: 'a castle',
+      imageUrl: 'https://example.com/image.png',
+      userId: 'user-1',
+      federalStateId: 'fs-1',
+    });
+
+    const messages = mockGenerateText.mock.calls[0]![1];
+    expect(messages.every((m) => !m.attachments?.length)).toBe(true);
+  });
+
+  it('does NOT include image when imageUrl uses a non-http protocol (SSRF)', async () => {
+    mockGetAuxiliaryModel.mockResolvedValue(mockVisionModel as never);
+
+    await chatWithImageEditAssistant({
+      messages: [],
+      originalPrompt: 'a castle',
+      imageUrl: 'file:///etc/passwd',
+      userId: 'user-1',
+      federalStateId: 'fs-1',
+    });
+
+    const messages = mockGenerateText.mock.calls[0]![1];
+    expect(messages.every((m) => !m.attachments?.length)).toBe(true);
+  });
 });
