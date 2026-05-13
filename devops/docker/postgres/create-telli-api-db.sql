@@ -1,1 +1,1 @@
-CREATE DATABASE telli_api_db;
+CREATE DATABASE api_db;

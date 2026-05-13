@@ -1,4 +1,4 @@
-name: telli
+name: ais-chat
 
 services:
   postgres:
@@ -6,8 +6,8 @@ services:
     image: pgvector/pgvector:pg16
     restart: unless-stopped
     environment:
-      POSTGRES_DB: telli_dialog_db
-      POSTGRES_USER: telli
+      POSTGRES_DB: app_db
+      POSTGRES_USER: admin
       POSTGRES_PASSWORD: test1234
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -15,7 +15,7 @@ services:
     ports:
       - '5432:5432'
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U telli_dialog_db -d telli_dialog_db']
+      test: ['CMD-SHELL', 'pg_isready -U admin -d app_db']
       interval: 10s
       timeout: 5s
       retries: 5
