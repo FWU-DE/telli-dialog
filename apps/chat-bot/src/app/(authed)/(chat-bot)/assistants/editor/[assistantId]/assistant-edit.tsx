@@ -11,7 +11,7 @@ import { AssistantSelectModel, FileModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/card';
 import { FieldGroup } from '@ui/components/field';
-import { FormField } from '@ui/components/form/FormField';
+import { FormField } from '@ui/components/form/form-field';
 import { useRouter } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { useCallback, useMemo, useRef } from 'react';

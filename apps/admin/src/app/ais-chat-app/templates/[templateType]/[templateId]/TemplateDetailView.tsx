@@ -13,7 +13,7 @@ import {
 } from '@shared/templates/template';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { Button } from '@ui/components/button';
-import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
+import { FormFieldCheckbox } from '@ais-chat/ui/components/form/form-field-checkbox';
 import { toast } from 'sonner';
 import { TemplateInfoCard } from './TemplateInfoCard';
 import {

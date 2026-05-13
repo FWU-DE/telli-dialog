@@ -24,8 +24,8 @@ import {
   FieldSet,
   FieldLegend,
 } from '@ui/components/field';
-import { FormField } from '@ui/components/form/FormField';
-import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
+import { FormField } from '@ui/components/form/form-field';
+import { FormFieldCheckbox } from '@ais-chat/ui/components/form/form-field-checkbox';
 import {
   Select,
   SelectContent,

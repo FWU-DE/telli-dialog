@@ -51,7 +51,7 @@ import { tokenPointsPercentageValues, usageTimeValuesInMinutes } from './schema'
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
-import { FormField } from '@ui/components/form/FormField';
+import { FormField } from '@ui/components/form/form-field';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;

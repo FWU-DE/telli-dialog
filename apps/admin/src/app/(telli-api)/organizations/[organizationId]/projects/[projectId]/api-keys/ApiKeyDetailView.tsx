@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/card';
 import { Button } from '@ui/components/button';
-import { FormField } from '@ui/components/form/FormField';
+import { FormField } from '@ui/components/form/form-field';
 import {
   Select,
   SelectContent,

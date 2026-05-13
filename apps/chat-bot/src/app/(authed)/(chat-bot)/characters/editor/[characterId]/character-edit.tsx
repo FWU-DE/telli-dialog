@@ -51,7 +51,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
-import { FormField } from '@ui/components/form/FormField';
+import { FormField } from '@ui/components/form/form-field';
 import { createNewCharacterAction } from '../../actions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';

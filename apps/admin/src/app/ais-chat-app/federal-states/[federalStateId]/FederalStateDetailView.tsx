@@ -11,8 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@ui/components/card';
-import { FormField } from '@ui/components/form/FormField';
-import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
+import { FormField } from '@ui/components/form/form-field';
+import { FormFieldCheckbox } from '@ais-chat/ui/components/form/form-field-checkbox';
 import { FormFieldArray } from '@/components/form/FormFieldArray';
 import { toast } from 'sonner';
 import z from 'zod';
