@@ -417,10 +417,11 @@
     "assistant-or-type-own": "Oder tippe deine eigene Antwort unten ein ↓",
     "assistant-show-english-prompt": "Englischen Prompt anzeigen",
     "assistant-hint-button": "Prompt-Assistent",
+    "assistant-opening-question": "Was soll auf dem Bild zu sehen sein? Beschreibe das Hauptmotiv – zum Beispiel eine Person, ein Tier, eine Landschaft oder ein Objekt.",
     "edit-assistant-title": "Bild anpassen",
     "edit-assistant-description": "Ich helfe dir, dein Bild durch einen verbesserten Prompt zu verfeinern.",
     "edit-assistant-button": "Bild anpassen",
-    "edit-assistant-loading": "Analysiere dein Bild…"
+    "edit-assistant-opening-question": "Was soll am Bild verändert werden? Du kannst zum Beispiel Stil, Farben, Stimmung, Details oder die Perspektive anpassen."
   },
   "authentication": {
     "login-error": {

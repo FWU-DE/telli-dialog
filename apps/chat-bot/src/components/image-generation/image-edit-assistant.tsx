@@ -90,19 +90,11 @@ export function ImageEditAssistant({
     }
   }, [messages, isLoading]);
 
-  const kickOff = useCallback(async () => {
-    setMessages([]);
+  const kickOff = useCallback(() => {
+    setMessages([{ role: 'assistant', content: t('edit-assistant-opening-question') }]);
     setInput('');
     setError(null);
-    setIsLoading(true);
-    const result = await imageEditAssistantAction([], { originalPrompt, imageUrl });
-    if (result.success) {
-      setMessages([{ role: 'assistant', content: result.value }]);
-    } else {
-      setError(t('assistant-error'));
-    }
-    setIsLoading(false);
-  }, [originalPrompt, imageUrl, t]);
+  }, [t]);
 
   useEffect(() => {
     if (open) {
@@ -227,9 +219,6 @@ export function ImageEditAssistant({
           {isLoading && (
             <div className="flex items-center gap-2 text-muted-foreground py-1">
               <Spinner className="size-4" />
-              {messages.length === 0 && (
-                <span className="text-sm">{t('edit-assistant-loading')}</span>
-              )}
             </div>
           )}
 

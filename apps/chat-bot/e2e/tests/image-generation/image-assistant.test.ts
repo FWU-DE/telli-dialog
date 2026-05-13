@@ -17,16 +17,12 @@ async function selectFluxModel(page: Page) {
   }
 }
 
-async function openAssistantAndWaitForResponse(page: Page, buttonName: string) {
+async function openAssistantAndWaitForFirstMessage(page: Page, buttonName: string) {
   await page.getByRole('button', { name: buttonName }).click();
   const sheet = page.getByRole('dialog');
   await expect(sheet).toBeVisible();
-  // wait for the loading spinner to disappear (LLM responded)
-  await expect(sheet.locator('svg').filter({ has: page.locator('[class*="animate"]') })).toBeHidden(
-    {
-      timeout: 30000,
-    },
-  );
+  // opening message is rendered synchronously — wait for it to appear
+  await expect(sheet.locator('.bg-muted').first()).toBeVisible({ timeout: 5000 });
   return sheet;
 }
 
@@ -40,16 +36,16 @@ test('image assistant - starts fresh conversation without pre-prompt', async ({ 
   const promptInput = page.getByPlaceholder('Beschreibe, wie das Bild aussehen soll.');
   await expect(promptInput).toHaveValue('');
 
-  const sheet = await openAssistantAndWaitForResponse(page, 'Prompt-Assistent');
+  const sheet = await openAssistantAndWaitForFirstMessage(page, 'Prompt-Assistent');
 
   await expect(sheet.getByRole('heading', { name: 'Bildassistent' })).toBeVisible();
 
-  // LLM should have responded with at least one assistant bubble
+  // Opening question is shown immediately (no LLM call on open)
   const firstBubble = sheet.locator('.bg-muted').first();
   await expect(firstBubble).toBeVisible();
   await expect(firstBubble).not.toBeEmpty();
 
-  // The response should contain a question (no FINAL_PROMPT yet)
+  // No FINAL_PROMPT yet — "Prompt verwenden" button must not be visible
   const usePromptButton = sheet.getByRole('button', { name: /Prompt verwenden/i });
   await expect(usePromptButton).not.toBeVisible();
 });
@@ -64,11 +60,11 @@ test('image assistant - asks to reuse existing input text', async ({ page }) => 
   const promptInput = page.getByPlaceholder('Beschreibe, wie das Bild aussehen soll.');
   await promptInput.fill('Ein roter Drache in den Bergen');
 
-  const sheet = await openAssistantAndWaitForResponse(page, 'Prompt-Assistent');
+  const sheet = await openAssistantAndWaitForFirstMessage(page, 'Prompt-Assistent');
 
-  // The LLM should ask whether to use the existing text and show option chips
+  // Opening message immediately shows Ja/Nein chips for the existing text
   const chips = sheet.locator('button.rounded-full');
-  await expect(chips.first()).toBeVisible({ timeout: 10000 });
+  await expect(chips.first()).toBeVisible({ timeout: 5000 });
 
   // Expect at least the two options: "Ja" and "Nein"
   expect(await chips.count()).toBeGreaterThanOrEqual(2);
@@ -102,11 +98,11 @@ test('edit assistant - opens and starts conversation after image generation', as
   await expect(generatedImage).toBeVisible({ timeout: 60000 });
 
   // Open the edit assistant
-  const sheet = await openAssistantAndWaitForResponse(page, 'Bild anpassen');
+  const sheet = await openAssistantAndWaitForFirstMessage(page, 'Bild anpassen');
 
   await expect(sheet.getByRole('heading', { name: 'Bild anpassen' })).toBeVisible();
 
-  // LLM should have responded about what to change
+  // Opening question is shown immediately (no LLM call on open)
   const firstBubble = sheet.locator('.bg-muted').first();
   await expect(firstBubble).toBeVisible();
   await expect(firstBubble).not.toBeEmpty();

@@ -92,18 +92,14 @@ export function ImageAssistant({
     }
   }, [messages, isLoading]);
 
-  const kickOff = useCallback(async () => {
-    setMessages([]);
+  const kickOff = useCallback(() => {
+    const prompt = initialPrompt?.trim();
+    const openingContent = prompt
+      ? `Du hast bereits folgenden Text eingegeben:\n\n„${prompt.replace(/[<>]/g, '').slice(0, 300)}"\n\nSoll ich das als Ausgangspunkt verwenden?\n\nOPTIONS: Ja, bestehenden Text verwenden | Nein, neu beginnen`
+      : t('assistant-opening-question');
+    setMessages([{ role: 'assistant', content: openingContent }]);
     setInput('');
     setError(null);
-    setIsLoading(true);
-    const result = await imageAssistantAction([], initialPrompt);
-    if (result.success) {
-      setMessages([{ role: 'assistant', content: result.value }]);
-    } else {
-      setError(t('assistant-error'));
-    }
-    setIsLoading(false);
   }, [initialPrompt, t]);
 
   useEffect(() => {
