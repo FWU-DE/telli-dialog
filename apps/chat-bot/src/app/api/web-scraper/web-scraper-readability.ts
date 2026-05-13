@@ -95,10 +95,9 @@ export async function webScraperReadability(url: string): Promise<WebSource> {
 function extractArticleContent(html: string, url: string): string {
   let doc: JSDOM | undefined;
   const virtualConsole = new VirtualConsole();
-  // For JSDOM v27: use forwardTo, to log jsdom errors on the console
-  // virtualConsole.forwardTo(console, {
-  //   jsdomErrors: ['unhandled-exception', 'not-implemented'],
-  // });
+  virtualConsole.on('jsdomError', (error) => {
+    logDebug(`JSDOM parsing error for URL: ${url}`, { error });
+  });
   try {
     doc = new JSDOM(html, { url, virtualConsole });
 
