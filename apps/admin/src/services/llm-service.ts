@@ -32,6 +32,9 @@ export async function createLargeLanguageModel(
     organizationId,
     isNew: data.isNew,
     isDeleted: data.isDeleted,
+    tier: data.tier ?? null,
+    openSource: data.openSource ?? null,
+    dataLocation: data.dataLocation ?? null,
   });
 
   logInfo('LLM was created successfully', { organizationId, data });
@@ -60,6 +63,9 @@ export async function updateLargeLanguageModel(
       : undefined,
     isNew: data.isNew,
     isDeleted: data.isDeleted,
+    tier: data.tier ?? null,
+    openSource: data.openSource ?? null,
+    dataLocation: data.dataLocation ?? null,
   });
 
   logInfo('LLM was updated successfully', { organizationId, modelId, data });

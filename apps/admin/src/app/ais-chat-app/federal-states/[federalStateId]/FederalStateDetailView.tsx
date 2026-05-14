@@ -259,6 +259,12 @@ export function FederalStateView(props: FederalStateViewProps) {
             description="Erlaubt die Nutzung der Websuchfunktion."
             control={control}
           />
+          <FormFieldCheckbox
+            name="featureToggles.isModelMatrixEnabled"
+            label="Modell-Matrix aktivieren"
+            description="Zeigt die Modellauswahl als Matrix (Anbieter × Leistungsstufe) statt als einfache Liste."
+            control={control}
+          />
           <FormField
             name="designConfiguration"
             label="Design Konfiguration"

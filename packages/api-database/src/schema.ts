@@ -58,6 +58,9 @@ export const llmModelTable = pgTable(
       .default({}),
     isNew: boolean('is_new').notNull().default(false),
     isDeleted: boolean('is_deleted').notNull().default(false),
+    tier: text('tier').$type<'fast' | 'balanced' | 'powerful'>(),
+    openSource: boolean('open_source'),
+    dataLocation: text('data_location').$type<'eu' | 'us' | 'other'>(),
   },
   (table) => [index().on(table.organizationId)],
 );

@@ -67,6 +67,9 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     name: 'meta-llama/Meta-Llama-3.1-8B-Instruct',
     displayName: 'Llama-3.1-8B',
     description: 'Efficient for lighter tasks',
+    tier: 'fast',
+    openSource: true,
+    dataLocation: 'eu',
     setting: {
       provider: 'ionos',
       apiKey: ionosApiKey,
@@ -85,6 +88,9 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     name: 'mistralai/Mistral-Nemo-Instruct-2407',
     displayName: 'Mistral Nemo Instruct',
     description: 'Multilingual, open source and efficient',
+    tier: 'balanced',
+    openSource: true,
+    dataLocation: 'eu',
     setting: {
       provider: 'ionos',
       apiKey: ionosApiKey,
@@ -103,6 +109,9 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     name: 'gpt-4o-mini',
     displayName: 'GPT-4o-mini',
     description: 'GPT-4o Mini model for testing',
+    tier: 'fast',
+    openSource: false,
+    dataLocation: 'eu',
     setting: {
       provider: 'azure',
       apiKey: gpt4oMiniApiKey,
@@ -121,7 +130,10 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     provider: 'azure',
     name: 'gpt-5-nano',
     displayName: 'GPT-5 nano',
-    description: 'GPT-5 nano model for testing',
+    description: 'Sehr schnell und günstig',
+    tier: 'fast',
+    openSource: false,
+    dataLocation: 'eu',
     setting: {
       provider: 'azure',
       apiKey: gpt5nanoApiKey,

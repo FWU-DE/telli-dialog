@@ -9,6 +9,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/c
 import { Button } from '@ui/components/button';
 import { FormField } from '@ui/components/form/form-field';
 import { FormFieldCheckbox } from '@ais-chat/ui/components/form/form-field-checkbox';
+import { Controller } from 'react-hook-form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@ui/components/select';
+import { Field, FieldDescription, FieldLabel } from '@ui/components/field';
 import { LargeLanguageModel } from '@/types/large-language-model';
 import { createLLMAction, updateLLMAction } from './actions';
 import { ROUTES } from '@/consts/routes';
@@ -37,6 +46,9 @@ const llmFormSchema = z.object({
   additionalParameters: jsonStringSchema.optional().default(''),
   isNew: z.boolean().default(false),
   isDeleted: z.boolean().default(false),
+  tier: z.enum(['fast', 'balanced', 'powerful']).nullable().optional(),
+  openSource: z.boolean().nullable().optional(),
+  dataLocation: z.enum(['eu', 'us', 'other']).nullable().optional(),
 });
 
 type LLMForm = z.infer<typeof llmFormSchema>;
@@ -73,6 +85,9 @@ export function LargeLanguageModelDetailView({
           additionalParameters: JSON.stringify(model.additionalParameters, null, 2),
           isNew: model.isNew,
           isDeleted: model.isDeleted,
+          tier: model.tier ?? null,
+          openSource: model.openSource ?? null,
+          dataLocation: model.dataLocation ?? null,
         }
       : {
           name: '',
@@ -85,6 +100,9 @@ export function LargeLanguageModelDetailView({
           additionalParameters: '{}',
           isNew: false,
           isDeleted: false,
+          tier: null,
+          openSource: null,
+          dataLocation: null,
         },
   });
 
@@ -207,6 +225,55 @@ export function LargeLanguageModelDetailView({
             name="isDeleted"
             label="Als gelöscht markieren"
             description="Kennzeichnet das Modell als gelöscht"
+            control={control}
+          />
+
+          <Controller
+            name="tier"
+            control={control}
+            render={({ field }) => (
+              <Field>
+                <FieldLabel htmlFor="tier">Leistungsstufe</FieldLabel>
+                <FieldDescription>Einordnung des Modells für die Matrix-Ansicht</FieldDescription>
+                <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
+                  <SelectTrigger id="tier">
+                    <SelectValue placeholder="Nicht zugeordnet" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fast">Schnell</SelectItem>
+                    <SelectItem value="balanced">Ausgewogen</SelectItem>
+                    <SelectItem value="powerful">Leistungsstark</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="dataLocation"
+            control={control}
+            render={({ field }) => (
+              <Field>
+                <FieldLabel htmlFor="dataLocation">Datenspeicherort</FieldLabel>
+                <FieldDescription>Wo findet die Inferenz statt?</FieldDescription>
+                <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
+                  <SelectTrigger id="dataLocation">
+                    <SelectValue placeholder="Nicht angegeben" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="eu">EU</SelectItem>
+                    <SelectItem value="us">USA</SelectItem>
+                    <SelectItem value="other">Sonstige</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+          />
+
+          <FormFieldCheckbox
+            name="openSource"
+            label="Open Source"
+            description="Modellgewichte sind öffentlich verfügbar"
             control={control}
           />
 

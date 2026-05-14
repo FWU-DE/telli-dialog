@@ -184,6 +184,7 @@ export const federalStateFeatureTogglesSchema = z.object({
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
   isImageGenerationEnabled: z.boolean().optional(),
   isWebSearchEnabled: z.boolean().optional(),
+  isModelMatrixEnabled: z.boolean().optional(),
 });
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
 
@@ -490,11 +491,17 @@ export const llmModelTable = pgTable(
     supportedImageFormats: json('supported_image_formats').$type<string[]>(),
     isNew: boolean('is_new').notNull().default(false),
     isDeleted: boolean('is_deleted').notNull().default(false),
+    tier: text('tier').$type<'fast' | 'balanced' | 'powerful'>(),
+    openSource: boolean('open_source'),
+    dataLocation: text('data_location').$type<'eu' | 'us' | 'other'>(),
   },
   (table) => [unique().on(table.provider, table.name)],
 );
 
-export const llmModelSelectSchema = createSelectSchema(llmModelTable);
+export const llmModelSelectSchema = createSelectSchema(llmModelTable, {
+  tier: z.enum(['fast', 'balanced', 'powerful']).nullable(),
+  dataLocation: z.enum(['eu', 'us', 'other']).nullable(),
+});
 export const llmModelInsertSchema = createInsertSchema(llmModelTable).omit({
   id: true,
   createdAt: true,

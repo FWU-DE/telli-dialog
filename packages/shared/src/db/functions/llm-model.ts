@@ -85,7 +85,7 @@ export async function dbUpdateLlmModelsByFederalStateId({
       models,
     }),
   ]);
-  return models;
+  return dbGetLlmModelsByFederalStateId({ federalStateId });
 }
 
 export async function dbUpdateLlmModelsForAllFederalStates(): Promise<
@@ -151,7 +151,7 @@ export async function dbUpsertLlmModelsByModelsAndFederalStateId({
           isDeleted: model.isDeleted,
         },
       });
-    insertedModels.push(model);
+    insertedModels.push({ ...model, tier: null, openSource: null, dataLocation: null });
     await db
       .insert(federalStateLlmModelMappingTable)
       .values({ federalStateId, llmModelId: model.id })
