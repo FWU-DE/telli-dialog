@@ -13,10 +13,12 @@ type SelectLlmModelProps = {
 };
 
 function useIsDesktop(breakpoint = 768) {
-  const [isDesktop, setIsDesktop] = useState(true);
+  const [isDesktop, setIsDesktop] = useState(
+    () =>
+      typeof window !== 'undefined' && window.matchMedia(`(min-width: ${breakpoint}px)`).matches,
+  );
   useEffect(() => {
     const mq = window.matchMedia(`(min-width: ${breakpoint}px)`);
-    setIsDesktop(mq.matches);
     const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);

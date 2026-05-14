@@ -21,10 +21,10 @@ Apps: chat-bot → :3000, admin → :3001, API → :3002
 
 Es gibt **zwei separate Datenbanken** mit je eigenem Schema und Migrations-Workflow:
 
-| Package | Datenbank | Schema-Datei | Wofür |
-|---|---|---|---|
-| `packages/api-database` | `api_db` (Port 5432) | `src/schema.ts` | LLM-Modelle, API-Keys, Organisationen |
-| `packages/shared` | `app_db` (Port 5432) | `src/db/schema.ts` | Nutzer, Konversationen, Bundesländer, Feature Flags |
+| Package                 | Datenbank            | Schema-Datei       | Wofür                                               |
+| ----------------------- | -------------------- | ------------------ | --------------------------------------------------- |
+| `packages/api-database` | `api_db` (Port 5432) | `src/schema.ts`    | LLM-Modelle, API-Keys, Organisationen               |
+| `packages/shared`       | `app_db` (Port 5432) | `src/db/schema.ts` | Nutzer, Konversationen, Bundesländer, Feature Flags |
 
 **Beide** müssen aktualisiert werden wenn ein Modell-Feld geändert wird (z.B. `llmModelTable` existiert in beiden!).
 
@@ -43,11 +43,13 @@ pnpm db:generate && pnpm db:migrate:local
 Flags sind **pro Bundesland** in der DB gespeichert (`federal_state.feature_toggles` JSON-Spalte).
 
 **Schema definieren** in `packages/shared/src/db/schema.ts` → `federalStateFeatureTogglesSchema`:
+
 ```ts
 isMyFeatureEnabled: z.boolean().optional(),
 ```
 
 **Zugriff** überall via `federalState.featureToggles`:
+
 ```ts
 const isEnabled = federalState.featureToggles?.isMyFeatureEnabled ?? false;
 ```

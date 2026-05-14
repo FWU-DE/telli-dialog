@@ -46,7 +46,7 @@ function buildMatrix(models: LlmModelSelectModel[], isStudent: boolean): Provide
   const textModels = models
     .filter((m) => m.priceMetadata.type === 'text')
     .filter((m) => !isStudent || !m.name.includes('mistral'))
-    .filter((m) => m.tier != null);
+    .filter((m) => m.tier !== null);
 
   const providerMap = new Map<string, ProviderRow>();
 
@@ -87,9 +87,7 @@ function DataLocationBadge({
   else if (openSource === false) parts.push('Closed');
 
   if (parts.length === 0) return null;
-  return (
-    <span className="text-xs text-muted-foreground font-normal">{parts.join(' · ')}</span>
-  );
+  return <span className="text-xs text-muted-foreground font-normal">{parts.join(' · ')}</span>;
 }
 
 export default function ModelMatrix({
@@ -105,14 +103,11 @@ export default function ModelMatrix({
   const searchParams = useSearchParams();
   const [optimisticModelId, setOptimisticModelId] = React.useOptimistic(selectedModel?.name);
 
-  const currentSelectedModel =
-    models.find((m) => m.name === optimisticModelId) ?? selectedModel;
+  const currentSelectedModel = models.find((m) => m.name === optimisticModelId) ?? selectedModel;
 
   const rows = buildMatrix(models, isStudent);
 
-  const activeTiers = TIER_ORDER.filter((tier) =>
-    rows.some((row) => row.cells[tier] != null),
-  );
+  const activeTiers = TIER_ORDER.filter((tier) => rows.some((row) => row.cells[tier] !== null));
 
   async function handleSelectModel(model: LlmModelSelectModel) {
     startTransition(() => {
@@ -185,10 +180,7 @@ export default function ModelMatrix({
                       <span className="text-sm font-semibold text-foreground">
                         {row.providerLabel}
                       </span>
-                      <DataLocationBadge
-                        location={row.dataLocation}
-                        openSource={row.openSource}
-                      />
+                      <DataLocationBadge location={row.dataLocation} openSource={row.openSource} />
                     </div>
                   </td>
                   {activeTiers.map((tier) => {
