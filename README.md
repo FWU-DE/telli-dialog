@@ -148,7 +148,7 @@ docker compose -f devops/docker/docker-compose.local.yml \
 # devops/docker/docker-compose.local.override.yml
 services:
   valkey:
-    image: redis:7-alpine   # keep this if also replacing valkey
+    image: redis:7-alpine # keep this if also replacing valkey
 
   rustfs:
     image: rustfs/rustfs:latest
