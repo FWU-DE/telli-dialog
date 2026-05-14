@@ -24,15 +24,15 @@ const { chain, getDbResult, setDbResult } = vi.hoisted(() => {
   for (const m of methods) {
     chain[m] = vi.fn().mockImplementation(() => chain);
   }
-  chain['$withCache'].mockImplementation(() => Promise.resolve(dbResult));
-  chain['onConflictDoNothing'].mockImplementation(() => Promise.resolve());
+  chain['$withCache']!.mockImplementation(() => Promise.resolve(dbResult));
+  chain['onConflictDoNothing']!.mockImplementation(() => Promise.resolve());
 
   return {
     chain,
     getDbResult: () => dbResult,
     setDbResult: (v: unknown[]) => {
       dbResult = v;
-      chain['$withCache'].mockImplementation(() => Promise.resolve(dbResult));
+      chain['$withCache']!.mockImplementation(() => Promise.resolve(dbResult));
     },
   };
 });
@@ -75,10 +75,10 @@ beforeEach(() => {
   setDbResult([]);
 
   for (const m of Object.keys(chain)) {
-    chain[m].mockImplementation(() => chain);
+    chain[m]!.mockImplementation(() => chain);
   }
-  chain['$withCache'].mockImplementation(() => Promise.resolve(getDbResult()));
-  chain['onConflictDoNothing'].mockImplementation(() => Promise.resolve());
+  chain['$withCache']!.mockImplementation(() => Promise.resolve(getDbResult()));
+  chain['onConflictDoNothing']!.mockImplementation(() => Promise.resolve());
 });
 
 // ── dbUpsertLlmModelsByModelsAndFederalStateId ────────────────────────────────
@@ -124,7 +124,7 @@ describe('dbUpdateLlmModelsByFederalStateId', () => {
 
     // First $withCache → existing models (empty); second → final result after upsert
     let callCount = 0;
-    chain['$withCache'].mockImplementation(() => {
+    chain['$withCache']!.mockImplementation(() => {
       callCount++;
       return Promise.resolve(callCount === 1 ? [] : [storedModel]);
     });
