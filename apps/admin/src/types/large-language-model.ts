@@ -12,6 +12,9 @@ export type LargeLanguageModel = {
   additionalParameters: object;
   isNew: boolean;
   isDeleted: boolean;
+  tier: 'fast' | 'balanced' | 'powerful' | null;
+  openSource: boolean | null;
+  dataLocation: 'eu' | 'us' | 'other' | null;
 };
 
 export type CreateLargeLanguageModel = {
@@ -25,6 +28,9 @@ export type CreateLargeLanguageModel = {
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
+  tier?: 'fast' | 'balanced' | 'powerful' | null;
+  openSource?: boolean | null;
+  dataLocation?: 'eu' | 'us' | 'other' | null;
 };
 
 export type UpdateLargeLanguageModel = {
@@ -38,4 +44,7 @@ export type UpdateLargeLanguageModel = {
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
+  tier?: 'fast' | 'balanced' | 'powerful' | null;
+  openSource?: boolean | null;
+  dataLocation?: 'eu' | 'us' | 'other' | null;
 };

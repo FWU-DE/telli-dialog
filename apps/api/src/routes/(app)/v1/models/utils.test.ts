@@ -16,6 +16,9 @@ const baseModel: LlmModel = {
   additionalParameters: {},
   isNew: false,
   isDeleted: false,
+  tier: null,
+  openSource: null,
+  dataLocation: null,
 };
 
 describe('obscureModels', () => {

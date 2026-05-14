@@ -266,6 +266,12 @@ export function FederalStateView(props: FederalStateViewProps) {
             description="Zeigt den geführten Bildprompt-Assistenten in der Bildgenerierungsansicht an."
             control={control}
           />
+          <FormFieldCheckbox
+            name="featureToggles.isModelMatrixEnabled"
+            label="Modell-Matrix aktivieren"
+            description="Zeigt die Modellauswahl als Matrix (Anbieter × Leistungsstufe) statt als einfache Liste."
+            control={control}
+          />
           <FormField
             name="designConfiguration"
             label="Design Konfiguration"

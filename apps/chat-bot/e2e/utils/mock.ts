@@ -63,6 +63,9 @@ export const mockLlmModel = (): LlmModelSelectModel => {
     supportedImageFormats: null,
     isNew: false,
     isDeleted: false,
+    tier: null,
+    openSource: null,
+    dataLocation: null,
   };
 };
 
