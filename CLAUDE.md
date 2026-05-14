@@ -67,6 +67,19 @@ Neue Flags standardmäßig `optional()` (nicht `.default(true)`), damit sie init
 
 Model-Auswahl-Priorität im Chat: Query-Param → letzte Nachricht → User-Präferenz → `DEFAULT_CHAT_MODEL`
 
+## Code-Qualität vor dem Commit
+
+Immer vor dem Commit ausführen:
+
+```sh
+pnpm prettier --write <datei>   # oder: pnpm prettier --write .
+pnpm lint                       # ESLint mit --max-warnings 0
+```
+
+CI prüft beides (`format:check` + `lint`). Prettier-Fehler erzeugen ESLint-Errors via `prettier/prettier`-Regel — beides zusammen fixen spart einen CI-Zyklus.
+
+Screenshots für Pull Requests **nicht ins Repo committen** — direkt per Drag-and-Drop in die PR-Beschreibung auf GitHub hochladen (erzeugt `user-attachments`-URLs).
+
 ## Konventionen
 
 - Beschreibungen zu Modellen sind im Feld `description` auf `llmModelTable` — bereits im UI sichtbar
