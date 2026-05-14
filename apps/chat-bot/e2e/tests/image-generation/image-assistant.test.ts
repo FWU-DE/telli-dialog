@@ -80,7 +80,38 @@ test('image assistant - asks to reuse existing input text', async ({ page }) => 
     .toBeGreaterThanOrEqual(2);
 });
 
-// ── Test 3: edit assistant after image generation ──────────────────────────
+// ── Test 3: clicking "Nein" chip starts fresh without the existing prompt ──
+
+test('image assistant - clicking "Nein" chip starts fresh conversation', async ({ page }) => {
+  await page.goto('/image-generation');
+  await page.waitForURL('/image-generation**');
+
+  // Pre-fill with an existing prompt
+  const promptInput = page.getByPlaceholder('Beschreibe, wie das Bild aussehen soll.');
+  await promptInput.fill('Ein blauer Elefant im Weltraum');
+
+  const sheet = await openAssistantAndWaitForFirstMessage(page, 'Prompt-Assistent');
+
+  // Ja/Nein chips should be visible
+  const chips = sheet.locator('button.rounded-full');
+  await expect(chips.first()).toBeVisible({ timeout: 5000 });
+
+  // Click "Nein" to start fresh
+  const noChip = chips.filter({ hasText: /nein/i }).first();
+  await expect(noChip).toBeVisible();
+  await noChip.click();
+
+  // Wait for the assistant to respond with a fresh opening question
+  await expect
+    .poll(() => sheet.locator('.bg-muted').count(), { timeout: 30000 })
+    .toBeGreaterThanOrEqual(2);
+
+  // The original Ja/Nein chips are no longer on the last message (a new message is now last)
+  const neinChipAfter = sheet.locator('button.rounded-full').filter({ hasText: /nein.*beginnen/i });
+  await expect(neinChipAfter).toHaveCount(0);
+});
+
+// ── Test 4: edit assistant after image generation ──────────────────────────
 
 test('edit assistant - opens and starts conversation after image generation', async ({ page }) => {
   await page.goto('/image-generation');
