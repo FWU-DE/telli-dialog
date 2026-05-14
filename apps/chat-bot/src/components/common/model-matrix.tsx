@@ -1,6 +1,6 @@
 'use client';
 
-import React, { startTransition } from 'react';
+import React, { startTransition, useState } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { type LlmModelSelectModel } from '@shared/db/schema';
 import { cn } from '@/utils/tailwind';
@@ -102,6 +102,7 @@ export default function ModelMatrix({
   const pathname = useCustomPathname();
   const searchParams = useSearchParams();
   const [optimisticModelId, setOptimisticModelId] = React.useOptimistic(selectedModel?.name);
+  const [hoveredCell, setHoveredCell] = useState<{ provider: string; tier: string } | null>(null);
 
   const currentSelectedModel = models.find((m) => m.name === optimisticModelId) ?? selectedModel;
 
@@ -165,7 +166,10 @@ export default function ModelMatrix({
                 {activeTiers.map((tier) => (
                   <th
                     key={tier}
-                    className="text-left text-xs text-muted-foreground font-medium pb-2 px-2"
+                    className={cn(
+                      'text-left text-xs font-medium pb-2 px-2 transition-colors',
+                      hoveredCell?.tier === tier ? 'text-foreground' : 'text-muted-foreground',
+                    )}
                   >
                     {TIER_LABELS[tier]}
                   </th>
@@ -177,7 +181,14 @@ export default function ModelMatrix({
                 <tr key={row.provider} className={cn(i > 0 && 'border-t border-border')}>
                   <td className="py-2 pr-4 align-top">
                     <div className="flex flex-col gap-0.5 pt-1">
-                      <span className="text-sm font-semibold text-foreground">
+                      <span
+                        className={cn(
+                          'text-sm font-semibold transition-colors',
+                          hoveredCell?.provider === row.provider
+                            ? 'text-primary'
+                            : 'text-foreground',
+                        )}
+                      >
                         {row.providerLabel}
                       </span>
                       <DataLocationBadge location={row.dataLocation} openSource={row.openSource} />
@@ -192,6 +203,8 @@ export default function ModelMatrix({
                           <DropdownMenu.Item asChild>
                             <button
                               onClick={() => handleSelectModel(model)}
+                              onMouseEnter={() => setHoveredCell({ provider: row.provider, tier })}
+                              onMouseLeave={() => setHoveredCell(null)}
                               className={cn(
                                 'text-left px-3 py-2 rounded-lg w-full outline-none transition-colors',
                                 isSelected
