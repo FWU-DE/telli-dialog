@@ -67,6 +67,8 @@ export default async function Page(
 
   const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
+  const isArtifactsEnabled = federalState.featureToggles?.isArtifactsEnabled ?? false;
+
   return (
     <LlmModelsProvider
       models={models}
@@ -91,6 +93,8 @@ export default async function Page(
           enableFileUpload={false}
           imageSource={avatarPictureUrl}
           logoElement={logoElement}
+          conversationDownloadBasename={chat.name}
+          isArtifactsEnabled={isArtifactsEnabled}
         />
       </DefaultPageLayout>
     </LlmModelsProvider>

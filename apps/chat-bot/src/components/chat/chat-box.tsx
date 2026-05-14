@@ -34,6 +34,7 @@ export function ChatBox({
   isLoading,
   regenerateMessage,
   status,
+  downloadFileBasename,
 }: {
   assistantIcon?: ReactNode;
   children: UIMessage;
@@ -45,6 +46,7 @@ export function ChatBox({
   isLoading: boolean;
   regenerateMessage: () => void;
   status: ChatStatus;
+  downloadFileBasename?: string | null;
 }) {
   const tCommon = useTranslations('common');
   const { isAtLeast } = useBreakpoints();
@@ -166,7 +168,11 @@ export function ChatBox({
       </div>
     ) : null;
 
-  const messageContent = <MarkdownDisplay>{children.content}</MarkdownDisplay>;
+  const messageContent = (
+    <MarkdownDisplay downloadFileBasename={downloadFileBasename}>
+      {children.content}
+    </MarkdownDisplay>
+  );
 
   return (
     <>

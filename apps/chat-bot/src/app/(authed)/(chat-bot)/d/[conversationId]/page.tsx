@@ -6,6 +6,7 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
+import { dbGetLatestArtifactVersionByConversationId } from '@shared/db/functions/artifacts';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import Logo from '@/components/common/logo';
 import z from 'zod';
@@ -48,6 +49,11 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   const currentModel =
     searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
+  const isArtifactsEnabled = federalState.featureToggles?.isArtifactsEnabled ?? false;
+  const initialArtifact = isArtifactsEnabled
+    ? await dbGetLatestArtifactVersionByConversationId(conversationId)
+    : undefined;
+
   const convertedMessages = convertMessageModelToMessage(messages);
   const webSourceMapping = new Map<string, WebSource[]>();
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
@@ -86,6 +92,9 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
           enableFileUpload={true}
           webSourceMapping={webSourceMapping}
           logoElement={logoElement}
+          isArtifactsEnabled={isArtifactsEnabled}
+          initialArtifactContent={initialArtifact?.content ?? ''}
+          conversationDownloadBasename={conversation.name}
         />
       </DefaultPageLayout>
     </LlmModelsProvider>

@@ -34,6 +34,13 @@ import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { searchWeb, isWebSearchNeeded } from './websearch';
 import { env } from '@/env';
+import { parseArtifactFromText, stripArtifactFromText } from './artifact-utils';
+import {
+  dbInsertArtifact,
+  dbInsertArtifactVersion,
+  dbGetArtifactByConversationId,
+  dbGetLatestVersionNumberByArtifactId,
+} from '@shared/db/functions/artifacts';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -243,14 +250,20 @@ export async function sendChatMessage({
     let fullText = '';
 
     try {
+      const isArtifactsEnabled = user.federalState.featureToggles?.isArtifactsEnabled ?? false;
+
       const textStream = generateTextStreamWithBilling(
         definedModel.id,
         aiCoreMessages,
         apiKeyId,
         async ({ usage, priceInCents }) => {
-          // Save assistant message to DB
+          const parsedArtifact = isArtifactsEnabled ? parseArtifactFromText(fullText) : null;
+          const proseContent = parsedArtifact ? stripArtifactFromText(fullText) : fullText;
+
+          // Save assistant message to DB (prose only, artifact stripped)
           await dbInsertChatContent({
-            content: fullText,
+            id: assistantMessageId,
+            content: proseContent,
             role: 'assistant',
             userId: user.id,
             orderNumber: messages.length + 2,
@@ -258,6 +271,26 @@ export async function sendChatMessage({
             conversationId: conversation.id,
             webSearchResults,
           });
+
+          // Persist artifact if present
+          if (parsedArtifact !== null) {
+            const existing = await dbGetArtifactByConversationId(conversation.id);
+            const artifactId =
+              existing?.id ??
+              (
+                await dbInsertArtifact({
+                  conversationId: conversation.id,
+                  title: parsedArtifact.title,
+                })
+              ).id;
+            const nextVersion = (await dbGetLatestVersionNumberByArtifactId(artifactId)) + 1;
+            await dbInsertArtifactVersion({
+              artifactId,
+              messageId: assistantMessageId,
+              content: parsedArtifact.content,
+              versionNumber: nextVersion,
+            });
+          }
 
           // Generate title if needed
           if (messages.length <= 2 || conversation.name === null) {

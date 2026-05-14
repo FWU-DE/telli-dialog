@@ -27,6 +27,7 @@ export default async function Page() {
   });
 
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
+  const isArtifactsEnabled = federalState.featureToggles?.isArtifactsEnabled ?? false;
 
   return (
     <LlmModelsProvider
@@ -50,6 +51,7 @@ export default async function Page() {
           promptSuggestions={promptSuggestions}
           enableFileUpload={true}
           logoElement={logoElement}
+          isArtifactsEnabled={isArtifactsEnabled}
         />
       </DefaultPageLayout>
     </LlmModelsProvider>

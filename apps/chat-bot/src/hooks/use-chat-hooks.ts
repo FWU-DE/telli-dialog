@@ -21,6 +21,7 @@ export type { ChatMessage, ChatStatus, UseChatReturn, UIMessage };
 export function useMainChat(options: {
   conversationId: string;
   initialMessages?: ChatMessage[];
+  initialArtifactContent?: string;
   modelId?: string;
   characterId?: string;
   assistantId?: string;

@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@ui/components/button';
 import { cn } from '@/utils/tailwind';
 import { BoxArrowDownIcon } from '@phosphor-icons/react';
+import { downloadFileFromBlob } from '@/utils/download-file-from-blob';
 
 type DownloadConversationButtonProps = {
   conversationId: string;
@@ -85,16 +86,4 @@ export default function DownloadConversationButton({
   );
 }
 
-export function downloadFileFromBlob(blob: Blob, fileName: string) {
-  const url = window.URL.createObjectURL(blob);
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', fileName);
-
-  document.body.appendChild(link);
-  link.click();
-
-  link.parentNode?.removeChild(link);
-  window.URL.revokeObjectURL(url);
-}
+export { downloadFileFromBlob } from '@/utils/download-file-from-blob';

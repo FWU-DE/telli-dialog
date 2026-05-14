@@ -15,21 +15,38 @@ import {
 } from '../utils/system-prompt';
 import type { WebSearchResult } from '@shared/db/schema';
 
+const ARTIFACT_GUIDELINES = `
+## Artifacts
+When the user asks you to create an interactive HTML app, visualization, game, component, or any self-contained runnable code, wrap the complete self-contained HTML document in XML tags:
+<artifact type="html" title="Brief descriptive title">
+<!DOCTYPE html>
+<html>
+...complete document with inline CSS and JS...
+</html>
+</artifact>
+Rules:
+- Always produce a complete, self-contained HTML document (no external CDN scripts or stylesheets unless the user explicitly requests them).
+- Write any explanatory text before or after the artifact tag, never inside it.
+- Never split the HTML across multiple artifact tags.
+- If the user asks to update or extend the artifact, output the full updated HTML in a new artifact tag.`;
+
 function constructAisChatSystemPrompt(
   chunks: RetrievedChunk[],
   errorUrls: string[],
   webSearchResults: WebSearchResult[],
+  isArtifactsEnabled: boolean,
 ) {
   const ragContext = constructRagContext(chunks, errorUrls, webSearchResults);
 
-  return `Du bist AIS.chat, der datenschutzkonforme KI-Chatbot für den Schulunterricht. 
-Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. 
-Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. 
+  return `Du bist AIS.chat, der datenschutzkonforme KI-Chatbot für den Schulunterricht.
+Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen.
+Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben.
 Heute ist der ${formatDateToGermanTimestamp(new Date())}.
 ${LANGUAGE_GUIDELINES}
 ${TOOL_GUIDELINES}
 ${FORMAT_GUIDELINES}
 ${SUGGESTION_GUIDELINES}
+${isArtifactsEnabled ? ARTIFACT_GUIDELINES : ''}
 ${ragContext}`;
 }
 
@@ -167,5 +184,10 @@ export async function constructChatSystemPrompt({
     }
   }
 
-  return constructAisChatSystemPrompt(chunks, errorUrls, webSearchResults);
+  return constructAisChatSystemPrompt(
+    chunks,
+    errorUrls,
+    webSearchResults,
+    federalState.featureToggles?.isArtifactsEnabled ?? false,
+  );
 }

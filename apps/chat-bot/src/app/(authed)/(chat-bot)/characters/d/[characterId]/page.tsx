@@ -48,6 +48,8 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
 
   const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
+  const isArtifactsEnabled = federalState.featureToggles?.isArtifactsEnabled ?? false;
+
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <DefaultPageLayout
@@ -68,6 +70,7 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
           imageSource={avatarPictureUrl}
           enableFileUpload={false}
           logoElement={logoElement}
+          isArtifactsEnabled={isArtifactsEnabled}
         />
       </DefaultPageLayout>
     </LlmModelsProvider>

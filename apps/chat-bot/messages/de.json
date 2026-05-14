@@ -537,6 +537,19 @@
       "custom-file-delete-error": "Fehler beim Löschen der Datei"
     }
   },
+  "artifact": {
+    "download": "Als HTML herunterladen",
+    "inline-preview-heading": "Vorschau",
+    "preview-title": "Artifact-Vorschau"
+  },
+  "htmlPreview": {
+    "open-preview": "Vorschau",
+    "dialog-title": "Vorschau",
+    "tab-preview": "Vorschau",
+    "tab-code": "Quelltext",
+    "download": "Herunterladen",
+    "iframe-title": "HTML- oder SVG-Vorschau"
+  },
   "entity-overview": {
     "filter-all": "Alle",
     "filter-mine": "Meine",

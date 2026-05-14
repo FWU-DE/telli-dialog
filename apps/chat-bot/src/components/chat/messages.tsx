@@ -17,6 +17,7 @@ interface MessagesProps {
   fileMapping?: Map<string, FileModel[]>;
   pendingFileMapping?: Map<string, PendingFileModel[]>;
   webSourceMapping?: Map<string, WebSource[]>;
+  downloadFileBasename?: string | null;
 }
 
 export function Messages({
@@ -29,6 +30,7 @@ export function Messages({
   fileMapping,
   pendingFileMapping,
   webSourceMapping,
+  downloadFileBasename,
 }: MessagesProps) {
   return (
     <div className={containerClassName}>
@@ -44,6 +46,7 @@ export function Messages({
           assistantIcon={assistantIcon}
           webSources={message.role === 'user' ? webSourceMapping?.get(message.id) : undefined}
           status={status}
+          downloadFileBasename={downloadFileBasename}
         >
           {message}
         </ChatBox>

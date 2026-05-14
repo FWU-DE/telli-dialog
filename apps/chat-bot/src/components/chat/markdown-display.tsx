@@ -1,17 +1,17 @@
 import React from 'react';
 import Markdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { nightOwl } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import remarkGfm from 'remark-gfm';
 import RehypeKatex from 'rehype-katex';
 import RemarkMathPlugin from 'remark-math';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { cn } from '@/utils/tailwind';
-import CopyToClipboardButton from '../common/clipboard-button';
+import { MarkdownFencedCodeBlock } from './markdown-fenced-code-block';
 
 type MarkdownDisplayProps = {
   children: string;
+  /** Conversation title for HTML/SVG fenced-block download file names. */
+  downloadFileBasename?: string | null;
 };
 
 function preprocessMathDelimiters(markdown: string) {
@@ -24,7 +24,10 @@ function preprocessMathDelimiters(markdown: string) {
   );
 }
 
-export default function MarkdownDisplay({ children: _children }: MarkdownDisplayProps) {
+export default function MarkdownDisplay({
+  children: _children,
+  downloadFileBasename,
+}: MarkdownDisplayProps) {
   const children = preprocessMathDelimiters(_children);
 
   // remove the top-padding for the immediate sibling element following an hr to ensure the hr has symmetric top/bottom padding
@@ -224,26 +227,12 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
             }
 
             return (
-              <div className="flex flex-col py-2 text-sm max-w-full">
-                <div className="flex items-center justify-center bg-gray-300 py-2 px-2 text-vidis-hover-purple">
-                  <span>{language}</span>
-                  <div className="grow" />
-                  <CopyToClipboardButton text={sanitizedText} />
-                </div>
-                <SyntaxHighlighter
-                  // @ts-expect-error wrong typing
-                  style={nightOwl}
-                  language={language}
-                  PreTag="pre"
-                  {...props}
-                  customStyle={{
-                    overflowX: 'auto',
-                    margin: '0rem',
-                  }}
-                >
-                  {sanitizedText}
-                </SyntaxHighlighter>
-              </div>
+              <MarkdownFencedCodeBlock
+                language={language}
+                code={sanitizedText}
+                downloadFileBasename={downloadFileBasename}
+                {...props}
+              />
             );
           },
         }}
