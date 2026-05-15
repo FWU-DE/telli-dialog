@@ -47,7 +47,6 @@ export default async function Page(
     searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
   const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
-  const isArtifactsEnabled = federalState.featureToggles?.isArtifactsEnabled ?? false;
 
   return (
     <LlmModelsProvider
@@ -74,7 +73,6 @@ export default async function Page(
           imageSource={avatarPictureUrl}
           logoElement={logoElement}
           conversationDownloadBasename={conversation.name}
-          isArtifactsEnabled={isArtifactsEnabled}
         />
       </DefaultPageLayout>
     </LlmModelsProvider>

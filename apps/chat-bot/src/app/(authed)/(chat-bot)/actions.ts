@@ -8,7 +8,6 @@ import deleteConversation, {
   updateConversationTitle,
 } from '@shared/conversation/conversation-service';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
-import { dbGetLatestArtifactVersionByConversationId } from '@shared/db/functions/artifacts';
 import { dbUpdateUserTermsVersion } from '@shared/db/functions/user';
 import { FileModel } from '@shared/db/schema';
 import { trackInfoBannerView } from '@shared/info-banners/info-banner-service';
@@ -48,13 +47,6 @@ export async function refetchFileMapping(
   // Verify the user owns this conversation before returning file data
   await getConversation({ conversationId, userId: user.id });
   return await dbGetRelatedFiles(conversationId);
-}
-
-export async function getLatestArtifactForConversationAction(conversationId: string) {
-  const { user } = await requireAuth();
-  await getConversation({ conversationId, userId: user.id });
-  const row = await dbGetLatestArtifactVersionByConversationId(conversationId);
-  return row ? { content: row.content } : null;
 }
 
 export async function trackInfoBannerViewAction(infoBannerId: string): Promise<void> {

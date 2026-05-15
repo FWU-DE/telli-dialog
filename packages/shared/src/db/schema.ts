@@ -184,7 +184,6 @@ export const federalStateFeatureTogglesSchema = z.object({
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
   isImageGenerationEnabled: z.boolean().optional(),
   isWebSearchEnabled: z.boolean().optional(),
-  isArtifactsEnabled: z.boolean().optional(),
 });
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
 
@@ -1430,62 +1429,4 @@ export const voucherUpdateSchema = createUpdateSchema(VoucherTable)
 export type VoucherSelectModel = z.infer<typeof voucherSelectSchema>;
 export type VoucherInsertModel = z.infer<typeof voucherInsertSchema>;
 
-/**
- * Schema for table artifact
- */
-export const artifactTable = pgTable(
-  'artifact',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    conversationId: uuid('conversation_id')
-      .references(() => conversationTable.id, { onDelete: 'cascade' })
-      .notNull(),
-    title: text('title').notNull().default(''),
-    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
-      .defaultNow()
-      .$onUpdateFn(() => new Date())
-      .notNull(),
-  },
-  (table) => [index().on(table.conversationId)],
-);
-
-export const artifactSelectSchema = createSelectSchema(artifactTable);
-export const artifactInsertSchema = createInsertSchema(artifactTable).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type ArtifactSelectModel = z.infer<typeof artifactSelectSchema>;
-export type ArtifactInsertModel = z.infer<typeof artifactInsertSchema>;
-
-/**
- * Schema for table artifact_version
- */
-export const artifactVersionTable = pgTable(
-  'artifact_version',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    artifactId: uuid('artifact_id')
-      .references(() => artifactTable.id, { onDelete: 'cascade' })
-      .notNull(),
-    messageId: uuid('message_id')
-      .references(() => conversationMessageTable.id, { onDelete: 'cascade' })
-      .notNull(),
-    content: text('content').notNull(),
-    versionNumber: integer('version_number').notNull(),
-    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [index().on(table.artifactId, table.versionNumber), index().on(table.messageId)],
-);
-
-export const artifactVersionSelectSchema = createSelectSchema(artifactVersionTable);
-export const artifactVersionInsertSchema = createInsertSchema(artifactVersionTable).omit({
-  id: true,
-  createdAt: true,
-});
-
-export type ArtifactVersionSelectModel = z.infer<typeof artifactVersionSelectSchema>;
-export type ArtifactVersionInsertModel = z.infer<typeof artifactVersionInsertSchema>;
 export type VoucherUpdateModel = z.infer<typeof voucherUpdateSchema>;

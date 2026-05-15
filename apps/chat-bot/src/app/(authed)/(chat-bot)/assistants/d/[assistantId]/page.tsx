@@ -33,7 +33,6 @@ export default async function Page(props: PageProps<'/assistants/d/[assistantId]
 
   const currentModel = user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
   const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
-  const isArtifactsEnabled = federalState.featureToggles?.isArtifactsEnabled ?? false;
 
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
@@ -55,7 +54,6 @@ export default async function Page(props: PageProps<'/assistants/d/[assistantId]
           promptSuggestions={assistant.promptSuggestions}
           imageSource={avatarPictureUrl}
           logoElement={logoElement}
-          isArtifactsEnabled={isArtifactsEnabled}
         />
       </DefaultPageLayout>
     </LlmModelsProvider>

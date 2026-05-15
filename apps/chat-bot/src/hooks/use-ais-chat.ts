@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { readTextStream } from '@/utils/streaming';
-import { extractStreamingArtifact, stripArtifactBlock } from '@/app/api/chat/artifact-utils';
 import {
   deserializeError,
   toUIMessages,
@@ -27,7 +26,6 @@ export type SendMessageFn = (params: {
 
 export type UseChatOptions = {
   initialMessages?: ChatMessage[];
-  initialArtifactContent?: string;
   modelId?: string;
   sendMessage: SendMessageFn;
   onError?: (error: Error) => void;
@@ -48,8 +46,6 @@ export type UseChatReturn = {
   error: Error | null;
   reload: () => Promise<void>;
   stop: () => void;
-  streamingArtifactContent: string;
-  setStreamingArtifactContent: React.Dispatch<React.SetStateAction<string>>;
 };
 
 function lastUserMessage(messages: ChatMessage[]): ChatMessage | null {
@@ -67,7 +63,6 @@ function lastUserMessage(messages: ChatMessage[]): ChatMessage | null {
  */
 export function useAisChat({
   initialMessages = [],
-  initialArtifactContent = '',
   modelId,
   sendMessage,
   onError,
@@ -78,8 +73,6 @@ export function useAisChat({
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<ChatStatus>('ready');
   const [error, setError] = useState<Error | null>(null);
-  const [streamingArtifactContent, setStreamingArtifactContent] =
-    useState<string>(initialArtifactContent);
   const abortControllerRef = useRef<AbortController | null>(null);
   const lastUserMessageRef = useRef<ChatMessage | null>(lastUserMessage(initialMessages));
 
@@ -125,21 +118,14 @@ export function useAisChat({
 
         // We need to handle the first chunk separately to avoid missing content
         let firstChunk = true;
-        let rawAccum = '';
 
         // Stream the response using native ReadableStream
-        let abortedDuringStream = false;
         for await (const content of readTextStream(result.stream)) {
           if (abortControllerRef.current?.signal.aborted) {
-            abortedDuringStream = true;
             break;
           }
 
           if (content !== undefined && content !== null) {
-            rawAccum += content;
-            const proseContent = stripArtifactBlock(rawAccum);
-            const artifactContent = extractStreamingArtifact(rawAccum);
-
             if (firstChunk) {
               // Create assistant message placeholder
               const assistantMessage: ChatMessage = {
@@ -159,20 +145,12 @@ export function useAisChat({
               if (updated[lastIdx]?.role === 'assistant') {
                 updated[lastIdx] = {
                   ...updated[lastIdx]!,
-                  content: proseContent,
+                  content: updated[lastIdx]!.content + content,
                 };
               }
               return updated;
             });
-
-            if (artifactContent !== null) {
-              setStreamingArtifactContent(artifactContent);
-            }
           }
-        }
-
-        if (!abortedDuringStream) {
-          setStreamingArtifactContent('');
         }
 
         // Get final message for onFinish callback
@@ -186,7 +164,6 @@ export function useAisChat({
 
         setStatus('ready');
       } catch (err) {
-        setStreamingArtifactContent('');
         const error = err instanceof Error ? err : new Error('Unknown error');
         setError(error);
         setStatus('error');
@@ -261,7 +238,5 @@ export function useAisChat({
     error,
     reload,
     stop,
-    streamingArtifactContent,
-    setStreamingArtifactContent,
   };
 }

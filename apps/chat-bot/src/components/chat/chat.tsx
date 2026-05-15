@@ -13,10 +13,7 @@ import RobotIcon from '../icons/robot';
 import { LocalFileState } from './send-message-form';
 import { deepCopy } from '@/utils/object';
 import { getFileExtension, isImageFile } from '@/utils/files/generic';
-import {
-  refetchFileMapping,
-  getLatestArtifactForConversationAction,
-} from '@/app/(authed)/(chat-bot)/actions';
+import { refetchFileMapping } from '@/app/(authed)/(chat-bot)/actions';
 import { InitialChatContentDisplay } from './initial-content-display';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
@@ -29,14 +26,6 @@ import { getConversationPath } from '@/utils/chat/path';
 import { Messages, type PendingFileModel } from './messages';
 import { WebSource } from '@shared/db/types';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
-import { Button } from '@ui/components/button';
-import { downloadFileFromBlob } from '@/utils/download-file-from-blob';
-import { artifactDownloadFileName } from './html-preview-srcdoc';
-import {
-  hardenHtmlForIframeSrcdoc,
-  LLM_HTML_IFRAME_REFERRER_POLICY,
-  LLM_HTML_IFRAME_SANDBOX,
-} from './sandboxed-llm-html-iframe';
 
 type ChatProps = {
   id: string;
@@ -49,9 +38,7 @@ type ChatProps = {
   enableFileUpload: boolean;
   webSourceMapping?: Map<string, WebSource[]>;
   logoElement: ReactNode;
-  initialArtifactContent?: string;
-  isArtifactsEnabled?: boolean;
-  /** Stored conversation title for download file names (HTML/SVG preview + artifact). */
+  /** Stored conversation title for download file names (HTML/SVG preview). */
   conversationDownloadBasename?: string | null;
 };
 
@@ -66,12 +53,9 @@ export default function Chat({
   enableFileUpload,
   webSourceMapping,
   logoElement,
-  initialArtifactContent = '',
-  isArtifactsEnabled = false,
   conversationDownloadBasename,
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
-  const tArtifact = useTranslations('artifact');
 
   const { selectedModel, setDownloadConversationEnabled } = useLlmModels();
   const conversationPath = getConversationPath({
@@ -104,14 +88,6 @@ export default function Chat({
   // we check for the absence of any user messages rather than checking messages.length === 0.
   const isFirstMessageRef = React.useRef(false);
 
-  const [prevId, setPrevId] = useState(id);
-  const [savedArtifactContent, setSavedArtifactContent] = useState(initialArtifactContent);
-
-  if (prevId !== id) {
-    setPrevId(id);
-    setSavedArtifactContent(initialArtifactContent);
-  }
-
   const {
     messages,
     uiMessages,
@@ -122,11 +98,9 @@ export default function Chat({
     reload,
     stop,
     status,
-    streamingArtifactContent,
   } = useMainChat({
     conversationId: id,
     initialMessages: initialMessages,
-    initialArtifactContent: '',
     modelId: selectedModel?.id,
     characterId: character?.id,
     assistantId: assistant?.id,
@@ -142,17 +116,8 @@ export default function Chat({
         pendingFilesRef.current = [];
       }
     },
-    onFinish: async (message) => {
+    onFinish: (message) => {
       logDebug(`onFinish called with message ${JSON.stringify(message)}`);
-
-      if (isArtifactsEnabled) {
-        try {
-          const latest = await getLatestArtifactForConversationAction(id);
-          setSavedArtifactContent(latest?.content ?? '');
-        } catch (e) {
-          logError('Failed to refetch latest artifact', e);
-        }
-      }
 
       // Trigger refetch of the fileMapping from the DB
       setCountOfFilesInChat((prev) => prev + 1);
@@ -175,19 +140,6 @@ export default function Chat({
       refetchConversations();
     },
   });
-
-  const isStreamingArtifactBusy = status === 'submitted' || status === 'streaming';
-  const displayArtifactContent =
-    isStreamingArtifactBusy && streamingArtifactContent.length > 0
-      ? streamingArtifactContent
-      : savedArtifactContent;
-
-  const showArtifactInlinePreview = isArtifactsEnabled && displayArtifactContent.length > 0;
-
-  function handleDownloadArtifact() {
-    const blob = new Blob([displayArtifactContent], { type: 'text/html' });
-    downloadFileFromBlob(blob, artifactDownloadFileName(conversationDownloadBasename));
-  }
 
   const { error, handleError, resetError } = useCheckStatusCode();
 
@@ -350,9 +302,9 @@ export default function Chat({
   const isLoading = status === 'submitted';
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden">
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+    <div className="flex flex-col h-full w-full overflow-hidden">
+      <div className="flex flex-col grow justify-between w-full overflow-hidden">
+        <div ref={scrollRef} className="grow overflow-y-auto">
           {messages.length === 0 ? (
             placeholderElement
           ) : (
@@ -371,37 +323,6 @@ export default function Chat({
           )}
           {error && <ErrorChatPlaceholder error={error} handleReload={handleReload} />}
         </div>
-        {showArtifactInlinePreview && (
-          <div className="shrink-0 border-t border-border bg-muted/30 px-4 py-3">
-            <div className="mx-auto flex max-w-3xl flex-col gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-medium text-muted-foreground">
-                  {tArtifact('inline-preview-heading')}
-                </span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0 text-xs"
-                  onClick={handleDownloadArtifact}
-                >
-                  {tArtifact('download')}
-                </Button>
-              </div>
-              <div className="max-h-[45vh] min-h-[12rem] overflow-hidden rounded-md border border-border bg-background">
-                <iframe
-                  sandbox={LLM_HTML_IFRAME_SANDBOX}
-                  referrerPolicy={LLM_HTML_IFRAME_REFERRER_POLICY}
-                  srcDoc={hardenHtmlForIframeSrcdoc(
-                    displayArtifactContent || '<html><body></body></html>',
-                  )}
-                  className="block h-96 max-h-[45vh] w-full min-h-[12rem] border-0"
-                  title={tArtifact('preview-title')}
-                />
-              </div>
-            </div>
-          </div>
-        )}
         <div className="w-full shrink-0 px-4 pb-4 pt-2 mx-auto">
           <div className="relative flex flex-col">
             {input.length === 0 && messages.length === 0 && (
