@@ -4,6 +4,7 @@ import {
   deleteLearningScenario,
   downloadFileFromLearningScenario,
   getFilesForLearningScenario,
+  getLearningScenarioForChatSession,
   getLearningScenariosByAccessLevel,
   getLearningScenariosByOverviewFilter,
   getLearningScenariosForUser,
@@ -159,6 +160,14 @@ function buildFunctionList(
       functionName: getLearningScenario.name,
       testFunction: () =>
         getLearningScenario({
+          learningScenarioId,
+          user,
+        }),
+    },
+    {
+      functionName: getLearningScenarioForChatSession.name,
+      testFunction: () =>
+        getLearningScenarioForChatSession({
           learningScenarioId,
           user,
         }),
@@ -406,6 +415,35 @@ describe('learning-scenario-service', () => {
         });
 
         expect(result.learningScenario).toBe(mockLearningScenario);
+      });
+
+      it.each([
+        {
+          accessLevel: 'private' as const,
+          description: 'private learning scenario with link sharing enabled',
+        },
+        {
+          accessLevel: 'school' as const,
+          description: 'school learning scenario with link sharing enabled (different school)',
+        },
+      ])('getLearningScenarioForChatSession - $description', async ({ accessLevel }) => {
+        const mockLearningScenario = {
+          id: learningScenarioId,
+          userId: ownerUserId,
+          accessLevel,
+          hasLinkAccess: true,
+        };
+
+        (
+          dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+        ).mockResolvedValue(mockLearningScenario as never);
+
+        const result = await getLearningScenarioForChatSession({
+          learningScenarioId,
+          user: differentUser,
+        });
+
+        expect(result).toBe(mockLearningScenario);
       });
 
       it.each([

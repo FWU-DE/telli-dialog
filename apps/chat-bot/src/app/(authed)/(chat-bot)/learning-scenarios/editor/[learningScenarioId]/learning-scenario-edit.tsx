@@ -18,6 +18,7 @@ import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
+import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { useRouter } from 'next/navigation';
 import {
   removeFileFromLearningScenarioAction,
@@ -198,6 +199,12 @@ export function LearningScenarioEdit({
     onBeforePageLeave: saveBeforeLeave,
   });
 
+  const handleUseChat = () => {
+    guardNavigation(() => {
+      router.push(`/learning-scenarios/d/${learningScenario.id}`);
+    });
+  };
+
   const handleDuplicateLearningScenario = async () => {
     const createResult = await createNewLearningScenarioFromTemplateAction({
       templateId: learningScenario.id,
@@ -302,6 +309,7 @@ export function LearningScenarioEdit({
 
   const actionButtons = (
     <CustomChatActions>
+      <CustomChatActionUse onClick={handleUseChat} />
       <CustomChatActionDuplicate onClick={handleDuplicateLearningScenario} />
       <CustomChatActionDelete
         onClick={handleDeleteLearningScenario}

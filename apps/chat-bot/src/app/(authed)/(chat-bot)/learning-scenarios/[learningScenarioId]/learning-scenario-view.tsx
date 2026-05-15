@@ -2,6 +2,7 @@
 
 import { BackButton } from '@/components/common/back-button';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
+import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
@@ -51,6 +52,10 @@ export function LearningScenarioView({
 
   const modelDisplayName = models.find((m) => m.id === learningScenario.modelId)?.displayName;
 
+  const handleTestLearningScenario = () => {
+    router.push(`/learning-scenarios/d/${learningScenario.id}`);
+  };
+
   const handleDuplicateLearningScenario = async () => {
     const createResult = await createNewLearningScenarioFromTemplateAction({
       templateId: learningScenario.id,
@@ -98,6 +103,7 @@ export function LearningScenarioView({
       />
       <CustomChatTitle title={learningScenario.name} />
       <CustomChatActions>
+        <CustomChatActionUse onClick={handleTestLearningScenario} />
         <CustomChatActionDuplicate onClick={handleDuplicateLearningScenario} />
         <CustomChatLastUpdate date={learningScenario.updatedAt} />
       </CustomChatActions>

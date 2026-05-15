@@ -10,6 +10,7 @@ import {
 import { sendChatMessageAction } from '@/app/api/chat/actions';
 import { sendCharacterMessageAction } from '@/app/api/character/actions';
 import { sendSharedChatMessageAction } from '@/app/api/shared-chat/actions';
+import { sendLearningScenarioPreviewMessageAction } from '@/app/api/learning-scenario-preview/actions';
 import { type UIMessage, type ChatStatus } from '@/types/chat';
 
 // Re-export types for convenience
@@ -73,6 +74,41 @@ export function useCharacterChat(options: {
       });
     },
     [characterId, inviteCode],
+  );
+
+  return useAisChat({
+    sendMessage,
+    ...rest,
+  });
+}
+
+/**
+ * Hook for the teacher-side preview chat of a learning scenario.
+ *
+ * Mirrors `useSharedChat` but authenticates via the session instead of an
+ * invite code and does not persist messages. Used to let teachers test a
+ * learning scenario before sharing it with students.
+ */
+export function useLearningScenarioPreviewChat(options: {
+  previewSessionId: string;
+  learningScenarioId: string;
+  initialMessages?: ChatMessage[];
+  modelId?: string;
+  onError?: (error: Error) => void;
+  onFinish?: (message: ChatMessage) => void;
+}): UseChatReturn {
+  const { previewSessionId, learningScenarioId, ...rest } = options;
+
+  const sendMessage: SendMessageFn = useCallback(
+    async ({ messages, modelId }) => {
+      return sendLearningScenarioPreviewMessageAction({
+        previewSessionId,
+        learningScenarioId,
+        messages,
+        modelId,
+      });
+    },
+    [previewSessionId, learningScenarioId],
   );
 
   return useAisChat({

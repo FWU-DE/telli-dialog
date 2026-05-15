@@ -395,6 +395,32 @@ export async function getLearningScenario({
 }
 
 /**
+ * Loads a learning scenario for an authenticated teacher's preview/test chat session.
+ *
+ * Mirrors the behavior of `getCharacterForChatSession` so teachers can dogfood a
+ * scenario before sharing it with students. Read access is verified the same way
+ * as in the editor flow; no invite code is required.
+ *
+ * @throws NotFoundError if the scenario does not exist
+ * @throws ForbiddenError if the user is not authorized to access the scenario
+ */
+export async function getLearningScenarioForChatSession({
+  learningScenarioId,
+  user,
+}: {
+  learningScenarioId: string;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}): Promise<LearningScenarioSelectModel> {
+  checkParameterUUID(learningScenarioId);
+  requireTeacherRole(user.userRole);
+  const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
+  if (!learningScenario) throw new NotFoundError('Learning scenario not found');
+  verifyReadAccess({ item: learningScenario, user });
+
+  return learningScenario;
+}
+
+/**
  * Get files linked to a learning scenario.
  *
  * If the learning scenario is private, only the owner can fetch file mappings.
