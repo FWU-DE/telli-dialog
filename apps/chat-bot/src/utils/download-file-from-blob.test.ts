@@ -23,15 +23,12 @@ describe('downloadFileFromBlob', () => {
       body,
     } as unknown as Document);
 
-    vi.stubGlobal(
-      'window',
-      {
-        URL: {
-          createObjectURL,
-          revokeObjectURL,
-        },
-      } as unknown as Window & typeof globalThis,
-    );
+    vi.stubGlobal('window', {
+      URL: {
+        createObjectURL,
+        revokeObjectURL,
+      },
+    } as unknown as Window & typeof globalThis);
 
     const blob = new Blob(['<p>x</p>'], { type: 'text/html' });
     downloadFileFromBlob(blob, 'export.html');
@@ -58,15 +55,12 @@ describe('downloadFileFromBlob', () => {
       createElement: vi.fn(() => link),
       body,
     } as unknown as Document);
-    vi.stubGlobal(
-      'window',
-      {
-        URL: {
-          createObjectURL: vi.fn(() => 'blob:x'),
-          revokeObjectURL: vi.fn(),
-        },
-      } as unknown as Window & typeof globalThis,
-    );
+    vi.stubGlobal('window', {
+      URL: {
+        createObjectURL: vi.fn(() => 'blob:x'),
+        revokeObjectURL: vi.fn(),
+      },
+    } as unknown as Window & typeof globalThis);
 
     downloadFileFromBlob(new Blob([]), '..\\..\\evil.txt');
     expect(link.setAttribute).toHaveBeenCalledWith('download', '..\\..\\evil.txt');

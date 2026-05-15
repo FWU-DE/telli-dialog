@@ -1,7 +1,7 @@
 'use client';
 
 import { useMainChat, type ChatMessage } from '@/hooks/use-chat-hooks';
-import React, { FormEvent, ReactNode, useEffect, useRef, useState } from 'react';
+import React, { FormEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
 import { type CharacterSelectModel, type AssistantSelectModel, FileModel } from '@shared/db/schema';
@@ -13,7 +13,10 @@ import RobotIcon from '../icons/robot';
 import { LocalFileState } from './send-message-form';
 import { deepCopy } from '@/utils/object';
 import { getFileExtension, isImageFile } from '@/utils/files/generic';
-import { refetchFileMapping, getLatestArtifactForConversationAction } from '@/app/(authed)/(chat-bot)/actions';
+import {
+  refetchFileMapping,
+  getLatestArtifactForConversationAction,
+} from '@/app/(authed)/(chat-bot)/actions';
 import { InitialChatContentDisplay } from './initial-content-display';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
@@ -101,11 +104,13 @@ export default function Chat({
   // we check for the absence of any user messages rather than checking messages.length === 0.
   const isFirstMessageRef = React.useRef(false);
 
+  const [prevId, setPrevId] = useState(id);
   const [savedArtifactContent, setSavedArtifactContent] = useState(initialArtifactContent);
 
-  useEffect(() => {
+  if (prevId !== id) {
+    setPrevId(id);
     setSavedArtifactContent(initialArtifactContent);
-  }, [id, initialArtifactContent]);
+  }
 
   const {
     messages,
@@ -145,7 +150,7 @@ export default function Chat({
           const latest = await getLatestArtifactForConversationAction(id);
           setSavedArtifactContent(latest?.content ?? '');
         } catch (e) {
-          logError(e instanceof Error ? e : new Error('Failed to refetch latest artifact'));
+          logError('Failed to refetch latest artifact', e);
         }
       }
 
@@ -177,8 +182,7 @@ export default function Chat({
       ? streamingArtifactContent
       : savedArtifactContent;
 
-  const showArtifactInlinePreview =
-    isArtifactsEnabled && displayArtifactContent.length > 0;
+  const showArtifactInlinePreview = isArtifactsEnabled && displayArtifactContent.length > 0;
 
   function handleDownloadArtifact() {
     const blob = new Blob([displayArtifactContent], { type: 'text/html' });
