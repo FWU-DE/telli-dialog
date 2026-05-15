@@ -1,6 +1,6 @@
 import { constructAzureEmbeddingGenerationFn } from './azure';
 import { constructIonosEmbeddingGenerationFn } from './ionos';
-import { EmbeddingGenerationFn, AiModel } from '../types';
+import type { AiModel, EmbeddingGenerationFn } from '../types';
 import { ProviderConfigurationError } from '../../errors';
 
 function getEmbeddingGenerationFnByModel({
