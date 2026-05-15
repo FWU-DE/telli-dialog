@@ -1,7 +1,8 @@
 'use client';
 
 import type { UserAndContext } from '@/auth/types';
-import ProfileMenu, { ThreeDotsProfileMenu } from '@/components/navigation/profile-menu';
+import ProfileMenu from '@/components/navigation/profile-menu';
+import { ThreeDotsProfileMenu } from '@/components/navigation/three-dots-profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import { useCustomPathname } from '@/hooks/use-custom-pathname';
 import {
