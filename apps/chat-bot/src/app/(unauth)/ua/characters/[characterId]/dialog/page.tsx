@@ -9,6 +9,15 @@ import { notFound } from 'next/navigation';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
+import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('characters.page-titles');
+  return {
+    title: t('chat-shared'),
+  };
+}
 
 const searchParamsSchema = z.object({ inviteCode: z.string() });
 

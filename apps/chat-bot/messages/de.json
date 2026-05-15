@@ -5,6 +5,11 @@
     "terms-of-use": "Nutzungsbedingungen"
   },
   "common": {
+    "page-titles": {
+      "chat": "Chat",
+      "login": "Anmelden",
+      "login-error": "Anmeldung fehlgeschlagen"
+    },
     "logout": "Abmelden",
     "close": "Schließen",
     "delete": "Löschen",
@@ -140,10 +145,11 @@
   "characters": {
     "character": "Dialogpartner",
     "page-titles": {
-      "list": "Dialogpartner",
+      "list": "Dialogpartner Übersicht",
       "view": "Dialogpartner anzeigen",
       "edit": "Dialogpartner bearbeiten",
-      "chat": "Dialogpartner-Chat",
+      "chat": "Dialogpartner Chat",
+      "chat-shared": "Chat mit geteiltem Dialogpartner",
       "share": "Dialogpartner teilen"
     },
     "description": "Mit individuell konfigurierten Dialogpartnern wird das Lernen lebendig und inspirierend. Fiktive Gesprächspartner helfen dabei, Themen zu vertiefen, die Lernenden emotional anzusprechen und sie neugierig zu machen. Die zeitlich begrenzten Chats werden einfach einzeln oder gruppenweise mit den Lernenden geteilt.",
@@ -265,7 +271,8 @@
   "learning-scenarios": {
     "title": "Lernszenarien",
     "page-titles": {
-      "list": "Lernszenarien",
+      "chat-shared": "Chat mit geteiltem Lernszenario",
+      "list": "Lernszenarien Übersicht",
       "view": "Lernszenario anzeigen",
       "edit": "Lernszenario bearbeiten",
       "share": "Lernszenario teilen"
@@ -391,6 +398,9 @@
   },
   "top-up": {
     "title": "Tokenvolumen aufladen",
+    "page-titles": {
+      "redeem": "Gutschein einlösen"
+    },
     "description": "Um AIS.chat mehr nutzen zu können, lade dein Tokenvolumen einfach hier auf.",
     "voucher": "Gutscheincode",
     "voucher-placeholder": "Gib deinen 16-stelligen Gutscheincode ein",
@@ -401,6 +411,9 @@
     }
   },
   "image-generation": {
+    "page-titles": {
+      "chat": "Bildgenerierung"
+    },
     "image-generation-model": "Modell",
     "no-model-available": "Kein Modell verfügbar",
     "placeholder": "Beschreibe, wie das Bild aussehen soll.",
@@ -502,10 +515,10 @@
   "assistants": {
     "title": "Assistenten",
     "page-titles": {
-      "list": "Assistenten",
+      "list": "Assistenten Übersicht",
       "view": "Assistent anzeigen",
       "edit": "Assistent bearbeiten",
-      "chat": "Assistenten-Chat"
+      "chat": "Assistent Chat"
     },
     "search-placeholder": "Assistent suchen...",
     "info-dialog": "<b>Was sind Assistenten?</b>\nAssistenten erleichtern Lehrkräften den schulischen Alltag. Sie können für wiederkehrende Tätigkeiten konfiguriert werden, individuell auf die eigenen Fächer, Jahrgangsstufen oder Arbeitskontexte angepasst. Einmal mit dem entsprechenden Hintergrundwissen angereichert und erstellt, liefert jeder Assistent Vorschläge, Impulse und Ideen, die für das gesamte Schuljahr und darüber hinaus genutzt werden können.\n\nLehrkräfte können bereits konfigurierte Vorlagen nutzen und selbst eigene Assistenten erstellen.\n\n<b>Zielgruppe:</b>\nLehrkräfte",
