@@ -31,7 +31,7 @@ Follow the instructions below when generating or modifying code.
 
 - apps/admin/ --> contains the admin web application
 - apps/api/ --> contains the public REST API
-- apps/dialog/ --> contains the main web application
+- apps/chat-bot/ --> contains the main web application
 - packages/shared/ --> contains shared code for Next.js apps, mainly types, services, and utilities that can be used in admin and chat apps
 - packages/shared-core/ --> contains cross-app shared utilities used by all apps (admin, app, api)
 - packages/ai-core/ --> contains logic to communicate with AI providers and LLMs

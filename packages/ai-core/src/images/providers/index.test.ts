@@ -1,7 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateImage } from './index';
 import { ProviderConfigurationError } from '../../errors';
 import type { AiModel } from '../types';
+import { constructIonosImageGenerationFn } from './ionos';
+import { constructAzureImageGenerationFn } from './azure';
+import { constructGoogleImageGenerationFn } from './google';
 
 // Mock provider modules
 vi.mock('./ionos', () => ({
@@ -15,10 +18,6 @@ vi.mock('./azure', () => ({
 vi.mock('./google', () => ({
   constructGoogleImageGenerationFn: vi.fn(),
 }));
-
-import { constructIonosImageGenerationFn } from './ionos';
-import { constructAzureImageGenerationFn } from './azure';
-import { constructGoogleImageGenerationFn } from './google';
 
 const mockConstructIonosImageGenerationFn = vi.mocked(constructIonosImageGenerationFn);
 const mockConstructAzureImageGenerationFn = vi.mocked(constructAzureImageGenerationFn);

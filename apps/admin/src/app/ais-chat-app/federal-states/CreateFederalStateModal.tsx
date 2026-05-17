@@ -1,9 +1,9 @@
 'use client';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createFederalStateAction } from './[federalStateId]/actions';
-import { FormField } from '@ui/components/form/FormField';
+import { FormField } from '@ui/components/form/form-field';
 import { toast } from 'sonner';
 import z from 'zod';
 import { useRouter } from 'next/navigation';

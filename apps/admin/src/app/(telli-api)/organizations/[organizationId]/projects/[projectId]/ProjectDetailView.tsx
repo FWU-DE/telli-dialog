@@ -4,7 +4,7 @@ import { startTransition, useCallback, useEffect, useState } from 'react';
 import { getApiKeysAction, getProjectByIdAction } from '../actions';
 import { Project } from '@/types/project';
 import { ApiKey } from '@/types/api-key';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/Card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/card';
 import {
   Table,
   TableBody,
@@ -12,8 +12,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@ui/components/Table';
-import { Button } from '@ui/components/Button';
+} from '@ui/components/table';
+import { Button } from '@ui/components/button';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { ROUTES } from '@/consts/routes';

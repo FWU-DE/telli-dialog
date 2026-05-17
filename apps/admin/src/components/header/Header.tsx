@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { SignOutButton } from '../authentication/SignOutButton';
 import { ROUTES } from '../../consts/routes';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 
 export function Header() {
   return (

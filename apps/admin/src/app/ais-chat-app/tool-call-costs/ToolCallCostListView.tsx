@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import z from 'zod';
 import { toast } from 'sonner';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import {
   Card,
   CardAction,
@@ -12,9 +12,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@ui/components/Card';
-import { Field, FieldDescription, FieldError, FieldLabel } from '@ui/components/Field';
-import { Input } from '@ui/components/Input';
+} from '@ui/components/card';
+import { Field, FieldDescription, FieldError, FieldLabel } from '@ui/components/field';
+import { Input } from '@ui/components/input';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
 import type { ToolCallName } from '@shared/db/schema';
 import {

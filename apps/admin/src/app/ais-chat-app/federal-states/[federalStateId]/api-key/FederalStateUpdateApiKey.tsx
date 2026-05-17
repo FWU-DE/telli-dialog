@@ -7,13 +7,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@ui/components/Card';
+} from '@ui/components/card';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
-import { FormField } from '@ui/components/form/FormField';
-import { Button } from '@ui/components/Button';
+import { FormField } from '@ui/components/form/form-field';
+import { Button } from '@ui/components/button';
 import { toast } from 'sonner';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { updateApiKeyAction } from './actions';

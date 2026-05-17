@@ -1,5 +1,6 @@
+import { instrumentOpenAiClient } from '@sentry/core';
 import OpenAI from 'openai';
-import type { AiModel, TextStreamFn, TextGenerationFn, TokenUsage } from '../types';
+import type { AiModel, TextGenerationFn, TextStreamFn, TokenUsage } from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { toOpenAIMessages } from '../utils';
 
@@ -8,10 +9,12 @@ function createOpenAIClient(model: AiModel): OpenAI {
     throw new ProviderConfigurationError('Invalid model configuration for OpenAI');
   }
 
-  return new OpenAI({
-    apiKey: model.setting.apiKey,
-    baseURL: model.setting.baseUrl,
-  });
+  return instrumentOpenAiClient(
+    new OpenAI({
+      apiKey: model.setting.apiKey,
+      baseURL: model.setting.baseUrl,
+    }),
+  );
 }
 
 export function constructOpenAITextStreamFn(model: AiModel): TextStreamFn {

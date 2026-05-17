@@ -5,24 +5,24 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/Card';
-import { Button } from '@ui/components/Button';
-import { FormField } from '@ui/components/form/FormField';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/card';
+import { Button } from '@ui/components/button';
+import { FormField } from '@ui/components/form/form-field';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@ui/components/Select';
+} from '@ui/components/select';
 import { ApiKey } from '@/types/api-key';
 import { createApiKeyAction, updateApiKeyAction } from './actions';
 import { ROUTES } from '@/consts/routes';
 import { logError } from '@shared/logging';
 import React, { useState } from 'react';
-import { Input } from '@ui/components/Input';
-import { Label } from '@ui/components/Label';
-import { Field, FieldDescription, FieldError, FieldLabel } from '@ui/components/Field';
+import { Input } from '@ui/components/input';
+import { Label } from '@ui/components/label';
+import { Field, FieldDescription, FieldError, FieldLabel } from '@ui/components/field';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
 
 const apiKeyFormSchema = z.object({

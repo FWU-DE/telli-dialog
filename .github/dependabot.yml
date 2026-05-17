@@ -10,7 +10,7 @@ updates:
   - package-ecosystem: 'docker'
     directories:
       - '/apps/admin'
-      - '/apps/dialog'
+      - '/apps/chat-bot'
     labels: ['dependencies']
     schedule:
       interval: 'weekly'
@@ -28,8 +28,8 @@ updates:
 
   - package-ecosystem: 'docker-compose'
     directories:
-      - '/apps/dialog/e2e'
-      - '/apps/dialog/e2e/mock'
+      - '/apps/chat-bot/e2e'
+      - '/apps/chat-bot/e2e/mock'
       - '/devops/docker'
     labels: ['dependencies']
     schedule:

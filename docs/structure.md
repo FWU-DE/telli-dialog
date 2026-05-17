@@ -2,7 +2,7 @@
 
 This document provides an overview of the top-level directories in the project with brief explanations of their purpose and contents.
 
-## [`/apps/dialog`](/apps/dialog)
+## [`/apps/chat-bot`](/apps/chat-bot)
 
 The main user-facing web application. A Next.js app with the app router used by students and teachers.
 
@@ -16,8 +16,8 @@ The AIS.chat proxy API. A Fastify REST API that acts as a proxy to LLM providers
 
 ## [`/packages/shared`](/packages/shared)
 
-Shared code used by the `dialog` and `admin` apps (Next.js).
-Contains the dialog database schema, Drizzle ORM configuration, database access functions, services, and utilities.
+Shared code used by the `chat-bot` and `admin` apps (Next.js).
+Contains the chat-bot database schema, Drizzle ORM configuration, database access functions, services, and utilities.
 
 Key contents:
 
@@ -28,7 +28,7 @@ Key contents:
 
 ## [`/packages/shared-core`](/packages/shared-core)
 
-Cross-app shared utilities used by all applications (`admin`, `dialog`, and `api`).
+Cross-app shared utilities used by all applications (`admin`, `chat-bot`, and `api`).
 Contains framework-agnostic code that does not depend on app-specific runtimes.
 
 ## [`/packages/api-database`](/packages/api-database)
@@ -47,7 +47,7 @@ Logic to communicate with AI providers and LLMs. Handles chat completions, embed
 
 ## [`/packages/ui`](/packages/ui)
 
-Shared UI component library based on [shadcn/ui](https://ui.shadcn.com/). Contains reusable React components and global Tailwind styles used across dialog and admin apps.
+Shared UI component library based on [shadcn/ui](https://ui.shadcn.com/). Contains reusable React components and global Tailwind styles used across chat-bot and admin apps.
 
 ## [`/packages/typescript-config`](/packages/typescript-config)
 

@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@ui/components/Table';
+} from '@ui/components/table';
 import {
   Card,
   CardAction,
@@ -15,9 +15,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@ui/components/Card';
-import { Button } from '@ui/components/Button';
-import { Checkbox } from '@ui/components/Checkbox';
+} from '@ui/components/card';
+import { Button } from '@ui/components/button';
+import { Checkbox } from '@ui/components/checkbox';
 import { logError } from '@shared/logging';
 import { getLargeLanguageModelsAction } from './actions';
 import Link from 'next/link';

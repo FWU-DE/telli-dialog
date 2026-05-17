@@ -12,8 +12,8 @@ import {
   TemplateTypes,
 } from '@shared/templates/template';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { Button } from '@ui/components/Button';
-import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
+import { Button } from '@ui/components/button';
+import { FormFieldCheckbox } from '@ais-chat/ui/components/form/form-field-checkbox';
 import { toast } from 'sonner';
 import { TemplateInfoCard } from './TemplateInfoCard';
 import {
@@ -23,7 +23,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@ui/components/Card';
+} from '@ui/components/card';
 
 export type TemplateDetailViewProps = {
   templateType: TemplateTypes;

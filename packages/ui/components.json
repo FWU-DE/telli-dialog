@@ -15,7 +15,8 @@
     "hooks": "@ais-chat/ui/hooks",
     "utils": "@ais-chat/ui/lib/utils",
     "lib": "@ais-chat/ui/lib",
-    "types": "@ais-chat/ui/types"
+    "types": "@ais-chat/ui/types",
+    "ui": "@ais-chat/ui/components"
   },
   "iconLibrary": "lucide-react"
 }

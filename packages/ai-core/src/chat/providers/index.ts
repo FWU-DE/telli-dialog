@@ -6,7 +6,7 @@ import {
 } from './azure';
 import { constructIonosTextGenerationFn, constructIonosTextStreamFn } from './ionos';
 import { constructOpenAITextGenerationFn, constructOpenAITextStreamFn } from './openai';
-import { TextGenerationFn, TextStreamFn, AiModel, GenerationOptions } from '../types';
+import type { AiModel, GenerationOptions, TextGenerationFn, TextStreamFn } from '../types';
 import { ProviderConfigurationError } from '../../errors';
 
 function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerationFn | undefined {

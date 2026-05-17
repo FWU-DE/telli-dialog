@@ -14,12 +14,12 @@ Use this skill when the user asks to:
 
 - update the schema file at 'packages/shared/src/db/schema.ts' with the necessary changes
 - navigate to 'packages/shared' from the repo root
-- the `db:generate` script loads env from `apps/dialog/.env.local` via dotenvx;
+- the `db:generate` script loads env from `apps/chat-bot/.env.local` via dotenvx;
   it needs `DATABASE_URL` defined but does NOT need a real DB connection;
   `drizzle-kit generate` only diffs the schema against the previous snapshot
-- if `apps/dialog/.env.local` does not exist or lacks `DATABASE_URL`, create it with a dummy value first:
+- if `apps/chat-bot/.env.local` does not exist or lacks `DATABASE_URL`, create it with a dummy value first:
   ```
-  echo "DATABASE_URL=postgres://dummy" > ../../apps/dialog/.env.local
+  echo "DATABASE_URL=postgres://dummy" > ../../apps/chat-bot/.env.local
   ```
 - run `pnpm run db:generate`
 - for each migration 2 files will be created:

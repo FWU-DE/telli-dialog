@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import z from 'zod';
 import { toast } from 'sonner';
 import { logError } from '@shared/logging';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import {
   Card,
   CardAction,
@@ -15,7 +15,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@ui/components/Card';
+} from '@ui/components/card';
 import {
   Field,
   FieldDescription,
@@ -23,16 +23,16 @@ import {
   FieldLabel,
   FieldSet,
   FieldLegend,
-} from '@ui/components/Field';
-import { FormField } from '@ui/components/form/FormField';
-import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
+} from '@ui/components/field';
+import { FormField } from '@ui/components/form/form-field';
+import { FormFieldCheckbox } from '@ais-chat/ui/components/form/form-field-checkbox';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@ui/components/Select';
+} from '@ui/components/select';
 import { ROUTES } from '@/consts/routes';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
 import type { FederalStateModel } from '@shared/federal-states/types';

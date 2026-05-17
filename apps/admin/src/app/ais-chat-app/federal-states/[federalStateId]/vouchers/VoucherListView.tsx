@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Voucher } from '@ais-chat/shared/vouchers/voucher';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import Link from 'next/link';
 import VoucherList from './VoucherList';
 import { ROUTES } from '../../../../../consts/routes';
