@@ -14,7 +14,7 @@ import { UserAndContext } from '@/auth/types';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { dbGetAssistantById } from '@shared/db/functions/assistants';
 
-async function resolveWebSearchEnabled({
+async function isWebSearchEnabled({
   user,
   characterId,
   assistantId,
@@ -230,7 +230,7 @@ export async function runWebSearchPipeline({
   apiKeyId: string;
   conversationId: string;
 }): Promise<WebSearchResult[]> {
-  const enabled = await resolveWebSearchEnabled({ user, characterId, assistantId });
+  const enabled = await isWebSearchEnabled({ user, characterId, assistantId });
   if (!enabled) return [];
 
   const decision = await isWebSearchNeeded({ messages, modelId, apiKeyId });
