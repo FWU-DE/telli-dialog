@@ -106,11 +106,13 @@ export function AssistantEdit({
   relatedFiles,
   initialLinks,
   avatarPictureUrl,
+  isWebSearchAvailable,
 }: {
   assistant: AssistantSelectModel;
   relatedFiles: FileModel[];
   initialLinks: WebSource[];
   avatarPictureUrl?: string;
+  isWebSearchAvailable: boolean;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -395,13 +397,15 @@ export function AssistantEdit({
             onLinksChange={handleLinksChange}
           />
 
-          <CustomChatWebSearch
-            name="isWebSearchEnabled"
-            control={control}
-            onCheckedChange={() => {
-              void flushAutoSave();
-            }}
-          />
+          {isWebSearchAvailable && (
+            <CustomChatWebSearch
+              name="isWebSearchEnabled"
+              control={control}
+              onCheckedChange={() => {
+                void flushAutoSave();
+              }}
+            />
+          )}
 
           <CustomShareSection
             control={control}

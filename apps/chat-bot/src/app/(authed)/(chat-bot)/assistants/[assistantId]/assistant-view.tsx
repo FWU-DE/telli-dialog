@@ -23,10 +23,12 @@ export function AssistantView({
   assistant,
   fileMappings,
   pictureUrl,
+  isWebSearchAvailable,
 }: {
   assistant: AssistantSelectModel;
   fileMappings: FileModel[];
   pictureUrl: string | undefined;
+  isWebSearchAvailable: boolean;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -109,7 +111,7 @@ export function AssistantView({
         onDownloadFile={handleDownloadFile}
       />
 
-      {assistant.isWebSearchEnabled && <CustomChatWebSearch readonly />}
+      {assistant.isWebSearchEnabled && isWebSearchAvailable && <CustomChatWebSearch readonly />}
     </CustomChatLayoutContainer>
   );
 }
