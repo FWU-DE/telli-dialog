@@ -28,7 +28,7 @@ const mockLlmBaseUrl = process.env.LLM_MOCK_BASE_URL ?? 'http://localhost:6556/v
 
 // All prices are rough estimates, probably outdated and just for mocking purposes
 // Static ids are used to ensure that the models are not created again
-// the ids are taken from the staging/production database for interoperability to be able to connect to local telli api or staging
+// the ids are taken from the staging/production database for interoperability to be able to connect to local AIS.chat api or staging
 const DEFAULT_MODELS: LlmInsertModel[] = [
   {
     // Mock LLM: OpenAI-compatible echo server used as the default model in e2e tests.

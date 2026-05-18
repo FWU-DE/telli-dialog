@@ -1,4 +1,4 @@
-import { dbLookupApiKeyByFullKey } from '@telli/api-database';
+import { dbLookupApiKeyByFullKey } from '@ais-chat/api-database';
 
 /**
  * Looks up API key IDs by federal state ID.

@@ -8,7 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@ui/components/Table';
+} from '@ui/components/table';
 import {
   Card,
   CardAction,
@@ -16,8 +16,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@ui/components/Card';
-import { Button } from '@ui/components/Button';
+} from '@ui/components/card';
+import { Button } from '@ui/components/button';
 import { getProjectsAction } from './actions';
 import Link from 'next/link';
 import { ROUTES } from '../../../../../consts/routes';

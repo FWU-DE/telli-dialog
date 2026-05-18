@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@telli/typescript-config/react-library.json",
+  "extends": "@ais-chat/typescript-config/react-library.json",
   "compilerOptions": {
     "esModuleInterop": true,
     "module": "esnext",

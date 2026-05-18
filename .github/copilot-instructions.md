@@ -31,9 +31,9 @@ Follow the instructions below when generating or modifying code.
 
 - apps/admin/ --> contains the admin web application
 - apps/api/ --> contains the public REST API
-- apps/dialog/ --> contains the main web application
-- packages/shared/ --> contains shared code for Next.js apps, mainly types, services, and utilities that can be used in admin and dialog apps
-- packages/shared-core/ --> contains cross-app shared utilities used by all apps (admin, dialog, api)
+- apps/chat-bot/ --> contains the main web application
+- packages/shared/ --> contains shared code for Next.js apps, mainly types, services, and utilities that can be used in admin and chat apps
+- packages/shared-core/ --> contains cross-app shared utilities used by all apps (admin, app, api)
 - packages/ai-core/ --> contains logic to communicate with AI providers and LLMs
 - packages/api-database/ --> contains database access logic and models for the api app
 - packages/ui/src/components/ --> contains reusable shadcn UI components
@@ -51,7 +51,7 @@ Follow the instructions below when generating or modifying code.
 - Use client components only when needed (state, events, browser APIs).
 - Keep components small and reusable.
 - Prefer composition over complex props.
-- Prefer shadcn components from @telli/ui before creating custom UI components.
+- Prefer shadcn components from @ais-chat/ui before creating custom UI components.
 - Follow the patterns used by shadcn components.
 - Take accessibility into account when designing UI components.
 - Ensure that components are responsive.

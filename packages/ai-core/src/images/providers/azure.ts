@@ -1,3 +1,4 @@
+import { instrumentOpenAiClient } from '@sentry/core';
 import OpenAI from 'openai';
 import type { AiModel, ImageGenerationFn } from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
@@ -14,11 +15,13 @@ function createAzureClient(model: AiModel): {
     baseUrl: model.setting.baseUrl,
   });
 
-  const client = new OpenAI({
-    apiKey: model.setting.apiKey,
-    baseURL: basePath,
-    defaultQuery: Object.fromEntries(searchParams.entries()),
-  });
+  const client = instrumentOpenAiClient(
+    new OpenAI({
+      apiKey: model.setting.apiKey,
+      baseURL: basePath,
+      defaultQuery: Object.fromEntries(searchParams.entries()),
+    }),
+  );
 
   return { client, deployment };
 }
@@ -33,9 +36,7 @@ export function constructAzureImageGenerationFn(model: AiModel): ImageGeneration
         prompt,
         size: '1024x1024',
         n: 1,
-        quality: 'standard',
-        style: 'vivid',
-        response_format: 'b64_json',
+        quality: 'medium',
       },
       {
         path: `/openai/deployments/${deployment}/images/generations`,

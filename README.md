@@ -1,8 +1,8 @@
-# telli dialog
+# AIS.chat
 
 ## Self-Hosted / Quick Start
 
-This guide helps you run telli using pre-built Docker images with minimal configuration.
+This guide helps you run AIS.chat using pre-built Docker images with minimal configuration.
 
 > [!NOTE]
 > The Docker Compose setup and credentials described in this section are intended **only for local exploration and testing**.
@@ -29,21 +29,21 @@ This guide helps you run telli using pre-built Docker images with minimal config
    - Create S3 bucket in RustFS
 
 3. **Access the applications:**
-   - **Dialog app**: http://localhost:3000
+   - **Chat-bot app**: http://localhost:3000
    - **Admin app**: http://localhost:3001
    - **API**: http://localhost:3002
    - **Keycloak**: http://localhost:8080 (credentials: `admin` / `admin`)
    - **RustFS Console**: http://localhost:9001 (S3-compatible storage, credentials: `rustfsadmin` / `rustfsadmin123`)
 
-4. **Configure the application using telli-admin:**
+4. **Configure the application using ais-chat-admin:**
    - Navigate to the admin app at http://localhost:3001
    - Login with teacher credentials (username: `teacher`, password: `password`)
-   - In `telli-api` section:
+   - In `ais-chat-api` section:
      - Create your LLM models
      - Create Projects (i.e., federal states) and assign the models to them.
        The federal states `DE-TEST` must exist. Others can be created optionally.
      - Create API Key(s) for the project(s) you created and copy the key.
-   - In `telli-dialog` section:
+   - In `ais-chat-app` section:
      - Create at least the `DE-TEST` federal state and assign the corresponding API Key to it.
      - Configure settings as needed.
 
@@ -51,7 +51,7 @@ This guide helps you run telli using pre-built Docker images with minimal config
 
    Use any of the predefined users from the Keycloak realm configuration:
    - Username: `teacher` / Password: `password` (teacher)
-   - See [telli-local-realm.json](devops/docker/keycloak/telli-local-realm.json) for all available users
+   - See [ais-chat-local-realm.json](devops/docker/keycloak/ais-chat-local-realm.json) for all available users
 
 ### Customization
 
@@ -72,7 +72,7 @@ docker compose -f devops/docker/docker-compose.yml down -v
 
 ## Local Development (from source)
 
-This section is for developers who want to run telli from source code.
+This section is for developers who want to run AIS.chat from source code.
 
 ### Requirements
 
@@ -96,7 +96,7 @@ The project uses environment variables in `.env.local` files for local developme
 
 **Required `.env.local` files:**
 
-- `apps/dialog/.env.local` — For the dialog app (database URLs, API connection, authentication, storage)
+- `apps/chat-bot/.env.local` — For the chat-bot app (database URLs, API connection, authentication, storage)
 - `apps/api/.env.local` — For the API app (database URL, logging, telemetry)
 
 For detailed variable documentation and values for local development with docker-compose, see the `.env.example` files in each app directory.
@@ -120,21 +120,21 @@ To delete only the keycloak data, shutdown all containers and delete the volume:
 
 ```sh
 docker compose -f devops/docker/docker-compose.local.yml down
-docker volume rm telli_keycloak_data
+docker volume rm ais-chat_keycloak_data
 ```
 
 ### Database
 
 The project uses two separate PostgreSQL databases:
 
-- **Dialog database** — managed by `packages/shared`, used by the dialog and admin apps
+- **chat-bot database** — managed by `packages/shared`, used by the chat-bot and admin apps
 - **API database** — managed by `packages/api-database`, used by the API app
 
 Check that you can access the local postgresql databases:
 
 ```sh
-psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db"
-psql "postgresql://telli_api_db:test1234@127.0.0.1:5433/telli_api_db"
+psql "postgresql://admin:test1234@127.0.0.1:5432/app_db"
+psql "postgresql://admin:test1234@127.0.0.1:5432/api_db"
 ```
 
 If you start with a fresh database, apply migrations and seed both databases; otherwise the application will not work.
@@ -143,7 +143,7 @@ If you start with a fresh database, apply migrations and seed both databases; ot
 pnpm db:migrate
 ```
 
-Add api keys in your `.env.local` files for all federal states that you want to seed. These keys are used to fetch the available LLM models from the telli-api (e.g. `DE_BY_API_KEY` for Bavaria). If you previously seeded the api database, use the resulting API key.
+Add api keys in your `.env.local` files for all federal states that you want to seed. These keys are used to fetch the available LLM models from the ais-chat-api (e.g. `DE_BY_API_KEY` for Bavaria). If you previously seeded the api database, use the resulting API key.
 
 The api database seed also requires LLM provider credentials for the models it creates locally. Add these to `apps/api/.env.local`:
 
@@ -171,7 +171,7 @@ pnpm dev
 ### Keycloak
 
 Keycloak is used for logins both locally and in e2e tests.
-The realm, client and several predefined users are configured in [telli-local-realm.json](devops/docker/keycloak/telli-local-realm.json).
+The realm, client and several predefined users are configured in [ais-chat-local-realm.json](devops/docker/keycloak/ais-chat-local-realm.json).
 Users are defined at the bottom of the json.
 
 The json is imported once when starting keycloak, but only if the realm does not yet exist.
@@ -205,7 +205,7 @@ Also make sure to include the required env variables in your `.env.local`.
 
 ## E2E Tests
 
-We use playwright for e2e testing, refer to the [details](apps/dialog/e2e/README.md) for a setup guide.
+We use playwright for e2e testing, refer to the [details](apps/chat-bot/e2e/README.md) for a setup guide.
 The e2e tests are integrated into the pipeline and run on every pull request.
 
 ## Load Tests

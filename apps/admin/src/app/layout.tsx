@@ -3,7 +3,7 @@ import { Barlow } from 'next/font/google';
 import Script from 'next/script';
 import type { ReactNode } from 'react';
 import { Header } from '../components/header/Header';
-import { Toaster } from '@ui/components/Toaster';
+import { Toaster } from '@ui/components/toaster';
 import { buildPublicConfig } from '@shared/sentry/public-config';
 
 const barlow = Barlow({

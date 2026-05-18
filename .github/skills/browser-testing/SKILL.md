@@ -1,9 +1,9 @@
 ---
 name: browser-testing
-description: 'Validate frontend changes in telli-dialog with browser automation. Use when asked to open web app locally, log in via VIDIS, reproduce UI bugs, verify visual fixes, and capture screenshots.'
+description: 'Validate frontend changes in ais-chat-app with browser automation. Use when asked to open web app locally, log in via VIDIS, reproduce UI bugs, verify visual fixes, and capture screenshots.'
 ---
 
-# Browser Testing for telli-dialog
+# Browser Testing for ais-chat-app
 
 Use this skill to validate frontend changes directly in the running web app.
 

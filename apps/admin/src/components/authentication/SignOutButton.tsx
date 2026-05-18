@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { useRouter } from 'next/navigation';
 
 export function SignOutButton() {

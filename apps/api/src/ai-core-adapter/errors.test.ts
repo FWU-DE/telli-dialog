@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { handleAiCoreError } from './errors';
 
-// Mock the error classes from @telli/ai-core/errors
-vi.mock('@telli/ai-core/errors', () => ({
+// Mock the error classes from @ais-chat/ai-core/errors
+vi.mock('@ais-chat/ai-core/errors', () => ({
   InvalidModelError: { is: (e: unknown) => e instanceof Error && e.message === 'InvalidModel' },
   RateLimitExceededError: {
     is: (e: unknown) => e instanceof Error && e.message === 'RateLimitExceeded',

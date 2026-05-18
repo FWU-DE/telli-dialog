@@ -1,6 +1,6 @@
-# telli-api
+# ais-chat-api
 
-This app contains the telli proxy api.
+This app contains the AIS.chat proxy api.
 
 Before you can start the app, you have to setup the required tooling described in the root `README.md`.
 

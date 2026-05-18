@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@ui/components/Button';
-import { Input } from '@ui/components/Input';
-import { Label } from '@ui/components/Label';
+import { Button } from '@ui/components/button';
+import { Input } from '@ui/components/input';
+import { Label } from '@ui/components/label';
 import { createTemplateFromUrlAction } from './actions';
 
 type CreateTemplateModalProps = {
@@ -113,13 +113,13 @@ export function CreateTemplateModal({ isOpen, onClose, onSuccess }: CreateTempla
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://chat.telli.schule/custom/editor/12345"
+              placeholder="https://app.ais-chat.schule/custom/editor/12345"
               className="mt-1"
               disabled={isLoading}
             />
             <p className="text-xs text-gray-500 mt-1">
               Beispiele: <br />
-              • https://chat.telli.schule/custom/editor/12345 <br />• /characters/editor/67890
+              • https://app.ais-chat.schule/custom/editor/12345 <br />• /characters/editor/67890
             </p>
           </div>
 

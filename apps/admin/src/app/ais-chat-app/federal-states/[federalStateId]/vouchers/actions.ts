@@ -1,8 +1,12 @@
 'use server';
 
 import { requireAdminAuth } from '@/auth/requireAdminAuth';
-import { getVouchers, createVouchers, revokeVoucher } from '@telli/shared/vouchers/voucher-service';
-import { type CreateVoucherParams } from '@telli/shared/vouchers/voucher';
+import {
+  getVouchers,
+  createVouchers,
+  revokeVoucher,
+} from '@ais-chat/shared/vouchers/voucher-service';
+import { type CreateVoucherParams } from '@ais-chat/shared/vouchers/voucher';
 
 export async function getVouchersAction(federalStateId: string) {
   await requireAdminAuth();

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
-import { Button } from '@ui/components/Button';
+import { Button } from '@ui/components/button';
 import { getTemplatesAction } from './actions';
 import {
   Table,
@@ -10,7 +10,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@ui/components/Table';
+} from '@ui/components/table';
 import {
   Card,
   CardAction,
@@ -18,7 +18,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@ui/components/Card';
+} from '@ui/components/card';
 import { ROUTES } from '@/consts/routes';
 import Link from 'next/link';
 import { TemplateModel } from '@shared/templates/template';

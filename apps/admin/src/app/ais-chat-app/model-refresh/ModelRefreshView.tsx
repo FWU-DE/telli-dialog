@@ -9,8 +9,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@ui/components/Card';
-import { Button } from '@ui/components/Button';
+} from '@ui/components/card';
+import { Button } from '@ui/components/button';
 import { toast } from 'sonner';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { LlmModelSelectModel } from '@shared/db/schema';
@@ -51,7 +51,7 @@ export default function ModelRefreshView() {
         <CardHeader>
           <CardTitle>LLM-Modelle aktualisieren</CardTitle>
           <CardDescription>
-            Aktualisiert die verfügbaren LLM-Modelle für alle Bundesländer, anhand der Telli-API.
+            Aktualisiert die verfügbaren LLM-Modelle für alle Bundesländer, anhand der AIS.chat-API.
           </CardDescription>
           <CardAction>
             <Button

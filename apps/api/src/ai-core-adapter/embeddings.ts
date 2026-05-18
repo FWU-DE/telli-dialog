@@ -1,4 +1,4 @@
-import { generateEmbeddingsByNameWithBilling } from '@telli/ai-core';
+import { generateEmbeddingsByNameWithBilling } from '@ais-chat/ai-core';
 
 /**
  * Generates embeddings using ai-core and returns an OpenAI-compatible response.

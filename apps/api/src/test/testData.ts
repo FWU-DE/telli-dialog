@@ -1,4 +1,8 @@
-import { LlmInsertModel, OrganizationInsertModel, ProjectInsertModel } from '@telli/api-database';
+import {
+  LlmInsertModel,
+  OrganizationInsertModel,
+  ProjectInsertModel,
+} from '@ais-chat/api-database';
 
 export const ORGANIZATION_ID = '5dbd7831-fcd2-4db3-aa93-6142893c51c2';
 export const PROJECT_ID = '6ecd4f8a-9576-5d5b-af0d-fc4cbce5d6e8';

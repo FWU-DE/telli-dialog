@@ -1,0 +1,36 @@
+type TokenPointsProgressBarProps = {
+  percentage: number;
+};
+
+export default function TokenPointsProgressBar({
+  percentage: _percentage,
+}: TokenPointsProgressBarProps) {
+  const percentage = Math.max(Math.ceil(_percentage), 0);
+
+  function getColorByProgress() {
+    if (percentage > 20) {
+      return '#02A59B';
+    }
+    return '#E94D52';
+  }
+
+  const color = getColorByProgress();
+
+  return (
+    <div className="flex flex-col w-full">
+      <div className="w-full">
+        <div className="w-full h-3 relative">
+          <div
+            className="bg-slate-100 h-3 transition-all duration-500 ease-in-out absolute left-0"
+            style={{ width: '100%' }}
+          ></div>
+          <div
+            className="h-3 transition-all duration-500 ease-in-out absolute left-0 rounded-1"
+            style={{ width: `${Math.min(percentage, 100)}%`, backgroundColor: color }}
+          ></div>
+        </div>
+        <div className="mt-1 text-xs text-right text-gray-600">{percentage} %</div>
+      </div>
+    </div>
+  );
+}

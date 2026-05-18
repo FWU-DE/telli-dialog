@@ -48,7 +48,7 @@ import {
   verifyReadAccess,
   verifyWriteAccess,
 } from '@shared/auth/authorization-service';
-import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
+import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 
 export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel & {
@@ -258,7 +258,7 @@ export async function updateLearningScenarioAccessLevel({
 }
 
 export const learningScenarioShareValuesSchema = z.object({
-  telliPointsPercentageLimit: z.number().min(1).max(100),
+  tokenPointsPercentageLimit: z.number().min(1).max(100),
   usageTimeLimit: z
     .number()
     .min(30)
@@ -306,7 +306,7 @@ export async function shareLearningScenario({
     learningScenarioId,
     inviteCode,
     startedAt,
-    tokenPointsLimit: parsedValues.telliPointsPercentageLimit,
+    tokenPointsLimit: parsedValues.tokenPointsPercentageLimit,
     maxUsageTimeLimit: parsedValues.usageTimeLimit,
   });
 

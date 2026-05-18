@@ -1,4 +1,4 @@
-import { LlmModel } from '@telli/api-database';
+import { LlmModel } from '@ais-chat/api-database';
 
 type ObscuredLlmModel = Omit<LlmModel, 'setting' | 'organizationId'>;
 

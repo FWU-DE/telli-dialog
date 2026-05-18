@@ -1,3 +1,4 @@
+import { instrumentOpenAiClient } from '@sentry/core';
 import OpenAI from 'openai';
 import type { AiModel, EmbeddingGenerationFn } from '../types';
 import { ProviderConfigurationError } from '../../errors';
@@ -14,11 +15,13 @@ function createAzureClient(model: AiModel): {
     baseUrl: model.setting.baseUrl,
   });
 
-  const client = new OpenAI({
-    apiKey: model.setting.apiKey,
-    baseURL: basePath,
-    defaultQuery: Object.fromEntries(searchParams.entries()),
-  });
+  const client = instrumentOpenAiClient(
+    new OpenAI({
+      apiKey: model.setting.apiKey,
+      baseURL: basePath,
+      defaultQuery: Object.fromEntries(searchParams.entries()),
+    }),
+  );
 
   return { client, deployment };
 }

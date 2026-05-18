@@ -1,6 +1,6 @@
 'use client';
-import { Button } from '@ui/components/Button';
-import { Input } from '@ui/components/Input';
+import { Button } from '@ui/components/button';
+import { Input } from '@ui/components/input';
 import {
   ArrayPath,
   Control,
@@ -10,7 +10,7 @@ import {
   Path,
   useFieldArray,
 } from 'react-hook-form';
-import { Field, FieldDescription, FieldError, FieldLegend, FieldSet } from '@ui/components/Field';
+import { Field, FieldDescription, FieldError, FieldLegend, FieldSet } from '@ui/components/field';
 
 export type FormFieldArrayProps<
   TFieldValues extends FieldValues = FieldValues,

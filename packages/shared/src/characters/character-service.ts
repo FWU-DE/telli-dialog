@@ -45,12 +45,11 @@ import {
   copyRelatedTemplateFiles,
 } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
-import { addDays } from '@shared/utils/date';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq, inArray, lt } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import z from 'zod';
-import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
+import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import {
   requireTeacherRole,
   verifyReadAccess,
@@ -347,12 +346,12 @@ export const deleteCharacter = async ({
 export const shareCharacter = async ({
   characterId,
   user,
-  telliPointsPercentageLimit,
+  tokenPointsPercentageLimit,
   usageTimeLimitMinutes,
 }: {
   characterId: string;
   user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
-  telliPointsPercentageLimit: number;
+  tokenPointsPercentageLimit: number;
   usageTimeLimitMinutes: number;
 }) => {
   checkParameterUUID(characterId);
@@ -366,8 +365,8 @@ export const shareCharacter = async ({
   });
 
   // validate input parameters
-  if (telliPointsPercentageLimit < 0 || telliPointsPercentageLimit > 100) {
-    throw new Error('telli points percentage limit must be between 0 and 100');
+  if (tokenPointsPercentageLimit < 0 || tokenPointsPercentageLimit > 100) {
+    throw new Error('token points percentage limit must be between 0 and 100');
   }
   if (usageTimeLimitMinutes <= 0 || usageTimeLimitMinutes > 30 * 24 * 60) {
     throw new Error('usage time limit must be between 1 and 43200 minutes');
@@ -376,7 +375,7 @@ export const shareCharacter = async ({
   const activeShares = await dbGetSharedCharacterConversations({ characterId, user });
   if (activeShares.length > 0) throw new Error('There can only be one active share at a time');
 
-  const tokenPointsLimit = telliPointsPercentageLimit;
+  const tokenPointsLimit = tokenPointsPercentageLimit;
   const maxUsageTimeLimit = usageTimeLimitMinutes;
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
@@ -601,22 +600,6 @@ export const getCharacterInfo = async (
     character,
   };
 };
-
-/**
- * Cleans up characters with empty names from the database.
- * Attention: This is an admin function that does not check any authorization!
- *
- * Note: linked files will be unlinked but removed separately by `dbDeleteDanglingFiles`
- *
- * @returns number of deleted characters in db
- */
-export async function cleanupCharacters() {
-  const result = await db
-    .delete(characterTable)
-    .where(and(eq(characterTable.name, ''), lt(characterTable.createdAt, addDays(new Date(), -1))))
-    .returning();
-  return result.length;
-}
 
 export async function uploadAvatarPictureForCharacter({
   characterId,

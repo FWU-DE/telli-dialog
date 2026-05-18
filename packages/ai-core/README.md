@@ -1,4 +1,4 @@
-# @telli/ai-core
+# @ais-chat/ai-core
 
 A package for communicating with AI providers and LLMs.
 
@@ -12,7 +12,7 @@ A package for communicating with AI providers and LLMs.
 
 ## Installation
 
-This package is part of the Telli monorepo and is not published separately.
+This package is part of the AIS.chat monorepo and is not published separately.
 
 ## Scripts
 

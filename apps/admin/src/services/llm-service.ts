@@ -3,7 +3,7 @@ import {
   dbCreateLlmModel,
   dbUpdateLlmModel,
   dbGetOrganizationById,
-} from '@telli/api-database';
+} from '@ais-chat/api-database';
 import { CreateLargeLanguageModel, UpdateLargeLanguageModel } from '../types/large-language-model';
 import { logInfo } from '@shared/logging';
 

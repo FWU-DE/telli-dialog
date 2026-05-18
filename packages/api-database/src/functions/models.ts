@@ -68,7 +68,7 @@ export async function dbGetAllModelsByOrganizationId(organizationId: string) {
 
 /**
  * Returns the list of llm models linked to the given API key.
- * The deleted flag is ignored for now because telli-dialog needs all models and the deleted flag needs to be mirrored.
+ * The deleted flag is ignored for now because ais-chat-app needs all models and the deleted flag needs to be mirrored.
  * @param apiKeyId: The id of the API key.
  * @returns
  */

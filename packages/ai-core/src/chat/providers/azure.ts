@@ -1,5 +1,6 @@
+import { instrumentOpenAiClient } from '@sentry/core';
 import OpenAI from 'openai';
-import type { AiModel, TextStreamFn, TextGenerationFn, TokenUsage } from '../types';
+import type { AiModel, TextGenerationFn, TextStreamFn, TokenUsage } from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { toOpenAIMessages, toOpenAIResponsesInput } from '../utils';
 
@@ -15,11 +16,13 @@ function createAzureClient(model: AiModel): {
     baseUrl: model.setting.baseUrl,
   });
 
-  const client = new OpenAI({
-    apiKey: model.setting.apiKey,
-    baseURL: basePath,
-    defaultQuery: Object.fromEntries(searchParams.entries()),
-  });
+  const client = instrumentOpenAiClient(
+    new OpenAI({
+      apiKey: model.setting.apiKey,
+      baseURL: basePath,
+      defaultQuery: Object.fromEntries(searchParams.entries()),
+    }),
+  );
 
   return { client, deployment };
 }
