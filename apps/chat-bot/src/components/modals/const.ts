@@ -41,7 +41,7 @@ Dialogpartner und Lernszenarien
 · Vorbereitung auf Klassenarbeiten und Prüfungen
 · Kritische Auseinandersetzung, Lernen und Reflektieren über generative KI
 
-Für Fragen zur Nutzung von AIS.chat, wenden Sie sich bitte an den Support des LIBRA. Weitere Informationen finden Sie unter [https://ais-bb.de](https://ais-bb.de) ehemals https://telli-bb.de).  
+Für Fragen zur Nutzung von AIS.chat, wenden Sie sich bitte an den Support des LIBRA. Weitere Informationen finden Sie unter [https://ais-bb.de](https://ais-bb.de) (ehemals https://telli-bb.de).  
 
 3. Zugangsberechtigung
 
@@ -166,7 +166,7 @@ Sollten Sie durch einen umfangreichen Prompt eine ganz spezielle Funktionsweise 
 
 ### Was sind Lernszenarien, Dialogpartner und Assistenten?
 
-Lernszenarien ermöglichen Lehrkräften, spezifische pädagogische Situationen zu gestalten und anonymisierte Chats für Schülerinnen zu erstellen. So können diese gezielt lernen, ohne sich einloggen zu müssen. Dialogpartner sind simulierte Personen, die in Chats agieren und den Schülerinnen helfen, verschiedene Perspektiven zu verstehen oder Diskussionen zuführen. Assistenten unterstützen bei der Unterrichtsvorbereitung, indem sie Materialienerstellen, Aufgaben übersetzen oder bei Hausaufgaben helfen. Gemeinsam fördern diese Funktionen individuelles Lernen, stärken die Selbstständigkeit der Schülerinnen und Schüler und bieten Lehrkräften wertvolle Werkzeuge zur Gestaltung eines effektiven Unterrichts. Wenn man über diese Funktionen Chatbots für die Klasse freigibt, wird das **eigene Budget an Tokenvolumen** verbraucht. 
+Lernszenarien ermöglichen Lehrkräften, spezifische pädagogische Situationen zu gestalten und anonymisierte Chats für Schülerinnen zu erstellen. So können diese gezielt lernen, ohne sich einloggen zu müssen. Dialogpartner sind simulierte Personen, die in Chats agieren und den Schülerinnen helfen, verschiedene Perspektiven zu verstehen oder Diskussionen zu führen. Assistenten unterstützen bei der Unterrichtsvorbereitung, indem sie Materialien erstellen, Aufgaben übersetzen oder bei Hausaufgaben helfen. Gemeinsam fördern diese Funktionen individuelles Lernen, stärken die Selbstständigkeit der Schülerinnen und Schüler und bieten Lehrkräften wertvolle Werkzeuge zur Gestaltung eines effektiven Unterrichts. Wenn man über diese Funktionen Chatbots für die Klasse freigibt, wird das **eigene Budget an Tokenvolumen** verbraucht. 
 
 **Lernszenarien:** Mit dieser Funktion kann man den Schülerinnen und Schülern einen DSGVO-konformen KI-Zugang freigeben. Hierbei kann man die Funktionsweise des Chatbots über eine Eingabemaske anpassen. Die Eingabemaske beinhaltet Vorschläge, wie man sie ausfüllen kann. Diesen KI-Zugang kann man zeitlich begrenzt in verschiedenen Schritten bis zu maximal 30 Tagen freigeben. Die Schülerinnen und Schüler können den Chatverlauf als Word-Dokument herunterladen. 
 
