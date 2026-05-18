@@ -14,6 +14,14 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { notFound } from 'next/navigation';
 import CollapseSidebar from '@/components/common/collapse-sidebar';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
+import { type Metadata } from 'next';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('learning-scenarios.page-titles');
+  return {
+    title: t('share'),
+  };
+}
 
 export default async function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]/share'>,

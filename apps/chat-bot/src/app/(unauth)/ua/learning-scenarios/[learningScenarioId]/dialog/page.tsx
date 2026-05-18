@@ -9,6 +9,15 @@ import { dbGetLearningScenarioByIdAndInviteCode } from '@shared/db/functions/lea
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { notFound } from 'next/navigation';
 import z from 'zod';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('learning-scenarios.page-titles');
+  return {
+    title: t('chat-shared'),
+  };
+}
 
 const searchParamsSchema = z.object({ inviteCode: z.string() });
 
