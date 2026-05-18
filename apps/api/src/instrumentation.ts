@@ -55,7 +55,7 @@ const sentryClient = Sentry.init({
 // import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
-const SERVICE_NAME = 'telli-api';
+const SERVICE_NAME = 'ais-chat-api';
 
 const exporter = new OTLPMetricExporter();
 const periodicExportingMetricReader = new PeriodicExportingMetricReader({
