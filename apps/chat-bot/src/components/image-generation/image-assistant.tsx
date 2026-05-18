@@ -95,7 +95,7 @@ export function ImageAssistant({
   const kickOff = useCallback(() => {
     const prompt = initialPrompt?.trim();
     const openingContent = prompt
-      ? `Du hast bereits folgenden Text eingegeben:\n\n„${prompt.replace(/[<>]/g, '').slice(0, 300)}"\n\nSoll ich das als Ausgangspunkt verwenden?\n\nOPTIONS: Ja, bestehenden Text verwenden | Nein, neu beginnen`
+      ? `Bereits eingegebener Text:\n\n„${prompt.replace(/[<>]/g, '').slice(0, 300)}"\n\nSoll dieser als Ausgangspunkt verwendet werden?\n\nOPTIONS: Ja, bestehenden Text verwenden | Nein, neu beginnen`
       : t('assistant-opening-question');
     setMessages([{ role: 'assistant', content: openingContent }]);
     setInput('');
