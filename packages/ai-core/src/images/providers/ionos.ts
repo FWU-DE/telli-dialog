@@ -1,5 +1,6 @@
+import { instrumentOpenAiClient } from '@sentry/core';
 import OpenAI from 'openai';
-import { ImageGenerationFn, AiModel } from '../types';
+import type { AiModel, ImageGenerationFn } from '../types';
 import { AiGenerationError } from '../../errors';
 
 export function constructIonosImageGenerationFn(llmModel: AiModel): ImageGenerationFn {
@@ -7,10 +8,12 @@ export function constructIonosImageGenerationFn(llmModel: AiModel): ImageGenerat
     throw new Error('Invalid model configuration for IONOS');
   }
 
-  const client = new OpenAI({
-    apiKey: llmModel.setting.apiKey,
-    baseURL: llmModel.setting.baseUrl,
-  });
+  const client = instrumentOpenAiClient(
+    new OpenAI({
+      apiKey: llmModel.setting.apiKey,
+      baseURL: llmModel.setting.baseUrl,
+    }),
+  );
 
   return async function getIonosImageGeneration({
     prompt,

@@ -1,5 +1,5 @@
 import { constructIonosImageGenerationFn } from './ionos';
-import { ImageGenerationFn, AiModel } from '../types';
+import type { AiModel, ImageGenerationFn } from '../types';
 import { constructAzureImageGenerationFn } from './azure';
 import { constructGoogleImageGenerationFn } from './google';
 import { ProviderConfigurationError } from '../../errors';
