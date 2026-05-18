@@ -141,8 +141,7 @@ Deshalb ist in Nordrhein-Westfalen der Besuch des Selbstlernkurses „Künstlich
 
 ### Wie logge ich mich bei AIS.chat ein?
 
-Sie finden den Zugang zu AIS.chat auf unserer Homepage www.lernen-digital.nrw 
-[Zugang zu „telli“ | Lehren und Lernen](https://www.lernen-digital.nrw/zugang-zu-telli)
+Sie finden den Zugang zu AIS.chat auf unserer Homepage [https://www.lernen-digital.nrw/zugang-zu-AIS.chat](https://www.lernen-digital.nrw/zugang-zu-AIS.chat)
 
 ### Was ist das Tokenvolumen?
 
@@ -199,7 +198,7 @@ const EDUCATION_HINT_HB = `Liebe Kollegin, lieber Kollege,
   Deshalb ist in Bremen der Besuch eines itslearning Selbstlernkurses zum Thema KI vor der initialen Nutzung von AIS.chat verpflichtend.
 
   Alle Informationen zum Selbstlernkurs sind abrufbar unter:
-  [https://www.bildung.bremen.de/einfuhrung-des-chatbots-telli-im-land-bremen-458348](https://www.bildung.bremen.de/einfuhrung-des-chatbots-telli-im-land-bremen-458348)
+  [https://www.bildung.bremen.de/der-chatbots-ais-chat-im-land-bremen-458348](https://www.bildung.bremen.de/der-chatbots-ais-chat-im-land-bremen-458348)
 
   Dort finden Sie hilfreiche Informationen, Hinweise und Tipps zum Thema KI und Schule im Allgemeinen sowie speziell zum Einsatz von AIS.chat.
 
@@ -221,7 +220,7 @@ Die Bereitstellung erfolgt gemäß VO (EU) 2024/1689 (KI-Verordnung) sowie DSGVO
 Nutzende erhalten ein begrenztes Nutzungskontingent „Tokenvolumen". Eine Nutzung über das Kontingent hinaus ist nicht möglich, um eine Verfügbarkeit des Dienstes für eine Vielzahl von Lehrkräften gewährleisten zu können. Der Dienst ist für Nutzende kostenlos.
 
 ## 5 Datenverarbeitung & Hosting
-AIS.chat verarbeitet alle Eingaben ausschließlich auf Servern innerhalb der EU. Die Large Language Models werden in europäischen Cloud-Lösungen gehostet; eine Übermittlung an Drittstaaten findet nicht statt. Mit den technischen Dienstleistern bestehen AV-Verträge nach Art. 28 DSGVO ([https://telli.schule/datenschutz](https://telli.schule/datenschutz)).
+AIS.chat verarbeitet alle Eingaben ausschließlich auf Servern innerhalb der EU. Die Large Language Models werden in europäischen Cloud-Lösungen gehostet; eine Übermittlung an Drittstaaten findet nicht statt. Mit den technischen Dienstleistern bestehen AV-Verträge nach Art. 28 DSGVO ([https://ais-chat.schule/datenschutzerklaerung/](https://ais-chat.schule/datenschutzerklaerung/)).
 
 ## 6 Speicherung der Chatverläufe
 Gespeicherte Verläufe werden unverschlüsselt im jeweiligen Benutzerkonto auf AIS.chat-Servern abgelegt. Der Zugriff auf diese Daten durch die Systemadministration der FWU sowie die AIS.chat-Entwickler erfolgt ausschließlich zur Wahrung der Nutzungsbedingungen. In Einzelfällen können dazu stichpunkthafte Kontrollen durchgeführt werden. LISA-Mitarbeitende haben auf die Daten keinen Zugriff. Die Daten werden bei Kontolöschung unwiderruflich gelöscht.
