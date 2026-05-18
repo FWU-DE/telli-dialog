@@ -54,13 +54,13 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
   // Mock LLMs
   {
     ...mockLlm,
-    id: 'dab0c5ad-de8b-4175-af5d-4d64128e39ba\n',
+    id: 'a0a46b60-41d5-4843-856d-c6d8172f0fca',
     name: 'mock-echo-1',
     displayName: process.env.E2E_TEXT_MODEL_1 ?? 'Mock LLM',
   },
   {
     ...mockLlm,
-    id: '88d3c0c3-cf49-4070-bcdb-9efbb8212873\n',
+    id: '689342a5-89ed-4d43-bc8c-a1a00f464184',
     name: 'mock-echo-2',
     displayName: process.env.E2E_TEXT_MODEL_2 ?? 'Mock LLM (2)',
   },

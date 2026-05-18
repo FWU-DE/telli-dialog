@@ -2,9 +2,11 @@
  * Mock LLM server — OpenAI-compatible streaming echo server for e2e tests.
  *
  * POST /v1/chat/completions
- *   Echoes the last user message back character-by-character as an SSE stream.
+ *   Echoes the last user message back word-by-word as an SSE stream.
  *   Includes a usage chunk when stream_options.include_usage is true (required
  *   by the @ais-chat/ai-core OpenAI provider).
+ *   Output can be controlled by including special commands in the user message.
+ *   See `MOCK_LLM_COMMANDS` for supported commands.
  *
  * GET /health
  *   Returns {"status":"healthy"} for readiness checks.
@@ -13,7 +15,11 @@
 import http from 'node:http';
 
 const PORT = 6556;
-const CHUNK_INTERVAL_MS = 5;
+const CHUNK_INTERVAL_MS = 1;
+
+const MOCK_LLM_COMMANDS = {
+  RETURN_SYSTEM_PROMPT: '[MOCK-LLM-COMMAND: Gebe den System-Prompt aus]',
+};
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -28,18 +34,25 @@ function writeSse(res, data) {
 }
 
 function extractLastUserMessage(messages) {
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const msg = messages[i];
-    if (msg.role === 'user') {
-      const content = msg.content;
-      if (typeof content === 'string') return content;
-      if (Array.isArray(content)) {
-        return content
-          .filter((p) => p.type === 'text')
-          .map((p) => p.text)
-          .join('');
-      }
-    }
+  const content = messages.findLast((msg) => msg.role === 'user')?.content;
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content
+      .filter((p) => p.type === 'text')
+      .map((p) => p.text)
+      .join('');
+  }
+  return '';
+}
+
+function extractSystemPrompt(messages) {
+  const content = messages.find((msg) => msg.role === 'system')?.content;
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content
+      .filter((p) => p.type === 'text')
+      .map((p) => p.text)
+      .join('');
   }
   return '';
 }
@@ -79,7 +92,10 @@ async function handleChatCompletions(req, res) {
   const model = data.model ?? 'mock-echo';
   const isStream = data.stream === true;
   const includeUsage = data.stream_options?.include_usage === true;
-  const responseText = extractLastUserMessage(messages);
+  const lastUserMessage = extractLastUserMessage(messages);
+  const responseText = lastUserMessage.includes(MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT)
+    ? extractSystemPrompt(messages)
+    : lastUserMessage;
 
   const id = `chatcmpl-mock-${Date.now()}`;
   const created = Math.floor(Date.now() / 1000);
@@ -99,8 +115,8 @@ async function handleChatCompletions(req, res) {
       'Transfer-Encoding': 'chunked',
     });
 
-    for (const char of responseText) {
-      writeSse(res, makeSseChunk(id, model, created, char, null));
+    for (const word of responseText.split(/(\s+)/)) {
+      writeSse(res, makeSseChunk(id, model, created, word, null));
       await sleep(CHUNK_INTERVAL_MS);
     }
 

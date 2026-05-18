@@ -40,7 +40,6 @@ async function readModelsFromDropdown(page: Page): Promise<string[]> {
 
 async function saveLlmModels(page: Page) {
   const allModels = await readModelsFromDropdown(page);
-  // Exclude mock models so that external-services tests only run against real LLMs.
   const realModels = allModels.filter((name) => !MOCK_MODEL_DISPLAY_NAMES.has(name));
 
   await fs.mkdir(path.dirname(LLM_MODELS_FILE), { recursive: true });

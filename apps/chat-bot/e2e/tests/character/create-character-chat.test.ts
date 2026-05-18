@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { AUTH_FILES } from '../../utils/const';
+import { AUTH_FILES, MOCK_LLM_COMMANDS } from '../../utils/const';
 import { regenerateMessage, sendMessage } from '../../utils/chat';
 import {
   configureCharacter,
@@ -77,7 +77,7 @@ test.describe('create, share, chat, delete', () => {
     await page.waitForURL('/ua/characters/**/dialog?inviteCode=*');
 
     // send first message
-    await sendMessage(page, 'Wer bist du? Antworte mit "John Cena".');
+    await sendMessage(page, `${MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT} Wer bist du?`);
     await page.getByTestId('copy-to-clipboard').click();
 
     await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');

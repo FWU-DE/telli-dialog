@@ -22,3 +22,7 @@ export const AUTH_FILES = {
 };
 
 export const LLM_MODELS_FILE = path.resolve(process.cwd(), '.playwright-auth/llm-models.json');
+
+export const MOCK_LLM_COMMANDS = {
+  RETURN_SYSTEM_PROMPT: '[MOCK-LLM-COMMAND: Gebe den System-Prompt aus]',
+};

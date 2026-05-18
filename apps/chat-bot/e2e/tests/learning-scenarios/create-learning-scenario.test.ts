@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { AUTH_FILES } from '../../utils/const';
+import { AUTH_FILES, MOCK_LLM_COMMANDS } from '../../utils/const';
 import { waitForAutosave, waitForToast, waitForToastDisappear } from '../../utils/utils';
 import { sendMessage } from '../../utils/chat';
 import {
@@ -119,7 +119,7 @@ test.describe('create, share, chat, delete', () => {
     await expect(startButton).toBeVisible();
     await startButton.click();
 
-    await sendMessage(page, 'Über wen lernen wir hier? Antworte mit "Ludwig XIV".');
+    await sendMessage(page, `${MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT} Über wen lernen wir hier?`);
 
     await expect(page.getByLabel('assistant message 1')).toContainText('Ludwig XIV');
 

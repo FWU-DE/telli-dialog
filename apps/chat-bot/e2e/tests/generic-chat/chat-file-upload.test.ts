@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { AUTH_FILES } from '../../utils/const';
+import { AUTH_FILES, MOCK_LLM_COMMANDS } from '../../utils/const';
 import { deleteChat, selectDifferentModel, sendMessage, uploadFile } from '../../utils/chat';
 import { LLM_MODELS } from '../../utils/llm-models';
 import path from 'path';
@@ -29,7 +29,7 @@ test('should successfully upload a file and get response about its contents', as
   // Send message about file contents
   await sendMessage(
     page,
-    'Wie heißt die Hauptperson die in dieser Datei genannt wird? Antworte mit "Napoleon Bonaparte".',
+    `${MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT} Wie heißt die Hauptperson die in dieser Datei genannt wird?`,
   );
 
   // Verify the response contains the expected content

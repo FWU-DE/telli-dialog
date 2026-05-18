@@ -106,7 +106,7 @@ For detailed variable documentation and values for local development with docker
 For local development spin up all required services using docker compose:
 
 ```sh
-docker compose -f devops/docker/docker-compose.local.yml up -d
+docker compose -f devops/docker/docker-compose.local.yml up -d --build
 ```
 
 To remove all data and start from scratch, you can stop and remove the container and its volume.
