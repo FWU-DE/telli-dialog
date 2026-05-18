@@ -85,8 +85,7 @@ async function handleChatCompletions(req, res) {
   const created = Math.floor(Date.now() / 1000);
   const promptTokens = messages.reduce(
     (sum, m) =>
-      sum +
-      estimateTokens(typeof m.content === 'string' ? m.content : JSON.stringify(m.content)),
+      sum + estimateTokens(typeof m.content === 'string' ? m.content : JSON.stringify(m.content)),
     0,
   );
   const completionTokens = estimateTokens(responseText);
@@ -96,7 +95,7 @@ async function handleChatCompletions(req, res) {
     res.writeHead(200, {
       'Content-Type': 'text/event-stream; charset=utf-8',
       'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
+      Connection: 'keep-alive',
       'Transfer-Encoding': 'chunked',
     });
 

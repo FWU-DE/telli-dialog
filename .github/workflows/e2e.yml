@@ -65,9 +65,6 @@ jobs:
       ENCRYPTION_KEY: EncryptionKeyForEncryptedApiKeysToAISChatApi
       # Auth.js secret
       AUTH_SECRET: 'yN1a0lQ77RgeEQam5DvGaddbdUDQoxswK+21FmEqBPs='
-      # Mock LLM server (echo server used as the default model in e2e tests)
-      LLM_MOCK_API_KEY: mock-api-key
-      LLM_MOCK_BASE_URL: http://localhost:6556/v1
       # S3 Storage
       OTC_SECRET_ACCESS_KEY: ${{ secrets.OTC_SECRET_ACCESS_KEY }}
       OTC_ACCESS_KEY_ID: ${{ secrets.OTC_ACCESS_KEY_ID }}
@@ -101,23 +98,6 @@ jobs:
             -p 11235:11235 \
             unclecode/crawl4ai:0.8.6 > /tmp/crawl4ai.log 2>&1 &
 
-      - name: Load 1Password Secrets
-        uses: 1password/load-secrets-action@v4
-        with:
-          export-env: true
-        env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          OTC_SECRET_ACCESS_KEY: op://telli Engineering/.env.e2e chatbot/OTC_SECRET_ACCESS_KEY
-          OTC_ACCESS_KEY_ID: op://telli Engineering/.env.e2e chatbot/OTC_ACCESS_KEY_ID
-          OTC_S3_HOSTNAME: op://telli Engineering/.env.e2e chatbot/OTC_S3_HOSTNAME
-          OTC_BUCKET_NAME: op://telli Engineering/.env.e2e chatbot/OTC_BUCKET_NAME
-          # LLM API Keys for seeding telli-api
-          LLM_IONOS_API_KEY: op://telli Engineering/.env.e2e chatbot/LLM_IONOS_API_KEY
-          LLM_IONOS_BASE_URL: op://telli Engineering/.env.e2e chatbot/LLM_IONOS_BASE_URL
-          LLM_GPT4OMINI_API_KEY: op://telli Engineering/.env.e2e chatbot/LLM_GPT4OMINI_API_KEY
-          LLM_GPT4OMINI_BASE_URL: op://telli Engineering/.env.e2e chatbot/LLM_GPT4OMINI_BASE_URL
-          LLM_GPT5NANO_API_KEY: op://telli Engineering/.env.e2e chatbot/LLM_GPT5NANO_API_KEY
-          LLM_GPT5NANO_BASE_URL: op://telli Engineering/.env.e2e chatbot/LLM_GPT5NANO_BASE_URL
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
       - name: Setup Node.js
@@ -175,6 +155,8 @@ jobs:
           LLM_GPT4OMINI_BASE_URL: ${{ secrets.LLM_GPT4OMINI_BASE_URL }}
           LLM_GPT5NANO_API_KEY: ${{ secrets.LLM_GPT5NANO_API_KEY }}
           LLM_GPT5NANO_BASE_URL: ${{ secrets.LLM_GPT5NANO_BASE_URL }}
+          LLM_MOCK_API_KEY: mock-api-key
+          LLM_MOCK_BASE_URL: http://localhost:6556/v1
 
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @ais-chat/shared db:migrate && pnpm --filter @ais-chat/shared db:seed
@@ -205,6 +187,8 @@ jobs:
         run: pnpm --filter ais-chat-app e2e
         env:
           CI: true
+          E2E_TEXT_MODEL_1: Mock LLM
+          E2E_TEXT_MODEL_2: Mock LLM (2)
 
       - name: Run E2E tests (api)
         run: pnpm --filter ais-chat-api e2e

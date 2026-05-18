@@ -7,32 +7,16 @@ For e2e tests we use [playwright](https://playwright.dev/).
 
 Most e2e tests use a local mock OpenAI-compatible server (`devops/docker/mock-llm/`) as the default
 text model instead of calling real LLMs. The mock server echoes the last user message back as a
-character-by-character SSE stream — fast, free, and fully deterministic.
-
-The mock model is registered in the telli-api database by `packages/api-database/src/seed.ts`
-under the display name **Mock LLM** and the internal model name `mock-echo`.
+character-by-character SSE stream for deterministic responses.
 
 ### Starting the mock LLM locally
 
-```sh
-docker build -t mock-llm devops/docker/mock-llm
-docker run -d --name mock-llm -p 6556:6556 mock-llm
-```
-
-Or use the local Docker Compose setup which includes the mock server:
-
-```sh
-docker compose -f devops/docker/docker-compose.local.yml up -d mock-llm
-```
-
-The `LLM_MOCK_BASE_URL` env var (default `http://localhost:6556/v1`) and
-`LLM_MOCK_API_KEY` (default `mock-api-key`) control where the seed points the model.
+Use the local Docker Compose setup which includes the mock server.
 
 ### External-services tests
 
-Tests in `tests/external-services/` are intentionally excluded from the mock
-and always run against real LLMs. They are skipped from the chromium/firefox
-test projects and must be run separately.
+Tests in `tests/external-services/` are intentionally excluded from the mock and always run against real LLMs.
+They are skipped from the chromium/firefox test projects and must be run separately.
 
 ## Run e2e tests
 

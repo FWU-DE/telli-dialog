@@ -94,6 +94,13 @@ services:
       retries: 3
       start_period: 40s
 
+  mock-llm:
+    build:
+      context: ./mock-llm
+    restart: unless-stopped
+    ports:
+      - '6556:6556'
+
 volumes:
   keycloak_data:
   postgres_data:

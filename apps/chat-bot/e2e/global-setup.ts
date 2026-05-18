@@ -10,7 +10,10 @@ import { LLM_MODELS } from './utils/llm-models';
  * Display names of models that exist only for e2e testing purposes and must
  * not appear in the external-services test matrix (which tests real LLMs).
  */
-const MOCK_MODEL_DISPLAY_NAMES = new Set<string>([LLM_MODELS.TEXT_MODEL_1]);
+const MOCK_MODEL_DISPLAY_NAMES = new Set<string>([
+  LLM_MODELS.TEXT_MODEL_1,
+  LLM_MODELS.TEXT_MODEL_2,
+]);
 
 async function readModelsFromDropdown(page: Page): Promise<string[]> {
   const dropdown = page.getByLabel(`Select text Model Dropdown`);

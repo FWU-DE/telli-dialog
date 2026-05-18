@@ -23,34 +23,48 @@ const gpt4oMiniApiKey = process.env.LLM_GPT4OMINI_API_KEY ?? 'API_KEY_PLACEHOLDE
 const gpt4oMiniBaseUrl = process.env.LLM_GPT4OMINI_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const gpt5nanoApiKey = process.env.LLM_GPT5NANO_API_KEY ?? 'API_KEY_PLACEHOLDER';
 const gpt5nanoBaseUrl = process.env.LLM_GPT5NANO_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
-const mockLlmApiKey = process.env.LLM_MOCK_API_KEY ?? 'mock-api-key';
-const mockLlmBaseUrl = process.env.LLM_MOCK_BASE_URL ?? 'http://localhost:6556/v1';
+const mockLlmApiKey = process.env.LLM_MOCK_API_KEY ?? 'API_KEY_PLACEHOLDER';
+const mockLlmBaseUrl = process.env.LLM_MOCK_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
+
+// Mock LLM: OpenAI-compatible echo server used as the default model in e2e tests.
+// Echoes the last user message back as a streaming response — no real API calls, fully deterministic.
+// See devops/docker/mock-llm/ for the server implementation.
+const mockLlm: LlmInsertModel = {
+  organizationId: ORGANIZATION_ID,
+  provider: 'openai',
+  name: 'mock-echo',
+  displayName: 'Mock LLM',
+  description: 'Mock LLM for e2e testing — echoes back the received prompt',
+  setting: {
+    provider: 'openai',
+    apiKey: mockLlmApiKey,
+    baseUrl: mockLlmBaseUrl,
+  },
+  priceMetadata: {
+    type: 'text',
+    promptTokenPrice: 0,
+    completionTokenPrice: 0,
+  },
+};
 
 // All prices are rough estimates, probably outdated and just for mocking purposes
 // Static ids are used to ensure that the models are not created again
 // the ids are taken from the staging/production database for interoperability to be able to connect to local AIS.chat api or staging
 const DEFAULT_MODELS: LlmInsertModel[] = [
+  // Mock LLMs
   {
-    // Mock LLM: OpenAI-compatible echo server used as the default model in e2e tests.
-    // Echoes the last user message back as a streaming response — no real API calls, fully deterministic.
-    // See devops/docker/mock-llm/ for the server implementation.
-    id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-    organizationId: ORGANIZATION_ID,
-    provider: 'openai',
-    name: 'mock-echo',
-    displayName: 'Mock LLM',
-    description: 'Mock LLM for e2e testing — echoes back the received prompt',
-    setting: {
-      provider: 'openai',
-      apiKey: mockLlmApiKey,
-      baseUrl: mockLlmBaseUrl,
-    },
-    priceMetadata: {
-      type: 'text',
-      promptTokenPrice: 0,
-      completionTokenPrice: 0,
-    },
+    ...mockLlm,
+    id: 'dab0c5ad-de8b-4175-af5d-4d64128e39ba\n',
+    name: 'mock-echo-1',
+    displayName: process.env.E2E_TEXT_MODEL_1 ?? 'Mock LLM',
   },
+  {
+    ...mockLlm,
+    id: '88d3c0c3-cf49-4070-bcdb-9efbb8212873\n',
+    name: 'mock-echo-2',
+    displayName: process.env.E2E_TEXT_MODEL_2 ?? 'Mock LLM (2)',
+  },
+  // Realm LLMs
   {
     id: 'b870b74d-7458-4dcf-99f6-ace83ef514f4',
     organizationId: ORGANIZATION_ID,
