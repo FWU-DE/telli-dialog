@@ -47,8 +47,6 @@ export function constructAzureImageGenerationFn(model: AiModel): ImageGeneration
       throw new AiGenerationError('No image data received from Azure OpenAI');
     }
 
-    console.log('Azure OpenAI image generation result:', result);
-
     return {
       data: result.data
         .map((item) => item.b64_json)
