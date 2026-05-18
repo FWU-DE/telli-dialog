@@ -1,18 +1,10 @@
-import {
-  generateTextStreamWithBilling,
-  type Message as AiCoreMessage,
-  TokenPointsExceededError,
-} from '@ais-chat/ai-core';
+import { generateTextStreamWithBilling, type Message as AiCoreMessage } from '@ais-chat/ai-core';
+import type { LearningScenarioSelectModel, LlmModelSelectModel } from '@shared/db/schema';
 import { createTextStream } from '@/utils/streaming';
-import { userHasReachedTokenPointsLimit } from '../chat/usage';
-import { getModelAndApiKeyWithResult } from '../utils/utils';
-import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
 import { dbGetRelatedSharedChatFiles } from '@shared/db/functions/files';
-import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
-import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
-import { constructLearningScenarioSystemPrompt } from '../shared-chat/system-prompt';
+import { constructLearningScenarioSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, limitChatHistory } from '../chat/utils';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
@@ -21,12 +13,15 @@ import {
   KEEP_RECENT_MESSAGES,
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
-import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
+import { ChatMessage, SendMessageResult } from '@/types/chat';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { UserAndContext } from '@/auth/types';
-import { checkParameterUUID } from '@shared/error';
 
+/**
+ * Convert frontend chat messages to the ai-core wire format and prepend the
+ * scenario system prompt.
+ */
 function convertToAiCoreMessages(systemPrompt: string, messages: ChatMessage[]): AiCoreMessage[] {
   const result: AiCoreMessage[] = [{ role: 'system', content: systemPrompt }];
 
@@ -41,60 +36,41 @@ function convertToAiCoreMessages(systemPrompt: string, messages: ChatMessage[]):
   return result;
 }
 
+export type UsageCallback = (args: {
+  promptTokens: number;
+  completionTokens: number;
+  costsInCent: number;
+}) => Promise<void>;
+
 /**
- * Teacher-side preview chat for a learning scenario. Mirrors the system prompt
- * and rendering of the student-facing shared chat, but uses authenticated
- * teacher access instead of an invite code and does not persist messages.
+ * Run the learning-scenario streaming pipeline: retrieve scenario files +
+ * linked web content, build the system prompt with RAG chunks, format with
+ * images if the model supports it, and stream the assistant reply.
  *
- * Usage is still tracked against the teacher's own monthly budget so the
- * preview can't be abused to bypass token limits. There is no per-share
- * token/time limit because no share is involved.
+ * Callers are responsible for auth, expiry, and budget pre-checks. The shared
+ * student-facing flow (shared-chat-service) and the teacher-side preview
+ * (learning-scenario-preview-service) both go through this helper so the
+ * pipeline stays in one place.
  */
-export async function sendLearningScenarioPreviewMessage({
-  previewSessionId,
-  learningScenarioId,
-  messages,
-  modelId,
+export async function streamLearningScenarioReply({
+  learningScenario,
   user,
+  messages,
+  model,
+  apiKeyId,
+  onUsage,
+  eventAnonymous,
+  logTag,
 }: {
-  previewSessionId: string;
-  learningScenarioId: string;
-  messages: ChatMessage[];
-  modelId: string;
+  learningScenario: LearningScenarioSelectModel;
   user: UserAndContext;
+  messages: ChatMessage[];
+  model: LlmModelSelectModel;
+  apiKeyId: string;
+  onUsage: UsageCallback;
+  eventAnonymous: boolean;
+  logTag: string;
 }): Promise<SendMessageResult> {
-  // Validate the client-supplied session id so we can't pollute usage tracking
-  // rows with arbitrary strings. The id is only used to attribute tokens — userId
-  // remains the authoritative anti-IDOR check, this is defense in depth.
-  checkParameterUUID(previewSessionId);
-
-  const learningScenario = await getLearningScenarioForChatSession({
-    learningScenarioId,
-    user,
-  });
-
-  const [error, modelAndApiKey] = await getModelAndApiKeyWithResult({
-    modelId,
-    federalStateId: user.federalState.id,
-  });
-
-  if (error !== null) {
-    throw new Error(error.message);
-  }
-
-  const { model: definedModel, apiKeyId } = modelAndApiKey;
-
-  if (await userHasReachedTokenPointsLimit({ user })) {
-    await sendRabbitmqEvent(
-      constructTokenBudgetExceededEvent({
-        anonymous: false,
-        user,
-        sharedChat: learningScenario,
-      }),
-    );
-    return createErrorResult(new TokenPointsExceededError());
-  }
-
   const relatedFileEntities = await dbGetRelatedSharedChatFiles(learningScenario.id);
   const urls = learningScenario.attachedLinks.filter((l) => l !== '');
   const { processedUrls } = await ingestWebContent({
@@ -122,7 +98,7 @@ export async function sendLearningScenarioPreviewMessage({
   });
 
   const modelSupportsImages =
-    definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
+    model.supportedImageFormats !== null && model.supportedImageFormats.length > 0;
   const extractedImages = await extractImagesAndUrl(relatedFileEntities);
   const messagesWithImages = formatMessagesWithImages(
     prunedMessages,
@@ -138,33 +114,20 @@ export async function sendLearningScenarioPreviewMessage({
   void (async () => {
     try {
       const textStream = generateTextStreamWithBilling(
-        definedModel.id,
+        model.id,
         aiCoreMessages,
         apiKeyId,
         async ({ usage, priceInCents }) => {
           const { promptTokens, completionTokens } = usage;
-
-          // Track usage on the teacher's monthly budget. We reuse the
-          // conversation_usage_tracking table — the conversationId column has
-          // no FK constraint, so the previewSessionId is enough to attribute
-          // tokens without persisting a conversation row.
-          await dbInsertConversationUsage({
-            conversationId: previewSessionId,
-            userId: user.id,
-            modelId: definedModel.id,
-            completionTokens,
-            promptTokens,
-            costsInCent: priceInCents,
-          });
-
+          await onUsage({ promptTokens, completionTokens, costsInCent: priceInCents });
           await sendRabbitmqEvent(
             constructNewMessageEvent({
               user,
-              provider: definedModel.provider,
+              provider: model.provider,
               promptTokens,
               completionTokens,
               costsInCent: priceInCents,
-              anonymous: false,
+              anonymous: eventAnonymous,
               sharedChat: learningScenario,
             }),
           );
@@ -177,7 +140,7 @@ export async function sendLearningScenarioPreviewMessage({
 
       done();
     } catch (error) {
-      logError('Error during learning scenario preview streaming:', error);
+      logError(`Error during ${logTag} streaming:`, error);
       streamError(error instanceof Error ? error : new Error('Unknown error'));
     }
   })();

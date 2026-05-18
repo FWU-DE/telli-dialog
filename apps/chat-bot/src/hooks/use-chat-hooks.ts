@@ -10,7 +10,7 @@ import {
 import { sendChatMessageAction } from '@/app/api/chat/actions';
 import { sendCharacterMessageAction } from '@/app/api/character/actions';
 import { sendSharedChatMessageAction } from '@/app/api/shared-chat/actions';
-import { sendLearningScenarioPreviewMessageAction } from '@/app/api/learning-scenario-preview/actions';
+import { sendLearningScenarioPreviewMessageAction } from '@/app/(authed)/(chat-bot)/learning-scenarios/actions';
 import { type UIMessage, type ChatStatus } from '@/types/chat';
 
 // Re-export types for convenience
