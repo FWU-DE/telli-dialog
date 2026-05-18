@@ -2,7 +2,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { act } from 'react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { downloadFileFromBlob } from '@/utils/download-file-from-blob';
 
 vi.mock('next-intl', () => ({
@@ -10,10 +10,7 @@ vi.mock('next-intl', () => ({
 }));
 
 vi.mock('@ui/components/button', () => ({
-  Button: ({
-    children,
-    onClick,
-  }: React.PropsWithChildren<{ onClick?: React.MouseEventHandler }>) =>
+  Button: ({ children, onClick }: React.PropsWithChildren<{ onClick?: React.MouseEventHandler }>) =>
     React.createElement('button', { onClick }, children),
 }));
 
@@ -24,8 +21,7 @@ vi.mock('@ui/components/dialog', () => ({
     React.createElement('div', { 'data-testid': 'dialog-content' }, children),
   DialogHeader: ({ children }: React.PropsWithChildren) =>
     React.createElement('div', null, children),
-  DialogTitle: ({ children }: React.PropsWithChildren) =>
-    React.createElement('h2', null, children),
+  DialogTitle: ({ children }: React.PropsWithChildren) => React.createElement('h2', null, children),
 }));
 
 vi.mock('@phosphor-icons/react', () => ({
@@ -72,11 +68,9 @@ function render(jsx: React.ReactElement): { container: HTMLElement; unmount: () 
 }
 
 function getButtonByText(container: HTMLElement, text: string): HTMLButtonElement | null {
-  return (
-    Array.from(container.querySelectorAll('button')).find((b) =>
-      b.textContent?.includes(text),
-    ) ?? null
-  ) as HTMLButtonElement | null;
+  return (Array.from(container.querySelectorAll('button')).find((b) =>
+    b.textContent?.includes(text),
+  ) ?? null) as HTMLButtonElement | null;
 }
 
 describe('MarkdownFencedCodeBlock', () => {
@@ -156,11 +150,7 @@ describe('MarkdownFencedCodeBlock', () => {
 
   it('download button calls downloadFileFromBlob with correct blob and filename', () => {
     const { container, unmount } = render(
-      <MarkdownFencedCodeBlock
-        language="html"
-        code="<p>hello</p>"
-        downloadFileBasename="MyChat"
-      />,
+      <MarkdownFencedCodeBlock language="html" code="<p>hello</p>" downloadFileBasename="MyChat" />,
     );
 
     act(() => {
@@ -172,7 +162,9 @@ describe('MarkdownFencedCodeBlock', () => {
     });
 
     expect(downloadFileFromBlob).toHaveBeenCalledOnce();
-    const [blob, filename] = (downloadFileFromBlob as ReturnType<typeof vi.fn>).mock.calls[0];
+    const call = (downloadFileFromBlob as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(call).toBeDefined();
+    const [blob, filename] = call!;
     expect(blob).toBeInstanceOf(Blob);
     expect(filename).toContain('html');
     expect(filename).toContain('MyChat');
@@ -181,9 +173,7 @@ describe('MarkdownFencedCodeBlock', () => {
   });
 
   it('download uses default filename when no basename provided', () => {
-    const { container, unmount } = render(
-      <MarkdownFencedCodeBlock language="svg" code="<svg/>" />,
-    );
+    const { container, unmount } = render(<MarkdownFencedCodeBlock language="svg" code="<svg/>" />);
 
     act(() => {
       getButtonByText(container, 'open-preview')!.click();
@@ -193,7 +183,9 @@ describe('MarkdownFencedCodeBlock', () => {
       getButtonByText(container, 'download')!.click();
     });
 
-    const [, filename] = (downloadFileFromBlob as ReturnType<typeof vi.fn>).mock.calls[0];
+    const call = (downloadFileFromBlob as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(call).toBeDefined();
+    const [, filename] = call!;
     expect(filename).toContain('svg');
     expect(filename).not.toContain('undefined');
 
