@@ -36,9 +36,7 @@ export function constructAzureImageGenerationFn(model: AiModel): ImageGeneration
         prompt,
         size: '1024x1024',
         n: 1,
-        quality: 'standard',
-        style: 'vivid',
-        response_format: 'b64_json',
+        quality: 'medium',
       },
       {
         path: `/openai/deployments/${deployment}/images/generations`,
@@ -48,6 +46,8 @@ export function constructAzureImageGenerationFn(model: AiModel): ImageGeneration
     if (!result.data || result.data.length === 0) {
       throw new AiGenerationError('No image data received from Azure OpenAI');
     }
+
+    console.log('Azure OpenAI image generation result:', result);
 
     return {
       data: result.data
