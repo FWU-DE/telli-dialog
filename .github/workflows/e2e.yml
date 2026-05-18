@@ -101,23 +101,6 @@ jobs:
             -p 11235:11235 \
             unclecode/crawl4ai:0.8.6 > /tmp/crawl4ai.log 2>&1 &
 
-      # mock-llm is built from source (small, fast) and started before seeding so the seed can reference it
-      - name: Build and start mock-llm container
-        run: |
-          docker build -t mock-llm devops/docker/mock-llm
-          docker run -d --name mock-llm -p 6556:6556 mock-llm > /tmp/mock-llm.log 2>&1
-          timeout=30
-          elapsed=0
-          until wget -qO- http://localhost:6556/health > /dev/null 2>&1; do
-            if [ $elapsed -ge $timeout ]; then
-              echo "mock-llm did not become ready within ${timeout}s"
-              exit 1
-            fi
-            sleep 1
-            elapsed=$((elapsed + 1))
-          done
-          echo "mock-llm is ready"
-
       - name: Load 1Password Secrets
         uses: 1password/load-secrets-action@v4
         with:
@@ -142,6 +125,10 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
+
+      - name: Start mock-llm server
+        run: |
+          node devops/docker/mock-llm/server.mjs > /tmp/mock-llm.log 2>&1 &
 
       - name: Install dependencies
         run: pnpm install
@@ -263,7 +250,7 @@ jobs:
         if: always()
         run: |
           echo "=== mock-llm logs ==="
-          docker logs mock-llm 2>&1 || cat /tmp/mock-llm.log || true
+          cat /tmp/mock-llm.log || true
 
       - name: Print keycloak logs
         if: always()
