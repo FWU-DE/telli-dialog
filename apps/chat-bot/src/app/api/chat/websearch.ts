@@ -14,6 +14,12 @@ import { UserAndContext } from '@/auth/types';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { dbGetAssistantById } from '@shared/db/functions/assistants';
 
+export function isWebSearchAvailableForFederalState(
+  federalState: UserAndContext['federalState'],
+): boolean {
+  return (federalState.featureToggles?.isWebSearchEnabled ?? false) && !!env.linkupApiKey;
+}
+
 async function isWebSearchEnabled({
   user,
   characterId,
@@ -23,8 +29,7 @@ async function isWebSearchEnabled({
   characterId?: string;
   assistantId?: string;
 }): Promise<boolean> {
-  const federalStateEnabled = user.federalState.featureToggles?.isWebSearchEnabled ?? false;
-  if (!federalStateEnabled || !env.linkupApiKey) return false;
+  if (!isWebSearchAvailableForFederalState(user.federalState)) return false;
   if (characterId) return false;
   if (!assistantId) return true;
   if (assistantId === HELP_MODE_ASSISTANT_ID) return false;

@@ -1,6 +1,6 @@
 'use client';
 
-import { Switch } from '@ui/components/Switch';
+import { Switch } from '@ui/components/switch';
 import { useTranslations } from 'next-intl';
 import { CustomChatHeading2 } from './custom-chat-heading2';
 import { Card, CardContent } from '@ui/components/card';
@@ -46,7 +46,6 @@ export function CustomChatWebSearch<
               control={props.control}
               render={({ field }) => (
                 <Switch
-                  id="web-search-toggle"
                   checked={field.value}
                   onCheckedChange={(checked) => {
                     field.onChange(checked);

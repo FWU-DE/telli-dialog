@@ -1,3 +1,4 @@
+import { isWebSearchAvailableForFederalState } from '@/app/api/chat/websearch';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAssistantByUser } from '@shared/assistants/assistant-service';
@@ -35,7 +36,7 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
         relatedFiles={fileMappings}
         initialLinks={initialLinks}
         avatarPictureUrl={pictureUrl}
-        isWebSearchAvailable={federalState.featureToggles?.isWebSearchEnabled ?? false}
+        isWebSearchAvailable={isWebSearchAvailableForFederalState(federalState)}
       />
     </DefaultPageLayout>
   );
