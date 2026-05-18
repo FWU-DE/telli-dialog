@@ -4,7 +4,7 @@
  * POST /v1/chat/completions
  *   Echoes the last user message back character-by-character as an SSE stream.
  *   Includes a usage chunk when stream_options.include_usage is true (required
- *   by the @telli/ai-core OpenAI provider).
+ *   by the @ais-chat/ai-core OpenAI provider).
  *
  * GET /health
  *   Returns {"status":"healthy"} for readiness checks.
@@ -14,6 +14,18 @@ import http from 'node:http';
 
 const PORT = 6556;
 const CHUNK_INTERVAL_MS = 5;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function readBody(req) {
+  let body = '';
+  for await (const chunk of req) body += chunk;
+  return body;
+}
+
+function writeSse(res, data) {
+  res.write(`data: ${JSON.stringify(data)}\n\n`);
+}
 
 function extractLastUserMessage(messages) {
   for (let i = messages.length - 1; i >= 0; i--) {
@@ -36,11 +48,11 @@ function estimateTokens(text) {
   return Math.max(1, Math.ceil(text.length / 4));
 }
 
-function makeSseChunk(id, model, deltaContent, finishReason) {
+function makeSseChunk(id, model, created, deltaContent, finishReason) {
   return {
     id,
     object: 'chat.completion.chunk',
-    created: Math.floor(Date.now() / 1000),
+    created,
     model,
     choices: [
       {
@@ -54,12 +66,9 @@ function makeSseChunk(id, model, deltaContent, finishReason) {
 }
 
 async function handleChatCompletions(req, res) {
-  let body = '';
-  for await (const chunk of req) body += chunk;
-
   let data;
   try {
-    data = JSON.parse(body);
+    data = JSON.parse(await readBody(req));
   } catch {
     res.writeHead(400, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Invalid JSON' }));
@@ -73,6 +82,7 @@ async function handleChatCompletions(req, res) {
   const responseText = extractLastUserMessage(messages);
 
   const id = `chatcmpl-mock-${Date.now()}`;
+  const created = Math.floor(Date.now() / 1000);
   const promptTokens = messages.reduce(
     (sum, m) =>
       sum +
@@ -91,21 +101,17 @@ async function handleChatCompletions(req, res) {
     });
 
     for (const char of responseText) {
-      const chunk = makeSseChunk(id, model, char, null);
-      res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-      await new Promise((resolve) => setTimeout(resolve, CHUNK_INTERVAL_MS));
+      writeSse(res, makeSseChunk(id, model, created, char, null));
+      await sleep(CHUNK_INTERVAL_MS);
     }
 
-    // Final chunk with finish_reason = 'stop'
-    const finishChunk = makeSseChunk(id, model, null, 'stop');
-    res.write(`data: ${JSON.stringify(finishChunk)}\n\n`);
+    writeSse(res, makeSseChunk(id, model, created, null, 'stop'));
 
-    // Usage chunk — required by @telli/ai-core when stream_options.include_usage=true
     if (includeUsage) {
-      const usageChunk = {
+      writeSse(res, {
         id,
         object: 'chat.completion.chunk',
-        created: Math.floor(Date.now() / 1000),
+        created,
         model,
         choices: [],
         usage: {
@@ -113,34 +119,34 @@ async function handleChatCompletions(req, res) {
           completion_tokens: completionTokens,
           total_tokens: totalTokens,
         },
-      };
-      res.write(`data: ${JSON.stringify(usageChunk)}\n\n`);
+      });
     }
 
     res.write('data: [DONE]\n\n');
     res.end();
   } else {
-    const response = {
-      id,
-      object: 'chat.completion',
-      created: Math.floor(Date.now() / 1000),
-      model,
-      choices: [
-        {
-          index: 0,
-          message: { role: 'assistant', content: responseText, refusal: null },
-          finish_reason: 'stop',
-          logprobs: null,
-        },
-      ],
-      usage: {
-        prompt_tokens: promptTokens,
-        completion_tokens: completionTokens,
-        total_tokens: totalTokens,
-      },
-    };
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(response));
+    res.end(
+      JSON.stringify({
+        id,
+        object: 'chat.completion',
+        created,
+        model,
+        choices: [
+          {
+            index: 0,
+            message: { role: 'assistant', content: responseText, refusal: null },
+            finish_reason: 'stop',
+            logprobs: null,
+          },
+        ],
+        usage: {
+          prompt_tokens: promptTokens,
+          completion_tokens: completionTokens,
+          total_tokens: totalTokens,
+        },
+      }),
+    );
   }
 }
 
