@@ -39,8 +39,6 @@ yarn-error.log*
 !.env.example
 !.env
 !.env.e2e
-# local secrets — never commit
-devops/docker/.env
 
 # vercel
 .vercel

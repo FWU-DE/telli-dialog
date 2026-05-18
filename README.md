@@ -88,7 +88,6 @@ nvm use # sets up the node version
 corepack enable # sets up the proper package manager
 corepack prepare
 pnpm i # installs the dependencies
-pnpm approve-builds --all # approve native build scripts (esbuild, swc, sharp, …)
 ```
 
 ### Environment variables
@@ -123,33 +122,13 @@ RABBITMQ_MGMT_HOST_PORT=15673
 
 Update the matching variables in `apps/chat-bot/.env.local` and `apps/admin/.env.local` accordingly (e.g. `VIDIS_BASE_URI=http://localhost:8081/…`).
 
-#### Valkey image requires GHCR authentication
-
-The `ghcr.io/valkey-io/valkey:8` image may fail to pull without `docker login ghcr.io`. As a drop-in replacement, create `devops/docker/docker-compose.local.override.yml`:
-
-```yaml
-services:
-  valkey:
-    image: redis:7-alpine
-```
-
-Then pass both files to every compose command:
-
-```sh
-docker compose -f devops/docker/docker-compose.local.yml \
-               -f devops/docker/docker-compose.local.override.yml up -d
-```
-
 #### Local S3 storage (RustFS) for file uploads and image generation
 
-`docker-compose.local.yml` does not include an S3-compatible server. If your development involves file uploads or image generation, add RustFS to the override file:
+`docker-compose.local.yml` does not include an S3-compatible server. If your development involves file uploads or image generation, add RustFS to `devops/docker/docker-compose.local.override.yml`:
 
 ```yaml
 # devops/docker/docker-compose.local.override.yml
 services:
-  valkey:
-    image: redis:7-alpine # keep this if also replacing valkey
-
   rustfs:
     image: rustfs/rustfs:latest
     restart: unless-stopped
@@ -168,6 +147,13 @@ services:
 
 volumes:
   rustfs_data:
+```
+
+Pass both files to every compose command:
+
+```sh
+docker compose -f devops/docker/docker-compose.local.yml \
+               -f devops/docker/docker-compose.local.override.yml up -d
 ```
 
 Set these in `apps/chat-bot/.env.local`:
@@ -232,6 +218,8 @@ If you start with a fresh database, apply migrations and seed both databases; ot
 ```sh
 pnpm db:migrate
 ```
+
+Add api keys in your `.env.local` files for all federal states that you want to seed. These keys are used to fetch the available LLM models from the ais-chat-api (e.g. `DE_BY_API_KEY` for Bavaria). If you previously seeded the api database, use the resulting API key.
 
 The api database seed requires LLM provider credentials for the models it creates. Add these to `apps/api/.env.local`:
 
