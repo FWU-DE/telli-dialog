@@ -1,0 +1,1 @@
+DROP TABLE "federal_state_llm_model_mapping" CASCADE;

@@ -510,60 +510,6 @@ export type LlmModelInsertModel = z.infer<typeof llmModelInsertSchema>;
 export type LlmModelUpdateModel = z.infer<typeof llmModelUpdateSchema>;
 
 /**
- * Schema for table federal_state_llm_model_mapping
- */
-export const federalStateLlmModelMappingTable = pgTable(
-  'federal_state_llm_model_mapping',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    federalStateId: text('federal_state_id').notNull(),
-    llmModelId: uuid('llm_model_id')
-      .references(() => llmModelTable.id)
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.federalStateId],
-      foreignColumns: [federalStateTable.id],
-      // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
-      // The custom name can only be set with foreignKey() function
-      name: 'federal_state_llm_model_mapping_federal_state_id_fk',
-    }),
-    unique('federal_state_llm_model_mapping_federal_state_llm_model_unique').on(
-      table.federalStateId,
-      table.llmModelId,
-    ),
-  ],
-);
-
-export const federalStateLlmModelMappingSelectSchema = createSelectSchema(
-  federalStateLlmModelMappingTable,
-).extend({
-  createdAt: z.coerce.date(),
-});
-export const federalStateLlmModelMappingInsertSchema = createInsertSchema(
-  federalStateLlmModelMappingTable,
-).omit({ id: true, createdAt: true });
-export const federalStateLlmModelMappingUpdateSchema = createUpdateSchema(
-  federalStateLlmModelMappingTable,
-)
-  .omit({ createdAt: true })
-  .extend({
-    id: z.string(),
-  });
-
-export type FederalStateLlmModelMappingSelectModel = z.infer<
-  typeof federalStateLlmModelMappingSelectSchema
->;
-export type FederalStateLlmModelMappingInsertModel = z.infer<
-  typeof federalStateLlmModelMappingInsertSchema
->;
-export type FederalStateLlmModelMappingUpdateModel = z.infer<
-  typeof federalStateLlmModelMappingUpdateSchema
->;
-
-/**
  * Schema for table learning_scenario
  */
 export const learningScenarioTable = pgTable(

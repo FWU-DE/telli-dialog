@@ -2,10 +2,8 @@ import { db as localDb } from '..';
 import {
   federalStateTable,
   llmModelTable,
-  federalStateLlmModelMappingTable,
   FederalStateSelectModel,
   LlmModelSelectModel,
-  FederalStateLlmModelMappingSelectModel,
 } from '../schema';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
@@ -18,7 +16,7 @@ import { insertHelpModeGpt } from './help-mode';
 import { insertDummyUser } from './user-entity';
 
 // Loads configuration data from the staging database into the local database
-// including federal states, schools, llm models and federal-state-to-model mappings.
+// including federal states, schools and llm models.
 // Does not copy over user data, conversations, or usage data.
 // Useful for local development to have the same configuration as staging.
 
@@ -40,12 +38,6 @@ async function getLlmModels(): Promise<LlmModelSelectModel[]> {
   return await stageDb.select().from(llmModelTable);
 }
 
-async function getFederalStateLlmModelMappings(): Promise<
-  FederalStateLlmModelMappingSelectModel[]
-> {
-  return await stageDb.select().from(federalStateLlmModelMappingTable);
-}
-
 async function seedDatabase() {
   console.log('Starting database seeding from stage...');
 
@@ -58,11 +50,6 @@ async function seedDatabase() {
     await localDb
       .insert(llmModelTable)
       .values(await getLlmModels())
-      .onConflictDoNothing();
-
-    await localDb
-      .insert(federalStateLlmModelMappingTable)
-      .values(await getFederalStateLlmModelMappings())
       .onConflictDoNothing();
 
     await insertDummyUser();
