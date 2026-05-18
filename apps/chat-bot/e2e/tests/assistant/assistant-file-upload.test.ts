@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { AUTH_FILES } from '../../utils/const';
+import { AUTH_FILES, MOCK_LLM_COMMANDS } from '../../utils/const';
 import { sendMessage, uploadFile } from '../../utils/chat';
 
 test.use({ storageState: AUTH_FILES.teacher });
@@ -29,7 +29,10 @@ test('should upload file and chat with assistant template (Schulorganisationsass
   await expect(page.locator('form').getByRole('img').nth(1)).toBeVisible();
 
   // Send message about file contents
-  await sendMessage(page, 'Wie heißt die Hauptperson die in dieser Datei genannt wird?');
+  await sendMessage(
+    page,
+    `${MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT} Wie heißt die Hauptperson die in dieser Datei genannt wird?`,
+  );
 
   // Verify the response contains expected content
   const assistantMessage = page.getByLabel('assistant message 1');
