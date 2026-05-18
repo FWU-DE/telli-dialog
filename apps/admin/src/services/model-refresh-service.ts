@@ -6,5 +6,6 @@ export async function refreshAllModelsAfterSave() {
     await dbUpdateLlmModelsForAllFederalStates();
   } catch (error) {
     logError('Error refreshing LLM models after save', error);
+    throw error;
   }
 }
