@@ -36,9 +36,7 @@ export function constructAzureImageGenerationFn(model: AiModel): ImageGeneration
         prompt,
         size: '1024x1024',
         n: 1,
-        quality: 'standard',
-        style: 'vivid',
-        response_format: 'b64_json',
+        quality: 'medium',
       },
       {
         path: `/openai/deployments/${deployment}/images/generations`,

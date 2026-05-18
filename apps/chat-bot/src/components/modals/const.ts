@@ -41,7 +41,7 @@ Dialogpartner und Lernszenarien
 · Vorbereitung auf Klassenarbeiten und Prüfungen
 · Kritische Auseinandersetzung, Lernen und Reflektieren über generative KI
 
-Für Fragen zur Nutzung von AIS.chat, wenden Sie sich bitte an den Support des LIBRA. Weitere Informationen finden Sie unter [https://telli-bb.de](https://telli-bb.de).
+Für Fragen zur Nutzung von AIS.chat, wenden Sie sich bitte an den Support des LIBRA. Weitere Informationen finden Sie unter [https://ais-bb.de](https://ais-bb.de) (ehemals https://telli-bb.de).  
 
 3. Zugangsberechtigung
 
@@ -141,12 +141,11 @@ Deshalb ist in Nordrhein-Westfalen der Besuch des Selbstlernkurses „Künstlich
 
 ### Wie logge ich mich bei AIS.chat ein?
 
-Sie finden den Zugang zu AIS.chat auf unserer Homepage www.lernen-digital.nrw 
-[Zugang zu „telli“ | Lehren und Lernen](https://www.lernen-digital.nrw/zugang-zu-telli)
+Sie finden den Zugang zu AIS.chat auf unserer Homepage [https://www.lernen-digital.nrw/zugang-zu-AIS.chat](https://www.lernen-digital.nrw/zugang-zu-AIS.chat)
 
 ### Was ist das Tokenvolumen?
 
-Das Tokenvolumen ist eine Art von virtuellem Guthaben, das Sie beim Chatten mit AIS.chat verwenden. Jeder Chat verbraucht eine bestimmte Anzahl von Tokens, abhängig vom verwendeten Sprachmodell und dem Tokenverbrauch. Sie haben ein limitiertes Budget pro Monat, und der Verbrauch wird in einer Balkenanzeige in der linken Sidebar angezeigt. 100% entsprechen einem initialen monatlichen Budget.
+Das Tokenvolumen ist eine Art von virtuellem Guthaben, das Sie beim Chatten mit AIS.chat verwenden. Jeder Chat verbraucht eine bestimmte Anzahl an Tokenvolumen, abhängig vom verwendeten Sprachmodell und dem Tokenverbrauch. Sie haben ein limitiertes Budget pro Monat, und der Verbrauch wird in einer Balkenanzeige in der linken Sidebar angezeigt. 100% entsprechen einem initialen monatlichen Budget.
 
 ### Was kann ich tun, wenn mein Tokenvolumen zur Neige geht?
 
@@ -155,7 +154,7 @@ Das Tokenvolumen ist eine Art von virtuellem Guthaben, das Sie beim Chatten mit 
 **Effiziente Prompts erstellen:** Formulieren Sie Ihre Anfragen so präzise wie möglich, um die benötigte Zeit und damit das verbrauchte Tokenvolumen zu minimieren.
 **Warten auf das nächste Budget:** Wenn Sie keine dringenden Anfragen haben, können Sie auch warten, bis Ihr monatliches Budget zurückgesetzt wird.
 
-Nähere Informationen zu einzelnen Sprachmodellen finden Sie ebenfalls auf unserer Homepage [www.lernen-digital.nrw](https://www.lernen-digital.nrw/) unter [Zugang zu „telli“ | Lehren und Lernen](https://www.lernen-digital.nrw/zugang-zu-telli)
+Nähere Informationen zu einzelnen Sprachmodellen finden Sie ebenfalls auf unserer Homepage [www.lernen-digital.nrw](https://www.lernen-digital.nrw/) unter [Zugang zu „AIS.chat“ | Lehren und Lernen](https://www.lernen-digital.nrw/zugang-zu-AIS.chat)
 
 ### Werden meine Chats gespeichert?
 
@@ -166,7 +165,7 @@ Sollten Sie durch einen umfangreichen Prompt eine ganz spezielle Funktionsweise 
 
 ### Was sind Lernszenarien, Dialogpartner und Assistenten?
 
-Lernszenarien ermöglichen Lehrkräften, spezifische pädagogische Situationen zu gestalten und anonymisierte Chats für Schülerinnen zu erstellen. So können diese gezielt lernen, ohne sich einloggen zu müssen. Dialogpartner sind simulierte Personen, die in Chats agieren und den Schülerinnen helfen, verschiedene Perspektiven zu verstehen oder Diskussionen zuführen. Assistenten unterstützen bei der Unterrichtsvorbereitung, indem sie Materialienerstellen, Aufgaben übersetzen oder bei Hausaufgaben helfen. Gemeinsam fördern diese Funktionen individuelles Lernen, stärken die Selbstständigkeit der Schülerinnen und Schüler und bieten Lehrkräften wertvolle Werkzeuge zur Gestaltung eines effektiven Unterrichts. Wenn man über diese Funktionen Chatbots für die Klasse freigibt, wird das **eigene Tokenvolumen** verbraucht. 
+Lernszenarien ermöglichen Lehrkräften, spezifische pädagogische Situationen zu gestalten und anonymisierte Chats für Schülerinnen zu erstellen. So können diese gezielt lernen, ohne sich einloggen zu müssen. Dialogpartner sind simulierte Personen, die in Chats agieren und den Schülerinnen helfen, verschiedene Perspektiven zu verstehen oder Diskussionen zu führen. Assistenten unterstützen bei der Unterrichtsvorbereitung, indem sie Materialien erstellen, Aufgaben übersetzen oder bei Hausaufgaben helfen. Gemeinsam fördern diese Funktionen individuelles Lernen, stärken die Selbstständigkeit der Schülerinnen und Schüler und bieten Lehrkräften wertvolle Werkzeuge zur Gestaltung eines effektiven Unterrichts. Wenn man über diese Funktionen Chatbots für die Klasse freigibt, wird das **eigene Budget an Tokenvolumen** verbraucht. 
 
 **Lernszenarien:** Mit dieser Funktion kann man den Schülerinnen und Schülern einen DSGVO-konformen KI-Zugang freigeben. Hierbei kann man die Funktionsweise des Chatbots über eine Eingabemaske anpassen. Die Eingabemaske beinhaltet Vorschläge, wie man sie ausfüllen kann. Diesen KI-Zugang kann man zeitlich begrenzt in verschiedenen Schritten bis zu maximal 30 Tagen freigeben. Die Schülerinnen und Schüler können den Chatverlauf als Word-Dokument herunterladen. 
 
@@ -176,7 +175,7 @@ Lernszenarien ermöglichen Lehrkräften, spezifische pädagogische Situationen z
 
 ### Weitere Fragen zu AIS.chat?
 
-[https://telli.schule/](https://telli.schule/)
+[https://ais-chat.schule/](https://ais-chat.schule/)
 
 `;
 
@@ -187,7 +186,7 @@ const EDUCATION_HINT_BB = `Liebe Kollegin, Lieber Kollege,
 
   Der Kurs ist abrufbar unter [https://ecampus.meinlibra.de/course/view.php?id=94](https://ecampus.meinlibra.de/course/view.php?id=94) und kann online absolviert werden.
 
-  Darüber hinaus bietet das LIBRA auf der Plattform [JWD](https://bildungsserver.berlin-brandenburg.de/jwd/startseite) zahlreiche Informationen, Hinweise und Tipps zum Thema KI und Schule und für den Einsatz von telli für Lehrkräfte.
+  Darüber hinaus bietet das LIBRA auf der Plattform [JWD](https://bildungsserver.berlin-brandenburg.de/jwd/startseite) zahlreiche Informationen, Hinweise und Tipps zum Thema KI und Schule und für den Einsatz von AIS.chat für Lehrkräfte.
   
   Vielen Dank und viel Freude bei der Nutzung von AIS.chat.
   
@@ -199,7 +198,7 @@ const EDUCATION_HINT_HB = `Liebe Kollegin, lieber Kollege,
   Deshalb ist in Bremen der Besuch eines itslearning Selbstlernkurses zum Thema KI vor der initialen Nutzung von AIS.chat verpflichtend.
 
   Alle Informationen zum Selbstlernkurs sind abrufbar unter:
-  [https://www.bildung.bremen.de/einfuhrung-des-chatbots-telli-im-land-bremen-458348](https://www.bildung.bremen.de/einfuhrung-des-chatbots-telli-im-land-bremen-458348)
+  [https://www.bildung.bremen.de/der-chatbots-ais-chat-im-land-bremen-458348](https://www.bildung.bremen.de/der-chatbots-ais-chat-im-land-bremen-458348)
 
   Dort finden Sie hilfreiche Informationen, Hinweise und Tipps zum Thema KI und Schule im Allgemeinen sowie speziell zum Einsatz von AIS.chat.
 
@@ -221,7 +220,7 @@ Die Bereitstellung erfolgt gemäß VO (EU) 2024/1689 (KI-Verordnung) sowie DSGVO
 Nutzende erhalten ein begrenztes Nutzungskontingent „Tokenvolumen". Eine Nutzung über das Kontingent hinaus ist nicht möglich, um eine Verfügbarkeit des Dienstes für eine Vielzahl von Lehrkräften gewährleisten zu können. Der Dienst ist für Nutzende kostenlos.
 
 ## 5 Datenverarbeitung & Hosting
-AIS.chat verarbeitet alle Eingaben ausschließlich auf Servern innerhalb der EU. Die Large Language Models werden in europäischen Cloud-Lösungen gehostet; eine Übermittlung an Drittstaaten findet nicht statt. Mit den technischen Dienstleistern bestehen AV-Verträge nach Art. 28 DSGVO ([https://telli.schule/datenschutz](https://telli.schule/datenschutz)).
+AIS.chat verarbeitet alle Eingaben ausschließlich auf Servern innerhalb der EU. Die Large Language Models werden in europäischen Cloud-Lösungen gehostet; eine Übermittlung an Drittstaaten findet nicht statt. Mit den technischen Dienstleistern bestehen AV-Verträge nach Art. 28 DSGVO ([https://ais-chat.schule/datenschutzerklaerung/](https://ais-chat.schule/datenschutzerklaerung/)).
 
 ## 6 Speicherung der Chatverläufe
 Gespeicherte Verläufe werden unverschlüsselt im jeweiligen Benutzerkonto auf AIS.chat-Servern abgelegt. Der Zugriff auf diese Daten durch die Systemadministration der FWU sowie die AIS.chat-Entwickler erfolgt ausschließlich zur Wahrung der Nutzungsbedingungen. In Einzelfällen können dazu stichpunkthafte Kontrollen durchgeführt werden. LISA-Mitarbeitende haben auf die Daten keinen Zugriff. Die Daten werden bei Kontolöschung unwiderruflich gelöscht.
@@ -296,7 +295,7 @@ export const federalStateDisclaimers: Partial<Record<FederalStateId, DisclaimerC
     pageContents: [EDUCATION_HINT_BW],
     showCheckBox: true,
     acceptLabel:
-      'Es dürfen keine privaten oder rechtswidrigen Inhalte über AIS.chat eingegeben werden. Der Output von KI-Systemen muss geprüft werden, bevor er weiterverwendet wird. Weiterführende Informationen, Hilfen und Materialien zum Einsatz von AIS.chat an Schulen sind [hier](https://edubw.link/telli-taskcards) zu finden. Ich bestätige, dies zur Kenntnis genommen zu haben.',
+      'Es dürfen keine privaten oder rechtswidrigen Inhalte über AIS.chat eingegeben werden. Der Output von KI-Systemen muss geprüft werden, bevor er weiterverwendet wird. Weiterführende Informationen, Hilfen und Materialien zum Einsatz von AIS.chat an Schulen sind [hier](https://edubw.link/aischat) zu finden. Ich bestätige, dies zur Kenntnis genommen zu haben.',
     image: disclaimerDeBw.src,
   },
   'DE-NW': {
