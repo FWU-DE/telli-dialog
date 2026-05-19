@@ -1,6 +1,6 @@
 import { initSentry } from '@shared/sentry/server-init';
 
 initSentry({
-  serviceName: 'telli-admin',
+  serviceName: 'ais-chat-admin',
   traceExcludedUrls: ['/api/healthz'],
 });

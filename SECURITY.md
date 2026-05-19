@@ -12,7 +12,7 @@ Instead, whean reporting a security vulnerability, you have the following option
 
 - **Option 1: GitHub Private Vulnerability Reporting System**: We encourage you to use GitHub's Vulnerability Reporting system to report any security vulnerabilities you find. This allows us to receive vulnerability reports directly through GitHub. For more information on how to submit a security advisory report, please refer to the [GitHub Security documentation](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability).
 
-- **Option 2: Email**: Submit your report to [security@telli.schule](mailto:security@telli.schule) (one issue per report) and respond to the report with any updates.
+- **Option 2: Email**: Submit your report to [security@ais-chat.schule](mailto:security@ais-chat.schule) (one issue per report) and respond to the report with any updates.
 
 Please do not contact employees directly or through other channels about a report.
 

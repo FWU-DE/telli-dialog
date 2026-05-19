@@ -10,6 +10,31 @@ import { logError } from '@shared/logging';
 import { dbInsertConversationToolCallUsage } from '@shared/db/functions/token-usage';
 import { dbGetToolCallCostByName } from '@shared/db/functions/tool-call';
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
+import { UserAndContext } from '@/auth/types';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
+import { dbGetAssistantById } from '@shared/db/functions/assistants';
+
+export function isWebSearchAvailableForFederalState(
+  federalState: UserAndContext['federalState'],
+): boolean {
+  return (federalState.featureToggles?.isWebSearchEnabled ?? false) && !!env.linkupApiKey;
+}
+
+async function isWebSearchEnabled({
+  user,
+  characterId,
+  assistantId,
+}: {
+  user: UserAndContext;
+  characterId?: string;
+  assistantId?: string;
+}): Promise<boolean> {
+  if (!isWebSearchAvailableForFederalState(user.federalState)) return false;
+  if (characterId) return false;
+  if (!assistantId) return true;
+  if (assistantId === HELP_MODE_ASSISTANT_ID) return false;
+  return (await dbGetAssistantById({ assistantId }))?.isWebSearchEnabled ?? false;
+}
 
 async function recordWebSearchUsage({
   conversationId,
@@ -38,7 +63,7 @@ async function recordWebSearchUsage({
   }
 }
 
-export async function isWebSearchNeeded({
+async function isWebSearchNeeded({
   messages,
   modelId,
   apiKeyId,
@@ -135,7 +160,7 @@ Beispiele:
  * @param query The search query string.
  * @returns An array of text search results from the Linkup API.
  */
-export async function searchWeb({
+async function searchWeb({
   query,
   conversationId,
   userId,
@@ -178,4 +203,43 @@ export async function searchWeb({
     logError('Error during web search', error);
     return [];
   }
+}
+
+/**
+ * Runs the full web search flow: checks if web search is enabled for the user and context,
+ * determines whether the conversation requires a web search, and performs the search if needed.
+ *
+ * @param messages - The conversation message history used to determine search necessity.
+ * @param user - The authenticated user and their context, including federal state feature toggles.
+ * @param characterId - Optional character ID
+ * @param assistantId - Optional assistant ID
+ * @param modelId - The ID of the auxiliary model used for the search classification.
+ * @param apiKeyId - The API key ID of the auxiliary model.
+ * @param conversationId - The conversation ID.
+ * @returns An array of web search results, or an empty array if search is disabled or not needed.
+ */
+export async function runWebSearchPipeline({
+  messages,
+  user,
+  characterId,
+  assistantId,
+  modelId,
+  apiKeyId,
+  conversationId,
+}: {
+  messages: Message[];
+  user: UserAndContext;
+  characterId?: string;
+  assistantId?: string;
+  modelId: string;
+  apiKeyId: string;
+  conversationId: string;
+}): Promise<WebSearchResult[]> {
+  const enabled = await isWebSearchEnabled({ user, characterId, assistantId });
+  if (!enabled) return [];
+
+  const decision = await isWebSearchNeeded({ messages, modelId, apiKeyId });
+  if (!decision.needed) return [];
+
+  return searchWeb({ query: decision.query, conversationId, userId: user.id });
 }

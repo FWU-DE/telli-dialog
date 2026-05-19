@@ -32,8 +32,7 @@ import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
-import { searchWeb, isWebSearchNeeded } from './websearch';
-import { env } from '@/env';
+import { runWebSearchPipeline } from './websearch';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -143,23 +142,15 @@ export async function sendChatMessage({
   });
 
   // Web search
-  const isWebSearchEnabled = user.federalState.featureToggles?.isWebSearchEnabled ?? false;
-  const webSearchDecision =
-    isWebSearchEnabled && env.linkupApiKey
-      ? await isWebSearchNeeded({
-          messages,
-          modelId: auxiliaryModel.id,
-          apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
-        })
-      : { needed: false, query: '' };
-
-  const webSearchResults = webSearchDecision.needed
-    ? await searchWeb({
-        query: webSearchDecision.query,
-        conversationId: conversation.id,
-        userId: user.id,
-      })
-    : [];
+  const webSearchResults = await runWebSearchPipeline({
+    messages,
+    user,
+    characterId,
+    assistantId,
+    modelId: auxiliaryModel.id,
+    apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
+    conversationId: conversation.id,
+  });
 
   // Save user message to DB
   await dbInsertChatContent({

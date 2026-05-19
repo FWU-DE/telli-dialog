@@ -1,3 +1,4 @@
+import { isWebSearchAvailableForFederalState } from '@/app/api/chat/websearch';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAssistantByUser } from '@shared/assistants/assistant-service';
@@ -17,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Page(props: PageProps<'/assistants/editor/[assistantId]'>) {
   const { assistantId } = await props.params;
-  const { user } = await requireAuth();
+  const { user, federalState } = await requireAuth();
 
   const { assistant, fileMappings, pictureUrl } = await getAssistantByUser({
     assistantId: assistantId,
@@ -35,6 +36,7 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
         relatedFiles={fileMappings}
         initialLinks={initialLinks}
         avatarPictureUrl={pictureUrl}
+        isWebSearchAvailable={isWebSearchAvailableForFederalState(federalState)}
       />
     </DefaultPageLayout>
   );
