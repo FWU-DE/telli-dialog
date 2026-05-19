@@ -17,15 +17,18 @@ import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
+import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 
 export function AssistantView({
   assistant,
   fileMappings,
   pictureUrl,
+  isWebSearchAvailable,
 }: {
   assistant: AssistantSelectModel;
   fileMappings: FileModel[];
   pictureUrl: string | undefined;
+  isWebSearchAvailable: boolean;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -107,6 +110,8 @@ export function AssistantView({
         initialLinks={assistant.attachedLinks.map((l) => ({ link: l }))}
         onDownloadFile={handleDownloadFile}
       />
+
+      {assistant.isWebSearchEnabled && isWebSearchAvailable && <CustomChatWebSearch readonly />}
     </CustomChatLayoutContainer>
   );
 }

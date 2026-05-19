@@ -13,8 +13,17 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
 import { WebSource } from '@shared/db/types';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('common.page-titles');
+  return {
+    title: t('chat'),
+  };
+}
 
 const searchParamsSchema = z.object({ model: z.string().optional() });
 

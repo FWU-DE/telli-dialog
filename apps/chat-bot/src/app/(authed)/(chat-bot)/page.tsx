@@ -7,8 +7,17 @@ import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import Logo from '@/components/common/logo';
 import { requireAuth } from '@/auth/requireAuth';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('common.page-titles');
+  return {
+    title: t('chat'),
+  };
+}
 
 export default async function Page() {
   const id = generateUUID();

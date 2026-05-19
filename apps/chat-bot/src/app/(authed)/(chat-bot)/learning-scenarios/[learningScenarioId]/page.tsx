@@ -3,8 +3,17 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 import { LearningScenarioView } from './learning-scenario-view';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import { type Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('learning-scenarios.page-titles');
+  return {
+    title: t('view'),
+  };
+}
 
 export default async function Page(props: PageProps<'/learning-scenarios/[learningScenarioId]'>) {
   const { learningScenarioId } = await props.params;

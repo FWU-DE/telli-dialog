@@ -46,6 +46,7 @@ import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-cha
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
+import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -84,6 +85,7 @@ function createAssistantFormValuesSchema(t: AssistantTranslator) {
     instructions: z.string(),
     isSchoolShared: z.boolean(),
     hasLinkAccess: z.boolean(),
+    isWebSearchEnabled: z.boolean(),
     promptSuggestions: z
       .array(
         z.object({
@@ -104,11 +106,13 @@ export function AssistantEdit({
   relatedFiles,
   initialLinks,
   avatarPictureUrl,
+  isWebSearchAvailable,
 }: {
   assistant: AssistantSelectModel;
   relatedFiles: FileModel[];
   initialLinks: WebSource[];
   avatarPictureUrl?: string;
+  isWebSearchAvailable: boolean;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -125,6 +129,7 @@ export function AssistantEdit({
     instructions: assistant.instructions ?? '',
     isSchoolShared: assistant.accessLevel === 'school',
     hasLinkAccess: assistant.hasLinkAccess,
+    isWebSearchEnabled: assistant.isWebSearchEnabled,
     promptSuggestions:
       assistant.promptSuggestions && assistant.promptSuggestions.length > 0
         ? assistant.promptSuggestions.map((s) => ({ value: s }))
@@ -160,6 +165,7 @@ export function AssistantEdit({
           description: data.description,
           instructions: data.instructions,
           hasLinkAccess: data.hasLinkAccess,
+          isWebSearchEnabled: data.isWebSearchEnabled,
           promptSuggestions: data.promptSuggestions
             .map((suggestion) => suggestion.value.trim())
             .filter((suggestion) => suggestion.length > 0),
@@ -390,6 +396,16 @@ export function AssistantEdit({
             initialLinks={initialLinks}
             onLinksChange={handleLinksChange}
           />
+
+          {isWebSearchAvailable && (
+            <CustomChatWebSearch
+              name="isWebSearchEnabled"
+              control={control}
+              onCheckedChange={() => {
+                void flushAutoSave();
+              }}
+            />
+          )}
 
           <CustomShareSection
             control={control}

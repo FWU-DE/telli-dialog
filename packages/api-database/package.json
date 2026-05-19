@@ -35,7 +35,7 @@
     "dotenv-cli": "11.0.0",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
-    "eslint-config-turbo": "2.9.10",
+    "eslint-config-turbo": "2.9.12",
     "tsx": "4.21.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.59.2"

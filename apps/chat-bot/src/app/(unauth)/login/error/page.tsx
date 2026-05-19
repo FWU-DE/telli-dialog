@@ -1,9 +1,17 @@
 import LogoutButton from '@/app/(authed)/logout-button';
 import { WarningIcon } from '@phosphor-icons/react/dist/ssr';
 import { getAuthErrorFromUrl, getFieldErrorsFromUrl } from '@shared/auth/authentication-service';
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('common.page-titles');
+  return {
+    title: t('login-error'),
+  };
+}
 
 const fieldNameMappings = {
   rolle: 'Rolle',

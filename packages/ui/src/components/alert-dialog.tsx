@@ -212,7 +212,11 @@ function ConfirmAlertDialog({
         )}
         <AlertDialogFooter>
           <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
-          <AlertDialogAction variant={confirmVariant} onClick={() => onConfirm()}>
+          <AlertDialogAction
+            variant={confirmVariant}
+            onClick={() => onConfirm()}
+            data-testid="confirm-alert-dialog-confirm-button"
+          >
             {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
