@@ -19,6 +19,49 @@ type DownloadConversationButtonProps = {
   inviteCode: string;
 };
 
+type DownloadSharedConversationParams = {
+  conversationMessages: Message[];
+  sharedConversationName?: string;
+  characterName?: string;
+  inviteCode: string;
+};
+
+export async function fetchSharedConversationDownload({
+  conversationMessages,
+  sharedConversationName,
+  characterName,
+  inviteCode,
+}: DownloadSharedConversationParams) {
+  const response = await fetch(`/api/download-conversation/shared`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messages: conversationMessages,
+      characterName,
+      sharedConversationName,
+      inviteCode,
+    }),
+  });
+
+  const encodedFileName = response.headers.get('X-Filename')?.toString();
+
+  const fileName =
+    encodedFileName !== undefined
+      ? decodeURIComponent(encodedFileName)
+      : `Konversation_AIS.chat.docx`;
+
+  if (!response.ok) {
+    throw new Error('Failed to download the document');
+  }
+
+  return {
+    blob: await response.blob(),
+    fileName,
+  };
+}
+
 export default function DownloadSharedConversationButton({
   conversationMessages,
   disabled = true,
@@ -47,31 +90,12 @@ export default function DownloadSharedConversationButton({
     try {
       setIsLoading(true);
 
-      const response = await fetch(`/api/download-conversation/shared`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: conversationMessages,
-          characterName,
-          sharedConversationName,
-          inviteCode,
-        }),
+      const { blob, fileName } = await fetchSharedConversationDownload({
+        conversationMessages,
+        sharedConversationName,
+        characterName,
+        inviteCode,
       });
-
-      const encodedFileName = response.headers.get('X-Filename')?.toString();
-
-      const fileName =
-        encodedFileName !== undefined
-          ? decodeURIComponent(encodedFileName)
-          : `Konversation_AIS.chat.docx`;
-
-      if (!response.ok) {
-        throw new Error('Failed to download the document');
-      }
-
-      const blob = await response.blob();
 
       downloadFileFromBlob(blob, fileName);
     } catch {

@@ -5,16 +5,10 @@ import {
   CustomChatHeaderContentProvider,
   useCustomChatHeaderContent,
 } from '@/components/custom-chat/custom-chat-header-content';
-import {
-  ChatHeaderBarCompactMenuContent,
-  ChatHeaderBarContent,
-} from '@/components/chat/header-bar';
+import { ChatHeaderBar } from '@/components/chat/header-bar';
 import SelectImageModel from '@/components/image-generation/select-image-model';
 import SelectImageStyle from '@/components/image-generation/select-image-style';
-import {
-  DialogHeaderCompactMenuContent,
-  DialogHeaderContent,
-} from '@/components/layout/dialog-header';
+import { ApplicationHeaderContent } from '@/components/layout/application-header';
 import type { DefaultPageLayoutConfig } from '@/components/layout/default-page-layout';
 import { ReactNode } from 'react';
 
@@ -22,23 +16,23 @@ function FormPageHeader() {
   const { formStateProps } = useCustomChatHeaderContent();
 
   return (
-    <DialogHeaderContent>
+    <ApplicationHeaderContent>
       <CustomChatHeader
         showFormState={formStateProps !== undefined}
         formStateProps={formStateProps ?? undefined}
       />
-    </DialogHeaderContent>
+    </ApplicationHeaderContent>
   );
 }
 
 function ImagePageHeader() {
   return (
-    <DialogHeaderContent>
+    <ApplicationHeaderContent>
       <div className="flex w-full gap-4">
         <SelectImageModel />
         <SelectImageStyle />
       </div>
-    </DialogHeaderContent>
+    </ApplicationHeaderContent>
   );
 }
 
@@ -48,23 +42,12 @@ function ChatPageHeader({
   layoutConfig: Extract<DefaultPageLayoutConfig, { layout: 'chat' }>;
 }) {
   return (
-    <>
-      <DialogHeaderCompactMenuContent>
-        <ChatHeaderBarCompactMenuContent
-          chatId={layoutConfig.headerConfig.chatId}
-          title={layoutConfig.headerConfig.title}
-          downloadConversationEnabled={layoutConfig.headerConfig.downloadConversationEnabled}
-        />
-      </DialogHeaderCompactMenuContent>
-      <DialogHeaderContent>
-        <ChatHeaderBarContent
-          userAndContext={layoutConfig.headerConfig.userAndContext}
-          chatId={layoutConfig.headerConfig.chatId}
-          title={layoutConfig.headerConfig.title}
-          downloadConversationEnabled={layoutConfig.headerConfig.downloadConversationEnabled}
-        />
-      </DialogHeaderContent>
-    </>
+    <ChatHeaderBar
+      userAndContext={layoutConfig.headerConfig.userAndContext}
+      chatId={layoutConfig.headerConfig.chatId}
+      title={layoutConfig.headerConfig.title}
+      downloadConversationEnabled={layoutConfig.headerConfig.downloadConversationEnabled}
+    />
   );
 }
 

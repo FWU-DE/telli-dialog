@@ -16,6 +16,41 @@ type DownloadConversationButtonProps = {
   className?: string;
 };
 
+type DownloadConversationParams = {
+  conversationId: string;
+  characterName?: string;
+};
+
+export async function fetchConversationDownload({
+  conversationId,
+  characterName,
+}: DownloadConversationParams) {
+  const searchParams = new URLSearchParams({
+    conversationId,
+  });
+
+  if (characterName !== undefined) {
+    searchParams.append('enterpriseGptName', characterName);
+  }
+
+  const response = await fetch(`/api/download-conversation?${searchParams.toString()}`);
+  const encodedFileName = response.headers.get('X-Filename')?.toString();
+
+  const fileName =
+    encodedFileName !== undefined
+      ? decodeURIComponent(encodedFileName)
+      : `Konversation_${conversationId}.docx`;
+
+  if (!response.ok) {
+    throw new Error('Failed to download the document');
+  }
+
+  return {
+    blob: await response.blob(),
+    fileName,
+  };
+}
+
 export default function DownloadConversationButton({
   conversationId,
   characterName,
@@ -34,27 +69,10 @@ export default function DownloadConversationButton({
     try {
       setIsLoading(true);
 
-      const searchParams = new URLSearchParams({
+      const { blob, fileName } = await fetchConversationDownload({
         conversationId,
+        characterName,
       });
-
-      if (characterName !== undefined) {
-        searchParams.append('enterpriseGptName', characterName);
-      }
-
-      const response = await fetch(`/api/download-conversation?${searchParams.toString()}`);
-      const encodedFileName = response.headers.get('X-Filename')?.toString();
-
-      const fileName =
-        encodedFileName !== undefined
-          ? decodeURIComponent(encodedFileName)
-          : `Konversation_${conversationId}.docx`;
-
-      if (!response.ok) {
-        throw new Error('Failed to download the document');
-      }
-
-      const blob = await response.blob();
 
       downloadFileFromBlob(blob, fileName);
     } catch {

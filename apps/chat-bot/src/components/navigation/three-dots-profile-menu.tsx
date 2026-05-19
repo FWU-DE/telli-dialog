@@ -11,16 +11,16 @@ import {
   DropdownMenuSeparator,
 } from '@ui/components/dropdown-menu';
 import { type UserAndContext } from '@/auth/types';
+import type { ApplicationHeaderMenuItem } from '@/components/layout/application-header';
 import { ProfileMenuContent } from './profile-menu-content';
-import { MenuActionRow } from './menu-action-row';
+
+export type ThreeDotsProfileMenuItem = ApplicationHeaderMenuItem;
 
 export function ThreeDotsProfileMenu({
-  downloadButtonJSX,
-  deleteButtonJSX,
+  customItems,
   userAndContext,
 }: {
-  downloadButtonJSX?: React.ReactNode;
-  deleteButtonJSX?: React.ReactNode;
+  customItems?: ThreeDotsProfileMenuItem[];
   userAndContext?: UserAndContext;
 }) {
   return (
@@ -42,17 +42,24 @@ export function ThreeDotsProfileMenu({
         sideOffset={10}
         className="z-300 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
       >
-        {deleteButtonJSX && (
-          <DropdownMenuItem asChild>
-            <MenuActionRow action={deleteButtonJSX} />
+        {customItems?.map((item) => (
+          <DropdownMenuItem
+            key={item.id}
+            disabled={item.disabled}
+            onSelect={() => {
+              if (item.disabled) {
+                return;
+              }
+
+              item.onSelect();
+            }}
+            className="gap-2 text-base font-normal text-primary"
+          >
+            {item.icon !== undefined && <span aria-hidden="true">{item.icon}</span>}
+            {item.label}
           </DropdownMenuItem>
-        )}
-        {downloadButtonJSX && (
-          <DropdownMenuItem asChild>
-            <MenuActionRow action={downloadButtonJSX} />
-          </DropdownMenuItem>
-        )}
-        {(deleteButtonJSX || downloadButtonJSX) && (
+        ))}
+        {(customItems?.length ?? 0) > 0 && (
           <DropdownMenuSeparator className="border-gray-200 mx-2" />
         )}
         <ProfileMenuContent userAndContext={userAndContext} />
