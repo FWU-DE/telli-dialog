@@ -182,12 +182,12 @@ async function dbUpsertFederalStateLlmModelMappings({
   federalStateId: string;
   modelIds: string[];
 }) {
-  for (const modelId of modelIds) {
-    await db
-      .insert(federalStateLlmModelMappingTable)
-      .values({ federalStateId, llmModelId: modelId })
-      .onConflictDoNothing();
-  }
+  if (modelIds.length === 0) return;
+
+  await db
+    .insert(federalStateLlmModelMappingTable)
+    .values(modelIds.map((llmModelId) => ({ federalStateId, llmModelId })))
+    .onConflictDoNothing();
 }
 
 /**
