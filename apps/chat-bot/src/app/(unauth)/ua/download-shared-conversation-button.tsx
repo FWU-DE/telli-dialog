@@ -34,6 +34,9 @@ export default function DownloadSharedConversationButton({
   const tCommon = useTranslations('common');
 
   React.useEffect(() => {
+    // in react strict mode, the component is mounted twice, so we need to reinitialize, otherwise we get an endless loading spinner
+    isMountedRef.current = true;
+
     return () => {
       isMountedRef.current = false;
     };
