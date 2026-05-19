@@ -128,9 +128,7 @@ test.describe('create, share, chat, delete', () => {
     await expect(newChatButton).toBeVisible();
     await newChatButton.click();
 
-    const deleteConfirmButton = page.getByRole('button', {
-      name: 'Aktuellen Chat verwerfen und neu beginnen',
-    });
+    const deleteConfirmButton = page.getByTestId('confirm-alert-dialog-confirm-button');
     await expect(deleteConfirmButton).toBeVisible();
     await deleteConfirmButton.click();
   });
