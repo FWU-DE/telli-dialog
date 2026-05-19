@@ -1,9 +1,8 @@
 import { db } from '..';
 import { decrypt, encrypt } from '../crypto';
 import { FederalStateInsertModel, federalStateTable } from '../schema';
-import { fetchLlmModels } from '../../knotenpunkt';
 import { dbGetFederalStateWithDecryptedApiKey } from '../functions/federal-state';
-import { dbUpsertLlmModelsByModelsAndFederalStateId } from '../functions/llm-model';
+import { dbUpdateLlmModelsForAllFederalStates } from '../functions/llm-model';
 import { env } from '../../env';
 import { env as aiEnv } from '@ais-chat/ai-core/env';
 import { lookupApiKeys } from '@ais-chat/ai-core/api-keys/lookup';
@@ -46,13 +45,9 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
     if (federalStateAndApiKey === undefined) {
       return;
     }
-    const models = await fetchLlmModels({ apiKey: federalStateAndApiKey.decryptedApiKey });
-
-    await dbUpsertLlmModelsByModelsAndFederalStateId({
-      models,
-      federalStateId: federalStateAndApiKey.id,
-    });
   }
+
+  await dbUpdateLlmModelsForAllFederalStates();
 
   console.log('federalState seed successful');
 }
