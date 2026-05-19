@@ -37,8 +37,6 @@ export async function createLargeLanguageModel(
 
   logInfo('LLM was created successfully', { organizationId, data });
 
-  await dbUpdateLlmModelsForAllFederalStates();
-
   if (!model) throw new Error('Failed to create model');
   return model;
 }
