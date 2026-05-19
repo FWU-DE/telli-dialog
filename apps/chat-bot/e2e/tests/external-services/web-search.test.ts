@@ -4,7 +4,6 @@ import { sendMessage } from '../../utils/chat';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
-// Test is flaky --> TD-1226
 test('should successfully perform web search', { tag: '@external-services' }, async ({ page }) => {
   await page.goto('/');
 
