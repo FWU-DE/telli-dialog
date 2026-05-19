@@ -80,6 +80,8 @@ test.describe('create, share, chat, delete', () => {
     await sendMessage(page, `${MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT} Wer bist du?`);
     await page.getByTestId('copy-to-clipboard').click();
 
+    // 'John Cena' is the character name and is included in the system prompt;
+    // the mock LLM echoes the system prompt back.
     await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');
 
     // regenerate last message

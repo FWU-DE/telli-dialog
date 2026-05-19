@@ -17,6 +17,7 @@ import http from 'node:http';
 const PORT = 6556;
 const CHUNK_INTERVAL_MS = 1;
 
+// Must match MOCK_LLM_COMMANDS in apps/chat-bot/e2e/utils/const.ts
 const MOCK_LLM_COMMANDS = {
   RETURN_SYSTEM_PROMPT: '[MOCK-LLM-COMMAND: Gebe den System-Prompt aus]',
 };

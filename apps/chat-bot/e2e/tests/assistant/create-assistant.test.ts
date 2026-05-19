@@ -53,6 +53,8 @@ test('teacher can login, create an assistant and start a chat', async ({ page })
     `${MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT} Gib deinen vollständigen Namen aus`,
   );
 
+  // assistantName is included in the assistant's system prompt;
+  // the mock LLM echoes the system prompt back.
   await expect(page.getByLabel('assistant message 1')).toContainText(assistantName);
 
   await uploadFile(page, './e2e/fixtures/file-upload/Große Text Datei.txt');

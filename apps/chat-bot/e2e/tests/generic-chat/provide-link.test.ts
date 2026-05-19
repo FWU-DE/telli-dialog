@@ -15,6 +15,8 @@ test('teacher can provide link and it is displayed in the chat', async ({ page }
 
   await expect(page.getByTestId('citation').first()).toContainText('planet-wissen.de');
   await expect(page.getByLabel('assistant message 1')).toBeVisible();
+  // The provided URL is scraped, and its content is injected into the system prompt;
+  // the mock LLM echoes the system prompt back, so the response contains the scraped page text.
   await expect(page.getByLabel('assistant message 1')).toContainText(/17.\sJahrhundert/);
 });
 

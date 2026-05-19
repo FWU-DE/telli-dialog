@@ -23,6 +23,7 @@ export const AUTH_FILES = {
 
 export const LLM_MODELS_FILE = path.resolve(process.cwd(), '.playwright-auth/llm-models.json');
 
+// Must match MOCK_LLM_COMMANDS in devops/docker/mock-llm/server.mjs
 export const MOCK_LLM_COMMANDS = {
   RETURN_SYSTEM_PROMPT: '[MOCK-LLM-COMMAND: Gebe den System-Prompt aus]',
 };

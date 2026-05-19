@@ -37,5 +37,7 @@ test('should upload file and chat with assistant template (Schulorganisationsass
   // Verify the response contains expected content
   const assistantMessage = page.getByLabel('assistant message 1');
   await expect(assistantMessage).toBeVisible();
+  // 'Napoleon Bonaparte' is written in the uploaded file, which is added to the system prompt;
+  // the mock LLM echoes the system prompt back.
   await expect(assistantMessage).toContainText(/Napol[eé]on Bonaparte/i);
 });
