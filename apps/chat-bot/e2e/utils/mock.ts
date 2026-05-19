@@ -100,6 +100,7 @@ export const mockLearningScenario = (): LearningScenarioSelectModel => {
     accessLevel: 'private',
     originalLearningScenarioId: null,
     isDeleted: false,
+    suspended: false,
     hasLinkAccess: false,
     ownerSchoolIds: [generateUUID()],
   };
@@ -157,6 +158,7 @@ export const mockCharacter = (): CharacterSelectModel => {
     attachedLinks: [],
     originalCharacterId: null,
     isDeleted: false,
+    suspended: false,
     hasLinkAccess: false,
     ownerSchoolIds: [generateUUID()],
   };

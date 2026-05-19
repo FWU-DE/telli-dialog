@@ -1,5 +1,6 @@
 import {
   boolean,
+  check,
   doublePrecision,
   foreignKey,
   index,
@@ -13,6 +14,7 @@ import {
   unique,
   uuid,
   vector,
+  varchar,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import { type DesignConfiguration, type LlmModelPriceMetadata } from './types';
@@ -356,6 +358,19 @@ export const accessLevelSchema = z.enum(['private', 'school', 'global']);
 export const accessLevelEnum = pgEnum('access_level', accessLevelSchema.enum);
 export type AccessLevel = z.infer<typeof accessLevelSchema>;
 
+export const entityReportReasonSchema = z.enum([
+  'copyright_violation',
+  'false_or_outdated_information',
+  'insufficient_sources',
+  'discrimination',
+  'personal_data_usage_or_query',
+  'violence_or_extremist_content',
+  'sexualized_content',
+  'other',
+]);
+export const entityReportReasonEnum = pgEnum('entity_report_reason', entityReportReasonSchema.enum);
+export type EntityReportReason = z.infer<typeof entityReportReasonSchema>;
+
 export const characterTable = pgTable(
   'character',
   {
@@ -392,6 +407,7 @@ export const characterTable = pgTable(
       .array()
       .notNull()
       .default(sql`'{}'::text[]`),
+    suspended: boolean('suspended').notNull().default(false),
     isDeleted: boolean('is_deleted').notNull().default(false),
     originalCharacterId: uuid('original_character_id'),
   },
@@ -594,6 +610,7 @@ export const learningScenarioTable = pgTable(
       .defaultNow()
       .$onUpdateFn(() => new Date())
       .notNull(),
+    suspended: boolean('suspended').notNull().default(false),
     isDeleted: boolean('is_deleted').notNull().default(false),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     originalLearningScenarioId: uuid('original_learning_scenario_id'),
@@ -1043,6 +1060,7 @@ export const assistantTable = pgTable(
       .array()
       .notNull()
       .default(sql`'{}'::text[]`),
+    suspended: boolean('suspended').notNull().default(false),
     isDeleted: boolean('is_deleted').notNull().default(false),
     originalAssistantId: uuid('original_assistant_id'),
   },
@@ -1075,6 +1093,62 @@ export const assistantUpdateSchema = createUpdateSchema(assistantTable)
 export type AssistantSelectModel = z.infer<typeof assistantSelectSchema>;
 export type AssistantInsertModel = z.infer<typeof assistantInsertSchema>;
 export type AssistantUpdateModel = z.infer<typeof assistantUpdateSchema>;
+
+/**
+ * Schema for table entity_report
+ */
+export const entityReportTable = pgTable(
+  'entity_report',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    assistantId: uuid('assistant_id').references(() => assistantTable.id, { onDelete: 'cascade' }),
+    characterId: uuid('character_id').references(() => characterTable.id, { onDelete: 'cascade' }),
+    learningScenarioId: uuid('learning_scenario_id').references(() => learningScenarioTable.id, {
+      onDelete: 'cascade',
+    }),
+    reporterId: uuid('reporter_id').references(() => userTable.id, {
+      onDelete: 'set null',
+    }),
+    reason: entityReportReasonEnum('reason').notNull(),
+    description: varchar('description', { length: 500 }).notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    checked: boolean('checked').notNull().default(false),
+  },
+  (table) => [
+    check(
+      'entity_report_exactly_one_target_ck',
+      sql`((${table.assistantId} IS NOT NULL)::int + (${table.characterId} IS NOT NULL)::int + (${table.learningScenarioId} IS NOT NULL)::int) = 1`,
+    ),
+    index().on(table.assistantId),
+    index().on(table.characterId),
+    index().on(table.learningScenarioId),
+    index().on(table.reporterId),
+    index().on(table.createdAt),
+    index().on(table.checked),
+  ],
+);
+
+export const entityReportSelectSchema = createSelectSchema(entityReportTable).extend({
+  createdAt: z.coerce.date(),
+  reason: entityReportReasonSchema,
+});
+
+export const entityReportInsertSchema = createInsertSchema(entityReportTable).omit({
+  id: true,
+  createdAt: true,
+  checked: true,
+});
+
+export const entityReportUpdateSchema = createUpdateSchema(entityReportTable)
+  .omit({ createdAt: true })
+  .extend({
+    id: z.string(),
+    reason: entityReportReasonSchema,
+  });
+
+export type EntityReportSelectModel = z.infer<typeof entityReportSelectSchema>;
+export type EntityReportInsertModel = z.infer<typeof entityReportInsertSchema>;
+export type EntityReportUpdateModel = z.infer<typeof entityReportUpdateSchema>;
 
 /**
  * Schema for table assistant_template_mappings
