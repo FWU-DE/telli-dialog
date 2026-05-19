@@ -4,6 +4,7 @@ import {
   constructAzureResponsesGenerationFn,
   constructAzureResponsesStreamFn,
 } from './azure';
+import { constructGoogleTextGenerationFn, constructGoogleTextStreamFn } from './google';
 import { constructIonosTextGenerationFn, constructIonosTextStreamFn } from './ionos';
 import { constructOpenAITextGenerationFn, constructOpenAITextStreamFn } from './openai';
 import type { AiModel, GenerationOptions, TextGenerationFn, TextStreamFn } from '../types';
@@ -18,6 +19,9 @@ function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerati
   }
   if (model.provider === 'ionos') {
     return constructIonosTextGenerationFn(model);
+  }
+  if (model.provider === 'google') {
+    return constructGoogleTextGenerationFn(model);
   }
   if (model.provider === 'openai') {
     return constructOpenAITextGenerationFn(model);
@@ -36,6 +40,9 @@ function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | u
   }
   if (model.provider === 'ionos') {
     return constructIonosTextStreamFn(model);
+  }
+  if (model.provider === 'google') {
+    return constructGoogleTextStreamFn(model);
   }
   if (model.provider === 'openai') {
     return constructOpenAITextStreamFn(model);
