@@ -29,18 +29,8 @@ export default function DownloadSharedConversationButton({
   inviteCode,
 }: DownloadConversationButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
-  const isMountedRef = React.useRef(true);
   const toast = useToast();
   const tCommon = useTranslations('common');
-
-  React.useEffect(() => {
-    // in react strict mode, the component is mounted twice, so we need to reinitialize, otherwise we get an endless loading spinner
-    isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
 
   async function handleDownload() {
     if (disabled) {
@@ -80,9 +70,7 @@ export default function DownloadSharedConversationButton({
     } catch {
       toast.error('Der Download der Konversation ist fehlgeschlagen.');
     } finally {
-      if (isMountedRef.current) {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
     }
   }
 
