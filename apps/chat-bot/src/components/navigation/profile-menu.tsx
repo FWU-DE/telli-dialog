@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { UserIcon } from '@/components/icons/user';
 import { Button } from '@ui/components/button';

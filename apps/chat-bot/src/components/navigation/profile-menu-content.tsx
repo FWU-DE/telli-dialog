@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { type UserAndContext } from '@/auth/types';
 import { useTranslations } from 'next-intl';
