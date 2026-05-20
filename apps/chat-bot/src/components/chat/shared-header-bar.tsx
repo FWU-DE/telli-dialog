@@ -4,9 +4,9 @@ import useBreakpoints from '../hooks/use-breakpoints';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
 import DownloadSharedConversationButton, {
-  downloadFileFromBlob,
   fetchSharedConversationDownload,
 } from '@/app/(unauth)/ua/download-shared-conversation-button';
+import { downloadFileFromBlob } from '@/utils/files/blob-download';
 import Image from 'next/image';
 import ProfileMenu from '../navigation/profile-menu';
 import {

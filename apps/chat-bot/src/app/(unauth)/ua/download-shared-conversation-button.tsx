@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { type ChatMessage as Message } from '@/types/chat';
 import { Button } from '@ui/components/button';
 import { BoxArrowDownIcon } from '@phosphor-icons/react';
+import { downloadFileFromBlob, extractFilenameFromResponse } from '@/utils/files/blob-download';
 
 type DownloadConversationButtonProps = {
   conversationMessages: Message[];
@@ -45,12 +46,7 @@ export async function fetchSharedConversationDownload({
     }),
   });
 
-  const encodedFileName = response.headers.get('X-Filename')?.toString();
-
-  const fileName =
-    encodedFileName !== undefined
-      ? decodeURIComponent(encodedFileName)
-      : `Konversation_AIS.chat.docx`;
+  const fileName = extractFilenameFromResponse(response, 'Konversation_AIS.chat.docx');
 
   if (!response.ok) {
     throw new Error('Failed to download the document');
@@ -146,18 +142,4 @@ export default function DownloadSharedConversationButton({
       {showText && tCommon('conversation-download')}
     </Button>
   );
-}
-
-export function downloadFileFromBlob(blob: Blob, fileName: string) {
-  const url = window.URL.createObjectURL(blob);
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', fileName);
-
-  document.body.appendChild(link);
-  link.click();
-
-  link.parentNode?.removeChild(link);
-  window.URL.revokeObjectURL(url);
 }

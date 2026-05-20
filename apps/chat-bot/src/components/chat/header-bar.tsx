@@ -4,9 +4,9 @@ import { UserAndContext } from '@/auth/types';
 import SelectLlmModel from '../conversation/select-llm-model';
 import { NewChatButton } from '../navigation/sidebar/collapsible-sidebar';
 import DownloadConversationButton, {
-  downloadFileFromBlob,
   fetchConversationDownload,
 } from '@/app/(authed)/(chat-bot)/download-conversation-button';
+import { downloadFileFromBlob } from '@/utils/files/blob-download';
 import { useLlmModels } from '../providers/llm-model-provider';
 import {
   ApplicationHeaderActions,
