@@ -58,7 +58,7 @@ export default async function Page(
           <section className="flex flex-col justify-between gap-4 items-center">
             <div className="flex flex-col items-center gap-4">
               <p className="text-2xl sm:text-3xl">{t('go-to')}</p>
-              <Link href={await getBaseUrlByHeaders()} target="_blank">
+              <Link href={await getBaseUrlByHeaders()} target="_blank" rel="noopener noreferrer">
                 <p className="text-3xl sm:text-5xl text-primary font-bold">
                   {await getHostByHeaders()}
                 </p>
@@ -74,7 +74,7 @@ export default async function Page(
               </div>
             </div>
             <Button asChild className="mt-10 sm:mt-16">
-              <Link href={shareUrl} target="_blank">
+              <Link href={shareUrl} target="_blank" rel="noopener noreferrer">
                 {t('open-chat')}
               </Link>
             </Button>

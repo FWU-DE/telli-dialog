@@ -40,7 +40,13 @@ export default function CookieModal() {
         <h1 className="text-xl font-medium">AIS.chat verwendet Cookies</h1>
         <p className="mt-8">
           Diese Anwendung verwendet Cookies, wie in den{' '}
-          <Link href={privacyPolicyLink} prefetch={false} target="_blank" className="underline">
+          <Link
+            href={privacyPolicyLink}
+            prefetch={false}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
             Datenschutzhinweisen
           </Link>{' '}
           beschrieben. Einige Cookies sind technisch notwendig, während andere dazu beitragen, das
