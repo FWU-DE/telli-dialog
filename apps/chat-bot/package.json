@@ -29,6 +29,9 @@
     "k6:run:cloud": "k6 cloud run -e LOADTEST_USERNAME=$LOADTEST_USERNAME -e LOADTEST_PASSWORD=$LOADTEST_PASSWORD -e LOADTEST_IDP_HINT=$LOADTEST_IDP_HINT -e LOADTEST_BASE_URL=$LOADTEST_BASE_URL"
   },
   "dependencies": {
+    "@ais-chat/ai-core": "workspace:*",
+    "@ais-chat/shared": "workspace:*",
+    "@ais-chat/ui": "workspace:*",
     "@aws-sdk/client-s3": "3.1045.0",
     "@aws-sdk/s3-request-presigner": "3.1045.0",
     "@hookform/resolvers": "5.2.2",
@@ -46,9 +49,6 @@
     "@t3-oss/env-nextjs": "0.13.11",
     "@tanstack/react-query": "5.100.9",
     "@tanstack/react-virtual": "3.13.24",
-    "@ais-chat/ai-core": "workspace:*",
-    "@ais-chat/shared": "workspace:*",
-    "@ais-chat/ui": "workspace:*",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "date-fns": "4.1.0",
@@ -92,13 +92,13 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@ais-chat/typescript-config": "workspace:*",
     "@axe-core/playwright": "4.11.3",
     "@dotenvx/dotenvx": "1.65.0",
     "@eslint/eslintrc": "3.3.5",
     "@playwright/test": "1.59.1",
     "@svgr/webpack": "8.1.0",
     "@tailwindcss/postcss": "4.3.0",
-    "@ais-chat/typescript-config": "workspace:*",
     "@types/he": "1.2.3",
     "@types/jsdom": "28.0.1",
     "@types/k6": "1.7.0",
@@ -110,6 +110,7 @@
     "@types/react-dom": "19.2.3",
     "@types/react-syntax-highlighter": "15.5.13",
     "@vitest/coverage-v8": "4.1.5",
+    "babel-plugin-react-compiler": "1.0.0",
     "esbuild": "0.28.0",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
