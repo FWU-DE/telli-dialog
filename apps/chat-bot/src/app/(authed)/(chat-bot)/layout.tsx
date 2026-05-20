@@ -17,7 +17,7 @@ import AppSidebar from '@/components/navigation/sidebar/app-sidebar';
 import { SidebarProvider } from '@ais-chat/ui/components/sidebar';
 import SessionWatcher from '@/auth/SessionWatcher';
 import { getActiveBannersForUser } from '@shared/info-banners/info-banner-service';
-import { ApplicationWrapper } from '@/components/layout/application-header';
+import { ApplicationLayout } from '@/components/layout/application-layout';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,9 +65,9 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
               currentModelCosts={priceInCent ?? 0}
               userPriceLimit={userPriceLimit ?? 500}
             />
-            <ApplicationWrapper userAndContext={userAndContext} infoBanners={activeBanners}>
+            <ApplicationLayout userAndContext={userAndContext} infoBanners={activeBanners}>
               {children}
-            </ApplicationWrapper>
+            </ApplicationLayout>
           </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (
