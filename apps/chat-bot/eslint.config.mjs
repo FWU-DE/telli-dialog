@@ -22,6 +22,14 @@ const eslintConfig = [
   ...compat.config({
     extends: ['prettier'],
     plugins: ['prettier'],
+    settings: {
+      linkComponents: [
+        {
+          name: 'Link',
+          linkAttribute: 'href',
+        },
+      ],
+    },
 
     rules: {
       'prettier/prettier': 'error',
@@ -50,6 +58,7 @@ const eslintConfig = [
         },
       ],
       eqeqeq: ['error', 'always'],
+      'react/jsx-no-target-blank': 'error',
       ...jsxA11y.flatConfigs.recommended.rules,
     },
   }),

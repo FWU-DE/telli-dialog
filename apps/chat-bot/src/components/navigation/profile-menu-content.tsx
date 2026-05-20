@@ -15,6 +15,7 @@ export function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAn
         href={PRIVACY_POLICY_URL}
         prefetch={false}
         target="_blank"
+        rel="noopener noreferrer"
         className="text-vidis-hover-purple py-2 px-4 hover:underline"
       >
         {t('privacy-policy')}
@@ -24,6 +25,7 @@ export function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAn
         prefetch={false}
         className="text-vidis-hover-purple py-2 px-4 hover:underline"
         target="_blank"
+        rel="noopener noreferrer"
       >
         {t('imprint')}
       </Link>
@@ -32,6 +34,7 @@ export function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAn
         prefetch={false}
         className="text-vidis-hover-purple py-2 px-4 hover:underline"
         target="_blank"
+        rel="noopener noreferrer"
       >
         {t('terms-of-use')}
       </Link>
