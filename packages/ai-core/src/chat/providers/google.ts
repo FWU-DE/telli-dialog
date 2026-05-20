@@ -1,516 +1,240 @@
+import { FinishReason, createPartFromText, createPartFromUri } from '@google/genai';
+import type {
+  GenerateContentParameters,
+  GenerateContentResponse,
+  GenerateContentResponsePromptFeedback,
+  GenerateContentResponseUsageMetadata,
+  Part,
+} from '@google/genai';
 import type { AiModel, Message, TextGenerationFn, TextStreamFn, TokenUsage } from '../types';
 import { AiGenerationError, ResponsibleAIError } from '../../errors';
-import {
-  createGoogleClient,
-  getGoogleAccessToken,
-  getGoogleServiceAddress,
-  type GoogleClientConfig,
-} from '../../google-client';
+import { createGoogleClient, formatGoogleError } from '../../google-client';
+import { calculateCompletionUsage } from '../utils';
 
-interface GoogleVertexInlineData {
-  mimeType: string;
-  data: string;
-}
-
-interface GoogleVertexFileData {
-  mimeType: string;
-  fileUri: string;
-}
-
-interface GoogleVertexPart {
-  text?: string;
-  inlineData?: GoogleVertexInlineData;
-  fileData?: GoogleVertexFileData;
-}
-
-interface GoogleVertexContent {
-  role?: 'user' | 'model';
-  parts?: GoogleVertexPart[];
-}
-
-interface GoogleVertexSafetyRating {
-  category?: string;
-  blocked?: boolean;
-}
-
-interface GoogleVertexCandidate {
-  content?: GoogleVertexContent;
-  finishReason?: string;
-  safetyRatings?: GoogleVertexSafetyRating[];
-}
-
-interface GoogleVertexUsageMetadata {
-  promptTokenCount?: number;
-  candidatesTokenCount?: number;
-  totalTokenCount?: number;
-}
-
-interface GoogleVertexGenerateContentResponse {
-  candidates?: GoogleVertexCandidate[];
-  usageMetadata?: GoogleVertexUsageMetadata;
-}
-
-type GoogleVertexMethod = 'generateContent' | 'streamGenerateContent';
-
-interface GoogleRequestConfig {
-  projectId: string;
-  location: string;
-  auth: GoogleClientConfig['auth'];
-  modelName: string;
-  requestBody: Record<string, unknown>;
-}
-
-const blockedFinishReasons = new Set([
-  'SAFETY',
-  'FINISH_REASON_SAFETY',
-  'BLOCKLIST',
-  'FINISH_REASON_BLOCKLIST',
-  'PROHIBITED_CONTENT',
-  'FINISH_REASON_PROHIBITED_CONTENT',
-  'RECITATION',
-  'FINISH_REASON_RECITATION',
+const RESPONSIBLE_AI_FINISH_REASONS = new Set<FinishReason>([
+  FinishReason.SAFETY,
+  FinishReason.BLOCKLIST,
+  FinishReason.PROHIBITED_CONTENT,
+  FinishReason.SPII,
+  FinishReason.IMAGE_SAFETY,
+  FinishReason.IMAGE_PROHIBITED_CONTENT,
 ]);
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function parseDataUrl(url: string): GoogleVertexInlineData | undefined {
-  const match = url.match(/^data:([^;,]+);base64,(.+)$/);
-
-  if (!match) {
-    return undefined;
-  }
-
-  const [, mimeType, data] = match;
-
-  if (!mimeType || !data) {
-    return undefined;
-  }
-
-  return {
-    mimeType,
-    data,
-  };
-}
-
-function toGooglePartsFromAttachments(message: Message): GoogleVertexPart[] {
-  return (
-    message.attachments
-      ?.filter((attachment) => attachment.type === 'image')
-      .map((attachment) => {
-        const inlineData = parseDataUrl(attachment.url);
-
-        if (inlineData) {
-          return { inlineData } satisfies GoogleVertexPart;
-        }
-
-        return {
-          fileData: {
-            mimeType: attachment.contentType,
-            fileUri: attachment.url,
-          },
-        } satisfies GoogleVertexPart;
-      }) ?? []
-  );
-}
-
-function toGoogleParts(message: Message): GoogleVertexPart[] {
-  const parts: GoogleVertexPart[] = [];
+function buildGoogleParts(message: Message): Part[] {
+  const parts: Part[] = [];
 
   if (message.content !== '') {
-    parts.push({ text: message.content });
+    parts.push(createPartFromText(message.content));
   }
 
-  parts.push(...toGooglePartsFromAttachments(message));
+  for (const attachment of message.attachments ?? []) {
+    if (attachment.type !== 'image') {
+      continue;
+    }
+
+    parts.push(createPartFromUri(attachment.url, attachment.contentType));
+  }
 
   if (parts.length === 0) {
-    parts.push({ text: '' });
+    parts.push(createPartFromText(''));
   }
 
   return parts;
 }
 
-function toGoogleContents(messages: Message[]): GoogleVertexContent[] {
-  return messages
+function buildGoogleGenerateContentParameters({
+  messages,
+  model,
+  maxTokens,
+  temperature,
+}: Parameters<TextGenerationFn>[0]): GenerateContentParameters {
+  const contents = messages
     .filter((message) => message.role !== 'system')
     .map((message) => ({
       role: message.role === 'assistant' ? 'model' : 'user',
-      parts: toGoogleParts(message),
+      parts: buildGoogleParts(message),
     }));
-}
-
-function toGoogleSystemInstruction(messages: Message[]): { parts: GoogleVertexPart[] } | undefined {
-  const parts = messages
+  const systemInstruction = messages
     .filter((message) => message.role === 'system' && message.content !== '')
-    .map((message) => ({ text: message.content }));
-
-  if (parts.length === 0) {
-    return undefined;
-  }
-
-  return { parts };
-}
-
-function toGoogleTokenUsage(
-  usageMetadata: GoogleVertexUsageMetadata | undefined,
-): TokenUsage | undefined {
-  if (
-    usageMetadata?.promptTokenCount === undefined ||
-    usageMetadata.totalTokenCount === undefined
-  ) {
-    return undefined;
-  }
-
-  return {
-    completionTokens:
-      usageMetadata.candidatesTokenCount ??
-      usageMetadata.totalTokenCount - usageMetadata.promptTokenCount,
-    promptTokens: usageMetadata.promptTokenCount,
-    totalTokens: usageMetadata.totalTokenCount,
-  };
-}
-
-function requireGoogleTokenUsage(
-  usageMetadata: GoogleVertexUsageMetadata | undefined,
-  errorMessage: string,
-): TokenUsage {
-  const usage = toGoogleTokenUsage(usageMetadata);
-
-  if (!usage) {
-    throw new AiGenerationError(errorMessage);
-  }
-
-  return usage;
-}
-
-function extractGoogleText(response: GoogleVertexGenerateContentResponse): string {
-  return (
-    response.candidates?.[0]?.content?.parts
-      ?.flatMap((part) => (part.text !== undefined ? [part.text] : []))
-      .join('') ?? ''
-  );
-}
-
-function ensureGoogleResponseIsAllowed(response: GoogleVertexGenerateContentResponse) {
-  const candidate = response.candidates?.[0];
-  if (!candidate) {
-    return;
-  }
-
-  const blockedCategories =
-    candidate.safetyRatings
-      ?.filter((rating) => rating.blocked === true)
-      .flatMap((rating) => (rating.category ? [rating.category] : [])) ?? [];
-
-  if (candidate.finishReason && blockedFinishReasons.has(candidate.finishReason)) {
-    const details = [candidate.finishReason, ...blockedCategories].join(', ');
-    throw new ResponsibleAIError(`Text generation was blocked due to safety settings: ${details}`);
-  }
-
-  if (blockedCategories.length > 0 && extractGoogleText(response) === '') {
-    throw new ResponsibleAIError(
-      `Text generation was blocked due to safety settings: ${blockedCategories.join(', ')}`,
-    );
-  }
-}
-
-function buildGoogleRequestBody({
-  messages,
-  maxTokens,
-  temperature,
-  additionalParameters,
-}: {
-  messages: Message[];
-  maxTokens?: number;
-  temperature?: number;
-  additionalParameters: Record<string, unknown>;
-}) {
-  const systemInstruction = toGoogleSystemInstruction(messages);
-  const baseGenerationConfig = isRecord(additionalParameters.generationConfig)
-    ? additionalParameters.generationConfig
-    : undefined;
-
-  const generationConfig = {
-    ...(baseGenerationConfig ?? {}),
+    .map((message) => createPartFromText(message.content));
+  const config = {
+    ...(systemInstruction.length > 0 ? { systemInstruction } : {}),
     ...(maxTokens !== undefined ? { maxOutputTokens: maxTokens } : {}),
     ...(temperature !== undefined ? { temperature } : {}),
   };
 
   return {
-    ...additionalParameters,
-    ...(systemInstruction ? { systemInstruction } : {}),
-    contents: toGoogleContents(messages),
-    ...(Object.keys(generationConfig).length > 0 ? { generationConfig } : {}),
+    model,
+    contents: contents.length > 0 ? contents : [{ role: 'user', parts: [createPartFromText('')] }],
+    ...(Object.keys(config).length > 0 ? { config } : {}),
   };
 }
 
-function buildGoogleEndpoint({
-  projectId,
-  location,
-  modelName,
-  method,
+function getResponsibleAiMessage({
+  promptFeedback,
+  finishReason,
 }: {
-  projectId: string;
-  location: string;
-  modelName: string;
-  method: GoogleVertexMethod;
-}): string {
-  const address = getGoogleServiceAddress(location);
-  const baseEndpoint = `https://${address}/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelName}:${method}`;
+  promptFeedback?: GenerateContentResponsePromptFeedback;
+  finishReason?: FinishReason;
+}): string | undefined {
+  if (promptFeedback?.blockReasonMessage) {
+    return promptFeedback.blockReasonMessage;
+  }
 
-  return method === 'streamGenerateContent' ? `${baseEndpoint}?alt=sse` : baseEndpoint;
+  if (promptFeedback?.blockReason) {
+    return `Google Vertex AI blocked the prompt: ${promptFeedback.blockReason}`;
+  }
+
+  if (finishReason && RESPONSIBLE_AI_FINISH_REASONS.has(finishReason)) {
+    return `Google Vertex AI blocked the response: ${finishReason}`;
+  }
+
+  return undefined;
 }
 
-function createGoogleRequestConfig({
-  clientConfig,
-  model,
+function assertGoogleResponseAllowed(response: GenerateContentResponse): void {
+  const finishReason = response.candidates?.[0]?.finishReason;
+  const errorMessage = getResponsibleAiMessage({
+    promptFeedback: response.promptFeedback,
+    finishReason,
+  });
+
+  if (errorMessage) {
+    throw new ResponsibleAIError(errorMessage);
+  }
+}
+
+function toTokenUsage({
+  usageMetadata,
   messages,
-  maxTokens,
-  temperature,
+  text,
 }: {
-  clientConfig: GoogleClientConfig;
-  model: AiModel;
+  usageMetadata?: GenerateContentResponseUsageMetadata;
   messages: Message[];
-  maxTokens?: number;
-  temperature?: number;
-}): GoogleRequestConfig {
-  return {
-    projectId: clientConfig.projectId,
-    location: clientConfig.location,
-    auth: clientConfig.auth,
-    modelName: model.name,
-    requestBody: buildGoogleRequestBody({
-      messages,
-      maxTokens,
-      temperature,
-      additionalParameters: model.additionalParameters,
-    }),
-  };
-}
-
-async function fetchGoogleResponse({
-  projectId,
-  location,
-  modelName,
-  method,
-  auth,
-  requestBody,
-}: {
-  projectId: string;
-  location: string;
-  modelName: string;
-  method: GoogleVertexMethod;
-  auth: GoogleClientConfig['auth'];
-  requestBody: Record<string, unknown>;
-}) {
-  const accessToken = await getGoogleAccessToken(auth);
-  const requestBodyJson = JSON.stringify(requestBody);
-  const endpoint = buildGoogleEndpoint({
-    projectId,
-    location,
-    modelName,
-    method,
-  });
-
-  return fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: requestBodyJson,
-  });
-}
-
-function applyGoogleStreamChunk({
-  accumulatedText,
-  chunkText,
-}: {
-  accumulatedText: string;
-  chunkText: string;
-}): { accumulatedText: string; delta?: string } {
-  if (chunkText === '') {
-    return { accumulatedText };
-  }
-
-  if (chunkText.startsWith(accumulatedText)) {
-    const delta = chunkText.slice(accumulatedText.length);
+  text: string;
+}): TokenUsage {
+  if (
+    usageMetadata?.promptTokenCount !== undefined ||
+    usageMetadata?.candidatesTokenCount !== undefined ||
+    usageMetadata?.totalTokenCount !== undefined
+  ) {
+    const promptTokens = usageMetadata.promptTokenCount ?? 0;
+    const completionTokens = usageMetadata.candidatesTokenCount ?? 0;
 
     return {
-      accumulatedText: chunkText,
-      ...(delta !== '' ? { delta } : {}),
+      promptTokens,
+      completionTokens,
+      totalTokens:
+        usageMetadata.totalTokenCount ??
+        promptTokens +
+          completionTokens +
+          (usageMetadata.toolUsePromptTokenCount ?? 0) +
+          (usageMetadata.thoughtsTokenCount ?? 0),
     };
   }
 
+  const calculatedUsage = calculateCompletionUsage({
+    messages,
+    modelMessage: { role: 'assistant', content: text },
+  });
+
   return {
-    accumulatedText: accumulatedText + chunkText,
-    delta: chunkText,
-  };
-}
-
-async function parseGoogleJsonResponse(
-  response: Response,
-  errorLabel: string,
-): Promise<GoogleVertexGenerateContentResponse> {
-  if (!response.ok) {
-    const errorDetails = await response.text();
-    throw new AiGenerationError(
-      `${errorLabel} request failed with status ${response.status}: ${response.statusText}\n\n${errorDetails}`,
-    );
-  }
-
-  return (await response.json()) as GoogleVertexGenerateContentResponse;
-}
-
-function parseSseEvent(rawEvent: string): GoogleVertexGenerateContentResponse | undefined {
-  const data = rawEvent
-    .split(/\r?\n/)
-    .filter((line) => line.startsWith('data:'))
-    .map((line) => line.slice(5).trimStart())
-    .join('\n');
-
-  if (data === '' || data === '[DONE]') {
-    return undefined;
-  }
-
-  try {
-    return JSON.parse(data) as GoogleVertexGenerateContentResponse;
-  } catch {
-    throw new AiGenerationError('Failed to parse Google Vertex AI stream response');
-  }
-}
-
-async function* parseGoogleSseStream(
-  response: Response,
-): AsyncGenerator<GoogleVertexGenerateContentResponse> {
-  if (!response.ok) {
-    const errorDetails = await response.text();
-    throw new AiGenerationError(
-      `Google Vertex AI text streaming request failed with status ${response.status}: ${response.statusText}\n\n${errorDetails}`,
-    );
-  }
-
-  if (!response.body) {
-    throw new AiGenerationError('No response body returned from Google Vertex AI stream');
-  }
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
-
-  while (true) {
-    const { value, done } = await reader.read();
-    buffer += decoder.decode(value, { stream: !done });
-
-    let separatorMatch = buffer.match(/\r?\n\r?\n/);
-
-    while (separatorMatch?.index !== undefined) {
-      const rawEvent = buffer.slice(0, separatorMatch.index);
-      buffer = buffer.slice(separatorMatch.index + separatorMatch[0].length);
-
-      const event = parseSseEvent(rawEvent.trim());
-      if (event) {
-        yield event;
-      }
-
-      separatorMatch = buffer.match(/\r?\n\r?\n/);
-    }
-
-    if (done) {
-      const tailEvent = parseSseEvent(buffer.trim());
-      if (tailEvent) {
-        yield tailEvent;
-      }
-      break;
-    }
-  }
-}
-
-export function constructGoogleTextGenerationFn(model: AiModel): TextGenerationFn {
-  const clientConfig = createGoogleClient(model);
-
-  return async function getGoogleTextGeneration({ messages, maxTokens, temperature }) {
-    const requestConfig = createGoogleRequestConfig({
-      clientConfig,
-      model,
-      messages,
-      maxTokens,
-      temperature,
-    });
-
-    const response = await fetchGoogleResponse({
-      projectId: requestConfig.projectId,
-      location: requestConfig.location,
-      modelName: requestConfig.modelName,
-      method: 'generateContent',
-      auth: requestConfig.auth,
-      requestBody: requestConfig.requestBody,
-    });
-
-    const result = await parseGoogleJsonResponse(response, 'Google Vertex AI text generation');
-
-    ensureGoogleResponseIsAllowed(result);
-
-    return {
-      text: extractGoogleText(result),
-      usage: requireGoogleTokenUsage(
-        result.usageMetadata,
-        'No usage data returned from Google Vertex AI',
-      ),
-    };
+    promptTokens: calculatedUsage.prompt_tokens,
+    completionTokens: calculatedUsage.completion_tokens,
+    totalTokens: calculatedUsage.total_tokens,
   };
 }
 
 export function constructGoogleTextStreamFn(model: AiModel): TextStreamFn {
   const clientConfig = createGoogleClient(model);
 
-  return async function* getGoogleTextStream({ messages, maxTokens, temperature }, onComplete) {
-    const requestConfig = createGoogleRequestConfig({
-      clientConfig,
-      model,
-      messages,
-      maxTokens,
-      temperature,
-    });
+  return async function* getGoogleTextStream(
+    { messages, model: modelName, maxTokens, temperature },
+    onComplete,
+  ) {
+    try {
+      const stream = await clientConfig.client.models.generateContentStream(
+        buildGoogleGenerateContentParameters({
+          messages,
+          model: modelName,
+          maxTokens,
+          temperature,
+        }),
+      );
 
-    const response = await fetchGoogleResponse({
-      projectId: requestConfig.projectId,
-      location: requestConfig.location,
-      modelName: requestConfig.modelName,
-      method: 'streamGenerateContent',
-      auth: requestConfig.auth,
-      requestBody: requestConfig.requestBody,
-    });
+      let text = '';
+      let usage: TokenUsage | undefined;
 
-    let usage: TokenUsage | undefined;
-    let accumulatedText = '';
+      for await (const chunk of stream) {
+        assertGoogleResponseAllowed(chunk);
 
-    for await (const chunk of parseGoogleSseStream(response)) {
-      ensureGoogleResponseIsAllowed(chunk);
+        const chunkText = chunk.text ?? '';
+        if (chunkText !== '') {
+          text += chunkText;
+          yield chunkText;
+        }
 
-      const streamChunk = applyGoogleStreamChunk({
-        accumulatedText,
-        chunkText: extractGoogleText(chunk),
-      });
-      accumulatedText = streamChunk.accumulatedText;
-
-      if (streamChunk.delta) {
-        yield streamChunk.delta;
+        if (chunk.usageMetadata) {
+          usage = toTokenUsage({
+            usageMetadata: chunk.usageMetadata,
+            messages,
+            text,
+          });
+        }
       }
 
-      const chunkUsage = toGoogleTokenUsage(chunk.usageMetadata);
-      if (chunkUsage) {
-        usage = chunkUsage;
+      const resolvedUsage = usage ?? toTokenUsage({ messages, text });
+
+      if (onComplete) {
+        await onComplete(resolvedUsage);
       }
-    }
+    } catch (error) {
+      if (error instanceof ResponsibleAIError || error instanceof AiGenerationError) {
+        throw error;
+      }
 
-    if (!usage) {
-      throw new AiGenerationError('No usage data returned from Google Vertex AI stream');
+      throw new AiGenerationError(formatGoogleError('Google Vertex AI Chat', error));
     }
+  };
+}
 
-    if (onComplete) {
-      await onComplete(usage);
+export function constructGoogleTextGenerationFn(model: AiModel): TextGenerationFn {
+  const clientConfig = createGoogleClient(model);
+
+  return async function getGoogleTextGeneration({
+    messages,
+    model: modelName,
+    maxTokens,
+    temperature,
+  }) {
+    try {
+      const response = await clientConfig.client.models.generateContent(
+        buildGoogleGenerateContentParameters({
+          messages,
+          model: modelName,
+          maxTokens,
+          temperature,
+        }),
+      );
+
+      assertGoogleResponseAllowed(response);
+
+      const text = response.text ?? '';
+
+      return {
+        text,
+        usage: toTokenUsage({
+          usageMetadata: response.usageMetadata,
+          messages,
+          text,
+        }),
+      };
+    } catch (error) {
+      if (error instanceof ResponsibleAIError || error instanceof AiGenerationError) {
+        throw error;
+      }
+
+      throw new AiGenerationError(formatGoogleError('Google Vertex AI Chat', error));
     }
   };
 }

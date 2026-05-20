@@ -2,6 +2,7 @@ packages:
   - 'apps/*'
   - 'packages/*'
 allowBuilds:
+  '@google/genai': set this to true or false
   '@parcel/watcher': true
   '@sentry-internal/node-cpu-profiler': false
   '@sentry/cli': true

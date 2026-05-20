@@ -1,14 +1,21 @@
 import type { LlmModel } from '@ais-chat/api-database';
-import { GoogleAuth } from 'google-auth-library';
+import { GoogleGenAI } from '@google/genai';
 import { ProviderConfigurationError } from './errors';
+
+const GOOGLE_API_VERSION = 'v1';
+const GOOGLE_CLOUD_PLATFORM_SCOPE = 'https://www.googleapis.com/auth/cloud-platform';
 
 export interface GoogleClientConfig {
   projectId: string;
   location: string;
-  auth: GoogleAuth;
+  client: GoogleGenAI;
 }
 
 const googleClientCache = new Map<string, GoogleClientConfig>();
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 export function createGoogleClient(model: LlmModel): GoogleClientConfig {
   if (model.setting.provider !== 'google') {
@@ -26,8 +33,14 @@ export function createGoogleClient(model: LlmModel): GoogleClientConfig {
   const client = {
     projectId,
     location,
-    auth: new GoogleAuth({
-      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    client: new GoogleGenAI({
+      enterprise: true,
+      project: projectId,
+      location,
+      apiVersion: GOOGLE_API_VERSION,
+      googleAuthOptions: {
+        scopes: [GOOGLE_CLOUD_PLATFORM_SCOPE],
+      },
     }),
   };
 
@@ -36,14 +49,25 @@ export function createGoogleClient(model: LlmModel): GoogleClientConfig {
   return client;
 }
 
-export async function getGoogleAccessToken(auth: GoogleAuth): Promise<string> {
-  const accessToken = await auth.getAccessToken();
+export function formatGoogleError(errorLabel: string, error: unknown): string {
+  if (isRecord(error)) {
+    const status = typeof error.status === 'number' ? error.status : undefined;
+    const message = typeof error.message === 'string' ? error.message : undefined;
 
-  if (!accessToken) {
-    throw new ProviderConfigurationError('Failed to resolve Google access token');
+    if (status !== undefined && message) {
+      return `${errorLabel} request failed with status ${status}: ${message}`;
+    }
+
+    if (message) {
+      return `${errorLabel} request failed: ${message}`;
+    }
   }
 
-  return accessToken;
+  if (error instanceof Error) {
+    return `${errorLabel} request failed: ${error.message}`;
+  }
+
+  return `${errorLabel} request failed`;
 }
 
 export function getGoogleServiceAddress(location: string): string {
