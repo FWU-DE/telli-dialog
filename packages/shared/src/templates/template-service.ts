@@ -45,7 +45,7 @@ import path from 'node:path';
 import { UserModel } from '@shared/auth/user-model';
 
 const templateTypeMap: Record<string, TemplateTypes> = {
-  custom: 'assistant',
+  assistants: 'assistant',
   characters: 'character',
   'learning-scenarios': 'learning-scenario',
 };
@@ -380,7 +380,7 @@ function parseTemplateUrl(url: string): { templateType: TemplateTypes; originalI
   }
 
   const [, templateTypeRaw, originalId] = match;
-
+  console.log('Parsed URL:', { templateTypeRaw, originalId });
   const templateType = templateTypeMap[templateTypeRaw ?? ''];
 
   if (!templateType) {
