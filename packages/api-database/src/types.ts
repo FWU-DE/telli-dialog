@@ -11,6 +11,12 @@ export const llmModelPriceMetadataSchema = z.discriminatedUnion('type', [
     pricePerImageInCent: z.number(),
   }),
   z.object({
+    type: z.literal('image'),
+    inputTextTokenPrice: z.number(),
+    outputTextTokenPrice: z.number().optional(),
+    outputImageTokenPrice: z.number(),
+  }),
+  z.object({
     type: z.literal('embedding'),
     promptTokenPrice: z.number(),
   }),

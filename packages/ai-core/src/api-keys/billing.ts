@@ -5,7 +5,7 @@ import {
   dbGetCompletionUsageCostsSinceStartOfCurrentMonth,
   dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth,
 } from '@ais-chat/api-database';
-import { AiModel } from '../images/types';
+import { AiModel, Usage } from '../images/types';
 import type { AiModel as TextAiModel, TokenUsage } from '../chat/types';
 
 const TOKEN_AMOUNT_PER_PRICE = 1_000_000;
@@ -28,6 +28,27 @@ function calculatePriceInCentByTextModelAndUsage({
   return (completionTokenPrice + promptTokenPrice) / PRICE_AND_CENT_MULTIPLIER;
 }
 
+function calculatePriceInCentByImageModelAndUsage({
+  usage,
+  priceMetadata,
+}: {
+  priceMetadata: {
+    inputTextTokenPrice: number;
+    outputTextTokenPrice?: number;
+    outputImageTokenPrice: number;
+  };
+  usage: Usage;
+}) {
+  const inputTextTokenPrice = usage.input_text_tokens * priceMetadata.inputTextTokenPrice;
+  const outputTextTokenPrice =
+    (usage.output_text_tokens ?? 0) * (priceMetadata.outputTextTokenPrice ?? 0);
+  const outputImageTokenPrice = usage.output_image_tokens * priceMetadata.outputImageTokenPrice;
+
+  return (
+    (inputTextTokenPrice + outputTextTokenPrice + outputImageTokenPrice) / TOKEN_AMOUNT_PER_PRICE
+  );
+}
+
 // TODO: Re-enable when embedding billing is implemented
 // function calculatePriceInCentByEmbeddingModelAndUsage({
 //   promptTokens,
@@ -48,16 +69,36 @@ function calculatePriceInCentByTextModelAndUsage({
  *
  * @param apiKeyId - The unique identifier of the API key to bill
  * @param imageModel - The image model used for generation
+ * @param usage - Usage information for the image generation
  * @returns A promise that includes the price in cents charged for the operation
  */
 export async function billImageGenerationUsageToApiKey(
   apiKeyId: string,
   imageModel: AiModel,
+  usage?: Usage,
 ): Promise<number> {
   if (imageModel.priceMetadata.type !== 'image') {
-    throw new Error(`Model ${imageModel.id} is not an image model`);
+    throw new Error(`Model ${imageModel.displayName} is not an image model`);
   }
-  const priceInCent = imageModel.priceMetadata.pricePerImageInCent;
+  let priceInCent: number;
+  if (!usage) {
+    if (!('pricePerImageInCent' in imageModel.priceMetadata)) {
+      throw new Error(
+        `Model ${imageModel.displayName} requires usage information for per-image pricing`,
+      );
+    }
+    priceInCent = imageModel.priceMetadata.pricePerImageInCent;
+  } else {
+    if (!('inputTextTokenPrice' in imageModel.priceMetadata)) {
+      throw new Error(
+        `Model ${imageModel.displayName} requires usage information for token-based pricing`,
+      );
+    }
+    priceInCent = calculatePriceInCentByImageModelAndUsage({
+      usage,
+      priceMetadata: imageModel.priceMetadata,
+    });
+  }
   await dbCreateImageGenerationUsage({
     apiKeyId,
     modelId: imageModel.id,

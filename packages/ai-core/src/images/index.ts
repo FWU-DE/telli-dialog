@@ -36,7 +36,11 @@ export async function generateImageWithBilling(modelId: string, prompt: string, 
   try {
     const imageResponse = await generateImage(model, prompt);
 
-    const priceInCents = await billImageGenerationUsageToApiKey(apiKeyId, model);
+    const priceInCents = await billImageGenerationUsageToApiKey(
+      apiKeyId,
+      model,
+      imageResponse.usage,
+    );
 
     return {
       ...imageResponse,

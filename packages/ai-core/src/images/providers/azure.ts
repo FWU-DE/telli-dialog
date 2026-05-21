@@ -47,11 +47,20 @@ export function constructAzureImageGenerationFn(model: AiModel): ImageGeneration
       throw new AiGenerationError('No image data received from Azure OpenAI');
     }
 
+    if (!result.usage) {
+      throw new AiGenerationError('No usage data received from Azure OpenAI');
+    }
+
     return {
       data: result.data
         .map((item) => item.b64_json)
         .filter((item): item is string => item !== undefined),
       output_format: result.output_format,
+      usage: {
+        input_text_tokens: result.usage.input_tokens_details.text_tokens,
+        output_text_tokens: result.usage.output_tokens_details?.text_tokens,
+        output_image_tokens: result.usage.output_tokens_details?.image_tokens ?? 0,
+      },
     };
   };
 }
