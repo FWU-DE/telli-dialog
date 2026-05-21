@@ -173,6 +173,26 @@ export async function dbUpdateAssistant({
   return dbGetAssistantById({ assistantId: updatedAssistant.id });
 }
 
+export async function dbSetAssistantSuspended({
+  assistantId,
+  suspended,
+}: {
+  assistantId: string;
+  suspended: boolean;
+}) {
+  const [updatedAssistant] = await db
+    .update(assistantTable)
+    .set({ suspended })
+    .where(eq(assistantTable.id, assistantId))
+    .returning();
+
+  if (!updatedAssistant) {
+    throw new NotFoundError('Assistant not found');
+  }
+
+  return dbGetAssistantById({ assistantId: updatedAssistant.id });
+}
+
 export async function dbDeleteAssistant({ assistantId }: { assistantId: string }) {
   await db.transaction(async (tx) => {
     await tx.delete(conversationTable).where(eq(conversationTable.assistantId, assistantId));

@@ -9,6 +9,7 @@ import {
   or,
   sql,
 } from 'drizzle-orm';
+import { NotFoundError } from '@shared/error';
 import { db } from '..';
 import {
   fileTable,
@@ -424,4 +425,31 @@ export async function dbCreateLearningScenarioShare({
     })
     .returning();
   return newShare;
+}
+
+export async function dbSetLearningScenarioSuspended({
+  learningScenarioId,
+  suspended,
+}: {
+  learningScenarioId: string;
+  suspended: boolean;
+}) {
+  const [updatedLearningScenario] = await db
+    .update(learningScenarioTable)
+    .set({ suspended })
+    .where(eq(learningScenarioTable.id, learningScenarioId))
+    .returning();
+
+  if (!updatedLearningScenario) {
+    throw new NotFoundError('Learning scenario not found');
+  }
+
+  const learningScenario = await dbGetLearningScenarioById({
+    learningScenarioId: updatedLearningScenario.id,
+  });
+  if (!learningScenario) {
+    throw new NotFoundError('Learning scenario not found');
+  }
+
+  return learningScenario;
 }

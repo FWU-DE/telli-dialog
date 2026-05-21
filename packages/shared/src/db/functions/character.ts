@@ -10,6 +10,7 @@ import {
   sql,
 } from 'drizzle-orm';
 import { db } from '..';
+import { NotFoundError } from '@shared/error';
 import {
   CharacterFileMapping,
   CharacterInsertModel,
@@ -455,6 +456,31 @@ export async function dbGetGlobalCharacterByName({
   const [character] = await baseCharacterQuery().where(
     and(eq(characterTable.name, name), eq(characterTable.accessLevel, 'global')),
   );
+  return character;
+}
+
+export async function dbSetCharacterSuspended({
+  characterId,
+  suspended,
+}: {
+  characterId: string;
+  suspended: boolean;
+}) {
+  const [updatedCharacter] = await db
+    .update(characterTable)
+    .set({ suspended })
+    .where(eq(characterTable.id, characterId))
+    .returning();
+
+  if (!updatedCharacter) {
+    throw new NotFoundError('Character not found');
+  }
+
+  const character = await dbGetCharacterById({ characterId: updatedCharacter.id });
+  if (!character) {
+    throw new NotFoundError('Character not found');
+  }
+
   return character;
 }
 
