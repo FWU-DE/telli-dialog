@@ -16,14 +16,14 @@ export function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAn
         prefetch={false}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-vidis-hover-purple py-2 px-4 hover:underline"
+        className="py-2 px-4 hover:underline"
       >
         {t('privacy-policy')}
       </Link>
       <Link
         href={IMPRESSUM_URL}
         prefetch={false}
-        className="text-vidis-hover-purple py-2 px-4 hover:underline"
+        className="py-2 px-4 hover:underline"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -32,7 +32,7 @@ export function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAn
       <Link
         href={TERMS_OF_USE_URL}
         prefetch={false}
-        className="text-vidis-hover-purple py-2 px-4 hover:underline"
+        className="py-2 px-4 hover:underline"
         target="_blank"
         rel="noopener noreferrer"
       >

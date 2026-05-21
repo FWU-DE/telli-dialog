@@ -225,7 +225,7 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
 
             return (
               <div className="flex flex-col py-2 text-sm max-w-full">
-                <div className="flex items-center justify-center bg-gray-300 py-2 px-2 text-vidis-hover-purple">
+                <div className="flex items-center justify-center bg-gray-300 py-2 px-2">
                   <span>{language}</span>
                   <div className="grow" />
                   <CopyToClipboardButton text={sanitizedText} />
