@@ -53,40 +53,37 @@ export function SharedChatHeader({
     confirmDelete(handleOpenNewChat);
   }, [confirmDelete, handleOpenNewChat]);
 
-  const customMenuItems = React.useMemo<ThreeDotsProfileMenuItem[]>(
-    () => [
-      {
-        id: 'delete-chat',
-        label: tCommon('delete'),
-        icon: <TrashSimpleIcon className="size-5 text-primary" />,
-        onSelect: openDeleteConfirm,
-      },
-      {
-        id: 'download-chat',
-        label: tCommon('conversation-download'),
-        icon: <BoxArrowDownIcon className="size-5 text-primary" />,
-        disabled: !chatActive || !hasMessages,
-        onSelect: async () => {
-          if (!chatActive || !hasMessages) {
-            return;
-          }
+  const customMenuItems: ThreeDotsProfileMenuItem[] = [
+    {
+      id: 'delete-chat',
+      label: tCommon('delete'),
+      icon: <TrashSimpleIcon className="size-5 text-primary" />,
+      onSelect: openDeleteConfirm,
+    },
+    {
+      id: 'download-chat',
+      label: tCommon('conversation-download'),
+      icon: <BoxArrowDownIcon className="size-5 text-primary" />,
+      disabled: !chatActive || !hasMessages,
+      onSelect: async () => {
+        if (!chatActive || !hasMessages) {
+          return;
+        }
 
-          try {
-            const { blob, fileName } = await fetchSharedConversationDownload({
-              conversationMessages: messages,
-              sharedConversationName: title,
-              inviteCode,
-            });
+        try {
+          const { blob, fileName } = await fetchSharedConversationDownload({
+            conversationMessages: messages,
+            sharedConversationName: title,
+            inviteCode,
+          });
 
-            downloadFileFromBlob(blob, fileName);
-          } catch {
-            toast.error('Der Download der Konversation ist fehlgeschlagen.');
-          }
-        },
+          downloadFileFromBlob(blob, fileName);
+        } catch {
+          toast.error('Der Download der Konversation ist fehlgeschlagen.');
+        }
       },
-    ],
-    [chatActive, hasMessages, inviteCode, messages, openDeleteConfirm, tCommon, title, toast],
-  );
+    },
+  ];
 
   return (
     <header
