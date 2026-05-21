@@ -15,8 +15,13 @@ import {
   dbGetAssistantsByIds,
   dbSetAssistantSuspended,
 } from '@shared/db/functions/assistants';
-import { dbGetCharactersByIds, dbSetCharacterSuspended } from '@shared/db/functions/character';
 import {
+  dbGetCharacterById,
+  dbGetCharactersByIds,
+  dbSetCharacterSuspended,
+} from '@shared/db/functions/character';
+import {
+  dbGetLearningScenarioById,
   dbGetLearningScenariosByIds,
   dbSetLearningScenarioSuspended,
 } from '@shared/db/functions/learning-scenario';
@@ -63,7 +68,7 @@ vi.mock('@shared/auth/authorization-service', () => ({
 
 describe('report-service', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('reportEntity', () => {
@@ -189,6 +194,65 @@ describe('report-service', () => {
           description: 'test',
         }),
       ).rejects.toThrow(ForbiddenError);
+    });
+
+    it('creates a report for an accessible character', async () => {
+      const characterId = generateUUID();
+      const reporterId = generateUUID();
+      const reportId = generateUUID();
+
+      (dbGetUserById as MockedFunction<typeof dbGetUserById>).mockResolvedValue({
+        id: reporterId,
+        schoolIds: [generateUUID()],
+      } as never);
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue({
+        id: characterId,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        userId: reporterId,
+        ownerSchoolIds: [generateUUID()],
+      } as never);
+      (dbCreateEntityReport as MockedFunction<typeof dbCreateEntityReport>).mockResolvedValue({
+        id: reportId,
+      } as never);
+
+      const result = await reportEntity({
+        characterId,
+        reporterId,
+        reason: 'other',
+        description: 'Looks suspicious',
+      });
+
+      expect(dbCreateEntityReport).toHaveBeenCalledWith({
+        report: {
+          assistantId: undefined,
+          characterId,
+          learningScenarioId: undefined,
+          reporterId,
+          reason: 'other',
+          description: 'Looks suspicious',
+        },
+      });
+      expect(result).toEqual({ id: reportId });
+    });
+
+    it('throws NotFoundError if learning scenario does not exist', async () => {
+      (dbGetUserById as MockedFunction<typeof dbGetUserById>).mockResolvedValue({
+        id: generateUUID(),
+        schoolIds: [generateUUID()],
+      } as never);
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(undefined);
+
+      await expect(
+        reportEntity({
+          learningScenarioId: generateUUID(),
+          reporterId: generateUUID(),
+          reason: 'other',
+          description: 'test',
+        }),
+      ).rejects.toThrow(NotFoundError);
     });
   });
 
@@ -321,12 +385,6 @@ describe('report-service', () => {
         dbGetLearningScenariosByIds as MockedFunction<typeof dbGetLearningScenariosByIds>
       ).mockResolvedValue([] as never);
 
-      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue({
-        id: assistantId,
-        name: 'Assistant A',
-        suspended: false,
-      } as never);
-
       const result = await getEntityReportOverviews();
 
       expect(result).toHaveLength(2);
@@ -350,11 +408,91 @@ describe('report-service', () => {
       (dbGetAllEntityReports as MockedFunction<typeof dbGetAllEntityReports>).mockResolvedValue(
         [] as never,
       );
+      (dbGetAssistantsByIds as MockedFunction<typeof dbGetAssistantsByIds>).mockResolvedValue(
+        [] as never,
+      );
+      (dbGetCharactersByIds as MockedFunction<typeof dbGetCharactersByIds>).mockResolvedValue(
+        [] as never,
+      );
+      (
+        dbGetLearningScenariosByIds as MockedFunction<typeof dbGetLearningScenariosByIds>
+      ).mockResolvedValue([] as never);
 
       const limitedResult = await getEntityReportOverviews({ limit: 1 });
       expect(limitedResult).toEqual([]);
 
       await expect(getEntityReportOverviews({ limit: 0 })).rejects.toThrow(InvalidArgumentError);
+    });
+
+    it('throws NotFoundError when grouped character cannot be resolved', async () => {
+      const characterId = generateUUID();
+
+      (dbGetAllEntityReports as MockedFunction<typeof dbGetAllEntityReports>).mockResolvedValue([
+        {
+          id: generateUUID(),
+          assistantId: null,
+          characterId,
+          learningScenarioId: null,
+          reporterId: generateUUID(),
+          reason: 'other',
+          description: 'c',
+          createdAt: new Date('2026-01-03T00:00:00.000Z'),
+          checked: true,
+        },
+      ] as never);
+
+      (dbGetAssistantsByIds as MockedFunction<typeof dbGetAssistantsByIds>).mockResolvedValue(
+        [] as never,
+      );
+      (dbGetCharactersByIds as MockedFunction<typeof dbGetCharactersByIds>).mockResolvedValue(
+        [] as never,
+      );
+      (
+        dbGetLearningScenariosByIds as MockedFunction<typeof dbGetLearningScenariosByIds>
+      ).mockResolvedValue([] as never);
+
+      await expect(getEntityReportOverviews()).rejects.toThrow(NotFoundError);
+    });
+
+    it('returns learning scenario overview with checked status', async () => {
+      const learningScenarioId = generateUUID();
+
+      (dbGetAllEntityReports as MockedFunction<typeof dbGetAllEntityReports>).mockResolvedValue([
+        {
+          id: generateUUID(),
+          assistantId: null,
+          characterId: null,
+          learningScenarioId,
+          reporterId: generateUUID(),
+          reason: 'other',
+          description: 'l',
+          createdAt: new Date('2026-01-04T00:00:00.000Z'),
+          checked: true,
+        },
+      ] as never);
+
+      (dbGetAssistantsByIds as MockedFunction<typeof dbGetAssistantsByIds>).mockResolvedValue(
+        [] as never,
+      );
+      (dbGetCharactersByIds as MockedFunction<typeof dbGetCharactersByIds>).mockResolvedValue(
+        [] as never,
+      );
+      (
+        dbGetLearningScenariosByIds as MockedFunction<typeof dbGetLearningScenariosByIds>
+      ).mockResolvedValue([
+        {
+          id: learningScenarioId,
+          name: 'Scenario L',
+          suspended: false,
+        },
+      ] as never);
+
+      const result = await getEntityReportOverviews();
+
+      expect(result).toHaveLength(1);
+      expect(result[0]?.entityType).toBe('learningScenario');
+      expect(result[0]?.status).toBe('checked');
+      expect(result[0]?.reasons).toEqual(['other']);
     });
   });
 

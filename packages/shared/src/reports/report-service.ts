@@ -22,7 +22,7 @@ import {
   dbMarkEntityReportAsChecked,
 } from '@shared/db/functions/reports';
 import { dbGetUserById } from '@shared/db/functions/user';
-import { entityReportReasonSchema } from '@shared/db/schema';
+import { EntityReportReason, entityReportReasonSchema } from '@shared/db/schema';
 import { InvalidArgumentError, NotFoundError, checkParameterUUID } from '@shared/error';
 
 const reportDescriptionSchema = z.string().min(1).max(500);
@@ -44,7 +44,7 @@ export type EntityReportOverview = {
   reportCount: number;
   status: ReportOverviewStatus;
   latestReportAt: Date;
-  reasons: string[];
+  reasons: EntityReportReason[];
 };
 
 function validateSingleTargetAndUuid({

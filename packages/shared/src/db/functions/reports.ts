@@ -79,29 +79,35 @@ export async function dbGetReportsForEntity({
   characterId,
   learningScenarioId,
 }: ReportTargetIds): Promise<EntityReportSelectModel[]> {
-  if (assistantId) {
-    return db
-      .select()
-      .from(entityReportTable)
-      .where(eq(entityReportTable.assistantId, assistantId))
-      .orderBy(desc(entityReportTable.createdAt));
+  const providedTargetIds = [assistantId, characterId, learningScenarioId].filter(
+    (id): id is string => id !== undefined,
+  );
+
+  if (providedTargetIds.length === 1) {
+    if (assistantId) {
+      return db
+        .select()
+        .from(entityReportTable)
+        .where(eq(entityReportTable.assistantId, assistantId))
+        .orderBy(desc(entityReportTable.createdAt));
+    }
+
+    if (characterId) {
+      return db
+        .select()
+        .from(entityReportTable)
+        .where(eq(entityReportTable.characterId, characterId))
+        .orderBy(desc(entityReportTable.createdAt));
+    }
+
+    if (learningScenarioId) {
+      return db
+        .select()
+        .from(entityReportTable)
+        .where(eq(entityReportTable.learningScenarioId, learningScenarioId))
+        .orderBy(desc(entityReportTable.createdAt));
+    }
   }
 
-  if (characterId) {
-    return db
-      .select()
-      .from(entityReportTable)
-      .where(eq(entityReportTable.characterId, characterId))
-      .orderBy(desc(entityReportTable.createdAt));
-  }
-
-  if (learningScenarioId) {
-    return db
-      .select()
-      .from(entityReportTable)
-      .where(eq(entityReportTable.learningScenarioId, learningScenarioId))
-      .orderBy(desc(entityReportTable.createdAt));
-  }
-
-  throw new Error('At least one entity target id is required');
+  throw new Error('Exactly one entity target id is required');
 }

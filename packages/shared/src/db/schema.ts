@@ -1143,7 +1143,7 @@ export const entityReportUpdateSchema = createUpdateSchema(entityReportTable)
   .omit({ createdAt: true })
   .extend({
     id: z.string(),
-    reason: entityReportReasonSchema,
+    reason: entityReportReasonSchema.optional(),
   });
 
 export type EntityReportSelectModel = z.infer<typeof entityReportSelectSchema>;
