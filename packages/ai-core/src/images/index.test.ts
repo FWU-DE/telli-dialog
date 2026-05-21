@@ -46,6 +46,11 @@ describe('generateImageWithBilling', () => {
   const mockImageResponse = {
     data: ['base64-image-data'],
     output_format: 'png' as const,
+    usage: {
+      input_text_tokens: 1_000_000,
+      output_text_tokens: 1_000_000,
+      output_image_tokens: 1_000_000,
+    },
   };
 
   beforeEach(() => {
@@ -65,7 +70,11 @@ describe('generateImageWithBilling', () => {
     expect(mockHasAccessToModel).toHaveBeenCalledWith('api-key-123', mockModel);
     expect(mockIsApiKeyOverQuota).toHaveBeenCalledWith('api-key-123');
     expect(mockGenerateImage).toHaveBeenCalledWith(mockModel, 'test prompt');
-    expect(mockBillImageGenerationUsageToApiKey).toHaveBeenCalledWith('api-key-123', mockModel);
+    expect(mockBillImageGenerationUsageToApiKey).toHaveBeenCalledWith(
+      'api-key-123',
+      mockModel,
+      mockImageResponse.usage,
+    );
     expect(result).toEqual({
       ...mockImageResponse,
       priceInCents: 50,
