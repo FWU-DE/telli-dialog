@@ -10,9 +10,16 @@ import {
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import { dbGetUserById } from '@shared/db/functions/user';
-import { dbGetAssistantById, dbSetAssistantSuspended } from '@shared/db/functions/assistants';
-import { dbGetCharacterById, dbSetCharacterSuspended } from '@shared/db/functions/character';
-import { dbSetLearningScenarioSuspended } from '@shared/db/functions/learning-scenario';
+import {
+  dbGetAssistantById,
+  dbGetAssistantsByIds,
+  dbSetAssistantSuspended,
+} from '@shared/db/functions/assistants';
+import { dbGetCharactersByIds, dbSetCharacterSuspended } from '@shared/db/functions/character';
+import {
+  dbGetLearningScenariosByIds,
+  dbSetLearningScenarioSuspended,
+} from '@shared/db/functions/learning-scenario';
 import {
   dbGetAllEntityReports,
   dbCreateEntityReport,
@@ -27,16 +34,19 @@ vi.mock('@shared/db/functions/user', () => ({
 
 vi.mock('@shared/db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
+  dbGetAssistantsByIds: vi.fn(),
   dbSetAssistantSuspended: vi.fn(),
 }));
 
 vi.mock('@shared/db/functions/character', () => ({
   dbGetCharacterById: vi.fn(),
+  dbGetCharactersByIds: vi.fn(),
   dbSetCharacterSuspended: vi.fn(),
 }));
 
 vi.mock('@shared/db/functions/learning-scenario', () => ({
   dbGetLearningScenarioById: vi.fn(),
+  dbGetLearningScenariosByIds: vi.fn(),
   dbSetLearningScenarioSuspended: vi.fn(),
 }));
 
@@ -252,7 +262,7 @@ describe('report-service', () => {
   });
 
   describe('getEntityReportOverviews', () => {
-    it('returns grouped report overviews sorted by report count', async () => {
+    it('returns grouped report overviews sorted by latest report date', async () => {
       const assistantId = generateUUID();
       const characterId = generateUUID();
       const reporterId = generateUUID();
@@ -293,15 +303,28 @@ describe('report-service', () => {
         },
       ] as never);
 
+      (dbGetAssistantsByIds as MockedFunction<typeof dbGetAssistantsByIds>).mockResolvedValue([
+        {
+          id: assistantId,
+          name: 'Assistant A',
+          suspended: false,
+        },
+      ] as never);
+      (dbGetCharactersByIds as MockedFunction<typeof dbGetCharactersByIds>).mockResolvedValue([
+        {
+          id: characterId,
+          name: 'Character C',
+          suspended: true,
+        },
+      ] as never);
+      (
+        dbGetLearningScenariosByIds as MockedFunction<typeof dbGetLearningScenariosByIds>
+      ).mockResolvedValue([] as never);
+
       (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue({
         id: assistantId,
         name: 'Assistant A',
         suspended: false,
-      } as never);
-      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue({
-        id: characterId,
-        name: 'Character C',
-        suspended: true,
       } as never);
 
       const result = await getEntityReportOverviews();
@@ -312,13 +335,15 @@ describe('report-service', () => {
       expect(first).toBeDefined();
       expect(second).toBeDefined();
 
-      expect(first?.entityType).toBe('assistant');
-      expect(first?.reportCount).toBe(2);
-      expect(first?.status).toBe('new');
-      expect(first?.reasons).toEqual(['discrimination', 'other']);
-      expect(second?.entityType).toBe('character');
-      expect(second?.status).toBe('suspended');
-      expect(second?.reasons).toEqual(['other']);
+      expect(first?.entityType).toBe('character');
+      expect(first?.status).toBe('suspended');
+      expect(first?.reasons).toHaveLength(1);
+      expect(first?.reasons).toEqual(expect.arrayContaining(['other']));
+      expect(second?.entityType).toBe('assistant');
+      expect(second?.reportCount).toBe(2);
+      expect(second?.status).toBe('new');
+      expect(second?.reasons).toHaveLength(2);
+      expect(second?.reasons).toEqual(expect.arrayContaining(['discrimination', 'other']));
     });
 
     it('applies limit and validates limit input', async () => {

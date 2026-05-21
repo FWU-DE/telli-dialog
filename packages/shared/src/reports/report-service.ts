@@ -1,9 +1,18 @@
 import { z } from 'zod';
 import { verifyReadAccess } from '@shared/auth/authorization-service';
-import { dbGetAssistantById, dbSetAssistantSuspended } from '@shared/db/functions/assistants';
-import { dbGetCharacterById, dbSetCharacterSuspended } from '@shared/db/functions/character';
+import {
+  dbGetAssistantById,
+  dbGetAssistantsByIds,
+  dbSetAssistantSuspended,
+} from '@shared/db/functions/assistants';
+import {
+  dbGetCharacterById,
+  dbGetCharactersByIds,
+  dbSetCharacterSuspended,
+} from '@shared/db/functions/character';
 import {
   dbGetLearningScenarioById,
+  dbGetLearningScenariosByIds,
   dbSetLearningScenarioSuspended,
 } from '@shared/db/functions/learning-scenario';
 import {
@@ -60,12 +69,7 @@ async function resolveTargetEntity({
   learningScenarioId,
 }: ReportTargetIds) {
   if (assistantId) {
-    const assistant = await dbGetAssistantById({ assistantId });
-    if (!assistant) {
-      throw new NotFoundError('Assistant not found');
-    }
-
-    return assistant;
+    return dbGetAssistantById({ assistantId });
   }
 
   if (characterId) {
@@ -184,6 +188,10 @@ export async function getEntityReportOverviews({
 }: {
   limit?: number;
 } = {}): Promise<EntityReportOverview[]> {
+  if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) {
+    throw new InvalidArgumentError('limit must be a positive integer');
+  }
+
   const allReports = await dbGetAllEntityReports();
 
   const groupedReports = new Map<string, Awaited<ReturnType<typeof dbGetAllEntityReports>>>();
@@ -198,6 +206,42 @@ export async function getEntityReportOverviews({
     reportsForEntity.push(report);
     groupedReports.set(key, reportsForEntity);
   }
+
+  const assistantIds = new Set<string>();
+  const characterIds = new Set<string>();
+  const learningScenarioIds = new Set<string>();
+
+  for (const key of groupedReports.keys()) {
+    const [entityType, entityId] = key.split(':') as [EntityType, string];
+
+    if (!entityId) {
+      throw new InvalidArgumentError('Invalid report target grouping');
+    }
+
+    if (entityType === 'assistant') {
+      assistantIds.add(entityId);
+      continue;
+    }
+
+    if (entityType === 'character') {
+      characterIds.add(entityId);
+      continue;
+    }
+
+    learningScenarioIds.add(entityId);
+  }
+
+  const [assistants, characters, learningScenarios] = await Promise.all([
+    dbGetAssistantsByIds({ assistantIds: [...assistantIds] }),
+    dbGetCharactersByIds({ characterIds: [...characterIds] }),
+    dbGetLearningScenariosByIds({ learningScenarioIds: [...learningScenarioIds] }),
+  ]);
+
+  const assistantsById = new Map(assistants.map((assistant) => [assistant.id, assistant]));
+  const charactersById = new Map(characters.map((character) => [character.id, character]));
+  const learningScenariosById = new Map(
+    learningScenarios.map((learningScenario) => [learningScenario.id, learningScenario]),
+  );
 
   const overviewItems = await Promise.all(
     Array.from(groupedReports.entries()).map(
@@ -215,7 +259,11 @@ export async function getEntityReportOverviews({
         const reasons = [...new Set(reports.map((report) => report.reason))];
 
         if (entityType === 'assistant') {
-          const assistant = await dbGetAssistantById({ assistantId: entityId });
+          const assistant = assistantsById.get(entityId);
+          if (!assistant) {
+            throw new NotFoundError('Assistant not found');
+          }
+
           return {
             entityType,
             entityId,
@@ -232,7 +280,7 @@ export async function getEntityReportOverviews({
         }
 
         if (entityType === 'character') {
-          const character = await dbGetCharacterById({ characterId: entityId });
+          const character = charactersById.get(entityId);
           if (!character) {
             throw new NotFoundError('Character not found');
           }
@@ -252,9 +300,7 @@ export async function getEntityReportOverviews({
           };
         }
 
-        const learningScenario = await dbGetLearningScenarioById({
-          learningScenarioId: entityId,
-        });
+        const learningScenario = learningScenariosById.get(entityId);
         if (!learningScenario) {
           throw new NotFoundError('Learning scenario not found');
         }
@@ -282,10 +328,6 @@ export async function getEntityReportOverviews({
 
   if (limit === undefined) {
     return sorted;
-  }
-
-  if (!Number.isInteger(limit) || limit < 1) {
-    throw new InvalidArgumentError('limit must be a positive integer');
   }
 
   return sorted.slice(0, limit);

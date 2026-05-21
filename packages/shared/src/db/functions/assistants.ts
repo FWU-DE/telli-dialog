@@ -43,6 +43,18 @@ export async function dbGetAssistantById({
   return assistant;
 }
 
+export async function dbGetAssistantsByIds({
+  assistantIds,
+}: {
+  assistantIds: string[];
+}): Promise<AssistantSelectModel[]> {
+  if (assistantIds.length === 0) {
+    return [];
+  }
+
+  return baseAssistantQuery().where(inArray(assistantTable.id, assistantIds));
+}
+
 export async function dbGetGlobalGpts({
   user,
 }: {

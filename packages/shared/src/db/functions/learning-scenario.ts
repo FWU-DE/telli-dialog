@@ -15,6 +15,7 @@ import {
   fileTable,
   LearningScenarioFileMapping,
   LearningScenarioOptionalShareDataModel,
+  LearningScenarioSelectModel,
   learningScenarioTable,
   learningScenarioTemplateMappingTable,
   LearningScenarioWithShareDataModel,
@@ -241,6 +242,18 @@ export async function dbGetLearningScenarioById({
     eq(learningScenarioTable.id, learningScenarioId),
   );
   return learningScenario;
+}
+
+export async function dbGetLearningScenariosByIds({
+  learningScenarioIds,
+}: {
+  learningScenarioIds: string[];
+}): Promise<LearningScenarioSelectModel[]> {
+  if (learningScenarioIds.length === 0) {
+    return [];
+  }
+
+  return baseLearningScenarioQuery().where(inArray(learningScenarioTable.id, learningScenarioIds));
 }
 
 /**

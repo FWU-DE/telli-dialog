@@ -175,6 +175,18 @@ export async function dbGetCharacterById({ characterId }: { characterId: string 
   return row;
 }
 
+export async function dbGetCharactersByIds({
+  characterIds,
+}: {
+  characterIds: string[];
+}): Promise<CharacterSelectModel[]> {
+  if (characterIds.length === 0) {
+    return [];
+  }
+
+  return baseCharacterQuery().where(inArray(characterTable.id, characterIds));
+}
+
 export async function dbGetCopyTemplateCharacter({
   templateId,
   characterId,
