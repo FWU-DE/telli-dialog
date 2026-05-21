@@ -30,7 +30,6 @@ function createGoogleImageConfig(additionalParameters: Record<string, unknown>):
     language: 'auto',
     includeRaiReason: true,
     outputMimeType: 'image/png',
-    ...(typeof sampleCount === 'number' ? { numberOfImages: sampleCount } : {}),
     ...(typeof sampleImageSize === 'string' ? { imageSize: sampleImageSize } : {}),
     ...(typeof safetySetting === 'string' ? { safetyFilterLevel: safetySetting } : {}),
     ...rest,

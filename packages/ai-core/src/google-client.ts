@@ -4,6 +4,7 @@ import { ProviderConfigurationError } from './errors';
 
 const GOOGLE_API_VERSION = 'v1';
 const GOOGLE_CLOUD_PLATFORM_SCOPE = 'https://www.googleapis.com/auth/cloud-platform';
+const GOOGLE_MULTI_REGION_LOCATIONS = new Set(['eu', 'us']);
 
 export interface GoogleClientConfig {
   projectId: string;
@@ -71,14 +72,13 @@ export function formatGoogleError(errorLabel: string, error: unknown): string {
 }
 
 export function getGoogleServiceAddress(location: string): string {
-  // Depending on the type of location (regional, multi-regional, or global), the endpoint format differs
-  switch (location) {
-    case 'europe-west1':
-      return `${location}-aiplatform.googleapis.com`;
-    case 'eu':
-      return `aiplatform.${location}.rep.googleapis.com`;
-    default:
-    case 'global':
-      return 'aiplatform.googleapis.com';
+  if (location === 'global') {
+    return 'aiplatform.googleapis.com';
   }
+
+  if (GOOGLE_MULTI_REGION_LOCATIONS.has(location)) {
+    return `aiplatform.${location}.rep.googleapis.com`;
+  }
+
+  return `${location}-aiplatform.googleapis.com`;
 }
