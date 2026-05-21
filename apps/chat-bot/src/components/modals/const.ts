@@ -41,7 +41,7 @@ Dialogpartner und Lernszenarien
 · Vorbereitung auf Klassenarbeiten und Prüfungen
 · Kritische Auseinandersetzung, Lernen und Reflektieren über generative KI
 
-Für Fragen zur Nutzung von AIS.chat, wenden Sie sich bitte an den Support des LIBRA. Weitere Informationen finden Sie unter [https://ais-bb.de](https://ais-bb.de) (ehemals https://telli-bb.de).  
+Für Fragen zur Nutzung von AIS.chat, wenden Sie sich bitte an den Support des LIBRA. Weitere Informationen finden Sie unter [https://ais-bb.de](https://ais-bb.de).  
 
 3. Zugangsberechtigung
 
