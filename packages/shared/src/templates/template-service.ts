@@ -380,7 +380,6 @@ function parseTemplateUrl(url: string): { templateType: TemplateTypes; originalI
   }
 
   const [, templateTypeRaw, originalId] = match;
-  console.log('Parsed URL:', { templateTypeRaw, originalId });
   const templateType = templateTypeMap[templateTypeRaw ?? ''];
 
   if (!templateType) {
