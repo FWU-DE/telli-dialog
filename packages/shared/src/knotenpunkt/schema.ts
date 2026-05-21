@@ -7,12 +7,18 @@ export const knotenpunktPriceMetadata = z.discriminatedUnion('type', [
     promptTokenPrice: z.number(),
   }),
   z.object({
-    type: z.literal('embedding'),
-    promptTokenPrice: z.number(),
+    type: z.literal('image'),
+    pricePerImageInCent: z.number(),
   }),
   z.object({
     type: z.literal('image'),
-    pricePerImageInCent: z.number(),
+    inputTextTokenPrice: z.number(),
+    outputTextTokenPrice: z.number().optional(),
+    outputImageTokenPrice: z.number(),
+  }),
+  z.object({
+    type: z.literal('embedding'),
+    promptTokenPrice: z.number(),
   }),
 ]);
 
