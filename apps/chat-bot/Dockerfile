@@ -1,6 +1,11 @@
 # This Dockerfile uses a multi-stage build to create a minimal production image.
 # https://docs.docker.com/build/building/multi-stage/
 
+# Global build args must be declared before the first FROM to be explicit about
+# accepted inputs. They still need to be re-declared in each stage that uses them.
+ARG APP_VERSION
+ARG CI
+
 # Alpine image
 FROM node:24.16.0-alpine AS base
 
@@ -41,12 +46,14 @@ COPY --from=pruner /app/out/full/ .
 COPY .git ./.git
 
 ARG CI
+ARG APP_VERSION
 
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
     --mount=type=secret,id=SENTRY_ORG,env=SENTRY_ORG \
     --mount=type=secret,id=SENTRY_PROJECT,env=SENTRY_PROJECT \
     --mount=type=secret,id=SENTRY_URL,env=SENTRY_URL \
     CI=${CI} \
+    APP_VERSION=${APP_VERSION} \
     pnpm turbo build:envless
 
 # Final image
