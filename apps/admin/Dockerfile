@@ -4,7 +4,7 @@
 # Global build args must be declared before the first FROM to be explicit about
 # accepted inputs. They still need to be re-declared in each stage that uses them.
 ARG APP_VERSION
-ARG CI
+ARG CI=true
 
 # Alpine image
 FROM node:24.16.0-alpine AS base
@@ -21,7 +21,10 @@ COPY . .
 # setup pnpm and pnpm install in order to install turbo in the correct version
 RUN corepack enable && corepack prepare
 RUN pnpm install --frozen-lockfile --dev
-RUN pnpm turbo prune ais-chat-admin --docker
+
+ARG CI=true
+RUN CI=${CI} \
+    pnpm turbo prune ais-chat-admin --docker
 
 # Build the project
 FROM base AS builder
@@ -45,7 +48,7 @@ COPY --from=pruner /app/out/full/ .
 # Copy git history, required for sentry to determine release name
 COPY .git ./.git
 
-ARG CI
+ARG CI=true
 ARG APP_VERSION
 
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \

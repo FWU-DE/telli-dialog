@@ -1,7 +1,7 @@
 # Global build args must be declared before the first FROM to be explicit about
 # accepted inputs. They still need to be re-declared in each stage that uses them.
 ARG APP_VERSION
-ARG CI
+ARG CI=true
 
 FROM node:24.16.0-alpine AS base
 ENV TURBO_TELEMETRY_DISABLED=1
@@ -25,7 +25,10 @@ RUN corepack enable && corepack prepare
 #   from the API's module resolution paths, i.e. /app/node_modules when running in the container
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile --dev --shamefully-hoist --prefer-offline
-RUN pnpm turbo prune ais-chat-api --docker
+
+ARG CI=true
+RUN CI=${CI} \
+    pnpm turbo prune ais-chat-api --docker
 
 FROM builder-base AS builder
 WORKDIR /app
@@ -49,7 +52,7 @@ COPY --from=pruner /app/out/full/ .
 # Copy git history, required for sentry to determine release name
 COPY .git ./.git
 
-ARG CI
+ARG CI=true
 
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
     --mount=type=secret,id=SENTRY_ORG,env=SENTRY_ORG \
