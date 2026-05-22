@@ -148,7 +148,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     priceMetadata: {
       type: 'text',
       promptTokenPrice: 165, // 0.165 € per 1M tokens
-      completionTokenPrice: 60, // 0.60 € per 1M tokens
+      completionTokenPrice: 60, // 0.060 € per 1M tokens
     },
     supportedImageFormats: ['jpg', 'jpeg', 'png', 'webp'],
   },

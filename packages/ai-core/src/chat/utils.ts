@@ -10,8 +10,28 @@ export function toOpenAIMessages(
   messages: Message[],
 ): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
   return messages.map((message) => {
+    if (message.role === 'tool' && message.toolCallId) {
+      return {
+        role: 'tool',
+        content: message.content,
+        tool_call_id: message.toolCallId,
+      } satisfies OpenAI.Chat.Completions.ChatCompletionToolMessageParam;
+    }
+
+    if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
+      return {
+        role: 'assistant',
+        content: message.content,
+        tool_calls: message.toolCalls.map((tc) => ({
+          id: tc.id,
+          type: 'function' as const,
+          function: { name: tc.name, arguments: tc.arguments },
+        })),
+      } satisfies OpenAI.Chat.Completions.ChatCompletionAssistantMessageParam;
+    }
+
     // If message has image attachments, convert to multimodal content format
-    if (message.attachments && message.attachments.length > 0 && message.role === 'user') {
+    if (message.role === 'user' && message.attachments && message.attachments.length > 0) {
       const contentParts: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
         { type: 'text', text: message.content },
         ...message.attachments
@@ -35,7 +55,7 @@ export function toOpenAIMessages(
     return {
       role: message.role,
       content: message.content,
-    } satisfies OpenAI.Chat.Completions.ChatCompletionMessageParam;
+    } as OpenAI.Chat.Completions.ChatCompletionMessageParam;
   });
 }
 
@@ -44,35 +64,37 @@ export function toOpenAIMessages(
  * Handles image attachments by converting them to multimodal content arrays.
  */
 export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.EasyInputMessage[] {
-  return messages.map((message) => {
-    // If message has image attachments, convert to multimodal content format
-    if (message.attachments && message.attachments.length > 0 && message.role !== 'system') {
-      const contentParts: OpenAI.Responses.ResponseInputContent[] = [
-        { type: 'input_text', text: message.content },
-        ...message.attachments
-          .filter((attachment) => attachment.type === 'image')
-          .map(
-            (attachment) =>
-              ({
-                type: 'input_image',
-                image_url: attachment.url,
-                detail: 'auto',
-              }) satisfies OpenAI.Responses.ResponseInputImageContent,
-          ),
-      ];
+  return messages
+    .filter((m) => m.role !== 'tool')
+    .map((message) => {
+      // If message has image attachments, convert to multimodal content format
+      if (message.role !== 'system' && message.attachments && message.attachments.length > 0) {
+        const contentParts: OpenAI.Responses.ResponseInputContent[] = [
+          { type: 'input_text', text: message.content },
+          ...message.attachments
+            .filter((attachment) => attachment.type === 'image')
+            .map(
+              (attachment) =>
+                ({
+                  type: 'input_image',
+                  image_url: attachment.url,
+                  detail: 'auto',
+                }) satisfies OpenAI.Responses.ResponseInputImageContent,
+            ),
+        ];
 
+        return {
+          role: message.role as 'user' | 'assistant' | 'system',
+          content: contentParts,
+        } satisfies OpenAI.Responses.EasyInputMessage;
+      }
+
+      // Simple text message
       return {
-        role: message.role,
-        content: contentParts,
+        role: message.role as 'user' | 'assistant' | 'system',
+        content: message.content,
       } satisfies OpenAI.Responses.EasyInputMessage;
-    }
-
-    // Simple text message
-    return {
-      role: message.role,
-      content: message.content,
-    } satisfies OpenAI.Responses.EasyInputMessage;
-  });
+    });
 }
 
 // Lazy-loaded encoder instance (cl100k_base is used for GPT-4, GPT-3.5-turbo, and newer models)
