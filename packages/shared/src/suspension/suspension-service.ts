@@ -16,18 +16,18 @@ import {
   dbSetLearningScenarioSuspended,
 } from '@shared/db/functions/learning-scenario';
 import {
-  dbCreateEntityReport,
-  dbGetAllEntityReports,
-  dbGetReportsForEntity,
-  dbMarkEntityReportAsChecked,
-} from '@shared/db/functions/reports';
+  dbCreateSuspensionRequest,
+  dbGetAllSuspensionRequests,
+  dbGetSuspensionRequestsForEntity,
+  dbMarkSuspensionRequestAsChecked,
+} from '@shared/db/functions/suspension-requests';
 import { dbGetUserById } from '@shared/db/functions/user';
-import { EntityReportReason, entityReportReasonSchema } from '@shared/db/schema';
+import { SuspensionRequestReason, suspensionRequestReasonSchema } from '@shared/db/schema';
 import { InvalidArgumentError, NotFoundError, checkParameterUUID } from '@shared/error';
 
-const reportDescriptionSchema = z.string().min(1).max(500);
+const suspensionRequestDescriptionSchema = z.string().min(1).max(500);
 
-type ReportTargetIds = {
+type SuspensionRequestTargetIds = {
   assistantId?: string;
   characterId?: string;
   learningScenarioId?: string;
@@ -35,23 +35,23 @@ type ReportTargetIds = {
 
 type EntityType = 'assistant' | 'character' | 'learningScenario';
 
-type ReportOverviewStatus = 'new' | 'suspended' | 'checked';
+type SuspensionRequestOverviewStatus = 'new' | 'suspended' | 'checked';
 
-export type EntityReportOverview = {
+export type SuspensionRequestOverview = {
   entityType: EntityType;
   entityId: string;
   entityName: string;
-  reportCount: number;
-  status: ReportOverviewStatus;
-  latestReportAt: Date;
-  reasons: EntityReportReason[];
+  requestCount: number;
+  status: SuspensionRequestOverviewStatus;
+  latestRequestAt: Date;
+  reasons: SuspensionRequestReason[];
 };
 
 function validateSingleTargetAndUuid({
   assistantId,
   characterId,
   learningScenarioId,
-}: ReportTargetIds) {
+}: SuspensionRequestTargetIds) {
   const providedIds = [assistantId, characterId, learningScenarioId].filter(
     (id): id is string => id !== undefined,
   );
@@ -67,7 +67,7 @@ async function resolveTargetEntity({
   assistantId,
   characterId,
   learningScenarioId,
-}: ReportTargetIds) {
+}: SuspensionRequestTargetIds) {
   if (assistantId) {
     return dbGetAssistantById({ assistantId });
   }
@@ -93,57 +93,57 @@ async function resolveTargetEntity({
   throw new InvalidArgumentError('Exactly one target entity id must be provided');
 }
 
-export async function reportEntity({
+export async function createSuspensionRequest({
   assistantId,
   characterId,
   learningScenarioId,
-  reporterId,
+  requesterId,
   reason,
   description,
-}: ReportTargetIds & {
-  reporterId: string;
+}: SuspensionRequestTargetIds & {
+  requesterId: string;
   reason: string;
   description: string;
 }) {
   validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
-  checkParameterUUID(reporterId);
+  checkParameterUUID(requesterId);
 
-  const validatedReason = entityReportReasonSchema.parse(reason);
-  const validatedDescription = reportDescriptionSchema.parse(description);
+  const validatedReason = suspensionRequestReasonSchema.parse(reason);
+  const validatedDescription = suspensionRequestDescriptionSchema.parse(description);
 
-  const reporter = await dbGetUserById({ userId: reporterId });
-  if (!reporter) {
-    throw new NotFoundError('Reporter not found');
+  const requester = await dbGetUserById({ userId: requesterId });
+  if (!requester) {
+    throw new NotFoundError('Requester not found');
   }
 
   const targetEntity = await resolveTargetEntity({ assistantId, characterId, learningScenarioId });
   verifyReadAccess({
     item: targetEntity,
-    user: reporter,
+    user: requester,
   });
 
-  return dbCreateEntityReport({
-    report: {
+  return dbCreateSuspensionRequest({
+    suspensionRequest: {
       assistantId,
       characterId,
       learningScenarioId,
-      reporterId,
+      requesterId,
       reason: validatedReason,
       description: validatedDescription,
     },
   });
 }
 
-export async function markReportAsChecked(reportId: string) {
-  checkParameterUUID(reportId);
-  return dbMarkEntityReportAsChecked({ reportId });
+export async function markSuspensionRequestAsChecked(suspensionRequestId: string) {
+  checkParameterUUID(suspensionRequestId);
+  return dbMarkSuspensionRequestAsChecked({ suspensionRequestId });
 }
 
 export async function suspendEntity({
   assistantId,
   characterId,
   learningScenarioId,
-}: ReportTargetIds) {
+}: SuspensionRequestTargetIds) {
   validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
 
   if (assistantId) {
@@ -165,7 +165,7 @@ export async function liftSuspensionOnEntity({
   assistantId,
   characterId,
   learningScenarioId,
-}: ReportTargetIds) {
+}: SuspensionRequestTargetIds) {
   validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
 
   if (assistantId) {
@@ -183,39 +183,42 @@ export async function liftSuspensionOnEntity({
   throw new InvalidArgumentError('Exactly one target entity id must be provided');
 }
 
-export async function getEntityReportOverviews({
+export async function getSuspensionRequestOverviews({
   limit,
 }: {
   limit?: number;
-} = {}): Promise<EntityReportOverview[]> {
+} = {}): Promise<SuspensionRequestOverview[]> {
   if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) {
     throw new InvalidArgumentError('limit must be a positive integer');
   }
 
-  const allReports = await dbGetAllEntityReports();
+  const allSuspensionRequests = await dbGetAllSuspensionRequests();
 
-  const groupedReports = new Map<string, Awaited<ReturnType<typeof dbGetAllEntityReports>>>();
-  for (const report of allReports) {
-    const key = report.assistantId
-      ? `assistant:${report.assistantId}`
-      : report.characterId
-        ? `character:${report.characterId}`
-        : `learningScenario:${report.learningScenarioId}`;
+  const groupedSuspensionRequests = new Map<
+    string,
+    Awaited<ReturnType<typeof dbGetAllSuspensionRequests>>
+  >();
+  for (const suspensionRequest of allSuspensionRequests) {
+    const key = suspensionRequest.assistantId
+      ? `assistant:${suspensionRequest.assistantId}`
+      : suspensionRequest.characterId
+        ? `character:${suspensionRequest.characterId}`
+        : `learningScenario:${suspensionRequest.learningScenarioId}`;
 
-    const reportsForEntity = groupedReports.get(key) ?? [];
-    reportsForEntity.push(report);
-    groupedReports.set(key, reportsForEntity);
+    const suspensionRequestsForEntity = groupedSuspensionRequests.get(key) ?? [];
+    suspensionRequestsForEntity.push(suspensionRequest);
+    groupedSuspensionRequests.set(key, suspensionRequestsForEntity);
   }
 
   const assistantIds = new Set<string>();
   const characterIds = new Set<string>();
   const learningScenarioIds = new Set<string>();
 
-  for (const key of groupedReports.keys()) {
+  for (const key of groupedSuspensionRequests.keys()) {
     const [entityType, entityId] = key.split(':') as [EntityType, string];
 
     if (!entityId) {
-      throw new InvalidArgumentError('Invalid report target grouping');
+      throw new InvalidArgumentError('Invalid suspension request target grouping');
     }
 
     if (entityType === 'assistant') {
@@ -244,19 +247,21 @@ export async function getEntityReportOverviews({
   );
 
   const overviewItems = await Promise.all(
-    Array.from(groupedReports.entries()).map(
-      async ([key, reports]): Promise<EntityReportOverview> => {
+    Array.from(groupedSuspensionRequests.entries()).map(
+      async ([key, suspensionRequests]): Promise<SuspensionRequestOverview> => {
         const [entityType, entityId] = key.split(':') as [EntityType, string];
 
-        if (!entityId || reports.length === 0) {
-          throw new InvalidArgumentError('Invalid report target grouping');
+        if (!entityId || suspensionRequests.length === 0) {
+          throw new InvalidArgumentError('Invalid suspension request target grouping');
         }
 
-        const latestReportAt = reports.reduce(
+        const latestRequestAt = suspensionRequests.reduce(
           (latest, current) => (current.createdAt > latest ? current.createdAt : latest),
-          reports[0]!.createdAt,
+          suspensionRequests[0]!.createdAt,
         );
-        const reasons = [...new Set(reports.map((report) => report.reason))];
+        const reasons = [
+          ...new Set(suspensionRequests.map((suspensionRequest) => suspensionRequest.reason)),
+        ];
 
         if (entityType === 'assistant') {
           const assistant = assistantsById.get(entityId);
@@ -268,13 +273,13 @@ export async function getEntityReportOverviews({
             entityType,
             entityId,
             entityName: assistant.name,
-            reportCount: reports.length,
+            requestCount: suspensionRequests.length,
             status: assistant.suspended
               ? 'suspended'
-              : reports.some((report) => !report.checked)
+              : suspensionRequests.some((suspensionRequest) => !suspensionRequest.checked)
                 ? 'new'
                 : 'checked',
-            latestReportAt,
+            latestRequestAt,
             reasons,
           };
         }
@@ -289,13 +294,13 @@ export async function getEntityReportOverviews({
             entityType,
             entityId,
             entityName: character.name,
-            reportCount: reports.length,
+            requestCount: suspensionRequests.length,
             status: character.suspended
               ? 'suspended'
-              : reports.some((report) => !report.checked)
+              : suspensionRequests.some((suspensionRequest) => !suspensionRequest.checked)
                 ? 'new'
                 : 'checked',
-            latestReportAt,
+            latestRequestAt,
             reasons,
           };
         }
@@ -309,13 +314,13 @@ export async function getEntityReportOverviews({
           entityType,
           entityId,
           entityName: learningScenario.name,
-          reportCount: reports.length,
+          requestCount: suspensionRequests.length,
           status: learningScenario.suspended
             ? 'suspended'
-            : reports.some((report) => !report.checked)
+            : suspensionRequests.some((suspensionRequest) => !suspensionRequest.checked)
               ? 'new'
               : 'checked',
-          latestReportAt,
+          latestRequestAt,
           reasons,
         };
       },
@@ -323,7 +328,7 @@ export async function getEntityReportOverviews({
   );
 
   const sorted = overviewItems.sort(
-    (a, b) => b.latestReportAt.getTime() - a.latestReportAt.getTime(),
+    (a, b) => b.latestRequestAt.getTime() - a.latestRequestAt.getTime(),
   );
 
   if (limit === undefined) {
@@ -333,11 +338,11 @@ export async function getEntityReportOverviews({
   return sorted.slice(0, limit);
 }
 
-export async function getReportsForEntity({
+export async function getSuspensionRequestsForEntity({
   assistantId,
   characterId,
   learningScenarioId,
-}: ReportTargetIds) {
+}: SuspensionRequestTargetIds) {
   validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
-  return dbGetReportsForEntity({ assistantId, characterId, learningScenarioId });
+  return dbGetSuspensionRequestsForEntity({ assistantId, characterId, learningScenarioId });
 }

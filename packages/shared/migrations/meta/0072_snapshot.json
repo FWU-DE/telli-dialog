@@ -1,5 +1,5 @@
 {
-  "id": "04a6f05e-54c6-4dab-9bdf-1a33db8e3cff",
+  "id": "a133e6fc-4d25-4bca-a44a-5846363461ed",
   "prevId": "5f0047c8-348b-4449-ac1c-ca7aea023c64",
   "version": "7",
   "dialect": "postgresql",
@@ -1538,225 +1538,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.entity_report": {
-      "name": "entity_report",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "assistant_id": {
-          "name": "assistant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "character_id": {
-          "name": "character_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "learning_scenario_id": {
-          "name": "learning_scenario_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reporter_id": {
-          "name": "reporter_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reason": {
-          "name": "reason",
-          "type": "entity_report_reason",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "checked": {
-          "name": "checked",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        }
-      },
-      "indexes": {
-        "entity_report_assistant_id_index": {
-          "name": "entity_report_assistant_id_index",
-          "columns": [
-            {
-              "expression": "assistant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "entity_report_character_id_index": {
-          "name": "entity_report_character_id_index",
-          "columns": [
-            {
-              "expression": "character_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "entity_report_learning_scenario_id_index": {
-          "name": "entity_report_learning_scenario_id_index",
-          "columns": [
-            {
-              "expression": "learning_scenario_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "entity_report_reporter_id_index": {
-          "name": "entity_report_reporter_id_index",
-          "columns": [
-            {
-              "expression": "reporter_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "entity_report_created_at_index": {
-          "name": "entity_report_created_at_index",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "entity_report_checked_index": {
-          "name": "entity_report_checked_index",
-          "columns": [
-            {
-              "expression": "checked",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "entity_report_assistant_id_assistant_id_fk": {
-          "name": "entity_report_assistant_id_assistant_id_fk",
-          "tableFrom": "entity_report",
-          "tableTo": "assistant",
-          "columnsFrom": [
-            "assistant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "entity_report_character_id_character_id_fk": {
-          "name": "entity_report_character_id_character_id_fk",
-          "tableFrom": "entity_report",
-          "tableTo": "character",
-          "columnsFrom": [
-            "character_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "entity_report_learning_scenario_id_learning_scenario_id_fk": {
-          "name": "entity_report_learning_scenario_id_learning_scenario_id_fk",
-          "tableFrom": "entity_report",
-          "tableTo": "learning_scenario",
-          "columnsFrom": [
-            "learning_scenario_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "entity_report_reporter_id_user_entity_id_fk": {
-          "name": "entity_report_reporter_id_user_entity_id_fk",
-          "tableFrom": "entity_report",
-          "tableTo": "user_entity",
-          "columnsFrom": [
-            "reporter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "entity_report_exactly_one_target_ck": {
-          "name": "entity_report_exactly_one_target_ck",
-          "value": "((\"entity_report\".\"assistant_id\" IS NOT NULL)::int + (\"entity_report\".\"character_id\" IS NOT NULL)::int + (\"entity_report\".\"learning_scenario_id\" IS NOT NULL)::int) = 1"
-        }
-      },
-      "isRLSEnabled": false
-    },
     "public.federal_state_llm_model_mapping": {
       "name": "federal_state_llm_model_mapping",
       "schema": "",
@@ -3084,6 +2865,210 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.suspension_request": {
+      "name": "suspension_request",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "assistant_id": {
+          "name": "assistant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "character_id": {
+          "name": "character_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "learning_scenario_id": {
+          "name": "learning_scenario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "requester_id": {
+          "name": "requester_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "suspension_request_reason",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "checked": {
+          "name": "checked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "suspension_request_assistant_id_index": {
+          "name": "suspension_request_assistant_id_index",
+          "columns": [
+            {
+              "expression": "assistant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "suspension_request_character_id_index": {
+          "name": "suspension_request_character_id_index",
+          "columns": [
+            {
+              "expression": "character_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "suspension_request_learning_scenario_id_index": {
+          "name": "suspension_request_learning_scenario_id_index",
+          "columns": [
+            {
+              "expression": "learning_scenario_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "suspension_request_created_at_index": {
+          "name": "suspension_request_created_at_index",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "suspension_request_checked_index": {
+          "name": "suspension_request_checked_index",
+          "columns": [
+            {
+              "expression": "checked",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "suspension_request_assistant_id_assistant_id_fk": {
+          "name": "suspension_request_assistant_id_assistant_id_fk",
+          "tableFrom": "suspension_request",
+          "tableTo": "assistant",
+          "columnsFrom": [
+            "assistant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "suspension_request_character_id_character_id_fk": {
+          "name": "suspension_request_character_id_character_id_fk",
+          "tableFrom": "suspension_request",
+          "tableTo": "character",
+          "columnsFrom": [
+            "character_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "suspension_request_learning_scenario_id_learning_scenario_id_fk": {
+          "name": "suspension_request_learning_scenario_id_learning_scenario_id_fk",
+          "tableFrom": "suspension_request",
+          "tableTo": "learning_scenario",
+          "columnsFrom": [
+            "learning_scenario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "suspension_request_requester_id_user_entity_id_fk": {
+          "name": "suspension_request_requester_id_user_entity_id_fk",
+          "tableFrom": "suspension_request",
+          "tableTo": "user_entity",
+          "columnsFrom": [
+            "requester_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "suspension_request_exactly_one_target_ck": {
+          "name": "suspension_request_exactly_one_target_ck",
+          "value": "((\"suspension_request\".\"assistant_id\" IS NOT NULL)::int + (\"suspension_request\".\"character_id\" IS NOT NULL)::int + (\"suspension_request\".\"learning_scenario_id\" IS NOT NULL)::int) = 1"
+        }
+      },
+      "isRLSEnabled": false
+    },
     "public.tool_call_cost": {
       "name": "tool_call_cost",
       "schema": "",
@@ -3234,20 +3219,6 @@
         "image-generation"
       ]
     },
-    "public.entity_report_reason": {
-      "name": "entity_report_reason",
-      "schema": "public",
-      "values": [
-        "copyright_violation",
-        "false_or_outdated_information",
-        "insufficient_sources",
-        "discrimination",
-        "personal_data_usage_or_query",
-        "violence_or_extremist_content",
-        "sexualized_content",
-        "other"
-      ]
-    },
     "public.info_banner_type": {
       "name": "info_banner_type",
       "schema": "public",
@@ -3263,6 +3234,20 @@
         "text",
         "image",
         "fc"
+      ]
+    },
+    "public.suspension_request_reason": {
+      "name": "suspension_request_reason",
+      "schema": "public",
+      "values": [
+        "copyright_violation",
+        "false_or_outdated_information",
+        "insufficient_sources",
+        "discrimination",
+        "personal_data_usage_or_query",
+        "violence_or_extremist_content",
+        "sexualized_content",
+        "other"
       ]
     },
     "public.tool_call_name": {

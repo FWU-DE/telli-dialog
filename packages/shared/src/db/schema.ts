@@ -358,7 +358,7 @@ export const accessLevelSchema = z.enum(['private', 'school', 'global']);
 export const accessLevelEnum = pgEnum('access_level', accessLevelSchema.enum);
 export type AccessLevel = z.infer<typeof accessLevelSchema>;
 
-export const entityReportReasonSchema = z.enum([
+export const suspensionRequestReasonSchema = z.enum([
   'copyright_violation',
   'false_or_outdated_information',
   'insufficient_sources',
@@ -368,8 +368,11 @@ export const entityReportReasonSchema = z.enum([
   'sexualized_content',
   'other',
 ]);
-export const entityReportReasonEnum = pgEnum('entity_report_reason', entityReportReasonSchema.enum);
-export type EntityReportReason = z.infer<typeof entityReportReasonSchema>;
+export const suspensionRequestReasonEnum = pgEnum(
+  'suspension_request_reason',
+  suspensionRequestReasonSchema.enum,
+);
+export type SuspensionRequestReason = z.infer<typeof suspensionRequestReasonSchema>;
 
 export const characterTable = pgTable(
   'character',
@@ -1095,10 +1098,10 @@ export type AssistantInsertModel = z.infer<typeof assistantInsertSchema>;
 export type AssistantUpdateModel = z.infer<typeof assistantUpdateSchema>;
 
 /**
- * Schema for table entity_report
+ * Schema for table suspension_request
  */
-export const entityReportTable = pgTable(
-  'entity_report',
+export const suspensionRequestTable = pgTable(
+  'suspension_request',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     assistantId: uuid('assistant_id').references(() => assistantTable.id, { onDelete: 'cascade' }),
@@ -1106,49 +1109,48 @@ export const entityReportTable = pgTable(
     learningScenarioId: uuid('learning_scenario_id').references(() => learningScenarioTable.id, {
       onDelete: 'cascade',
     }),
-    reporterId: uuid('reporter_id').references(() => userTable.id, {
+    requesterId: uuid('requester_id').references(() => userTable.id, {
       onDelete: 'set null',
     }),
-    reason: entityReportReasonEnum('reason').notNull(),
+    reason: suspensionRequestReasonEnum('reason').notNull(),
     description: varchar('description', { length: 500 }).notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     checked: boolean('checked').notNull().default(false),
   },
   (table) => [
     check(
-      'entity_report_exactly_one_target_ck',
+      'suspension_request_exactly_one_target_ck',
       sql`((${table.assistantId} IS NOT NULL)::int + (${table.characterId} IS NOT NULL)::int + (${table.learningScenarioId} IS NOT NULL)::int) = 1`,
     ),
     index().on(table.assistantId),
     index().on(table.characterId),
     index().on(table.learningScenarioId),
-    index().on(table.reporterId),
     index().on(table.createdAt),
     index().on(table.checked),
   ],
 );
 
-export const entityReportSelectSchema = createSelectSchema(entityReportTable).extend({
+export const suspensionRequestSelectSchema = createSelectSchema(suspensionRequestTable).extend({
   createdAt: z.coerce.date(),
-  reason: entityReportReasonSchema,
+  reason: suspensionRequestReasonSchema,
 });
 
-export const entityReportInsertSchema = createInsertSchema(entityReportTable).omit({
+export const suspensionRequestInsertSchema = createInsertSchema(suspensionRequestTable).omit({
   id: true,
   createdAt: true,
   checked: true,
 });
 
-export const entityReportUpdateSchema = createUpdateSchema(entityReportTable)
+export const suspensionRequestUpdateSchema = createUpdateSchema(suspensionRequestTable)
   .omit({ createdAt: true })
   .extend({
     id: z.string(),
-    reason: entityReportReasonSchema.optional(),
+    reason: suspensionRequestReasonSchema.optional(),
   });
 
-export type EntityReportSelectModel = z.infer<typeof entityReportSelectSchema>;
-export type EntityReportInsertModel = z.infer<typeof entityReportInsertSchema>;
-export type EntityReportUpdateModel = z.infer<typeof entityReportUpdateSchema>;
+export type SuspensionRequestSelectModel = z.infer<typeof suspensionRequestSelectSchema>;
+export type SuspensionRequestInsertModel = z.infer<typeof suspensionRequestInsertSchema>;
+export type SuspensionRequestUpdateModel = z.infer<typeof suspensionRequestUpdateSchema>;
 
 /**
  * Schema for table assistant_template_mappings

@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import {
-  getEntityReportOverviews,
-  getReportsForEntity,
+  getSuspensionRequestOverviews,
+  getSuspensionRequestsForEntity,
   liftSuspensionOnEntity,
-  markReportAsChecked,
-  reportEntity,
+  markSuspensionRequestAsChecked,
+  createSuspensionRequest,
   suspendEntity,
-} from './report-service';
+} from './suspension-service';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import { dbGetUserById } from '@shared/db/functions/user';
@@ -26,11 +26,11 @@ import {
   dbSetLearningScenarioSuspended,
 } from '@shared/db/functions/learning-scenario';
 import {
-  dbGetAllEntityReports,
-  dbCreateEntityReport,
-  dbGetReportsForEntity as dbGetReportsForEntityFn,
-  dbMarkEntityReportAsChecked,
-} from '@shared/db/functions/reports';
+  dbGetAllSuspensionRequests,
+  dbCreateSuspensionRequest,
+  dbGetSuspensionRequestsForEntity as dbGetSuspensionRequestsForEntityFn,
+  dbMarkSuspensionRequestAsChecked,
+} from '@shared/db/functions/suspension-requests';
 import { verifyReadAccess } from '@shared/auth/authorization-service';
 
 vi.mock('@shared/db/functions/user', () => ({
@@ -55,93 +55,95 @@ vi.mock('@shared/db/functions/learning-scenario', () => ({
   dbSetLearningScenarioSuspended: vi.fn(),
 }));
 
-vi.mock('@shared/db/functions/reports', () => ({
-  dbGetAllEntityReports: vi.fn(),
-  dbCreateEntityReport: vi.fn(),
-  dbGetReportsForEntity: vi.fn(),
-  dbMarkEntityReportAsChecked: vi.fn(),
+vi.mock('@shared/db/functions/suspension-requests', () => ({
+  dbGetAllSuspensionRequests: vi.fn(),
+  dbCreateSuspensionRequest: vi.fn(),
+  dbGetSuspensionRequestsForEntity: vi.fn(),
+  dbMarkSuspensionRequestAsChecked: vi.fn(),
 }));
 
 vi.mock('@shared/auth/authorization-service', () => ({
   verifyReadAccess: vi.fn(),
 }));
 
-describe('report-service', () => {
+describe('suspension-request-service', () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  describe('reportEntity', () => {
-    it('creates a report for an accessible assistant', async () => {
+  describe('createSuspensionRequest', () => {
+    it('creates a suspension request for an accessible assistant', async () => {
       const assistantId = generateUUID();
-      const reporterId = generateUUID();
-      const reportId = generateUUID();
+      const requesterId = generateUUID();
+      const suspensionRequestId = generateUUID();
 
       (dbGetUserById as MockedFunction<typeof dbGetUserById>).mockResolvedValue({
-        id: reporterId,
+        id: requesterId,
         schoolIds: [generateUUID()],
       } as never);
       (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue({
         id: assistantId,
         accessLevel: 'private',
         hasLinkAccess: false,
-        userId: reporterId,
+        userId: requesterId,
         ownerSchoolIds: [generateUUID()],
       } as never);
-      (dbCreateEntityReport as MockedFunction<typeof dbCreateEntityReport>).mockResolvedValue({
-        id: reportId,
+      (
+        dbCreateSuspensionRequest as MockedFunction<typeof dbCreateSuspensionRequest>
+      ).mockResolvedValue({
+        id: suspensionRequestId,
       } as never);
 
-      const result = await reportEntity({
+      const result = await createSuspensionRequest({
         assistantId,
-        reporterId,
+        requesterId,
         reason: 'other',
         description: 'Looks suspicious',
       });
 
       expect(verifyReadAccess).toHaveBeenCalledTimes(1);
-      expect(dbCreateEntityReport).toHaveBeenCalledWith({
-        report: {
+      expect(dbCreateSuspensionRequest).toHaveBeenCalledWith({
+        suspensionRequest: {
           assistantId,
           characterId: undefined,
           learningScenarioId: undefined,
-          reporterId,
+          requesterId,
           reason: 'other',
           description: 'Looks suspicious',
         },
       });
-      expect(result).toEqual({ id: reportId });
+      expect(result).toEqual({ id: suspensionRequestId });
     });
 
     it('throws if none or multiple target ids are provided', async () => {
-      const reporterId = generateUUID();
+      const requesterId = generateUUID();
 
       await expect(
-        reportEntity({
-          reporterId,
+        createSuspensionRequest({
+          requesterId,
           reason: 'other',
           description: 'test',
         }),
       ).rejects.toThrow(InvalidArgumentError);
 
       await expect(
-        reportEntity({
+        createSuspensionRequest({
           assistantId: generateUUID(),
           characterId: generateUUID(),
-          reporterId,
+          requesterId,
           reason: 'other',
           description: 'test',
         }),
       ).rejects.toThrow(InvalidArgumentError);
     });
 
-    it('throws NotFoundError if reporter does not exist', async () => {
+    it('throws NotFoundError if requester does not exist', async () => {
       (dbGetUserById as MockedFunction<typeof dbGetUserById>).mockResolvedValue(undefined);
 
       await expect(
-        reportEntity({
+        createSuspensionRequest({
           assistantId: generateUUID(),
-          reporterId: generateUUID(),
+          requesterId: generateUUID(),
           reason: 'other',
           description: 'test',
         }),
@@ -158,9 +160,9 @@ describe('report-service', () => {
       );
 
       await expect(
-        reportEntity({
+        createSuspensionRequest({
           assistantId: generateUUID(),
-          reporterId: generateUUID(),
+          requesterId: generateUUID(),
           reason: 'other',
           description: 'test',
         }),
@@ -169,10 +171,10 @@ describe('report-service', () => {
 
     it('propagates ForbiddenError from verifyReadAccess', async () => {
       const assistantId = generateUUID();
-      const reporterId = generateUUID();
+      const requesterId = generateUUID();
 
       (dbGetUserById as MockedFunction<typeof dbGetUserById>).mockResolvedValue({
-        id: reporterId,
+        id: requesterId,
         schoolIds: [generateUUID()],
       } as never);
       (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue({
@@ -187,53 +189,55 @@ describe('report-service', () => {
       });
 
       await expect(
-        reportEntity({
+        createSuspensionRequest({
           assistantId,
-          reporterId,
+          requesterId,
           reason: 'other',
           description: 'test',
         }),
       ).rejects.toThrow(ForbiddenError);
     });
 
-    it('creates a report for an accessible character', async () => {
+    it('creates a suspension request for an accessible character', async () => {
       const characterId = generateUUID();
-      const reporterId = generateUUID();
-      const reportId = generateUUID();
+      const requesterId = generateUUID();
+      const suspensionRequestId = generateUUID();
 
       (dbGetUserById as MockedFunction<typeof dbGetUserById>).mockResolvedValue({
-        id: reporterId,
+        id: requesterId,
         schoolIds: [generateUUID()],
       } as never);
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue({
         id: characterId,
         accessLevel: 'private',
         hasLinkAccess: false,
-        userId: reporterId,
+        userId: requesterId,
         ownerSchoolIds: [generateUUID()],
       } as never);
-      (dbCreateEntityReport as MockedFunction<typeof dbCreateEntityReport>).mockResolvedValue({
-        id: reportId,
+      (
+        dbCreateSuspensionRequest as MockedFunction<typeof dbCreateSuspensionRequest>
+      ).mockResolvedValue({
+        id: suspensionRequestId,
       } as never);
 
-      const result = await reportEntity({
+      const result = await createSuspensionRequest({
         characterId,
-        reporterId,
+        requesterId,
         reason: 'other',
         description: 'Looks suspicious',
       });
 
-      expect(dbCreateEntityReport).toHaveBeenCalledWith({
-        report: {
+      expect(dbCreateSuspensionRequest).toHaveBeenCalledWith({
+        suspensionRequest: {
           assistantId: undefined,
           characterId,
           learningScenarioId: undefined,
-          reporterId,
+          requesterId,
           reason: 'other',
           description: 'Looks suspicious',
         },
       });
-      expect(result).toEqual({ id: reportId });
+      expect(result).toEqual({ id: suspensionRequestId });
     });
 
     it('throws NotFoundError if learning scenario does not exist', async () => {
@@ -246,9 +250,9 @@ describe('report-service', () => {
       ).mockResolvedValue(undefined);
 
       await expect(
-        reportEntity({
+        createSuspensionRequest({
           learningScenarioId: generateUUID(),
-          reporterId: generateUUID(),
+          requesterId: generateUUID(),
           reason: 'other',
           description: 'test',
         }),
@@ -256,21 +260,23 @@ describe('report-service', () => {
     });
   });
 
-  describe('markReportAsChecked', () => {
-    it('marks report as checked', async () => {
-      const reportId = generateUUID();
+  describe('markSuspensionRequestAsChecked', () => {
+    it('marks suspension request as checked', async () => {
+      const suspensionRequestId = generateUUID();
       (
-        dbMarkEntityReportAsChecked as MockedFunction<typeof dbMarkEntityReportAsChecked>
-      ).mockResolvedValue({ id: reportId, checked: true } as never);
+        dbMarkSuspensionRequestAsChecked as MockedFunction<typeof dbMarkSuspensionRequestAsChecked>
+      ).mockResolvedValue({ id: suspensionRequestId, checked: true } as never);
 
-      const result = await markReportAsChecked(reportId);
+      const result = await markSuspensionRequestAsChecked(suspensionRequestId);
 
-      expect(dbMarkEntityReportAsChecked).toHaveBeenCalledWith({ reportId });
-      expect(result).toEqual({ id: reportId, checked: true });
+      expect(dbMarkSuspensionRequestAsChecked).toHaveBeenCalledWith({ suspensionRequestId });
+      expect(result).toEqual({ id: suspensionRequestId, checked: true });
     });
 
     it('throws InvalidArgumentError for invalid uuid', async () => {
-      await expect(markReportAsChecked('invalid-uuid')).rejects.toThrow(InvalidArgumentError);
+      await expect(markSuspensionRequestAsChecked('invalid-uuid')).rejects.toThrow(
+        InvalidArgumentError,
+      );
     });
   });
 
@@ -325,19 +331,21 @@ describe('report-service', () => {
     });
   });
 
-  describe('getEntityReportOverviews', () => {
-    it('returns grouped report overviews sorted by latest report date', async () => {
+  describe('getSuspensionRequestOverviews', () => {
+    it('returns grouped suspension request overviews sorted by latest suspension request date', async () => {
       const assistantId = generateUUID();
       const characterId = generateUUID();
-      const reporterId = generateUUID();
+      const requesterId = generateUUID();
 
-      (dbGetAllEntityReports as MockedFunction<typeof dbGetAllEntityReports>).mockResolvedValue([
+      (
+        dbGetAllSuspensionRequests as MockedFunction<typeof dbGetAllSuspensionRequests>
+      ).mockResolvedValue([
         {
           id: generateUUID(),
           assistantId,
           characterId: null,
           learningScenarioId: null,
-          reporterId,
+          requesterId,
           reason: 'discrimination',
           description: 'a',
           createdAt: new Date('2026-01-01T00:00:00.000Z'),
@@ -348,7 +356,7 @@ describe('report-service', () => {
           assistantId,
           characterId: null,
           learningScenarioId: null,
-          reporterId,
+          requesterId,
           reason: 'other',
           description: 'b',
           createdAt: new Date('2026-01-02T00:00:00.000Z'),
@@ -359,7 +367,7 @@ describe('report-service', () => {
           assistantId: null,
           characterId,
           learningScenarioId: null,
-          reporterId,
+          requesterId,
           reason: 'other',
           description: 'c',
           createdAt: new Date('2026-01-03T00:00:00.000Z'),
@@ -385,7 +393,7 @@ describe('report-service', () => {
         dbGetLearningScenariosByIds as MockedFunction<typeof dbGetLearningScenariosByIds>
       ).mockResolvedValue([] as never);
 
-      const result = await getEntityReportOverviews();
+      const result = await getSuspensionRequestOverviews();
 
       expect(result).toHaveLength(2);
       const first = result.at(0);
@@ -398,16 +406,16 @@ describe('report-service', () => {
       expect(first?.reasons).toHaveLength(1);
       expect(first?.reasons).toEqual(expect.arrayContaining(['other']));
       expect(second?.entityType).toBe('assistant');
-      expect(second?.reportCount).toBe(2);
+      expect(second?.requestCount).toBe(2);
       expect(second?.status).toBe('new');
       expect(second?.reasons).toHaveLength(2);
       expect(second?.reasons).toEqual(expect.arrayContaining(['discrimination', 'other']));
     });
 
     it('applies limit and validates limit input', async () => {
-      (dbGetAllEntityReports as MockedFunction<typeof dbGetAllEntityReports>).mockResolvedValue(
-        [] as never,
-      );
+      (
+        dbGetAllSuspensionRequests as MockedFunction<typeof dbGetAllSuspensionRequests>
+      ).mockResolvedValue([] as never);
       (dbGetAssistantsByIds as MockedFunction<typeof dbGetAssistantsByIds>).mockResolvedValue(
         [] as never,
       );
@@ -418,22 +426,26 @@ describe('report-service', () => {
         dbGetLearningScenariosByIds as MockedFunction<typeof dbGetLearningScenariosByIds>
       ).mockResolvedValue([] as never);
 
-      const limitedResult = await getEntityReportOverviews({ limit: 1 });
+      const limitedResult = await getSuspensionRequestOverviews({ limit: 1 });
       expect(limitedResult).toEqual([]);
 
-      await expect(getEntityReportOverviews({ limit: 0 })).rejects.toThrow(InvalidArgumentError);
+      await expect(getSuspensionRequestOverviews({ limit: 0 })).rejects.toThrow(
+        InvalidArgumentError,
+      );
     });
 
     it('throws NotFoundError when grouped character cannot be resolved', async () => {
       const characterId = generateUUID();
 
-      (dbGetAllEntityReports as MockedFunction<typeof dbGetAllEntityReports>).mockResolvedValue([
+      (
+        dbGetAllSuspensionRequests as MockedFunction<typeof dbGetAllSuspensionRequests>
+      ).mockResolvedValue([
         {
           id: generateUUID(),
           assistantId: null,
           characterId,
           learningScenarioId: null,
-          reporterId: generateUUID(),
+          requesterId: generateUUID(),
           reason: 'other',
           description: 'c',
           createdAt: new Date('2026-01-03T00:00:00.000Z'),
@@ -451,19 +463,21 @@ describe('report-service', () => {
         dbGetLearningScenariosByIds as MockedFunction<typeof dbGetLearningScenariosByIds>
       ).mockResolvedValue([] as never);
 
-      await expect(getEntityReportOverviews()).rejects.toThrow(NotFoundError);
+      await expect(getSuspensionRequestOverviews()).rejects.toThrow(NotFoundError);
     });
 
     it('returns learning scenario overview with checked status', async () => {
       const learningScenarioId = generateUUID();
 
-      (dbGetAllEntityReports as MockedFunction<typeof dbGetAllEntityReports>).mockResolvedValue([
+      (
+        dbGetAllSuspensionRequests as MockedFunction<typeof dbGetAllSuspensionRequests>
+      ).mockResolvedValue([
         {
           id: generateUUID(),
           assistantId: null,
           characterId: null,
           learningScenarioId,
-          reporterId: generateUUID(),
+          requesterId: generateUUID(),
           reason: 'other',
           description: 'l',
           createdAt: new Date('2026-01-04T00:00:00.000Z'),
@@ -487,7 +501,7 @@ describe('report-service', () => {
         },
       ] as never);
 
-      const result = await getEntityReportOverviews();
+      const result = await getSuspensionRequestOverviews();
 
       expect(result).toHaveLength(1);
       expect(result[0]?.entityType).toBe('learningScenario');
@@ -496,16 +510,18 @@ describe('report-service', () => {
     });
   });
 
-  describe('getReportsForEntity', () => {
-    it('returns reports for target entity', async () => {
+  describe('getSuspensionRequestsForEntity', () => {
+    it('returns suspension requests for target entity', async () => {
       const assistantId = generateUUID();
-      (dbGetReportsForEntityFn as MockedFunction<typeof dbGetReportsForEntityFn>).mockResolvedValue(
-        [{ id: generateUUID(), assistantId }] as never,
-      );
+      (
+        dbGetSuspensionRequestsForEntityFn as MockedFunction<
+          typeof dbGetSuspensionRequestsForEntityFn
+        >
+      ).mockResolvedValue([{ id: generateUUID(), assistantId }] as never);
 
-      const result = await getReportsForEntity({ assistantId });
+      const result = await getSuspensionRequestsForEntity({ assistantId });
 
-      expect(dbGetReportsForEntityFn).toHaveBeenCalledWith({
+      expect(dbGetSuspensionRequestsForEntityFn).toHaveBeenCalledWith({
         assistantId,
         characterId: undefined,
         learningScenarioId: undefined,
@@ -514,9 +530,9 @@ describe('report-service', () => {
     });
 
     it('throws if none or multiple target ids are provided', async () => {
-      await expect(getReportsForEntity({})).rejects.toThrow(InvalidArgumentError);
+      await expect(getSuspensionRequestsForEntity({})).rejects.toThrow(InvalidArgumentError);
       await expect(
-        getReportsForEntity({
+        getSuspensionRequestsForEntity({
           characterId: generateUUID(),
           learningScenarioId: generateUUID(),
         }),
