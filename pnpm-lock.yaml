@@ -490,8 +490,8 @@ importers:
         specifier: 28.0.3
         version: 28.0.3
       '@types/k6':
-        specifier: 1.7.0
-        version: 1.7.0
+        specifier: 2.0.0
+        version: 2.0.0
       '@types/katex':
         specifier: 0.16.8
         version: 0.16.8
@@ -5340,8 +5340,8 @@ packages:
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
 
-  '@types/k6@1.7.0':
-    resolution: {integrity: sha512-oL4mckVcOPIA2HUrCVj3aQXCJgCqsQe35Uc4fRTffmrQuR24v92GJImnagqUaRnC1TQVJFx85o3aHQPP+0bxpg==}
+  '@types/k6@2.0.0':
+    resolution: {integrity: sha512-ztO2fVOAQxtCpF6VWTn8O6FW6Z4DpjhY+XvD2GpCe/+fAfekD45bQ+vrM0B0C0c5ajLpVgWTMlLu9dKZ1nI+wg==}
 
   '@types/katex@0.16.8':
     resolution: {integrity: sha512-trgaNyfU+Xh2Tc+ABIb44a5AYUpicB3uwirOioeOkNPPbmgRNtcWyDeeFRzjPZENO9Vq8gvVqfhaaXWLlevVwg==}
@@ -14453,7 +14453,7 @@ snapshots:
 
   '@types/json5@0.0.29': {}
 
-  '@types/k6@1.7.0': {}
+  '@types/k6@2.0.0': {}
 
   '@types/katex@0.16.8': {}
 
