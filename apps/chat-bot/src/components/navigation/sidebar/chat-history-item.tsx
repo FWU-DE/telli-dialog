@@ -161,6 +161,7 @@ export function ChatHistoryItem({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem
+                className="text-sm"
                 onClick={() => {
                   setIsEditable(true);
                 }}
@@ -169,10 +170,11 @@ export function ChatHistoryItem({
               </DropdownMenuItem>
               <DropdownMenuItem
                 variant="destructive"
+                className="text-sm"
                 data-testid="delete-conversation"
                 onClick={() => onDeleteConversation(conversation.id)}
               >
-                <TrashIcon />
+                <TrashIcon className="size-4" />
                 <span>{t('delete-chat')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>

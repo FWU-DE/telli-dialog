@@ -85,7 +85,7 @@ export function ChatHeaderBar({
       id: 'download-conversation',
       menuItem: {
         label: tCommon('conversation-download'),
-        icon: <BoxArrowDownIcon className="size-5 text-primary" />,
+        icon: <BoxArrowDownIcon />,
         disabled: !downloadConversationEnabled,
         onSelect: handleDownload,
       },

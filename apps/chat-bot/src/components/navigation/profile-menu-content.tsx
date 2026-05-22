@@ -4,46 +4,42 @@ import React from 'react';
 import { type UserAndContext } from '@/auth/types';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import LogoutButton from '@/app/(authed)/logout-button';
 import { IMPRESSUM_URL, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from './const';
+import { DropdownMenuItem } from '@ui/components/dropdown-menu';
+import { SignOutIcon } from '@phosphor-icons/react';
+
+async function logout() {
+  window.location.assign('/api/auth/logout');
+}
 
 export function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAndContext }) {
-  const t = useTranslations('legal');
+  const tCommon = useTranslations('common');
+  const tLegal = useTranslations('legal');
+
   return (
     <>
-      <Link
-        href={PRIVACY_POLICY_URL}
-        prefetch={false}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="py-2 px-4 hover:underline"
-      >
-        {t('privacy-policy')}
-      </Link>
-      <Link
-        href={IMPRESSUM_URL}
-        prefetch={false}
-        className="py-2 px-4 hover:underline"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {t('imprint')}
-      </Link>
-      <Link
-        href={TERMS_OF_USE_URL}
-        prefetch={false}
-        className="py-2 px-4 hover:underline"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {t('terms-of-use')}
-      </Link>
+      <DropdownMenuItem asChild>
+        <Link href={PRIVACY_POLICY_URL} prefetch={false} target="_blank" rel="noopener noreferrer">
+          {tLegal('privacy-policy')}
+        </Link>
+      </DropdownMenuItem>
+      <DropdownMenuItem asChild>
+        <Link href={IMPRESSUM_URL} prefetch={false} target="_blank" rel="noopener noreferrer">
+          {tLegal('imprint')}
+        </Link>
+      </DropdownMenuItem>
+      <DropdownMenuItem asChild>
+        <Link href={TERMS_OF_USE_URL} prefetch={false} target="_blank" rel="noopener noreferrer">
+          {tLegal('terms-of-use')}
+        </Link>
+      </DropdownMenuItem>
       {userAndContext !== undefined && (
         <>
           <hr className="border-gray-200 mx-2" />
-          <div className="p-2 pl-4">
-            <LogoutButton className="w-full text-primary hover:underline" />
-          </div>
+          <DropdownMenuItem key="profile-menu-logout" onSelect={logout} className="text-primary">
+            <SignOutIcon />
+            {tCommon('logout')}
+          </DropdownMenuItem>
         </>
       )}
     </>

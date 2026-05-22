@@ -40,22 +40,16 @@ export function ThreeDotsProfileMenu({
       <DropdownMenuContent
         align="end"
         sideOffset={10}
-        className="z-300 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
+        className="w-[256px] z-300 flex flex-col gap-2 px-2 py-2 rounded-enterprise-md shadow-dropdown"
       >
         {customItems?.map((item) => (
           <DropdownMenuItem
             key={item.id}
             disabled={item.disabled}
-            onSelect={() => {
-              if (item.disabled) {
-                return;
-              }
-
-              item.onSelect();
-            }}
-            className="gap-2 text-base font-normal text-primary"
+            onSelect={() => item.onSelect()}
+            className="text-primary"
           >
-            {item.icon !== undefined && <span aria-hidden="true">{item.icon}</span>}
+            {item.icon !== undefined && item.icon}
             {item.label}
           </DropdownMenuItem>
         ))}
