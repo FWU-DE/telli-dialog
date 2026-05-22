@@ -1,6 +1,15 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+allowBuilds:
+  '@parcel/watcher': false
+  '@sentry-internal/node-cpu-profiler': false
+  '@sentry/cli': false
+  '@swc/core': false
+  esbuild: false
+  protobufjs: false
+  sharp: false
+  unrs-resolver: false
 overrides:
   glob@<11.1.0: 11.1.0
   minimatch@>=9.0.0 <9.0.7: 9.0.7
