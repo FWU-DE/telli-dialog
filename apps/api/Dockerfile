@@ -3,7 +3,7 @@
 ARG APP_VERSION
 ARG CI
 
-FROM node:24.15.0-alpine AS base
+FROM node:24.16.0-alpine AS base
 ENV TURBO_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
