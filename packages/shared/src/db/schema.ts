@@ -430,6 +430,7 @@ export const characterInsertSchema = createInsertSchema(characterTable)
     id: true,
     createdAt: true,
     updatedAt: true,
+    suspended: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
@@ -440,6 +441,7 @@ export const characterUpdateSchema = createUpdateSchema(characterTable)
     userId: true,
     createdAt: true,
     updatedAt: true,
+    suspended: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
@@ -634,13 +636,14 @@ export const learningScenarioInsertSchema = createInsertSchema(learningScenarioT
   .omit({
     createdAt: true,
     updatedAt: true,
+    suspended: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     accessLevel: accessLevelSchema,
   });
 export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
-  .omit({ userId: true, createdAt: true, updatedAt: true })
+  .omit({ userId: true, createdAt: true, updatedAt: true, suspended: true })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     id: z.string(),
@@ -1077,7 +1080,7 @@ export const assistantSelectSchema = createSelectSchema(assistantTable).extend({
   ownerSchoolIds: z.array(z.string()),
 });
 export const assistantInsertSchema = createInsertSchema(assistantTable)
-  .omit({ id: true, createdAt: true, updatedAt: true })
+  .omit({ id: true, createdAt: true, updatedAt: true, suspended: true })
   .extend({
     accessLevel: accessLevelSchema,
   });
@@ -1086,6 +1089,7 @@ export const assistantUpdateSchema = createUpdateSchema(assistantTable)
     userId: true,
     createdAt: true,
     updatedAt: true,
+    suspended: true,
   })
   .extend({
     id: z.string(),

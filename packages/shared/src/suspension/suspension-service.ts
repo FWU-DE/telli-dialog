@@ -47,6 +47,40 @@ export type SuspensionRequestOverview = {
   reasons: SuspensionRequestReason[];
 };
 
+type SuspensionRequest = Awaited<ReturnType<typeof dbGetAllSuspensionRequests>>[number];
+
+type SuspensionRequestGroup = {
+  entityType: EntityType;
+  entityId: string;
+  suspensionRequests: SuspensionRequest[];
+};
+
+type SuspensionRequestEntityIds = {
+  assistantIds: string[];
+  characterIds: string[];
+  learningScenarioIds: string[];
+};
+
+type SuspensionRequestEntitySummary = {
+  entityType: EntityType;
+  entityId: string;
+  entityName: string;
+  suspended: boolean;
+};
+
+type SuspensionRequestEntityLookup = {
+  assistantsById: Map<string, SuspensionRequestEntitySummary>;
+  charactersById: Map<string, SuspensionRequestEntitySummary>;
+  learningScenariosById: Map<string, SuspensionRequestEntitySummary>;
+};
+
+type SuspensionRequestAggregate = Pick<
+  SuspensionRequestOverview,
+  'requestCount' | 'latestRequestAt' | 'reasons'
+> & {
+  hasUncheckedRequests: boolean;
+};
+
 function validateSingleTargetAndUuid({
   assistantId,
   characterId,
@@ -144,21 +178,12 @@ export async function suspendEntity({
   characterId,
   learningScenarioId,
 }: SuspensionRequestTargetIds) {
-  validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
-
-  if (assistantId) {
-    return dbSetAssistantSuspended({ assistantId, suspended: true });
-  }
-
-  if (characterId) {
-    return dbSetCharacterSuspended({ characterId, suspended: true });
-  }
-
-  if (learningScenarioId) {
-    return dbSetLearningScenarioSuspended({ learningScenarioId, suspended: true });
-  }
-
-  throw new InvalidArgumentError('Exactly one target entity id must be provided');
+  return setEntitySuspensionState({
+    assistantId,
+    characterId,
+    learningScenarioId,
+    suspended: true,
+  });
 }
 
 export async function liftSuspensionOnEntity({
@@ -166,61 +191,99 @@ export async function liftSuspensionOnEntity({
   characterId,
   learningScenarioId,
 }: SuspensionRequestTargetIds) {
+  return setEntitySuspensionState({
+    assistantId,
+    characterId,
+    learningScenarioId,
+    suspended: false,
+  });
+}
+
+// internal helper for deduplication - use suspendEntity and liftSuspensionOnEntity for clarity of intent
+async function setEntitySuspensionState({
+  assistantId,
+  characterId,
+  learningScenarioId,
+  suspended,
+}: SuspensionRequestTargetIds & { suspended: boolean }) {
   validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
 
   if (assistantId) {
-    return dbSetAssistantSuspended({ assistantId, suspended: false });
+    return dbSetAssistantSuspended({ assistantId, suspended });
   }
 
   if (characterId) {
-    return dbSetCharacterSuspended({ characterId, suspended: false });
+    return dbSetCharacterSuspended({ characterId, suspended });
   }
 
   if (learningScenarioId) {
-    return dbSetLearningScenarioSuspended({ learningScenarioId, suspended: false });
+    return dbSetLearningScenarioSuspended({ learningScenarioId, suspended });
   }
 
   throw new InvalidArgumentError('Exactly one target entity id must be provided');
 }
 
-export async function getSuspensionRequestOverviews({
-  limit,
-}: {
-  limit?: number;
-} = {}): Promise<SuspensionRequestOverview[]> {
-  if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) {
-    throw new InvalidArgumentError('limit must be a positive integer');
+function getSuspensionRequestTarget(
+  suspensionRequest: SuspensionRequest,
+): Pick<SuspensionRequestGroup, 'entityType' | 'entityId'> {
+  if (suspensionRequest.assistantId) {
+    return {
+      entityType: 'assistant',
+      entityId: suspensionRequest.assistantId,
+    };
   }
 
-  const allSuspensionRequests = await dbGetAllSuspensionRequests();
+  if (suspensionRequest.characterId) {
+    return {
+      entityType: 'character',
+      entityId: suspensionRequest.characterId,
+    };
+  }
 
-  const groupedSuspensionRequests = new Map<
-    string,
-    Awaited<ReturnType<typeof dbGetAllSuspensionRequests>>
-  >();
-  for (const suspensionRequest of allSuspensionRequests) {
-    const key = suspensionRequest.assistantId
-      ? `assistant:${suspensionRequest.assistantId}`
-      : suspensionRequest.characterId
-        ? `character:${suspensionRequest.characterId}`
-        : `learningScenario:${suspensionRequest.learningScenarioId}`;
+  if (suspensionRequest.learningScenarioId) {
+    return {
+      entityType: 'learningScenario',
+      entityId: suspensionRequest.learningScenarioId,
+    };
+  }
 
-    const suspensionRequestsForEntity = groupedSuspensionRequests.get(key) ?? [];
+  throw new InvalidArgumentError('Invalid suspension request target grouping');
+}
+
+function groupSuspensionRequestsByEntity(
+  suspensionRequests: SuspensionRequest[],
+): SuspensionRequestGroup[] {
+  const groupedSuspensionRequests = {
+    assistant: new Map<string, SuspensionRequest[]>(),
+    character: new Map<string, SuspensionRequest[]>(),
+    learningScenario: new Map<string, SuspensionRequest[]>(),
+  } satisfies Record<EntityType, Map<string, SuspensionRequest[]>>;
+
+  for (const suspensionRequest of suspensionRequests) {
+    const { entityType, entityId } = getSuspensionRequestTarget(suspensionRequest);
+    const suspensionRequestsForEntity = groupedSuspensionRequests[entityType].get(entityId) ?? [];
+
     suspensionRequestsForEntity.push(suspensionRequest);
-    groupedSuspensionRequests.set(key, suspensionRequestsForEntity);
+    groupedSuspensionRequests[entityType].set(entityId, suspensionRequestsForEntity);
   }
 
+  return Object.entries(groupedSuspensionRequests).flatMap(([entityType, requestsById]) =>
+    Array.from(requestsById.entries()).map(([entityId, groupedRequests]) => ({
+      entityType: entityType as EntityType,
+      entityId,
+      suspensionRequests: groupedRequests,
+    })),
+  );
+}
+
+function collectSuspensionRequestEntityIds(
+  groupedSuspensionRequests: SuspensionRequestGroup[],
+): SuspensionRequestEntityIds {
   const assistantIds = new Set<string>();
   const characterIds = new Set<string>();
   const learningScenarioIds = new Set<string>();
 
-  for (const key of groupedSuspensionRequests.keys()) {
-    const [entityType, entityId] = key.split(':') as [EntityType, string];
-
-    if (!entityId) {
-      throw new InvalidArgumentError('Invalid suspension request target grouping');
-    }
-
+  for (const { entityType, entityId } of groupedSuspensionRequests) {
     if (entityType === 'assistant') {
       assistantIds.add(entityId);
       continue;
@@ -234,108 +297,147 @@ export async function getSuspensionRequestOverviews({
     learningScenarioIds.add(entityId);
   }
 
+  return {
+    assistantIds: [...assistantIds],
+    characterIds: [...characterIds],
+    learningScenarioIds: [...learningScenarioIds],
+  };
+}
+
+async function loadSuspensionRequestEntityLookup({
+  assistantIds,
+  characterIds,
+  learningScenarioIds,
+}: SuspensionRequestEntityIds): Promise<SuspensionRequestEntityLookup> {
   const [assistants, characters, learningScenarios] = await Promise.all([
-    dbGetAssistantsByIds({ assistantIds: [...assistantIds] }),
-    dbGetCharactersByIds({ characterIds: [...characterIds] }),
-    dbGetLearningScenariosByIds({ learningScenarioIds: [...learningScenarioIds] }),
+    dbGetAssistantsByIds({ assistantIds }),
+    dbGetCharactersByIds({ characterIds }),
+    dbGetLearningScenariosByIds({ learningScenarioIds }),
   ]);
 
-  const assistantsById = new Map(assistants.map((assistant) => [assistant.id, assistant]));
-  const charactersById = new Map(characters.map((character) => [character.id, character]));
-  const learningScenariosById = new Map(
-    learningScenarios.map((learningScenario) => [learningScenario.id, learningScenario]),
-  );
-
-  const overviewItems = await Promise.all(
-    Array.from(groupedSuspensionRequests.entries()).map(
-      async ([key, suspensionRequests]): Promise<SuspensionRequestOverview> => {
-        const [entityType, entityId] = key.split(':') as [EntityType, string];
-
-        if (!entityId || suspensionRequests.length === 0) {
-          throw new InvalidArgumentError('Invalid suspension request target grouping');
-        }
-
-        const latestRequestAt = suspensionRequests.reduce(
-          (latest, current) => (current.createdAt > latest ? current.createdAt : latest),
-          suspensionRequests[0]!.createdAt,
-        );
-        const reasons = [
-          ...new Set(suspensionRequests.map((suspensionRequest) => suspensionRequest.reason)),
-        ];
-
-        if (entityType === 'assistant') {
-          const assistant = assistantsById.get(entityId);
-          if (!assistant) {
-            throw new NotFoundError('Assistant not found');
-          }
-
-          return {
-            entityType,
-            entityId,
-            entityName: assistant.name,
-            requestCount: suspensionRequests.length,
-            status: assistant.suspended
-              ? 'suspended'
-              : suspensionRequests.some((suspensionRequest) => !suspensionRequest.checked)
-                ? 'new'
-                : 'checked',
-            latestRequestAt,
-            reasons,
-          };
-        }
-
-        if (entityType === 'character') {
-          const character = charactersById.get(entityId);
-          if (!character) {
-            throw new NotFoundError('Character not found');
-          }
-
-          return {
-            entityType,
-            entityId,
-            entityName: character.name,
-            requestCount: suspensionRequests.length,
-            status: character.suspended
-              ? 'suspended'
-              : suspensionRequests.some((suspensionRequest) => !suspensionRequest.checked)
-                ? 'new'
-                : 'checked',
-            latestRequestAt,
-            reasons,
-          };
-        }
-
-        const learningScenario = learningScenariosById.get(entityId);
-        if (!learningScenario) {
-          throw new NotFoundError('Learning scenario not found');
-        }
-
-        return {
-          entityType,
-          entityId,
-          entityName: learningScenario.name,
-          requestCount: suspensionRequests.length,
-          status: learningScenario.suspended
-            ? 'suspended'
-            : suspensionRequests.some((suspensionRequest) => !suspensionRequest.checked)
-              ? 'new'
-              : 'checked',
-          latestRequestAt,
-          reasons,
-        };
-      },
+  return {
+    assistantsById: new Map(
+      assistants.map((assistant) => [
+        assistant.id,
+        {
+          entityType: 'assistant' as const,
+          entityId: assistant.id,
+          entityName: assistant.name,
+          suspended: assistant.suspended,
+        },
+      ]),
     ),
+    charactersById: new Map(
+      characters.map((character) => [
+        character.id,
+        {
+          entityType: 'character' as const,
+          entityId: character.id,
+          entityName: character.name,
+          suspended: character.suspended,
+        },
+      ]),
+    ),
+    learningScenariosById: new Map(
+      learningScenarios.map((learningScenario) => [
+        learningScenario.id,
+        {
+          entityType: 'learningScenario' as const,
+          entityId: learningScenario.id,
+          entityName: learningScenario.name,
+          suspended: learningScenario.suspended,
+        },
+      ]),
+    ),
+  };
+}
+
+function getSuspensionRequestAggregate(
+  suspensionRequests: SuspensionRequest[],
+): SuspensionRequestAggregate {
+  if (suspensionRequests.length === 0) {
+    throw new InvalidArgumentError('Invalid suspension request target grouping');
+  }
+
+  return {
+    requestCount: suspensionRequests.length,
+    latestRequestAt: suspensionRequests.reduce(
+      (latest, current) => (current.createdAt > latest ? current.createdAt : latest),
+      suspensionRequests[0]!.createdAt,
+    ),
+    reasons: [...new Set(suspensionRequests.map((suspensionRequest) => suspensionRequest.reason))],
+    hasUncheckedRequests: suspensionRequests.some(
+      (suspensionRequest) => !suspensionRequest.checked,
+    ),
+  };
+}
+
+function getSuspensionRequestEntitySummary(
+  groupedSuspensionRequest: SuspensionRequestGroup,
+  entityLookup: SuspensionRequestEntityLookup,
+): SuspensionRequestEntitySummary {
+  if (groupedSuspensionRequest.entityType === 'assistant') {
+    const assistant = entityLookup.assistantsById.get(groupedSuspensionRequest.entityId);
+    if (!assistant) {
+      throw new NotFoundError('Assistant not found');
+    }
+
+    return assistant;
+  }
+
+  if (groupedSuspensionRequest.entityType === 'character') {
+    const character = entityLookup.charactersById.get(groupedSuspensionRequest.entityId);
+    if (!character) {
+      throw new NotFoundError('Character not found');
+    }
+
+    return character;
+  }
+
+  const learningScenario = entityLookup.learningScenariosById.get(
+    groupedSuspensionRequest.entityId,
+  );
+  if (!learningScenario) {
+    throw new NotFoundError('Learning scenario not found');
+  }
+
+  return learningScenario;
+}
+
+function buildSuspensionRequestOverview(
+  groupedSuspensionRequest: SuspensionRequestGroup,
+  entityLookup: SuspensionRequestEntityLookup,
+): SuspensionRequestOverview {
+  const entity = getSuspensionRequestEntitySummary(groupedSuspensionRequest, entityLookup);
+  const aggregate = getSuspensionRequestAggregate(groupedSuspensionRequest.suspensionRequests);
+
+  return {
+    entityType: entity.entityType,
+    entityId: entity.entityId,
+    entityName: entity.entityName,
+    requestCount: aggregate.requestCount,
+    status: entity.suspended ? 'suspended' : aggregate.hasUncheckedRequests ? 'new' : 'checked',
+    latestRequestAt: aggregate.latestRequestAt,
+    reasons: aggregate.reasons,
+  };
+}
+
+export async function getSuspensionRequestOverviews(): Promise<SuspensionRequestOverview[]> {
+  const allSuspensionRequests = await dbGetAllSuspensionRequests();
+
+  const groupedSuspensionRequests = groupSuspensionRequestsByEntity(allSuspensionRequests);
+  const groupedEntityIds = collectSuspensionRequestEntityIds(groupedSuspensionRequests);
+  const entityLookup = await loadSuspensionRequestEntityLookup(groupedEntityIds);
+
+  const overviewItems = groupedSuspensionRequests.map((groupedSuspensionRequest) =>
+    buildSuspensionRequestOverview(groupedSuspensionRequest, entityLookup),
   );
 
   const sorted = overviewItems.sort(
     (a, b) => b.latestRequestAt.getTime() - a.latestRequestAt.getTime(),
   );
 
-  if (limit === undefined) {
-    return sorted;
-  }
-
-  return sorted.slice(0, limit);
+  return sorted;
 }
 
 export async function getSuspensionRequestsForEntity({

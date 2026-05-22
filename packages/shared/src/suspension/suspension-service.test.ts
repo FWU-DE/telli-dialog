@@ -412,28 +412,6 @@ describe('suspension-request-service', () => {
       expect(second?.reasons).toEqual(expect.arrayContaining(['discrimination', 'other']));
     });
 
-    it('applies limit and validates limit input', async () => {
-      (
-        dbGetAllSuspensionRequests as MockedFunction<typeof dbGetAllSuspensionRequests>
-      ).mockResolvedValue([] as never);
-      (dbGetAssistantsByIds as MockedFunction<typeof dbGetAssistantsByIds>).mockResolvedValue(
-        [] as never,
-      );
-      (dbGetCharactersByIds as MockedFunction<typeof dbGetCharactersByIds>).mockResolvedValue(
-        [] as never,
-      );
-      (
-        dbGetLearningScenariosByIds as MockedFunction<typeof dbGetLearningScenariosByIds>
-      ).mockResolvedValue([] as never);
-
-      const limitedResult = await getSuspensionRequestOverviews({ limit: 1 });
-      expect(limitedResult).toEqual([]);
-
-      await expect(getSuspensionRequestOverviews({ limit: 0 })).rejects.toThrow(
-        InvalidArgumentError,
-      );
-    });
-
     it('throws NotFoundError when grouped character cannot be resolved', async () => {
       const characterId = generateUUID();
 

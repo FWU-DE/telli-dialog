@@ -168,23 +168,6 @@ export async function dbUpsertAssistant({
   return dbGetAssistantById({ assistantId: insertedAssistant.id });
 }
 
-export async function dbUpdateAssistant({
-  assistantId,
-  assistant,
-}: {
-  assistantId: string;
-  assistant: Partial<AssistantInsertModel>;
-}): Promise<AssistantSelectModel | undefined> {
-  const [updatedAssistant] = await db
-    .update(assistantTable)
-    .set(assistant)
-    .where(eq(assistantTable.id, assistantId))
-    .returning();
-
-  if (!updatedAssistant) throw new Error('Could not update assistant');
-  return dbGetAssistantById({ assistantId: updatedAssistant.id });
-}
-
 export async function dbSetAssistantSuspended({
   assistantId,
   suspended,
