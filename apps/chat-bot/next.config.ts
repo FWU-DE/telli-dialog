@@ -5,6 +5,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const isDevBuild = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
 
 const baseNextConfig: NextConfig = {
+  deploymentId: process.env.APP_VERSION,
   transpilePackages: [
     '@ais-chat/ui',
     '@ais-chat/shared',

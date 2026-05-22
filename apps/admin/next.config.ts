@@ -4,6 +4,7 @@ import { withSentryConfig } from '@sentry/nextjs';
 const isDevBuild = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
 
 const baseNextConfig: NextConfig = {
+  deploymentId: process.env.APP_VERSION,
   reactStrictMode: true,
   transpilePackages: [
     '@ais-chat/ui',
