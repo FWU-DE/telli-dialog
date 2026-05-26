@@ -16,6 +16,7 @@ type CustomShareSectionProps<T extends FieldValues> = {
   linkSharingName: Path<T>;
   linkToShare: string;
   onShareChange?: (change: { name: Path<T>; checked: boolean }) => void;
+  suspended?: boolean;
 };
 
 export default function CustomShareSection<T extends FieldValues>({
@@ -24,6 +25,7 @@ export default function CustomShareSection<T extends FieldValues>({
   linkSharingName,
   linkToShare,
   onShareChange,
+  suspended,
 }: CustomShareSectionProps<T>) {
   const t = useTranslations('sharing');
   const toast = useToast();
@@ -58,6 +60,7 @@ export default function CustomShareSection<T extends FieldValues>({
               label={t('school')}
               tooltip={t('school-tooltip')}
               testId="school-sharing-checkbox"
+              disabled={suspended}
               onCheckedChange={(checked) => {
                 onShareChange?.({ name: schoolSharingName, checked });
               }}
@@ -68,6 +71,7 @@ export default function CustomShareSection<T extends FieldValues>({
             control={control}
             label={t('link')}
             tooltip={t('link-tooltip')}
+            disabled={suspended}
             onCheckedChange={(checked) => {
               onShareChange?.({ name: linkSharingName, checked });
             }}
@@ -75,7 +79,7 @@ export default function CustomShareSection<T extends FieldValues>({
 
           <Button
             className="shrink-0"
-            disabled={!isLinkSharingEnabled}
+            disabled={!isLinkSharingEnabled || suspended}
             onClick={handleCopyLink}
             aria-label={t('copy-link')}
             type="button"

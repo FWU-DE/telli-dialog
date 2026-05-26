@@ -55,6 +55,7 @@ import { FormField } from '@ui/components/form/form-field';
 import { createNewCharacterAction } from '../../actions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
+import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -177,7 +178,7 @@ export function CharacterEdit({
   const savedAccessLevelRef = useRef(character.accessLevel);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
-  const showShareInfo = isSchoolShared || hasLinkAccess;
+  const showShareInfo = (isSchoolShared || hasLinkAccess) && !character.suspended;
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -291,7 +292,7 @@ export function CharacterEdit({
   const actionButtons = (
     <CustomChatActions>
       <CustomChatActionUse onClick={handleUseChat} />
-      <CustomChatActionDuplicate onClick={handleDuplicateCharacter} />
+      {!character.suspended && <CustomChatActionDuplicate onClick={handleDuplicateCharacter} />}
       <CustomChatActionDelete
         onClick={handleDeleteCharacter}
         modalTitle={t('delete-modal-title')}
@@ -327,7 +328,7 @@ export function CharacterEdit({
             linkText={t('sharing-settings')}
           />
         )}
-
+        {character.suspended && <CustomChatSuspensionError info={t('suspension-error')} />}
         <CustomChatShareWithLearners
           startedAt={character.startedAt}
           manuallyStoppedAt={character.manuallyStoppedAt}
@@ -452,6 +453,7 @@ export function CharacterEdit({
             linkSharingName="hasLinkAccess"
             linkToShare={`/characters/${character.id}`}
             onShareChange={handleSharingChange}
+            suspended={character.suspended}
           />
         </form>
       </CustomChatLayoutContainer>

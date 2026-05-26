@@ -43,7 +43,7 @@ import { and, eq } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import {
-  verifyCopySourceAccess,
+  verifySuspensionState,
   verifyReadAccess,
   verifyWriteAccess,
   filterReadableCustomChats,
@@ -230,7 +230,7 @@ export async function createNewAssistant({
       item: sourceAssistant,
       user,
     });
-    verifyCopySourceAccess({ item: sourceAssistant });
+    verifySuspensionState({ item: sourceAssistant });
 
     let insertedAssistant = await copyAssistant(
       templateId,
@@ -387,6 +387,7 @@ export async function updateAssistantAccessLevel({
 
   const assistant = await dbGetAssistantById({ assistantId });
   verifyWriteAccess({ item: assistant, user });
+  verifySuspensionState({ item: assistant });
 
   const [updatedAssistant] = await db
     .update(assistantTable)

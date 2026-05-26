@@ -45,7 +45,7 @@ import z from 'zod';
 import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-admin-service';
 import {
   requireTeacherRole,
-  verifyCopySourceAccess,
+  verifySuspensionState,
   verifyReadAccess,
   verifyWriteAccess,
   filterReadableCustomChats,
@@ -259,6 +259,7 @@ export async function updateLearningScenarioAccessLevel({
   requireTeacherRole(user.userRole);
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user);
   verifyWriteAccess({ item: learningScenario, user });
+  verifySuspensionState({ item: learningScenario });
 
   // Update the access level in database
   const [updatedLearningScenario] = await db
@@ -665,7 +666,7 @@ export async function createNewLearningScenarioFromTemplate({
     item: learningScenario,
     user,
   });
-  verifyCopySourceAccess({
+  verifySuspensionState({
     item: learningScenario,
   });
 

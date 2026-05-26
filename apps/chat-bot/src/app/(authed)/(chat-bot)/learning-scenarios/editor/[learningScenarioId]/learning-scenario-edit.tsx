@@ -53,6 +53,7 @@ import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/cu
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
 import { FormField } from '@ui/components/form/form-field';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
+import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
@@ -183,7 +184,7 @@ export function LearningScenarioEdit({
   const attachedLinksRef = useRef(learningScenario.attachedLinks);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
-  const showShareInfo = isSchoolShared || hasLinkAccess;
+  const showShareInfo = (isSchoolShared || hasLinkAccess) && !learningScenario.suspended;
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -302,7 +303,9 @@ export function LearningScenarioEdit({
 
   const actionButtons = (
     <CustomChatActions>
-      <CustomChatActionDuplicate onClick={handleDuplicateLearningScenario} />
+      {!learningScenario.suspended && (
+        <CustomChatActionDuplicate onClick={handleDuplicateLearningScenario} />
+      )}
       <CustomChatActionDelete
         onClick={handleDeleteLearningScenario}
         modalTitle={t('delete-modal-title')}
@@ -338,7 +341,7 @@ export function LearningScenarioEdit({
             linkText={t('sharing-settings')}
           />
         )}
-
+        {learningScenario.suspended && <CustomChatSuspensionError info={t('suspension-error')} />}
         <CustomChatShareWithLearners
           startedAt={learningScenario.startedAt}
           manuallyStoppedAt={learningScenario.manuallyStoppedAt}
@@ -461,6 +464,7 @@ export function LearningScenarioEdit({
               linkSharingName="hasLinkAccess"
               linkToShare={`/learning-scenarios/${learningScenario.id}`}
               onShareChange={handleSharingChange}
+              suspended={learningScenario.suspended}
             />
           </form>
         </div>

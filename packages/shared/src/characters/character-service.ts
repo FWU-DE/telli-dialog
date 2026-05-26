@@ -52,7 +52,7 @@ import z from 'zod';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import {
   requireTeacherRole,
-  verifyCopySourceAccess,
+  verifySuspensionState,
   verifyReadAccess,
   verifyWriteAccess,
   filterReadableCustomChats,
@@ -89,7 +89,7 @@ export const createNewCharacter = async ({
       item: sourceCharacter,
       user,
     });
-    verifyCopySourceAccess({ item: sourceCharacter });
+    verifySuspensionState({ item: sourceCharacter });
 
     let insertedCharacter = await copyCharacter(
       templateId,
@@ -264,6 +264,7 @@ export const updateCharacterAccessLevel = async ({
 
   const { character } = await getCharacterInfo(characterId, user.id);
   verifyWriteAccess({ item: character, user });
+  verifySuspensionState({ item: character });
 
   // Update the access level in database
   const [updatedCharacter] = await db

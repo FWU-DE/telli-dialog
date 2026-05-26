@@ -48,13 +48,13 @@ export function verifyWriteAccess<T extends AuthorizedItem>({
   throw new ForbiddenError('Not authorized for write access');
 }
 
-export function verifyCopySourceAccess<T extends Pick<AuthorizedItem, 'suspended'>>({
+export function verifySuspensionState<T extends Pick<AuthorizedItem, 'suspended'>>({
   item,
 }: {
   item: T;
 }) {
   if (item.suspended) {
-    throw new ForbiddenError(`Not authorized to copy`);
+    throw new ForbiddenError(`Not authorized to perform this action`);
   }
 }
 

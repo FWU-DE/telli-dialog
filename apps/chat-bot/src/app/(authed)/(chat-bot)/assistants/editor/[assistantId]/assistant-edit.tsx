@@ -47,6 +47,7 @@ import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/cu
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
 import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
+import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -179,7 +180,7 @@ export function AssistantEdit({
   const savedAccessLevelRef = useRef(assistant.accessLevel);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
-  const showShareInfo = isSchoolShared || hasLinkAccess;
+  const showShareInfo = (isSchoolShared || hasLinkAccess) && !assistant.suspended;
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -291,7 +292,7 @@ export function AssistantEdit({
   const assistantActions = (
     <CustomChatActions>
       <CustomChatActionUse onClick={handleUseChat} />
-      <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
+      {!assistant.suspended && <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />}
       <CustomChatActionDelete
         onClick={handleDeleteAssistant}
         modalTitle={t('delete-modal-title')}
@@ -327,6 +328,7 @@ export function AssistantEdit({
             linkText={t('sharing-settings')}
           />
         )}
+        {assistant.suspended && <CustomChatSuspensionError info={t('suspension-error')} />}
         <CustomChatImageUpload
           avatarPictureUrl={avatarPictureUrl}
           onUploadPicture={handleUploadPicture}
@@ -413,6 +415,7 @@ export function AssistantEdit({
             linkSharingName="hasLinkAccess"
             linkToShare={`/assistants/${assistant.id}`}
             onShareChange={handleSharingChange}
+            suspended={assistant.suspended}
           />
         </form>
       </CustomChatLayoutContainer>
