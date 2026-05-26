@@ -19,7 +19,7 @@ function createGoogleImageConfig(additionalParameters: Record<string, unknown>):
   const rawConfig = isRecord(additionalParameters.parameters)
     ? additionalParameters.parameters
     : additionalParameters;
-  const { sampleCount, sampleImageSize, safetySetting, ...rest } = rawConfig;
+  const { sampleImageSize, safetySetting, ...rest } = rawConfig;
 
   const configRecord: Record<string, unknown> = {
     numberOfImages: 1,
