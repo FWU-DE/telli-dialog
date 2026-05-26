@@ -458,18 +458,36 @@ describe('assistant-service', () => {
   describe('createNewAssistant', () => {
     const templateId = generateUUID();
     const duplicatedAssistantName = 'Copy of Biology Assistant';
+    const templateAssistant = (overrides: Partial<AssistantSelectModel> = {}) => ({
+      id: templateId,
+      name: 'Template Assistant',
+      userId: generateUUID(),
+      accessLevel: 'global',
+      hasLinkAccess: false,
+      suspended: false,
+      ownerSchoolIds: [],
+      ...overrides,
+    });
 
     beforeEach(() => {
       (
         copyRelatedTemplateFiles as MockedFunction<typeof copyRelatedTemplateFiles>
       ).mockResolvedValue(undefined as never);
+      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+        templateAssistant() as never,
+      );
     });
 
     it('should pass duplicateAssistantName to copyAssistant when creating from template', async () => {
+      const user = mockUser('teacher');
       const insertedAssistant = {
         id: generateUUID(),
         pictureId: null,
       } as AssistantSelectModel;
+
+      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+        templateAssistant({ userId: user.id, accessLevel: 'private' }) as never,
+      );
 
       (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
         insertedAssistant as never,
@@ -480,7 +498,7 @@ describe('assistant-service', () => {
 
       const result = await createNewAssistant({
         templateId,
-        user: mockUser('teacher'),
+        user,
         duplicateAssistantName: duplicatedAssistantName,
       });
 
@@ -504,10 +522,15 @@ describe('assistant-service', () => {
     });
 
     it('should pass undefined duplicateAssistantName to copyAssistant when not provided', async () => {
+      const user = mockUser('teacher');
       const insertedAssistant = {
         id: generateUUID(),
         pictureId: null,
       } as AssistantSelectModel;
+
+      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+        templateAssistant({ userId: user.id, accessLevel: 'private' }) as never,
+      );
 
       (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
         insertedAssistant as never,
@@ -518,7 +541,7 @@ describe('assistant-service', () => {
 
       await createNewAssistant({
         templateId,
-        user: mockUser('teacher'),
+        user,
       });
 
       expect(copyAssistant).toHaveBeenCalledWith(
@@ -540,6 +563,10 @@ describe('assistant-service', () => {
         pictureId: copiedPictureKey,
       } as AssistantSelectModel;
       const user = mockUser('teacher');
+
+      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+        templateAssistant({ userId: user.id, accessLevel: 'private' }) as never,
+      );
 
       (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
         insertedAssistant as never,
@@ -563,10 +590,15 @@ describe('assistant-service', () => {
     });
 
     it('should keep assistant unchanged when no copied picture key is returned', async () => {
+      const user = mockUser('teacher');
       const insertedAssistant = {
         id: generateUUID(),
         pictureId: 'custom-gpts/template-id/original.png',
       } as AssistantSelectModel;
+
+      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+        templateAssistant({ userId: user.id, accessLevel: 'private' }) as never,
+      );
 
       (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
         insertedAssistant as never,
@@ -577,10 +609,26 @@ describe('assistant-service', () => {
 
       const result = await createNewAssistant({
         templateId,
-        user: mockUser('teacher'),
+        user,
       });
 
       expect(result).toEqual(insertedAssistant);
+    });
+
+    it('should throw ForbiddenError when template is suspended', async () => {
+      const user = mockUser('teacher');
+      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+        templateAssistant({ userId: user.id, accessLevel: 'private', suspended: true }) as never,
+      );
+
+      await expect(
+        createNewAssistant({
+          templateId,
+          user,
+        }),
+      ).rejects.toThrow(ForbiddenError);
+
+      expect(copyAssistant).not.toHaveBeenCalled();
     });
   });
 
@@ -868,7 +916,16 @@ describe('assistant-service', () => {
 
   describe('assistant discovery filters', () => {
     const user = mockUser('teacher');
-    const assistants = [{ id: generateUUID() } as AssistantSelectModel];
+    const assistants = [
+      {
+        id: generateUUID(),
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as AssistantSelectModel,
+    ];
 
     it.each([
       {
@@ -907,9 +964,30 @@ describe('assistant-service', () => {
     });
 
     it('returns combined lists for filter=all', async () => {
-      const privateAssistant = { id: generateUUID() } as AssistantSelectModel;
-      const schoolAssistant = { id: generateUUID() } as AssistantSelectModel;
-      const officialAssistant = { id: generateUUID() } as AssistantSelectModel;
+      const privateAssistant = {
+        id: generateUUID(),
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as AssistantSelectModel;
+      const schoolAssistant = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'school',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as AssistantSelectModel;
+      const officialAssistant = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'global',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: [],
+      } as unknown as AssistantSelectModel;
 
       (dbGetGptsByUser as MockedFunction<typeof dbGetGptsByUser>).mockResolvedValue([
         privateAssistant,
@@ -924,6 +1002,50 @@ describe('assistant-service', () => {
       const result = await getAssistantsByOverviewFilter({ filter: 'all', user });
 
       expect(result).toEqual([privateAssistant, schoolAssistant, officialAssistant]);
+    });
+
+    it('filters suspended assistants for non-owners', async () => {
+      const visibleAssistant = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'global',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: [],
+      } as unknown as AssistantSelectModel;
+      const suspendedAssistant = {
+        ...visibleAssistant,
+        id: generateUUID(),
+        suspended: true,
+      } as AssistantSelectModel;
+
+      (dbGetGlobalGpts as MockedFunction<typeof dbGetGlobalGpts>).mockResolvedValue([
+        visibleAssistant,
+        suspendedAssistant,
+      ] as never);
+
+      const result = await getAssistantsByOverviewFilter({ filter: 'official', user });
+
+      expect(result).toEqual([visibleAssistant]);
+    });
+
+    it('keeps suspended assistants visible for owners', async () => {
+      const ownSuspendedAssistant = {
+        id: generateUUID(),
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        suspended: true,
+        ownerSchoolIds: user.schoolIds,
+      } as AssistantSelectModel;
+
+      (dbGetGptsByUser as MockedFunction<typeof dbGetGptsByUser>).mockResolvedValue([
+        ownSuspendedAssistant,
+      ] as never);
+
+      const result = await getAssistantsByOverviewFilter({ filter: 'mine', user });
+
+      expect(result).toEqual([ownSuspendedAssistant]);
     });
 
     it.each([

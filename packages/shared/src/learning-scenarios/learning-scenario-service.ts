@@ -45,8 +45,10 @@ import z from 'zod';
 import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-admin-service';
 import {
   requireTeacherRole,
+  verifyCopySourceAccess,
   verifyReadAccess,
   verifyWriteAccess,
+  filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
@@ -88,16 +90,23 @@ export async function getLearningScenariosByAccessLevel({
   accessLevel: AccessLevel;
   user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
+  let learningScenarios: LearningScenarioOptionalShareDataModel[];
+
   switch (accessLevel) {
     case 'global':
-      return dbGetGlobalLearningScenarios({ user });
+      learningScenarios = await dbGetGlobalLearningScenarios({ user });
+      break;
     case 'school':
-      return dbGetLearningScenariosByAssociatedSchools({ user });
+      learningScenarios = await dbGetLearningScenariosByAssociatedSchools({ user });
+      break;
     case 'private':
-      return dbGetLearningScenariosByUser({ user });
+      learningScenarios = await dbGetLearningScenariosByUser({ user });
+      break;
     default:
       return [];
   }
+
+  return filterReadableCustomChats({ items: learningScenarios, user });
 }
 
 export async function getLearningScenariosByOverviewFilter({
@@ -107,20 +116,28 @@ export async function getLearningScenariosByOverviewFilter({
   filter: OverviewFilter;
   user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
+  let learningScenarios: LearningScenarioOptionalShareDataModel[];
+
   switch (filter) {
     case 'all':
-      return dbGetAllAccessibleLearningScenarios({
+      learningScenarios = await dbGetAllAccessibleLearningScenarios({
         user,
       });
+      break;
     case 'mine':
-      return await dbGetAllLearningScenariosByUser({ user });
+      learningScenarios = await dbGetAllLearningScenariosByUser({ user });
+      break;
     case 'official':
-      return await dbGetGlobalLearningScenarios({ user });
+      learningScenarios = await dbGetGlobalLearningScenarios({ user });
+      break;
     case 'school':
-      return await dbGetLearningScenariosByAssociatedSchools({ user });
+      learningScenarios = await dbGetLearningScenariosByAssociatedSchools({ user });
+      break;
     default:
       return [];
   }
+
+  return filterReadableCustomChats({ items: learningScenarios, user });
 }
 
 /**
@@ -647,6 +664,9 @@ export async function createNewLearningScenarioFromTemplate({
   verifyReadAccess({
     item: learningScenario,
     user,
+  });
+  verifyCopySourceAccess({
+    item: learningScenario,
   });
 
   return duplicateLearningScenario({

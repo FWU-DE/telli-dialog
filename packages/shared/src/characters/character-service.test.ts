@@ -462,18 +462,36 @@ describe('character-service', () => {
     const federalStateId = generateUUID();
     const templateId = generateUUID();
     const duplicateCharacterName = 'Copied Character';
+    const templateCharacter = (overrides: Partial<CharacterSelectModel> = {}) => ({
+      id: templateId,
+      name: 'Template Character',
+      userId: generateUUID(),
+      accessLevel: 'global',
+      hasLinkAccess: false,
+      suspended: false,
+      ownerSchoolIds: [],
+      ...overrides,
+    });
 
     beforeEach(() => {
       (
         copyRelatedTemplateFiles as MockedFunction<typeof copyRelatedTemplateFiles>
       ).mockResolvedValue(undefined as never);
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        templateCharacter() as never,
+      );
     });
 
     it('should pass duplicateCharacterName to copyCharacter when creating from template', async () => {
+      const user = mockUser('teacher');
       const insertedCharacter = {
         id: generateUUID(),
         pictureId: null,
       } as CharacterSelectModel;
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        templateCharacter({ userId: user.id, accessLevel: 'private' }) as never,
+      );
 
       (copyCharacter as MockedFunction<typeof copyCharacter>).mockResolvedValue(
         insertedCharacter as never,
@@ -485,7 +503,7 @@ describe('character-service', () => {
       const result = await createNewCharacter({
         federalStateId,
         templateId,
-        user: mockUser('teacher'),
+        user,
         duplicateCharacterName,
       });
 
@@ -509,6 +527,7 @@ describe('character-service', () => {
     });
 
     it('should update character picture when template picture is copied', async () => {
+      const user = mockUser('teacher');
       const insertedCharacter = {
         id: generateUUID(),
         pictureId: 'characters/template-id/original.png',
@@ -518,6 +537,10 @@ describe('character-service', () => {
         ...insertedCharacter,
         pictureId: copiedPictureKey,
       } as CharacterSelectModel;
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        templateCharacter({ userId: user.id, accessLevel: 'private' }) as never,
+      );
 
       (copyCharacter as MockedFunction<typeof copyCharacter>).mockResolvedValue(
         insertedCharacter as never,
@@ -530,10 +553,27 @@ describe('character-service', () => {
       const result = await createNewCharacter({
         federalStateId,
         templateId,
-        user: mockUser('teacher'),
+        user,
       });
 
       expect(result).toEqual({ ...updatedCharacter, ownerSchoolIds: expect.any(Array) });
+    });
+
+    it('should throw ForbiddenError when template is suspended', async () => {
+      const user = mockUser('teacher');
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        templateCharacter({ userId: user.id, accessLevel: 'private', suspended: true }) as never,
+      );
+
+      await expect(
+        createNewCharacter({
+          federalStateId,
+          templateId,
+          user,
+        }),
+      ).rejects.toThrow(ForbiddenError);
+
+      expect(copyCharacter).not.toHaveBeenCalled();
     });
   });
 
@@ -802,7 +842,59 @@ describe('character-service', () => {
 
   describe('character discovery filters', () => {
     const user = mockUser('teacher');
-    const characters = [{ id: generateUUID() } as CharacterSelectModel];
+    const characters = [
+      {
+        id: generateUUID(),
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as CharacterSelectModel,
+    ];
+    it('filters suspended characters for non-owners', async () => {
+      const visibleCharacter = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'global',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: [],
+      } as unknown as CharacterSelectModel;
+      const suspendedCharacter = {
+        ...visibleCharacter,
+        id: generateUUID(),
+        suspended: true,
+      } as CharacterSelectModel;
+
+      (dbGetGlobalCharacters as MockedFunction<typeof dbGetGlobalCharacters>).mockResolvedValue([
+        visibleCharacter,
+        suspendedCharacter,
+      ] as never);
+
+      const result = await getCharactersByOverviewFilter({ filter: 'official', user });
+
+      expect(result).toEqual([visibleCharacter]);
+    });
+
+    it('keeps suspended characters visible for owners', async () => {
+      const ownSuspendedCharacter = {
+        id: generateUUID(),
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        suspended: true,
+        ownerSchoolIds: user.schoolIds,
+      } as CharacterSelectModel;
+
+      (
+        dbGetAllCharactersByUser as MockedFunction<typeof dbGetAllCharactersByUser>
+      ).mockResolvedValue([ownSuspendedCharacter] as never);
+
+      const result = await getCharactersByOverviewFilter({ filter: 'mine', user });
+
+      expect(result).toEqual([ownSuspendedCharacter]);
+    });
 
     it.each([
       {

@@ -42,7 +42,12 @@ import { generateUUID } from '@shared/utils/uuid';
 import { and, eq } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
-import { verifyReadAccess, verifyWriteAccess } from '@shared/auth/authorization-service';
+import {
+  verifyCopySourceAccess,
+  verifyReadAccess,
+  verifyWriteAccess,
+  filterReadableCustomChats,
+} from '@shared/auth/authorization-service';
 
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
@@ -149,16 +154,23 @@ export async function getAssistantByAccessLevel({
   accessLevel: AccessLevel;
   user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<AssistantSelectModel[]> {
+  let assistants: AssistantSelectModel[];
+
   switch (accessLevel) {
     case 'global':
-      return await dbGetGlobalGpts({ user });
+      assistants = await dbGetGlobalGpts({ user });
+      break;
     case 'school':
-      return await dbGetGptsByAssociatedSchools({ user });
+      assistants = await dbGetGptsByAssociatedSchools({ user });
+      break;
     case 'private':
-      return await dbGetGptsByUser({ user });
+      assistants = await dbGetGptsByUser({ user });
+      break;
     default:
       return [];
   }
+
+  return filterReadableCustomChats({ items: assistants, user });
 }
 
 export async function getAssistantsByOverviewFilter({
@@ -168,6 +180,8 @@ export async function getAssistantsByOverviewFilter({
   filter: OverviewFilter;
   user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<AssistantSelectModel[]> {
+  let assistants: AssistantSelectModel[];
+
   switch (filter) {
     case 'all': {
       const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
@@ -175,17 +189,23 @@ export async function getAssistantsByOverviewFilter({
         dbGetGptsByAssociatedSchools({ user }),
         dbGetGlobalGpts({ user }),
       ]);
-      return [...privateAssistants, ...schoolAssistants, ...globalAssistants];
+      assistants = [...privateAssistants, ...schoolAssistants, ...globalAssistants];
+      break;
     }
     case 'mine':
-      return await dbGetGptsByUser({ user });
+      assistants = await dbGetGptsByUser({ user });
+      break;
     case 'official':
-      return await dbGetGlobalGpts({ user });
+      assistants = await dbGetGlobalGpts({ user });
+      break;
     case 'school':
-      return await dbGetGptsByAssociatedSchools({ user });
+      assistants = await dbGetGptsByAssociatedSchools({ user });
+      break;
     default:
       return [];
   }
+
+  return filterReadableCustomChats({ items: assistants, user });
 }
 
 /**
@@ -205,6 +225,13 @@ export async function createNewAssistant({
   if (user.userRole !== 'teacher') throw new ForbiddenError('Not authorized to create assistant');
 
   if (templateId !== undefined) {
+    const sourceAssistant = await dbGetAssistantById({ assistantId: templateId });
+    verifyReadAccess({
+      item: sourceAssistant,
+      user,
+    });
+    verifyCopySourceAccess({ item: sourceAssistant });
+
     let insertedAssistant = await copyAssistant(
       templateId,
       'private',

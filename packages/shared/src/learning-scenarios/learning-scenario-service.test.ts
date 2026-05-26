@@ -36,6 +36,7 @@ import { LearningScenarioSelectModel } from '@shared/db/schema';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { UserModel } from '@shared/auth/user-model';
 import { getReadOnlySignedUrl, uploadFileToS3 } from '../s3';
+import { duplicateLearningScenario } from './learning-scenario-admin-service';
 
 vi.mock('../db/functions/learning-scenario', () => ({
   dbGetAllAccessibleLearningScenarios: vi.fn(),
@@ -252,6 +253,10 @@ describe('learning-scenario-service', () => {
         userId,
         id: learningScenarioId,
         name: 'Test Scenario',
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: [],
       };
       (
         dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
@@ -302,6 +307,26 @@ describe('learning-scenario-service', () => {
           await expect(testFunction()).rejects.toThrow(ForbiddenError);
         },
       );
+    });
+
+    it('should throw when copying a suspended learning scenario template', async () => {
+      const user = mockUser('teacher');
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue({
+        ...mockLearningScenario,
+        userId: user.id,
+        suspended: true,
+      } as never);
+
+      await expect(
+        createNewLearningScenarioFromTemplate({
+          originalLearningScenarioId: learningScenarioId,
+          user,
+        }),
+      ).rejects.toThrow(ForbiddenError);
+
+      expect(duplicateLearningScenario).not.toHaveBeenCalled();
     });
   });
 
@@ -707,7 +732,17 @@ describe('learning-scenario-service', () => {
 
   describe('learning scenario discovery filters', () => {
     const user = mockUser('teacher');
-    const scenarios = [{ id: generateUUID(), name: 'Scenario 1' } as LearningScenarioSelectModel];
+    const scenarios = [
+      {
+        id: generateUUID(),
+        name: 'Scenario 1',
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as LearningScenarioSelectModel,
+    ];
 
     it('filters out unnamed scenarios and enriches with picture URLs', async () => {
       const namedScenario = {
@@ -784,6 +819,51 @@ describe('learning-scenario-service', () => {
 
       expect(result).toEqual(scenarios);
       expect(dbGetAllAccessibleLearningScenarios).toHaveBeenCalledWith({ user });
+    });
+
+    it('filters suspended learning scenarios for non-owners', async () => {
+      const visibleScenario = {
+        id: generateUUID(),
+        name: 'Visible scenario',
+        userId: generateUUID(),
+        accessLevel: 'global',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: [],
+      } as unknown as LearningScenarioSelectModel;
+      const suspendedScenario = {
+        ...visibleScenario,
+        id: generateUUID(),
+        suspended: true,
+      } as LearningScenarioSelectModel;
+
+      (
+        dbGetGlobalLearningScenarios as MockedFunction<typeof dbGetGlobalLearningScenarios>
+      ).mockResolvedValue([visibleScenario, suspendedScenario] as never);
+
+      const result = await getLearningScenariosByOverviewFilter({ filter: 'official', user });
+
+      expect(result).toEqual([visibleScenario]);
+    });
+
+    it('keeps suspended learning scenarios visible for owners', async () => {
+      const ownSuspendedScenario = {
+        id: generateUUID(),
+        name: 'Own suspended scenario',
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        suspended: true,
+        ownerSchoolIds: user.schoolIds,
+      } as LearningScenarioSelectModel;
+
+      (
+        dbGetAllLearningScenariosByUser as MockedFunction<typeof dbGetAllLearningScenariosByUser>
+      ).mockResolvedValue([ownSuspendedScenario] as never);
+
+      const result = await getLearningScenariosByOverviewFilter({ filter: 'mine', user });
+
+      expect(result).toEqual([ownSuspendedScenario]);
     });
 
     it.each([

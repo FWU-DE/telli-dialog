@@ -52,8 +52,10 @@ import z from 'zod';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import {
   requireTeacherRole,
+  verifyCopySourceAccess,
   verifyReadAccess,
   verifyWriteAccess,
+  filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
 
 function buildAvatarFilename(hash: string) {
@@ -79,6 +81,16 @@ export const createNewCharacter = async ({
   requireTeacherRole(user.userRole);
 
   if (templateId !== undefined) {
+    const sourceCharacter = await dbGetCharacterById({ characterId: templateId });
+    if (!sourceCharacter) {
+      throw new NotFoundError('Character not found');
+    }
+    verifyReadAccess({
+      item: sourceCharacter,
+      user,
+    });
+    verifyCopySourceAccess({ item: sourceCharacter });
+
     let insertedCharacter = await copyCharacter(
       templateId,
       'private',
@@ -546,16 +558,23 @@ export async function getCharacterByAccessLevel({
   accessLevel: AccessLevel;
   user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<CharacterOptionalShareDataModel[]> {
+  let characters: CharacterOptionalShareDataModel[];
+
   switch (accessLevel) {
     case 'global':
-      return dbGetGlobalCharacters({ user });
+      characters = await dbGetGlobalCharacters({ user });
+      break;
     case 'school':
-      return dbGetCharactersByAssociatedSchools({ user });
+      characters = await dbGetCharactersByAssociatedSchools({ user });
+      break;
     case 'private':
-      return dbGetCharactersByUser({ user });
+      characters = await dbGetCharactersByUser({ user });
+      break;
     default:
       return [];
   }
+
+  return filterReadableCustomChats({ items: characters, user });
 }
 
 export async function getCharactersByOverviewFilter({
@@ -565,18 +584,26 @@ export async function getCharactersByOverviewFilter({
   filter: OverviewFilter;
   user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<CharacterOptionalShareDataModel[]> {
+  let characters: CharacterOptionalShareDataModel[];
+
   switch (filter) {
     case 'all':
-      return dbGetAllAccessibleCharacters({ user });
+      characters = await dbGetAllAccessibleCharacters({ user });
+      break;
     case 'mine':
-      return await dbGetAllCharactersByUser({ user });
+      characters = await dbGetAllCharactersByUser({ user });
+      break;
     case 'official':
-      return await dbGetGlobalCharacters({ user });
+      characters = await dbGetGlobalCharacters({ user });
+      break;
     case 'school':
-      return await dbGetCharactersByAssociatedSchools({ user });
+      characters = await dbGetCharactersByAssociatedSchools({ user });
+      break;
     default:
       return [];
   }
+
+  return filterReadableCustomChats({ items: characters, user });
 }
 
 /**
