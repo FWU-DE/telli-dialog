@@ -73,8 +73,6 @@ export function CustomChatCreateSuspensionDialog({
   });
 
   async function onSubmit(data: z.infer<typeof suspensionFormValuesSchema>) {
-    console.log(data);
-
     const result = await createSuspensionRequestAction({
       ...entityId,
       reason: data.reason,

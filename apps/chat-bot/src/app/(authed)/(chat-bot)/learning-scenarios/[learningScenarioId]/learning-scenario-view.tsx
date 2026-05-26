@@ -31,6 +31,7 @@ import {
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
 } from '../editor/[learningScenarioId]/actions';
+import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 
 export function LearningScenarioView({
   learningScenario,
@@ -161,6 +162,12 @@ export function LearningScenarioView({
         initialLinks={initialLinks}
         onDownloadFile={handleDownloadFile}
       />
+      {learningScenario.hasLinkAccess && (
+        <CustomChatCreateSuspensionRequestButton
+          entityType="learningScenario"
+          entityId={{ learningScenarioId: learningScenario.id }}
+        />
+      )}
     </CustomChatLayoutContainer>
   );
 }
