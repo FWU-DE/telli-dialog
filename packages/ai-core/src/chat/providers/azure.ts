@@ -176,7 +176,7 @@ export function constructAzureResponsesToolStreamFn(model: AiModel): AgenticStre
       throw new AiGenerationError('No usage data returned from Azure OpenAI Responses API stream');
     }
 
-    yield { type: 'finish', usage, finishReason: 'stop' };
+    yield { type: 'finish', usage };
   };
 }
 

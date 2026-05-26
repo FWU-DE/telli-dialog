@@ -64,7 +64,7 @@ export type TextResponse = {
 export type StreamEvent =
   | { type: 'text'; delta: string }
   | { type: 'tool_call'; call: ToolCall }
-  | { type: 'finish'; usage: TokenUsage; finishReason: 'stop' | 'tool_calls' };
+  | { type: 'finish'; usage: TokenUsage };
 
 export type TextGenerationFn = (args: TextGenerationArgs) => Promise<TextResponse>;
 
