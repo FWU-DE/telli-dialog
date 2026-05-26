@@ -3,7 +3,7 @@
 import { ShieldWarningIcon } from '@phosphor-icons/react';
 import { EntityType, SuspensionRequestTargetIds } from '@shared/suspension/suspension-service';
 import { Button } from '@ui/components/button';
-import { useMessages, useTranslations } from 'next-intl';
+import { useMessages } from 'next-intl';
 import { CustomChatCreateSuspensionDialog } from './custom-chat-create-suspension-dialog';
 
 type CustomChatCreateSuspensionRequestProps = {
@@ -15,7 +15,6 @@ export function CustomChatCreateSuspensionRequestButton({
   entityType,
   entityId,
 }: CustomChatCreateSuspensionRequestProps) {
-  const t = useTranslations('suspension');
   const messages = useMessages();
 
   return (
