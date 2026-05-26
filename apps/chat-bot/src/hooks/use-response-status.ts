@@ -10,11 +10,15 @@ export function useCheckStatusCode() {
   const [isChatExpired, setIsChatExpired] = useState(false);
 
   const handleError = useCallback((error: Error) => {
+    const errorName = (error as { name?: string }).name;
+
     if (TokenPointsExceededError.is(error)) {
       setError(new Error(t('rate-limit-error')));
     } else if (SharedChatExpiredError.is(error)) {
       setIsChatExpired(true);
       setError(new Error(t('chat-expired')));
+    } else if (errorName === 'NotFoundError') {
+      setError(new Error(t('not-found-error')));
     } else {
       setError(new Error(t('generic-error')));
     }

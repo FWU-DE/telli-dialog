@@ -3,6 +3,7 @@ import { dbGetCharacterById } from '@shared/db/functions/character';
 import { ObscuredFederalState } from '@/auth/utils';
 import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { AssistantSelectModel } from '@shared/db/schema';
+import { NotFoundError } from '@shared/error';
 import { RetrievedChunk } from '../rag/types';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { constructCharacterSystemPrompt } from '../character/system-prompt';
@@ -141,8 +142,8 @@ export async function constructChatSystemPrompt({
   if (characterId !== undefined) {
     const character = await dbGetCharacterById({ characterId });
 
-    if (character === undefined) {
-      throw new Error(`Character with id ${characterId} not found`);
+    if (character === undefined || character.suspended) {
+      throw new NotFoundError('Character not found');
     }
 
     return constructCharacterSystemPrompt({ character, chunks });
@@ -151,8 +152,8 @@ export async function constructChatSystemPrompt({
   if (assistantId !== undefined) {
     const assistant = await dbGetAssistantById({ assistantId });
 
-    if (assistant === undefined) {
-      throw new Error(`Assistant with id ${assistantId} not found`);
+    if (assistant.suspended) {
+      throw new NotFoundError('Assistant not found');
     }
 
     if (assistant.id === HELP_MODE_ASSISTANT_ID) {

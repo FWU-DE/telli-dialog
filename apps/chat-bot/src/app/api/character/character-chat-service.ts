@@ -4,6 +4,7 @@ import {
   TokenPointsExceededError,
   SharedChatExpiredError,
 } from '@ais-chat/ai-core';
+import { NotFoundError } from '@shared/error';
 import { createTextStream } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
@@ -67,8 +68,8 @@ export async function sendCharacterMessage({
 }): Promise<SendMessageResult> {
   // Get character
   const character = await dbGetCharacterByIdAndInviteCode({ id: characterId, inviteCode });
-  if (character === undefined || character.startedBy === null) {
-    throw new Error('Could not get character');
+  if (character === undefined || character.startedBy === null || character.suspended) {
+    return createErrorResult(new NotFoundError('Character not found'));
   }
 
   // Get teacher user context

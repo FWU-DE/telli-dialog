@@ -4,6 +4,7 @@ import {
   TokenPointsExceededError,
   SharedChatExpiredError,
 } from '@ais-chat/ai-core';
+import { NotFoundError } from '@shared/error';
 import { createTextStream } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
@@ -70,8 +71,8 @@ export async function sendSharedChatMessage({
     learningScenarioId: sharedChatId,
     inviteCode,
   });
-  if (sharedChat === undefined) {
-    throw new Error('Could not get shared chat');
+  if (sharedChat === undefined || sharedChat.suspended) {
+    return createErrorResult(new NotFoundError('Shared chat not found'));
   }
 
   // Get teacher user context

@@ -2,9 +2,10 @@
 
 import { requireAuth } from '@/auth/requireAuth';
 import { userHasCompletedTraining } from '@/auth/utils';
+import { NotFoundError } from '@shared/error';
 
 import { sendChatMessage } from './chat-service';
-import { ChatMessage, SendMessageResult } from '@/types/chat';
+import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { checkProductAccess } from '@/utils/vidis/access';
 
 export type { ChatMessage, SendMessageResult } from '@/types/chat';
@@ -37,13 +38,21 @@ export async function sendChatMessageAction({
   if (!productAccess.hasAccess) {
     throw new Error(productAccess.errorType);
   }
-  return sendChatMessage({
-    conversationId,
-    messages,
-    modelId,
-    characterId,
-    assistantId,
-    fileIds,
-    user: userAndContext,
-  });
+
+  try {
+    return await sendChatMessage({
+      conversationId,
+      messages,
+      modelId,
+      characterId,
+      assistantId,
+      fileIds,
+      user: userAndContext,
+    });
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      return createErrorResult(error);
+    }
+    throw error;
+  }
 }

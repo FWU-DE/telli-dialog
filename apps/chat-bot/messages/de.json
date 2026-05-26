@@ -35,6 +35,7 @@
     "regenerate-message": "Antwort erneut generieren",
     "image-load-failed": "Bild konnte nicht geladen werden",
     "rate-limit-error": "Das bereitgestellte Tokenvolumen wurde aufgebraucht.",
+    "not-found-error": "Diese Seite gibt es leider nicht.",
     "generic-error": "Ein Fehler ist aufgetreten",
     "retry-button": "Erneut versuchen"
   },
