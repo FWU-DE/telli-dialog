@@ -116,7 +116,7 @@ export function CustomChatCreateSuspensionDialog({
                     {tMessages.suspension['create-dialog-reason-label']}
                   </FieldLabel>
                   <Select name={field.name} value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
+                    <SelectTrigger id="suspension-reason">
                       <SelectValue
                         placeholder={tMessages.suspension['create-dialog-reason-placeholder']}
                       />
@@ -146,7 +146,7 @@ export function CustomChatCreateSuspensionDialog({
                     {...field}
                     id="suspension-description"
                     maxLength={500}
-                    className="min-h-35 max-h-60 resize-none"
+                    className="min-h-36 max-h-60 resize-none"
                   />
                 </Field>
               )}
