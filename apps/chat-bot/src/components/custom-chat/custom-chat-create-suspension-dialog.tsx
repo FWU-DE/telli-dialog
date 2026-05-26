@@ -30,6 +30,8 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createSuspensionRequestAction } from '@/app/(authed)/(chat-bot)/actions/suspension-actions';
 
+const FORM_ID = 'create-suspension-form';
+
 const suspensionFormValuesSchema = z.object({
   reason: z.string().min(1),
   description: z.string().max(500),
@@ -48,19 +50,19 @@ export function CustomChatCreateSuspensionDialog({
 }: CustomChatCreateSuspensionDialogProps) {
   const [open, setOpen] = React.useState(false);
   const toast = useToast();
-  const messages = useMessages();
-  const tEntityMessages = messages.suspension[entityType];
-  const tResons = messages.suspension['create-dialog-reasons'];
+  const tMessages = useMessages();
+  const tEntityMessages = tMessages.suspension[entityType];
+  const tReasons = tMessages.suspension['create-dialog-reasons'];
 
   const reasons = [
-    { value: 'copyright_violation', label: tResons['copyright-violation'] },
-    { value: 'false_or_outdated_information', label: tResons['false-or-outdated-information'] },
-    { value: 'insufficient_sources', label: tResons['insufficient-sources'] },
-    { value: 'discrimination', label: tResons['discrimination'] },
-    { value: 'personal_data_usage_or_query', label: tResons['personal-data-usage-or-query'] },
-    { value: 'violence_or_extremist_content', label: tResons['violence-or-extremist-content'] },
-    { value: 'sexualized_content', label: tResons['sexualized-content'] },
-    { value: 'other', label: tResons['other'] },
+    { value: 'copyright_violation', label: tReasons['copyright-violation'] },
+    { value: 'false_or_outdated_information', label: tReasons['false-or-outdated-information'] },
+    { value: 'insufficient_sources', label: tReasons['insufficient-sources'] },
+    { value: 'discrimination', label: tReasons['discrimination'] },
+    { value: 'personal_data_usage_or_query', label: tReasons['personal-data-usage-or-query'] },
+    { value: 'violence_or_extremist_content', label: tReasons['violence-or-extremist-content'] },
+    { value: 'sexualized_content', label: tReasons['sexualized-content'] },
+    { value: 'other', label: tReasons['other'] },
   ] as const;
 
   const form = useForm<z.infer<typeof suspensionFormValuesSchema>>({
@@ -100,10 +102,10 @@ export function CustomChatCreateSuspensionDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>{tEntityMessages['create-dialog-title']}</AlertDialogTitle>
           <AlertDialogDescription className="sr-only">
-            {messages.suspension['create-dialog-description']}
+            {tMessages.suspension['create-dialog-description']}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <form id="create-suspension-form" onSubmit={form.handleSubmit(onSubmit)}>
+        <form id={FORM_ID} onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
             <Controller
               name="reason"
@@ -111,21 +113,23 @@ export function CustomChatCreateSuspensionDialog({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="suspension-reason" required>
-                    {messages.suspension['create-dialog-reason-label']}
+                    {tMessages.suspension['create-dialog-reason-label']}
                   </FieldLabel>
                   <Select name={field.name} value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Grund auswählen" />
-                      <SelectContent>
-                        <SelectGroup>
-                          {reasons.map((reason) => (
-                            <SelectItem key={reason.value} value={reason.value}>
-                              {reason.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
+                      <SelectValue
+                        placeholder={tMessages.suspension['create-dialog-reason-placeholder']}
+                      />
                     </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {reasons.map((reason) => (
+                          <SelectItem key={reason.value} value={reason.value}>
+                            {reason.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
                   </Select>
                 </Field>
               )}
@@ -136,7 +140,7 @@ export function CustomChatCreateSuspensionDialog({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="suspension-description">
-                    {messages.suspension['create-dialog-description-label']}
+                    {tMessages.suspension['create-dialog-description-label']}
                   </FieldLabel>
                   <Textarea
                     {...field}
@@ -152,12 +156,12 @@ export function CustomChatCreateSuspensionDialog({
 
         <AlertDialogFooter>
           <AlertDialogCancel>
-            {messages.suspension['create-dialog-cancel-button-text']}
+            {tMessages.suspension['create-dialog-cancel-button-text']}
           </AlertDialogCancel>
           <AlertDialogAction
             variant="default"
             type="submit"
-            form="create-suspension-form"
+            form={FORM_ID}
             disabled={!form.formState.isValid}
           >
             {tEntityMessages['create-dialog-confirm-button-text']}

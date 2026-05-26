@@ -594,6 +594,7 @@
     "create-dialog-description": "Dieser Dialog kann genutzt werden um unangemessene Inhalte zu melden.",
     "create-dialog-description-label": "Beschreibung",
     "create-dialog-reason-label": "Grund",
+    "create-dialog-reason-placeholder": "Grund auswählen",
     "create-dialog-cancel-button-text": "Abbrechen",
     "create-dialog-reasons": {
       "copyright-violation": "Urheberrechtsverletzung",
