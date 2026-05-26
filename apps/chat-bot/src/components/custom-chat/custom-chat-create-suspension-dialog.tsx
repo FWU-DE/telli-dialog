@@ -53,13 +53,13 @@ export function CustomChatCreateSuspensionDialog({
   const tResons = messages.suspension['create-dialog-reasons'];
 
   const reasons = [
-    { value: 'copyright-infringement', label: tResons['copyright-infringement'] },
-    { value: 'wrong-or-outdated', label: tResons['wrong-or-outdated'] },
-    { value: 'insufficient-citations', label: tResons['insufficient-citations'] },
+    { value: 'copyright_violation', label: tResons['copyright-violation'] },
+    { value: 'false_or_outdated_information', label: tResons['false-or-outdated-information'] },
+    { value: 'insufficient_sources', label: tResons['insufficient-sources'] },
     { value: 'discrimination', label: tResons['discrimination'] },
-    { value: 'personal-data', label: tResons['personal-data'] },
-    { value: 'violence', label: tResons['violence'] },
-    { value: 'sexualized-content', label: tResons['sexualized-content'] },
+    { value: 'personal_data_usage_or_query', label: tResons['personal-data-usage-or-query'] },
+    { value: 'violence_or_extremist_content', label: tResons['violence-or-extremist-content'] },
+    { value: 'sexualized_content', label: tResons['sexualized-content'] },
     { value: 'other', label: tResons['other'] },
   ] as const;
 

@@ -31,6 +31,7 @@ import {
   tokenPointsPercentageValues,
   usageTimeValuesInMinutes,
 } from '../../learning-scenarios/editor/[learningScenarioId]/schema';
+import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 
 export function CharacterView({
   character,
@@ -155,6 +156,12 @@ export function CharacterView({
           onDownloadFile={handleDownloadFile}
         />
       </div>
+      {character.hasLinkAccess && (
+        <CustomChatCreateSuspensionRequestButton
+          entityType="character"
+          entityId={{ characterId: character.id }}
+        />
+      )}
     </CustomChatLayoutContainer>
   );
 }

@@ -596,12 +596,12 @@
     "create-dialog-reason-label": "Grund",
     "create-dialog-cancel-button-text": "Abbrechen",
     "create-dialog-reasons": {
-      "copyright-infringement": "Urheberrechtsverletzung",
-      "wrong-or-outdated": "Falsche oder veraltete Informationen",
-      "insufficient-citations": "Unzureichende Quellenangaben",
+      "copyright-violation": "Urheberrechtsverletzung",
+      "false-or-outdated-information": "Falsche oder veraltete Informationen",
+      "insufficient-sources": "Unzureichende Quellenangaben",
       "discrimination": "Diskriminierung",
-      "personal-data": "Nutzung oder Abfrage persönlicher Daten",
-      "violence": "Gewalt / extremistische Inhalte",
+      "personal-data-usage-or-query": "Nutzung oder Abfrage persönlicher Daten",
+      "violence-or-extremist-content": "Gewalt / extremistische Inhalte",
       "sexualized-content": "Sexualisierte Inhalte",
       "other": "Sonstiges"
     },
