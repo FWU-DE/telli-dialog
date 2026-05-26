@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useMessages } from 'next-intl';
-import { EntityType } from '@shared/suspension/suspension-service';
+import { EntityType, SuspensionRequestTargetIds } from '@shared/suspension/suspension-service';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,20 +28,23 @@ import {
   SelectValue,
 } from '@ui/components/select';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { createSuspensionRequestAction } from '@/app/(authed)/(chat-bot)/actions/suspension-actions';
 
 const suspensionFormValuesSchema = z.object({
   reason: z.string().min(1),
-  description: z.string().max(500).optional(),
+  description: z.string().max(500),
 });
 
 type CustomChatCreateSuspensionDialogProps = {
   trigger: React.ReactElement;
   entityType: EntityType;
+  entityId: SuspensionRequestTargetIds;
 };
 
 export function CustomChatCreateSuspensionDialog({
   trigger,
   entityType,
+  entityId,
 }: CustomChatCreateSuspensionDialogProps) {
   const [open, setOpen] = React.useState(false);
   const toast = useToast();
@@ -69,9 +72,20 @@ export function CustomChatCreateSuspensionDialog({
     },
   });
 
-  function onSubmit(data: z.infer<typeof suspensionFormValuesSchema>) {
+  async function onSubmit(data: z.infer<typeof suspensionFormValuesSchema>) {
     console.log(data);
-    toast.success(tEntityMessages['create-dialog-success-message']);
+
+    const result = await createSuspensionRequestAction({
+      ...entityId,
+      reason: data.reason,
+      description: data.description,
+    });
+
+    if (result.success) {
+      toast.success(tEntityMessages['create-dialog-success-message']);
+    } else {
+      toast.error(result.error.message);
+    }
   }
 
   function handleOpenChange(nextOpen: boolean) {

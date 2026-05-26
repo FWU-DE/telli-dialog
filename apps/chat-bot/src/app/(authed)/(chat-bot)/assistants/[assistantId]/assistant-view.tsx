@@ -18,7 +18,7 @@ import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
 import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
-import { CustomChatCreateSuspensionRequest } from '@/components/custom-chat/custom-chat-create-suspension-request';
+import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 
 export function AssistantView({
   assistant,
@@ -109,7 +109,12 @@ export function AssistantView({
       />
       {assistant.isWebSearchEnabled && isWebSearchAvailable && <CustomChatWebSearch readonly />}
 
-      {assistant.hasLinkAccess && <CustomChatCreateSuspensionRequest entityType="assistant" />}
+      {assistant.hasLinkAccess && (
+        <CustomChatCreateSuspensionRequestButton
+          entityType="assistant"
+          entityId={{ assistantId: assistant.id }}
+        />
+      )}
     </CustomChatLayoutContainer>
   );
 }

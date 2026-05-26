@@ -27,7 +27,7 @@ import { InvalidArgumentError, NotFoundError, checkParameterUUID } from '@shared
 
 const suspensionRequestDescriptionSchema = z.string().min(1).max(500);
 
-type SuspensionRequestTargetIds = {
+export type SuspensionRequestTargetIds = {
   assistantId?: string;
   characterId?: string;
   learningScenarioId?: string;
