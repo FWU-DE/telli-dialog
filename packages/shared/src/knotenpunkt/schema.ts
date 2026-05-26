@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const knotenpunktPriceMetadata = z.discriminatedUnion('type', [
+const knotenpunktPriceMetadata = z.union([
   z.object({
     type: z.literal('text'),
     completionTokenPrice: z.number(),
