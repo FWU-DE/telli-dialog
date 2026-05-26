@@ -33,14 +33,17 @@ jobs:
             dockerfile: apps/api/Dockerfile
             image_ref: ghcr.io/fwu-de/ais-chat-api
             sentry_project: ${{ vars.SENTRY_PROJECT_API }}
+            server_actions_secret: ''
           - image_name: ais-chat-app
             dockerfile: apps/chat-bot/Dockerfile
             image_ref: ghcr.io/fwu-de/ais-chat-app
             sentry_project: ${{ vars.SENTRY_PROJECT_DIALOG }}
+            server_actions_secret: NEXT_SERVER_ACTIONS_ENCRYPTION_KEY_APP
           - image_name: ais-chat-admin
             dockerfile: apps/admin/Dockerfile
             image_ref: ghcr.io/fwu-de/ais-chat-admin
             sentry_project: ${{ vars.SENTRY_PROJECT_ADMIN }}
+            server_actions_secret: NEXT_SERVER_ACTIONS_ENCRYPTION_KEY_ADMIN
 
     steps:
       - name: Checkout repository
@@ -64,6 +67,7 @@ jobs:
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
           SENTRY_URL: ${{ vars.SENTRY_URL }}
           SENTRY_PROJECT: ${{ matrix.sentry_project }}
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ matrix.server_actions_secret != '' && secrets[matrix.server_actions_secret] || '' }}
         with:
           context: .
           file: ${{ matrix.dockerfile }}
@@ -72,6 +76,7 @@ jobs:
             SENTRY_ORG=SENTRY_ORG
             SENTRY_PROJECT=SENTRY_PROJECT
             SENTRY_URL=SENTRY_URL
+            NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
           build-args: |
             CI=${CI}
             APP_VERSION=${{ github.sha }}

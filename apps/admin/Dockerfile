@@ -55,6 +55,7 @@ RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
     --mount=type=secret,id=SENTRY_ORG,env=SENTRY_ORG \
     --mount=type=secret,id=SENTRY_PROJECT,env=SENTRY_PROJECT \
     --mount=type=secret,id=SENTRY_URL,env=SENTRY_URL \
+    --mount=type=secret,id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY \
     CI=${CI} \
     APP_VERSION=${APP_VERSION} \
     pnpm turbo build:envless

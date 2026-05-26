@@ -58,12 +58,26 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "passThroughEnv": ["CI", "SENTRY_AUTH_TOKEN", "SENTRY_ORG", "SENTRY_PROJECT", "SENTRY_URL"]
+      "passThroughEnv": [
+        "CI",
+        "SENTRY_AUTH_TOKEN",
+        "SENTRY_ORG",
+        "SENTRY_PROJECT",
+        "SENTRY_URL",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY"
+      ]
     },
     "build:envless": {
       "dependsOn": ["^build:envless"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "passThroughEnv": ["CI", "SENTRY_AUTH_TOKEN", "SENTRY_ORG", "SENTRY_PROJECT", "SENTRY_URL"]
+      "passThroughEnv": [
+        "CI",
+        "SENTRY_AUTH_TOKEN",
+        "SENTRY_ORG",
+        "SENTRY_PROJECT",
+        "SENTRY_URL",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY"
+      ]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
