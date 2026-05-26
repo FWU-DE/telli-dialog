@@ -3,11 +3,20 @@ import {
   constructAzureChatCompletionStreamFn,
   constructAzureResponsesGenerationFn,
   constructAzureResponsesStreamFn,
+  constructAzureResponsesToolStreamFn,
 } from './azure';
 import { constructGoogleTextGenerationFn, constructGoogleTextStreamFn } from './google';
 import { constructIonosTextGenerationFn, constructIonosTextStreamFn } from './ionos';
 import { constructOpenAITextGenerationFn, constructOpenAITextStreamFn } from './openai';
-import type { AiModel, GenerationOptions, TextGenerationFn, TextStreamFn } from '../types';
+import type {
+  AgenticStreamFn,
+  AiModel,
+  GenerationOptions,
+  StreamEvent,
+  TextGenerationFn,
+  TextStreamFn,
+  TokenUsage,
+} from '../types';
 import { ProviderConfigurationError } from '../../errors';
 
 function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerationFn | undefined {
@@ -51,6 +60,13 @@ function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | u
   return undefined;
 }
 
+function getToolStreamFnByModel({ model }: { model: AiModel }): AgenticStreamFn | undefined {
+  if (model.provider === 'azure') {
+    return constructAzureResponsesToolStreamFn(model);
+  }
+  return undefined; // TODO: Add support for other providers
+}
+
 export async function generateText(
   model: AiModel,
   messages: Parameters<TextGenerationFn>[0]['messages'],
@@ -70,12 +86,45 @@ export function generateTextStream(
   messages: Parameters<TextStreamFn>[0]['messages'],
   onComplete?: Parameters<TextStreamFn>[1],
   options?: GenerationOptions,
-) {
-  const streamFn = getTextStreamFnByModel({ model });
+): AsyncGenerator<string> {
+  if (!options?.tools) {
+    const streamFn = getTextStreamFnByModel({ model });
+    if (!streamFn) {
+      throw new ProviderConfigurationError(
+        `No text stream function found for provider: ${model.provider}`,
+      );
+    }
+    return streamFn({ messages, model: model.name, ...options }, onComplete);
+  }
+
+  const streamFn = getToolStreamFnByModel({ model });
   if (!streamFn) {
     throw new ProviderConfigurationError(
-      `No text stream function found for provider: ${model.provider}`,
+      `No tool stream function found for provider: ${model.provider}`,
     );
   }
-  return streamFn({ messages, model: model.name, ...options }, onComplete);
+  // The agentic loop will have to take care of this too
+  return filterToolStreamToText(streamFn({ messages, model: model.name, ...options }), onComplete);
+}
+
+async function* filterToolStreamToText(
+  stream: AsyncGenerator<StreamEvent>,
+  onComplete?: (usage: TokenUsage) => void | Promise<void>,
+): AsyncGenerator<string> {
+  let usage: TokenUsage | undefined;
+
+  for await (const event of stream) {
+    if (event.type === 'text') {
+      yield event.delta;
+      continue;
+    }
+
+    if (event.type === 'finish') {
+      usage = event.usage;
+    }
+  }
+
+  if (usage && onComplete) {
+    await onComplete(usage);
+  }
 }

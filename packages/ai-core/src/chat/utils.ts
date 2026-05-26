@@ -1,6 +1,6 @@
 import { getEncoding, type Tiktoken } from 'js-tiktoken';
 import type OpenAI from 'openai';
-import type { Message } from './types';
+import type { Message, ToolDefinition } from './types';
 
 /**
  * Converts internal Message format to OpenAI ChatCompletionMessageParam format.
@@ -95,6 +95,22 @@ export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.Ea
         content: message.content,
       } satisfies OpenAI.Responses.EasyInputMessage;
     });
+}
+
+export function toOpenAITools(
+  tools: ToolDefinition[] | undefined,
+): OpenAI.Responses.Tool[] | undefined {
+  if (!tools) return undefined;
+
+  return tools.map((tool) => {
+    return {
+      type: 'function',
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parameters,
+      strict: true, // Always recomended https://developers.openai.com/api/docs/guides/function-calling#strict-mode
+    } satisfies OpenAI.Responses.FunctionTool;
+  });
 }
 
 // Lazy-loaded encoder instance (cl100k_base is used for GPT-4, GPT-3.5-turbo, and newer models)
