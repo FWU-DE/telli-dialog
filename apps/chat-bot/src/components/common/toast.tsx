@@ -31,7 +31,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       <div className="flex items-center p-6 gap-4">
         {action === 'success' && <CheckIcon className="w-10 h-10 text-[#02A59B]" />}
         {action === 'error' && <DangerIcon className="w-10 h-10 text-coral" />}
-        <span>{msg}</span>
+        <span className="whitespace-pre-line">{msg}</span>
       </div>,
     );
     setOpen(true);

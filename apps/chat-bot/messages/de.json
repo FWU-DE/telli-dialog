@@ -589,5 +589,39 @@
     "sort-name-desc": "Alphabetisch Z-A",
     "close": "Schließen",
     "chat": "Chatten"
+  },
+  "suspension": {
+    "create-dialog-description": "Dieser Dialog kann genutzt werden um unangemessene Inhalte zu melden.",
+    "create-dialog-description-label": "Beschreibung",
+    "create-dialog-reason-label": "Grund",
+    "create-dialog-cancel-button-text": "Abbrechen",
+    "create-dialog-reasons": {
+      "copyright-infringement": "Urheberrechtsverletzung",
+      "wrong-or-outdated": "Falsche oder veraltete Informationen",
+      "insufficient-citations": "Unzureichende Quellenangaben",
+      "discrimination": "Diskriminierung",
+      "personal-data": "Nutzung oder Abfrage persönlicher Daten",
+      "violence": "Gewalt / extremistische Inhalte",
+      "sexualized-content": "Sexualisierte Inhalte",
+      "other": "Sonstiges"
+    },
+    "assistant": {
+      "create-button-text": "Assistent melden",
+      "create-dialog-title": "Assistent melden",
+      "create-dialog-confirm-button-text": "Assistent melden",
+      "create-dialog-success-message": "Vielen Dank!\nDer Assistent wurde gemeldet."
+    },
+    "character": {
+      "create-button-text": "Dialogpartner melden",
+      "create-dialog-title": "Dialogpartner melden",
+      "create-dialog-confirm-button-text": "Dialogpartner melden",
+      "create-dialog-success-message": "Vielen Dank!\nDer Dialogpartner wurde gemeldet."
+    },
+    "learningScenario": {
+      "create-button-text": "Lernszenario melden",
+      "create-dialog-title": "Lernszenario melden",
+      "create-dialog-confirm-button-text": "Lernszenario melden",
+      "create-dialog-success-message": "Vielen Dank!\nDas Lernszenario wurde gemeldet."
+    }
   }
 }

@@ -33,7 +33,7 @@ type SuspensionRequestTargetIds = {
   learningScenarioId?: string;
 };
 
-type EntityType = 'assistant' | 'character' | 'learningScenario';
+export type EntityType = 'assistant' | 'character' | 'learningScenario';
 
 type SuspensionRequestOverviewStatus = 'new' | 'suspended' | 'checked';
 

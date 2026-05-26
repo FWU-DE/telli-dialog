@@ -18,6 +18,7 @@ import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
 import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
+import { CustomChatCreateSuspensionRequest } from '@/components/custom-chat/custom-chat-create-suspension-request';
 
 export function AssistantView({
   assistant,
@@ -72,13 +73,11 @@ export function AssistantView({
         <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
         <CustomChatLastUpdate date={assistant.updatedAt} />
       </CustomChatActions>
-
       <Card>
         <CardContent className="flex justify-center items-center">
           <CustomChatAvatarImage pictureUrl={pictureUrl} />
         </CardContent>
       </Card>
-
       {assistant.accessLevel === 'global' && (
         <Card className="w-full">
           <CardContent className="flex flex-col items-center">
@@ -87,7 +86,6 @@ export function AssistantView({
           </CardContent>
         </Card>
       )}
-
       <Card>
         <CardContent>
           <CustomChatFields>
@@ -104,14 +102,14 @@ export function AssistantView({
           </CustomChatFields>
         </CardContent>
       </Card>
-
       <CustomChatFilesAndLinks
         initialFiles={fileMappings}
         initialLinks={assistant.attachedLinks.map((l) => ({ link: l }))}
         onDownloadFile={handleDownloadFile}
       />
-
       {assistant.isWebSearchEnabled && isWebSearchAvailable && <CustomChatWebSearch readonly />}
+
+      {assistant.hasLinkAccess && <CustomChatCreateSuspensionRequest entityType="assistant" />}
     </CustomChatLayoutContainer>
   );
 }
