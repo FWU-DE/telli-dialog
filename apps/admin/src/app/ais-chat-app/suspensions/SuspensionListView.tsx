@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/card';
 import {
   getSuspensionsAction,
@@ -48,13 +49,45 @@ export function SuspensionListView() {
     loadSuspensions();
   }, []);
 
-  function canMarkAsChecked() {
-    return false;
+  function mapEntityTypeToLabel(entityType: SuspensionRequestOverview['entityType']) {
+    switch (entityType) {
+      case 'assistant':
+        return 'Assistent';
+      case 'character':
+        return 'Dialogpartner';
+      case 'learningScenario':
+        return 'Lernszenario';
+      default:
+        return entityType;
+    }
   }
 
-  // function canMarkAsChecked(suspension: SuspensionRequestOverview) {
-  //   return suspension.status === 'new';
-  // }
+  function mapReasonToLabel(reason: SuspensionRequestOverview['reasons'][number]['reason']) {
+    switch (reason) {
+      case 'copyright_violation':
+        return 'Urheberrechtsverletzung';
+      case 'discrimination':
+        return 'Diskriminierung';
+      case 'false_or_outdated_information':
+        return 'Falsche oder veraltete Informationen';
+      case 'insufficient_sources':
+        return 'Unzureichende Quellenangaben';
+      case 'other':
+        return 'Sonstiges';
+      case 'personal_data_usage_or_query':
+        return 'Nutzung oder Abfrage persönlicher Daten';
+      case 'sexualized_content':
+        return 'Sexualisierte Inhalte';
+      case 'violence_or_extremist_content':
+        return 'Gewalt / extremistische Inhalte';
+      default:
+        return reason;
+    }
+  }
+
+  function canMarkAsChecked(suspension: SuspensionRequestOverview) {
+    return suspension.status === 'new';
+  }
 
   async function handleMarkAsChecked(suspensionRequestId: string) {
     const result = await markSuspensionRequestAsCheckedAction(suspensionRequestId);
@@ -122,11 +155,11 @@ export function SuspensionListView() {
           </TableHeader>
           <TableBody>
             {suspensions.map((suspension) => (
-              <>
+              <React.Fragment key={suspension.entityId}>
                 <TableRow key={suspension.entityId}>
-                  <TableCell>{suspension.entityType}</TableCell>
+                  <TableCell>{mapEntityTypeToLabel(suspension.entityType)}</TableCell>
                   <TableCell>{suspension.entityName}</TableCell>
-                  <TableCell>{JSON.stringify(suspension.latestRequestAt)}</TableCell>
+                  <TableCell>{suspension.latestRequestAt.toLocaleString()}</TableCell>
                   <TableCell>{suspension.requestCount}</TableCell>
                   <TableCell>{suspension.status}</TableCell>
                   <TableCell>
@@ -137,13 +170,6 @@ export function SuspensionListView() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        {canMarkAsChecked() && (
-                          <DropdownMenuItem
-                            onClick={() => handleMarkAsChecked('')} // Todo: wrong id here
-                          >
-                            gelesen
-                          </DropdownMenuItem>
-                        )}
                         {canSuspendEntity(suspension) && (
                           <DropdownMenuItem onClick={() => handleSuspendEntity(suspension)}>
                             sperren
@@ -160,10 +186,26 @@ export function SuspensionListView() {
                 </TableRow>
                 {suspension.reasons.map((reason, index) => (
                   <TableRow key={`${suspension.entityId}-reason-${index}`}>
-                    <TableCell colSpan={6}>{reason}</TableCell>
+                    <TableCell colSpan={5}>{mapReasonToLabel(reason.reason)}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreHorizontalIcon />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          {canMarkAsChecked(suspension) && (
+                            <DropdownMenuItem onClick={() => handleMarkAsChecked(reason.id)}>
+                              gelesen
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 ))}
-              </>
+              </React.Fragment>
             ))}
           </TableBody>
           <TableFooter>

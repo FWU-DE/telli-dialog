@@ -44,7 +44,7 @@ export type SuspensionRequestOverview = {
   requestCount: number;
   status: SuspensionRequestOverviewStatus;
   latestRequestAt: Date;
-  reasons: SuspensionRequestReason[];
+  reasons: { id: string; reason: SuspensionRequestReason }[];
 };
 
 type SuspensionRequest = Awaited<ReturnType<typeof dbGetAllSuspensionRequests>>[number];
@@ -365,7 +365,11 @@ function getSuspensionRequestAggregate(
       (latest, current) => (current.createdAt > latest ? current.createdAt : latest),
       suspensionRequests[0]!.createdAt,
     ),
-    reasons: [...new Set(suspensionRequests.map((suspensionRequest) => suspensionRequest.reason))],
+    reasons: suspensionRequests.map((suspensionRequest) => ({
+      id: suspensionRequest.id,
+      reason: suspensionRequest.reason,
+    })),
+
     hasUncheckedRequests: suspensionRequests.some(
       (suspensionRequest) => !suspensionRequest.checked,
     ),
