@@ -1,7 +1,7 @@
 import { instrumentOpenAiClient } from '@sentry/core';
 import OpenAI from 'openai';
 import type { AiModel, ImageGenerationFn } from '../types';
-import { AiGenerationError, ProviderConfigurationError } from '../../errors';
+import { AiGenerationError, ProviderConfigurationError, ResponsibleAIError } from '../../errors';
 
 function createAzureClient(model: AiModel): {
   client: OpenAI;
@@ -31,17 +31,35 @@ export function constructAzureImageGenerationFn(model: AiModel): ImageGeneration
 
   return async function getAzureImageGeneration(params: Parameters<ImageGenerationFn>[0]) {
     const { prompt } = params;
-    const result = await client.images.generate(
-      {
-        prompt,
-        size: '1024x1024',
-        n: 1,
-        quality: 'medium',
-      },
-      {
-        path: `/openai/deployments/${deployment}/images/generations`,
-      },
-    );
+    let result: Awaited<ReturnType<typeof client.images.generate>>;
+    try {
+      result = await client.images.generate(
+        {
+          prompt,
+          size: '1024x1024',
+          n: 1,
+          quality: 'medium',
+        },
+        {
+          path: `/openai/deployments/${deployment}/images/generations`,
+        },
+      );
+    } catch (error) {
+      if (error instanceof OpenAI.BadRequestError) {
+        if (
+          error.code === 'content_policy_violation' ||
+          error.code === 'ResponsibleAIPolicyViolation'
+        ) {
+          throw new ResponsibleAIError(
+            `Azure OpenAI Responsible AI Policy Violation: ${error.message}`,
+          );
+        }
+      }
+      if (error instanceof Error) {
+        throw new AiGenerationError(`Azure OpenAI Error: ${error.message}`);
+      }
+      throw new AiGenerationError('An unknown error occurred during Azure OpenAI image generation');
+    }
 
     if (!result.data || result.data.length === 0) {
       throw new AiGenerationError('No image data received from Azure OpenAI');
