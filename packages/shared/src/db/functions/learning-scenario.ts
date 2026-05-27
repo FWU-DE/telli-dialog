@@ -442,14 +442,41 @@ export async function dbCreateLearningScenarioShare({
 
 export async function dbSetLearningScenarioSuspended({
   learningScenarioId,
-  suspended,
 }: {
   learningScenarioId: string;
-  suspended: boolean;
 }) {
   const [updatedLearningScenario] = await db
     .update(learningScenarioTable)
-    .set({ suspended })
+    .set({
+      suspended: true,
+      accessLevel: 'private',
+      hasLinkAccess: false,
+    })
+    .where(eq(learningScenarioTable.id, learningScenarioId))
+    .returning();
+
+  if (!updatedLearningScenario) {
+    throw new NotFoundError('Learning scenario not found');
+  }
+
+  const learningScenario = await dbGetLearningScenarioById({
+    learningScenarioId: updatedLearningScenario.id,
+  });
+  if (!learningScenario) {
+    throw new NotFoundError('Learning scenario not found');
+  }
+
+  return learningScenario;
+}
+
+export async function dbLiftSuspensionOnLearningScenario({
+  learningScenarioId,
+}: {
+  learningScenarioId: string;
+}) {
+  const [updatedLearningScenario] = await db
+    .update(learningScenarioTable)
+    .set({ suspended: false })
     .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 

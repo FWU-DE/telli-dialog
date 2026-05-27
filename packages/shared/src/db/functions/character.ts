@@ -471,16 +471,33 @@ export async function dbGetGlobalCharacterByName({
   return character;
 }
 
-export async function dbSetCharacterSuspended({
-  characterId,
-  suspended,
-}: {
-  characterId: string;
-  suspended: boolean;
-}) {
+export async function dbSetCharacterSuspended({ characterId }: { characterId: string }) {
   const [updatedCharacter] = await db
     .update(characterTable)
-    .set({ suspended })
+    .set({
+      suspended: true,
+      accessLevel: 'private',
+      hasLinkAccess: false,
+    })
+    .where(eq(characterTable.id, characterId))
+    .returning();
+
+  if (!updatedCharacter) {
+    throw new NotFoundError('Character not found');
+  }
+
+  const character = await dbGetCharacterById({ characterId: updatedCharacter.id });
+  if (!character) {
+    throw new NotFoundError('Character not found');
+  }
+
+  return character;
+}
+
+export async function dbLiftSuspensionOnCharacter({ characterId }: { characterId: string }) {
+  const [updatedCharacter] = await db
+    .update(characterTable)
+    .set({ suspended: false })
     .where(eq(characterTable.id, characterId))
     .returning();
 

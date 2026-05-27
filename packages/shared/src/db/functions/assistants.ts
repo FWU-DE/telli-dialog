@@ -168,16 +168,28 @@ export async function dbUpsertAssistant({
   return dbGetAssistantById({ assistantId: insertedAssistant.id });
 }
 
-export async function dbSetAssistantSuspended({
-  assistantId,
-  suspended,
-}: {
-  assistantId: string;
-  suspended: boolean;
-}) {
+export async function dbSetAssistantSuspended({ assistantId }: { assistantId: string }) {
   const [updatedAssistant] = await db
     .update(assistantTable)
-    .set({ suspended })
+    .set({
+      suspended: true,
+      accessLevel: 'private',
+      hasLinkAccess: false,
+    })
+    .where(eq(assistantTable.id, assistantId))
+    .returning();
+
+  if (!updatedAssistant) {
+    throw new NotFoundError('Assistant not found');
+  }
+
+  return dbGetAssistantById({ assistantId: updatedAssistant.id });
+}
+
+export async function dbLiftSuspensionOnAssistant({ assistantId }: { assistantId: string }) {
+  const [updatedAssistant] = await db
+    .update(assistantTable)
+    .set({ suspended: false })
     .where(eq(assistantTable.id, assistantId))
     .returning();
 

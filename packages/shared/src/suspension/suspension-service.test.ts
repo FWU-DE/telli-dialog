@@ -13,16 +13,19 @@ import { dbGetUserById } from '@shared/db/functions/user';
 import {
   dbGetAssistantById,
   dbGetAssistantsByIds,
+  dbLiftSuspensionOnAssistant,
   dbSetAssistantSuspended,
 } from '@shared/db/functions/assistants';
 import {
   dbGetCharacterById,
   dbGetCharactersByIds,
+  dbLiftSuspensionOnCharacter,
   dbSetCharacterSuspended,
 } from '@shared/db/functions/character';
 import {
   dbGetLearningScenarioById,
   dbGetLearningScenariosByIds,
+  dbLiftSuspensionOnLearningScenario,
   dbSetLearningScenarioSuspended,
 } from '@shared/db/functions/learning-scenario';
 import {
@@ -40,18 +43,21 @@ vi.mock('@shared/db/functions/user', () => ({
 vi.mock('@shared/db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
   dbGetAssistantsByIds: vi.fn(),
+  dbLiftSuspensionOnAssistant: vi.fn(),
   dbSetAssistantSuspended: vi.fn(),
 }));
 
 vi.mock('@shared/db/functions/character', () => ({
   dbGetCharacterById: vi.fn(),
   dbGetCharactersByIds: vi.fn(),
+  dbLiftSuspensionOnCharacter: vi.fn(),
   dbSetCharacterSuspended: vi.fn(),
 }));
 
 vi.mock('@shared/db/functions/learning-scenario', () => ({
   dbGetLearningScenarioById: vi.fn(),
   dbGetLearningScenariosByIds: vi.fn(),
+  dbLiftSuspensionOnLearningScenario: vi.fn(),
   dbSetLearningScenarioSuspended: vi.fn(),
 }));
 
@@ -286,38 +292,49 @@ describe('suspension-request-service', () => {
       (dbSetAssistantSuspended as MockedFunction<typeof dbSetAssistantSuspended>).mockResolvedValue(
         { id: assistantId, suspended: true } as never,
       );
+      (
+        dbLiftSuspensionOnAssistant as MockedFunction<typeof dbLiftSuspensionOnAssistant>
+      ).mockResolvedValue({ id: assistantId, suspended: false } as never);
 
       await suspendEntity({ assistantId });
-      expect(dbSetAssistantSuspended).toHaveBeenCalledWith({ assistantId, suspended: true });
+      expect(dbSetAssistantSuspended).toHaveBeenCalledWith({ assistantId });
 
       await liftSuspensionOnEntity({ assistantId });
-      expect(dbSetAssistantSuspended).toHaveBeenCalledWith({ assistantId, suspended: false });
+      expect(dbLiftSuspensionOnAssistant).toHaveBeenCalledWith({ assistantId });
     });
 
     it('suspends and unsuspends character', async () => {
       const characterId = generateUUID();
+      (dbSetCharacterSuspended as MockedFunction<typeof dbSetCharacterSuspended>).mockResolvedValue(
+        { id: characterId, suspended: true } as never,
+      );
+      (
+        dbLiftSuspensionOnCharacter as MockedFunction<typeof dbLiftSuspensionOnCharacter>
+      ).mockResolvedValue({ id: characterId, suspended: false } as never);
 
       await suspendEntity({ characterId });
-      expect(dbSetCharacterSuspended).toHaveBeenCalledWith({ characterId, suspended: true });
+      expect(dbSetCharacterSuspended).toHaveBeenCalledWith({ characterId });
 
       await liftSuspensionOnEntity({ characterId });
-      expect(dbSetCharacterSuspended).toHaveBeenCalledWith({ characterId, suspended: false });
+      expect(dbLiftSuspensionOnCharacter).toHaveBeenCalledWith({ characterId });
     });
 
     it('suspends and unsuspends learning scenario', async () => {
       const learningScenarioId = generateUUID();
+      (
+        dbSetLearningScenarioSuspended as MockedFunction<typeof dbSetLearningScenarioSuspended>
+      ).mockResolvedValue({ id: learningScenarioId, suspended: true } as never);
+      (
+        dbLiftSuspensionOnLearningScenario as MockedFunction<
+          typeof dbLiftSuspensionOnLearningScenario
+        >
+      ).mockResolvedValue({ id: learningScenarioId, suspended: false } as never);
 
       await suspendEntity({ learningScenarioId });
-      expect(dbSetLearningScenarioSuspended).toHaveBeenCalledWith({
-        learningScenarioId,
-        suspended: true,
-      });
+      expect(dbSetLearningScenarioSuspended).toHaveBeenCalledWith({ learningScenarioId });
 
       await liftSuspensionOnEntity({ learningScenarioId });
-      expect(dbSetLearningScenarioSuspended).toHaveBeenCalledWith({
-        learningScenarioId,
-        suspended: false,
-      });
+      expect(dbLiftSuspensionOnLearningScenario).toHaveBeenCalledWith({ learningScenarioId });
     });
 
     it('throws if none or multiple target ids are provided', async () => {

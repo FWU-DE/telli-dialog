@@ -3,16 +3,19 @@ import { verifyReadAccess } from '@shared/auth/authorization-service';
 import {
   dbGetAssistantById,
   dbGetAssistantsByIds,
+  dbLiftSuspensionOnAssistant,
   dbSetAssistantSuspended,
 } from '@shared/db/functions/assistants';
 import {
   dbGetCharacterById,
   dbGetCharactersByIds,
+  dbLiftSuspensionOnCharacter,
   dbSetCharacterSuspended,
 } from '@shared/db/functions/character';
 import {
   dbGetLearningScenarioById,
   dbGetLearningScenariosByIds,
+  dbLiftSuspensionOnLearningScenario,
   dbSetLearningScenarioSuspended,
 } from '@shared/db/functions/learning-scenario';
 import {
@@ -178,12 +181,21 @@ export async function suspendEntity({
   characterId,
   learningScenarioId,
 }: SuspensionRequestTargetIds) {
-  return setEntitySuspensionState({
-    assistantId,
-    characterId,
-    learningScenarioId,
-    suspended: true,
-  });
+  validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
+
+  if (assistantId) {
+    return dbSetAssistantSuspended({ assistantId });
+  }
+
+  if (characterId) {
+    return dbSetCharacterSuspended({ characterId });
+  }
+
+  if (learningScenarioId) {
+    return dbSetLearningScenarioSuspended({ learningScenarioId });
+  }
+
+  throw new InvalidArgumentError('Exactly one target entity id must be provided');
 }
 
 export async function liftSuspensionOnEntity({
@@ -191,33 +203,18 @@ export async function liftSuspensionOnEntity({
   characterId,
   learningScenarioId,
 }: SuspensionRequestTargetIds) {
-  return setEntitySuspensionState({
-    assistantId,
-    characterId,
-    learningScenarioId,
-    suspended: false,
-  });
-}
-
-// internal helper for deduplication - use suspendEntity and liftSuspensionOnEntity for clarity of intent
-async function setEntitySuspensionState({
-  assistantId,
-  characterId,
-  learningScenarioId,
-  suspended,
-}: SuspensionRequestTargetIds & { suspended: boolean }) {
   validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
 
   if (assistantId) {
-    return dbSetAssistantSuspended({ assistantId, suspended });
+    return dbLiftSuspensionOnAssistant({ assistantId });
   }
 
   if (characterId) {
-    return dbSetCharacterSuspended({ characterId, suspended });
+    return dbLiftSuspensionOnCharacter({ characterId });
   }
 
   if (learningScenarioId) {
-    return dbSetLearningScenarioSuspended({ learningScenarioId, suspended });
+    return dbLiftSuspensionOnLearningScenario({ learningScenarioId });
   }
 
   throw new InvalidArgumentError('Exactly one target entity id must be provided');
