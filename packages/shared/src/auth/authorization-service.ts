@@ -54,7 +54,7 @@ export function verifySuspensionState<T extends Pick<AuthorizedItem, 'suspended'
   item: T;
 }) {
   if (item.suspended) {
-    throw new ForbiddenError(`Not authorized to perform this action`);
+    throw new ForbiddenError('Cannot perform this action: item is suspended');
   }
 }
 
