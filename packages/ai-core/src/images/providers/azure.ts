@@ -46,10 +46,7 @@ export function constructAzureImageGenerationFn(model: AiModel): ImageGeneration
       );
     } catch (error) {
       if (error instanceof OpenAI.BadRequestError) {
-        if (
-          error.code === 'content_policy_violation' ||
-          error.code === 'ResponsibleAIPolicyViolation'
-        ) {
+        if (error.code === 'moderation_blocked' || error.code === 'content_policy_violation') {
           throw new ResponsibleAIError(
             `Azure OpenAI Responsible AI Policy Violation: ${error.message}`,
           );
