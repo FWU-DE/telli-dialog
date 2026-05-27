@@ -336,12 +336,15 @@ describe('suspension-request-service', () => {
       const assistantId = generateUUID();
       const characterId = generateUUID();
       const requesterId = generateUUID();
+      const requestId1 = generateUUID();
+      const requestId2 = generateUUID();
+      const requestId3 = generateUUID();
 
       (
         dbGetAllSuspensionRequests as MockedFunction<typeof dbGetAllSuspensionRequests>
       ).mockResolvedValue([
         {
-          id: generateUUID(),
+          id: requestId1,
           assistantId,
           characterId: null,
           learningScenarioId: null,
@@ -352,7 +355,7 @@ describe('suspension-request-service', () => {
           checked: false,
         },
         {
-          id: generateUUID(),
+          id: requestId2,
           assistantId,
           characterId: null,
           learningScenarioId: null,
@@ -363,7 +366,7 @@ describe('suspension-request-service', () => {
           checked: true,
         },
         {
-          id: generateUUID(),
+          id: requestId3,
           assistantId: null,
           characterId,
           learningScenarioId: null,
@@ -404,12 +407,17 @@ describe('suspension-request-service', () => {
       expect(first?.entityType).toBe('character');
       expect(first?.status).toBe('suspended');
       expect(first?.reasons).toHaveLength(1);
-      expect(first?.reasons).toEqual(expect.arrayContaining(['other']));
+      expect(first?.reasons).toEqual(expect.arrayContaining([{ id: requestId3, reason: 'other' }]));
       expect(second?.entityType).toBe('assistant');
       expect(second?.requestCount).toBe(2);
       expect(second?.status).toBe('new');
       expect(second?.reasons).toHaveLength(2);
-      expect(second?.reasons).toEqual(expect.arrayContaining(['discrimination', 'other']));
+      expect(second?.reasons).toEqual(
+        expect.arrayContaining([
+          { id: requestId1, reason: 'discrimination' },
+          { id: requestId2, reason: 'other' },
+        ]),
+      );
     });
 
     it('throws NotFoundError when grouped character cannot be resolved', async () => {
@@ -446,12 +454,13 @@ describe('suspension-request-service', () => {
 
     it('returns learning scenario overview with checked status', async () => {
       const learningScenarioId = generateUUID();
+      const requestId = generateUUID();
 
       (
         dbGetAllSuspensionRequests as MockedFunction<typeof dbGetAllSuspensionRequests>
       ).mockResolvedValue([
         {
-          id: generateUUID(),
+          id: requestId,
           assistantId: null,
           characterId: null,
           learningScenarioId,
@@ -484,7 +493,7 @@ describe('suspension-request-service', () => {
       expect(result).toHaveLength(1);
       expect(result[0]?.entityType).toBe('learningScenario');
       expect(result[0]?.status).toBe('checked');
-      expect(result[0]?.reasons).toEqual(['other']);
+      expect(result[0]?.reasons).toEqual([{ id: requestId, reason: 'other' }]);
     });
   });
 
