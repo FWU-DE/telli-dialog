@@ -3,7 +3,6 @@ import OpenAI from 'openai';
 import type {
   AgenticStreamFn,
   AiModel,
-  StreamEvent,
   TextGenerationFn,
   TextStreamFn,
   TokenUsage,
@@ -129,7 +128,7 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
   };
 }
 
-export function constructAzureResponsesToolStreamFn(model: AiModel): AgenticStreamFn {
+export function constructAzureResponsesAgenticStreamFn(model: AiModel): AgenticStreamFn {
   const { client, deployment } = createAzureClient(model);
 
   return async function* getAzureTextStream({ messages, maxTokens, tools }) {

@@ -3,11 +3,19 @@ import {
   constructAzureChatCompletionStreamFn,
   constructAzureResponsesGenerationFn,
   constructAzureResponsesStreamFn,
-  constructAzureResponsesToolStreamFn,
+  constructAzureResponsesAgenticStreamFn,
 } from './azure';
 import { constructGoogleTextGenerationFn, constructGoogleTextStreamFn } from './google';
-import { constructIonosTextGenerationFn, constructIonosTextStreamFn } from './ionos';
-import { constructOpenAITextGenerationFn, constructOpenAITextStreamFn } from './openai';
+import {
+  constructIonosAgenticStreamFn,
+  constructIonosTextGenerationFn,
+  constructIonosTextStreamFn,
+} from './ionos';
+import {
+  constructOpenAIAgenticStreamFn,
+  constructOpenAITextGenerationFn,
+  constructOpenAITextStreamFn,
+} from './openai';
 import type {
   AgenticStreamFn,
   AiModel,
@@ -60,9 +68,15 @@ function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | u
   return undefined;
 }
 
-function getToolStreamFnByModel({ model }: { model: AiModel }): AgenticStreamFn | undefined {
+function getAgenticStreamFnByModel({ model }: { model: AiModel }): AgenticStreamFn | undefined {
   if (model.provider === 'azure') {
-    return constructAzureResponsesToolStreamFn(model);
+    return constructAzureResponsesAgenticStreamFn(model);
+  }
+  if (model.provider === 'ionos') {
+    return constructIonosAgenticStreamFn(model);
+  }
+  if (model.provider === 'openai') {
+    return constructOpenAIAgenticStreamFn(model);
   }
   return undefined; // TODO: Add support for other providers
 }
@@ -97,7 +111,7 @@ export function generateTextStream(
     return streamFn({ messages, model: model.name, ...options }, onComplete);
   }
 
-  const streamFn = getToolStreamFnByModel({ model });
+  const streamFn = getAgenticStreamFnByModel({ model });
   if (!streamFn) {
     throw new ProviderConfigurationError(
       `No tool stream function found for provider: ${model.provider}`,

@@ -113,6 +113,24 @@ export function toOpenAITools(
   });
 }
 
+export function toOpenAIChatTools(
+  tools: ToolDefinition[] | undefined,
+): OpenAI.Chat.Completions.ChatCompletionTool[] | undefined {
+  if (!tools) return undefined;
+
+  return tools.map((tool) => {
+    return {
+      type: 'function',
+      function: {
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.parameters,
+        strict: true,
+      },
+    } satisfies OpenAI.Chat.Completions.ChatCompletionTool;
+  });
+}
+
 // Lazy-loaded encoder instance (cl100k_base is used for GPT-4, GPT-3.5-turbo, and newer models)
 let encoder: Tiktoken | null = null;
 
