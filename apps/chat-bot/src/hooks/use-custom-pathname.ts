@@ -33,7 +33,7 @@ export function useCustomPathname() {
   const pathname = useSyncExternalStore(
     subscribe,
     () => window.location.pathname,
-    () => '', // Not supported on server
+    () => nextPathname, // window.location.pathname is empty string on server, so we return nextPathname
   );
 
   return pathname;
