@@ -1,8 +1,4 @@
-import {
-  generateTextStreamWithBilling,
-  type Message as AiCoreMessage,
-  TokenPointsExceededError,
-} from '@ais-chat/ai-core';
+import { type Message as AiCoreMessage, TokenPointsExceededError } from '@ais-chat/ai-core';
 import { createTextStream } from '@/utils/streaming';
 import { userHasReachedTokenPointsLimit } from './usage';
 import { getModelAndApiKeyWithResult, getAuxiliaryModel } from '../utils/utils';
@@ -32,7 +28,8 @@ import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
-import { runWebSearchPipeline } from './websearch';
+import { runAgentLoop } from './agent-loop';
+import { buildTools } from './build-tools';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -141,14 +138,11 @@ export async function sendChatMessage({
     federalStateId: user.federalState.id,
   });
 
-  // Web search
-  const webSearchResults = await runWebSearchPipeline({
-    messages,
+  // Build tools based on enabled features
+  const { tools, toolHandlers } = await buildTools({
     user,
     characterId,
     assistantId,
-    modelId: auxiliaryModel.id,
-    apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
     conversationId: conversation.id,
   });
 
@@ -205,7 +199,6 @@ export async function sendChatMessage({
     federalState: user.federalState,
     chunks,
     errorUrls,
-    webSearchResults,
   });
 
   // Check if the model supports images based on supportedImageFormats
@@ -229,77 +222,75 @@ export async function sendChatMessage({
   const { stream, update, done, error: streamError } = createTextStream();
   const assistantMessageId = crypto.randomUUID();
 
-  // Start streaming in the background
-  (async () => {
-    let fullText = '';
+  // Start the agent loop in the background
+  runAgentLoop({
+    modelId: definedModel.id,
+    apiKeyId,
+    messages: aiCoreMessages,
+    tools,
+    toolHandlers,
+    onTextChunk: (delta) => {
+      update(delta);
+    },
+    onComplete: async ({ fullText, usage, priceInCents }) => {
+      try {
+        // Save assistant message to DB
+        await dbInsertChatContent({
+          content: fullText,
+          role: 'assistant',
+          userId: user.id,
+          orderNumber: messages.length + 2,
+          modelName: definedModel.name,
+          conversationId: conversation.id,
+          webSearchResults: [], // TODO pass actual web search results
+        });
 
-    try {
-      const textStream = generateTextStreamWithBilling(
-        definedModel.id,
-        aiCoreMessages,
-        apiKeyId,
-        async ({ usage, priceInCents }) => {
-          // Save assistant message to DB
-          await dbInsertChatContent({
-            content: fullText,
-            role: 'assistant',
-            userId: user.id,
-            orderNumber: messages.length + 2,
-            modelName: definedModel.name,
-            conversationId: conversation.id,
-            webSearchResults,
+        // Generate title if needed
+        if (messages.length <= 2 || conversation.name === null) {
+          const chatTitle = await getChatTitle({
+            modelId: auxiliaryModel.id,
+            apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
+            message: userMessage,
           });
-
-          // Generate title if needed
-          if (messages.length <= 2 || conversation.name === null) {
-            const chatTitle = await getChatTitle({
-              modelId: auxiliaryModel.id,
-              apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
-              message: userMessage,
-            });
-            await dbUpdateConversationTitle({
-              name: chatTitle,
-              conversationId: conversation.id,
-              userId: user.id,
-            });
-          }
-
-          const { promptTokens, completionTokens } = usage;
-
-          // Save usage
-          await dbInsertConversationUsage({
+          await dbUpdateConversationTitle({
+            name: chatTitle,
             conversationId: conversation.id,
             userId: user.id,
-            modelId: definedModel.id,
-            completionTokens,
+          });
+        }
+
+        const { promptTokens, completionTokens } = usage;
+
+        // Save usage
+        await dbInsertConversationUsage({
+          conversationId: conversation.id,
+          userId: user.id,
+          modelId: definedModel.id,
+          completionTokens,
+          promptTokens,
+          costsInCent: priceInCents,
+        });
+
+        // Send event
+        await sendRabbitmqEvent(
+          constructNewMessageEvent({
+            user,
             promptTokens,
+            completionTokens,
             costsInCent: priceInCents,
-          });
+            provider: definedModel.provider,
+            anonymous: false,
+            conversation,
+          }),
+        );
 
-          // Send event
-          await sendRabbitmqEvent(
-            constructNewMessageEvent({
-              user,
-              promptTokens,
-              completionTokens,
-              costsInCent: priceInCents,
-              provider: definedModel.provider,
-              anonymous: false,
-              conversation,
-            }),
-          );
-        },
-      );
-
-      for await (const chunk of textStream) {
-        fullText += chunk;
-        update(chunk);
+        done();
+      } catch (error) {
+        logError('Error during agent loop completion:', error);
+        streamError(error instanceof Error ? error : new Error('Unknown error'));
       }
-
-      done();
-    } catch (error) {
-      logError('Error during chat streaming:', error);
-
+    },
+    onError: async (error) => {
       // Save empty assistant message on error
       await dbInsertChatContent({
         content: '',
@@ -310,13 +301,13 @@ export async function sendChatMessage({
         conversationId: conversation.id,
       });
 
-      streamError(error instanceof Error ? error : new Error('Unknown error'));
-    }
-  })();
+      streamError(error);
+    },
+  });
 
   return {
     stream,
     messageId: assistantMessageId,
-    webSearchResults,
+    webSearchResults: [], // TODO pass actual web search results
   };
 }

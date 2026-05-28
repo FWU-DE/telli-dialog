@@ -121,6 +121,20 @@ export function generateTextStream(
   return filterToolStreamToText(streamFn({ messages, model: model.name, ...options }), onComplete);
 }
 
+export function generateAgenticStream(
+  model: AiModel,
+  messages: Parameters<AgenticStreamFn>[0]['messages'],
+  options?: GenerationOptions,
+): AsyncGenerator<StreamEvent> {
+  const streamFn = getAgenticStreamFnByModel({ model });
+  if (!streamFn) {
+    throw new ProviderConfigurationError(
+      `No agentic stream function found for provider: ${model.provider}`,
+    );
+  }
+  return streamFn({ messages, model: model.name, ...options });
+}
+
 async function* filterToolStreamToText(
   stream: AsyncGenerator<StreamEvent>,
   onComplete?: (usage: TokenUsage) => void | Promise<void>,

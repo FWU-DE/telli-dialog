@@ -1,6 +1,5 @@
 import { SUPPORTED_DOCUMENTS_EXTENSIONS, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
 import { RetrievedChunk } from '../rag/types';
-import type { WebSearchResult } from '@shared/db/schema';
 
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien
@@ -13,7 +12,7 @@ export const TOOL_GUIDELINES = `
 ## Fähigkeiten und Einschränkungen
 - Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Ausschließlich folgende Formate werden unterstützt: ${[...SUPPORTED_DOCUMENTS_EXTENSIONS, ...SUPPORTED_IMAGE_EXTENSIONS].map((ext) => ext.toUpperCase()).join(', ')}. Biete niemals an, andere Formate zu verarbeiten. Der Inhalt dieser Dateien steht dir im Kontext zur Verfügung.
 - Du kannst **Links und URLs lesen**, die die Nutzerin oder der Nutzer dir schickt. Die Inhalte der Webseiten werden automatisch für dich abgerufen und stehen dir im Kontext zur Verfügung. Sage NIEMALS, dass du generell keine Webseiten aufrufen oder keine Live-Inhalte abrufen kannst - die Inhalte liegen dir bereits vor.
-- Du kannst eine **Websuche durchführen**. Wenn die Nutzerin oder der Nutzer eine Frage stellt, die aktuelle Informationen erfordert, wird für dich eine Websuche durchgeführt. Die Inhalte der Websuche stehen dir im Kontext zur Verfügung.
+- Du kannst eine **Websuche durchführen**. Wenn die Nutzerin oder der Nutzer eine Frage stellt, die aktuelle Informationen erfordert, führe die Websuche **sofort selbst durch** – frage niemals erst nach Erlaubnis oder ob du suchen sollst. Führe pro Nutzernachricht **maximal eine Websuche** durch und nutze die erhaltenen Ergebnisse direkt für deine Antwort.
 - Du kannst **ausschließlich Textantworten** generieren.
 - Du kannst **keine Dateien erstellen** (z.B. Word-Dokumente, PDFs, Excel-Tabellen, Bilder etc.). Biete dies niemals an.
 - Die Nutzerin oder der Nutzer kann die Konversation über den Button mit dem Download-Icon ("Konversation herunterladen") in der oberen rechten Ecke herunterladen.
@@ -31,7 +30,8 @@ export const FORMAT_GUIDELINES = `
 
 export const SUGGESTION_GUIDELINES = `
 ## Vorschläge und Rückfragen
-Solltest du notwendige Rückfragen oder hilfreiche Vorschläge haben, um den User zu inspirieren, beende die Antwort damit.
+Beantworte die Frage immer zuerst mit der naheliegendsten Interpretation - stelle niemals eine Rückfrage als Ersatz für eine Antwort.
+Rückfragen oder Vorschläge kommen ausschließlich am Ende der Antwort.
 Bei einfachen Fragen erstelle nur einen Vorschlag. Bei komplexeren Fragen erstelle bis zu drei Vorschläge, falls das Thema es zulässt.
 Biete nie mehr als drei Vorschläge an.
 Solltest du bereits Vorschläge bereitet haben, auf die dein Gegenüber nicht eingegangen ist, überspring diese.
@@ -39,12 +39,8 @@ Markiere die wichtigsten Begriffe **fett**.
 
 \`\`\``;
 
-export function constructRagContext(
-  chunks: RetrievedChunk[],
-  errorUrls: string[] = [],
-  webSearchResults: WebSearchResult[] = [],
-) {
-  if (chunks.length === 0 && errorUrls.length === 0 && webSearchResults.length === 0) return '';
+export function constructRagContext(chunks: RetrievedChunk[], errorUrls: string[] = []) {
+  if (chunks.length === 0 && errorUrls.length === 0) return '';
 
   const fileChunks = chunks
     .filter((chunk) => chunk.sourceType === 'file')
@@ -85,15 +81,6 @@ export function constructRagContext(
   if (errorUrls.length > 0) {
     sections.push(
       `### Fehler beim Zugriff\nEs gab Probleme beim Zugriff auf die folgenden URLs:\n${errorUrls.map((url) => `- ${url}`).join('\n')}`,
-    );
-  }
-
-  if (webSearchResults.length > 0) {
-    const webSearchText = webSearchResults
-      .map((result) => `Url: ${result.url}\n${result.content}`)
-      .join('\n\n');
-    sections.push(
-      `### Websuche\nDie folgenden Inhalte stammen aus einer live Websuche:\n\n${webSearchText}`,
     );
   }
 
