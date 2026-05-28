@@ -25,6 +25,7 @@ export async function buildTools({
   const toolHandlers: Record<string, ToolHandler> = {};
 
   const webSearchEnabled = await isWebSearchEnabled({ user, characterId, assistantId });
+
   if (webSearchEnabled) {
     tools.push({
       name: 'web_search',
@@ -43,6 +44,7 @@ export async function buildTools({
         additionalProperties: false,
       },
     });
+
     toolHandlers['web_search'] = async (args) => {
       const results = await searchWeb({
         query: args.query as string,
