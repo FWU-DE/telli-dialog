@@ -62,7 +62,6 @@
     --success: #02a59bff;
     --success-foreground: #ffffff;
     --error: #9f070d;
-    --error-background: #fef6f6;
     --error-foreground: #000000;
     --warning: #facc15ff;
     --warning-foreground: #ffffff;
@@ -108,7 +107,6 @@
     --success: #ffffff;
     --success-foreground: #ffffff;
     --error: #9f070d;
-    --error-background: #fef6f6;
     --error-foreground: #ffffff;
     --warning: #ffffff;
     --warning-foreground: #ffffff;
@@ -223,7 +221,6 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-error: var(--error);
-  --color-error-background: var(--error-background);
   --color-error-foreground: var(--error-foreground);
   --color-icon: var(--icon);
 }

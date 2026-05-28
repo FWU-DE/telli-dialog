@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { constructAzureImageGenerationFn } from './azure';
-import { AiGenerationError, ProviderConfigurationError } from '../../errors';
+import { AiGenerationError, ProviderConfigurationError, ResponsibleAIError } from '../../errors';
 import type { AiModel } from '../types';
 
 const { generateMock, openAiConstructorMock, instrumentOpenAiClientMock, MockOpenAI } = vi.hoisted(
@@ -62,11 +62,11 @@ describe('constructAzureImageGenerationFn', () => {
     vi.clearAllMocks();
   });
 
-  it('should generate images and map Azure usage data', async () => {
-    const model = createAzureModel(
-      'https://example.openai.azure.com/openai/deployments/image-deploy?api-version=2024-02-15-preview&foo=bar',
-    );
+  const model = createAzureModel(
+    'https://example.openai.azure.com/openai/deployments/image-deploy?api-version=2024-02-15-preview&foo=bar',
+  );
 
+  it('should generate images and map Azure usage data', async () => {
     generateMock.mockResolvedValue({
       data: [{ b64_json: 'base64-azure-image' }, { b64_json: undefined }],
       output_format: 'png',
@@ -113,6 +113,26 @@ describe('constructAzureImageGenerationFn', () => {
       },
     });
   });
+
+  it.each(['content_policy_violation', 'ResponsibleAIPolicyViolation'])(
+    'should map %s to ResponsibleAIError',
+    async (code) => {
+      generateMock.mockRejectedValue({
+        code,
+        message: 'prompt blocked by Azure policy',
+        status: 400,
+      });
+
+      const generateImage = constructAzureImageGenerationFn(model);
+
+      await expect(
+        generateImage({ prompt: 'azure prompt', model: model.name }),
+      ).rejects.toBeInstanceOf(ResponsibleAIError);
+      await expect(generateImage({ prompt: 'azure prompt', model: model.name })).rejects.toThrow(
+        'Azure OpenAI Responsible AI Policy Violation: prompt blocked by Azure policy',
+      );
+    },
+  );
 
   it('should throw when Azure OpenAI returns no usage data', async () => {
     const model = createAzureModel(

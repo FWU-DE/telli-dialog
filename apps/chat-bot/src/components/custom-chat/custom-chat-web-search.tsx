@@ -44,7 +44,7 @@ export function CustomChatWebSearch<
             <Controller
               name={props.name}
               control={props.control}
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <Switch
                   checked={field.value}
                   onCheckedChange={(checked) => {
@@ -52,6 +52,7 @@ export function CustomChatWebSearch<
                     props.onCheckedChange?.(checked);
                   }}
                   aria-label={t('heading')}
+                  aria-invalid={fieldState.invalid}
                 />
               )}
             />

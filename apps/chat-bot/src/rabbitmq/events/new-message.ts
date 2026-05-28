@@ -26,7 +26,7 @@ type FunctionProps =
 
 export function constructNewMessageEvent(props: FunctionProps): NewChatMessageEventType {
   const commonObjectProps = {
-    event_type: 'telli_new_chat_message' as const,
+    event_type: 'new_chat_message' as const,
     school_id: props.user.schoolIds?.[0] ?? '',
     federal_state: props.user.federalState.id,
     provider: props.provider,
