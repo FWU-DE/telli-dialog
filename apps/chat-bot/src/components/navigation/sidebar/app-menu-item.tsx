@@ -18,7 +18,9 @@ export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
 
   const isActive = () => {
     // special case for help mode because it is also an assistant and starts with the same path
-    if (pathname.startsWith(`/assistants/d/${HELP_MODE_ASSISTANT_ID}`)) return pathname === href;
+    if (pathname.startsWith(`/assistants/d/${HELP_MODE_ASSISTANT_ID}`)) {
+      return href.startsWith(`/assistants/d/${HELP_MODE_ASSISTANT_ID}`);
+    }
 
     return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
   };
