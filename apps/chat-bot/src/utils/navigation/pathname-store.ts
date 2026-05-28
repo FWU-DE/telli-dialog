@@ -47,6 +47,7 @@ export function notifyPathnameChanged() {
 
   ensureInitialized();
   emitIfChanged(window.location.pathname);
+  cleanupIfUnused();
 }
 
 /**
@@ -62,10 +63,12 @@ export function syncPathnameWithNextPathname(pathname: string) {
   // `usePathname` can lag behind native history updates (e.g. navigateWithoutRefresh).
   // Ignore stale values so a newly mounted hook instance cannot overwrite the current path.
   if (window.location.pathname !== pathname) {
+    cleanupIfUnused();
     return;
   }
 
   emitIfChanged(pathname);
+  cleanupIfUnused();
 }
 
 export function subscribeToPathnameStore(listener: () => void) {
