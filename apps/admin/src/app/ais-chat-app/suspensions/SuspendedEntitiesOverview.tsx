@@ -19,6 +19,7 @@ import {
 } from '@ui/components/card';
 import { Button } from '@ui/components/button';
 import { Skeleton } from '@ui/components/skeleton';
+import { ROUTES } from '@/consts/routes';
 
 export default function SuspendedEntitiesOverview() {
   const [suspendedEntites, setSuspendedEntities] = useState<SuspensionRequestOverview[]>([]);
@@ -46,7 +47,7 @@ export default function SuspendedEntitiesOverview() {
   };
 
   function handleRowClicked(row: SuspensionRequestOverview): void {
-    router.push(`/ais-chat-app/suspensions/${row.entityType}/${row.entityId}`);
+    router.push(ROUTES.app.suspensionDetails(row.entityType, row.entityId));
   }
 
   return (

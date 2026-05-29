@@ -455,7 +455,7 @@ export async function getSuspensionRequestsForEntity({
 }
 
 /**
- * Retrieves an entity that was reported by an user along with all the susprension requests.
+ * Retrieves an entity that was reported by an user along with all the suspension requests.
  * The entity is identified by the combination of the entity type and entity id.
  * This is used to display the details of a reported entity in the admin interface.
  * @param entityType The type of the entity (assistant, character or learning scenario)
@@ -484,12 +484,10 @@ export async function getSuspendedItemWithDetails({
     buildSuspensionRequestOverview(groupedSuspensionRequest, entityLookup),
   )[0];
 
-  const requests = await dbGetSuspensionRequestsForEntity(targetIds);
-
   if (!overviewItem)
     throw new NotFoundError('Suspension request overview not found for the given entity');
 
-  return { suspendedItem: overviewItem, requests };
+  return { suspendedItem: overviewItem, requests: suspensionRequest };
 }
 
 function convertSuspensionRequestTargetIdsToSuspensionRequestEntityIds({
