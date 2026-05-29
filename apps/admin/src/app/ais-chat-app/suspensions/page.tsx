@@ -1,9 +1,9 @@
 import TwoColumnLayout from '@/components/layout/TwoColumnLayout';
 import { AdminAppSidebar } from '../AdminAppSidebar';
-import { SuspensionListView } from './SuspensionListView';
+import SuspendedEntitiesOverview from './SuspendedEntitiesOverview';
 
 export const dynamic = 'force-dynamic';
 
-export default function SuspensionsPage() {
-  return <TwoColumnLayout sidebar={<AdminAppSidebar />} page={<SuspensionListView />} />;
+export default async function SuspensionsPage() {
+  return <TwoColumnLayout sidebar={<AdminAppSidebar />} page={<SuspendedEntitiesOverview />} />;
 }

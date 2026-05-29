@@ -25,7 +25,11 @@ import {
   dbMarkSuspensionRequestAsChecked,
 } from '@shared/db/functions/suspension-requests';
 import { dbGetUserById } from '@shared/db/functions/user';
-import { SuspensionRequestReason, suspensionRequestReasonSchema } from '@shared/db/schema';
+import {
+  SuspensionRequestReason,
+  suspensionRequestReasonSchema,
+  SuspensionRequestSelectModel,
+} from '@shared/db/schema';
 import { InvalidArgumentError, NotFoundError, checkParameterUUID } from '@shared/error';
 
 const suspensionRequestDescriptionSchema = z.string().min(1).max(500);
@@ -445,7 +449,78 @@ export async function getSuspensionRequestsForEntity({
   assistantId,
   characterId,
   learningScenarioId,
-}: SuspensionRequestTargetIds) {
+}: SuspensionRequestTargetIds): Promise<SuspensionRequestSelectModel[]> {
   validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
   return dbGetSuspensionRequestsForEntity({ assistantId, characterId, learningScenarioId });
+}
+
+/**
+ * Retrieves an entity that was reported by an user along with all the susprension requests.
+ * The entity is identified by the combination of the entity type and entity id.
+ * This is used to display the details of a reported entity in the admin interface.
+ * @param entityType The type of the entity (assistant, character or learning scenario)
+ * @param entityId The id of the entity
+ * @returns The details of the reported entity along with all its suspension requests
+ */
+export async function getSuspendedItemWithDetails({
+  entityType,
+  entityId,
+}: {
+  entityType: EntityType;
+  entityId: string;
+}): Promise<{
+  suspendedItem: SuspensionRequestOverview;
+  requests: SuspensionRequestSelectModel[];
+}> {
+  checkParameterUUID(entityId);
+
+  const targetIds = convertEntityTypeAndIdToSuspensionRequestTargetIds({ entityType, entityId });
+  const entityIds = convertSuspensionRequestTargetIdsToSuspensionRequestEntityIds(targetIds);
+  const entityLookup = await loadSuspensionRequestEntityLookup(entityIds);
+  const suspensionRequest = await dbGetSuspensionRequestsForEntity(targetIds);
+  const groupedSuspensionRequests = groupSuspensionRequestsByEntity([...suspensionRequest]);
+
+  const overviewItem = groupedSuspensionRequests.map((groupedSuspensionRequest) =>
+    buildSuspensionRequestOverview(groupedSuspensionRequest, entityLookup),
+  )[0];
+
+  const requests = await dbGetSuspensionRequestsForEntity(targetIds);
+
+  if (!overviewItem)
+    throw new NotFoundError('Suspension request overview not found for the given entity');
+
+  return { suspendedItem: overviewItem, requests };
+}
+
+function convertSuspensionRequestTargetIdsToSuspensionRequestEntityIds({
+  assistantId,
+  characterId,
+  learningScenarioId,
+}: SuspensionRequestTargetIds): SuspensionRequestEntityIds {
+  return {
+    assistantIds: assistantId ? [assistantId] : [],
+    characterIds: characterId ? [characterId] : [],
+    learningScenarioIds: learningScenarioId ? [learningScenarioId] : [],
+  };
+}
+
+function convertEntityTypeAndIdToSuspensionRequestTargetIds({
+  entityType,
+  entityId,
+}: {
+  entityType: EntityType;
+  entityId: string;
+}): SuspensionRequestTargetIds {
+  if (entityType === 'assistant') {
+    return { assistantId: entityId };
+  }
+  if (entityType === 'character') {
+    return { characterId: entityId };
+  }
+  if (entityType === 'learningScenario') {
+    return { learningScenarioId: entityId };
+  }
+  throw new InvalidArgumentError(
+    "Invalid entity type. Must be 'assistant', 'character' or 'learningScenario'.",
+  );
 }

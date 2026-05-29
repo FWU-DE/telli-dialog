@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "2.1.10",
+    "@tanstack/react-table": "8.21.3",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "lucide-react": "1.16.0",
@@ -19,9 +20,9 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@ais-chat/typescript-config": "workspace:*",
     "@eslint/eslintrc": "3.3.5",
     "@tailwindcss/postcss": "4.3.0",
-    "@ais-chat/typescript-config": "workspace:*",
     "@turbo/gen": "2.9.14",
     "@types/eslint": "9.6.1",
     "@types/react": "19.2.14",
