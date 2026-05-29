@@ -51,14 +51,13 @@ export function SuspendedEntityDetailView({
 
   useEffect(() => {
     void loadData();
-  }, []);
+  });
 
   function canMarkAsChecked() {
     return suspendedItemDetails?.status === 'new';
   }
 
   async function handleMarkAsChecked(suspensionRequestId: string) {
-    console.log('Marking as checked:', suspensionRequestId);
     const result = await markSuspensionRequestAsCheckedAction(suspensionRequestId);
     if (!result.success) {
       toast.error(result.error.message);
