@@ -11,7 +11,7 @@ import {
 import { mapEntityTypeToLabel } from '../../utils';
 import { EntityType, SuspensionRequestOverview } from '@shared/suspension/suspension-service';
 import { Button } from '@ui/components/button';
-import { useEffect, useState, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { SuspensionRequestSelectModel } from '@shared/db/schema';
 import {
   getSuspendedItemWithDetailsAction,
@@ -36,8 +36,7 @@ export function SuspendedEntityDetailView({
   const [suspensionRequests, setSuspensionRequests] = useState<SuspensionRequestSelectModel[]>([]);
   const [isPending, startTransition] = useTransition();
 
-  // besser: Daten in server komponente laden und mit revalidatePath in server action arbeiten
-  async function loadData() {
+  const loadData = useCallback(async () => {
     startTransition(async () => {
       const result = await getSuspendedItemWithDetailsAction({ entityType, entityId });
       if (result.success) {
@@ -47,11 +46,11 @@ export function SuspendedEntityDetailView({
         toast.error(result.error.message);
       }
     });
-  }
+  }, [entityType, entityId]);
 
   useEffect(() => {
     void loadData();
-  });
+  }, [loadData]);
 
   function canMarkAsChecked() {
     return suspendedItemDetails?.status === 'new';
