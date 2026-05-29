@@ -4,32 +4,89 @@ import { SuspensionRequestOverview } from '@shared/suspension/suspension-service
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { ColumnDef } from '@tanstack/react-table';
 import { mapEntityTypeToLabel } from './utils';
+import { Button } from '@ui/components/button';
+import { ArrowUpDownIcon } from 'lucide-react';
 
 export const columns: ColumnDef<SuspensionRequestOverview>[] = [
   {
     accessorKey: 'entityName',
-    header: 'Name',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="link"
+          className="p-0"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Name
+          <ArrowUpDownIcon className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: 'entityType',
-    header: 'Typ',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="link"
+          className="p-0"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Typ
+          <ArrowUpDownIcon className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       return mapEntityTypeToLabel(row.original.entityType);
     },
   },
   {
     accessorKey: 'latestRequestAt',
-    header: 'Zuletzt gemeldet am',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="link"
+          className="p-0"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          zuletzt gemeldet am
+          <ArrowUpDownIcon className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       return formatDateToGermanTimestamp(row.original.latestRequestAt);
     },
   },
   {
     accessorKey: 'requestCount',
-    header: 'Anzahl Meldungen',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="link"
+          className="p-0"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Anzahl Meldungen
+          <ArrowUpDownIcon className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: 'status',
-    header: 'Status',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="link"
+          className="p-0"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Status
+          <ArrowUpDownIcon className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
 ];
