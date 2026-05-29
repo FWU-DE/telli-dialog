@@ -24,7 +24,7 @@
     "drizzle-orm": "0.45.2",
     "drizzle-zod": "0.8.3",
     "nanoid": "5.1.11",
-    "pg": "8.20.0",
+    "pg": "8.21.0",
     "zod": "4.4.3"
   },
   "devDependencies": {
@@ -36,8 +36,8 @@
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
     "eslint-config-turbo": "2.9.14",
-    "tsx": "4.22.1",
+    "tsx": "4.22.3",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.59.3"
+    "typescript-eslint": "8.59.4"
   }
 }

@@ -21,9 +21,9 @@
   "dependencies": {
     "@ais-chat/api-database": "workspace:*",
     "@sentry/core": "10.53.1",
-    "@google/genai": "^2.4.0",
+    "@google/genai": "^2.6.0",
     "js-tiktoken": "1.0.21",
-    "openai": "6.38.0",
+    "openai": "6.39.0",
     "openaiv4": "npm:openai@4.104.0",
     "zod": "4.4.3"
   },
@@ -33,9 +33,9 @@
     "@eslint/js": "9.39.2",
     "@t3-oss/env-core": "0.13.11",
     "@types/node": "24.12.4",
-    "@typescript-eslint/eslint-plugin": "8.59.3",
-    "@typescript-eslint/parser": "8.59.3",
-    "@vitest/coverage-v8": "4.1.6",
+    "@typescript-eslint/eslint-plugin": "8.59.4",
+    "@typescript-eslint/parser": "8.59.4",
+    "@vitest/coverage-v8": "4.1.7",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
     "eslint-config-prettier": "10.1.8",
@@ -43,8 +43,8 @@
     "eslint-plugin-prettier": "5.5.5",
     "prettier": "3.8.3",
     "prettier-eslint": "16.4.2",
-    "tsx": "4.22.1",
+    "tsx": "4.22.3",
     "typescript": "6.0.3",
-    "vitest": "4.1.6"
+    "vitest": "4.1.7"
   }
 }
