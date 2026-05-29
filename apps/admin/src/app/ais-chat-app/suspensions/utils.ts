@@ -35,3 +35,16 @@ export function mapReasonToLabel(reason: SuspensionRequestOverview['reasons'][nu
       return reason;
   }
 }
+
+export function mapStatusToLabel(status: SuspensionRequestOverview['status']) {
+  switch (status) {
+    case 'new':
+      return 'neu';
+    case 'suspended':
+      return 'gesperrt';
+    case 'checked':
+      return 'geprüft';
+    default:
+      return status;
+  }
+}

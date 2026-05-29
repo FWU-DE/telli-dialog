@@ -58,6 +58,7 @@ export function SuspendedEntityDetailView({
   }
 
   async function handleMarkAsChecked(suspensionRequestId: string) {
+    console.log('Marking as checked:', suspensionRequestId);
     const result = await markSuspensionRequestAsCheckedAction(suspensionRequestId);
     if (!result.success) {
       toast.error(result.error.message);

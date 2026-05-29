@@ -5,6 +5,8 @@ import { columns } from './columns';
 import { DataTable } from '@ui/components/data-table';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
+import { type ColumnFiltersState } from '@tanstack/react-table';
+import { Input } from '@ui/components/input';
 import { getSuspendedEntitiesAction } from './actions';
 import { toast } from 'sonner';
 import {
@@ -20,6 +22,7 @@ import { Skeleton } from '@ui/components/skeleton';
 
 export default function SuspendedEntitiesOverview() {
   const [suspendedEntites, setSuspendedEntities] = useState<SuspensionRequestOverview[]>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -65,7 +68,21 @@ export default function SuspendedEntitiesOverview() {
             <Skeleton className="h-4 w-full rounded" />
           </div>
         ) : (
-          <DataTable columns={columns} data={suspendedEntites} rowClickHandler={handleRowClicked} />
+          <div className="flex flex-col gap-4">
+            <Input
+              placeholder="Nach Name filtern"
+              value={(columnFilters.find((f) => f.id === 'entityName')?.value as string) ?? ''}
+              onChange={(e) => setColumnFilters([{ id: 'entityName', value: e.target.value }])}
+              className="max-w-sm"
+            />
+            <DataTable
+              columns={columns}
+              data={suspendedEntites}
+              rowClickHandler={handleRowClicked}
+              columnFilters={columnFilters}
+              onColumnFiltersChange={setColumnFilters}
+            />
+          </div>
         )}
       </CardContent>
     </Card>

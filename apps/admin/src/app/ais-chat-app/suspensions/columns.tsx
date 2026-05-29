@@ -3,7 +3,7 @@
 import { SuspensionRequestOverview } from '@shared/suspension/suspension-service';
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { ColumnDef } from '@tanstack/react-table';
-import { mapEntityTypeToLabel } from './utils';
+import { mapEntityTypeToLabel, mapStatusToLabel } from './utils';
 import { Button } from '@ui/components/button';
 import { ArrowUpDownIcon } from 'lucide-react';
 
@@ -87,6 +87,9 @@ export const columns: ColumnDef<SuspensionRequestOverview>[] = [
           <ArrowUpDownIcon className="ml-2 h-4 w-4" />
         </Button>
       );
+    },
+    cell: ({ row }) => {
+      return mapStatusToLabel(row.original.status);
     },
   },
 ];

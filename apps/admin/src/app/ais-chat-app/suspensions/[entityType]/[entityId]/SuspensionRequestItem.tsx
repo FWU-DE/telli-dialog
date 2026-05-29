@@ -22,7 +22,7 @@ export function SuspensionRequestItem({
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <div className="border rounded bg-background-2">
+    <div className="border rounded bg-background-2 overflow-hidden">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="flex flex-row items-center">
           <CollapsibleTrigger asChild>
@@ -40,7 +40,7 @@ export function SuspensionRequestItem({
             <Checkbox
               disabled={!canMarkAsChecked}
               checked={request.checked}
-              onChange={() => onMarkAsChecked(request.id)}
+              onCheckedChange={() => onMarkAsChecked(request.id)}
             />
             <FieldLabel>Gelesen</FieldLabel>
           </div>
