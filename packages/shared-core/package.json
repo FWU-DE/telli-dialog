@@ -23,11 +23,11 @@
     "@eslint/js": "9.39.4",
     "@ais-chat/typescript-config": "workspace:*",
     "@types/node": "24.12.4",
-    "@vitest/coverage-v8": "4.1.6",
+    "@vitest/coverage-v8": "4.1.7",
     "eslint": "9.39.4",
     "eslint-config-turbo": "2.9.14",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.59.3",
-    "vitest": "4.1.6"
+    "typescript-eslint": "8.59.4",
+    "vitest": "4.1.7"
   }
 }
