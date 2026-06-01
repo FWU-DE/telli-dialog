@@ -48,3 +48,37 @@ export function mapStatusToLabel(status: SuspensionRequestOverview['status']) {
       return status;
   }
 }
+
+export function getChatBotEntityUrl(
+  entityType: SuspensionRequestOverview['entityType'],
+  entityId: string,
+  host: string,
+) {
+  const normalizedHost = host.toLowerCase();
+  const chatBotAppBaseUrl = (() => {
+    switch (true) {
+      case normalizedHost.startsWith('localhost'):
+      case normalizedHost.startsWith('127.0.0.1'):
+        return 'http://localhost:3000';
+      case normalizedHost.includes('staging'):
+        return 'https://app-staging.ais-chat.schule';
+      default:
+        return 'https://app.ais-chat.schule';
+    }
+  })();
+
+  const chatBotEntityPath = (() => {
+    switch (entityType) {
+      case 'assistant':
+        return `/assistants/${entityId}`;
+      case 'character':
+        return `/characters/${entityId}`;
+      case 'learningScenario':
+        return `/learning-scenarios/${entityId}`;
+      default:
+        return '/';
+    }
+  })();
+
+  return new URL(chatBotEntityPath, chatBotAppBaseUrl).toString();
+}

@@ -1,6 +1,8 @@
 import { EntityType } from '@shared/suspension/suspension-service';
 import { AdminAppSidebar } from '@/app/ais-chat-app/AdminAppSidebar';
 import TwoColumnLayout from '@/components/layout/TwoColumnLayout';
+import { headers } from 'next/headers';
+import { getChatBotEntityUrl } from '../../utils';
 import { SuspendedEntityDetailView } from './SuspendedEntityDetailView';
 
 export const dynamic = 'force-dynamic';
@@ -9,11 +11,19 @@ export default async function SuspensionRequestPage(
   props: PageProps<'/ais-chat-app/suspensions/[entityType]/[entityId]'>,
 ) {
   const { entityType, entityId } = await props.params;
+  const host = (await headers()).get('host') ?? '';
+  const chatBotEntityUrl = getChatBotEntityUrl(entityType as EntityType, entityId, host);
 
   return (
     <TwoColumnLayout
       sidebar={<AdminAppSidebar />}
-      page={<SuspendedEntityDetailView entityType={entityType as EntityType} entityId={entityId} />}
+      page={
+        <SuspendedEntityDetailView
+          entityType={entityType as EntityType}
+          entityId={entityId}
+          chatBotEntityUrl={chatBotEntityUrl}
+        />
+      }
     />
   );
 }

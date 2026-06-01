@@ -13,6 +13,7 @@ import { EntityType, SuspensionRequestOverview } from '@shared/suspension/suspen
 import { Button } from '@ui/components/button';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import { SuspensionRequestSelectModel } from '@shared/db/schema';
+import Link from 'next/link';
 import {
   getSuspendedItemWithDetailsAction,
   liftSuspensionAction,
@@ -26,11 +27,13 @@ import { SuspensionRequestItem } from './SuspensionRequestItem';
 type SuspendedEntityDetailViewProps = {
   entityType: EntityType;
   entityId: string;
+  chatBotEntityUrl: string;
 };
 
 export function SuspendedEntityDetailView({
   entityType,
   entityId,
+  chatBotEntityUrl,
 }: SuspendedEntityDetailViewProps) {
   const [suspendedItemDetails, setSuspendedItemDetails] = useState<SuspensionRequestOverview>();
   const [suspensionRequests, setSuspensionRequests] = useState<SuspensionRequestSelectModel[]>([]);
@@ -121,7 +124,17 @@ export function SuspendedEntityDetailView({
       <CardHeader>
         <CardTitle>Meldungen</CardTitle>
         <CardDescription>
-          Liste aller Meldungen für den {mapEntityTypeToLabel(entityType)} mit der ID {entityId}
+          <div>
+            Liste aller Meldungen für {mapEntityTypeToLabel(entityType)} mit ID {entityId}
+          </div>
+          <Link
+            href={chatBotEntityUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-4"
+          >
+            In AIS.chat öffnen
+          </Link>
         </CardDescription>
         <CardAction className="flex gap-2">
           <Button
