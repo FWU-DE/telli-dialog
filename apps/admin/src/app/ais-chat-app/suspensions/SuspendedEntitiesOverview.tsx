@@ -1,6 +1,6 @@
 'use client';
 
-import { SuspensionRequestOverview } from '@shared/suspension/suspension-service';
+import { ReportedEntityOverview } from '@shared/suspension/suspension-service';
 import { columns } from './columns';
 import { DataTable } from '@ui/components/data-table';
 import { useRouter } from 'next/navigation';
@@ -22,7 +22,7 @@ import { Skeleton } from '@ui/components/skeleton';
 import { ROUTES } from '@/consts/routes';
 
 export default function SuspendedEntitiesOverview() {
-  const [suspendedEntites, setSuspendedEntities] = useState<SuspensionRequestOverview[]>([]);
+  const [suspendedEntites, setSuspendedEntities] = useState<ReportedEntityOverview[]>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -46,7 +46,7 @@ export default function SuspendedEntitiesOverview() {
     void loadData();
   };
 
-  function handleRowClicked(row: SuspensionRequestOverview): void {
+  function handleRowClicked(row: ReportedEntityOverview): void {
     router.push(ROUTES.app.suspensionDetails(row.entityType, row.entityId));
   }
 

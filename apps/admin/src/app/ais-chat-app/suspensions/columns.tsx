@@ -1,13 +1,13 @@
 'use client';
 
-import { SuspensionRequestOverview } from '@shared/suspension/suspension-service';
+import { ReportedEntityOverview } from '@shared/suspension/suspension-service';
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { ColumnDef } from '@tanstack/react-table';
 import { mapEntityTypeToLabel, mapStatusToLabel } from './utils';
 import { Button } from '@ui/components/button';
 import { ArrowUpDownIcon } from 'lucide-react';
 
-export const columns: ColumnDef<SuspensionRequestOverview>[] = [
+export const columns: ColumnDef<ReportedEntityOverview>[] = [
   {
     accessorKey: 'entityName',
     header: ({ column }) => {

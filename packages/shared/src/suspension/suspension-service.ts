@@ -21,7 +21,7 @@ import {
 import {
   dbCreateSuspensionRequest,
   dbGetAllSuspensionRequests,
-  dbGetSuspensionRequestsForEntity,
+  dbGetSuspensionRequestsByEntityRef,
   dbMarkSuspensionRequestAsChecked,
 } from '@shared/db/functions/suspension-requests';
 import { dbGetUserById } from '@shared/db/functions/user';
@@ -33,6 +33,7 @@ import {
 import { InvalidArgumentError, NotFoundError, checkParameterUUID } from '@shared/error';
 
 const suspensionRequestDescriptionSchema = z.string().min(1).max(500);
+const EXACTLY_ONE_TARGET_ENTITY_ID_ERROR = 'Exactly one target entity id must be provided';
 
 export type SuspensionRequestTargetIds = {
   assistantId?: string;
@@ -42,17 +43,27 @@ export type SuspensionRequestTargetIds = {
 
 export type EntityType = 'assistant' | 'character' | 'learningScenario';
 
-type SuspensionRequestOverviewStatus = 'new' | 'suspended' | 'checked';
+export type SuspensionEntityRef = {
+  entityType: EntityType;
+  entityId: string;
+};
 
-export type SuspensionRequestOverview = {
+type ReportedEntityOverviewStatus = 'new' | 'suspended' | 'checked';
+
+export type ReportedEntityOverview = {
   entityType: EntityType;
   entityId: string;
   entityName: string;
   requestCount: number;
-  status: SuspensionRequestOverviewStatus;
+  status: ReportedEntityOverviewStatus;
   latestRequestAt: Date;
   reasons: { id: string; reason: SuspensionRequestReason }[];
 };
+
+/**
+ * @deprecated Use ReportedEntityOverview instead.
+ */
+export type SuspensionRequestOverview = ReportedEntityOverview;
 
 type SuspensionRequest = Awaited<ReturnType<typeof dbGetAllSuspensionRequests>>[number];
 
@@ -82,7 +93,7 @@ type SuspensionRequestEntityLookup = {
 };
 
 type SuspensionRequestAggregate = Pick<
-  SuspensionRequestOverview,
+  ReportedEntityOverview,
   'requestCount' | 'latestRequestAt' | 'reasons'
 > & {
   hasUncheckedRequests: boolean;
@@ -98,7 +109,7 @@ function validateSingleTargetAndUuid({
   );
 
   if (providedIds.length !== 1) {
-    throw new InvalidArgumentError('Exactly one target entity id must be provided');
+    throw new InvalidArgumentError(EXACTLY_ONE_TARGET_ENTITY_ID_ERROR);
   }
 
   checkParameterUUID(...providedIds);
@@ -131,7 +142,7 @@ async function resolveTargetEntity({
     return learningScenario;
   }
 
-  throw new InvalidArgumentError('Exactly one target entity id must be provided');
+  throw new InvalidArgumentError(EXACTLY_ONE_TARGET_ENTITY_ID_ERROR);
 }
 
 export async function createSuspensionRequest({
@@ -180,48 +191,44 @@ export async function markSuspensionRequestAsChecked(suspensionRequestId: string
   return dbMarkSuspensionRequestAsChecked({ suspensionRequestId });
 }
 
-export async function suspendEntity({
-  assistantId,
-  characterId,
-  learningScenarioId,
-}: SuspensionRequestTargetIds) {
-  validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
+export async function suspendEntity(
+  entityRefOrTargetIds: SuspensionEntityRef | SuspensionRequestTargetIds,
+) {
+  const { entityType, entityId } = normalizeSuspensionEntityRef(entityRefOrTargetIds);
 
-  if (assistantId) {
-    return dbSetAssistantSuspended({ assistantId });
+  if (entityType === 'assistant') {
+    return dbSetAssistantSuspended({ assistantId: entityId });
   }
 
-  if (characterId) {
-    return dbSetCharacterSuspended({ characterId });
+  if (entityType === 'character') {
+    return dbSetCharacterSuspended({ characterId: entityId });
   }
 
-  if (learningScenarioId) {
-    return dbSetLearningScenarioSuspended({ learningScenarioId });
+  if (entityType === 'learningScenario') {
+    return dbSetLearningScenarioSuspended({ learningScenarioId: entityId });
   }
 
-  throw new InvalidArgumentError('Exactly one target entity id must be provided');
+  throw new InvalidArgumentError(EXACTLY_ONE_TARGET_ENTITY_ID_ERROR);
 }
 
-export async function liftSuspensionOnEntity({
-  assistantId,
-  characterId,
-  learningScenarioId,
-}: SuspensionRequestTargetIds) {
-  validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
+export async function liftSuspensionOnEntity(
+  entityRefOrTargetIds: SuspensionEntityRef | SuspensionRequestTargetIds,
+) {
+  const { entityType, entityId } = normalizeSuspensionEntityRef(entityRefOrTargetIds);
 
-  if (assistantId) {
-    return dbLiftSuspensionOnAssistant({ assistantId });
+  if (entityType === 'assistant') {
+    return dbLiftSuspensionOnAssistant({ assistantId: entityId });
   }
 
-  if (characterId) {
-    return dbLiftSuspensionOnCharacter({ characterId });
+  if (entityType === 'character') {
+    return dbLiftSuspensionOnCharacter({ characterId: entityId });
   }
 
-  if (learningScenarioId) {
-    return dbLiftSuspensionOnLearningScenario({ learningScenarioId });
+  if (entityType === 'learningScenario') {
+    return dbLiftSuspensionOnLearningScenario({ learningScenarioId: entityId });
   }
 
-  throw new InvalidArgumentError('Exactly one target entity id must be provided');
+  throw new InvalidArgumentError(EXACTLY_ONE_TARGET_ENTITY_ID_ERROR);
 }
 
 function getSuspensionRequestTarget(
@@ -409,10 +416,10 @@ function getSuspensionRequestEntitySummary(
   return learningScenario;
 }
 
-function buildSuspensionRequestOverview(
+function buildReportedEntityOverview(
   groupedSuspensionRequest: SuspensionRequestGroup,
   entityLookup: SuspensionRequestEntityLookup,
-): SuspensionRequestOverview {
+): ReportedEntityOverview {
   const entity = getSuspensionRequestEntitySummary(groupedSuspensionRequest, entityLookup);
   const aggregate = getSuspensionRequestAggregate(groupedSuspensionRequest.suspensionRequests);
 
@@ -427,7 +434,7 @@ function buildSuspensionRequestOverview(
   };
 }
 
-export async function getSuspensionRequestOverviews(): Promise<SuspensionRequestOverview[]> {
+export async function getSuspensionRequestOverviews(): Promise<ReportedEntityOverview[]> {
   const allSuspensionRequests = await dbGetAllSuspensionRequests();
 
   const groupedSuspensionRequests = groupSuspensionRequestsByEntity(allSuspensionRequests);
@@ -435,7 +442,7 @@ export async function getSuspensionRequestOverviews(): Promise<SuspensionRequest
   const entityLookup = await loadSuspensionRequestEntityLookup(groupedEntityIds);
 
   const overviewItems = groupedSuspensionRequests.map((groupedSuspensionRequest) =>
-    buildSuspensionRequestOverview(groupedSuspensionRequest, entityLookup),
+    buildReportedEntityOverview(groupedSuspensionRequest, entityLookup),
   );
 
   const sorted = overviewItems.sort(
@@ -450,38 +457,35 @@ export async function getSuspensionRequestsForEntity({
   characterId,
   learningScenarioId,
 }: SuspensionRequestTargetIds): Promise<SuspensionRequestSelectModel[]> {
-  validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
-  return dbGetSuspensionRequestsForEntity({ assistantId, characterId, learningScenarioId });
+  const entityRef = normalizeSuspensionEntityRef({ assistantId, characterId, learningScenarioId });
+  return dbGetSuspensionRequestsByEntityRef(entityRef);
 }
 
 /**
- * Retrieves an entity that was reported by an user along with all the suspension requests.
- * The entity is identified by the combination of the entity type and entity id.
- * This is used to display the details of a reported entity in the admin interface.
- * @param entityType The type of the entity (assistant, character or learning scenario)
+ * Retrieves a reported entity together with all related suspension requests.
+ * The entity is identified by the combination of entity type and entity id.
+ * This is used to display the detailed view in the admin interface.
+ * @param entityType The type of the entity (assistant, character, or learning scenario)
  * @param entityId The id of the entity
- * @returns The details of the reported entity along with all its suspension requests
+ * @returns The detailed reported entity overview and related suspension requests
  */
 export async function getSuspendedItemWithDetails({
   entityType,
   entityId,
-}: {
-  entityType: EntityType;
-  entityId: string;
-}): Promise<{
-  suspendedItem: SuspensionRequestOverview;
+}: SuspensionEntityRef): Promise<{
+  suspendedItem: ReportedEntityOverview;
   requests: SuspensionRequestSelectModel[];
 }> {
   checkParameterUUID(entityId);
 
-  const targetIds = convertEntityTypeAndIdToSuspensionRequestTargetIds({ entityType, entityId });
-  const entityIds = convertSuspensionRequestTargetIdsToSuspensionRequestEntityIds(targetIds);
+  const entityRef = { entityType, entityId };
+  const entityIds = convertSuspensionEntityRefToEntityIds(entityRef);
   const entityLookup = await loadSuspensionRequestEntityLookup(entityIds);
-  const suspensionRequest = await dbGetSuspensionRequestsForEntity(targetIds);
+  const suspensionRequest = await dbGetSuspensionRequestsByEntityRef(entityRef);
   const groupedSuspensionRequests = groupSuspensionRequestsByEntity([...suspensionRequest]);
 
   const overviewItem = groupedSuspensionRequests.map((groupedSuspensionRequest) =>
-    buildSuspensionRequestOverview(groupedSuspensionRequest, entityLookup),
+    buildReportedEntityOverview(groupedSuspensionRequest, entityLookup),
   )[0];
 
   if (!overviewItem)
@@ -490,35 +494,47 @@ export async function getSuspendedItemWithDetails({
   return { suspendedItem: overviewItem, requests: suspensionRequest };
 }
 
-function convertSuspensionRequestTargetIdsToSuspensionRequestEntityIds({
-  assistantId,
-  characterId,
-  learningScenarioId,
-}: SuspensionRequestTargetIds): SuspensionRequestEntityIds {
+function convertSuspensionEntityRefToEntityIds({
+  entityType,
+  entityId,
+}: SuspensionEntityRef): SuspensionRequestEntityIds {
   return {
-    assistantIds: assistantId ? [assistantId] : [],
-    characterIds: characterId ? [characterId] : [],
-    learningScenarioIds: learningScenarioId ? [learningScenarioId] : [],
+    assistantIds: entityType === 'assistant' ? [entityId] : [],
+    characterIds: entityType === 'character' ? [entityId] : [],
+    learningScenarioIds: entityType === 'learningScenario' ? [entityId] : [],
   };
 }
 
-function convertEntityTypeAndIdToSuspensionRequestTargetIds({
-  entityType,
-  entityId,
-}: {
-  entityType: EntityType;
-  entityId: string;
-}): SuspensionRequestTargetIds {
-  if (entityType === 'assistant') {
-    return { assistantId: entityId };
+function normalizeSuspensionEntityRef(
+  entityRefOrTargetIds: SuspensionEntityRef | SuspensionRequestTargetIds,
+): SuspensionEntityRef {
+  if ('entityType' in entityRefOrTargetIds) {
+    checkParameterUUID(entityRefOrTargetIds.entityId);
+    return entityRefOrTargetIds;
   }
-  if (entityType === 'character') {
-    return { characterId: entityId };
+
+  validateSingleTargetAndUuid(entityRefOrTargetIds);
+
+  if (entityRefOrTargetIds.assistantId) {
+    return {
+      entityType: 'assistant',
+      entityId: entityRefOrTargetIds.assistantId,
+    };
   }
-  if (entityType === 'learningScenario') {
-    return { learningScenarioId: entityId };
+
+  if (entityRefOrTargetIds.characterId) {
+    return {
+      entityType: 'character',
+      entityId: entityRefOrTargetIds.characterId,
+    };
   }
-  throw new InvalidArgumentError(
-    "Invalid entity type. Must be 'assistant', 'character' or 'learningScenario'.",
-  );
+
+  if (entityRefOrTargetIds.learningScenarioId) {
+    return {
+      entityType: 'learningScenario',
+      entityId: entityRefOrTargetIds.learningScenarioId,
+    };
+  }
+
+  throw new InvalidArgumentError(EXACTLY_ONE_TARGET_ENTITY_ID_ERROR);
 }

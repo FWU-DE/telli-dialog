@@ -1,6 +1,6 @@
-import { SuspensionRequestOverview } from '@shared/suspension/suspension-service';
+import { ReportedEntityOverview } from '@shared/suspension/suspension-service';
 
-export function mapEntityTypeToLabel(entityType: SuspensionRequestOverview['entityType']) {
+export function mapEntityTypeToLabel(entityType: ReportedEntityOverview['entityType']) {
   switch (entityType) {
     case 'assistant':
       return 'Assistent';
@@ -13,7 +13,7 @@ export function mapEntityTypeToLabel(entityType: SuspensionRequestOverview['enti
   }
 }
 
-export function mapReasonToLabel(reason: SuspensionRequestOverview['reasons'][number]['reason']) {
+export function mapReasonToLabel(reason: ReportedEntityOverview['reasons'][number]['reason']) {
   switch (reason) {
     case 'copyright_violation':
       return 'Urheberrechtsverletzung';
@@ -36,7 +36,7 @@ export function mapReasonToLabel(reason: SuspensionRequestOverview['reasons'][nu
   }
 }
 
-export function mapStatusToLabel(status: SuspensionRequestOverview['status']) {
+export function mapStatusToLabel(status: ReportedEntityOverview['status']) {
   switch (status) {
     case 'new':
       return 'neu';

@@ -30,8 +30,8 @@ import {
 } from '@shared/db/functions/learning-scenario';
 import {
   dbGetAllSuspensionRequests,
+  dbGetSuspensionRequestsByEntityRef as dbGetSuspensionRequestsByEntityRefFn,
   dbCreateSuspensionRequest,
-  dbGetSuspensionRequestsForEntity as dbGetSuspensionRequestsForEntityFn,
   dbMarkSuspensionRequestAsChecked,
 } from '@shared/db/functions/suspension-requests';
 import { verifyReadAccess } from '@shared/auth/authorization-service';
@@ -63,6 +63,7 @@ vi.mock('@shared/db/functions/learning-scenario', () => ({
 
 vi.mock('@shared/db/functions/suspension-requests', () => ({
   dbGetAllSuspensionRequests: vi.fn(),
+  dbGetSuspensionRequestsByEntityRef: vi.fn(),
   dbCreateSuspensionRequest: vi.fn(),
   dbGetSuspensionRequestsForEntity: vi.fn(),
   dbMarkSuspensionRequestAsChecked: vi.fn(),
@@ -287,7 +288,7 @@ describe('suspension-request-service', () => {
   });
 
   describe('suspendEntity / liftSuspensionOnEntity', () => {
-    it('suspends and unsuspends assistant', async () => {
+    it('suspends and unsuspends assistant using entity ref', async () => {
       const assistantId = generateUUID();
       (dbSetAssistantSuspended as MockedFunction<typeof dbSetAssistantSuspended>).mockResolvedValue(
         { id: assistantId, suspended: true } as never,
@@ -296,14 +297,14 @@ describe('suspension-request-service', () => {
         dbLiftSuspensionOnAssistant as MockedFunction<typeof dbLiftSuspensionOnAssistant>
       ).mockResolvedValue({ id: assistantId, suspended: false } as never);
 
-      await suspendEntity({ assistantId });
+      await suspendEntity({ entityType: 'assistant', entityId: assistantId });
       expect(dbSetAssistantSuspended).toHaveBeenCalledWith({ assistantId });
 
-      await liftSuspensionOnEntity({ assistantId });
+      await liftSuspensionOnEntity({ entityType: 'assistant', entityId: assistantId });
       expect(dbLiftSuspensionOnAssistant).toHaveBeenCalledWith({ assistantId });
     });
 
-    it('suspends and unsuspends character', async () => {
+    it('suspends and unsuspends character using entity ref', async () => {
       const characterId = generateUUID();
       (dbSetCharacterSuspended as MockedFunction<typeof dbSetCharacterSuspended>).mockResolvedValue(
         { id: characterId, suspended: true } as never,
@@ -312,14 +313,14 @@ describe('suspension-request-service', () => {
         dbLiftSuspensionOnCharacter as MockedFunction<typeof dbLiftSuspensionOnCharacter>
       ).mockResolvedValue({ id: characterId, suspended: false } as never);
 
-      await suspendEntity({ characterId });
+      await suspendEntity({ entityType: 'character', entityId: characterId });
       expect(dbSetCharacterSuspended).toHaveBeenCalledWith({ characterId });
 
-      await liftSuspensionOnEntity({ characterId });
+      await liftSuspensionOnEntity({ entityType: 'character', entityId: characterId });
       expect(dbLiftSuspensionOnCharacter).toHaveBeenCalledWith({ characterId });
     });
 
-    it('suspends and unsuspends learning scenario', async () => {
+    it('suspends and unsuspends learning scenario using entity ref', async () => {
       const learningScenarioId = generateUUID();
       (
         dbSetLearningScenarioSuspended as MockedFunction<typeof dbSetLearningScenarioSuspended>
@@ -330,11 +331,25 @@ describe('suspension-request-service', () => {
         >
       ).mockResolvedValue({ id: learningScenarioId, suspended: false } as never);
 
-      await suspendEntity({ learningScenarioId });
+      await suspendEntity({ entityType: 'learningScenario', entityId: learningScenarioId });
       expect(dbSetLearningScenarioSuspended).toHaveBeenCalledWith({ learningScenarioId });
 
-      await liftSuspensionOnEntity({ learningScenarioId });
+      await liftSuspensionOnEntity({
+        entityType: 'learningScenario',
+        entityId: learningScenarioId,
+      });
       expect(dbLiftSuspensionOnLearningScenario).toHaveBeenCalledWith({ learningScenarioId });
+    });
+
+    it('accepts legacy target ids for backwards compatibility', async () => {
+      const assistantId = generateUUID();
+      (dbSetAssistantSuspended as MockedFunction<typeof dbSetAssistantSuspended>).mockResolvedValue(
+        { id: assistantId, suspended: true } as never,
+      );
+
+      await suspendEntity({ assistantId });
+
+      expect(dbSetAssistantSuspended).toHaveBeenCalledWith({ assistantId });
     });
 
     it('throws if none or multiple target ids are provided', async () => {
@@ -518,17 +533,16 @@ describe('suspension-request-service', () => {
     it('returns suspension requests for target entity', async () => {
       const assistantId = generateUUID();
       (
-        dbGetSuspensionRequestsForEntityFn as MockedFunction<
-          typeof dbGetSuspensionRequestsForEntityFn
+        dbGetSuspensionRequestsByEntityRefFn as MockedFunction<
+          typeof dbGetSuspensionRequestsByEntityRefFn
         >
       ).mockResolvedValue([{ id: generateUUID(), assistantId }] as never);
 
       const result = await getSuspensionRequestsForEntity({ assistantId });
 
-      expect(dbGetSuspensionRequestsForEntityFn).toHaveBeenCalledWith({
-        assistantId,
-        characterId: undefined,
-        learningScenarioId: undefined,
+      expect(dbGetSuspensionRequestsByEntityRefFn).toHaveBeenCalledWith({
+        entityType: 'assistant',
+        entityId: assistantId,
       });
       expect(result).toHaveLength(1);
     });

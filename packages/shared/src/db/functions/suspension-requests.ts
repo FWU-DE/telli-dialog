@@ -1,9 +1,16 @@
 import { desc, eq } from 'drizzle-orm';
-import { NotFoundError } from '@shared/error';
+import { InvalidArgumentError, NotFoundError } from '@shared/error';
 import { db } from '..';
 import { SuspensionRequestSelectModel, suspensionRequestTable } from '../schema';
 
-type ReportTargetIds = {
+export type SuspensionRequestEntityType = 'assistant' | 'character' | 'learningScenario';
+
+export type SuspensionRequestEntityRef = {
+  entityType: SuspensionRequestEntityType;
+  entityId: string;
+};
+
+type SuspensionRequestTargetIdsInput = {
   assistantId?: string;
   characterId?: string;
   learningScenarioId?: string;
@@ -77,40 +84,58 @@ export async function dbGetAllSuspensionRequests(): Promise<SuspensionRequestSel
   return db.select().from(suspensionRequestTable).orderBy(desc(suspensionRequestTable.createdAt));
 }
 
+export async function dbGetSuspensionRequestsByEntityRef({
+  entityType,
+  entityId,
+}: SuspensionRequestEntityRef): Promise<SuspensionRequestSelectModel[]> {
+  if (entityType === 'assistant') {
+    return db
+      .select()
+      .from(suspensionRequestTable)
+      .where(eq(suspensionRequestTable.assistantId, entityId))
+      .orderBy(desc(suspensionRequestTable.createdAt));
+  }
+
+  if (entityType === 'character') {
+    return db
+      .select()
+      .from(suspensionRequestTable)
+      .where(eq(suspensionRequestTable.characterId, entityId))
+      .orderBy(desc(suspensionRequestTable.createdAt));
+  }
+
+  return db
+    .select()
+    .from(suspensionRequestTable)
+    .where(eq(suspensionRequestTable.learningScenarioId, entityId))
+    .orderBy(desc(suspensionRequestTable.createdAt));
+}
+
 export async function dbGetSuspensionRequestsForEntity({
   assistantId,
   characterId,
   learningScenarioId,
-}: ReportTargetIds): Promise<SuspensionRequestSelectModel[]> {
+}: SuspensionRequestTargetIdsInput): Promise<SuspensionRequestSelectModel[]> {
   const providedTargetIds = [assistantId, characterId, learningScenarioId].filter(
     (id): id is string => id !== undefined,
   );
 
   if (providedTargetIds.length === 1) {
     if (assistantId) {
-      return db
-        .select()
-        .from(suspensionRequestTable)
-        .where(eq(suspensionRequestTable.assistantId, assistantId))
-        .orderBy(desc(suspensionRequestTable.createdAt));
+      return dbGetSuspensionRequestsByEntityRef({ entityType: 'assistant', entityId: assistantId });
     }
 
     if (characterId) {
-      return db
-        .select()
-        .from(suspensionRequestTable)
-        .where(eq(suspensionRequestTable.characterId, characterId))
-        .orderBy(desc(suspensionRequestTable.createdAt));
+      return dbGetSuspensionRequestsByEntityRef({ entityType: 'character', entityId: characterId });
     }
 
     if (learningScenarioId) {
-      return db
-        .select()
-        .from(suspensionRequestTable)
-        .where(eq(suspensionRequestTable.learningScenarioId, learningScenarioId))
-        .orderBy(desc(suspensionRequestTable.createdAt));
+      return dbGetSuspensionRequestsByEntityRef({
+        entityType: 'learningScenario',
+        entityId: learningScenarioId,
+      });
     }
   }
 
-  throw new Error('Exactly one entity target id is required');
+  throw new InvalidArgumentError('Exactly one target entity id must be provided');
 }

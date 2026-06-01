@@ -7,8 +7,8 @@ import {
   suspendEntity,
   liftSuspensionOnEntity,
   markSuspensionRequestAsChecked,
-  EntityType,
   getSuspendedItemWithDetails,
+  SuspensionEntityRef,
 } from '@shared/suspension/suspension-service';
 
 export async function getSuspendedEntitiesAction() {
@@ -16,30 +16,14 @@ export async function getSuspendedEntitiesAction() {
   return runServerAction(getSuspensionRequestOverviews)();
 }
 
-export async function suspendEntityAction({
-  assistantId,
-  characterId,
-  learningScenarioId,
-}: {
-  assistantId?: string;
-  characterId?: string;
-  learningScenarioId?: string;
-}) {
+export async function suspendEntityAction(entityRef: SuspensionEntityRef) {
   await requireAdminAuth();
-  return runServerAction(suspendEntity)({ assistantId, characterId, learningScenarioId });
+  return runServerAction(suspendEntity)(entityRef);
 }
 
-export async function liftSuspensionAction({
-  assistantId,
-  characterId,
-  learningScenarioId,
-}: {
-  assistantId?: string;
-  characterId?: string;
-  learningScenarioId?: string;
-}) {
+export async function liftSuspensionAction(entityRef: SuspensionEntityRef) {
   await requireAdminAuth();
-  return runServerAction(liftSuspensionOnEntity)({ assistantId, characterId, learningScenarioId });
+  return runServerAction(liftSuspensionOnEntity)(entityRef);
 }
 
 export async function markSuspensionRequestAsCheckedAction(suspensionRequestId: string) {
@@ -50,10 +34,7 @@ export async function markSuspensionRequestAsCheckedAction(suspensionRequestId: 
 export async function getSuspendedItemWithDetailsAction({
   entityType,
   entityId,
-}: {
-  entityType: EntityType;
-  entityId: string;
-}) {
+}: SuspensionEntityRef) {
   await requireAdminAuth();
   return runServerAction(getSuspendedItemWithDetails)({
     entityType,
