@@ -18,7 +18,6 @@ import {
 import {
   dbCreateSuspensionRequest,
   dbGetAllSuspensionRequestsWithEntityDetails,
-  dbGetSuspensionRequestsByEntityRef,
   dbGetSuspensionRequestsByEntityRefWithEntityDetails,
   dbMarkSuspensionRequestAsChecked,
 } from '@shared/db/functions/suspension-requests';
@@ -44,11 +43,6 @@ export type ReportedEntityOverview = {
   latestRequestAt: Date;
   reasons: { id: string; reason: SuspensionRequestReason }[];
 };
-
-/**
- * @deprecated Use ReportedEntityOverview instead.
- */
-export type SuspensionRequestOverview = ReportedEntityOverview;
 
 type SuspensionRequest = Awaited<
   ReturnType<typeof dbGetAllSuspensionRequestsWithEntityDetails>
@@ -270,14 +264,6 @@ export async function getSuspensionRequestOverviews(): Promise<ReportedEntityOve
   );
 
   return sorted;
-}
-
-export async function getSuspensionRequestsForEntity({
-  entityType,
-  entityId,
-}: EntityRef): Promise<SuspensionRequestSelectModel[]> {
-  checkParameterUUID(entityId);
-  return dbGetSuspensionRequestsByEntityRef({ entityType, entityId });
 }
 
 /**

@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import {
   getSuspensionRequestOverviews,
-  getSuspensionRequestsForEntity,
   liftSuspensionOnEntity,
   markSuspensionRequestAsChecked,
   createSuspensionRequest,
@@ -27,7 +26,6 @@ import {
 } from '@shared/db/functions/learning-scenario';
 import {
   dbGetAllSuspensionRequestsWithEntityDetails,
-  dbGetSuspensionRequestsByEntityRef as dbGetSuspensionRequestsByEntityRefFn,
   dbCreateSuspensionRequest,
   dbMarkSuspensionRequestAsChecked,
 } from '@shared/db/functions/suspension-requests';
@@ -57,10 +55,8 @@ vi.mock('@shared/db/functions/learning-scenario', () => ({
 
 vi.mock('@shared/db/functions/suspension-requests', () => ({
   dbGetAllSuspensionRequestsWithEntityDetails: vi.fn(),
-  dbGetSuspensionRequestsByEntityRef: vi.fn(),
   dbGetSuspensionRequestsByEntityRefWithEntityDetails: vi.fn(),
   dbCreateSuspensionRequest: vi.fn(),
-  dbGetSuspensionRequestsForEntity: vi.fn(),
   dbMarkSuspensionRequestAsChecked: vi.fn(),
 }));
 
@@ -493,37 +489,6 @@ describe('suspension-request-service', () => {
       expect(result[0]?.entityType).toBe('learningScenario');
       expect(result[0]?.status).toBe('checked');
       expect(result[0]?.reasons).toEqual([{ id: requestId, reason: 'other' }]);
-    });
-  });
-
-  describe('getSuspensionRequestsForEntity', () => {
-    it('returns suspension requests for target entity', async () => {
-      const assistantId = generateUUID();
-      (
-        dbGetSuspensionRequestsByEntityRefFn as MockedFunction<
-          typeof dbGetSuspensionRequestsByEntityRefFn
-        >
-      ).mockResolvedValue([{ id: generateUUID(), assistantId }] as never);
-
-      const result = await getSuspensionRequestsForEntity({
-        entityType: 'assistant',
-        entityId: assistantId,
-      });
-
-      expect(dbGetSuspensionRequestsByEntityRefFn).toHaveBeenCalledWith({
-        entityType: 'assistant',
-        entityId: assistantId,
-      });
-      expect(result).toHaveLength(1);
-    });
-
-    it('throws for invalid entity id', async () => {
-      await expect(
-        getSuspensionRequestsForEntity({
-          entityType: 'character',
-          entityId: 'invalid-uuid',
-        }),
-      ).rejects.toThrow(InvalidArgumentError);
     });
   });
 });

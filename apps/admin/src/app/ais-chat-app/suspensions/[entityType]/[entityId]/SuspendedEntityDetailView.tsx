@@ -9,9 +9,7 @@ import {
   CardAction,
 } from '@ui/components/card';
 import { mapEntityTypeToLabel } from '../../utils';
-import {
-  ReportedEntityOverview,
-} from '@shared/suspension/suspension-service';
+import { ReportedEntityOverview } from '@shared/suspension/suspension-service';
 import { EntityRef, EntityType } from '@shared/entities/entity-types';
 import { Button } from '@ui/components/button';
 import { useCallback, useEffect, useState, useTransition } from 'react';

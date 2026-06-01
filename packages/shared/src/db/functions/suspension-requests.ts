@@ -10,7 +10,7 @@ import {
   suspensionRequestTable,
 } from '../schema';
 
-export type SuspensionRequestWithEntityDetails = SuspensionRequestSelectModel & {
+type SuspensionRequestWithEntityDetails = SuspensionRequestSelectModel & {
   entityType: EntityType;
   entityId: string;
   entityName: string | null;
@@ -76,19 +76,6 @@ export async function dbCreateSuspensionRequest({
   return createdSuspensionRequest;
 }
 
-export async function dbGetSuspensionRequestById({
-  suspensionRequestId,
-}: {
-  suspensionRequestId: string;
-}): Promise<SuspensionRequestSelectModel | undefined> {
-  const [suspensionRequest] = await db
-    .select()
-    .from(suspensionRequestTable)
-    .where(eq(suspensionRequestTable.id, suspensionRequestId));
-
-  return suspensionRequest;
-}
-
 export async function dbMarkSuspensionRequestAsChecked({
   suspensionRequestId,
 }: {
@@ -105,26 +92,6 @@ export async function dbMarkSuspensionRequestAsChecked({
   }
 
   return updatedSuspensionRequest;
-}
-
-export async function dbGetPendingSuspensionRequests({
-  limit,
-  offset,
-}: {
-  limit: number;
-  offset: number;
-}): Promise<SuspensionRequestSelectModel[]> {
-  return db
-    .select()
-    .from(suspensionRequestTable)
-    .where(eq(suspensionRequestTable.checked, false))
-    .orderBy(desc(suspensionRequestTable.createdAt))
-    .limit(limit)
-    .offset(offset);
-}
-
-export async function dbGetAllSuspensionRequests(): Promise<SuspensionRequestSelectModel[]> {
-  return db.select().from(suspensionRequestTable).orderBy(desc(suspensionRequestTable.createdAt));
 }
 
 export async function dbGetAllSuspensionRequestsWithEntityDetails(): Promise<
@@ -181,11 +148,4 @@ export async function dbGetSuspensionRequestsByEntityRefWithEntityDetails({
   return baseSuspensionRequestsWithEntityDetailsQuery()
     .where(eq(suspensionRequestTable.learningScenarioId, entityId))
     .orderBy(desc(suspensionRequestTable.createdAt));
-}
-
-export async function dbGetSuspensionRequestsForEntity({
-  entityType,
-  entityId,
-}: EntityRef): Promise<SuspensionRequestSelectModel[]> {
-  return dbGetSuspensionRequestsByEntityRef({ entityType, entityId });
 }

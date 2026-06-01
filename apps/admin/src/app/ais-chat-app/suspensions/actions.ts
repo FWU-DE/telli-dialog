@@ -31,10 +31,7 @@ export async function markSuspensionRequestAsCheckedAction(suspensionRequestId: 
   return runServerAction(markSuspensionRequestAsChecked)(suspensionRequestId);
 }
 
-export async function getSuspendedItemWithDetailsAction({
-  entityType,
-  entityId,
-}: EntityRef) {
+export async function getSuspendedItemWithDetailsAction({ entityType, entityId }: EntityRef) {
   await requireAdminAuth();
   return runServerAction(getSuspendedItemWithDetails)({
     entityType,
