@@ -111,8 +111,7 @@ export function AssistantView({
 
       {assistant.hasLinkAccess && (
         <CustomChatCreateSuspensionRequestButton
-          entityType="assistant"
-          entityId={{ assistantId: assistant.id }}
+          entityRef={{ entityType: 'assistant', entityId: assistant.id }}
         />
       )}
     </CustomChatLayoutContainer>

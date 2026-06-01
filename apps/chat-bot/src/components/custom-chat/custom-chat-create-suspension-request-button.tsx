@@ -1,27 +1,25 @@
 'use client';
 
 import { ShieldWarningIcon } from '@phosphor-icons/react';
-import { EntityType, SuspensionRequestTargetIds } from '@shared/suspension/suspension-service';
+import { SuspensionEntityRef } from '@shared/suspension/suspension-service';
 import { Button } from '@ui/components/button';
 import { useMessages } from 'next-intl';
 import { CustomChatCreateSuspensionDialog } from './custom-chat-create-suspension-dialog';
 
 type CustomChatCreateSuspensionRequestProps = {
-  entityType: EntityType;
-  entityId: SuspensionRequestTargetIds;
+  entityRef: SuspensionEntityRef;
 };
 
 export function CustomChatCreateSuspensionRequestButton({
-  entityType,
-  entityId,
+  entityRef,
 }: CustomChatCreateSuspensionRequestProps) {
   const messages = useMessages();
+  const { entityType } = entityRef;
 
   return (
     <div className="flex justify-center">
       <CustomChatCreateSuspensionDialog
-        entityType={entityType}
-        entityId={entityId}
+        entityRef={entityRef}
         trigger={
           <Button variant="link" className="text-sm">
             <ShieldWarningIcon />

@@ -35,12 +35,6 @@ import { InvalidArgumentError, NotFoundError, checkParameterUUID } from '@shared
 const suspensionRequestDescriptionSchema = z.string().min(1).max(500);
 const EXACTLY_ONE_TARGET_ENTITY_ID_ERROR = 'Exactly one target entity id must be provided';
 
-export type SuspensionRequestTargetIds = {
-  assistantId?: string;
-  characterId?: string;
-  learningScenarioId?: string;
-};
-
 export type EntityType = 'assistant' | 'character' | 'learningScenario';
 
 export type SuspensionEntityRef = {
@@ -99,33 +93,20 @@ type SuspensionRequestAggregate = Pick<
   hasUncheckedRequests: boolean;
 };
 
-function validateSingleTargetAndUuid({
-  assistantId,
-  characterId,
-  learningScenarioId,
-}: SuspensionRequestTargetIds) {
-  const providedIds = [assistantId, characterId, learningScenarioId].filter(
-    (id): id is string => id !== undefined,
-  );
+async function resolveTargetEntity({ entityType, entityId }: SuspensionEntityRef) {
+  checkParameterUUID(entityId);
 
-  if (providedIds.length !== 1) {
-    throw new InvalidArgumentError(EXACTLY_ONE_TARGET_ENTITY_ID_ERROR);
+  if (entityType === 'assistant') {
+    const assistant = await dbGetAssistantById({ assistantId: entityId });
+    if (!assistant) {
+      throw new NotFoundError('Assistant not found');
+    }
+
+    return assistant;
   }
 
-  checkParameterUUID(...providedIds);
-}
-
-async function resolveTargetEntity({
-  assistantId,
-  characterId,
-  learningScenarioId,
-}: SuspensionRequestTargetIds) {
-  if (assistantId) {
-    return dbGetAssistantById({ assistantId });
-  }
-
-  if (characterId) {
-    const character = await dbGetCharacterById({ characterId });
+  if (entityType === 'character') {
+    const character = await dbGetCharacterById({ characterId: entityId });
     if (!character) {
       throw new NotFoundError('Character not found');
     }
@@ -133,31 +114,24 @@ async function resolveTargetEntity({
     return character;
   }
 
-  if (learningScenarioId) {
-    const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
-    if (!learningScenario) {
-      throw new NotFoundError('Learning scenario not found');
-    }
-
-    return learningScenario;
+  const learningScenario = await dbGetLearningScenarioById({ learningScenarioId: entityId });
+  if (!learningScenario) {
+    throw new NotFoundError('Learning scenario not found');
   }
 
-  throw new InvalidArgumentError(EXACTLY_ONE_TARGET_ENTITY_ID_ERROR);
+  return learningScenario;
 }
-
 export async function createSuspensionRequest({
-  assistantId,
-  characterId,
-  learningScenarioId,
+  entityType,
+  entityId,
   requesterId,
   reason,
   description,
-}: SuspensionRequestTargetIds & {
+}: SuspensionEntityRef & {
   requesterId: string;
   reason: string;
   description: string;
 }) {
-  validateSingleTargetAndUuid({ assistantId, characterId, learningScenarioId });
   checkParameterUUID(requesterId);
 
   const validatedReason = suspensionRequestReasonSchema.parse(reason);
@@ -168,7 +142,7 @@ export async function createSuspensionRequest({
     throw new NotFoundError('Requester not found');
   }
 
-  const targetEntity = await resolveTargetEntity({ assistantId, characterId, learningScenarioId });
+  const targetEntity = await resolveTargetEntity({ entityType, entityId });
   verifyReadAccess({
     item: targetEntity,
     user: requester,
@@ -176,9 +150,9 @@ export async function createSuspensionRequest({
 
   return dbCreateSuspensionRequest({
     suspensionRequest: {
-      assistantId,
-      characterId,
-      learningScenarioId,
+      assistantId: entityType === 'assistant' ? entityId : undefined,
+      characterId: entityType === 'character' ? entityId : undefined,
+      learningScenarioId: entityType === 'learningScenario' ? entityId : undefined,
       requesterId,
       reason: validatedReason,
       description: validatedDescription,
@@ -191,10 +165,8 @@ export async function markSuspensionRequestAsChecked(suspensionRequestId: string
   return dbMarkSuspensionRequestAsChecked({ suspensionRequestId });
 }
 
-export async function suspendEntity(
-  entityRefOrTargetIds: SuspensionEntityRef | SuspensionRequestTargetIds,
-) {
-  const { entityType, entityId } = normalizeSuspensionEntityRef(entityRefOrTargetIds);
+export async function suspendEntity(entityRef: SuspensionEntityRef) {
+  const { entityType, entityId } = entityRef;
 
   if (entityType === 'assistant') {
     return dbSetAssistantSuspended({ assistantId: entityId });
@@ -211,10 +183,8 @@ export async function suspendEntity(
   throw new InvalidArgumentError(EXACTLY_ONE_TARGET_ENTITY_ID_ERROR);
 }
 
-export async function liftSuspensionOnEntity(
-  entityRefOrTargetIds: SuspensionEntityRef | SuspensionRequestTargetIds,
-) {
-  const { entityType, entityId } = normalizeSuspensionEntityRef(entityRefOrTargetIds);
+export async function liftSuspensionOnEntity(entityRef: SuspensionEntityRef) {
+  const { entityType, entityId } = entityRef;
 
   if (entityType === 'assistant') {
     return dbLiftSuspensionOnAssistant({ assistantId: entityId });
@@ -453,12 +423,11 @@ export async function getSuspensionRequestOverviews(): Promise<ReportedEntityOve
 }
 
 export async function getSuspensionRequestsForEntity({
-  assistantId,
-  characterId,
-  learningScenarioId,
-}: SuspensionRequestTargetIds): Promise<SuspensionRequestSelectModel[]> {
-  const entityRef = normalizeSuspensionEntityRef({ assistantId, characterId, learningScenarioId });
-  return dbGetSuspensionRequestsByEntityRef(entityRef);
+  entityType,
+  entityId,
+}: SuspensionEntityRef): Promise<SuspensionRequestSelectModel[]> {
+  checkParameterUUID(entityId);
+  return dbGetSuspensionRequestsByEntityRef({ entityType, entityId });
 }
 
 /**
@@ -503,38 +472,4 @@ function convertSuspensionEntityRefToEntityIds({
     characterIds: entityType === 'character' ? [entityId] : [],
     learningScenarioIds: entityType === 'learningScenario' ? [entityId] : [],
   };
-}
-
-function normalizeSuspensionEntityRef(
-  entityRefOrTargetIds: SuspensionEntityRef | SuspensionRequestTargetIds,
-): SuspensionEntityRef {
-  if ('entityType' in entityRefOrTargetIds) {
-    checkParameterUUID(entityRefOrTargetIds.entityId);
-    return entityRefOrTargetIds;
-  }
-
-  validateSingleTargetAndUuid(entityRefOrTargetIds);
-
-  if (entityRefOrTargetIds.assistantId) {
-    return {
-      entityType: 'assistant',
-      entityId: entityRefOrTargetIds.assistantId,
-    };
-  }
-
-  if (entityRefOrTargetIds.characterId) {
-    return {
-      entityType: 'character',
-      entityId: entityRefOrTargetIds.characterId,
-    };
-  }
-
-  if (entityRefOrTargetIds.learningScenarioId) {
-    return {
-      entityType: 'learningScenario',
-      entityId: entityRefOrTargetIds.learningScenarioId,
-    };
-  }
-
-  throw new InvalidArgumentError(EXACTLY_ONE_TARGET_ENTITY_ID_ERROR);
 }

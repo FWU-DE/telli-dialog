@@ -158,8 +158,7 @@ export function CharacterView({
       </div>
       {character.hasLinkAccess && (
         <CustomChatCreateSuspensionRequestButton
-          entityType="character"
-          entityId={{ characterId: character.id }}
+          entityRef={{ entityType: 'character', entityId: character.id }}
         />
       )}
     </CustomChatLayoutContainer>

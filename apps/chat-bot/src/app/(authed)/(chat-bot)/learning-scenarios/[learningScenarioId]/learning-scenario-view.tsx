@@ -164,8 +164,7 @@ export function LearningScenarioView({
       />
       {learningScenario.hasLinkAccess && (
         <CustomChatCreateSuspensionRequestButton
-          entityType="learningScenario"
-          entityId={{ learningScenarioId: learningScenario.id }}
+          entityRef={{ entityType: 'learningScenario', entityId: learningScenario.id }}
         />
       )}
     </CustomChatLayoutContainer>

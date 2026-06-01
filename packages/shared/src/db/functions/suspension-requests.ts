@@ -1,5 +1,5 @@
 import { desc, eq } from 'drizzle-orm';
-import { InvalidArgumentError, NotFoundError } from '@shared/error';
+import { NotFoundError } from '@shared/error';
 import { db } from '..';
 import { SuspensionRequestSelectModel, suspensionRequestTable } from '../schema';
 
@@ -8,12 +8,6 @@ export type SuspensionRequestEntityType = 'assistant' | 'character' | 'learningS
 export type SuspensionRequestEntityRef = {
   entityType: SuspensionRequestEntityType;
   entityId: string;
-};
-
-type SuspensionRequestTargetIdsInput = {
-  assistantId?: string;
-  characterId?: string;
-  learningScenarioId?: string;
 };
 
 export async function dbCreateSuspensionRequest({
@@ -112,30 +106,8 @@ export async function dbGetSuspensionRequestsByEntityRef({
 }
 
 export async function dbGetSuspensionRequestsForEntity({
-  assistantId,
-  characterId,
-  learningScenarioId,
-}: SuspensionRequestTargetIdsInput): Promise<SuspensionRequestSelectModel[]> {
-  const providedTargetIds = [assistantId, characterId, learningScenarioId].filter(
-    (id): id is string => id !== undefined,
-  );
-
-  if (providedTargetIds.length === 1) {
-    if (assistantId) {
-      return dbGetSuspensionRequestsByEntityRef({ entityType: 'assistant', entityId: assistantId });
-    }
-
-    if (characterId) {
-      return dbGetSuspensionRequestsByEntityRef({ entityType: 'character', entityId: characterId });
-    }
-
-    if (learningScenarioId) {
-      return dbGetSuspensionRequestsByEntityRef({
-        entityType: 'learningScenario',
-        entityId: learningScenarioId,
-      });
-    }
-  }
-
-  throw new InvalidArgumentError('Exactly one target entity id must be provided');
+  entityType,
+  entityId,
+}: SuspensionRequestEntityRef): Promise<SuspensionRequestSelectModel[]> {
+  return dbGetSuspensionRequestsByEntityRef({ entityType, entityId });
 }

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useMessages } from 'next-intl';
-import { EntityType, SuspensionRequestTargetIds } from '@shared/suspension/suspension-service';
+import { SuspensionEntityRef } from '@shared/suspension/suspension-service';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,18 +39,17 @@ const suspensionFormValuesSchema = z.object({
 
 type CustomChatCreateSuspensionDialogProps = {
   trigger: React.ReactElement;
-  entityType: EntityType;
-  entityId: SuspensionRequestTargetIds;
+  entityRef: SuspensionEntityRef;
 };
 
 export function CustomChatCreateSuspensionDialog({
   trigger,
-  entityType,
-  entityId,
+  entityRef,
 }: CustomChatCreateSuspensionDialogProps) {
   const [open, setOpen] = React.useState(false);
   const toast = useToast();
   const tMessages = useMessages();
+  const { entityType } = entityRef;
   const tEntityMessages = tMessages.suspension[entityType];
   const tReasons = tMessages.suspension['create-dialog-reasons'];
 
@@ -76,7 +75,7 @@ export function CustomChatCreateSuspensionDialog({
 
   async function onSubmit(data: z.infer<typeof suspensionFormValuesSchema>) {
     const result = await createSuspensionRequestAction({
-      ...entityId,
+      ...entityRef,
       reason: data.reason,
       description: data.description,
     });
