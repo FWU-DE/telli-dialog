@@ -30,17 +30,15 @@ import {
   suspensionRequestReasonSchema,
   SuspensionRequestSelectModel,
 } from '@shared/db/schema';
+import { EntityRef, EntityType as SharedEntityType } from '@shared/entities/entity-types';
 import { InvalidArgumentError, NotFoundError, checkParameterUUID } from '@shared/error';
 
 const suspensionRequestDescriptionSchema = z.string().min(1).max(500);
 const EXACTLY_ONE_TARGET_ENTITY_ID_ERROR = 'Exactly one target entity id must be provided';
 
-export type EntityType = 'assistant' | 'character' | 'learningScenario';
+export type EntityType = SharedEntityType;
 
-export type SuspensionEntityRef = {
-  entityType: EntityType;
-  entityId: string;
-};
+export type SuspensionEntityRef = EntityRef;
 
 type ReportedEntityOverviewStatus = 'new' | 'suspended' | 'checked';
 

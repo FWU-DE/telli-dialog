@@ -1,14 +1,12 @@
 import { desc, eq } from 'drizzle-orm';
 import { NotFoundError } from '@shared/error';
+import { EntityRef, EntityType } from '@shared/entities/entity-types';
 import { db } from '..';
 import { SuspensionRequestSelectModel, suspensionRequestTable } from '../schema';
 
-export type SuspensionRequestEntityType = 'assistant' | 'character' | 'learningScenario';
+export type SuspensionRequestEntityType = EntityType;
 
-export type SuspensionRequestEntityRef = {
-  entityType: SuspensionRequestEntityType;
-  entityId: string;
-};
+export type SuspensionRequestEntityRef = EntityRef;
 
 export async function dbCreateSuspensionRequest({
   suspensionRequest,

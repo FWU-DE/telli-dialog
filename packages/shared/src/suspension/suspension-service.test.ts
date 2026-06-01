@@ -102,7 +102,8 @@ describe('suspension-request-service', () => {
       } as never);
 
       const result = await createSuspensionRequest({
-        assistantId,
+        entityType: 'assistant',
+        entityId: assistantId,
         requesterId,
         reason: 'other',
         description: 'Looks suspicious',
@@ -122,21 +123,17 @@ describe('suspension-request-service', () => {
       expect(result).toEqual({ id: suspensionRequestId });
     });
 
-    it('throws if none or multiple target ids are provided', async () => {
+    it('throws for invalid entity id', async () => {
       const requesterId = generateUUID();
+      (dbGetUserById as MockedFunction<typeof dbGetUserById>).mockResolvedValue({
+        id: requesterId,
+        schoolIds: [generateUUID()],
+      } as never);
 
       await expect(
         createSuspensionRequest({
-          requesterId,
-          reason: 'other',
-          description: 'test',
-        }),
-      ).rejects.toThrow(InvalidArgumentError);
-
-      await expect(
-        createSuspensionRequest({
-          assistantId: generateUUID(),
-          characterId: generateUUID(),
+          entityType: 'assistant',
+          entityId: 'invalid-uuid',
           requesterId,
           reason: 'other',
           description: 'test',
@@ -149,7 +146,8 @@ describe('suspension-request-service', () => {
 
       await expect(
         createSuspensionRequest({
-          assistantId: generateUUID(),
+          entityType: 'assistant',
+          entityId: generateUUID(),
           requesterId: generateUUID(),
           reason: 'other',
           description: 'test',
@@ -168,7 +166,8 @@ describe('suspension-request-service', () => {
 
       await expect(
         createSuspensionRequest({
-          assistantId: generateUUID(),
+          entityType: 'assistant',
+          entityId: generateUUID(),
           requesterId: generateUUID(),
           reason: 'other',
           description: 'test',
@@ -197,7 +196,8 @@ describe('suspension-request-service', () => {
 
       await expect(
         createSuspensionRequest({
-          assistantId,
+          entityType: 'assistant',
+          entityId: assistantId,
           requesterId,
           reason: 'other',
           description: 'test',
@@ -228,7 +228,8 @@ describe('suspension-request-service', () => {
       } as never);
 
       const result = await createSuspensionRequest({
-        characterId,
+        entityType: 'character',
+        entityId: characterId,
         requesterId,
         reason: 'other',
         description: 'Looks suspicious',
@@ -258,7 +259,8 @@ describe('suspension-request-service', () => {
 
       await expect(
         createSuspensionRequest({
-          learningScenarioId: generateUUID(),
+          entityType: 'learningScenario',
+          entityId: generateUUID(),
           requesterId: generateUUID(),
           reason: 'other',
           description: 'test',
@@ -341,23 +343,11 @@ describe('suspension-request-service', () => {
       expect(dbLiftSuspensionOnLearningScenario).toHaveBeenCalledWith({ learningScenarioId });
     });
 
-    it('accepts legacy target ids for backwards compatibility', async () => {
-      const assistantId = generateUUID();
-      (dbSetAssistantSuspended as MockedFunction<typeof dbSetAssistantSuspended>).mockResolvedValue(
-        { id: assistantId, suspended: true } as never,
-      );
-
-      await suspendEntity({ assistantId });
-
-      expect(dbSetAssistantSuspended).toHaveBeenCalledWith({ assistantId });
-    });
-
-    it('throws if none or multiple target ids are provided', async () => {
-      await expect(suspendEntity({})).rejects.toThrow(InvalidArgumentError);
+    it('throws for unsupported entity type', async () => {
       await expect(
         suspendEntity({
-          assistantId: generateUUID(),
-          characterId: generateUUID(),
+          entityType: 'invalid' as never,
+          entityId: generateUUID(),
         }),
       ).rejects.toThrow(InvalidArgumentError);
     });
@@ -538,7 +528,10 @@ describe('suspension-request-service', () => {
         >
       ).mockResolvedValue([{ id: generateUUID(), assistantId }] as never);
 
-      const result = await getSuspensionRequestsForEntity({ assistantId });
+      const result = await getSuspensionRequestsForEntity({
+        entityType: 'assistant',
+        entityId: assistantId,
+      });
 
       expect(dbGetSuspensionRequestsByEntityRefFn).toHaveBeenCalledWith({
         entityType: 'assistant',
@@ -547,12 +540,11 @@ describe('suspension-request-service', () => {
       expect(result).toHaveLength(1);
     });
 
-    it('throws if none or multiple target ids are provided', async () => {
-      await expect(getSuspensionRequestsForEntity({})).rejects.toThrow(InvalidArgumentError);
+    it('throws for invalid entity id', async () => {
       await expect(
         getSuspensionRequestsForEntity({
-          characterId: generateUUID(),
-          learningScenarioId: generateUUID(),
+          entityType: 'character',
+          entityId: 'invalid-uuid',
         }),
       ).rejects.toThrow(InvalidArgumentError);
     });
