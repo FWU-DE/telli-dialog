@@ -2,17 +2,15 @@
 
 import { requireAuth } from '@/auth/requireAuth';
 import { runServerAction } from '@shared/actions/run-server-action';
-import {
-  createSuspensionRequest,
-  SuspensionEntityRef,
-} from '@shared/suspension/suspension-service';
+import { createSuspensionRequest } from '@shared/suspension/suspension-service';
+import { EntityRef } from '@shared/entities/entity-types';
 
 export async function createSuspensionRequestAction({
   entityType,
   entityId,
   reason,
   description,
-}: SuspensionEntityRef & {
+}: EntityRef & {
   reason: string;
   description: string;
 }) {

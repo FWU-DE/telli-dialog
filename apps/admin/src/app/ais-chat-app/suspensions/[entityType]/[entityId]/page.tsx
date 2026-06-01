@@ -1,4 +1,4 @@
-import { EntityType } from '@shared/suspension/suspension-service';
+import { EntityType } from '@shared/entities/entity-types';
 import { AdminAppSidebar } from '@/app/ais-chat-app/AdminAppSidebar';
 import TwoColumnLayout from '@/components/layout/TwoColumnLayout';
 import { headers } from 'next/headers';

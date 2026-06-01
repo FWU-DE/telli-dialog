@@ -1,13 +1,13 @@
 'use client';
 
 import { ShieldWarningIcon } from '@phosphor-icons/react';
-import { SuspensionEntityRef } from '@shared/suspension/suspension-service';
+import { EntityRef } from '@shared/entities/entity-types';
 import { Button } from '@ui/components/button';
 import { useMessages } from 'next-intl';
 import { CustomChatCreateSuspensionDialog } from './custom-chat-create-suspension-dialog';
 
 type CustomChatCreateSuspensionRequestProps = {
-  entityRef: SuspensionEntityRef;
+  entityRef: EntityRef;
 };
 
 export function CustomChatCreateSuspensionRequestButton({

@@ -12,24 +12,21 @@ import { generateUUID } from '@shared/utils/uuid';
 import { dbGetUserById } from '@shared/db/functions/user';
 import {
   dbGetAssistantById,
-  dbGetAssistantsByIds,
   dbLiftSuspensionOnAssistant,
   dbSetAssistantSuspended,
 } from '@shared/db/functions/assistants';
 import {
   dbGetCharacterById,
-  dbGetCharactersByIds,
   dbLiftSuspensionOnCharacter,
   dbSetCharacterSuspended,
 } from '@shared/db/functions/character';
 import {
   dbGetLearningScenarioById,
-  dbGetLearningScenariosByIds,
   dbLiftSuspensionOnLearningScenario,
   dbSetLearningScenarioSuspended,
 } from '@shared/db/functions/learning-scenario';
 import {
-  dbGetAllSuspensionRequests,
+  dbGetAllSuspensionRequestsWithEntityDetails,
   dbGetSuspensionRequestsByEntityRef as dbGetSuspensionRequestsByEntityRefFn,
   dbCreateSuspensionRequest,
   dbMarkSuspensionRequestAsChecked,
@@ -42,28 +39,26 @@ vi.mock('@shared/db/functions/user', () => ({
 
 vi.mock('@shared/db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
-  dbGetAssistantsByIds: vi.fn(),
   dbLiftSuspensionOnAssistant: vi.fn(),
   dbSetAssistantSuspended: vi.fn(),
 }));
 
 vi.mock('@shared/db/functions/character', () => ({
   dbGetCharacterById: vi.fn(),
-  dbGetCharactersByIds: vi.fn(),
   dbLiftSuspensionOnCharacter: vi.fn(),
   dbSetCharacterSuspended: vi.fn(),
 }));
 
 vi.mock('@shared/db/functions/learning-scenario', () => ({
   dbGetLearningScenarioById: vi.fn(),
-  dbGetLearningScenariosByIds: vi.fn(),
   dbLiftSuspensionOnLearningScenario: vi.fn(),
   dbSetLearningScenarioSuspended: vi.fn(),
 }));
 
 vi.mock('@shared/db/functions/suspension-requests', () => ({
-  dbGetAllSuspensionRequests: vi.fn(),
+  dbGetAllSuspensionRequestsWithEntityDetails: vi.fn(),
   dbGetSuspensionRequestsByEntityRef: vi.fn(),
+  dbGetSuspensionRequestsByEntityRefWithEntityDetails: vi.fn(),
   dbCreateSuspensionRequest: vi.fn(),
   dbGetSuspensionRequestsForEntity: vi.fn(),
   dbMarkSuspensionRequestAsChecked: vi.fn(),
@@ -363,7 +358,9 @@ describe('suspension-request-service', () => {
       const requestId3 = generateUUID();
 
       (
-        dbGetAllSuspensionRequests as MockedFunction<typeof dbGetAllSuspensionRequests>
+        dbGetAllSuspensionRequestsWithEntityDetails as MockedFunction<
+          typeof dbGetAllSuspensionRequestsWithEntityDetails
+        >
       ).mockResolvedValue([
         {
           id: requestId1,
@@ -375,6 +372,10 @@ describe('suspension-request-service', () => {
           description: 'a',
           createdAt: new Date('2026-01-01T00:00:00.000Z'),
           checked: false,
+          entityType: 'assistant',
+          entityId: assistantId,
+          entityName: 'Assistant A',
+          suspended: false,
         },
         {
           id: requestId2,
@@ -386,6 +387,10 @@ describe('suspension-request-service', () => {
           description: 'b',
           createdAt: new Date('2026-01-02T00:00:00.000Z'),
           checked: true,
+          entityType: 'assistant',
+          entityId: assistantId,
+          entityName: 'Assistant A',
+          suspended: false,
         },
         {
           id: requestId3,
@@ -397,26 +402,12 @@ describe('suspension-request-service', () => {
           description: 'c',
           createdAt: new Date('2026-01-03T00:00:00.000Z'),
           checked: true,
-        },
-      ] as never);
-
-      (dbGetAssistantsByIds as MockedFunction<typeof dbGetAssistantsByIds>).mockResolvedValue([
-        {
-          id: assistantId,
-          name: 'Assistant A',
-          suspended: false,
-        },
-      ] as never);
-      (dbGetCharactersByIds as MockedFunction<typeof dbGetCharactersByIds>).mockResolvedValue([
-        {
-          id: characterId,
-          name: 'Character C',
+          entityType: 'character',
+          entityId: characterId,
+          entityName: 'Character C',
           suspended: true,
         },
       ] as never);
-      (
-        dbGetLearningScenariosByIds as MockedFunction<typeof dbGetLearningScenariosByIds>
-      ).mockResolvedValue([] as never);
 
       const result = await getSuspensionRequestOverviews();
 
@@ -446,7 +437,9 @@ describe('suspension-request-service', () => {
       const characterId = generateUUID();
 
       (
-        dbGetAllSuspensionRequests as MockedFunction<typeof dbGetAllSuspensionRequests>
+        dbGetAllSuspensionRequestsWithEntityDetails as MockedFunction<
+          typeof dbGetAllSuspensionRequestsWithEntityDetails
+        >
       ).mockResolvedValue([
         {
           id: generateUUID(),
@@ -458,18 +451,12 @@ describe('suspension-request-service', () => {
           description: 'c',
           createdAt: new Date('2026-01-03T00:00:00.000Z'),
           checked: true,
+          entityType: 'character',
+          entityId: characterId,
+          entityName: null,
+          suspended: null,
         },
       ] as never);
-
-      (dbGetAssistantsByIds as MockedFunction<typeof dbGetAssistantsByIds>).mockResolvedValue(
-        [] as never,
-      );
-      (dbGetCharactersByIds as MockedFunction<typeof dbGetCharactersByIds>).mockResolvedValue(
-        [] as never,
-      );
-      (
-        dbGetLearningScenariosByIds as MockedFunction<typeof dbGetLearningScenariosByIds>
-      ).mockResolvedValue([] as never);
 
       await expect(getSuspensionRequestOverviews()).rejects.toThrow(NotFoundError);
     });
@@ -479,7 +466,9 @@ describe('suspension-request-service', () => {
       const requestId = generateUUID();
 
       (
-        dbGetAllSuspensionRequests as MockedFunction<typeof dbGetAllSuspensionRequests>
+        dbGetAllSuspensionRequestsWithEntityDetails as MockedFunction<
+          typeof dbGetAllSuspensionRequestsWithEntityDetails
+        >
       ).mockResolvedValue([
         {
           id: requestId,
@@ -491,21 +480,9 @@ describe('suspension-request-service', () => {
           description: 'l',
           createdAt: new Date('2026-01-04T00:00:00.000Z'),
           checked: true,
-        },
-      ] as never);
-
-      (dbGetAssistantsByIds as MockedFunction<typeof dbGetAssistantsByIds>).mockResolvedValue(
-        [] as never,
-      );
-      (dbGetCharactersByIds as MockedFunction<typeof dbGetCharactersByIds>).mockResolvedValue(
-        [] as never,
-      );
-      (
-        dbGetLearningScenariosByIds as MockedFunction<typeof dbGetLearningScenariosByIds>
-      ).mockResolvedValue([
-        {
-          id: learningScenarioId,
-          name: 'Scenario L',
+          entityType: 'learningScenario',
+          entityId: learningScenarioId,
+          entityName: 'Scenario L',
           suspended: false,
         },
       ] as never);

@@ -8,20 +8,20 @@ import {
   liftSuspensionOnEntity,
   markSuspensionRequestAsChecked,
   getSuspendedItemWithDetails,
-  SuspensionEntityRef,
 } from '@shared/suspension/suspension-service';
+import { EntityRef } from '@shared/entities/entity-types';
 
 export async function getSuspendedEntitiesAction() {
   await requireAdminAuth();
   return runServerAction(getSuspensionRequestOverviews)();
 }
 
-export async function suspendEntityAction(entityRef: SuspensionEntityRef) {
+export async function suspendEntityAction(entityRef: EntityRef) {
   await requireAdminAuth();
   return runServerAction(suspendEntity)(entityRef);
 }
 
-export async function liftSuspensionAction(entityRef: SuspensionEntityRef) {
+export async function liftSuspensionAction(entityRef: EntityRef) {
   await requireAdminAuth();
   return runServerAction(liftSuspensionOnEntity)(entityRef);
 }
@@ -34,7 +34,7 @@ export async function markSuspensionRequestAsCheckedAction(suspensionRequestId: 
 export async function getSuspendedItemWithDetailsAction({
   entityType,
   entityId,
-}: SuspensionEntityRef) {
+}: EntityRef) {
   await requireAdminAuth();
   return runServerAction(getSuspendedItemWithDetails)({
     entityType,

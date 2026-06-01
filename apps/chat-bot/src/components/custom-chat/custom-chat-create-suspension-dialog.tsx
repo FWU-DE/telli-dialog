@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useMessages } from 'next-intl';
-import { SuspensionEntityRef } from '@shared/suspension/suspension-service';
+import { EntityRef } from '@shared/entities/entity-types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,7 +39,7 @@ const suspensionFormValuesSchema = z.object({
 
 type CustomChatCreateSuspensionDialogProps = {
   trigger: React.ReactElement;
-  entityRef: SuspensionEntityRef;
+  entityRef: EntityRef;
 };
 
 export function CustomChatCreateSuspensionDialog({

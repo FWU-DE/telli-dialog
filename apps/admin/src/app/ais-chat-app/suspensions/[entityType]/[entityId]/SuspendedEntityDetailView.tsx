@@ -10,10 +10,9 @@ import {
 } from '@ui/components/card';
 import { mapEntityTypeToLabel } from '../../utils';
 import {
-  EntityType,
   ReportedEntityOverview,
-  SuspensionEntityRef,
 } from '@shared/suspension/suspension-service';
+import { EntityRef, EntityType } from '@shared/entities/entity-types';
 import { Button } from '@ui/components/button';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import { SuspensionRequestSelectModel } from '@shared/db/schema';
@@ -80,7 +79,7 @@ export function SuspendedEntityDetailView({
       return;
     }
 
-    const entityRef: SuspensionEntityRef = {
+    const entityRef: EntityRef = {
       entityType: suspendedItemDetails.entityType,
       entityId: suspendedItemDetails.entityId,
     };
@@ -100,7 +99,7 @@ export function SuspendedEntityDetailView({
       return;
     }
 
-    const entityRef: SuspensionEntityRef = {
+    const entityRef: EntityRef = {
       entityType: suspendedItemDetails.entityType,
       entityId: suspendedItemDetails.entityId,
     };
