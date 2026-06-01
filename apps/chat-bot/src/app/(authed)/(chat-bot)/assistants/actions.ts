@@ -12,7 +12,7 @@ import {
   uploadAvatarPictureForAssistant,
 } from '@shared/assistants/assistant-service';
 import { runServerAction } from '@shared/actions/run-server-action';
-import { AccessLevel, AssistantInsertModel } from '@shared/db/schema';
+import { AccessLevel, AssistantInsertModel, ShareTarget } from '@shared/db/schema';
 
 export async function createNewAssistantAction({
   templateId,
@@ -57,15 +57,18 @@ export async function linkFileToAssistantAction({
 export async function updateAssistantAccessLevelAction({
   assistantId,
   accessLevel,
+  shareTargets,
 }: {
   assistantId: string;
   accessLevel: AccessLevel;
+  shareTargets: ShareTarget[];
 }) {
   const { user } = await requireAuth();
 
   return runServerAction(updateAssistantAccessLevel)({
     assistantId,
     accessLevel,
+    shareTargets,
     user,
   });
 }

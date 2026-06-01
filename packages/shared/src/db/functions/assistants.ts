@@ -105,10 +105,16 @@ export async function dbGetGptsByAssociatedSchools({
   return baseAssistantQuery()
     .where(
       and(
-        eq(assistantTable.accessLevel, 'school'),
+        sql`'school' = any(${assistantTable.shareTargets})`,
         arrayOverlaps(userTable.schoolIds, user.schoolIds),
       ),
     )
+    .orderBy(desc(assistantTable.createdAt));
+}
+
+export async function dbGetCommunityGpts(): Promise<AssistantSelectModel[]> {
+  return baseAssistantQuery()
+    .where(eq(assistantTable.accessLevel, 'community'))
     .orderBy(desc(assistantTable.createdAt));
 }
 
@@ -119,6 +125,37 @@ export async function dbGetGptsByUser({
 }): Promise<AssistantSelectModel[]> {
   return baseAssistantQuery()
     .where(and(eq(assistantTable.userId, user.id), eq(assistantTable.accessLevel, 'private')))
+    .orderBy(desc(assistantTable.createdAt));
+}
+
+export async function dbGetAllAccessibleAssistants({
+  user,
+}: {
+  user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
+}): Promise<AssistantSelectModel[]> {
+  return baseAssistantQuery()
+    .leftJoin(
+      assistantTemplateMappingTable,
+      eq(assistantTemplateMappingTable.assistantId, assistantTable.id),
+    )
+    .where(
+      or(
+        eq(assistantTable.userId, user.id),
+        user.schoolIds.length > 0
+          ? and(
+              sql`'school' = any(${assistantTable.shareTargets})`,
+              arrayOverlaps(userTable.schoolIds, user.schoolIds),
+            )
+          : undefined,
+        eq(assistantTable.accessLevel, 'community'),
+        user.federalStateId
+          ? and(
+              eq(assistantTable.accessLevel, 'global'),
+              eq(assistantTemplateMappingTable.federalStateId, user.federalStateId),
+            )
+          : eq(assistantTable.accessLevel, 'global'),
+      ),
+    )
     .orderBy(desc(assistantTable.createdAt));
 }
 
@@ -143,6 +180,7 @@ export async function dbGetAssistantByIdOrAssociatedSchool({
             arrayOverlaps(userTable.schoolIds, user.schoolIds),
           )
         : undefined,
+      and(eq(assistantTable.id, assistantId), eq(assistantTable.accessLevel, 'community')),
       eq(assistantTable.accessLevel, 'global'),
     ),
   );

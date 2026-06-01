@@ -7,6 +7,7 @@ import {
   ConversationUsageTrackingSelectModel,
   LearningScenarioSelectModel,
   LlmModelSelectModel,
+  ShareTarget,
   SharedCharacterChatUsageTrackingSelectModel,
   SharedLearningScenarioUsageTrackingSelectModel,
 } from '@shared/db/schema';
@@ -98,6 +99,7 @@ export const mockLearningScenario = (): LearningScenarioSelectModel => {
     restrictions: null,
     pictureId: null,
     accessLevel: 'private',
+    shareTargets: [] as ShareTarget[],
     originalLearningScenarioId: null,
     isDeleted: false,
     suspended: false,
@@ -153,6 +155,7 @@ export const mockCharacter = (): CharacterSelectModel => {
     pictureId: generateUUID(),
     initialMessage: generateRandomString(10),
     accessLevel: 'private',
+    shareTargets: [] as ShareTarget[],
     createdAt: new Date(),
     updatedAt: new Date(),
     attachedLinks: [],

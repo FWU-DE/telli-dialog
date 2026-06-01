@@ -354,9 +354,15 @@ export type InfoBannerUserStateInsertModel = z.infer<typeof infoBannerUserStateI
 /**
  * Schema for table character
  */
-export const accessLevelSchema = z.enum(['private', 'school', 'global']);
+export const accessLevelSchema = z.enum(['private', 'school', 'community', 'global']);
 export const accessLevelEnum = pgEnum('access_level', accessLevelSchema.enum);
 export type AccessLevel = z.infer<typeof accessLevelSchema>;
+
+// Custom share targets can currently only be 'school' and 'community',
+// because they are the only access levels that can be manually set at the same time in the share section
+export const shareTargetSchema = z.enum(['school', 'community']);
+export const shareTargetEnum = pgEnum('share_target', shareTargetSchema.enum);
+export type ShareTarget = z.infer<typeof shareTargetSchema>;
 
 export const suspensionRequestReasonSchema = z.enum([
   'copyright_violation',
@@ -400,6 +406,10 @@ export const characterTable = pgTable(
     pictureId: text('picture_id'),
     initialMessage: text('initial_message'),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
+    shareTargets: shareTargetEnum('share_targets')
+      .array()
+      .notNull()
+      .default(sql`'{}'::share_target[]`),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
@@ -423,6 +433,7 @@ export const characterSelectSchema = createSelectSchema(characterTable)
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
+    shareTargets: z.array(shareTargetSchema),
     ownerSchoolIds: z.array(z.string()),
   });
 export const characterInsertSchema = createInsertSchema(characterTable)
@@ -435,6 +446,7 @@ export const characterInsertSchema = createInsertSchema(characterTable)
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     accessLevel: accessLevelSchema,
+    shareTargets: z.array(shareTargetSchema).optional(),
   });
 export const characterUpdateSchema = createUpdateSchema(characterTable)
   .omit({
@@ -447,6 +459,7 @@ export const characterUpdateSchema = createUpdateSchema(characterTable)
   .extend({
     id: z.string(),
     accessLevel: accessLevelSchema,
+    shareTargets: z.array(shareTargetSchema).optional(),
   });
 
 export type CharacterSelectModel = z.infer<typeof characterSelectSchema>;
@@ -618,6 +631,10 @@ export const learningScenarioTable = pgTable(
     suspended: boolean('suspended').notNull().default(false),
     isDeleted: boolean('is_deleted').notNull().default(false),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
+    shareTargets: shareTargetEnum('share_targets')
+      .array()
+      .notNull()
+      .default(sql`'{}'::share_target[]`),
     originalLearningScenarioId: uuid('original_learning_scenario_id'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
   },
@@ -630,6 +647,7 @@ export const learningScenarioSelectSchema = createSelectSchema(learningScenarioT
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
+    shareTargets: z.array(shareTargetSchema),
     ownerSchoolIds: z.array(z.string()),
   });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
@@ -641,6 +659,7 @@ export const learningScenarioInsertSchema = createInsertSchema(learningScenarioT
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     accessLevel: accessLevelSchema,
+    shareTargets: z.array(shareTargetSchema).optional(),
   });
 export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
   .omit({ userId: true, createdAt: true, updatedAt: true, suspended: true })
@@ -648,6 +667,7 @@ export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioT
   .extend({
     id: z.string(),
     accessLevel: accessLevelSchema,
+    shareTargets: z.array(shareTargetSchema).optional(),
   });
 
 export type LearningScenarioSelectModel = z.infer<typeof learningScenarioSelectSchema>;
@@ -1053,6 +1073,10 @@ export const assistantTable = pgTable(
       .$onUpdateFn(() => new Date())
       .notNull(),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
+    shareTargets: shareTargetEnum('share_targets')
+      .array()
+      .notNull()
+      .default(sql`'{}'::share_target[]`),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     isWebSearchEnabled: boolean('is_web_search_enabled').notNull().default(false),
     pictureId: text('picture_id'),
@@ -1077,12 +1101,14 @@ export const assistantSelectSchema = createSelectSchema(assistantTable).extend({
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   accessLevel: accessLevelSchema,
+  shareTargets: z.array(shareTargetSchema),
   ownerSchoolIds: z.array(z.string()),
 });
 export const assistantInsertSchema = createInsertSchema(assistantTable)
   .omit({ id: true, createdAt: true, updatedAt: true, suspended: true })
   .extend({
     accessLevel: accessLevelSchema,
+    shareTargets: z.array(shareTargetSchema).optional(),
   });
 export const assistantUpdateSchema = createUpdateSchema(assistantTable)
   .omit({
@@ -1095,6 +1121,7 @@ export const assistantUpdateSchema = createUpdateSchema(assistantTable)
     id: z.string(),
     // for any reason accessLevel has a different type so we have to override it here
     accessLevel: accessLevelSchema.optional(),
+    shareTargets: z.array(shareTargetSchema).optional(),
   });
 
 export type AssistantSelectModel = z.infer<typeof assistantSelectSchema>;

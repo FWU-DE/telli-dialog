@@ -5,8 +5,11 @@ import {
 } from '@shared/conversation/conversation-service';
 import { db } from '@shared/db';
 import {
+  dbGetAllAccessibleAssistants,
+  dbGetAssistantsByUserId,
   dbDeleteAssistantByIdAndUser,
   dbGetAssistantById,
+  dbGetCommunityGpts,
   dbGetGlobalGpts,
   dbGetGptsByAssociatedSchools,
   dbGetGptsByUser,
@@ -18,6 +21,7 @@ import {
   accessLevelSchema,
   AssistantFileMapping,
   AssistantSelectModel,
+  ShareTarget,
   assistantTable,
   assistantUpdateSchema,
   FileModel,
@@ -48,6 +52,10 @@ import {
   verifyWriteAccess,
   filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
+import {
+  getAccessLevelFromShareTargets,
+  normalizeShareTargets,
+} from '@shared/sharing/share-targets';
 
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
@@ -160,6 +168,9 @@ export async function getAssistantByAccessLevel({
     case 'global':
       assistants = await dbGetGlobalGpts({ user });
       break;
+    case 'community':
+      assistants = await dbGetCommunityGpts();
+      break;
     case 'school':
       assistants = await dbGetGptsByAssociatedSchools({ user });
       break;
@@ -184,22 +195,20 @@ export async function getAssistantsByOverviewFilter({
 
   switch (filter) {
     case 'all': {
-      const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
-        dbGetGptsByUser({ user }),
-        dbGetGptsByAssociatedSchools({ user }),
-        dbGetGlobalGpts({ user }),
-      ]);
-      assistants = [...privateAssistants, ...schoolAssistants, ...globalAssistants];
+      assistants = await dbGetAllAccessibleAssistants({ user });
       break;
     }
     case 'mine':
-      assistants = await dbGetGptsByUser({ user });
+      assistants = await dbGetAssistantsByUserId({ user });
       break;
     case 'official':
       assistants = await dbGetGlobalGpts({ user });
       break;
     case 'school':
       assistants = await dbGetGptsByAssociatedSchools({ user });
+      break;
+    case 'community':
+      assistants = await dbGetCommunityGpts();
       break;
     default:
       return [];
@@ -370,10 +379,12 @@ export async function getFileMappings({
  */
 export async function updateAssistantAccessLevel({
   accessLevel,
+  shareTargets,
   assistantId,
   user,
 }: {
   accessLevel: AccessLevel;
+  shareTargets?: ShareTarget[];
   assistantId: string;
   user: Pick<UserModel, 'id'>;
 }) {
@@ -389,9 +400,17 @@ export async function updateAssistantAccessLevel({
   verifyWriteAccess({ item: assistant, user });
   verifySuspensionState({ item: assistant });
 
+  const normalizedShareTargets = normalizeShareTargets(
+    shareTargets ??
+      (accessLevel === 'community' ? ['community'] : accessLevel === 'school' ? ['school'] : []),
+  );
+
   const [updatedAssistant] = await db
     .update(assistantTable)
-    .set({ accessLevel })
+    .set({
+      accessLevel: getAccessLevelFromShareTargets(normalizedShareTargets),
+      shareTargets: normalizedShareTargets,
+    })
     .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, user.id)))
     .returning();
 

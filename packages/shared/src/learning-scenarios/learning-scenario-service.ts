@@ -9,6 +9,7 @@ import {
   dbDeleteLearningScenarioByIdAndUser,
   dbGetAllAccessibleLearningScenarios,
   dbGetAllLearningScenariosByUser,
+  dbGetCommunityLearningScenarios,
   dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
   dbGetLearningScenarioByIdOptionalShareData,
@@ -24,6 +25,7 @@ import {
   fileTable,
   LearningScenarioFileMapping,
   LearningScenarioOptionalShareDataModel,
+  ShareTarget,
   LearningScenarioSelectModel,
   learningScenarioTable,
   learningScenarioUpdateSchema,
@@ -50,6 +52,10 @@ import {
   verifyWriteAccess,
   filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
+import {
+  getAccessLevelFromShareTargets,
+  normalizeShareTargets,
+} from '@shared/sharing/share-targets';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 
@@ -96,6 +102,9 @@ export async function getLearningScenariosByAccessLevel({
     case 'global':
       learningScenarios = await dbGetGlobalLearningScenarios({ user });
       break;
+    case 'community':
+      learningScenarios = await dbGetCommunityLearningScenarios({ user });
+      break;
     case 'school':
       learningScenarios = await dbGetLearningScenariosByAssociatedSchools({ user });
       break;
@@ -132,6 +141,9 @@ export async function getLearningScenariosByOverviewFilter({
       break;
     case 'school':
       learningScenarios = await dbGetLearningScenariosByAssociatedSchools({ user });
+      break;
+    case 'community':
+      learningScenarios = await dbGetCommunityLearningScenarios({ user });
       break;
     default:
       return [];
@@ -194,6 +206,7 @@ export async function getSharedLearningScenario({
  */
 const updateLearningScenarioSchema = learningScenarioUpdateSchema.omit({
   accessLevel: true,
+  shareTargets: true,
   isDeleted: true,
   originalLearningScenarioId: true,
   pictureId: true,
@@ -242,10 +255,12 @@ export async function updateLearningScenario({
 export async function updateLearningScenarioAccessLevel({
   learningScenarioId,
   accessLevel,
+  shareTargets,
   user,
 }: {
   learningScenarioId: string;
   accessLevel: AccessLevel;
+  shareTargets?: ShareTarget[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(learningScenarioId);
@@ -261,10 +276,18 @@ export async function updateLearningScenarioAccessLevel({
   verifyWriteAccess({ item: learningScenario, user });
   verifySuspensionState({ item: learningScenario });
 
+  const normalizedShareTargets = normalizeShareTargets(
+    shareTargets ??
+      (accessLevel === 'community' ? ['community'] : accessLevel === 'school' ? ['school'] : []),
+  );
+
   // Update the access level in database
   const [updatedLearningScenario] = await db
     .update(learningScenarioTable)
-    .set({ accessLevel })
+    .set({
+      accessLevel: getAccessLevelFromShareTargets(normalizedShareTargets),
+      shareTargets: normalizedShareTargets,
+    })
     .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 

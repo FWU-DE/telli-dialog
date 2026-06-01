@@ -279,9 +279,23 @@ export async function dbGetCharactersByAssociatedSchools({
     .where(
       and(
         arrayOverlaps(userTable.schoolIds, user.schoolIds),
-        eq(characterTable.accessLevel, 'school'),
+        sql`'school' = any(${characterTable.shareTargets})`,
       ),
     )
+    .orderBy(desc(characterTable.createdAt));
+
+  return characters;
+}
+
+export async function dbGetCommunityCharacters({
+  user,
+}: {
+  user: Pick<UserModel, 'id'>;
+}): Promise<CharacterOptionalShareDataModel[]> {
+  const activeShare = latestActiveCharacterShare(user);
+  const characters = await baseCharacterWithShareQuery(activeShare)
+    .leftJoin(activeShare, eq(activeShare.characterId, characterTable.id))
+    .where(eq(characterTable.accessLevel, 'community'))
     .orderBy(desc(characterTable.createdAt));
 
   return characters;
@@ -330,13 +344,14 @@ export async function dbGetAllAccessibleCharacters({
     )
     .where(
       or(
-        and(eq(characterTable.userId, user.id), eq(characterTable.accessLevel, 'private')),
+        eq(characterTable.userId, user.id),
         user.schoolIds && user.schoolIds.length > 0
           ? and(
               eq(characterTable.accessLevel, 'school'),
               arrayOverlaps(userTable.schoolIds, user.schoolIds),
             )
           : undefined,
+        eq(characterTable.accessLevel, 'community'),
         and(
           eq(characterTable.accessLevel, 'global'),
           eq(characterTemplateMappingTable.federalStateId, federalStateId),

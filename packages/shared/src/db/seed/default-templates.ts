@@ -173,6 +173,7 @@ export const defaultTemplates: Omit<CharacterInsertModel, 'modelId'>[] = [
 
     gradeLevel: '',
     accessLevel: 'global',
+    shareTargets: [],
     schoolType: '',
     pictureId: 'characters/_templates/Goethe_Static',
     subject: '',
@@ -190,6 +191,7 @@ export const defaultAssistant: AssistantInsertModelWithId[] = [
       'Der Assistent soll mich in meiner täglichen organisatorischen Arbeit unterstützen. Er soll Vorlagen für Elternbriefe, Elternabende, Rundschreiben, Vorlagen für Protokolle für Elterngespräche, Bewertungsvorlagen für Schüler:innenarbeiten etc. generieren, die ich mir einfach anpassen kann. Das Format sollte so gewählt sein, dass ich es einfach exportieren kann, ohne große Formatänderungen vornehmen zu müssen.',
     systemPrompt: '',
     accessLevel: 'global',
+    shareTargets: [],
     pictureId: 'custom-gpts/_templates/Schulorganisationsassistent_Static',
     promptSuggestions: [
       'Erstelle mir einen Elternbrief zu einem Wandertag.',
@@ -214,6 +216,7 @@ export const defaultLearningScenario: Omit<LearningScenarioInsertModel, 'modelId
     additionalInstructions:
       'Du bist eine künstliche Intelligenz. Du bringst dem Schüler bei, was du gut machst, wo deine Schwächen liegen und wo du einfach nur halluzinierst. Wenn du Fehler machst, stehe dafür ein.',
     accessLevel: 'global',
+    shareTargets: [],
     pictureId: 'shared-chats/_templates/AI-Lernszenario_Static',
 
     gradeLevel: '',

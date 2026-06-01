@@ -6,7 +6,7 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
+import { FileModel, LearningScenarioOptionalShareDataModel, ShareTarget } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/card';
 import { FieldGroup } from '@ui/components/field';
@@ -54,6 +54,10 @@ import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-he
 import { FormField } from '@ui/components/form/form-field';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
+import {
+  getAccessLevelFromShareTargets,
+  normalizeShareTargets,
+} from '@shared/sharing/share-targets';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
@@ -95,6 +99,7 @@ function createLearningScenarioFormValuesSchema(t: LearningScenarioTranslator) {
     studentExercise: z.string(),
     modelId: z.string(),
     isSchoolShared: z.boolean(),
+    isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
   });
 }
@@ -102,6 +107,36 @@ function createLearningScenarioFormValuesSchema(t: LearningScenarioTranslator) {
 export type LearningScenarioFormValues = z.infer<
   ReturnType<typeof createLearningScenarioFormValuesSchema>
 >;
+
+function buildShareTargets({
+  isSchoolShared,
+  isCommunityShared,
+}: Pick<LearningScenarioFormValues, 'isSchoolShared' | 'isCommunityShared'>): ShareTarget[] {
+  return normalizeShareTargets([
+    ...(isSchoolShared ? (['school'] as const) : []),
+    ...(isCommunityShared ? (['community'] as const) : []),
+  ]);
+}
+
+function getInitialShareTargets(
+  learningScenario: Pick<LearningScenarioOptionalShareDataModel, 'accessLevel' | 'shareTargets'>,
+) {
+  const shareTargets = normalizeShareTargets(learningScenario.shareTargets);
+
+  if (shareTargets.length > 0) {
+    return shareTargets;
+  }
+
+  if (learningScenario.accessLevel === 'community') {
+    return ['community'];
+  }
+
+  if (learningScenario.accessLevel === 'school') {
+    return ['school'];
+  }
+
+  return [];
+}
 
 export function LearningScenarioEdit({
   learningScenario,
@@ -129,6 +164,7 @@ export function LearningScenarioEdit({
   const isModelAvailable =
     learningScenario.modelId && models.some((m) => m.id === learningScenario.modelId);
   const selectedModelId = isModelAvailable ? learningScenario.modelId : maybeDefaultModelId;
+  const initialShareTargets = getInitialShareTargets(learningScenario);
 
   const initialValues: LearningScenarioFormValues = {
     name: learningScenario.name,
@@ -136,7 +172,8 @@ export function LearningScenarioEdit({
     additionalInstructions: learningScenario.additionalInstructions ?? '',
     studentExercise: learningScenario.studentExercise ?? '',
     modelId: selectedModelId ?? '',
-    isSchoolShared: learningScenario.accessLevel === 'school',
+    isSchoolShared: initialShareTargets.includes('school'),
+    isCommunityShared: initialShareTargets.includes('community'),
     hasLinkAccess: learningScenario.hasLinkAccess,
   };
 
@@ -180,11 +217,13 @@ export function LearningScenarioEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
-  const savedAccessLevelRef = useRef(learningScenario.accessLevel);
+  const savedShareTargetsRef = useRef(initialShareTargets.join(','));
   const attachedLinksRef = useRef(learningScenario.attachedLinks);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
+  const isCommunityShared = useWatch({ control, name: 'isCommunityShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
-  const showShareInfo = (isSchoolShared || hasLinkAccess) && !learningScenario.suspended;
+  const showShareInfo =
+    (isSchoolShared || isCommunityShared || hasLinkAccess) && !learningScenario.suspended;
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -280,13 +319,19 @@ export function LearningScenarioEdit({
   }
 
   const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
-    if (name === 'isSchoolShared') {
-      const newAccessLevel = checked ? 'school' : 'private';
+    if (name === 'isSchoolShared' || name === 'isCommunityShared') {
+      const currentValues = getValues();
+      const nextShareTargets = buildShareTargets({
+        isSchoolShared: name === 'isSchoolShared' ? checked : currentValues.isSchoolShared,
+        isCommunityShared: name === 'isCommunityShared' ? checked : currentValues.isCommunityShared,
+      });
+      const nextShareTargetsKey = nextShareTargets.join(',');
 
-      if (newAccessLevel !== savedAccessLevelRef.current) {
+      if (nextShareTargetsKey !== savedShareTargetsRef.current) {
         const result = await updateLearningScenarioAccessLevelAction({
           learningScenarioId: learningScenario.id,
-          accessLevel: newAccessLevel,
+          accessLevel: getAccessLevelFromShareTargets(nextShareTargets),
+          shareTargets: nextShareTargets,
         });
 
         if (!result.success) {
@@ -294,7 +339,7 @@ export function LearningScenarioEdit({
           return;
         }
 
-        savedAccessLevelRef.current = newAccessLevel;
+        savedShareTargetsRef.current = nextShareTargetsKey;
       }
     }
 
@@ -462,6 +507,7 @@ export function LearningScenarioEdit({
               control={control}
               schoolSharingName="isSchoolShared"
               linkSharingName="hasLinkAccess"
+              communitySharingName="isCommunityShared"
               linkToShare={`/learning-scenarios/${learningScenario.id}`}
               onShareChange={handleSharingChange}
               suspended={learningScenario.suspended}

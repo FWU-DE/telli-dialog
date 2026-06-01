@@ -9,6 +9,7 @@ import {
   dbGetCharacterByIdWithShareData,
   dbGetCharacters,
   dbGetCharactersByAssociatedSchools,
+  dbGetCommunityCharacters,
   dbGetCharactersByUser,
   dbGetGlobalCharacters,
   dbGetSharedCharacterConversations,
@@ -21,6 +22,7 @@ import {
   CharacterFileMapping,
   CharacterOptionalShareDataModel,
   CharacterSelectModel,
+  ShareTarget,
   characterTable,
   characterUpdateSchema,
   CharacterWithShareDataModel,
@@ -57,6 +59,10 @@ import {
   verifyWriteAccess,
   filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
+import {
+  getAccessLevelFromShareTargets,
+  normalizeShareTargets,
+} from '@shared/sharing/share-targets';
 
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
@@ -248,10 +254,12 @@ export const linkFileToCharacter = async ({
 export const updateCharacterAccessLevel = async ({
   characterId,
   accessLevel,
+  shareTargets,
   user,
 }: {
   characterId: string;
   accessLevel: AccessLevel;
+  shareTargets?: ShareTarget[];
   user: Pick<UserModel, 'id'>;
 }) => {
   checkParameterUUID(characterId);
@@ -266,10 +274,18 @@ export const updateCharacterAccessLevel = async ({
   verifyWriteAccess({ item: character, user });
   verifySuspensionState({ item: character });
 
+  const normalizedShareTargets = normalizeShareTargets(
+    shareTargets ??
+      (accessLevel === 'community' ? ['community'] : accessLevel === 'school' ? ['school'] : []),
+  );
+
   // Update the access level in database
   const [updatedCharacter] = await db
     .update(characterTable)
-    .set({ accessLevel })
+    .set({
+      accessLevel: getAccessLevelFromShareTargets(normalizedShareTargets),
+      shareTargets: normalizedShareTargets,
+    })
     .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
     .returning();
 
@@ -565,6 +581,9 @@ export async function getCharacterByAccessLevel({
     case 'global':
       characters = await dbGetGlobalCharacters({ user });
       break;
+    case 'community':
+      characters = await dbGetCommunityCharacters({ user });
+      break;
     case 'school':
       characters = await dbGetCharactersByAssociatedSchools({ user });
       break;
@@ -599,6 +618,9 @@ export async function getCharactersByOverviewFilter({
       break;
     case 'school':
       characters = await dbGetCharactersByAssociatedSchools({ user });
+      break;
+    case 'community':
+      characters = await dbGetCommunityCharacters({ user });
       break;
     default:
       return [];

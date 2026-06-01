@@ -13,6 +13,7 @@ import {
   LearningScenarioFileMapping,
   learningScenarioTable,
   llmModelTable,
+  ShareTarget,
   userTable,
 } from '@shared/db/schema';
 import { addDays } from '@shared/utils/date';
@@ -195,13 +196,20 @@ const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable).o
 async function createLearningScenario(
   data?: Partial<z.infer<typeof learningScenarioInsertSchema>>,
 ) {
+  const normalizedData = data
+    ? {
+        ...data,
+        shareTargets: data.shareTargets as ShareTarget[] | undefined,
+      }
+    : undefined;
+
   const [learningScenario] = await db
     .insert(learningScenarioTable)
     .values({
       name: '',
       userId: generateUUID(),
       modelId: generateUUID(),
-      ...data,
+      ...normalizedData,
     })
     .returning();
   if (!learningScenario) {
@@ -220,6 +228,13 @@ async function createLearningScenario(
 const characterInsertSchema = createInsertSchema(characterTable).omit({ accessLevel: true });
 async function createCharacter(data?: Partial<z.infer<typeof characterInsertSchema>>) {
   const userId = data?.userId ?? generateUUID();
+  const normalizedData = data
+    ? {
+        ...data,
+        shareTargets: data.shareTargets as ShareTarget[] | undefined,
+      }
+    : undefined;
+
   const [character] = await db
     .insert(characterTable)
     .values({
@@ -227,7 +242,7 @@ async function createCharacter(data?: Partial<z.infer<typeof characterInsertSche
       userId,
       description: '',
       modelId: generateUUID(),
-      ...data,
+      ...normalizedData,
     })
     .returning();
   if (!character) {
@@ -246,13 +261,20 @@ async function createCharacter(data?: Partial<z.infer<typeof characterInsertSche
 const assistantInsertSchema = createInsertSchema(assistantTable).omit({ accessLevel: true });
 async function createAssistant(data?: Partial<z.infer<typeof assistantInsertSchema>>) {
   const userId = data?.userId ?? generateUUID();
+  const normalizedData = data
+    ? {
+        ...data,
+        shareTargets: data.shareTargets as ShareTarget[] | undefined,
+      }
+    : undefined;
+
   const [assistant] = await db
     .insert(assistantTable)
     .values({
       name: '',
       systemPrompt: '',
       userId,
-      ...data,
+      ...normalizedData,
     })
     .returning();
   if (!assistant) {

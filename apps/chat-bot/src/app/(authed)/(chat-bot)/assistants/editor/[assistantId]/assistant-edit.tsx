@@ -7,7 +7,7 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AssistantSelectModel, FileModel } from '@shared/db/schema';
+import { AssistantSelectModel, FileModel, ShareTarget } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/card';
 import { FieldGroup } from '@ui/components/field';
@@ -48,6 +48,10 @@ import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
 import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
+import {
+  getAccessLevelFromShareTargets,
+  normalizeShareTargets,
+} from '@shared/sharing/share-targets';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -86,6 +90,7 @@ function createAssistantFormValuesSchema(t: AssistantTranslator) {
     instructions: z.string(),
     isSchoolShared: z.boolean(),
     hasLinkAccess: z.boolean(),
+    isCommunityShared: z.boolean(),
     isWebSearchEnabled: z.boolean(),
     promptSuggestions: z
       .array(
@@ -101,6 +106,36 @@ function createAssistantFormValuesSchema(t: AssistantTranslator) {
 }
 
 export type AssistantFormValues = z.infer<ReturnType<typeof createAssistantFormValuesSchema>>;
+
+function buildShareTargets({
+  isSchoolShared,
+  isCommunityShared,
+}: Pick<AssistantFormValues, 'isSchoolShared' | 'isCommunityShared'>): ShareTarget[] {
+  return normalizeShareTargets([
+    ...(isSchoolShared ? (['school'] as const) : []),
+    ...(isCommunityShared ? (['community'] as const) : []),
+  ]);
+}
+
+function getInitialShareTargets(
+  assistant: Pick<AssistantSelectModel, 'accessLevel' | 'shareTargets'>,
+) {
+  const shareTargets = normalizeShareTargets(assistant.shareTargets);
+
+  if (shareTargets.length > 0) {
+    return shareTargets;
+  }
+
+  if (assistant.accessLevel === 'community') {
+    return ['community'];
+  }
+
+  if (assistant.accessLevel === 'school') {
+    return ['school'];
+  }
+
+  return [];
+}
 
 export function AssistantEdit({
   assistant,
@@ -124,12 +159,14 @@ export function AssistantEdit({
     () => createAssistantFieldValidationConfig(t),
     [t],
   );
+  const initialShareTargets = getInitialShareTargets(assistant);
   const initialValues: AssistantFormValues = {
     name: assistant.name,
     description: assistant.description ?? '',
     instructions: assistant.instructions ?? '',
-    isSchoolShared: assistant.accessLevel === 'school',
+    isSchoolShared: initialShareTargets.includes('school'),
     hasLinkAccess: assistant.hasLinkAccess,
+    isCommunityShared: initialShareTargets.includes('community'),
     isWebSearchEnabled: assistant.isWebSearchEnabled,
     promptSuggestions:
       assistant.promptSuggestions && assistant.promptSuggestions.length > 0
@@ -159,7 +196,6 @@ export function AssistantEdit({
       },
       validate: trigger,
       saveValues: async (data) => {
-        // accessLevel is handled separately in handleSharingChange
         const updateResult = await updateAssistantAction({
           assistantId: assistant.id,
           name: data.name.trim(),
@@ -177,10 +213,12 @@ export function AssistantEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
-  const savedAccessLevelRef = useRef(assistant.accessLevel);
+  const savedShareTargetsRef = useRef(initialShareTargets.join(','));
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
-  const showShareInfo = (isSchoolShared || hasLinkAccess) && !assistant.suspended;
+  const isCommunityShared = useWatch({ control, name: 'isCommunityShared' });
+  const showShareInfo =
+    (isSchoolShared || hasLinkAccess || isCommunityShared) && !assistant.suspended;
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -268,13 +306,19 @@ export function AssistantEdit({
   }
 
   const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
-    if (name === 'isSchoolShared') {
-      const newAccessLevel = checked ? 'school' : 'private';
+    if (name === 'isSchoolShared' || name === 'isCommunityShared') {
+      const currentValues = getValues();
+      const nextShareTargets = buildShareTargets({
+        isSchoolShared: name === 'isSchoolShared' ? checked : currentValues.isSchoolShared,
+        isCommunityShared: name === 'isCommunityShared' ? checked : currentValues.isCommunityShared,
+      });
+      const nextShareTargetsKey = nextShareTargets.join(',');
 
-      if (newAccessLevel !== savedAccessLevelRef.current) {
+      if (nextShareTargetsKey !== savedShareTargetsRef.current) {
         const result = await updateAssistantAccessLevelAction({
           assistantId: assistant.id,
-          accessLevel: newAccessLevel,
+          accessLevel: getAccessLevelFromShareTargets(nextShareTargets),
+          shareTargets: nextShareTargets,
         });
 
         if (!result.success) {
@@ -282,7 +326,7 @@ export function AssistantEdit({
           return;
         }
 
-        savedAccessLevelRef.current = newAccessLevel;
+        savedShareTargetsRef.current = nextShareTargetsKey;
       }
     }
 
@@ -413,6 +457,7 @@ export function AssistantEdit({
             control={control}
             schoolSharingName="isSchoolShared"
             linkSharingName="hasLinkAccess"
+            communitySharingName="isCommunityShared"
             linkToShare={`/assistants/${assistant.id}`}
             onShareChange={handleSharingChange}
             suspended={assistant.suspended}

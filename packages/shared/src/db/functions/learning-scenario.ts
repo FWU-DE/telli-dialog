@@ -154,10 +154,22 @@ export async function dbGetLearningScenariosByAssociatedSchools({
     .leftJoin(activeShare, eq(activeShare.learningScenarioId, learningScenarioTable.id))
     .where(
       and(
-        eq(learningScenarioTable.accessLevel, 'school'),
+        sql`'school' = any(${learningScenarioTable.shareTargets})`,
         arrayOverlaps(userTable.schoolIds, user.schoolIds),
       ),
     )
+    .orderBy(desc(learningScenarioTable.createdAt));
+}
+
+export async function dbGetCommunityLearningScenarios({
+  user,
+}: {
+  user: Pick<UserModel, 'id'>;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  const activeShare = latestActiveLearningScenarioShare(user);
+  return baseLearningScenarioWithShareQuery(activeShare)
+    .leftJoin(activeShare, eq(activeShare.learningScenarioId, learningScenarioTable.id))
+    .where(eq(learningScenarioTable.accessLevel, 'community'))
     .orderBy(desc(learningScenarioTable.createdAt));
 }
 
@@ -210,16 +222,14 @@ export async function dbGetAllAccessibleLearningScenarios({
     )
     .where(
       or(
-        and(
-          eq(learningScenarioTable.userId, user.id),
-          eq(learningScenarioTable.accessLevel, 'private'),
-        ),
+        eq(learningScenarioTable.userId, user.id),
         user.schoolIds.length > 0
           ? and(
               eq(learningScenarioTable.accessLevel, 'school'),
               arrayOverlaps(userTable.schoolIds, user.schoolIds),
             )
           : undefined,
+        eq(learningScenarioTable.accessLevel, 'community'),
         and(
           eq(learningScenarioTable.accessLevel, 'global'),
           eq(learningScenarioTemplateMappingTable.federalStateId, user.federalStateId),

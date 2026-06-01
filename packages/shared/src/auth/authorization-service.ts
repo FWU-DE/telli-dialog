@@ -1,9 +1,15 @@
 import { ForbiddenError } from '@shared/error';
-import { AccessLevel, UserRole } from '@shared/db/schema';
+import { AccessLevel, ShareTarget, UserRole } from '@shared/db/schema';
+import {
+  isCommunityAccessible,
+  isOfficialTemplate,
+  isSchoolAccessible,
+} from '@shared/sharing/share-targets';
 import { UserModel } from './user-model';
 
 type AuthorizedItem = {
   accessLevel: AccessLevel;
+  shareTargets?: ShareTarget[] | null;
   hasLinkAccess: boolean;
   userId: string | null;
   ownerSchoolIds?: string[];
@@ -17,15 +23,12 @@ export function verifyReadAccess<T extends AuthorizedItem>({
   item: T;
   user?: Pick<UserModel, 'id' | 'schoolIds'>;
 }) {
-  // allow access if shared by link
   if (item.hasLinkAccess && !item.suspended) return;
-  // allow access if shared globally
-  if (item.accessLevel === 'global' && !item.suspended) return;
-  // allow if owner (disregarding the access-level)
+  if (isOfficialTemplate(item) && !item.suspended) return;
+  if (isCommunityAccessible(item) && user?.id && !item.suspended) return;
   if (item.userId && item.userId === user?.id) return;
-  // allow if school-shared
   if (
-    item.accessLevel === 'school' &&
+    isSchoolAccessible(item) &&
     user?.schoolIds &&
     item.ownerSchoolIds?.some((id) => user.schoolIds?.includes(id)) &&
     !item.suspended

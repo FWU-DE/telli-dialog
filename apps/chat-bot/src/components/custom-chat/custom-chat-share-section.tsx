@@ -14,6 +14,7 @@ type CustomShareSectionProps<T extends FieldValues> = {
   control: Control<T>;
   schoolSharingName?: Path<T>;
   linkSharingName: Path<T>;
+  communitySharingName: Path<T>;
   linkToShare: string;
   onShareChange?: (change: { name: Path<T>; checked: boolean }) => void;
   suspended?: boolean;
@@ -23,6 +24,7 @@ export default function CustomShareSection<T extends FieldValues>({
   control,
   schoolSharingName,
   linkSharingName,
+  communitySharingName,
   linkToShare,
   onShareChange,
   suspended,
@@ -67,6 +69,16 @@ export default function CustomShareSection<T extends FieldValues>({
             />
           )}
           <CheckboxWithInfo
+            name={communitySharingName}
+            control={control}
+            label={t('community')}
+            tooltip={t('community-tooltip')}
+            onCheckedChange={(checked) => {
+              onShareChange?.({ name: communitySharingName, checked });
+            }}
+            disabled={suspended}
+          />
+          <CheckboxWithInfo
             name={linkSharingName}
             control={control}
             label={t('link')}
@@ -76,7 +88,6 @@ export default function CustomShareSection<T extends FieldValues>({
               onShareChange?.({ name: linkSharingName, checked });
             }}
           />
-
           <Button
             className="shrink-0"
             disabled={!isLinkSharingEnabled || suspended}

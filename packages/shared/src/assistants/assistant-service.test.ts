@@ -19,6 +19,7 @@ import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/err
 import { generateUUID } from '@shared/utils/uuid';
 import {
   dbGetAssistantById,
+  dbGetCommunityGpts,
   dbGetGlobalGpts,
   dbGetGptsByAssociatedSchools,
   dbGetGptsByUser,
@@ -40,6 +41,7 @@ import {
 
 vi.mock('../db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
+  dbGetCommunityGpts: vi.fn(),
   dbGetGlobalGpts: vi.fn(),
   dbGetGptsByAssociatedSchools: vi.fn(),
   dbGetGptsByUser: vi.fn(),
@@ -988,6 +990,14 @@ describe('assistant-service', () => {
         suspended: false,
         ownerSchoolIds: [],
       } as unknown as AssistantSelectModel;
+      const communityAssistant = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'community',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: [],
+      } as unknown as AssistantSelectModel;
 
       (dbGetGptsByUser as MockedFunction<typeof dbGetGptsByUser>).mockResolvedValue([
         privateAssistant,
@@ -995,13 +1005,21 @@ describe('assistant-service', () => {
       (
         dbGetGptsByAssociatedSchools as MockedFunction<typeof dbGetGptsByAssociatedSchools>
       ).mockResolvedValue([schoolAssistant] as never);
+      (dbGetCommunityGpts as MockedFunction<typeof dbGetCommunityGpts>).mockResolvedValue([
+        communityAssistant,
+      ] as never);
       (dbGetGlobalGpts as MockedFunction<typeof dbGetGlobalGpts>).mockResolvedValue([
         officialAssistant,
       ] as never);
 
       const result = await getAssistantsByOverviewFilter({ filter: 'all', user });
 
-      expect(result).toEqual([privateAssistant, schoolAssistant, officialAssistant]);
+      expect(result).toEqual([
+        privateAssistant,
+        schoolAssistant,
+        communityAssistant,
+        officialAssistant,
+      ]);
     });
 
     it('filters suspended assistants for non-owners', async () => {
