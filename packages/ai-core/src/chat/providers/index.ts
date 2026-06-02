@@ -123,25 +123,3 @@ export function generateAgenticStream(
   }
   return streamFn({ messages, model: model.name, ...options });
 }
-
-async function* filterToolStreamToText(
-  stream: AsyncGenerator<StreamEvent>,
-  onComplete?: (usage: TokenUsage) => void | Promise<void>,
-): AsyncGenerator<string> {
-  let usage: TokenUsage | undefined;
-
-  for await (const event of stream) {
-    if (event.type === 'text') {
-      yield event.delta;
-      continue;
-    }
-
-    if (event.type === 'finish') {
-      usage = event.usage;
-    }
-  }
-
-  if (usage && onComplete) {
-    await onComplete(usage);
-  }
-}
