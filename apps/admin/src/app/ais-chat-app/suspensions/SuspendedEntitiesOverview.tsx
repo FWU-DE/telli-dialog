@@ -22,7 +22,7 @@ import { Skeleton } from '@ui/components/skeleton';
 import { ROUTES } from '@/consts/routes';
 
 export default function SuspendedEntitiesOverview() {
-  const [suspendedEntites, setSuspendedEntities] = useState<ReportedEntityOverview[]>([]);
+  const [suspendedEntities, setSuspendedEntities] = useState<ReportedEntityOverview[]>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -31,7 +31,7 @@ export default function SuspendedEntitiesOverview() {
     startTransition(async () => {
       const result = await getSuspendedEntitiesAction();
       if (result.success) {
-        setSuspendedEntities(result.value);
+        setSuspendedEntities(result.value as ReportedEntityOverview[]);
       } else {
         toast.error(result.error.message);
       }
@@ -78,7 +78,7 @@ export default function SuspendedEntitiesOverview() {
             />
             <DataTable
               columns={columns}
-              data={suspendedEntites}
+              data={suspendedEntities}
               rowClickHandler={handleRowClicked}
               columnFilters={columnFilters}
               onColumnFiltersChange={setColumnFilters}

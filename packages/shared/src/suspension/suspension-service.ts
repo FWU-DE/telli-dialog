@@ -27,7 +27,12 @@ import {
   suspensionRequestReasonSchema,
   SuspensionRequestSelectModel,
 } from '@shared/db/schema';
-import { EntityRef, EntityType } from '@shared/entities/entity-types';
+import {
+  EntityRef,
+  EntityType,
+  assertEntityType,
+  throwEntityInvalidArgumentError,
+} from '@shared/entities/entity-types';
 import { InvalidArgumentError, NotFoundError, checkParameterUUID } from '@shared/error';
 
 const suspensionRequestDescriptionSchema = z.string().min(1).max(500);
@@ -55,30 +60,42 @@ type SuspensionRequestAggregate = Pick<
   hasUncheckedRequests: boolean;
 };
 
+/**
+ * Resolves the referenced entity from the given entity type and id.
+ * Throws when the id is invalid, the entity type is unsupported, or the entity does not exist.
+ */
 async function resolveTargetEntity({ entityType, entityId }: EntityRef) {
+  assertEntityType(entityType);
   checkParameterUUID(entityId);
 
-  if (entityType === 'assistant') {
-    const assistant = await dbGetAssistantById({ assistantId: entityId });
-    if (!assistant) {
-      throw new NotFoundError('Assistant not found');
+  switch (entityType) {
+    case 'assistant': {
+      const assistant = await dbGetAssistantById({ assistantId: entityId });
+      if (!assistant) {
+        throw new NotFoundError('Assistant not found');
+      }
+      return assistant;
     }
-    return assistant;
-  }
 
-  if (entityType === 'character') {
-    const character = await dbGetCharacterById({ characterId: entityId });
-    if (!character) {
-      throw new NotFoundError('Character not found');
+    case 'character': {
+      const character = await dbGetCharacterById({ characterId: entityId });
+      if (!character) {
+        throw new NotFoundError('Character not found');
+      }
+      return character;
     }
-    return character;
-  }
 
-  const learningScenario = await dbGetLearningScenarioById({ learningScenarioId: entityId });
-  if (!learningScenario) {
-    throw new NotFoundError('Learning scenario not found');
+    case 'learningScenario': {
+      const learningScenario = await dbGetLearningScenarioById({ learningScenarioId: entityId });
+      if (!learningScenario) {
+        throw new NotFoundError('Learning scenario not found');
+      }
+      return learningScenario;
+    }
+
+    default:
+      throwEntityInvalidArgumentError();
   }
-  return learningScenario;
 }
 
 export async function createSuspensionRequest({
@@ -127,38 +144,34 @@ export async function markSuspensionRequestAsChecked(suspensionRequestId: string
 
 export async function suspendEntity(entityRef: EntityRef) {
   const { entityType, entityId } = entityRef;
+  assertEntityType(entityType);
 
-  if (entityType === 'assistant') {
-    return dbSetAssistantSuspended({ assistantId: entityId });
+  switch (entityType) {
+    case 'assistant':
+      return dbSetAssistantSuspended({ assistantId: entityId });
+    case 'character':
+      return dbSetCharacterSuspended({ characterId: entityId });
+    case 'learningScenario':
+      return dbSetLearningScenarioSuspended({ learningScenarioId: entityId });
+    default:
+      throwEntityInvalidArgumentError();
   }
-
-  if (entityType === 'character') {
-    return dbSetCharacterSuspended({ characterId: entityId });
-  }
-
-  if (entityType === 'learningScenario') {
-    return dbSetLearningScenarioSuspended({ learningScenarioId: entityId });
-  }
-
-  throw new InvalidArgumentError('Exactly one target entity id must be provided');
 }
 
 export async function liftSuspensionOnEntity(entityRef: EntityRef) {
   const { entityType, entityId } = entityRef;
+  assertEntityType(entityType);
 
-  if (entityType === 'assistant') {
-    return dbLiftSuspensionOnAssistant({ assistantId: entityId });
+  switch (entityType) {
+    case 'assistant':
+      return dbLiftSuspensionOnAssistant({ assistantId: entityId });
+    case 'character':
+      return dbLiftSuspensionOnCharacter({ characterId: entityId });
+    case 'learningScenario':
+      return dbLiftSuspensionOnLearningScenario({ learningScenarioId: entityId });
+    default:
+      throwEntityInvalidArgumentError();
   }
-
-  if (entityType === 'character') {
-    return dbLiftSuspensionOnCharacter({ characterId: entityId });
-  }
-
-  if (entityType === 'learningScenario') {
-    return dbLiftSuspensionOnLearningScenario({ learningScenarioId: entityId });
-  }
-
-  throw new InvalidArgumentError('Exactly one target entity id must be provided');
 }
 
 function groupSuspensionRequestsByEntity(suspensionRequests: SuspensionRequest[]): Array<{
@@ -215,15 +228,18 @@ function getSuspensionRequestAggregate(
 }
 
 function throwNotFoundForEntity(entityType: EntityType): never {
-  if (entityType === 'assistant') {
-    throw new NotFoundError('Assistant not found');
-  }
+  assertEntityType(entityType);
 
-  if (entityType === 'character') {
-    throw new NotFoundError('Character not found');
+  switch (entityType) {
+    case 'assistant':
+      throw new NotFoundError('Assistant not found');
+    case 'character':
+      throw new NotFoundError('Character not found');
+    case 'learningScenario':
+      throw new NotFoundError('Learning scenario not found');
+    default:
+      throwEntityInvalidArgumentError();
   }
-
-  throw new NotFoundError('Learning scenario not found');
 }
 
 function buildReportedEntityOverview(groupedSuspensionRequest: {

@@ -1,6 +1,9 @@
+import { assertEntityType, throwEntityInvalidArgumentError } from '@shared/entities/entity-types';
 import { ReportedEntityOverview } from '@shared/suspension/suspension-service';
 
 export function mapEntityTypeToLabel(entityType: ReportedEntityOverview['entityType']) {
+  assertEntityType(entityType);
+
   switch (entityType) {
     case 'assistant':
       return 'Assistent';
@@ -9,7 +12,7 @@ export function mapEntityTypeToLabel(entityType: ReportedEntityOverview['entityT
     case 'learningScenario':
       return 'Lernszenario';
     default:
-      return entityType;
+      throwEntityInvalidArgumentError();
   }
 }
 
@@ -50,7 +53,7 @@ export function mapStatusToLabel(status: ReportedEntityOverview['status']) {
 }
 
 export function getChatBotEntityUrl(
-  entityType: SuspensionRequestOverview['entityType'],
+  entityType: ReportedEntityOverview['entityType'],
   entityId: string,
   host: string,
 ) {
@@ -68,6 +71,8 @@ export function getChatBotEntityUrl(
   })();
 
   const chatBotEntityPath = (() => {
+    assertEntityType(entityType);
+
     switch (entityType) {
       case 'assistant':
         return `/assistants/${entityId}`;
@@ -76,7 +81,7 @@ export function getChatBotEntityUrl(
       case 'learningScenario':
         return `/learning-scenarios/${entityId}`;
       default:
-        return '/';
+        throwEntityInvalidArgumentError();
     }
   })();
 

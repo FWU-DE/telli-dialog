@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import {
   getSuspensionRequestOverviews,
+  getSuspendedItemWithDetails,
   liftSuspensionOnEntity,
   markSuspensionRequestAsChecked,
   createSuspensionRequest,
@@ -26,6 +27,7 @@ import {
 } from '@shared/db/functions/learning-scenario';
 import {
   dbGetAllSuspensionRequestsWithEntityDetails,
+  dbGetSuspensionRequestsByEntityRefWithEntityDetails,
   dbCreateSuspensionRequest,
   dbMarkSuspensionRequestAsChecked,
 } from '@shared/db/functions/suspension-requests';
@@ -63,6 +65,31 @@ vi.mock('@shared/db/functions/suspension-requests', () => ({
 vi.mock('@shared/auth/authorization-service', () => ({
   verifyReadAccess: vi.fn(),
 }));
+
+type SuspensionRequestWithEntityDetails = Awaited<
+  ReturnType<typeof dbGetAllSuspensionRequestsWithEntityDetails>
+>[number];
+
+function buildSuspensionRequestWithEntityDetails(
+  overrides: Partial<SuspensionRequestWithEntityDetails>,
+): SuspensionRequestWithEntityDetails {
+  return {
+    id: generateUUID(),
+    assistantId: null,
+    characterId: null,
+    learningScenarioId: null,
+    requesterId: generateUUID(),
+    reason: 'other',
+    description: 'fixture',
+    createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    checked: true,
+    entityType: 'assistant',
+    entityId: generateUUID(),
+    entityName: 'Fixture Entity',
+    suspended: false,
+    ...overrides,
+  };
+}
 
 describe('suspension-request-service', () => {
   beforeEach(() => {
@@ -358,11 +385,9 @@ describe('suspension-request-service', () => {
           typeof dbGetAllSuspensionRequestsWithEntityDetails
         >
       ).mockResolvedValue([
-        {
+        buildSuspensionRequestWithEntityDetails({
           id: requestId1,
           assistantId,
-          characterId: null,
-          learningScenarioId: null,
           requesterId,
           reason: 'discrimination',
           description: 'a',
@@ -372,12 +397,10 @@ describe('suspension-request-service', () => {
           entityId: assistantId,
           entityName: 'Assistant A',
           suspended: false,
-        },
-        {
+        }),
+        buildSuspensionRequestWithEntityDetails({
           id: requestId2,
           assistantId,
-          characterId: null,
-          learningScenarioId: null,
           requesterId,
           reason: 'other',
           description: 'b',
@@ -387,12 +410,10 @@ describe('suspension-request-service', () => {
           entityId: assistantId,
           entityName: 'Assistant A',
           suspended: false,
-        },
-        {
+        }),
+        buildSuspensionRequestWithEntityDetails({
           id: requestId3,
-          assistantId: null,
           characterId,
-          learningScenarioId: null,
           requesterId,
           reason: 'other',
           description: 'c',
@@ -402,7 +423,7 @@ describe('suspension-request-service', () => {
           entityId: characterId,
           entityName: 'Character C',
           suspended: true,
-        },
+        }),
       ] as never);
 
       const result = await getSuspensionRequestOverviews();
@@ -437,11 +458,9 @@ describe('suspension-request-service', () => {
           typeof dbGetAllSuspensionRequestsWithEntityDetails
         >
       ).mockResolvedValue([
-        {
+        buildSuspensionRequestWithEntityDetails({
           id: generateUUID(),
-          assistantId: null,
           characterId,
-          learningScenarioId: null,
           requesterId: generateUUID(),
           reason: 'other',
           description: 'c',
@@ -451,7 +470,7 @@ describe('suspension-request-service', () => {
           entityId: characterId,
           entityName: null,
           suspended: null,
-        },
+        }),
       ] as never);
 
       await expect(getSuspensionRequestOverviews()).rejects.toThrow(NotFoundError);
@@ -466,10 +485,8 @@ describe('suspension-request-service', () => {
           typeof dbGetAllSuspensionRequestsWithEntityDetails
         >
       ).mockResolvedValue([
-        {
+        buildSuspensionRequestWithEntityDetails({
           id: requestId,
-          assistantId: null,
-          characterId: null,
           learningScenarioId,
           requesterId: generateUUID(),
           reason: 'other',
@@ -480,7 +497,7 @@ describe('suspension-request-service', () => {
           entityId: learningScenarioId,
           entityName: 'Scenario L',
           suspended: false,
-        },
+        }),
       ] as never);
 
       const result = await getSuspensionRequestOverviews();
@@ -489,6 +506,94 @@ describe('suspension-request-service', () => {
       expect(result[0]?.entityType).toBe('learningScenario');
       expect(result[0]?.status).toBe('checked');
       expect(result[0]?.reasons).toEqual([{ id: requestId, reason: 'other' }]);
+    });
+  });
+
+  describe('getSuspendedItemWithDetails', () => {
+    it('returns details overview and all requests for the given entity ref', async () => {
+      const assistantId = generateUUID();
+      const requesterId = generateUUID();
+      const requestId1 = generateUUID();
+      const requestId2 = generateUUID();
+
+      (
+        dbGetSuspensionRequestsByEntityRefWithEntityDetails as MockedFunction<
+          typeof dbGetSuspensionRequestsByEntityRefWithEntityDetails
+        >
+      ).mockResolvedValue([
+        buildSuspensionRequestWithEntityDetails({
+          id: requestId1,
+          assistantId,
+          requesterId,
+          reason: 'discrimination',
+          description: 'a',
+          createdAt: new Date('2026-01-01T00:00:00.000Z'),
+          checked: false,
+          entityType: 'assistant',
+          entityId: assistantId,
+          entityName: 'Assistant A',
+          suspended: false,
+        }),
+        buildSuspensionRequestWithEntityDetails({
+          id: requestId2,
+          assistantId,
+          requesterId,
+          reason: 'other',
+          description: 'b',
+          createdAt: new Date('2026-01-02T00:00:00.000Z'),
+          checked: true,
+          entityType: 'assistant',
+          entityId: assistantId,
+          entityName: 'Assistant A',
+          suspended: false,
+        }),
+      ] as never);
+
+      const result = await getSuspendedItemWithDetails({
+        entityType: 'assistant',
+        entityId: assistantId,
+      });
+
+      expect(dbGetSuspensionRequestsByEntityRefWithEntityDetails).toHaveBeenCalledWith({
+        entityType: 'assistant',
+        entityId: assistantId,
+      });
+      expect(result.suspendedItem).toEqual({
+        entityType: 'assistant',
+        entityId: assistantId,
+        entityName: 'Assistant A',
+        requestCount: 2,
+        status: 'new',
+        latestRequestAt: new Date('2026-01-02T00:00:00.000Z'),
+        reasons: [
+          { id: requestId1, reason: 'discrimination' },
+          { id: requestId2, reason: 'other' },
+        ],
+      });
+      expect(result.requests).toHaveLength(2);
+      expect(result.requests).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: requestId1 }),
+          expect.objectContaining({ id: requestId2 }),
+        ]),
+      );
+    });
+
+    it('throws NotFoundError when no suspension requests exist for the entity ref', async () => {
+      const assistantId = generateUUID();
+
+      (
+        dbGetSuspensionRequestsByEntityRefWithEntityDetails as MockedFunction<
+          typeof dbGetSuspensionRequestsByEntityRefWithEntityDetails
+        >
+      ).mockResolvedValue([] as never);
+
+      await expect(
+        getSuspendedItemWithDetails({
+          entityType: 'assistant',
+          entityId: assistantId,
+        }),
+      ).rejects.toThrow(NotFoundError);
     });
   });
 });

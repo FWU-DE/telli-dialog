@@ -1,6 +1,11 @@
 import { desc, eq, getTableColumns, sql } from 'drizzle-orm';
 import { NotFoundError } from '@shared/error';
-import { EntityRef, EntityType } from '@shared/entities/entity-types';
+import {
+  assertEntityType,
+  EntityRef,
+  EntityType,
+  throwEntityInvalidArgumentError,
+} from '@shared/entities/entity-types';
 import { db } from '..';
 import {
   assistantTable,
@@ -16,6 +21,21 @@ type SuspensionRequestWithEntityDetails = SuspensionRequestSelectModel & {
   entityName: string | null;
   suspended: boolean | null;
 };
+
+function getSuspensionRequestEntityIdColumn(entityType: EntityType) {
+  assertEntityType(entityType);
+
+  switch (entityType) {
+    case 'assistant':
+      return suspensionRequestTable.assistantId;
+    case 'character':
+      return suspensionRequestTable.characterId;
+    case 'learningScenario':
+      return suspensionRequestTable.learningScenarioId;
+    default:
+      throwEntityInvalidArgumentError();
+  }
+}
 
 function baseSuspensionRequestsWithEntityDetailsQuery() {
   return db
@@ -106,26 +126,12 @@ export async function dbGetSuspensionRequestsByEntityRef({
   entityType,
   entityId,
 }: EntityRef): Promise<SuspensionRequestSelectModel[]> {
-  if (entityType === 'assistant') {
-    return db
-      .select()
-      .from(suspensionRequestTable)
-      .where(eq(suspensionRequestTable.assistantId, entityId))
-      .orderBy(desc(suspensionRequestTable.createdAt));
-  }
-
-  if (entityType === 'character') {
-    return db
-      .select()
-      .from(suspensionRequestTable)
-      .where(eq(suspensionRequestTable.characterId, entityId))
-      .orderBy(desc(suspensionRequestTable.createdAt));
-  }
+  const entityColumn = getSuspensionRequestEntityIdColumn(entityType);
 
   return db
     .select()
     .from(suspensionRequestTable)
-    .where(eq(suspensionRequestTable.learningScenarioId, entityId))
+    .where(eq(entityColumn, entityId))
     .orderBy(desc(suspensionRequestTable.createdAt));
 }
 
@@ -133,19 +139,9 @@ export async function dbGetSuspensionRequestsByEntityRefWithEntityDetails({
   entityType,
   entityId,
 }: EntityRef): Promise<SuspensionRequestWithEntityDetails[]> {
-  if (entityType === 'assistant') {
-    return baseSuspensionRequestsWithEntityDetailsQuery()
-      .where(eq(suspensionRequestTable.assistantId, entityId))
-      .orderBy(desc(suspensionRequestTable.createdAt));
-  }
-
-  if (entityType === 'character') {
-    return baseSuspensionRequestsWithEntityDetailsQuery()
-      .where(eq(suspensionRequestTable.characterId, entityId))
-      .orderBy(desc(suspensionRequestTable.createdAt));
-  }
+  const entityColumn = getSuspensionRequestEntityIdColumn(entityType);
 
   return baseSuspensionRequestsWithEntityDetailsQuery()
-    .where(eq(suspensionRequestTable.learningScenarioId, entityId))
+    .where(eq(entityColumn, entityId))
     .orderBy(desc(suspensionRequestTable.createdAt));
 }

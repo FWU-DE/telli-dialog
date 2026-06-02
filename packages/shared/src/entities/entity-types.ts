@@ -1,3 +1,5 @@
+import { InvalidArgumentError } from '@shared/error';
+
 export const ENTITY_TYPES = ['assistant', 'character', 'learningScenario'] as const;
 
 export type EntityType = (typeof ENTITY_TYPES)[number];
@@ -7,9 +9,9 @@ export type EntityRef = {
   entityId: string;
 };
 
-export const KEBAP_ENTITY_TYPES = ['assistant', 'character', 'learning-scenario'] as const;
+export const KEBAB_ENTITY_TYPES = ['assistant', 'character', 'learning-scenario'] as const;
 
-export type KebabEntityType = (typeof KEBAP_ENTITY_TYPES)[number];
+export type KebabEntityType = (typeof KEBAB_ENTITY_TYPES)[number];
 
 export function mapEntityTypeToKebabEntityType(entityType: EntityType): KebabEntityType {
   if (entityType === 'learningScenario') {
@@ -25,4 +27,14 @@ export function mapKebabEntityTypeToEntityType(kebabEntityType: KebabEntityType)
   }
 
   return kebabEntityType;
+}
+
+export function assertEntityType(entityType: string): asserts entityType is EntityType {
+  if (!ENTITY_TYPES.includes(entityType as EntityType)) {
+    throwEntityInvalidArgumentError();
+  }
+}
+
+export function throwEntityInvalidArgumentError(): never {
+  throw new InvalidArgumentError('Unsupported entity type');
 }
