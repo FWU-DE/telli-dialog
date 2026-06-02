@@ -145,7 +145,7 @@ export async function markSuspensionRequestAsChecked(suspensionRequestId: string
 export async function suspendEntity(entityRef: EntityRef) {
   const { entityType, entityId } = entityRef;
   assertEntityType(entityType);
-
+  checkParameterUUID(entityId);
   switch (entityType) {
     case 'assistant':
       return dbSetAssistantSuspended({ assistantId: entityId });
@@ -161,7 +161,7 @@ export async function suspendEntity(entityRef: EntityRef) {
 export async function liftSuspensionOnEntity(entityRef: EntityRef) {
   const { entityType, entityId } = entityRef;
   assertEntityType(entityType);
-
+  checkParameterUUID(entityId);
   switch (entityType) {
     case 'assistant':
       return dbLiftSuspensionOnAssistant({ assistantId: entityId });
