@@ -1,6 +1,6 @@
-import { KEBAB_ENTITY_TYPES, KebabEntityType } from '@shared/entities/entity-types';
+import { URL_ENTITY_TYPES, UrlEntityType } from '@shared/entities/entity-types';
 
-export type TemplateTypes = KebabEntityType;
+export type TemplateTypes = UrlEntityType;
 
 /* Unified template model for characters and assistants */
 export type TemplateModel = {
@@ -20,5 +20,5 @@ export type TemplateToFederalStateMapping = {
 /**** Guards ****/
 
 export function isTemplateType(templateType: string): templateType is TemplateTypes {
-  return (KEBAB_ENTITY_TYPES as readonly string[]).includes(templateType);
+  return (URL_ENTITY_TYPES as readonly string[]).includes(templateType);
 }

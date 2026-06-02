@@ -1,7 +1,7 @@
 import { assertEntityType, throwEntityInvalidArgumentError } from '@shared/entities/entity-types';
-import { ReportedEntityOverview } from '@shared/suspension/suspension-service';
+import { SuspensionRequestEntityOverview } from '@shared/suspension/suspension-service';
 
-export function mapEntityTypeToLabel(entityType: ReportedEntityOverview['entityType']) {
+export function mapEntityTypeToLabel(entityType: SuspensionRequestEntityOverview['entityType']) {
   assertEntityType(entityType);
 
   switch (entityType) {
@@ -16,7 +16,9 @@ export function mapEntityTypeToLabel(entityType: ReportedEntityOverview['entityT
   }
 }
 
-export function mapReasonToLabel(reason: ReportedEntityOverview['reasons'][number]['reason']) {
+export function mapReasonToLabel(
+  reason: SuspensionRequestEntityOverview['reasons'][number]['reason'],
+) {
   switch (reason) {
     case 'copyright_violation':
       return 'Urheberrechtsverletzung';
@@ -39,7 +41,7 @@ export function mapReasonToLabel(reason: ReportedEntityOverview['reasons'][numbe
   }
 }
 
-export function mapStatusToLabel(status: ReportedEntityOverview['status']) {
+export function mapStatusToLabel(status: SuspensionRequestEntityOverview['status']) {
   switch (status) {
     case 'new':
       return 'neu';
@@ -53,7 +55,7 @@ export function mapStatusToLabel(status: ReportedEntityOverview['status']) {
 }
 
 export function getChatBotEntityUrl(
-  entityType: ReportedEntityOverview['entityType'],
+  entityType: SuspensionRequestEntityOverview['entityType'],
   entityId: string,
   host: string,
 ) {

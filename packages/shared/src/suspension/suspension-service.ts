@@ -37,14 +37,14 @@ import { InvalidArgumentError, NotFoundError, checkParameterUUID } from '@shared
 
 const suspensionRequestDescriptionSchema = z.string().min(1).max(500);
 
-type ReportedEntityOverviewStatus = 'new' | 'suspended' | 'checked';
+type SuspensionRequestEntityOverviewStatus = 'new' | 'suspended' | 'checked';
 
-export type ReportedEntityOverview = {
+export type SuspensionRequestEntityOverview = {
   entityType: EntityType;
   entityId: string;
   entityName: string;
   requestCount: number;
-  status: ReportedEntityOverviewStatus;
+  status: SuspensionRequestEntityOverviewStatus;
   latestRequestAt: Date;
   reasons: { id: string; reason: SuspensionRequestReason }[];
 };
@@ -54,7 +54,7 @@ type SuspensionRequest = Awaited<
 >[number];
 
 type SuspensionRequestAggregate = Pick<
-  ReportedEntityOverview,
+  SuspensionRequestEntityOverview,
   'requestCount' | 'latestRequestAt' | 'reasons'
 > & {
   hasUncheckedRequests: boolean;
@@ -242,11 +242,11 @@ function throwNotFoundForEntity(entityType: EntityType): never {
   }
 }
 
-function buildReportedEntityOverview(groupedSuspensionRequest: {
+function buildSuspensionRequestEntityOverview(groupedSuspensionRequest: {
   entityType: EntityType;
   entityId: string;
   suspensionRequests: SuspensionRequest[];
-}): ReportedEntityOverview {
+}): SuspensionRequestEntityOverview {
   const entity = groupedSuspensionRequest.suspensionRequests[0];
 
   if (!entity || !entity.entityName || entity.suspended === null) {
@@ -266,13 +266,13 @@ function buildReportedEntityOverview(groupedSuspensionRequest: {
   };
 }
 
-export async function getSuspensionRequestOverviews(): Promise<ReportedEntityOverview[]> {
+export async function getSuspensionRequestOverviews(): Promise<SuspensionRequestEntityOverview[]> {
   const allSuspensionRequests = await dbGetAllSuspensionRequestsWithEntityDetails();
 
   const groupedSuspensionRequests = groupSuspensionRequestsByEntity(allSuspensionRequests);
 
   const overviewItems = groupedSuspensionRequests.map((groupedSuspensionRequest) =>
-    buildReportedEntityOverview(groupedSuspensionRequest),
+    buildSuspensionRequestEntityOverview(groupedSuspensionRequest),
   );
 
   const sorted = overviewItems.sort(
@@ -283,15 +283,18 @@ export async function getSuspensionRequestOverviews(): Promise<ReportedEntityOve
 }
 
 /**
- * Retrieves a reported entity together with all related suspension requests.
+ * Retrieves an entity overview together with all related suspension requests.
  * The entity is identified by the combination of entity type and entity id.
  * This is used to display the detailed view in the admin interface.
  * @param entityType The type of the entity (assistant, character, or learning scenario)
  * @param entityId The id of the entity
- * @returns The detailed reported entity overview and related suspension requests
+ * @returns The detailed suspension request entity overview and related suspension requests
  */
-export async function getSuspendedItemWithDetails({ entityType, entityId }: EntityRef): Promise<{
-  suspendedItem: ReportedEntityOverview;
+export async function getSuspensionRequestItemWithDetails({
+  entityType,
+  entityId,
+}: EntityRef): Promise<{
+  suspendedItem: SuspensionRequestEntityOverview;
   requests: SuspensionRequestSelectModel[];
 }> {
   checkParameterUUID(entityId);
@@ -301,7 +304,7 @@ export async function getSuspendedItemWithDetails({ entityType, entityId }: Enti
   const groupedSuspensionRequests = groupSuspensionRequestsByEntity([...suspensionRequests]);
 
   const overviewItem = groupedSuspensionRequests.map((groupedSuspensionRequest) =>
-    buildReportedEntityOverview(groupedSuspensionRequest),
+    buildSuspensionRequestEntityOverview(groupedSuspensionRequest),
   )[0];
 
   if (!overviewItem)

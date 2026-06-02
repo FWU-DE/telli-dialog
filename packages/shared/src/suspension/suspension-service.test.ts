@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import {
   getSuspensionRequestOverviews,
-  getSuspendedItemWithDetails,
+  getSuspensionRequestItemWithDetails,
   liftSuspensionOnEntity,
   markSuspensionRequestAsChecked,
   createSuspensionRequest,
@@ -549,7 +549,7 @@ describe('suspension-request-service', () => {
         }),
       ] as never);
 
-      const result = await getSuspendedItemWithDetails({
+      const result = await getSuspensionRequestItemWithDetails({
         entityType: 'assistant',
         entityId: assistantId,
       });
@@ -589,7 +589,7 @@ describe('suspension-request-service', () => {
       ).mockResolvedValue([] as never);
 
       await expect(
-        getSuspendedItemWithDetails({
+        getSuspensionRequestItemWithDetails({
           entityType: 'assistant',
           entityId: assistantId,
         }),

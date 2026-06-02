@@ -1,13 +1,13 @@
 'use client';
 
-import { ReportedEntityOverview } from '@shared/suspension/suspension-service';
+import { SuspensionRequestEntityOverview } from '@shared/suspension/suspension-service';
 import { columns } from './columns';
 import { DataTable } from '@ui/components/data-table';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { type ColumnFiltersState } from '@tanstack/react-table';
 import { Input } from '@ui/components/input';
-import { getSuspendedEntitiesAction } from './actions';
+import { getSuspensionRequestEntitiesAction } from './actions';
 import { toast } from 'sonner';
 import {
   Card,
@@ -21,17 +21,19 @@ import { Button } from '@ui/components/button';
 import { Skeleton } from '@ui/components/skeleton';
 import { ROUTES } from '@/consts/routes';
 
-export default function SuspendedEntitiesOverview() {
-  const [suspendedEntities, setSuspendedEntities] = useState<ReportedEntityOverview[]>([]);
+export default function SuspensionRequestEntitiesOverview() {
+  const [suspensionRequestEntities, setSuspensionRequestEntities] = useState<
+    SuspensionRequestEntityOverview[]
+  >([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   async function loadData() {
     startTransition(async () => {
-      const result = await getSuspendedEntitiesAction();
+      const result = await getSuspensionRequestEntitiesAction();
       if (result.success) {
-        setSuspendedEntities(result.value as ReportedEntityOverview[]);
+        setSuspensionRequestEntities(result.value as SuspensionRequestEntityOverview[]);
       } else {
         toast.error(result.error.message);
       }
@@ -46,7 +48,7 @@ export default function SuspendedEntitiesOverview() {
     void loadData();
   };
 
-  function handleRowClicked(row: ReportedEntityOverview): void {
+  function handleRowClicked(row: SuspensionRequestEntityOverview): void {
     router.push(ROUTES.app.suspensionDetails(row.entityType, row.entityId));
   }
 
@@ -78,7 +80,7 @@ export default function SuspendedEntitiesOverview() {
             />
             <DataTable
               columns={columns}
-              data={suspendedEntities}
+              data={suspensionRequestEntities}
               rowClickHandler={handleRowClicked}
               columnFilters={columnFilters}
               onColumnFiltersChange={setColumnFilters}

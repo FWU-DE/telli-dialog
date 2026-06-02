@@ -3,7 +3,7 @@ import { AdminAppSidebar } from '@/app/ais-chat-app/AdminAppSidebar';
 import TwoColumnLayout from '@/components/layout/TwoColumnLayout';
 import { headers } from 'next/headers';
 import { getChatBotEntityUrl } from '../../utils';
-import { SuspendedEntityDetailView } from './SuspendedEntityDetailView';
+import { SuspensionRequestItemDetailView } from './SuspensionRequestItemDetailView';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +18,7 @@ export default async function SuspensionRequestPage(
     <TwoColumnLayout
       sidebar={<AdminAppSidebar />}
       page={
-        <SuspendedEntityDetailView
+        <SuspensionRequestItemDetailView
           entityType={entityType as EntityType}
           entityId={entityId}
           chatBotEntityUrl={chatBotEntityUrl}

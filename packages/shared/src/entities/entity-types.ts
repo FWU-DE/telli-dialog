@@ -9,11 +9,11 @@ export type EntityRef = {
   entityId: string;
 };
 
-export const KEBAB_ENTITY_TYPES = ['assistant', 'character', 'learning-scenario'] as const;
+export const URL_ENTITY_TYPES = ['assistant', 'character', 'learning-scenario'] as const;
 
-export type KebabEntityType = (typeof KEBAB_ENTITY_TYPES)[number];
+export type UrlEntityType = (typeof URL_ENTITY_TYPES)[number];
 
-export function mapEntityTypeToKebabEntityType(entityType: EntityType): KebabEntityType {
+export function mapEntityTypeToUrlEntityType(entityType: EntityType): UrlEntityType {
   if (entityType === 'learningScenario') {
     return 'learning-scenario';
   }
@@ -21,12 +21,12 @@ export function mapEntityTypeToKebabEntityType(entityType: EntityType): KebabEnt
   return entityType;
 }
 
-export function mapKebabEntityTypeToEntityType(kebabEntityType: KebabEntityType): EntityType {
-  if (kebabEntityType === 'learning-scenario') {
+export function mapUrlEntityTypeToEntityType(urlEntityType: UrlEntityType): EntityType {
+  if (urlEntityType === 'learning-scenario') {
     return 'learningScenario';
   }
 
-  return kebabEntityType;
+  return urlEntityType;
 }
 
 export function assertEntityType(entityType: string): asserts entityType is EntityType {
