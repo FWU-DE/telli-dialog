@@ -66,6 +66,10 @@ vi.mock('./build-tools', () => ({
   buildTools: mocks.buildToolsMock,
 }));
 
+vi.mock('./agent-loop', () => ({
+  runAgentLoop: mocks.runAgentLoopMock,
+}));
+
 vi.mock('./websearch', () => ({
   runWebSearchPipeline: mocks.runWebSearchPipelineMock,
 }));
@@ -270,7 +274,7 @@ beforeEach(() => {
     });
   });
   mocks.runAgentLoopMock.mockImplementation(
-    async ({
+    ({
       onTextChunk,
       onComplete,
       tools,
@@ -293,7 +297,7 @@ beforeEach(() => {
       expect(toolHandlers).toEqual(buildToolsOutput.toolHandlers);
 
       onTextChunk('agentic chunk');
-      await onComplete({
+      void onComplete({
         fullText: 'agentic chunk',
         usage: { promptTokens: 11, completionTokens: 22, totalTokens: 33 },
         priceInCents: 44,

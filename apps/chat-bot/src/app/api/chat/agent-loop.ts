@@ -41,8 +41,6 @@ export function runAgentLoop({
     const loopMessages = [...messages];
 
     try {
-      console.log('[agent-loop] initial messages:', JSON.stringify(loopMessages, null, 2));
-
       for (let iteration = 0; iteration < MAX_AGENTIC_ITERATIONS; iteration++) {
         const pendingToolCalls: ToolCall[] = [];
         let iterationText = '';
@@ -78,10 +76,7 @@ export function runAgentLoop({
           // Final iteration: flush buffered text to the client
           fullText += iterationText;
           onTextChunk(iterationText);
-          console.log(`[agent-loop] iteration ${iteration}: final text:`, fullText);
           break;
-        } else {
-          console.log(`[agent-loop] iteration ${iteration}: pending tool calls:`, pendingToolCalls);
         }
 
         // Tool-calling iteration: discard iterationText (intermediate reasoning)
@@ -112,10 +107,6 @@ export function runAgentLoop({
               result = `Error: Unknown tool "${toolCall.name}"`;
             }
 
-            /*console.log(
-              `[agent-loop] iteration ${iteration}: tool result for "${toolCall.name}":`,
-              result,
-            );*/
             return { toolCallId: toolCall.id, result };
           }),
         );

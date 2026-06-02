@@ -101,7 +101,7 @@ export function generateTextStream(
   onComplete?: Parameters<TextStreamFn>[1],
   options?: GenerationOptions,
 ): AsyncGenerator<string> {
-  if (!options?.tools) {
+  if (!(options?.tools?.length ?? 0)) {
     const streamFn = getTextStreamFnByModel({ model });
     if (!streamFn) {
       throw new ProviderConfigurationError(

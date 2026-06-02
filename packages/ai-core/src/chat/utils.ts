@@ -10,7 +10,11 @@ export function toOpenAIMessages(
   messages: Message[],
 ): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
   return messages.map((message) => {
-    if (message.role === 'tool' && message.toolCallId) {
+    if (message.role === 'tool') {
+      if (!message.toolCallId) {
+        throw new Error('Tool messages require toolCallId');
+      }
+
       return {
         role: 'tool',
         content: message.content,
@@ -108,7 +112,7 @@ export function toOpenAITools(
       name: tool.name,
       description: tool.description,
       parameters: tool.parameters,
-      strict: true, // Always recomended https://developers.openai.com/api/docs/guides/function-calling#strict-mode
+      strict: true, // Always recommended: https://developers.openai.com/api/docs/guides/function-calling#strict-mode
     } satisfies OpenAI.Responses.FunctionTool;
   });
 }
