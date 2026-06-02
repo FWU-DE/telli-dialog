@@ -61,6 +61,7 @@ function transformToFederalStateEditForm(federalState: FederalStateModel): Feder
       ...federalState.featureToggles,
       isImageGenerationEnabled: federalState.featureToggles.isImageGenerationEnabled ?? false,
       isWebSearchEnabled: federalState.featureToggles.isWebSearchEnabled ?? false,
+      isAgenticChatEnabled: federalState.featureToggles.isAgenticChatEnabled ?? false,
     },
     supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
     designConfiguration: federalState.designConfiguration
@@ -257,6 +258,12 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="featureToggles.isWebSearchEnabled"
             label="Websuche aktivieren"
             description="Erlaubt die Nutzung der Websuchfunktion."
+            control={control}
+          />
+          <FormFieldCheckbox
+            name="featureToggles.isAgenticChatEnabled"
+            label="Agentic Chat aktivieren"
+            description="Erlaubt die Nutzung des neuen agentic loop im Chat."
             control={control}
           />
           <FormField

@@ -1,5 +1,6 @@
 import { SUPPORTED_DOCUMENTS_EXTENSIONS, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
 import { RetrievedChunk } from '../rag/types';
+import type { WebSearchResult } from '@shared/db/schema';
 
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien
@@ -39,8 +40,12 @@ Markiere die wichtigsten Begriffe **fett**.
 
 \`\`\``;
 
-export function constructRagContext(chunks: RetrievedChunk[], errorUrls: string[] = []) {
-  if (chunks.length === 0 && errorUrls.length === 0) return '';
+export function constructRagContext(
+  chunks: RetrievedChunk[],
+  errorUrls: string[] = [],
+  webSearchResults: WebSearchResult[] = [],
+) {
+  if (chunks.length === 0 && errorUrls.length === 0 && webSearchResults.length === 0) return '';
 
   const fileChunks = chunks
     .filter((chunk) => chunk.sourceType === 'file')
@@ -81,6 +86,15 @@ export function constructRagContext(chunks: RetrievedChunk[], errorUrls: string[
   if (errorUrls.length > 0) {
     sections.push(
       `### Fehler beim Zugriff\nEs gab Probleme beim Zugriff auf die folgenden URLs:\n${errorUrls.map((url) => `- ${url}`).join('\n')}`,
+    );
+  }
+
+  if (webSearchResults.length > 0) {
+    const webSearchText = webSearchResults
+      .map((result) => `Url: ${result.url}\n${result.content}`)
+      .join('\n\n');
+    sections.push(
+      `### Websuche\nDie folgenden Inhalte stammen aus einer live Websuche:\n\n${webSearchText}`,
     );
   }
 

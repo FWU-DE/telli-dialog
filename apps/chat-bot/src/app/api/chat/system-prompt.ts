@@ -14,9 +14,14 @@ import {
   SUGGESTION_GUIDELINES,
   TOOL_GUIDELINES,
 } from '../utils/system-prompt';
+import type { WebSearchResult } from '@shared/db/schema';
 
-function constructAisChatSystemPrompt(chunks: RetrievedChunk[], errorUrls: string[]) {
-  const ragContext = constructRagContext(chunks, errorUrls);
+function constructAisChatSystemPrompt(
+  chunks: RetrievedChunk[],
+  errorUrls: string[],
+  webSearchResults: WebSearchResult[],
+) {
+  const ragContext = constructRagContext(chunks, errorUrls, webSearchResults);
 
   return `Du bist AIS.chat, der datenschutzkonforme KI-Chatbot für den Schulunterricht. 
 Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. 
@@ -33,8 +38,9 @@ function constructAssistantSystemPrompt(
   assistant: AssistantSelectModel,
   chunks: RetrievedChunk[],
   errorUrls: string[],
+  webSearchResults: WebSearchResult[] = [],
 ) {
-  const ragContext = constructRagContext(chunks, errorUrls);
+  const ragContext = constructRagContext(chunks, errorUrls, webSearchResults);
 
   return `Du bist ein hilfreicher Assistent, der in einer Schule eingesetzt wird, um eine Lehrkraft zu unterstützen. Dein Name ist ${assistant.name}.
 
@@ -123,6 +129,7 @@ export async function constructChatSystemPrompt({
   federalState,
   chunks,
   errorUrls,
+  webSearchResults = [],
 }: {
   characterId?: string;
   assistantId?: string;
@@ -130,6 +137,7 @@ export async function constructChatSystemPrompt({
   federalState: ObscuredFederalState;
   chunks: RetrievedChunk[];
   errorUrls: string[];
+  webSearchResults?: WebSearchResult[];
 }) {
   if (characterId !== undefined) {
     const character = await dbGetCharacterById({ characterId });
@@ -157,9 +165,9 @@ export async function constructChatSystemPrompt({
         errorUrls,
       });
     } else {
-      return constructAssistantSystemPrompt(assistant, chunks, errorUrls);
+      return constructAssistantSystemPrompt(assistant, chunks, errorUrls, webSearchResults);
     }
   }
 
-  return constructAisChatSystemPrompt(chunks, errorUrls);
+  return constructAisChatSystemPrompt(chunks, errorUrls, webSearchResults);
 }
