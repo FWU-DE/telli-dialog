@@ -64,6 +64,7 @@ export function runAgentLoop({
         for await (const event of stream) {
           if (event.type === 'text') {
             iterationText += event.delta;
+            onTextChunk(event.delta);
             // Don't flush to client yet — wait until we know there are no tool calls
           } else if (event.type === 'tool_call') {
             if (pendingToolCalls.length < MAX_TOOL_CALLS_PER_ITERATION) {
@@ -72,14 +73,8 @@ export function runAgentLoop({
           }
         }
 
-        if (pendingToolCalls.length === 0) {
-          // Final iteration: flush buffered text to the client
-          fullText += iterationText;
-          onTextChunk(iterationText);
-          break;
-        }
-
         // Tool-calling iteration: discard iterationText (intermediate reasoning)
+        fullText += iterationText;
 
         // Append the assistant message with tool calls
         const assistantMessage: AiCoreMessage = {
