@@ -2,17 +2,20 @@ import type { ToolDefinition } from '@ais-chat/ai-core';
 import { UserAndContext } from '@/auth/types';
 import { isWebSearchEnabled, searchWeb } from './websearch';
 import type { ToolHandler } from './agent-loop';
+import type { WebSearchResult } from '@shared/db/schema';
 
 type BuildToolsParams = {
   user: UserAndContext;
   characterId?: string;
   assistantId?: string;
   conversationId: string;
+  onWebSearchResults?: (results: WebSearchResult[]) => void;
 };
 
 type BuildToolsResult = {
   tools: ToolDefinition[];
   toolHandlers: Record<string, ToolHandler>;
+  webSearchResults: WebSearchResult[];
 };
 
 export async function buildTools({
@@ -20,9 +23,11 @@ export async function buildTools({
   characterId,
   assistantId,
   conversationId,
+  onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
   const tools: ToolDefinition[] = [];
   const toolHandlers: Record<string, ToolHandler> = {};
+  const webSearchResults: WebSearchResult[] = [];
 
   const webSearchEnabled = await isWebSearchEnabled({ user, characterId, assistantId });
 
@@ -51,6 +56,10 @@ export async function buildTools({
         conversationId,
         userId: user.id,
       });
+
+      webSearchResults.push(...results);
+      onWebSearchResults?.(results);
+
       if (results.length === 0) {
         return 'No results found.';
       }
@@ -58,5 +67,5 @@ export async function buildTools({
     };
   }
 
-  return { tools, toolHandlers };
+  return { tools, toolHandlers, webSearchResults };
 }

@@ -2,6 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ChatMessage } from '@/types/chat';
 import type { UserAndContext } from '@/auth/types';
 
+const webSearchResults = [
+  {
+    type: 'text' as const,
+    name: 'Search result',
+    url: 'https://example.com/article',
+    content: 'Current details from the web search.',
+    favicon: 'https://example.com/favicon.ico',
+  },
+];
+
 const buildToolsOutput = {
   tools: [
     {
@@ -13,17 +23,8 @@ const buildToolsOutput = {
   toolHandlers: {
     web_search: vi.fn(),
   },
+  webSearchResults,
 };
-
-const webSearchResults = [
-  {
-    type: 'text' as const,
-    name: 'Search result',
-    url: 'https://example.com/article',
-    content: 'Current details from the web search.',
-    favicon: 'https://example.com/favicon.ico',
-  },
-];
 
 const mocks = vi.hoisted(() => ({
   generateTextStreamWithBillingMock: vi.fn(),
@@ -328,9 +329,9 @@ describe('sendChatMessage', () => {
     if (isAgenticChatEnabled) {
       expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
       expect(mocks.runWebSearchPipelineMock).not.toHaveBeenCalled();
-      expect(result.webSearchResults).toEqual([]);
+      expect(result.webSearchResults).toEqual(webSearchResults);
       expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
-        expect.objectContaining({ webSearchResults: [] }),
+        expect.objectContaining({ webSearchResults }),
       );
       expect(streamedText).toBe('agentic chunk');
     } else {

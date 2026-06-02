@@ -4,7 +4,7 @@ import {
   type TokenUsage,
   TokenPointsExceededError,
 } from '@ais-chat/ai-core';
-import { createTextStream } from '@/utils/streaming';
+import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { userHasReachedTokenPointsLimit } from './usage';
 import { getModelAndApiKeyWithResult, getAuxiliaryModel } from '../utils/utils';
 import {
@@ -164,10 +164,19 @@ export async function sendChatMessage({
       characterId,
       assistantId,
       conversationId: activeConversation.id,
+      onWebSearchResults: (results) => {
+        update(
+          encodeChatStreamEvent({
+            type: 'web_search_results',
+            webSearchResults: results,
+          }),
+        );
+      },
     });
 
     tools = builtTools.tools;
     toolHandlers = builtTools.toolHandlers;
+    webSearchResults = builtTools.webSearchResults;
   } else {
     webSearchResults = await runWebSearchPipeline({
       messages,
