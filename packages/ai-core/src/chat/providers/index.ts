@@ -23,7 +23,6 @@ import type {
   StreamEvent,
   TextGenerationFn,
   TextStreamFn,
-  TokenUsage,
 } from '../types';
 import { ProviderConfigurationError } from '../../errors';
 
