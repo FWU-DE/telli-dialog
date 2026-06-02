@@ -101,24 +101,13 @@ export function generateTextStream(
   onComplete?: Parameters<TextStreamFn>[1],
   options?: GenerationOptions,
 ): AsyncGenerator<string> {
-  if (!(options?.tools?.length ?? 0)) {
-    const streamFn = getTextStreamFnByModel({ model });
-    if (!streamFn) {
-      throw new ProviderConfigurationError(
-        `No text stream function found for provider: ${model.provider}`,
-      );
-    }
-    return streamFn({ messages, model: model.name, ...options }, onComplete);
-  }
-
-  const streamFn = getAgenticStreamFnByModel({ model });
+  const streamFn = getTextStreamFnByModel({ model });
   if (!streamFn) {
     throw new ProviderConfigurationError(
-      `No tool stream function found for provider: ${model.provider}`,
+      `No text stream function found for provider: ${model.provider}`,
     );
   }
-  // The agentic loop will have to take care of this too
-  return filterToolStreamToText(streamFn({ messages, model: model.name, ...options }), onComplete);
+  return streamFn({ messages, model: model.name, ...options }, onComplete);
 }
 
 export function generateAgenticStream(
