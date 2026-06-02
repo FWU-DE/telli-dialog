@@ -1,7 +1,7 @@
 import type OpenAI from 'openai';
 import type { Message, StreamEvent, TokenUsage, ToolCall, ToolDefinition } from '../types';
 import { AiGenerationError } from '../../errors';
-import { toOpenAIChatTools, toOpenAIMessages } from '../utils';
+import { toOpenAIResponsesInput, toOpenAITools } from '../utils';
 
 type OpenAICompatibleAgenticStreamArgs = {
   client: OpenAI;
@@ -17,6 +17,7 @@ type OpenAICompatibleAgenticStreamArgs = {
 
 type ToolCallAccumulator = {
   id: string;
+  callId: string;
   name: string;
   arguments: string;
 };
@@ -32,14 +33,13 @@ export async function* streamOpenAICompatibleAgenticResponse({
   getUsage,
   providerName,
 }: OpenAICompatibleAgenticStreamArgs): AsyncGenerator<StreamEvent> {
-  const stream = await client.chat.completions.create({
+  const stream = await client.responses.create({
     model: modelName,
-    messages: toOpenAIMessages(messages),
+    input: toOpenAIResponsesInput(messages),
     stream: true,
-    stream_options: { include_usage: true },
-    max_tokens: maxTokens,
+    max_output_tokens: maxTokens,
     temperature,
-    tools: toOpenAIChatTools(tools),
+    tools: toOpenAITools(tools),
     tool_choice: toolChoice,
   });
 
@@ -48,49 +48,60 @@ export async function* streamOpenAICompatibleAgenticResponse({
   const toolCalls = new Map<number, ToolCallAccumulator>();
 
   for await (const chunk of stream) {
-    const delta = chunk.choices[0]?.delta;
+    if (chunk.type === 'response.output_text.delta') {
+      content += chunk.delta;
+      yield { type: 'text', delta: chunk.delta };
+    } else if (chunk.type === 'response.function_call_arguments.delta') {
+      const existingToolCall = toolCalls.get(chunk.output_index) ?? {
+        id: '',
+        callId: '',
+        name: '',
+        arguments: '',
+      };
 
-    if (delta?.content) {
-      content += delta.content;
-      yield { type: 'text', delta: delta.content };
-    }
+      existingToolCall.arguments += chunk.delta;
+      toolCalls.set(chunk.output_index, existingToolCall);
+    } else if (chunk.type === 'response.function_call_arguments.done') {
+      const existingToolCall = toolCalls.get(chunk.output_index) ?? {
+        id: '',
+        callId: '',
+        name: '',
+        arguments: '',
+      };
 
-    for (const toolCallDelta of delta?.tool_calls ?? []) {
-      const index = toolCallDelta.index ?? 0;
-      const existingToolCall = toolCalls.get(index) ?? { id: '', name: '', arguments: '' };
+      existingToolCall.name = chunk.name;
+      existingToolCall.arguments = chunk.arguments;
+      toolCalls.set(chunk.output_index, existingToolCall);
+    } else if (chunk.type === 'response.output_item.done' && chunk.item.type === 'function_call') {
+      const existingToolCall = toolCalls.get(chunk.output_index) ?? {
+        id: '',
+        callId: '',
+        name: '',
+        arguments: '',
+      };
 
-      if (toolCallDelta.id) {
-        existingToolCall.id = toolCallDelta.id;
-      }
-
-      if (toolCallDelta.function?.name) {
-        existingToolCall.name = toolCallDelta.function.name;
-      }
-
-      if (toolCallDelta.function?.arguments) {
-        existingToolCall.arguments += toolCallDelta.function.arguments;
-      }
-
-      toolCalls.set(index, existingToolCall);
-    }
-
-    if (chunk.usage) {
+      existingToolCall.id = chunk.item.id ?? chunk.item.call_id;
+      existingToolCall.callId = chunk.item.call_id;
+      existingToolCall.name = chunk.item.name;
+      existingToolCall.arguments = chunk.item.arguments;
+      toolCalls.set(chunk.output_index, existingToolCall);
+    } else if (chunk.type === 'response.completed' && chunk.response.usage) {
       usage = {
-        completionTokens: chunk.usage.completion_tokens,
-        promptTokens: chunk.usage.prompt_tokens,
-        totalTokens: chunk.usage.total_tokens,
+        completionTokens: chunk.response.usage.output_tokens,
+        promptTokens: chunk.response.usage.input_tokens,
+        totalTokens: chunk.response.usage.total_tokens,
       };
     }
   }
 
   const resolvedToolCalls: ToolCall[] = [];
   for (const [, toolCall] of [...toolCalls.entries()].sort(([left], [right]) => left - right)) {
-    if (!toolCall.id || !toolCall.name) {
+    if ((!toolCall.callId && !toolCall.id) || !toolCall.name) {
       throw new AiGenerationError(`Incomplete tool call returned from ${providerName} stream`);
     }
 
     resolvedToolCalls.push({
-      id: toolCall.id,
+      id: toolCall.callId || toolCall.id,
       name: toolCall.name,
       arguments: toolCall.arguments,
     });
