@@ -82,6 +82,12 @@ export async function dbGetGlobalGpts({
   }
 }
 
+export async function dbGetCommunityGpts(): Promise<AssistantSelectModel[]> {
+  return baseAssistantQuery()
+    .where(eq(assistantTable.accessLevel, 'community'))
+    .orderBy(desc(assistantTable.createdAt));
+}
+
 export async function dbGetGlobalAssistantByName({
   name,
 }: {
@@ -143,6 +149,7 @@ export async function dbGetAssistantByIdOrAssociatedSchool({
             arrayOverlaps(userTable.schoolIds, user.schoolIds),
           )
         : undefined,
+      and(eq(assistantTable.id, assistantId), eq(assistantTable.accessLevel, 'community')),
       eq(assistantTable.accessLevel, 'global'),
     ),
   );

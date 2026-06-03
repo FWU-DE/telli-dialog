@@ -7,6 +7,7 @@ import { db } from '@shared/db';
 import {
   dbDeleteAssistantByIdAndUser,
   dbGetAssistantById,
+  dbGetCommunityGpts,
   dbGetGlobalGpts,
   dbGetGptsByAssociatedSchools,
   dbGetGptsByUser,
@@ -157,6 +158,9 @@ export async function getAssistantByAccessLevel({
   let assistants: AssistantSelectModel[];
 
   switch (accessLevel) {
+    case 'community':
+      assistants = await dbGetCommunityGpts();
+      break;
     case 'global':
       assistants = await dbGetGlobalGpts({ user });
       break;
@@ -184,12 +188,19 @@ export async function getAssistantsByOverviewFilter({
 
   switch (filter) {
     case 'all': {
-      const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
-        dbGetGptsByUser({ user }),
-        dbGetGptsByAssociatedSchools({ user }),
-        dbGetGlobalGpts({ user }),
-      ]);
-      assistants = [...privateAssistants, ...schoolAssistants, ...globalAssistants];
+      const [privateAssistants, schoolAssistants, communityAssistants, globalAssistants] =
+        await Promise.all([
+          dbGetGptsByUser({ user }),
+          dbGetGptsByAssociatedSchools({ user }),
+          dbGetCommunityGpts(),
+          dbGetGlobalGpts({ user }),
+        ]);
+      assistants = [
+        ...privateAssistants,
+        ...schoolAssistants,
+        ...communityAssistants,
+        ...globalAssistants,
+      ];
       break;
     }
     case 'mine':
@@ -198,9 +209,17 @@ export async function getAssistantsByOverviewFilter({
     case 'official':
       assistants = await dbGetGlobalGpts({ user });
       break;
-    case 'school':
-      assistants = await dbGetGptsByAssociatedSchools({ user });
+    case 'community':
+      assistants = await dbGetCommunityGpts();
       break;
+    case 'school': {
+      const [schoolAssistants, communityAssistants] = await Promise.all([
+        dbGetGptsByAssociatedSchools({ user }),
+        dbGetCommunityGpts(),
+      ]);
+      assistants = [...schoolAssistants, ...communityAssistants];
+      break;
+    }
     default:
       return [];
   }
@@ -364,8 +383,7 @@ export async function getFileMappings({
 }
 
 /**
- * Update access level, e.g. from private to school or back to private.
- * Global access level is not allowed for this use case.
+ * Update access level, e.g. from private to school/community or back to private.
  * Throws if the user is not the owner of the custom gpt.
  */
 export async function updateAssistantAccessLevel({
@@ -380,7 +398,6 @@ export async function updateAssistantAccessLevel({
   checkParameterUUID(assistantId);
   accessLevelSchema.parse(accessLevel);
 
-  // Authorization check
   if (accessLevel === 'global') {
     throw new ForbiddenError('Not authorized to set the access level to global');
   }

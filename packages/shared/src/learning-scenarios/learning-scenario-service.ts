@@ -8,6 +8,7 @@ import {
   dbCreateLearningScenarioShare,
   dbDeleteLearningScenarioByIdAndUser,
   dbGetAllAccessibleLearningScenarios,
+  dbGetCommunityLearningScenarios,
   dbGetAllLearningScenariosByUser,
   dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
@@ -93,6 +94,9 @@ export async function getLearningScenariosByAccessLevel({
   let learningScenarios: LearningScenarioOptionalShareDataModel[];
 
   switch (accessLevel) {
+    case 'community':
+      learningScenarios = await dbGetCommunityLearningScenarios({ user });
+      break;
     case 'global':
       learningScenarios = await dbGetGlobalLearningScenarios({ user });
       break;
@@ -130,9 +134,17 @@ export async function getLearningScenariosByOverviewFilter({
     case 'official':
       learningScenarios = await dbGetGlobalLearningScenarios({ user });
       break;
-    case 'school':
-      learningScenarios = await dbGetLearningScenariosByAssociatedSchools({ user });
+    case 'community':
+      learningScenarios = await dbGetCommunityLearningScenarios({ user });
       break;
+    case 'school': {
+      const [schoolLearningScenarios, communityLearningScenarios] = await Promise.all([
+        dbGetLearningScenariosByAssociatedSchools({ user }),
+        dbGetCommunityLearningScenarios({ user }),
+      ]);
+      learningScenarios = [...schoolLearningScenarios, ...communityLearningScenarios];
+      break;
+    }
     default:
       return [];
   }
@@ -235,7 +247,7 @@ export async function updateLearningScenario({
 }
 
 /**
- * User can share a learning scenario he owns with the school (access level = school)
+ * User can share a learning scenario he owns with the school or community
  * or unshare it (access level = private).
  * User is not allowed to set the access level to global.
  */
@@ -251,7 +263,6 @@ export async function updateLearningScenarioAccessLevel({
   checkParameterUUID(learningScenarioId);
   accessLevelSchema.parse(accessLevel);
 
-  // Authorization check
   if (accessLevel === 'global') {
     throw new ForbiddenError('Not authorized to set the access level to global');
   }

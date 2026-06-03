@@ -56,7 +56,9 @@ export default function EntityOverview({
   const showSchoolFilter = federalState?.featureToggles?.isShareTemplateWithSchoolEnabled ?? false;
   const filterDisabled = itemCount < 1;
 
-  const visibleTabs = FILTER_OPTIONS.filter((f) => f !== 'school' || showSchoolFilter).map((f) => ({
+  const visibleTabs = FILTER_OPTIONS.filter(
+    (f) => (f !== 'school' && f !== 'community') || showSchoolFilter,
+  ).map((f) => ({
     value: f,
     label: t(`filter-${f}`),
   }));

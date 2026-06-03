@@ -512,6 +512,13 @@
       "when": 1779441350859,
       "tag": "0072_cold_taskmaster",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1780501042142,
+      "tag": "0073_chilly_black_tarantula",
+      "breakpoints": true
     }
   ]
 }

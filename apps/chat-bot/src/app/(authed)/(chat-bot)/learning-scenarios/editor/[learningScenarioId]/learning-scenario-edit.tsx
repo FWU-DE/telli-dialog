@@ -54,6 +54,10 @@ import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-he
 import { FormField } from '@ui/components/form/form-field';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
+import {
+  getAccessLevelFromShareForm,
+  getShareFormValues,
+} from '@/components/custom-chat/access-level-sharing';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
@@ -95,6 +99,7 @@ function createLearningScenarioFormValuesSchema(t: LearningScenarioTranslator) {
     studentExercise: z.string(),
     modelId: z.string(),
     isSchoolShared: z.boolean(),
+    isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
   });
 }
@@ -136,7 +141,7 @@ export function LearningScenarioEdit({
     additionalInstructions: learningScenario.additionalInstructions ?? '',
     studentExercise: learningScenario.studentExercise ?? '',
     modelId: selectedModelId ?? '',
-    isSchoolShared: learningScenario.accessLevel === 'school',
+    ...getShareFormValues(learningScenario.accessLevel),
     hasLinkAccess: learningScenario.hasLinkAccess,
   };
 
@@ -183,8 +188,10 @@ export function LearningScenarioEdit({
   const savedAccessLevelRef = useRef(learningScenario.accessLevel);
   const attachedLinksRef = useRef(learningScenario.attachedLinks);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
+  const isCommunityShared = useWatch({ control, name: 'isCommunityShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
-  const showShareInfo = (isSchoolShared || hasLinkAccess) && !learningScenario.suspended;
+  const showShareInfo =
+    (isSchoolShared || isCommunityShared || hasLinkAccess) && !learningScenario.suspended;
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -280,8 +287,13 @@ export function LearningScenarioEdit({
   }
 
   const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
-    if (name === 'isSchoolShared') {
-      const newAccessLevel = checked ? 'school' : 'private';
+    if (name === 'isSchoolShared' || name === 'isCommunityShared') {
+      const nextShareValues = {
+        isSchoolShared: name === 'isSchoolShared' ? checked : getValues('isSchoolShared'),
+        isCommunityShared: name === 'isCommunityShared' ? checked : getValues('isCommunityShared'),
+      };
+
+      const newAccessLevel = getAccessLevelFromShareForm(nextShareValues);
 
       if (newAccessLevel !== savedAccessLevelRef.current) {
         const result = await updateLearningScenarioAccessLevelAction({
@@ -290,6 +302,9 @@ export function LearningScenarioEdit({
         });
 
         if (!result.success) {
+          const savedShareValues = getShareFormValues(savedAccessLevelRef.current);
+          setValue('isSchoolShared', savedShareValues.isSchoolShared);
+          setValue('isCommunityShared', savedShareValues.isCommunityShared);
           toast.error(tToast('edit-toast-error'));
           return;
         }
@@ -461,6 +476,7 @@ export function LearningScenarioEdit({
             <CustomShareSection
               control={control}
               schoolSharingName="isSchoolShared"
+              communitySharingName="isCommunityShared"
               linkSharingName="hasLinkAccess"
               linkToShare={`/learning-scenarios/${learningScenario.id}`}
               onShareChange={handleSharingChange}

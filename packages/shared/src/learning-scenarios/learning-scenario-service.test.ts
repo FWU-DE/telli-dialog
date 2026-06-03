@@ -20,6 +20,7 @@ import {
 import {
   dbGetAllAccessibleLearningScenarios,
   dbGetAllLearningScenariosByUser,
+  dbGetCommunityLearningScenarios,
   dbCreateLearningScenarioShare,
   dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
@@ -41,6 +42,7 @@ import { duplicateLearningScenario } from './learning-scenario-admin-service';
 vi.mock('../db/functions/learning-scenario', () => ({
   dbGetAllAccessibleLearningScenarios: vi.fn(),
   dbGetAllLearningScenariosByUser: vi.fn(),
+  dbGetCommunityLearningScenarios: vi.fn(),
   dbCreateLearningScenarioShare: vi.fn(),
   dbGetGlobalLearningScenarios: vi.fn(),
   dbGetLearningScenarioById: vi.fn(),
@@ -776,6 +778,10 @@ describe('learning-scenario-service', () => {
 
     it.each([
       {
+        accessLevel: 'community' as const,
+        expectedMock: dbGetCommunityLearningScenarios,
+      },
+      {
         accessLevel: 'global' as const,
         expectedMock: dbGetGlobalLearningScenarios,
       },
@@ -869,7 +875,6 @@ describe('learning-scenario-service', () => {
     it.each([
       { filter: 'mine' as const, expectedMock: dbGetAllLearningScenariosByUser },
       { filter: 'official' as const, expectedMock: dbGetGlobalLearningScenarios },
-      { filter: 'school' as const, expectedMock: dbGetLearningScenariosByAssociatedSchools },
     ])('routes filter=$filter to the correct db function', async ({ filter, expectedMock }) => {
       (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(scenarios as never);
 
@@ -877,6 +882,34 @@ describe('learning-scenario-service', () => {
 
       expect(result).toEqual(scenarios);
       expect(expectedMock).toHaveBeenCalledWith({ user });
+    });
+
+    it('routes filter=community to dbGetCommunityLearningScenarios', async () => {
+      (
+        dbGetCommunityLearningScenarios as MockedFunction<typeof dbGetCommunityLearningScenarios>
+      ).mockResolvedValue(scenarios as never);
+
+      const result = await getLearningScenariosByOverviewFilter({ filter: 'community', user });
+
+      expect(result).toEqual(scenarios);
+      expect(dbGetCommunityLearningScenarios).toHaveBeenCalledWith({ user });
+    });
+
+    it('routes filter=school to the school and community db functions', async () => {
+      (
+        dbGetLearningScenariosByAssociatedSchools as MockedFunction<
+          typeof dbGetLearningScenariosByAssociatedSchools
+        >
+      ).mockResolvedValue([scenarios[0]] as never);
+      (
+        dbGetCommunityLearningScenarios as MockedFunction<typeof dbGetCommunityLearningScenarios>
+      ).mockResolvedValue([scenarios[1]] as never);
+
+      const result = await getLearningScenariosByOverviewFilter({ filter: 'school', user });
+
+      expect(result).toEqual([scenarios[0], scenarios[1]]);
+      expect(dbGetLearningScenariosByAssociatedSchools).toHaveBeenCalledWith({ user });
+      expect(dbGetCommunityLearningScenarios).toHaveBeenCalledWith({ user });
     });
 
     it('returns an empty list for unsupported overview filters', async () => {

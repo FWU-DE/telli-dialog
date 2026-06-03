@@ -19,6 +19,7 @@ import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/err
 import { generateUUID } from '@shared/utils/uuid';
 import {
   dbGetAssistantById,
+  dbGetCommunityGpts,
   dbGetGlobalGpts,
   dbGetGptsByAssociatedSchools,
   dbGetGptsByUser,
@@ -40,6 +41,7 @@ import {
 
 vi.mock('../db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
+  dbGetCommunityGpts: vi.fn(),
   dbGetGlobalGpts: vi.fn(),
   dbGetGptsByAssociatedSchools: vi.fn(),
   dbGetGptsByUser: vi.fn(),
@@ -929,6 +931,11 @@ describe('assistant-service', () => {
 
     it.each([
       {
+        accessLevel: 'community' as const,
+        expectedMock: dbGetCommunityGpts,
+        expectedArgs: [],
+      },
+      {
         accessLevel: 'global' as const,
         expectedMock: dbGetGlobalGpts,
       },
@@ -942,7 +949,7 @@ describe('assistant-service', () => {
       },
     ])(
       'routes accessLevel=$accessLevel to the correct db function',
-      async ({ accessLevel, expectedMock }) => {
+      async ({ accessLevel, expectedMock, expectedArgs = [{ user }] }) => {
         (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(
           assistants as never,
         );
@@ -950,7 +957,7 @@ describe('assistant-service', () => {
         const result = await getAssistantByAccessLevel({ accessLevel, user });
 
         expect(result).toEqual(assistants);
-        expect(expectedMock).toHaveBeenCalledWith({ user });
+        expect(expectedMock).toHaveBeenCalledWith(...expectedArgs);
       },
     );
 
@@ -980,6 +987,14 @@ describe('assistant-service', () => {
         suspended: false,
         ownerSchoolIds: user.schoolIds,
       } as AssistantSelectModel;
+      const communityAssistant = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'community',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: [],
+      } as unknown as AssistantSelectModel;
       const officialAssistant = {
         id: generateUUID(),
         userId: generateUUID(),
@@ -995,13 +1010,21 @@ describe('assistant-service', () => {
       (
         dbGetGptsByAssociatedSchools as MockedFunction<typeof dbGetGptsByAssociatedSchools>
       ).mockResolvedValue([schoolAssistant] as never);
+      (dbGetCommunityGpts as MockedFunction<typeof dbGetCommunityGpts>).mockResolvedValue([
+        communityAssistant,
+      ] as never);
       (dbGetGlobalGpts as MockedFunction<typeof dbGetGlobalGpts>).mockResolvedValue([
         officialAssistant,
       ] as never);
 
       const result = await getAssistantsByOverviewFilter({ filter: 'all', user });
 
-      expect(result).toEqual([privateAssistant, schoolAssistant, officialAssistant]);
+      expect(result).toEqual([
+        privateAssistant,
+        schoolAssistant,
+        communityAssistant,
+        officialAssistant,
+      ]);
     });
 
     it('filters suspended assistants for non-owners', async () => {
@@ -1048,10 +1071,35 @@ describe('assistant-service', () => {
       expect(result).toEqual([ownSuspendedAssistant]);
     });
 
+    it('routes filter=community to dbGetCommunityGpts', async () => {
+      (dbGetCommunityGpts as MockedFunction<typeof dbGetCommunityGpts>).mockResolvedValue(
+        assistants as never,
+      );
+
+      const result = await getAssistantsByOverviewFilter({ filter: 'community', user });
+
+      expect(result).toEqual(assistants);
+      expect(dbGetCommunityGpts).toHaveBeenCalledWith();
+    });
+
+    it('routes filter=school to the school and community db functions', async () => {
+      (
+        dbGetGptsByAssociatedSchools as MockedFunction<typeof dbGetGptsByAssociatedSchools>
+      ).mockResolvedValue([assistants[0]] as never);
+      (dbGetCommunityGpts as MockedFunction<typeof dbGetCommunityGpts>).mockResolvedValue([
+        assistants[1],
+      ] as never);
+
+      const result = await getAssistantsByOverviewFilter({ filter: 'school', user });
+
+      expect(result).toEqual([assistants[0], assistants[1]]);
+      expect(dbGetGptsByAssociatedSchools).toHaveBeenCalledWith({ user });
+      expect(dbGetCommunityGpts).toHaveBeenCalledWith();
+    });
+
     it.each([
       { filter: 'mine' as const, expectedMock: dbGetGptsByUser },
       { filter: 'official' as const, expectedMock: dbGetGlobalGpts },
-      { filter: 'school' as const, expectedMock: dbGetGptsByAssociatedSchools },
     ])('routes filter=$filter to the correct db function', async ({ filter, expectedMock }) => {
       (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(assistants as never);
 

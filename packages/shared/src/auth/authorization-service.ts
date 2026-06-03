@@ -19,6 +19,8 @@ export function verifyReadAccess<T extends AuthorizedItem>({
 }) {
   // allow access if shared by link
   if (item.hasLinkAccess && !item.suspended) return;
+  // allow access if shared with the community
+  if (item.accessLevel === 'community' && !item.suspended) return;
   // allow access if shared globally
   if (item.accessLevel === 'global' && !item.suspended) return;
   // allow if owner (disregarding the access-level)
