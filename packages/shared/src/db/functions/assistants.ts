@@ -173,7 +173,7 @@ export async function dbGetAssistantByIdOrAssociatedSchool({
           )
         : undefined,
       and(eq(assistantTable.id, assistantId), eq(assistantTable.accessLevel, 'community')),
-      eq(assistantTable.accessLevel, 'global'),
+      and(eq(assistantTable.id, assistantId), eq(assistantTable.accessLevel, 'global')),
     ),
   );
 
