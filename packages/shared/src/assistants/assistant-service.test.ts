@@ -1083,16 +1083,33 @@ describe('assistant-service', () => {
     });
 
     it('routes filter=school to the school and community db functions', async () => {
+      const schoolAssistant = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'school',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as AssistantSelectModel;
+      const communityAssistant = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'community',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: [],
+      } as unknown as AssistantSelectModel;
+
       (
         dbGetGptsByAssociatedSchools as MockedFunction<typeof dbGetGptsByAssociatedSchools>
-      ).mockResolvedValue([assistants[0]] as never);
+      ).mockResolvedValue([schoolAssistant] as never);
       (dbGetCommunityGpts as MockedFunction<typeof dbGetCommunityGpts>).mockResolvedValue([
-        assistants[1],
+        communityAssistant,
       ] as never);
 
       const result = await getAssistantsByOverviewFilter({ filter: 'school', user });
 
-      expect(result).toEqual([assistants[0], assistants[1]]);
+      expect(result).toEqual([schoolAssistant, communityAssistant]);
       expect(dbGetGptsByAssociatedSchools).toHaveBeenCalledWith({ user });
       expect(dbGetCommunityGpts).toHaveBeenCalledWith();
     });

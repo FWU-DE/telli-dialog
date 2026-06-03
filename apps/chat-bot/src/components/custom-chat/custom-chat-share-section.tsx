@@ -12,8 +12,8 @@ import { Button } from '@ui/components/button';
 
 type CustomShareSectionProps<T extends FieldValues> = {
   control: Control<T>;
-  schoolSharingName?: Path<T>;
-  communitySharingName?: Path<T>;
+  schoolSharingName: Path<T>;
+  communitySharingName: Path<T>;
   linkSharingName: Path<T>;
   linkToShare: string;
   onShareChange?: (change: { name: Path<T>; checked: boolean }) => void;

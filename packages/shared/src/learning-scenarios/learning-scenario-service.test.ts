@@ -896,18 +896,37 @@ describe('learning-scenario-service', () => {
     });
 
     it('routes filter=school to the school and community db functions', async () => {
+      const schoolScenario = {
+        id: generateUUID(),
+        name: 'School scenario',
+        userId: generateUUID(),
+        accessLevel: 'school',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as unknown as LearningScenarioSelectModel;
+      const communityScenario = {
+        id: generateUUID(),
+        name: 'Community scenario',
+        userId: generateUUID(),
+        accessLevel: 'community',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: [],
+      } as unknown as LearningScenarioSelectModel;
+
       (
         dbGetLearningScenariosByAssociatedSchools as MockedFunction<
           typeof dbGetLearningScenariosByAssociatedSchools
         >
-      ).mockResolvedValue([scenarios[0]] as never);
+      ).mockResolvedValue([schoolScenario] as never);
       (
         dbGetCommunityLearningScenarios as MockedFunction<typeof dbGetCommunityLearningScenarios>
-      ).mockResolvedValue([scenarios[1]] as never);
+      ).mockResolvedValue([communityScenario] as never);
 
       const result = await getLearningScenariosByOverviewFilter({ filter: 'school', user });
 
-      expect(result).toEqual([scenarios[0], scenarios[1]]);
+      expect(result).toEqual([schoolScenario, communityScenario]);
       expect(dbGetLearningScenariosByAssociatedSchools).toHaveBeenCalledWith({ user });
       expect(dbGetCommunityLearningScenarios).toHaveBeenCalledWith({ user });
     });

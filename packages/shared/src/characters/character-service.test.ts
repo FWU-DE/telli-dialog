@@ -973,18 +973,35 @@ describe('character-service', () => {
     });
 
     it('routes filter=school to the school and community db functions', async () => {
+      const schoolCharacter = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'school',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as unknown as CharacterSelectModel;
+      const communityCharacter = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'community',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: [],
+      } as unknown as CharacterSelectModel;
+
       (
         dbGetCharactersByAssociatedSchools as MockedFunction<
           typeof dbGetCharactersByAssociatedSchools
         >
-      ).mockResolvedValue([characters[0]] as never);
+      ).mockResolvedValue([schoolCharacter] as never);
       (
         dbGetCommunityCharacters as MockedFunction<typeof dbGetCommunityCharacters>
-      ).mockResolvedValue([characters[1]] as never);
+      ).mockResolvedValue([communityCharacter] as never);
 
       const result = await getCharactersByOverviewFilter({ filter: 'school', user });
 
-      expect(result).toEqual([characters[0], characters[1]]);
+      expect(result).toEqual([schoolCharacter, communityCharacter]);
       expect(dbGetCharactersByAssociatedSchools).toHaveBeenCalledWith({ user });
       expect(dbGetCommunityCharacters).toHaveBeenCalledWith({ user });
     });
