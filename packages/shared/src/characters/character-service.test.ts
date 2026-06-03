@@ -23,6 +23,7 @@ import {
   dbGetCharacterById,
   dbGetCharacterByIdOptionalShareData,
   dbGetCharacterByIdWithShareData,
+  dbGetCommunityCharacters,
   dbGetCharactersByAssociatedSchools,
   dbGetCharactersByUser,
   dbGetGlobalCharacters,
@@ -48,6 +49,7 @@ vi.mock('../db/functions/character', () => ({
   dbGetCharacterByIdAndUserId: vi.fn(),
   dbGetCharacterByIdOptionalShareData: vi.fn(),
   dbGetCharacterByIdWithShareData: vi.fn(),
+  dbGetCommunityCharacters: vi.fn(),
   dbDeleteCharacterByIdAndUser: vi.fn(),
   dbGetCharactersByAssociatedSchools: vi.fn(),
   dbGetCharactersByUser: vi.fn(),
@@ -898,20 +900,28 @@ describe('character-service', () => {
 
     it.each([
       {
+        accessLevel: 'community' as const,
+        expectedMock: dbGetCommunityCharacters,
+        expectedArgs: [{ user }],
+      },
+      {
         accessLevel: 'global' as const,
         expectedMock: dbGetGlobalCharacters,
+        expectedArgs: [{ user }],
       },
       {
         accessLevel: 'school' as const,
         expectedMock: dbGetCharactersByAssociatedSchools,
+        expectedArgs: [{ user }],
       },
       {
         accessLevel: 'private' as const,
         expectedMock: dbGetCharactersByUser,
+        expectedArgs: [{ user }],
       },
     ])(
       'routes accessLevel=$accessLevel to the correct db function',
-      async ({ accessLevel, expectedMock }) => {
+      async ({ accessLevel, expectedMock, expectedArgs }) => {
         (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(
           characters as never,
         );
@@ -919,7 +929,7 @@ describe('character-service', () => {
         const result = await getCharacterByAccessLevel({ accessLevel, user });
 
         expect(result).toEqual(characters);
-        expect(expectedMock).toHaveBeenCalledWith({ user });
+        expect(expectedMock).toHaveBeenCalledWith(...expectedArgs);
       },
     );
 
@@ -944,6 +954,7 @@ describe('character-service', () => {
     });
 
     it.each([
+      { filter: 'community' as const, expectedMock: dbGetCommunityCharacters },
       { filter: 'mine' as const, expectedMock: dbGetAllCharactersByUser },
       { filter: 'official' as const, expectedMock: dbGetGlobalCharacters },
       { filter: 'school' as const, expectedMock: dbGetCharactersByAssociatedSchools },

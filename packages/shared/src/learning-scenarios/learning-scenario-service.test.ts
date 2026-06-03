@@ -20,6 +20,7 @@ import {
 import {
   dbGetAllAccessibleLearningScenarios,
   dbGetAllLearningScenariosByUser,
+  dbGetCommunityLearningScenarios,
   dbCreateLearningScenarioShare,
   dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
@@ -41,6 +42,7 @@ import { duplicateLearningScenario } from './learning-scenario-admin-service';
 vi.mock('../db/functions/learning-scenario', () => ({
   dbGetAllAccessibleLearningScenarios: vi.fn(),
   dbGetAllLearningScenariosByUser: vi.fn(),
+  dbGetCommunityLearningScenarios: vi.fn(),
   dbCreateLearningScenarioShare: vi.fn(),
   dbGetGlobalLearningScenarios: vi.fn(),
   dbGetLearningScenarioById: vi.fn(),
@@ -776,26 +778,34 @@ describe('learning-scenario-service', () => {
 
     it.each([
       {
+        accessLevel: 'community' as const,
+        expectedMock: dbGetCommunityLearningScenarios,
+        expectedArgs: [{ user }],
+      },
+      {
         accessLevel: 'global' as const,
         expectedMock: dbGetGlobalLearningScenarios,
+        expectedArgs: [{ user }],
       },
       {
         accessLevel: 'school' as const,
         expectedMock: dbGetLearningScenariosByAssociatedSchools,
+        expectedArgs: [{ user }],
       },
       {
         accessLevel: 'private' as const,
         expectedMock: dbGetLearningScenariosByUser,
+        expectedArgs: [{ user }],
       },
     ])(
       'routes accessLevel=$accessLevel to the correct db function',
-      async ({ accessLevel, expectedMock }) => {
+      async ({ accessLevel, expectedMock, expectedArgs }) => {
         (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(scenarios as never);
 
         const result = await getLearningScenariosByAccessLevel({ accessLevel, user });
 
         expect(result).toEqual(scenarios);
-        expect(expectedMock).toHaveBeenCalledWith({ user });
+        expect(expectedMock).toHaveBeenCalledWith(...expectedArgs);
       },
     );
 
@@ -867,6 +877,7 @@ describe('learning-scenario-service', () => {
     });
 
     it.each([
+      { filter: 'community' as const, expectedMock: dbGetCommunityLearningScenarios },
       { filter: 'mine' as const, expectedMock: dbGetAllLearningScenariosByUser },
       { filter: 'official' as const, expectedMock: dbGetGlobalLearningScenarios },
       { filter: 'school' as const, expectedMock: dbGetLearningScenariosByAssociatedSchools },

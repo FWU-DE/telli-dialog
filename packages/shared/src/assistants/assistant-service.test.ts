@@ -20,6 +20,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import {
   dbGetAllAccessibleAssistants,
   dbGetAssistantById,
+  dbGetCommunityGpts,
   dbGetGlobalGpts,
   dbGetGptsByAssociatedSchools,
   dbGetGptsByUser,
@@ -932,20 +933,28 @@ describe('assistant-service', () => {
 
     it.each([
       {
+        accessLevel: 'community' as const,
+        expectedMock: dbGetCommunityGpts,
+        expectedArgs: [],
+      },
+      {
         accessLevel: 'global' as const,
         expectedMock: dbGetGlobalGpts,
+        expectedArgs: [{ user }],
       },
       {
         accessLevel: 'school' as const,
         expectedMock: dbGetGptsByAssociatedSchools,
+        expectedArgs: [{ user }],
       },
       {
         accessLevel: 'private' as const,
         expectedMock: dbGetGptsByUser,
+        expectedArgs: [{ user }],
       },
     ])(
       'routes accessLevel=$accessLevel to the correct db function',
-      async ({ accessLevel, expectedMock }) => {
+      async ({ accessLevel, expectedMock, expectedArgs }) => {
         (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(
           assistants as never,
         );
@@ -953,7 +962,7 @@ describe('assistant-service', () => {
         const result = await getAssistantByAccessLevel({ accessLevel, user });
 
         expect(result).toEqual(assistants);
-        expect(expectedMock).toHaveBeenCalledWith({ user });
+        expect(expectedMock).toHaveBeenCalledWith(...expectedArgs);
       },
     );
 
@@ -1064,18 +1073,24 @@ describe('assistant-service', () => {
     });
 
     it.each([
+      { filter: 'community' as const, expectedMock: dbGetCommunityGpts, expectedArgs: [] },
       { filter: 'all' as const, expectedMock: dbGetAllAccessibleAssistants },
       { filter: 'mine' as const, expectedMock: dbGetGptsByUser },
       { filter: 'official' as const, expectedMock: dbGetGlobalGpts },
       { filter: 'school' as const, expectedMock: dbGetGptsByAssociatedSchools },
-    ])('routes filter=$filter to the correct db function', async ({ filter, expectedMock }) => {
-      (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(assistants as never);
+    ])(
+      'routes filter=$filter to the correct db function',
+      async ({ filter, expectedMock, expectedArgs = [{ user }] }) => {
+        (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(
+          assistants as never,
+        );
 
-      const result = await getAssistantsByOverviewFilter({ filter, user });
+        const result = await getAssistantsByOverviewFilter({ filter, user });
 
-      expect(result).toEqual(assistants);
-      expect(expectedMock).toHaveBeenCalledWith({ user });
-    });
+        expect(result).toEqual(assistants);
+        expect(expectedMock).toHaveBeenCalledWith(...expectedArgs);
+      },
+    );
 
     it('returns an empty list for unsupported overview filters', async () => {
       const result = await getAssistantsByOverviewFilter({
