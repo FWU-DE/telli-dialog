@@ -73,8 +73,12 @@ export function runAgentLoop({
           }
         }
 
-        // Tool-calling iteration: discard iterationText (intermediate reasoning)
+        // Tool-calling iteration
         fullText += iterationText;
+
+        if (pendingToolCalls.length === 0) {
+          break;
+        }
 
         // Append the assistant message with tool calls
         const assistantMessage: AiCoreMessage = {
