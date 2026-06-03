@@ -5,6 +5,8 @@ import { getMaybeUser } from '@/auth/utils';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { dbGetFederalStateByIdWithResult } from '@shared/db/functions/federal-state';
 
+export const dynamic = 'force-dynamic';
+
 export const size = {
   width: 32,
   height: 32,
@@ -12,9 +14,14 @@ export const size = {
 
 export const contentType = 'image/png';
 
+const responseHeaders = {
+  'Cache-Control': 'private, no-store',
+  Vary: 'Cookie',
+};
+
 // Read the SVG once and extract the `d` attributes so the icon route stays
 // in sync with the source asset without duplicating path data here.
-const logoDataPromise = readFile(path.join(process.cwd(), 'src/assets/logo-only.svg'), 'utf8').then(
+const logoDataPromise = readFile(path.join(process.cwd(), 'public/logo.svg'), 'utf8').then(
   (svg) => ({
     viewBox: svg.match(/viewBox="([^"]+)"/)?.[1] ?? '0 0 24 24',
     paths: [...svg.matchAll(/\bd="([^"]+)"/g)].map((m) => m[1] ?? ''),
@@ -51,6 +58,9 @@ export default async function Icon() {
     >
       <LogoIcon color={primaryColor} paths={paths} viewBox={viewBox} />
     </div>,
-    size,
+    {
+      ...size,
+      headers: responseHeaders,
+    },
   );
 }
