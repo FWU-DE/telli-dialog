@@ -7,14 +7,14 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AssistantSelectModel, FileModel, ShareTarget } from '@shared/db/schema';
+import { AssistantSelectModel, FileModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/card';
 import { FieldGroup } from '@ui/components/field';
 import { FormField } from '@ui/components/form/form-field';
 import { useRouter } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
@@ -48,10 +48,11 @@ import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
 import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
+import { getAccessLevelFromShareTargets } from '@shared/sharing/share-targets';
 import {
-  getAccessLevelFromShareTargets,
-  normalizeShareTargets,
-} from '@shared/sharing/share-targets';
+  getInitialShareTargets,
+  useCustomChatSharing,
+} from '@/components/hooks/use-custom-chat-sharing';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -106,36 +107,6 @@ function createAssistantFormValuesSchema(t: AssistantTranslator) {
 }
 
 export type AssistantFormValues = z.infer<ReturnType<typeof createAssistantFormValuesSchema>>;
-
-function buildShareTargets({
-  isSchoolShared,
-  isCommunityShared,
-}: Pick<AssistantFormValues, 'isSchoolShared' | 'isCommunityShared'>): ShareTarget[] {
-  return normalizeShareTargets([
-    ...(isSchoolShared ? (['school'] as const) : []),
-    ...(isCommunityShared ? (['community'] as const) : []),
-  ]);
-}
-
-function getInitialShareTargets(
-  assistant: Pick<AssistantSelectModel, 'accessLevel' | 'shareTargets'>,
-) {
-  const shareTargets = normalizeShareTargets(assistant.shareTargets);
-
-  if (shareTargets.length > 0) {
-    return shareTargets;
-  }
-
-  if (assistant.accessLevel === 'community') {
-    return ['community'];
-  }
-
-  if (assistant.accessLevel === 'school') {
-    return ['school'];
-  }
-
-  return [];
-}
 
 export function AssistantEdit({
   assistant,
@@ -213,12 +184,25 @@ export function AssistantEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
-  const savedShareTargetsRef = useRef(initialShareTargets.join(','));
-  const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
-  const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
-  const isCommunityShared = useWatch({ control, name: 'isCommunityShared' });
-  const showShareInfo =
-    (isSchoolShared || hasLinkAccess || isCommunityShared) && !assistant.suspended;
+  const { showShareInfo, handleSharingChange } = useCustomChatSharing<AssistantFormValues>({
+    control,
+    getValues,
+    flushAutoSave,
+    initialShareTargets,
+    suspended: assistant.suspended,
+    onUpdateShareTargets: async (shareTargets) => {
+      const result = await updateAssistantAccessLevelAction({
+        assistantId: assistant.id,
+        accessLevel: getAccessLevelFromShareTargets(shareTargets),
+        shareTargets,
+      });
+
+      return result.success;
+    },
+    onUpdateError: () => {
+      toast.error(t('toasts.edit-toast-error'));
+    },
+  });
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -304,34 +288,6 @@ export function AssistantEdit({
 
     return result;
   }
-
-  const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
-    if (name === 'isSchoolShared' || name === 'isCommunityShared') {
-      const currentValues = getValues();
-      const nextShareTargets = buildShareTargets({
-        isSchoolShared: name === 'isSchoolShared' ? checked : currentValues.isSchoolShared,
-        isCommunityShared: name === 'isCommunityShared' ? checked : currentValues.isCommunityShared,
-      });
-      const nextShareTargetsKey = nextShareTargets.join(',');
-
-      if (nextShareTargetsKey !== savedShareTargetsRef.current) {
-        const result = await updateAssistantAccessLevelAction({
-          assistantId: assistant.id,
-          accessLevel: getAccessLevelFromShareTargets(nextShareTargets),
-          shareTargets: nextShareTargets,
-        });
-
-        if (!result.success) {
-          toast.error(t('toasts.edit-toast-error'));
-          return;
-        }
-
-        savedShareTargetsRef.current = nextShareTargetsKey;
-      }
-    }
-
-    await flushAutoSave();
-  };
 
   const assistantActions = (
     <CustomChatActions>

@@ -3,7 +3,7 @@
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
-import { CharacterOptionalShareDataModel, FileModel, ShareTarget } from '@shared/db/schema';
+import { CharacterOptionalShareDataModel, FileModel } from '@shared/db/schema';
 import { WebSource } from '@shared/db/types';
 import { useTranslations } from 'next-intl';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
@@ -43,7 +43,7 @@ import {
 } from '@/configuration-text-inputs/const';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
@@ -56,10 +56,11 @@ import { createNewCharacterAction } from '../../actions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
+import { getAccessLevelFromShareTargets } from '@shared/sharing/share-targets';
 import {
-  getAccessLevelFromShareTargets,
-  normalizeShareTargets,
-} from '@shared/sharing/share-targets';
+  getInitialShareTargets,
+  useCustomChatSharing,
+} from '@/components/hooks/use-custom-chat-sharing';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -107,36 +108,6 @@ function createCharacterFormValuesSchema(t: CharacterTranslator) {
 }
 
 export type CharacterFormValues = z.infer<ReturnType<typeof createCharacterFormValuesSchema>>;
-
-function buildShareTargets({
-  isSchoolShared,
-  isCommunityShared,
-}: Pick<CharacterFormValues, 'isSchoolShared' | 'isCommunityShared'>): ShareTarget[] {
-  return normalizeShareTargets([
-    ...(isSchoolShared ? (['school'] as const) : []),
-    ...(isCommunityShared ? (['community'] as const) : []),
-  ]);
-}
-
-function getInitialShareTargets(
-  character: Pick<CharacterOptionalShareDataModel, 'accessLevel' | 'shareTargets'>,
-) {
-  const shareTargets = normalizeShareTargets(character.shareTargets);
-
-  if (shareTargets.length > 0) {
-    return shareTargets;
-  }
-
-  if (character.accessLevel === 'community') {
-    return ['community'];
-  }
-
-  if (character.accessLevel === 'school') {
-    return ['school'];
-  }
-
-  return [];
-}
 
 export function CharacterEdit({
   character,
@@ -212,12 +183,25 @@ export function CharacterEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
-  const savedShareTargetsRef = useRef(initialShareTargets.join(','));
-  const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
-  const isCommunityShared = useWatch({ control, name: 'isCommunityShared' });
-  const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
-  const showShareInfo =
-    (isSchoolShared || isCommunityShared || hasLinkAccess) && !character.suspended;
+  const { showShareInfo, handleSharingChange } = useCustomChatSharing<CharacterFormValues>({
+    control,
+    getValues,
+    flushAutoSave,
+    initialShareTargets,
+    suspended: character.suspended,
+    onUpdateShareTargets: async (shareTargets) => {
+      const result = await updateCharacterAccessLevelAction({
+        characterId: character.id,
+        accessLevel: getAccessLevelFromShareTargets(shareTargets),
+        shareTargets,
+      });
+
+      return result.success;
+    },
+    onUpdateError: () => {
+      toast.error(t('toasts.edit-toast-error'));
+    },
+  });
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -305,34 +289,6 @@ export function CharacterEdit({
 
     return result;
   }
-
-  const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
-    if (name === 'isSchoolShared' || name === 'isCommunityShared') {
-      const currentValues = getValues();
-      const nextShareTargets = buildShareTargets({
-        isSchoolShared: name === 'isSchoolShared' ? checked : currentValues.isSchoolShared,
-        isCommunityShared: name === 'isCommunityShared' ? checked : currentValues.isCommunityShared,
-      });
-      const nextShareTargetsKey = nextShareTargets.join(',');
-
-      if (nextShareTargetsKey !== savedShareTargetsRef.current) {
-        const result = await updateCharacterAccessLevelAction({
-          characterId: character.id,
-          accessLevel: getAccessLevelFromShareTargets(nextShareTargets),
-          shareTargets: nextShareTargets,
-        });
-
-        if (!result.success) {
-          toast.error(t('toasts.edit-toast-error'));
-          return;
-        }
-
-        savedShareTargetsRef.current = nextShareTargetsKey;
-      }
-    }
-
-    await flushAutoSave();
-  };
 
   const actionButtons = (
     <CustomChatActions>
