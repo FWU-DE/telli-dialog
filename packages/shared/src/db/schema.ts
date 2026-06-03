@@ -184,6 +184,7 @@ export const federalStateFeatureTogglesSchema = z.object({
   isSharedChatEnabled: z.boolean().default(true),
   isCustomGptEnabled: z.boolean().default(true),
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
+  isAgenticChatEnabled: z.boolean().optional(),
   isImageGenerationEnabled: z.boolean().optional(),
   isWebSearchEnabled: z.boolean().optional(),
 });

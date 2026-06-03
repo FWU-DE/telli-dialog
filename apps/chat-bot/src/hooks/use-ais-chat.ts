@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { readTextStream } from '@/utils/streaming';
+import { decodeChatStreamEvent, readTextStream } from '@/utils/streaming';
 import {
   deserializeError,
   toUIMessages,
@@ -118,6 +118,24 @@ export function useAisChat({
 
         // We need to handle the first chunk separately to avoid missing content
         let firstChunk = true;
+        let assistantWebSearchResults = result.webSearchResults ?? [];
+
+        const ensureAssistantMessage = () => {
+          if (!firstChunk) {
+            return;
+          }
+
+          const assistantMessage: ChatMessage = {
+            id: result.messageId,
+            role: 'assistant',
+            content: '',
+            webSearchResults: assistantWebSearchResults,
+          };
+
+          setMessages((prev) => [...prev, assistantMessage]);
+          setStatus('streaming');
+          firstChunk = false;
+        };
 
         // Stream the response using native ReadableStream
         for await (const content of readTextStream(result.stream)) {
@@ -126,19 +144,30 @@ export function useAisChat({
           }
 
           if (content !== undefined && content !== null) {
-            if (firstChunk) {
-              // Create assistant message placeholder
-              const assistantMessage: ChatMessage = {
-                id: result.messageId,
-                role: 'assistant',
-                content: '',
-                webSearchResults: result.webSearchResults,
-              };
+            const streamEvent = decodeChatStreamEvent(content);
 
-              setMessages((prev) => [...prev, assistantMessage]);
-              setStatus('streaming');
-              firstChunk = false;
+            if (streamEvent?.type === 'web_search_results') {
+              assistantWebSearchResults = streamEvent.webSearchResults;
+              ensureAssistantMessage();
+
+              setMessages((prev) => {
+                const updated = [...prev];
+                const lastIdx = updated.length - 1;
+
+                if (updated[lastIdx]?.role === 'assistant') {
+                  updated[lastIdx] = {
+                    ...updated[lastIdx]!,
+                    webSearchResults: assistantWebSearchResults,
+                  };
+                }
+
+                return updated;
+              });
+
+              continue;
             }
+
+            ensureAssistantMessage();
             setMessages((prev) => {
               const updated = [...prev];
               const lastIdx = updated.length - 1;

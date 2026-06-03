@@ -129,7 +129,7 @@ export async function constructChatSystemPrompt({
   federalState,
   chunks,
   errorUrls,
-  webSearchResults,
+  webSearchResults = [],
 }: {
   characterId?: string;
   assistantId?: string;
@@ -137,7 +137,7 @@ export async function constructChatSystemPrompt({
   federalState: ObscuredFederalState;
   chunks: RetrievedChunk[];
   errorUrls: string[];
-  webSearchResults: WebSearchResult[];
+  webSearchResults?: WebSearchResult[];
 }) {
   if (characterId !== undefined) {
     const character = await dbGetCharacterById({ characterId });

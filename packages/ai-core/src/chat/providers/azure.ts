@@ -1,8 +1,14 @@
 import { instrumentOpenAiClient } from '@sentry/core';
 import OpenAI from 'openai';
-import type { AiModel, TextGenerationFn, TextStreamFn, TokenUsage } from '../types';
+import type {
+  AgenticStreamFn,
+  AiModel,
+  TextGenerationFn,
+  TextStreamFn,
+  TokenUsage,
+} from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
-import { toOpenAIMessages, toOpenAIResponsesInput } from '../utils';
+import { toOpenAIMessages, toOpenAIResponsesInput, toOpenAITools } from '../utils';
 
 function createAzureClient(model: AiModel): {
   client: OpenAI;
@@ -119,6 +125,57 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
     if (onComplete) {
       await onComplete(usage);
     }
+  };
+}
+
+export function constructAzureResponsesAgenticStreamFn(model: AiModel): AgenticStreamFn {
+  const { client, deployment } = createAzureClient(model);
+
+  return async function* getAzureTextStream({ messages, maxTokens, tools }) {
+    const response = await client.responses.create(
+      {
+        model: deployment,
+        input: toOpenAIResponsesInput(messages),
+        stream: true,
+        max_output_tokens: maxTokens,
+        tools: toOpenAITools(tools),
+        ...model.additionalParameters,
+      },
+      {
+        path: `/openai/responses`,
+      },
+    );
+
+    let usage: TokenUsage | undefined;
+
+    for await (const event of response) {
+      if (event.type === 'response.output_text.delta') {
+        yield { type: 'text', delta: event.delta };
+      } else if (
+        event.type === 'response.output_item.done' &&
+        event.item.type === 'function_call' &&
+        event.item.id
+      ) {
+        yield {
+          type: 'tool_call',
+          call: { id: event.item.id, name: event.item.name, arguments: event.item.arguments },
+        };
+      }
+
+      if (event.type === 'response.completed' && event.response.usage) {
+        usage = {
+          completionTokens: event.response.usage.output_tokens,
+          promptTokens: event.response.usage.input_tokens,
+          totalTokens: event.response.usage.total_tokens,
+        };
+      }
+    }
+
+    if (!usage) {
+      throw new AiGenerationError('No usage data returned from Azure OpenAI Responses API stream');
+    }
+
+    yield { type: 'finish', usage };
   };
 }
 

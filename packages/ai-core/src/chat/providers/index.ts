@@ -3,11 +3,31 @@ import {
   constructAzureChatCompletionStreamFn,
   constructAzureResponsesGenerationFn,
   constructAzureResponsesStreamFn,
+  constructAzureResponsesAgenticStreamFn,
 } from './azure';
-import { constructGoogleTextGenerationFn, constructGoogleTextStreamFn } from './google';
-import { constructIonosTextGenerationFn, constructIonosTextStreamFn } from './ionos';
-import { constructOpenAITextGenerationFn, constructOpenAITextStreamFn } from './openai';
-import type { AiModel, GenerationOptions, TextGenerationFn, TextStreamFn } from '../types';
+import {
+  constructGoogleAgenticStreamFn,
+  constructGoogleTextGenerationFn,
+  constructGoogleTextStreamFn,
+} from './google';
+import {
+  constructIonosAgenticStreamFn,
+  constructIonosTextGenerationFn,
+  constructIonosTextStreamFn,
+} from './ionos';
+import {
+  constructOpenAIAgenticStreamFn,
+  constructOpenAITextGenerationFn,
+  constructOpenAITextStreamFn,
+} from './openai';
+import type {
+  AgenticStreamFn,
+  AiModel,
+  GenerationOptions,
+  StreamEvent,
+  TextGenerationFn,
+  TextStreamFn,
+} from '../types';
 import { ProviderConfigurationError } from '../../errors';
 
 function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerationFn | undefined {
@@ -51,6 +71,22 @@ function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | u
   return undefined;
 }
 
+function getAgenticStreamFnByModel({ model }: { model: AiModel }): AgenticStreamFn | undefined {
+  if (model.provider === 'azure') {
+    return constructAzureResponsesAgenticStreamFn(model);
+  }
+  if (model.provider === 'ionos') {
+    return constructIonosAgenticStreamFn(model);
+  }
+  if (model.provider === 'openai') {
+    return constructOpenAIAgenticStreamFn(model);
+  }
+  if (model.provider === 'google') {
+    return constructGoogleAgenticStreamFn(model);
+  }
+  return undefined; // TODO: Add support for other providers
+}
+
 export async function generateText(
   model: AiModel,
   messages: Parameters<TextGenerationFn>[0]['messages'],
@@ -70,7 +106,7 @@ export function generateTextStream(
   messages: Parameters<TextStreamFn>[0]['messages'],
   onComplete?: Parameters<TextStreamFn>[1],
   options?: GenerationOptions,
-) {
+): AsyncGenerator<string> {
   const streamFn = getTextStreamFnByModel({ model });
   if (!streamFn) {
     throw new ProviderConfigurationError(
@@ -78,4 +114,18 @@ export function generateTextStream(
     );
   }
   return streamFn({ messages, model: model.name, ...options }, onComplete);
+}
+
+export function generateAgenticStream(
+  model: AiModel,
+  messages: Parameters<AgenticStreamFn>[0]['messages'],
+  options?: GenerationOptions,
+): AsyncGenerator<StreamEvent> {
+  const streamFn = getAgenticStreamFnByModel({ model });
+  if (!streamFn) {
+    throw new ProviderConfigurationError(
+      `No agentic stream function found for provider: ${model.provider}`,
+    );
+  }
+  return streamFn({ messages, model: model.name, ...options });
 }

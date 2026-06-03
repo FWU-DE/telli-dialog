@@ -1,12 +1,21 @@
 import { billTextGenerationUsageToApiKey, isApiKeyOverQuota } from '../api-keys/billing';
-import { generateText, generateTextStream } from './providers';
+import { generateText, generateTextStream, generateAgenticStream } from './providers';
 import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
 import { getTextModelById, getTextModelByName } from '../models';
-import type { Message, TokenUsage, GenerationOptions } from './types';
+import type { Message, TokenUsage, GenerationOptions, StreamEvent } from './types';
 
 // Re-export types for external consumers
-export type { Message, TokenUsage, ChatAttachment, GenerationOptions } from './types';
+export type {
+  Message,
+  TokenUsage,
+  ChatAttachment,
+  GenerationOptions,
+  ToolCall,
+  ToolDefinition,
+  StreamEvent,
+  AgenticStreamFn,
+} from './types';
 
 /**
  * Generates text using the specified model and messages, with access control and billing.
@@ -163,4 +172,63 @@ export async function generateTextStreamByNameWithBilling(
   const model = await getTextModelByName(modelName, apiKeyId);
   const stream = generateTextStreamWithBilling(model.id, messages, apiKeyId, onComplete, options);
   return { stream, model };
+}
+
+/**
+ * Generates a stream of agentic events (text deltas, tool calls, finish) with access control and billing.
+ *
+ * The caller is responsible for executing tool calls and re-invoking this function
+ * with updated messages to implement the agent loop.
+ *
+ * @param modelId - The ID of the text model to use
+ * @param messages - The conversation messages including tool results
+ * @param apiKeyId - The API key for access control and billing
+ * @param onComplete - Called after the stream finishes with usage and cost
+ * @param options - Must include `tools` for the model to invoke
+ *
+ * @returns An async generator yielding StreamEvent objects
+ */
+export async function* generateAgenticStreamWithBilling(
+  modelId: string,
+  messages: Message[],
+  apiKeyId: string,
+  onComplete?: (result: { usage: TokenUsage; priceInCents: number }) => void | Promise<void>,
+  options?: GenerationOptions,
+): AsyncGenerator<StreamEvent> {
+  const model = await getTextModelById(modelId);
+
+  const [hasAccess, isOverQuota] = await Promise.all([
+    hasAccessToModel(apiKeyId, model),
+    isApiKeyOverQuota(apiKeyId),
+  ]);
+
+  if (!hasAccess) {
+    throw new InvalidModelError(`API key does not have access to the text model: ${model.name}`);
+  }
+
+  if (isOverQuota) {
+    throw new AiGenerationError(`API key has exceeded its monthly quota`);
+  }
+
+  try {
+    const stream = generateAgenticStream(model, messages, options);
+
+    for await (const event of stream) {
+      yield event;
+
+      if (event.type === 'finish') {
+        const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, event.usage);
+        if (onComplete) {
+          await onComplete({ usage: event.usage, priceInCents });
+        }
+      }
+    }
+  } catch (error) {
+    if (!(error instanceof AiGenerationError)) {
+      throw new AiGenerationError(
+        `Agentic stream failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+    throw error;
+  }
 }

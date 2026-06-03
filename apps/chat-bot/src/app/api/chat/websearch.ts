@@ -20,7 +20,7 @@ export function isWebSearchAvailableForFederalState(
   return (federalState.featureToggles?.isWebSearchEnabled ?? false) && !!env.linkupApiKey;
 }
 
-async function isWebSearchEnabled({
+export async function isWebSearchEnabled({
   user,
   characterId,
   assistantId,
@@ -160,7 +160,7 @@ Beispiele:
  * @param query The search query string.
  * @returns An array of text search results from the Linkup API.
  */
-async function searchWeb({
+export async function searchWeb({
   query,
   conversationId,
   userId,
@@ -182,6 +182,7 @@ async function searchWeb({
       query: query,
       depth: 'standard',
       outputType: 'searchResults',
+      maxResults: WEBSEARCH_RESULTS_LIMIT,
     });
 
     await recordWebSearchUsage({
@@ -193,12 +194,10 @@ async function searchWeb({
       return [];
     }
 
-    return (searchResults.results as WebSearchResult[])
-      .slice(0, WEBSEARCH_RESULTS_LIMIT)
-      .map((result) => ({
-        ...result,
-        content: result.content.slice(0, WEBSEARCH_RESULT_LENGTH_LIMIT),
-      }));
+    return (searchResults.results as WebSearchResult[]).map((result) => ({
+      ...result,
+      content: result.content.slice(0, WEBSEARCH_RESULT_LENGTH_LIMIT),
+    }));
   } catch (error) {
     logError('Error during web search', error);
     return [];

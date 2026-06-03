@@ -1,6 +1,6 @@
 import { getEncoding, type Tiktoken } from 'js-tiktoken';
 import type OpenAI from 'openai';
-import type { Message } from './types';
+import type { Message, ToolDefinition } from './types';
 
 /**
  * Converts internal Message format to OpenAI ChatCompletionMessageParam format.
@@ -10,8 +10,32 @@ export function toOpenAIMessages(
   messages: Message[],
 ): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
   return messages.map((message) => {
+    if (message.role === 'tool') {
+      if (!message.toolCallId) {
+        throw new Error('Tool messages require toolCallId');
+      }
+
+      return {
+        role: 'tool',
+        content: message.content,
+        tool_call_id: message.toolCallId,
+      } satisfies OpenAI.Chat.Completions.ChatCompletionToolMessageParam;
+    }
+
+    if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
+      return {
+        role: 'assistant',
+        content: message.content,
+        tool_calls: message.toolCalls.map((tc) => ({
+          id: tc.id,
+          type: 'function' as const,
+          function: { name: tc.name, arguments: tc.arguments },
+        })),
+      } satisfies OpenAI.Chat.Completions.ChatCompletionAssistantMessageParam;
+    }
+
     // If message has image attachments, convert to multimodal content format
-    if (message.attachments && message.attachments.length > 0 && message.role === 'user') {
+    if (message.role === 'user' && message.attachments && message.attachments.length > 0) {
       const contentParts: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
         { type: 'text', text: message.content },
         ...message.attachments
@@ -35,7 +59,7 @@ export function toOpenAIMessages(
     return {
       role: message.role,
       content: message.content,
-    } satisfies OpenAI.Chat.Completions.ChatCompletionMessageParam;
+    } as OpenAI.Chat.Completions.ChatCompletionMessageParam;
   });
 }
 
@@ -43,10 +67,32 @@ export function toOpenAIMessages(
  * Converts internal Message format to OpenAI Responses API input format.
  * Handles image attachments by converting them to multimodal content arrays.
  */
-export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.EasyInputMessage[] {
+export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.ResponseInputItem[] {
   return messages.map((message) => {
+    if (message.role === 'tool') {
+      return {
+        type: 'function_call_output',
+        id: message.toolCallId! + '_output',
+        call_id: message.toolCallId!,
+        output: message.content,
+        status: 'completed',
+      } satisfies OpenAI.Responses.ResponseFunctionToolCallOutputItem;
+    }
+    if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
+      // TODO: The Assistant might include messages in the future.
+      // TODO: This might include multiple tool calls in the future, we would need to handle that as well.
+      return {
+        type: 'function_call',
+        id: message.toolCalls[0]!.id + '_call',
+        status: 'completed',
+        arguments: message.toolCalls[0]!.arguments,
+        call_id: message.toolCalls[0]!.id,
+        name: message.toolCalls[0]!.name,
+      } satisfies OpenAI.Responses.ResponseFunctionToolCallItem;
+    }
+
     // If message has image attachments, convert to multimodal content format
-    if (message.attachments && message.attachments.length > 0 && message.role !== 'system') {
+    if (message.role !== 'system' && message.attachments && message.attachments.length > 0) {
       const contentParts: OpenAI.Responses.ResponseInputContent[] = [
         { type: 'input_text', text: message.content },
         ...message.attachments
@@ -62,16 +108,50 @@ export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.Ea
       ];
 
       return {
-        role: message.role,
+        role: message.role as 'user' | 'assistant' | 'system',
         content: contentParts,
       } satisfies OpenAI.Responses.EasyInputMessage;
     }
 
     // Simple text message
     return {
-      role: message.role,
+      role: message.role as 'user' | 'assistant' | 'system',
       content: message.content,
     } satisfies OpenAI.Responses.EasyInputMessage;
+  });
+}
+
+export function toOpenAITools(
+  tools: ToolDefinition[] | undefined,
+): OpenAI.Responses.Tool[] | undefined {
+  if (!tools) return undefined;
+
+  return tools.map((tool) => {
+    return {
+      type: 'function',
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parameters,
+      strict: true, // Always recommended: https://developers.openai.com/api/docs/guides/function-calling#strict-mode
+    } satisfies OpenAI.Responses.FunctionTool;
+  });
+}
+
+export function toOpenAIChatTools(
+  tools: ToolDefinition[] | undefined,
+): OpenAI.Chat.Completions.ChatCompletionTool[] | undefined {
+  if (!tools) return undefined;
+
+  return tools.map((tool) => {
+    return {
+      type: 'function',
+      function: {
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.parameters,
+        strict: true,
+      },
+    } satisfies OpenAI.Chat.Completions.ChatCompletionTool;
   });
 }
 

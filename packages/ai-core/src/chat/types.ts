@@ -9,15 +9,37 @@ export type ChatAttachment = {
   type: 'image';
 };
 
+/**
+ * A tool call requested by the assistant.
+ */
+export type ToolCall = {
+  id: string;
+  name: string;
+  arguments: string;
+};
+
+/**
+ * Defines a tool that can be invoked by the model.
+ */
+export type ToolDefinition = {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+};
+
 export type Message = {
-  role: 'system' | 'user' | 'assistant';
+  role: 'system' | 'user' | 'assistant' | 'tool';
   content: string;
   attachments?: ChatAttachment[];
+  toolCalls?: ToolCall[];
+  toolCallId?: string;
 };
 
 export type GenerationOptions = {
   maxTokens?: number;
   temperature?: number;
+  tools?: ToolDefinition[];
+  toolChoice?: 'auto' | 'none' | 'required';
 };
 
 export type TextGenerationArgs = {
@@ -36,12 +58,22 @@ export type TextResponse = {
   usage: TokenUsage;
 };
 
+/**
+ * Events yielded by the agentic stream.
+ */
+export type StreamEvent =
+  | { type: 'text'; delta: string }
+  | { type: 'tool_call'; call: ToolCall }
+  | { type: 'finish'; usage: TokenUsage };
+
 export type TextGenerationFn = (args: TextGenerationArgs) => Promise<TextResponse>;
 
 export type TextStreamFn = (
   args: TextGenerationArgs,
   onComplete?: (usage: TokenUsage) => void | Promise<void>,
 ) => AsyncGenerator<string>;
+
+export type AgenticStreamFn = (args: TextGenerationArgs) => AsyncGenerator<StreamEvent>;
 
 // TODO: Just an alias for now, since the llmModel table needs renaming (it has image and embedding models too)
 export type AiModel = LlmModel;

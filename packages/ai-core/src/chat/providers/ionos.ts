@@ -1,8 +1,15 @@
 import { instrumentOpenAiClient } from '@sentry/core';
 import OpenAI from 'openai';
-import type { AiModel, TextGenerationFn, TextStreamFn, TokenUsage } from '../types';
+import type {
+  AgenticStreamFn,
+  AiModel,
+  TextGenerationFn,
+  TextStreamFn,
+  TokenUsage,
+} from '../types';
 import { ProviderConfigurationError } from '../../errors';
 import { calculateCompletionUsage, toOpenAIMessages } from '../utils';
+import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
 
 function createIonosClient(model: AiModel): OpenAI {
   if (model.setting.provider !== 'ionos') {
@@ -97,5 +104,48 @@ export function constructIonosTextGenerationFn(model: AiModel): TextGenerationFn
         totalTokens: calculatedUsage.total_tokens,
       },
     };
+  };
+}
+
+export function constructIonosAgenticStreamFn(model: AiModel): AgenticStreamFn {
+  const client = createIonosClient(model);
+
+  return async function* getIonosAgenticTextStream({
+    messages,
+    model: modelName,
+    maxTokens,
+    temperature,
+    tools,
+    toolChoice,
+  }) {
+    yield* streamOpenAICompatibleAgenticResponse({
+      client,
+      messages,
+      modelName,
+      maxTokens,
+      temperature,
+      tools,
+      toolChoice,
+      getUsage: ({ content, toolCalls }) => {
+        const completionContent = [
+          content,
+          ...toolCalls.map((toolCall) =>
+            JSON.stringify({ name: toolCall.name, arguments: toolCall.arguments }),
+          ),
+        ].join('');
+
+        const calculatedUsage = calculateCompletionUsage({
+          messages,
+          modelMessage: { role: 'assistant', content: completionContent },
+        });
+
+        return {
+          completionTokens: calculatedUsage.completion_tokens,
+          promptTokens: calculatedUsage.prompt_tokens,
+          totalTokens: calculatedUsage.total_tokens,
+        };
+      },
+      providerName: 'IONOS',
+    });
   };
 }
