@@ -18,8 +18,8 @@ import {
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import {
+  dbGetAllAccessibleAssistants,
   dbGetAssistantById,
-  dbGetCommunityGpts,
   dbGetGlobalGpts,
   dbGetGptsByAssociatedSchools,
   dbGetGptsByUser,
@@ -40,6 +40,7 @@ import {
 } from '../templates/template-service';
 
 vi.mock('../db/functions/assistants', () => ({
+  dbGetAllAccessibleAssistants: vi.fn(),
   dbGetAssistantById: vi.fn(),
   dbGetCommunityGpts: vi.fn(),
   dbGetGlobalGpts: vi.fn(),
@@ -965,7 +966,7 @@ describe('assistant-service', () => {
       expect(result).toEqual([]);
     });
 
-    it('returns combined lists for filter=all', async () => {
+    it('returns all accessible assistants for filter=all', async () => {
       const privateAssistant = {
         id: generateUUID(),
         userId: user.id,
@@ -999,16 +1000,12 @@ describe('assistant-service', () => {
         ownerSchoolIds: [],
       } as unknown as AssistantSelectModel;
 
-      (dbGetGptsByUser as MockedFunction<typeof dbGetGptsByUser>).mockResolvedValue([
-        privateAssistant,
-      ] as never);
       (
-        dbGetGptsByAssociatedSchools as MockedFunction<typeof dbGetGptsByAssociatedSchools>
-      ).mockResolvedValue([schoolAssistant] as never);
-      (dbGetCommunityGpts as MockedFunction<typeof dbGetCommunityGpts>).mockResolvedValue([
+        dbGetAllAccessibleAssistants as MockedFunction<typeof dbGetAllAccessibleAssistants>
+      ).mockResolvedValue([
+        privateAssistant,
+        schoolAssistant,
         communityAssistant,
-      ] as never);
-      (dbGetGlobalGpts as MockedFunction<typeof dbGetGlobalGpts>).mockResolvedValue([
         officialAssistant,
       ] as never);
 
@@ -1067,6 +1064,7 @@ describe('assistant-service', () => {
     });
 
     it.each([
+      { filter: 'all' as const, expectedMock: dbGetAllAccessibleAssistants },
       { filter: 'mine' as const, expectedMock: dbGetGptsByUser },
       { filter: 'official' as const, expectedMock: dbGetGlobalGpts },
       { filter: 'school' as const, expectedMock: dbGetGptsByAssociatedSchools },
