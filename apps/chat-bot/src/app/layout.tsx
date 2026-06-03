@@ -14,7 +14,6 @@ import { buildPublicConfig } from '@shared/sentry/public-config';
 import { cn } from '@/utils/tailwind';
 import { getReadOnlySignedUrl } from '@shared/s3';
 import { SEVEN_DAYS } from '@shared/s3/const';
-import logoIcon from '@/assets/logo-only.svg?url';
 import appleTouchIcon from '@/assets/apple-touch-icon.png';
 
 const barlow = Barlow({
@@ -34,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: 'AIS.chat', template: '%s | AIS.chat' },
     description: 'Der datenschutzkonforme KI-Chatbot für die Schule',
     icons: {
-      icon: faviconPreSignedUrl ?? logoIcon.src,
+      icon: faviconPreSignedUrl ?? { url: '/icon', type: 'image/png' },
       apple: appleTouchIcon.src,
     },
   };
