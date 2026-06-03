@@ -1,12 +1,30 @@
-import { FinishReason, createPartFromText, createPartFromUri } from '@google/genai';
+import {
+  FinishReason,
+  FunctionCallingConfigMode,
+  createPartFromText,
+  createPartFromUri,
+} from '@google/genai';
+import { randomUUID } from 'node:crypto';
 import type {
+  FunctionDeclaration,
   GenerateContentParameters,
   GenerateContentResponse,
   GenerateContentResponsePromptFeedback,
   GenerateContentResponseUsageMetadata,
   Part,
+  Tool,
+  ToolConfig,
 } from '@google/genai';
-import type { AiModel, Message, TextGenerationFn, TextStreamFn, TokenUsage } from '../types';
+import type {
+  AgenticStreamFn,
+  AiModel,
+  Message,
+  TextGenerationFn,
+  TextStreamFn,
+  TokenUsage,
+  ToolCall,
+  ToolDefinition,
+} from '../types';
 import { AiGenerationError, ResponsibleAIError } from '../../errors';
 import { createGoogleClient, formatGoogleError } from '../../google-client';
 import { calculateCompletionUsage } from '../utils';
@@ -47,6 +65,8 @@ function buildGoogleGenerateContentParameters({
   model,
   maxTokens,
   temperature,
+  tools,
+  toolChoice,
 }: Parameters<TextGenerationFn>[0]): GenerateContentParameters {
   const contents = messages
     .filter((message) => message.role !== 'system')
@@ -61,12 +81,62 @@ function buildGoogleGenerateContentParameters({
     ...(systemInstruction.length > 0 ? { systemInstruction } : {}),
     ...(maxTokens !== undefined ? { maxOutputTokens: maxTokens } : {}),
     ...(temperature !== undefined ? { temperature } : {}),
+    ...buildGoogleToolConfig(tools, toolChoice),
   };
 
   return {
     model,
     contents: contents.length > 0 ? contents : [{ role: 'user', parts: [createPartFromText('')] }],
     ...(Object.keys(config).length > 0 ? { config } : {}),
+  };
+}
+
+function toGoogleFunctionDeclarations(
+  tools: ToolDefinition[] | undefined,
+): FunctionDeclaration[] | undefined {
+  if (!tools) {
+    return undefined;
+  }
+
+  return tools.map((tool) => ({
+    name: tool.name,
+    description: tool.description,
+    parameters: tool.parameters,
+  }));
+}
+
+function buildGoogleToolConfig(
+  tools: ToolDefinition[] | undefined,
+  toolChoice: 'auto' | 'none' | 'required' | undefined,
+): { tools?: Tool[]; toolConfig?: ToolConfig } {
+  const functionDeclarations = toGoogleFunctionDeclarations(tools);
+  const googleTools = functionDeclarations ? [{ functionDeclarations }] : undefined;
+
+  if (!toolChoice && !googleTools) {
+    return {};
+  }
+
+  const functionCallingConfig =
+    toolChoice === 'none'
+      ? { mode: FunctionCallingConfigMode.NONE }
+      : toolChoice === 'required'
+        ? {
+            mode: FunctionCallingConfigMode.ANY,
+            ...(functionDeclarations && functionDeclarations.length > 0
+              ? {
+                  allowedFunctionNames: functionDeclarations
+                    .map((tool) => tool.name)
+                    .filter(Boolean) as string[],
+                }
+              : {}),
+          }
+        : toolChoice === 'auto'
+          ? { mode: FunctionCallingConfigMode.AUTO }
+          : undefined;
+
+  return {
+    ...(googleTools ? { tools: googleTools } : {}),
+    ...(functionCallingConfig ? { toolConfig: { functionCallingConfig } } : {}),
   };
 }
 
@@ -235,6 +305,88 @@ export function constructGoogleTextGenerationFn(model: AiModel): TextGenerationF
       }
 
       throw new AiGenerationError(formatGoogleError('Google Vertex AI Chat', error));
+    }
+  };
+}
+
+export function constructGoogleAgenticStreamFn(model: AiModel): AgenticStreamFn {
+  const clientConfig = createGoogleClient(model);
+
+  return async function* getGoogleAgenticStream({
+    messages,
+    model: modelName,
+    maxTokens,
+    temperature,
+    tools,
+    toolChoice,
+  }) {
+    try {
+      const stream = await clientConfig.client.models.generateContentStream(
+        buildGoogleGenerateContentParameters({
+          messages,
+          model: modelName,
+          maxTokens,
+          temperature,
+          tools,
+          toolChoice,
+        }),
+      );
+
+      let text = '';
+      let usage: TokenUsage | undefined;
+      let functionCalls: NonNullable<GenerateContentResponse['functionCalls']> | undefined;
+
+      for await (const chunk of stream) {
+        assertGoogleResponseAllowed(chunk);
+
+        const chunkText = chunk.text ?? '';
+        if (chunkText !== '') {
+          text += chunkText;
+          yield { type: 'text', delta: chunkText };
+        }
+
+        if (chunk.functionCalls && chunk.functionCalls.length > 0) {
+          functionCalls = chunk.functionCalls;
+        }
+
+        if (chunk.usageMetadata) {
+          usage = toTokenUsage({
+            usageMetadata: chunk.usageMetadata,
+            messages,
+            text,
+          });
+        }
+      }
+
+      if (functionCalls) {
+        for (const functionCall of functionCalls) {
+          if (!functionCall.name) {
+            throw new AiGenerationError(
+              'Incomplete tool call returned from Google Vertex AI stream',
+            );
+          }
+
+          const id = functionCall.id ?? randomUUID();
+
+          yield {
+            type: 'tool_call',
+            call: {
+              id,
+              name: functionCall.name,
+              arguments: JSON.stringify(functionCall.args ?? {}),
+            } satisfies ToolCall,
+          };
+        }
+      }
+
+      const resolvedUsage = usage ?? toTokenUsage({ messages, text });
+      yield { type: 'finish', usage: resolvedUsage };
+    } catch (error) {
+      if (error instanceof ResponsibleAIError || error instanceof AiGenerationError) {
+        throw error;
+      }
+
+      throw new AiGenerationError(formatGoogleError('Google Vertex AI Agentic stream', error));
     }
   };
 }

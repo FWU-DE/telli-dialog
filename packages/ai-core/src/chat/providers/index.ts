@@ -5,7 +5,11 @@ import {
   constructAzureResponsesStreamFn,
   constructAzureResponsesAgenticStreamFn,
 } from './azure';
-import { constructGoogleTextGenerationFn, constructGoogleTextStreamFn } from './google';
+import {
+  constructGoogleAgenticStreamFn,
+  constructGoogleTextGenerationFn,
+  constructGoogleTextStreamFn,
+} from './google';
 import {
   constructIonosAgenticStreamFn,
   constructIonosTextGenerationFn,
@@ -76,6 +80,9 @@ function getAgenticStreamFnByModel({ model }: { model: AiModel }): AgenticStream
   }
   if (model.provider === 'openai') {
     return constructOpenAIAgenticStreamFn(model);
+  }
+  if (model.provider === 'google') {
+    return constructGoogleAgenticStreamFn(model);
   }
   return undefined; // TODO: Add support for other providers
 }
