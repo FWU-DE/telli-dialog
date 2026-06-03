@@ -23,14 +23,6 @@ function baseAssistantQuery() {
     .leftJoin(userTable, eq(assistantTable.userId, userTable.id));
 }
 
-export async function dbGetAssistantsByUserId({
-  user,
-}: {
-  user: Pick<UserModel, 'id'>;
-}): Promise<AssistantSelectModel[]> {
-  return baseAssistantQuery().where(eq(assistantTable.userId, user.id));
-}
-
 export async function dbGetAssistantById({
   assistantId,
 }: {
@@ -124,7 +116,7 @@ export async function dbGetGptsByUser({
   user: Pick<UserModel, 'id'>;
 }): Promise<AssistantSelectModel[]> {
   return baseAssistantQuery()
-    .where(and(eq(assistantTable.userId, user.id), eq(assistantTable.accessLevel, 'private')))
+    .where(eq(assistantTable.userId, user.id))
     .orderBy(desc(assistantTable.createdAt));
 }
 

@@ -6,7 +6,6 @@ import {
 import { db } from '@shared/db';
 import {
   dbGetAllAccessibleAssistants,
-  dbGetAssistantsByUserId,
   dbDeleteAssistantByIdAndUser,
   dbGetAssistantById,
   dbGetCommunityGpts,
@@ -199,7 +198,7 @@ export async function getAssistantsByOverviewFilter({
       break;
     }
     case 'mine':
-      assistants = await dbGetAssistantsByUserId({ user });
+      assistants = await dbGetGptsByUser({ user });
       break;
     case 'official':
       assistants = await dbGetGlobalGpts({ user });
