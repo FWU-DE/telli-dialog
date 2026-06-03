@@ -37,6 +37,16 @@ export default function CustomShareSection<T extends FieldValues>({
       name: linkSharingName,
     }),
   );
+  const isCommunitySharingEnabled = Boolean(
+    useWatch({
+      control,
+      name: communitySharingName,
+    }),
+  );
+  const isLinkSharingDisabled = Boolean(suspended || isCommunitySharingEnabled);
+  const isCopyLinkEnabled = Boolean(
+    !suspended && (isCommunitySharingEnabled || isLinkSharingEnabled),
+  );
 
   const federalState = useFederalState();
 
@@ -83,14 +93,14 @@ export default function CustomShareSection<T extends FieldValues>({
             control={control}
             label={t('link')}
             tooltip={t('link-tooltip')}
-            disabled={suspended}
+            disabled={isLinkSharingDisabled}
             onCheckedChange={(checked) => {
               onShareChange?.({ name: linkSharingName, checked });
             }}
           />
           <Button
             className="shrink-0"
-            disabled={!isLinkSharingEnabled || suspended}
+            disabled={!isCopyLinkEnabled}
             onClick={handleCopyLink}
             aria-label={t('copy-link')}
             type="button"
