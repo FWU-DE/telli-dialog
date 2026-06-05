@@ -4,7 +4,6 @@ import { SimpleInputDialog } from '@ui/components/simple-input-dialog';
 import { getTemplateTypeName } from '../../templateTypeName';
 import { EditIcon } from 'lucide-react';
 import { Button } from '@ui/components/button';
-import React from 'react';
 import { Input } from '@ui/components/input';
 import { updateAuthorOfTemplateAction } from './actions';
 import { toast } from 'sonner';
@@ -49,11 +48,11 @@ export function TemplateInfoCard({ template, onDataChanged }: TemplateInfoCardPr
           <dd>{template.isDeleted ? 'Ja' : 'Nein'}</dd>
           <dt>Autor:</dt>
           <dd className="flex items-center gap-2">
-            <span>{template.author ?? 'nicht gesetzt'}</span>
+            <span>{template.author !== '' ? template.author : 'nicht gesetzt'}</span>
             <SimpleInputDialog
               title="Name des Autors"
               description="Geben Sie den Namen des Autors ein."
-              initialValues={{ author: template.author ?? '' }}
+              initialValues={{ author: template.author }}
               content={(values, onChange) => (
                 <Input
                   type="text"
@@ -62,7 +61,7 @@ export function TemplateInfoCard({ template, onDataChanged }: TemplateInfoCardPr
                 />
               )}
               trigger={
-                <Button variant="ghost" size="icon-sm">
+                <Button variant="ghost" size="icon-sm" aria-label="Autor bearbeiten">
                   <EditIcon />
                 </Button>
               }
