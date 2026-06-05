@@ -26,6 +26,6 @@
   "devDependencies": {
     "@ais-chat/typescript-config": "workspace:*",
     "prettier": "3.8.3",
-    "turbo": "2.9.14"
+    "turbo": "2.9.16"
   }
 }
