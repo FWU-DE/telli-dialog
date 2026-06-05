@@ -519,6 +519,13 @@
       "when": 1780501042142,
       "tag": "0073_chilly_black_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1780649405358,
+      "tag": "0074_burly_iron_fist",
+      "breakpoints": true
     }
   ]
 }
