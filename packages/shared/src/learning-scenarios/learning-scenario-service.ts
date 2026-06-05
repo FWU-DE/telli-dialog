@@ -49,6 +49,7 @@ import {
   verifySuspensionState,
   verifyReadAccess,
   verifyWriteAccess,
+  filterCommunitySharedByAssociatedSchool,
   filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
@@ -142,7 +143,10 @@ export async function getLearningScenariosByOverviewFilter({
         dbGetLearningScenariosByAssociatedSchools({ user }),
         dbGetCommunityLearningScenarios({ user }),
       ]);
-      learningScenarios = [...schoolLearningScenarios, ...communityLearningScenarios];
+      learningScenarios = [
+        ...schoolLearningScenarios,
+        ...filterCommunitySharedByAssociatedSchool({ items: communityLearningScenarios, user }),
+      ];
       break;
     }
     default:

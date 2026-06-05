@@ -56,6 +56,7 @@ import {
   verifySuspensionState,
   verifyReadAccess,
   verifyWriteAccess,
+  filterCommunitySharedByAssociatedSchool,
   filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
 
@@ -608,7 +609,10 @@ export async function getCharactersByOverviewFilter({
         dbGetCharactersByAssociatedSchools({ user }),
         dbGetCommunityCharacters({ user }),
       ]);
-      characters = [...schoolCharacters, ...communityCharacters];
+      characters = [
+        ...schoolCharacters,
+        ...filterCommunitySharedByAssociatedSchool({ items: communityCharacters, user }),
+      ];
       break;
     }
     default:

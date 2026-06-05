@@ -80,6 +80,18 @@ export function filterReadableCustomChats<T extends AuthorizedItem>({
   });
 }
 
+export function filterCommunitySharedByAssociatedSchool<
+  T extends Pick<AuthorizedItem, 'ownerSchoolIds'>,
+>({ items, user }: { items: T[]; user: Pick<UserModel, 'schoolIds'> }) {
+  if (user.schoolIds.length === 0) {
+    return [];
+  }
+
+  return items.filter((item) =>
+    item.ownerSchoolIds?.some((schoolId) => user.schoolIds.includes(schoolId)),
+  );
+}
+
 export function requireTeacherRole(userRole: UserRole) {
   // allow teacher role
   if (userRole === 'teacher') return;

@@ -987,6 +987,14 @@ describe('character-service', () => {
         accessLevel: 'community',
         hasLinkAccess: false,
         suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as unknown as CharacterSelectModel;
+      const otherSchoolCommunityCharacter = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'community',
+        hasLinkAccess: false,
+        suspended: false,
         ownerSchoolIds: [],
       } as unknown as CharacterSelectModel;
 
@@ -997,7 +1005,7 @@ describe('character-service', () => {
       ).mockResolvedValue([schoolCharacter] as never);
       (
         dbGetCommunityCharacters as MockedFunction<typeof dbGetCommunityCharacters>
-      ).mockResolvedValue([communityCharacter] as never);
+      ).mockResolvedValue([communityCharacter, otherSchoolCommunityCharacter] as never);
 
       const result = await getCharactersByOverviewFilter({ filter: 'school', user });
 

@@ -912,6 +912,15 @@ describe('learning-scenario-service', () => {
         accessLevel: 'community',
         hasLinkAccess: false,
         suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as unknown as LearningScenarioSelectModel;
+      const otherSchoolCommunityScenario = {
+        id: generateUUID(),
+        name: 'Other school community scenario',
+        userId: generateUUID(),
+        accessLevel: 'community',
+        hasLinkAccess: false,
+        suspended: false,
         ownerSchoolIds: [],
       } as unknown as LearningScenarioSelectModel;
 
@@ -922,7 +931,7 @@ describe('learning-scenario-service', () => {
       ).mockResolvedValue([schoolScenario] as never);
       (
         dbGetCommunityLearningScenarios as MockedFunction<typeof dbGetCommunityLearningScenarios>
-      ).mockResolvedValue([communityScenario] as never);
+      ).mockResolvedValue([communityScenario, otherSchoolCommunityScenario] as never);
 
       const result = await getLearningScenariosByOverviewFilter({ filter: 'school', user });
 

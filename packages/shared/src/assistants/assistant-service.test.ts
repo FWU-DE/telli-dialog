@@ -1097,6 +1097,14 @@ describe('assistant-service', () => {
         accessLevel: 'community',
         hasLinkAccess: false,
         suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as unknown as AssistantSelectModel;
+      const otherSchoolCommunityAssistant = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'community',
+        hasLinkAccess: false,
+        suspended: false,
         ownerSchoolIds: [],
       } as unknown as AssistantSelectModel;
 
@@ -1105,6 +1113,7 @@ describe('assistant-service', () => {
       ).mockResolvedValue([schoolAssistant] as never);
       (dbGetCommunityGpts as MockedFunction<typeof dbGetCommunityGpts>).mockResolvedValue([
         communityAssistant,
+        otherSchoolCommunityAssistant,
       ] as never);
 
       const result = await getAssistantsByOverviewFilter({ filter: 'school', user });

@@ -47,6 +47,7 @@ import {
   verifySuspensionState,
   verifyReadAccess,
   verifyWriteAccess,
+  filterCommunitySharedByAssociatedSchool,
   filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
 
@@ -217,7 +218,10 @@ export async function getAssistantsByOverviewFilter({
         dbGetGptsByAssociatedSchools({ user }),
         dbGetCommunityGpts(),
       ]);
-      assistants = [...schoolAssistants, ...communityAssistants];
+      assistants = [
+        ...schoolAssistants,
+        ...filterCommunitySharedByAssociatedSchool({ items: communityAssistants, user }),
+      ];
       break;
     }
     default:
