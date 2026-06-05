@@ -18,6 +18,7 @@ import {
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import {
+  dbGetAssistantsByUserId,
   dbGetAssistantById,
   dbGetCommunityGpts,
   dbGetGlobalGpts,
@@ -40,6 +41,7 @@ import {
 } from '../templates/template-service';
 
 vi.mock('../db/functions/assistants', () => ({
+  dbGetAssistantsByUserId: vi.fn(),
   dbGetAssistantById: vi.fn(),
   dbGetCommunityGpts: vi.fn(),
   dbGetGlobalGpts: vi.fn(),
@@ -1056,19 +1058,48 @@ describe('assistant-service', () => {
       const ownSuspendedAssistant = {
         id: generateUUID(),
         userId: user.id,
-        accessLevel: 'private',
+        accessLevel: 'school',
         hasLinkAccess: false,
         suspended: true,
         ownerSchoolIds: user.schoolIds,
       } as AssistantSelectModel;
 
-      (dbGetGptsByUser as MockedFunction<typeof dbGetGptsByUser>).mockResolvedValue([
-        ownSuspendedAssistant,
-      ] as never);
+      (dbGetAssistantsByUserId as MockedFunction<typeof dbGetAssistantsByUserId>).mockResolvedValue(
+        [ownSuspendedAssistant] as never,
+      );
 
       const result = await getAssistantsByOverviewFilter({ filter: 'mine', user });
 
       expect(result).toEqual([ownSuspendedAssistant]);
+    });
+
+    it('keeps user-owned assistants in mine regardless of sharing level', async () => {
+      const privateAssistant = {
+        id: generateUUID(),
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as AssistantSelectModel;
+      const schoolAssistant = {
+        ...privateAssistant,
+        id: generateUUID(),
+        accessLevel: 'school',
+      } as AssistantSelectModel;
+      const communityAssistant = {
+        ...privateAssistant,
+        id: generateUUID(),
+        accessLevel: 'community',
+      } as AssistantSelectModel;
+
+      (dbGetAssistantsByUserId as MockedFunction<typeof dbGetAssistantsByUserId>).mockResolvedValue(
+        [privateAssistant, schoolAssistant, communityAssistant] as never,
+      );
+
+      const result = await getAssistantsByOverviewFilter({ filter: 'mine', user });
+
+      expect(result).toEqual([privateAssistant, schoolAssistant, communityAssistant]);
     });
 
     it('routes filter=community to dbGetCommunityGpts', async () => {
@@ -1124,7 +1155,7 @@ describe('assistant-service', () => {
     });
 
     it.each([
-      { filter: 'mine' as const, expectedMock: dbGetGptsByUser },
+      { filter: 'mine' as const, expectedMock: dbGetAssistantsByUserId },
       { filter: 'official' as const, expectedMock: dbGetGlobalGpts },
     ])('routes filter=$filter to the correct db function', async ({ filter, expectedMock }) => {
       (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(assistants as never);
