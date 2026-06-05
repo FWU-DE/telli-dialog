@@ -1,8 +1,7 @@
 import { TemplateModel, TemplateTypes } from '@shared/templates/template';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/card';
 import { SimpleInputDialog } from '@ui/components/simple-input-dialog';
 import { getTemplateTypeName } from '../../templateTypeName';
-import { Checkbox } from '@ui/components/checkbox';
 import { EditIcon } from 'lucide-react';
 import { Button } from '@ui/components/button';
 import React from 'react';
