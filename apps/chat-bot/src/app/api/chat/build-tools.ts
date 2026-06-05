@@ -7,6 +7,7 @@ import type { WebSearchResult } from '@shared/db/schema';
 type BuildToolsParams = {
   user: UserAndContext;
   characterId?: string;
+  learningScenarioId?: string;
   assistantId?: string;
   conversationId: string;
   onWebSearchResults?: (results: WebSearchResult[]) => void;
@@ -21,6 +22,7 @@ type BuildToolsResult = {
 export async function buildTools({
   user,
   characterId,
+  learningScenarioId,
   assistantId,
   conversationId,
   onWebSearchResults,
@@ -29,7 +31,12 @@ export async function buildTools({
   const toolHandlers: Record<string, ToolHandler> = {};
   const webSearchResults: WebSearchResult[] = [];
 
-  const webSearchEnabled = await isWebSearchEnabled({ user, characterId, assistantId });
+  const webSearchEnabled = await isWebSearchEnabled({
+    user,
+    characterId,
+    learningScenarioId,
+    assistantId,
+  });
 
   if (webSearchEnabled) {
     tools.push({

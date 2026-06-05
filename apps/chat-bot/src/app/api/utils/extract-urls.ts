@@ -1,5 +1,6 @@
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
+import { dbGetLearningScenarioByIdOptionalShareData } from '@shared/db/functions/learning-scenario';
 import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
@@ -15,6 +16,7 @@ function extractUniqueUrls(content: string): string[] {
 async function getAttachedLinks(
   assistantId: string | undefined,
   characterId: string | undefined,
+  learningScenarioId: string | undefined,
   userId: string,
 ): Promise<string[] | null> {
   if (assistantId) {
@@ -26,6 +28,16 @@ async function getAttachedLinks(
     if (user) {
       const character = await dbGetCharacterByIdWithShareData({ characterId, user });
       return character?.attachedLinks.filter((l) => l !== '') ?? [];
+    }
+  }
+  if (learningScenarioId) {
+    const user = await dbGetUserById({ userId });
+    if (user) {
+      const learningScenario = await dbGetLearningScenarioByIdOptionalShareData({
+        learningScenarioId,
+        user,
+      });
+      return learningScenario?.attachedLinks.filter((l) => l !== '') ?? [];
     }
   }
   return null;
@@ -46,13 +58,19 @@ async function getAttachedLinks(
 export async function extractUrls(
   assistantId: string | undefined,
   characterId: string | undefined,
+  learningScenarioId: string | undefined,
   user: UserAndContext,
   messages: ChatMessage[],
 ): Promise<string[]> {
-  const attachedLinks = await getAttachedLinks(assistantId, characterId, user.id);
+  const attachedLinks = await getAttachedLinks(
+    assistantId,
+    characterId,
+    learningScenarioId,
+    user.id,
+  );
 
   // For characters, just return their attached links
-  if (characterId) {
+  if (characterId || learningScenarioId) {
     return attachedLinks ?? [];
   }
 

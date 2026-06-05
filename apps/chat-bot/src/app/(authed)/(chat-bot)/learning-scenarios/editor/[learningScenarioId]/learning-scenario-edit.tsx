@@ -58,6 +58,7 @@ import {
   getAccessLevelFromShareForm,
   getShareFormValues,
 } from '@/components/custom-chat/access-level-sharing';
+import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
@@ -206,6 +207,12 @@ export function LearningScenarioEdit({
     onBeforePageLeave: saveBeforeLeave,
   });
 
+  const handleUseChat = () => {
+    guardNavigation(() => {
+      router.push(`/learning-scenarios/d/${learningScenario.id}/`);
+    });
+  };
+
   const handleDuplicateLearningScenario = async () => {
     const createResult = await createNewLearningScenarioFromTemplateAction({
       templateId: learningScenario.id,
@@ -318,6 +325,7 @@ export function LearningScenarioEdit({
 
   const actionButtons = (
     <CustomChatActions>
+      <CustomChatActionUse onClick={handleUseChat} />
       {!learningScenario.suspended && (
         <CustomChatActionDuplicate onClick={handleDuplicateLearningScenario} />
       )}

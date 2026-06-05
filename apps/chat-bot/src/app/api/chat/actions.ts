@@ -15,6 +15,7 @@ export async function sendChatMessageAction({
   messages,
   modelId,
   characterId,
+  learningScenarioId,
   assistantId,
   fileIds,
 }: {
@@ -22,6 +23,7 @@ export async function sendChatMessageAction({
   messages: ChatMessage[];
   modelId: string;
   characterId?: string;
+  learningScenarioId?: string;
   assistantId?: string;
   fileIds?: string[];
 }): Promise<SendMessageResult> {
@@ -45,6 +47,7 @@ export async function sendChatMessageAction({
       messages,
       modelId,
       characterId,
+      learningScenarioId,
       assistantId,
       fileIds,
       user: userAndContext,

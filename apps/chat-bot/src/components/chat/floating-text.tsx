@@ -15,6 +15,7 @@ export function FloatingText({
   dialogStarted,
   title,
   parentRef,
+  parentElement,
   maxWidth,
   maxHeight,
   minMargin,
@@ -22,7 +23,8 @@ export function FloatingText({
   learningContext: string;
   dialogStarted: boolean;
   title: string;
-  parentRef: React.RefObject<HTMLDivElement>;
+  parentRef?: React.RefObject<HTMLElement>;
+  parentElement?: HTMLElement | null;
   maxWidth: number;
   maxHeight: number;
   minMargin: number;
@@ -30,9 +32,14 @@ export function FloatingText({
   const { isAtLeast } = useBreakpoints();
   const [isMinimized, setIsMinimized] = React.useState(false);
   const [position, setPosition] = React.useState({ x: minMargin, y: minMargin });
+  const [parentViewportOffset, setParentViewportOffset] = React.useState({ left: 0, top: 0 });
   const [dragging, setDragging] = React.useState(false);
   const [rel, setRel] = React.useState<{ x: number; y: number } | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const getParentElement = React.useCallback(() => {
+    return parentElement ?? parentRef?.current ?? null;
+  }, [parentElement, parentRef]);
 
   // Helper to clamp position within parent bounds
   function clampPosition({
@@ -46,8 +53,9 @@ export function FloatingText({
     containerWidth: number;
     containerHeight: number;
   }) {
-    if (!parentRef.current) return { x, y };
-    const parentRect = parentRef.current.getBoundingClientRect();
+    const parent = getParentElement();
+    if (!parent) return { x, y };
+    const parentRect = parent.getBoundingClientRect();
     const newX = Math.max(minMargin, Math.min(x, parentRect.width - containerWidth - minMargin));
     const newY = Math.max(minMargin, Math.min(y, parentRect.height - containerHeight - minMargin));
     return { x: newX, y: newY };
@@ -55,25 +63,42 @@ export function FloatingText({
 
   React.useEffect(() => {
     // Set initial position within parent (top-left corner with minMargin)
-    if (parentRef.current && containerRef.current) {
+    if (getParentElement() && containerRef.current) {
       setPosition({
         x: minMargin,
         y: minMargin,
       });
     }
-  }, [minMargin, parentRef, containerRef]);
+  }, [minMargin, containerRef, getParentElement]);
+
+  React.useEffect(() => {
+    function updateParentOffset() {
+      const parent = getParentElement();
+      if (!parent) return;
+      const rect = parent.getBoundingClientRect();
+      setParentViewportOffset({ left: rect.left, top: rect.top });
+    }
+
+    updateParentOffset();
+    window.addEventListener('resize', updateParentOffset);
+
+    return () => {
+      window.removeEventListener('resize', updateParentOffset);
+    };
+  }, [getParentElement]);
 
   React.useEffect(() => {
     function onMouseMove(e: MouseEvent) {
       if (!dragging || !rel) return;
-      if (!containerRef.current || !parentRef.current) return;
+      const parent = getParentElement();
+      if (!containerRef.current || !parent) return;
 
       const container = containerRef.current;
       const containerRect = container.getBoundingClientRect();
       const containerWidth = containerRect.width;
       const containerHeight = containerRect.height;
 
-      const parentRect = parentRef.current.getBoundingClientRect();
+      const parentRect = parent.getBoundingClientRect();
       const newX = e.clientX - parentRect.left - rel.x;
       const newY = e.clientY - parentRect.top - rel.y;
 
@@ -88,7 +113,8 @@ export function FloatingText({
     // Touch event handlers
     function onTouchMove(e: TouchEvent) {
       if (!dragging || !rel) return;
-      if (!containerRef.current || !parentRef.current) return;
+      const parent = getParentElement();
+      if (!containerRef.current || !parent) return;
       if (e.touches.length !== 1) return;
       const touch = e.touches[0];
       if (!touch?.clientX || !touch?.clientY) return;
@@ -97,7 +123,7 @@ export function FloatingText({
       const containerWidth = containerRect.width;
       const containerHeight = containerRect.height;
 
-      const parentRect = parentRef.current.getBoundingClientRect();
+      const parentRect = parent.getBoundingClientRect();
       const newX = touch.clientX - parentRect.left - rel.x;
       const newY = touch.clientY - parentRect.top - rel.y;
 
@@ -127,7 +153,7 @@ export function FloatingText({
       window.removeEventListener('touchend', onTouchEnd);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dragging, rel, parentRef]);
+  }, [dragging, rel, getParentElement]);
 
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     if (containerRef.current) {
@@ -157,12 +183,12 @@ export function FloatingText({
       className={cn(
         'flex flex-col z-200 bg-secondary rounded-xl border select-none',
         // using string interpolations is extremely flaky, so we're using a static class name
-        isAtLeast.lg ? `absolute` : 'sticky',
+        isAtLeast.lg ? 'fixed' : 'sticky',
         dragging ? 'cursor-grabbing' : 'cursor-grab',
       )}
       style={{
-        left: position.x,
-        top: isAtLeast.lg ? position.y : 0,
+        left: isAtLeast.lg ? parentViewportOffset.left + position.x : position.x,
+        top: isAtLeast.lg ? parentViewportOffset.top + position.y : 0,
         maxWidth: isAtLeast.lg ? maxWidth : '100%',
         maxHeight: isAtLeast.lg ? maxHeight : '40%',
       }}
@@ -185,8 +211,9 @@ export function FloatingText({
           onClick={() => {
             setIsMinimized(!isMinimized);
             setTimeout(() => {
-              if (containerRef.current && parentRef.current) {
-                const parentRect = parentRef.current.getBoundingClientRect();
+              const parent = getParentElement();
+              if (containerRef.current && parent) {
+                const parentRect = parent.getBoundingClientRect();
                 const rect = containerRef.current.getBoundingClientRect();
                 const newPos = {
                   x: Math.max(
