@@ -83,6 +83,7 @@ export const mockConversationUsage = (): ConversationUsageTrackingSelectModel =>
 export const mockLearningScenario = (): LearningScenarioSelectModel => {
   return {
     id: generateUUID(),
+    author: '',
     name: generateRandomString(10),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -138,6 +139,7 @@ export const mockSharedCharacterChatUsage = (): SharedCharacterChatUsageTracking
 export const mockCharacter = (): CharacterSelectModel => {
   return {
     id: generateUUID(),
+    author: '',
     userId: generateUUID(),
     modelId: generateUUID(),
     name: generateRandomString(10),
