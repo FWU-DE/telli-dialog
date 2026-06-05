@@ -1,3 +1,4 @@
+import 'server-only';
 import { isDeepStrictEqual } from 'node:util';
 
 type WithUpdatedAt = {
