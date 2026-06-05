@@ -5,7 +5,7 @@ services:
   # Containers share this network namespace via network_mode: "service:keycloak"
   # This is required to access keycloak using the same URL from within the container and the browser
   keycloak:
-    image: quay.io/keycloak/keycloak:26.6.2
+    image: quay.io/keycloak/keycloak:26.6.3
     restart: unless-stopped
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
@@ -86,7 +86,7 @@ services:
 
   # Crawl4AI for web scraping capabilities
   crawl4ai:
-    image: unclecode/crawl4ai:0.8.6
+    image: unclecode/crawl4ai:0.8.9
     restart: unless-stopped
     ports:
       - '11235:11235'
