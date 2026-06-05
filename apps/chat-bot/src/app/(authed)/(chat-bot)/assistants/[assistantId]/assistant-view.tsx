@@ -19,6 +19,7 @@ import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avat
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
 import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
+import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
 
 export function AssistantView({
   assistant,
@@ -78,14 +79,14 @@ export function AssistantView({
           <CustomChatAvatarImage pictureUrl={pictureUrl} />
         </CardContent>
       </Card>
+
       {assistant.accessLevel === 'global' && (
-        <Card className="w-full">
-          <CardContent className="flex flex-col items-center">
-            <div className="text-sm text-foreground/70">{t('author-label')}</div>
-            <div className="text-base font-medium">{t('author-text')}</div>
-          </CardContent>
-        </Card>
+        <CustomChatAuthorInfo
+          authorLabel={t('author-label')}
+          authorText={assistant.author !== '' ? assistant.author : t('author-text')}
+        />
       )}
+
       <Card>
         <CardContent>
           <CustomChatFields>
