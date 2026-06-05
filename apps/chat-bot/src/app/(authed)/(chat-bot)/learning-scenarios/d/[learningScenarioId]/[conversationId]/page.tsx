@@ -17,6 +17,7 @@ import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { NotFoundError } from '@shared/error';
 
 export const dynamic = 'force-dynamic';
 const searchParamsSchema = z.object({ model: z.string().optional() });
@@ -53,6 +54,10 @@ export default async function Page(
       user,
     }),
   ]).catch(handleErrorInServerComponent);
+
+  if (chat.learningScenarioId !== params.learningScenarioId) {
+    handleErrorInServerComponent(new NotFoundError('Conversation not found'));
+  }
 
   const chatMessages = convertMessageModelToMessage(rawChatMessages);
 

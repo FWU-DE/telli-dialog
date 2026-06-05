@@ -5,7 +5,6 @@ import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
 import { ChatMessage } from '../chat/actions';
-import { dbGetUserById } from '@shared/db/functions/user';
 
 // Extract unique URLs from message content
 function extractUniqueUrls(content: string): string[] {
@@ -24,21 +23,15 @@ async function getAttachedLinks(
     return assistant?.attachedLinks.filter((l) => l !== '') ?? [];
   }
   if (characterId) {
-    const user = await dbGetUserById({ userId });
-    if (user) {
-      const character = await dbGetCharacterByIdWithShareData({ characterId, user });
-      return character?.attachedLinks.filter((l) => l !== '') ?? [];
-    }
+    const character = await dbGetCharacterByIdWithShareData({ characterId, user: { id: userId } });
+    return character?.attachedLinks.filter((l) => l !== '') ?? [];
   }
   if (learningScenarioId) {
-    const user = await dbGetUserById({ userId });
-    if (user) {
-      const learningScenario = await dbGetLearningScenarioByIdOptionalShareData({
-        learningScenarioId,
-        user,
-      });
-      return learningScenario?.attachedLinks.filter((l) => l !== '') ?? [];
-    }
+    const learningScenario = await dbGetLearningScenarioByIdOptionalShareData({
+      learningScenarioId,
+      user: { id: userId },
+    });
+    return learningScenario?.attachedLinks.filter((l) => l !== '') ?? [];
   }
   return null;
 }

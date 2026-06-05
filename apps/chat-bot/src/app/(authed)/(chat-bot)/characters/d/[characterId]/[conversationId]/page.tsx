@@ -18,6 +18,7 @@ import type { ChatMessage as Message } from '@/types/chat';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { NotFoundError } from '@shared/error';
 
 export const dynamic = 'force-dynamic';
 const searchParamsSchema = z.object({ model: z.string().optional() });
@@ -54,6 +55,10 @@ export default async function Page(
       user,
     }),
   ]).catch(handleErrorInServerComponent);
+
+  if (chat.characterId !== params.characterId) {
+    handleErrorInServerComponent(new NotFoundError('Conversation not found'));
+  }
 
   const dbMessages = convertMessageModelToMessage(rawChatMessages);
 
