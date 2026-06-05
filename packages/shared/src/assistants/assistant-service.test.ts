@@ -70,12 +70,12 @@ vi.mock('../templates/template-service', () => ({
   copyRelatedTemplateFiles: vi.fn(),
   copyEntityPictureIfExists: vi.fn(),
 }));
-const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
+const { mockDbReturning, mockDbSet, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
   const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
   const mockDbSet = vi.fn(() => ({ where: mockDbWhere }));
   const mockDbUpdate = vi.fn(() => ({ set: mockDbSet }));
-  return { mockDbReturning, mockDbUpdate };
+  return { mockDbReturning, mockDbSet, mockDbUpdate };
 });
 vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 
@@ -456,6 +456,63 @@ describe('assistant-service', () => {
           user: mockUser('student'),
         }),
       ).rejects.toThrow(ForbiddenError);
+    });
+  });
+
+  describe('sharing updates preserve updatedAt', () => {
+    it('preserves updatedAt when only accessLevel changes', async () => {
+      const userId = generateUUID();
+      const assistantId = generateUUID();
+      const updatedAt = new Date('2026-06-01T10:00:00.000Z');
+      const assistant = {
+        id: assistantId,
+        userId,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        updatedAt,
+      } as Partial<AssistantSelectModel>;
+
+      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+        assistant as never,
+      );
+      mockDbReturning.mockResolvedValue([
+        { ...assistant, accessLevel: 'school' } as AssistantSelectModel,
+      ]);
+
+      await updateAssistantAccessLevel({
+        assistantId,
+        accessLevel: 'school',
+        user: { id: userId },
+      });
+
+      expect(mockDbSet).toHaveBeenCalledWith({ accessLevel: 'school', updatedAt });
+    });
+
+    it('preserves updatedAt when only hasLinkAccess changes', async () => {
+      const userId = generateUUID();
+      const assistantId = generateUUID();
+      const updatedAt = new Date('2026-06-01T10:00:00.000Z');
+      const assistant = {
+        id: assistantId,
+        userId,
+        hasLinkAccess: false,
+        updatedAt,
+      } as Partial<AssistantSelectModel>;
+
+      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+        assistant as never,
+      );
+      mockDbReturning.mockResolvedValue([
+        { ...assistant, hasLinkAccess: true } as AssistantSelectModel,
+      ]);
+
+      await updateAssistant({
+        assistantId,
+        user: { id: userId },
+        assistantProps: { hasLinkAccess: true },
+      });
+
+      expect(mockDbSet).toHaveBeenCalledWith({ hasLinkAccess: true, updatedAt });
     });
   });
 

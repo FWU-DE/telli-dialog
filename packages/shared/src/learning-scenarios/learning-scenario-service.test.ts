@@ -69,12 +69,12 @@ vi.mock('../s3', () => ({
   uploadFileToS3: vi.fn(),
   deleteFileFromS3: vi.fn(),
 }));
-const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
+const { mockDbReturning, mockDbSet, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
   const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
   const mockDbSet = vi.fn(() => ({ where: mockDbWhere }));
   const mockDbUpdate = vi.fn(() => ({ set: mockDbSet }));
-  return { mockDbReturning, mockDbUpdate };
+  return { mockDbReturning, mockDbSet, mockDbUpdate };
 });
 vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 
@@ -367,6 +367,63 @@ describe('learning-scenario-service', () => {
           accessLevel: 'global',
         }),
       ).rejects.toThrow(ForbiddenError);
+    });
+  });
+
+  describe('sharing updates preserve updatedAt', () => {
+    it('preserves updatedAt when only accessLevel changes', async () => {
+      const user = mockUser('teacher');
+      const learningScenarioId = generateUUID();
+      const updatedAt = new Date('2026-06-01T10:00:00.000Z');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        updatedAt,
+      } as Partial<LearningScenarioSelectModel>;
+
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+      mockDbReturning.mockResolvedValue([
+        { ...learningScenario, accessLevel: 'school' } as LearningScenarioSelectModel,
+      ]);
+
+      await updateLearningScenarioAccessLevel({ learningScenarioId, user, accessLevel: 'school' });
+
+      expect(mockDbSet).toHaveBeenCalledWith({ accessLevel: 'school', updatedAt });
+    });
+
+    it('preserves updatedAt when only hasLinkAccess changes', async () => {
+      const user = mockUser('teacher');
+      const learningScenarioId = generateUUID();
+      const updatedAt = new Date('2026-06-01T10:00:00.000Z');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        hasLinkAccess: false,
+        updatedAt,
+      } as Partial<LearningScenarioSelectModel>;
+
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+      mockDbReturning.mockResolvedValue([
+        { ...learningScenario, hasLinkAccess: true } as LearningScenarioSelectModel,
+      ]);
+
+      await updateLearningScenario({
+        learningScenarioId,
+        user,
+        data: { id: learningScenarioId, hasLinkAccess: true } as LearningScenarioSelectModel,
+      });
+
+      expect(mockDbSet).toHaveBeenCalledWith({
+        id: learningScenarioId,
+        hasLinkAccess: true,
+        updatedAt,
+      });
     });
   });
 
