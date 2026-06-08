@@ -1,6 +1,7 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import turboConfig from 'eslint-config-turbo/flat';
+import packageJson from 'eslint-plugin-package-json';
 import prettier from 'eslint-plugin-prettier';
 
 /**
@@ -32,6 +33,13 @@ export default tseslint.config(
       'turbo/no-undeclared-env-vars': 'warn',
     },
     files: ['**/*.ts'],
+  },
+  {
+    ...packageJson.configs.recommended,
+    files: ['package.json'],
+    rules: {
+      'package-json/restrict-dependency-ranges': ['error', { rangeType: 'pin' }],
+    },
   },
   {
     files: ['**/*.mjs'],
