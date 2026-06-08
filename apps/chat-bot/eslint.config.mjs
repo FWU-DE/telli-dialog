@@ -1,39 +1,12 @@
-import next from 'eslint-config-next';
-import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
-import nextTypescript from 'eslint-config-next/typescript';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { FlatCompat } from '@eslint/eslintrc';
-import turboConfig from 'eslint-config-turbo/flat';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import nextJsConfig from '@ais-chat/eslint-config/nextjs';
 
 const eslintConfig = [
-  ...turboConfig,
-  ...next,
-  ...nextCoreWebVitals,
-  ...nextTypescript,
-  ...compat.config({
-    extends: ['prettier'],
-    plugins: ['prettier'],
+  ...nextJsConfig,
+  {
     settings: {
-      linkComponents: [
-        {
-          name: 'Link',
-          linkAttribute: 'href',
-        },
-      ],
+      linkComponents: [{ name: 'Link', linkAttribute: 'href' }],
     },
-
     rules: {
-      'prettier/prettier': 'error',
-      'turbo/no-undeclared-env-vars': ['warn'],
       'no-restricted-imports': [
         'error',
         {
@@ -57,11 +30,9 @@ const eslintConfig = [
           message: "Do not import 'getToken' from 'next-auth/jwt'. Use the auth() wrapper instead.",
         },
       ],
-      eqeqeq: ['error', 'always'],
-      'react/jsx-no-target-blank': 'error',
-      ...jsxA11y.flatConfigs.recommended.rules,
+      'turbo/no-undeclared-env-vars': ['warn'],
     },
-  }),
+  },
   {
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
@@ -69,16 +40,7 @@ const eslintConfig = [
     files: ['**/*.test.ts'],
   },
   {
-    ignores: [
-      'node_modules/**',
-      '.next/**',
-      'out/**',
-      'build/**',
-      'coverage/**',
-      'playwright-report/**',
-      'next-env.d.ts',
-      'e2e/**/*.js',
-    ],
+    ignores: ['e2e/**/*.js'],
   },
 ];
 

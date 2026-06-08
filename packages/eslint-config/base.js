@@ -1,0 +1,40 @@
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import turboConfig from 'eslint-config-turbo/flat';
+import prettier from 'eslint-plugin-prettier';
+
+/**
+ * Base ESLint config for pure TypeScript/Node.js packages.
+ */
+export default tseslint.config(
+  {
+    ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'playwright-report/**'],
+  },
+  {
+    extends: [
+      eslint.configs.recommended,
+      ...tseslint.configs.recommendedTypeChecked,
+      ...turboConfig,
+    ],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      parserOptions: {
+        projectService: true,
+      },
+    },
+    plugins: {
+      prettier,
+    },
+    rules: {
+      'prettier/prettier': 'error',
+      eqeqeq: ['error', 'always'],
+      'turbo/no-undeclared-env-vars': 'warn',
+    },
+    files: ['**/*.ts'],
+  },
+  {
+    files: ['**/*.mjs'],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
+);
