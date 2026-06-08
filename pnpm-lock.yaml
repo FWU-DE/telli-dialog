@@ -565,7 +565,7 @@ importers:
         specifier: workspace:*
         version: link:../api-database
       '@google/genai':
-        specifier: ^2.7.0
+        specifier: 2.7.0
         version: 2.7.0
       '@sentry/core':
         specifier: 10.55.0

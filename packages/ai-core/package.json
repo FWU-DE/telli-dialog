@@ -21,7 +21,7 @@
   "dependencies": {
     "@ais-chat/api-database": "workspace:*",
     "@sentry/core": "10.55.0",
-    "@google/genai": "^2.7.0",
+    "@google/genai": "2.7.0",
     "js-tiktoken": "1.0.21",
     "openai": "6.39.1",
     "openaiv4": "npm:openai@4.104.0",
