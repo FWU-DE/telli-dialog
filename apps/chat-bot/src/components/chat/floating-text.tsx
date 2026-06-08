@@ -2,6 +2,8 @@
 
 import useBreakpoints from '../hooks/use-breakpoints';
 import React from 'react';
+import { createPortal } from 'react-dom';
+import { useChatOverlayRoot } from '@/components/layout/chat-overlay-root-context';
 import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import ChevronDownIcon from '../icons/chevron-down';
@@ -30,16 +32,16 @@ export function FloatingText({
   minMargin: number;
 }) {
   const { isAtLeast } = useBreakpoints();
+  const overlayTarget = useChatOverlayRoot();
   const [isMinimized, setIsMinimized] = React.useState(false);
   const [position, setPosition] = React.useState({ x: minMargin, y: minMargin });
-  const [parentViewportOffset, setParentViewportOffset] = React.useState({ left: 0, top: 0 });
   const [dragging, setDragging] = React.useState(false);
   const [rel, setRel] = React.useState<{ x: number; y: number } | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const getParentElement = React.useCallback(() => {
-    return parentElement ?? parentRef?.current ?? null;
-  }, [parentElement, parentRef]);
+    return overlayTarget ?? parentElement ?? parentRef?.current ?? null;
+  }, [overlayTarget, parentElement, parentRef]);
 
   // Helper to clamp position within parent bounds
   function clampPosition({
@@ -70,22 +72,6 @@ export function FloatingText({
       });
     }
   }, [minMargin, containerRef, getParentElement]);
-
-  React.useEffect(() => {
-    function updateParentOffset() {
-      const parent = getParentElement();
-      if (!parent) return;
-      const rect = parent.getBoundingClientRect();
-      setParentViewportOffset({ left: rect.left, top: rect.top });
-    }
-
-    updateParentOffset();
-    window.addEventListener('resize', updateParentOffset);
-
-    return () => {
-      window.removeEventListener('resize', updateParentOffset);
-    };
-  }, [getParentElement]);
 
   React.useEffect(() => {
     function onMouseMove(e: MouseEvent) {
@@ -176,19 +162,19 @@ export function FloatingText({
 
   if (!dialogStarted) return null;
 
-  return (
+  const floatingTextElement = (
     <aside
       ref={containerRef}
       aria-labelledby="floating-text-title"
       className={cn(
-        'flex flex-col z-200 bg-secondary rounded-xl border select-none',
+        'pointer-events-auto flex flex-col z-200 bg-secondary rounded-xl border select-none',
         // using string interpolations is extremely flaky, so we're using a static class name
-        isAtLeast.lg ? 'fixed' : 'sticky',
+        isAtLeast.lg ? 'absolute' : 'sticky',
         dragging ? 'cursor-grabbing' : 'cursor-grab',
       )}
       style={{
-        left: isAtLeast.lg ? parentViewportOffset.left + position.x : position.x,
-        top: isAtLeast.lg ? parentViewportOffset.top + position.y : 0,
+        left: isAtLeast.lg ? position.x : undefined,
+        top: isAtLeast.lg ? position.y : 0,
         maxWidth: isAtLeast.lg ? maxWidth : '100%',
         maxHeight: isAtLeast.lg ? maxHeight : '40%',
       }}
@@ -247,4 +233,10 @@ export function FloatingText({
       )}
     </aside>
   );
+
+  if (isAtLeast.lg && overlayTarget) {
+    return createPortal(floatingTextElement, overlayTarget);
+  }
+
+  return floatingTextElement;
 }

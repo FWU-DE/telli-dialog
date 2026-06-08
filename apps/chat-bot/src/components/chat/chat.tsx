@@ -58,9 +58,6 @@ export default function Chat({
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
   const tLearningScenarioShared = useTranslations('learning-scenarios.shared');
-  const [floatingParentElement, setFloatingParentElement] = useState<
-    HTMLElement | undefined | null
-  >(null);
 
   const { selectedModel, setDownloadConversationEnabled } = useLlmModels();
   const conversationPath = getConversationPath({
@@ -151,10 +148,6 @@ export default function Chat({
 
   const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, status]);
   const containerRef = React.useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setFloatingParentElement(containerRef.current?.closest('main'));
-  }, []);
 
   useEffect(() => {
     // Skip fetching file mappings if the conversation doesn't exist yet (no messages sent)
@@ -332,7 +325,6 @@ export default function Chat({
               learningContext={learningScenario.studentExercise}
               dialogStarted={true}
               title={tLearningScenarioShared('excersise-title')}
-              parentElement={floatingParentElement}
               maxWidth={600}
               maxHeight={600}
               minMargin={16}
