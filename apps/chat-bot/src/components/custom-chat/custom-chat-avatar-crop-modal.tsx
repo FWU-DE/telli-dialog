@@ -107,7 +107,12 @@ export default function AvatarCropModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('crop-image')}
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4"
+    >
       <Card className="w-full max-w-xl max-h-[90vh] gap-4 py-4 sm:py-6">
         <CardHeader className="shrink-0 pl-8">
           <CardTitle>{t('crop-image')}</CardTitle>
