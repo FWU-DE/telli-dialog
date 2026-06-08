@@ -1,38 +1,18 @@
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import turboConfig from 'eslint-config-turbo/flat';
+import baseConfig from '@ais-chat/eslint-config/base';
 
 export default [
   {
     ignores: ['node_modules/**', 'coverage/**', 'dist/**', 'playwright-report/**'],
   },
-  ...tseslint.config(
-    {
-      extends: [
-        eslint.configs.recommended,
-        ...tseslint.configs.recommendedTypeChecked,
-        turboConfig,
-      ],
-      languageOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        parserOptions: {
-          projectService: true,
-        },
-        globals: {
-          AsyncGenerator: 'readonly',
-          AsyncIterable: 'readonly',
-          AsyncIterator: 'readonly',
-        },
-      },
-      files: ['**/*.ts'],
-    },
-    {
-      files: ['**/*.mjs'],
-      extends: [tseslint.configs.disableTypeChecked],
-    },
-  ),
+  ...baseConfig,
   {
+    languageOptions: {
+      globals: {
+        AsyncGenerator: 'readonly',
+        AsyncIterable: 'readonly',
+        AsyncIterator: 'readonly',
+      },
+    },
     rules: {
       'no-inner-declarations': 'off',
       'no-constant-condition': 'off',

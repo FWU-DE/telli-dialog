@@ -1,0 +1,32 @@
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import turboConfig from 'eslint-config-turbo/flat';
+
+/**
+ * Base ESLint config for pure TypeScript/Node.js packages.
+ */
+export default tseslint.config(
+  {
+    extends: [
+      eslint.configs.recommended,
+      ...tseslint.configs.recommendedTypeChecked,
+      ...turboConfig,
+    ],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      parserOptions: {
+        projectService: true,
+      },
+    },
+    rules: {
+      eqeqeq: ['error', 'always'],
+      'turbo/no-undeclared-env-vars': 'warn',
+    },
+    files: ['**/*.ts'],
+  },
+  {
+    files: ['**/*.mjs'],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
+);
