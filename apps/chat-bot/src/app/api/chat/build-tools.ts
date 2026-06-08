@@ -151,7 +151,7 @@ export async function buildTools({
           url: {
             type: 'string',
             description:
-              'The exact URL of the page to scrape. It must be a single http or https URL.',
+              'The exact URL of the page to scrape. It must be a single http or https URL. Only domain hosts are allowed (no localhost, .local, or IP addresses).',
           },
         },
         required: ['url'],
