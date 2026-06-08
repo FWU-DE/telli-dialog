@@ -9,6 +9,17 @@ import prettier from 'eslint-plugin-prettier';
  * ESLint config for Next.js apps and React packages.
  */
 const nextJsConfig = [
+  {
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      'out/**',
+      'build/**',
+      'coverage/**',
+      'playwright-report/**',
+      'next-env.d.ts',
+    ],
+  },
   ...next,
   ...nextCoreWebVitals,
   ...nextTypescript,

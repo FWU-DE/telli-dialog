@@ -16,9 +16,6 @@ const eslintConfig = [
       'jsx-a11y/label-has-associated-control': 'off',
     },
   },
-  {
-    ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
-  },
 ];
 
 export default eslintConfig;

@@ -7,6 +7,9 @@ import turboConfig from 'eslint-config-turbo/flat';
  */
 export default tseslint.config(
   {
+    ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'playwright-report/**'],
+  },
+  {
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommendedTypeChecked,

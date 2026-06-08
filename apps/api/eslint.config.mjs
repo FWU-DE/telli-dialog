@@ -1,9 +1,6 @@
 import baseConfig from '@ais-chat/eslint-config/base';
 
 export default [
-  {
-    ignores: ['node_modules/**', 'coverage/**', 'dist/**', 'playwright-report/**'],
-  },
   ...baseConfig,
   {
     languageOptions: {

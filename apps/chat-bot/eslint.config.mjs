@@ -37,16 +37,7 @@ const eslintConfig = [
     files: ['**/*.test.ts'],
   },
   {
-    ignores: [
-      'node_modules/**',
-      '.next/**',
-      'out/**',
-      'build/**',
-      'coverage/**',
-      'playwright-report/**',
-      'next-env.d.ts',
-      'e2e/**/*.js',
-    ],
+    ignores: ['e2e/**/*.js'],
   },
 ];
 
