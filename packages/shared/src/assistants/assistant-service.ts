@@ -5,8 +5,10 @@ import {
 } from '@shared/conversation/conversation-service';
 import { db } from '@shared/db';
 import {
+  dbGetAssistantsByUserId,
   dbDeleteAssistantByIdAndUser,
   dbGetAssistantById,
+  dbGetCommunityGpts,
   dbGetGlobalGpts,
   dbGetGptsByAssociatedSchools,
   dbGetGptsByUser,
@@ -39,6 +41,10 @@ import {
 } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { generateUUID } from '@shared/utils/uuid';
+import {
+  getChangedKeys,
+  getPreservedUpdatedAtForExemptedKeys,
+} from '@shared/utils/preserve-updated-at';
 import { and, eq } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
@@ -46,6 +52,7 @@ import {
   verifySuspensionState,
   verifyReadAccess,
   verifyWriteAccess,
+  filterCommunitySharedByAssociatedSchool,
   filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
 
@@ -157,6 +164,9 @@ export async function getAssistantByAccessLevel({
   let assistants: AssistantSelectModel[];
 
   switch (accessLevel) {
+    case 'community':
+      assistants = await dbGetCommunityGpts();
+      break;
     case 'global':
       assistants = await dbGetGlobalGpts({ user });
       break;
@@ -184,23 +194,41 @@ export async function getAssistantsByOverviewFilter({
 
   switch (filter) {
     case 'all': {
-      const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
-        dbGetGptsByUser({ user }),
-        dbGetGptsByAssociatedSchools({ user }),
-        dbGetGlobalGpts({ user }),
-      ]);
-      assistants = [...privateAssistants, ...schoolAssistants, ...globalAssistants];
+      const [privateAssistants, schoolAssistants, communityAssistants, globalAssistants] =
+        await Promise.all([
+          dbGetGptsByUser({ user }),
+          dbGetGptsByAssociatedSchools({ user }),
+          dbGetCommunityGpts(),
+          dbGetGlobalGpts({ user }),
+        ]);
+      assistants = [
+        ...privateAssistants,
+        ...schoolAssistants,
+        ...communityAssistants,
+        ...globalAssistants,
+      ];
       break;
     }
     case 'mine':
-      assistants = await dbGetGptsByUser({ user });
+      assistants = await dbGetAssistantsByUserId({ user });
       break;
     case 'official':
       assistants = await dbGetGlobalGpts({ user });
       break;
-    case 'school':
-      assistants = await dbGetGptsByAssociatedSchools({ user });
+    case 'community':
+      assistants = await dbGetCommunityGpts();
       break;
+    case 'school': {
+      const [schoolAssistants, communityAssistants] = await Promise.all([
+        dbGetGptsByAssociatedSchools({ user }),
+        dbGetCommunityGpts(),
+      ]);
+      assistants = [
+        ...schoolAssistants,
+        ...filterCommunitySharedByAssociatedSchool({ items: communityAssistants, user }),
+      ];
+      break;
+    }
     default:
       return [];
   }
@@ -364,8 +392,7 @@ export async function getFileMappings({
 }
 
 /**
- * Update access level, e.g. from private to school or back to private.
- * Global access level is not allowed for this use case.
+ * Update access level, e.g. from private to school/community or back to private.
  * Throws if the user is not the owner of the custom gpt.
  */
 export async function updateAssistantAccessLevel({
@@ -380,7 +407,6 @@ export async function updateAssistantAccessLevel({
   checkParameterUUID(assistantId);
   accessLevelSchema.parse(accessLevel);
 
-  // Authorization check
   if (accessLevel === 'global') {
     throw new ForbiddenError('Not authorized to set the access level to global');
   }
@@ -389,9 +415,19 @@ export async function updateAssistantAccessLevel({
   verifyWriteAccess({ item: assistant, user });
   verifySuspensionState({ item: assistant });
 
+  if (assistant.accessLevel === accessLevel) {
+    return assistant;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: assistant,
+    values: { accessLevel },
+    exemptedKeys: ['accessLevel'],
+  });
+
   const [updatedAssistant] = await db
     .update(assistantTable)
-    .set({ accessLevel })
+    .set({ accessLevel, ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}) })
     .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, user.id)))
     .returning();
 
@@ -428,10 +464,24 @@ export async function updateAssistant({
   verifyWriteAccess({ item: assistant, user });
 
   const parsedValues = updateAssistantSchema.parse(assistantProps);
+  const changedKeys = getChangedKeys({
+    entity: assistant,
+    values: parsedValues,
+  });
+
+  if (changedKeys.length === 0) {
+    return assistant;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: assistant,
+    values: parsedValues,
+    exemptedKeys: ['hasLinkAccess'],
+  });
 
   const [updatedAssistant] = await db
     .update(assistantTable)
-    .set(parsedValues)
+    .set({ ...parsedValues, ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}) })
     .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, user.id)))
     .returning();
 

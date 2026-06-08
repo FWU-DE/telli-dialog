@@ -24,6 +24,7 @@ import {
   dbGetCharacterByIdOptionalShareData,
   dbGetCharacterByIdWithShareData,
   dbGetCharactersByAssociatedSchools,
+  dbGetCommunityCharacters,
   dbGetCharactersByUser,
   dbGetGlobalCharacters,
   dbGetSharedCharacterConversations,
@@ -50,6 +51,7 @@ vi.mock('../db/functions/character', () => ({
   dbGetCharacterByIdWithShareData: vi.fn(),
   dbDeleteCharacterByIdAndUser: vi.fn(),
   dbGetCharactersByAssociatedSchools: vi.fn(),
+  dbGetCommunityCharacters: vi.fn(),
   dbGetCharactersByUser: vi.fn(),
   dbGetGlobalCharacters: vi.fn(),
 }));
@@ -71,12 +73,12 @@ vi.mock('../templates/template-service', () => ({
   copyEntityPictureIfExists: vi.fn(),
   copyRelatedTemplateFiles: vi.fn(),
 }));
-const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
+const { mockDbReturning, mockDbSet, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
   const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
   const mockDbSet = vi.fn(() => ({ where: mockDbWhere }));
   const mockDbUpdate = vi.fn(() => ({ set: mockDbSet }));
-  return { mockDbReturning, mockDbUpdate };
+  return { mockDbReturning, mockDbSet, mockDbUpdate };
 });
 vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 
@@ -326,6 +328,59 @@ describe('character-service', () => {
           user: viewerUser,
         }),
       ).resolves.toEqual([]);
+    });
+  });
+
+  describe('sharing updates preserve updatedAt', () => {
+    it('preserves updatedAt when only accessLevel changes', async () => {
+      const userId = generateUUID();
+      const characterId = generateUUID();
+      const updatedAt = new Date('2026-06-01T10:00:00.000Z');
+      const character = {
+        id: characterId,
+        userId,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        updatedAt,
+      } as Partial<CharacterSelectModel>;
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        character as never,
+      );
+      mockDbReturning.mockResolvedValue([
+        { ...character, accessLevel: 'school' } as CharacterSelectModel,
+      ]);
+
+      await updateCharacterAccessLevel({
+        characterId,
+        user: { id: userId },
+        accessLevel: 'school',
+      });
+
+      expect(mockDbSet).toHaveBeenCalledWith({ accessLevel: 'school', updatedAt });
+    });
+
+    it('preserves updatedAt when only hasLinkAccess changes', async () => {
+      const userId = generateUUID();
+      const characterId = generateUUID();
+      const updatedAt = new Date('2026-06-01T10:00:00.000Z');
+      const character = {
+        id: characterId,
+        userId,
+        hasLinkAccess: false,
+        updatedAt,
+      } as Partial<CharacterSelectModel>;
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        character as never,
+      );
+      mockDbReturning.mockResolvedValue([
+        { ...character, hasLinkAccess: true } as CharacterSelectModel,
+      ]);
+
+      await updateCharacter({ id: characterId, user: { id: userId }, hasLinkAccess: true });
+
+      expect(mockDbSet).toHaveBeenCalledWith({ id: characterId, hasLinkAccess: true, updatedAt });
     });
   });
 
@@ -898,6 +953,10 @@ describe('character-service', () => {
 
     it.each([
       {
+        accessLevel: 'community' as const,
+        expectedMock: dbGetCommunityCharacters,
+      },
+      {
         accessLevel: 'global' as const,
         expectedMock: dbGetGlobalCharacters,
       },
@@ -946,7 +1005,6 @@ describe('character-service', () => {
     it.each([
       { filter: 'mine' as const, expectedMock: dbGetAllCharactersByUser },
       { filter: 'official' as const, expectedMock: dbGetGlobalCharacters },
-      { filter: 'school' as const, expectedMock: dbGetCharactersByAssociatedSchools },
     ])('routes filter=$filter to the correct db function', async ({ filter, expectedMock }) => {
       (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(characters as never);
 
@@ -954,6 +1012,59 @@ describe('character-service', () => {
 
       expect(result).toEqual(characters);
       expect(expectedMock).toHaveBeenCalledWith({ user });
+    });
+
+    it('routes filter=community to dbGetCommunityCharacters', async () => {
+      (
+        dbGetCommunityCharacters as MockedFunction<typeof dbGetCommunityCharacters>
+      ).mockResolvedValue(characters as never);
+
+      const result = await getCharactersByOverviewFilter({ filter: 'community', user });
+
+      expect(result).toEqual(characters);
+      expect(dbGetCommunityCharacters).toHaveBeenCalledWith({ user });
+    });
+
+    it('routes filter=school to the school and community db functions', async () => {
+      const schoolCharacter = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'school',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as unknown as CharacterSelectModel;
+      const communityCharacter = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'community',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as unknown as CharacterSelectModel;
+      const otherSchoolCommunityCharacter = {
+        id: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'community',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: [],
+      } as unknown as CharacterSelectModel;
+
+      (
+        dbGetCharactersByAssociatedSchools as MockedFunction<
+          typeof dbGetCharactersByAssociatedSchools
+        >
+      ).mockResolvedValue([schoolCharacter] as never);
+      (
+        dbGetCommunityCharacters as MockedFunction<typeof dbGetCommunityCharacters>
+      ).mockResolvedValue([communityCharacter, otherSchoolCommunityCharacter] as never);
+
+      const result = await getCharactersByOverviewFilter({ filter: 'school', user });
+
+      expect(result).toEqual([schoolCharacter, communityCharacter]);
+      expect(dbGetCharactersByAssociatedSchools).toHaveBeenCalledWith({ user });
+      expect(dbGetCommunityCharacters).toHaveBeenCalledWith({ user });
     });
 
     it('returns an empty list for unsupported overview filters', async () => {

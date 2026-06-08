@@ -48,6 +48,10 @@ import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
 import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
+import {
+  getAccessLevelFromShareForm,
+  getShareFormValues,
+} from '@/components/custom-chat/access-level-sharing';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -85,6 +89,7 @@ function createAssistantFormValuesSchema(t: AssistantTranslator) {
     description: z.string(),
     instructions: z.string(),
     isSchoolShared: z.boolean(),
+    isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
     isWebSearchEnabled: z.boolean(),
     promptSuggestions: z
@@ -128,7 +133,7 @@ export function AssistantEdit({
     name: assistant.name,
     description: assistant.description ?? '',
     instructions: assistant.instructions ?? '',
-    isSchoolShared: assistant.accessLevel === 'school',
+    ...getShareFormValues(assistant.accessLevel),
     hasLinkAccess: assistant.hasLinkAccess,
     isWebSearchEnabled: assistant.isWebSearchEnabled,
     promptSuggestions:
@@ -142,6 +147,7 @@ export function AssistantEdit({
     trigger,
     getValues,
     reset,
+    setValue,
     formState: { isDirty },
   } = useForm<AssistantFormValues>({
     resolver: zodResolver(assistantFormValuesSchema),
@@ -179,8 +185,10 @@ export function AssistantEdit({
   const name = useWatch({ control, name: 'name' });
   const savedAccessLevelRef = useRef(assistant.accessLevel);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
+  const isCommunityShared = useWatch({ control, name: 'isCommunityShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
-  const showShareInfo = (isSchoolShared || hasLinkAccess) && !assistant.suspended;
+  const showShareInfo =
+    (isSchoolShared || isCommunityShared || hasLinkAccess) && !assistant.suspended;
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -268,8 +276,13 @@ export function AssistantEdit({
   }
 
   const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
-    if (name === 'isSchoolShared') {
-      const newAccessLevel = checked ? 'school' : 'private';
+    if (name === 'isSchoolShared' || name === 'isCommunityShared') {
+      const nextShareValues = {
+        isSchoolShared: name === 'isSchoolShared' ? checked : getValues('isSchoolShared'),
+        isCommunityShared: name === 'isCommunityShared' ? checked : getValues('isCommunityShared'),
+      };
+
+      const newAccessLevel = getAccessLevelFromShareForm(nextShareValues);
 
       if (newAccessLevel !== savedAccessLevelRef.current) {
         const result = await updateAssistantAccessLevelAction({
@@ -278,6 +291,9 @@ export function AssistantEdit({
         });
 
         if (!result.success) {
+          const savedShareValues = getShareFormValues(savedAccessLevelRef.current);
+          setValue('isSchoolShared', savedShareValues.isSchoolShared);
+          setValue('isCommunityShared', savedShareValues.isCommunityShared);
           toast.error(t('toasts.edit-toast-error'));
           return;
         }
@@ -412,6 +428,7 @@ export function AssistantEdit({
           <CustomShareSection
             control={control}
             schoolSharingName="isSchoolShared"
+            communitySharingName="isCommunityShared"
             linkSharingName="hasLinkAccess"
             linkToShare={`/assistants/${assistant.id}`}
             onShareChange={handleSharingChange}

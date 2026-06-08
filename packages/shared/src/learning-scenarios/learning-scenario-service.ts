@@ -8,6 +8,7 @@ import {
   dbCreateLearningScenarioShare,
   dbDeleteLearningScenarioByIdAndUser,
   dbGetAllAccessibleLearningScenarios,
+  dbGetCommunityLearningScenarios,
   dbGetAllLearningScenariosByUser,
   dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
@@ -48,10 +49,15 @@ import {
   verifySuspensionState,
   verifyReadAccess,
   verifyWriteAccess,
+  filterCommunitySharedByAssociatedSchool,
   filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
+import {
+  getChangedKeys,
+  getPreservedUpdatedAtForExemptedKeys,
+} from '@shared/utils/preserve-updated-at';
 
 export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -93,6 +99,9 @@ export async function getLearningScenariosByAccessLevel({
   let learningScenarios: LearningScenarioOptionalShareDataModel[];
 
   switch (accessLevel) {
+    case 'community':
+      learningScenarios = await dbGetCommunityLearningScenarios({ user });
+      break;
     case 'global':
       learningScenarios = await dbGetGlobalLearningScenarios({ user });
       break;
@@ -130,9 +139,20 @@ export async function getLearningScenariosByOverviewFilter({
     case 'official':
       learningScenarios = await dbGetGlobalLearningScenarios({ user });
       break;
-    case 'school':
-      learningScenarios = await dbGetLearningScenariosByAssociatedSchools({ user });
+    case 'community':
+      learningScenarios = await dbGetCommunityLearningScenarios({ user });
       break;
+    case 'school': {
+      const [schoolLearningScenarios, communityLearningScenarios] = await Promise.all([
+        dbGetLearningScenariosByAssociatedSchools({ user }),
+        dbGetCommunityLearningScenarios({ user }),
+      ]);
+      learningScenarios = [
+        ...schoolLearningScenarios,
+        ...filterCommunitySharedByAssociatedSchool({ items: communityLearningScenarios, user }),
+      ];
+      break;
+    }
     default:
       return [];
   }
@@ -220,10 +240,24 @@ export async function updateLearningScenario({
   verifyWriteAccess({ item: learningScenario, user });
 
   const parsedData = updateLearningScenarioSchema.parse(data);
+  const changedKeys = getChangedKeys({
+    entity: learningScenario,
+    values: parsedData,
+  });
+
+  if (changedKeys.length === 0) {
+    return learningScenario;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: learningScenario,
+    values: parsedData,
+    exemptedKeys: ['hasLinkAccess'],
+  });
 
   const [updatedLearningScenario] = await db
     .update(learningScenarioTable)
-    .set({ ...parsedData })
+    .set({ ...parsedData, ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}) })
     .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 
@@ -235,7 +269,7 @@ export async function updateLearningScenario({
 }
 
 /**
- * User can share a learning scenario he owns with the school (access level = school)
+ * User can share a learning scenario he owns with the school or community
  * or unshare it (access level = private).
  * User is not allowed to set the access level to global.
  */
@@ -251,7 +285,6 @@ export async function updateLearningScenarioAccessLevel({
   checkParameterUUID(learningScenarioId);
   accessLevelSchema.parse(accessLevel);
 
-  // Authorization check
   if (accessLevel === 'global') {
     throw new ForbiddenError('Not authorized to set the access level to global');
   }
@@ -261,10 +294,20 @@ export async function updateLearningScenarioAccessLevel({
   verifyWriteAccess({ item: learningScenario, user });
   verifySuspensionState({ item: learningScenario });
 
+  if (learningScenario.accessLevel === accessLevel) {
+    return learningScenario;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: learningScenario,
+    values: { accessLevel },
+    exemptedKeys: ['accessLevel'],
+  });
+
   // Update the access level in database
   const [updatedLearningScenario] = await db
     .update(learningScenarioTable)
-    .set({ accessLevel })
+    .set({ accessLevel, ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}) })
     .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 

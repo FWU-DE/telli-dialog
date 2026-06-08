@@ -161,6 +161,18 @@ export async function dbGetLearningScenariosByAssociatedSchools({
     .orderBy(desc(learningScenarioTable.createdAt));
 }
 
+export async function dbGetCommunityLearningScenarios({
+  user,
+}: {
+  user: Pick<UserModel, 'id'>;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  const activeShare = latestActiveLearningScenarioShare(user);
+  return baseLearningScenarioWithShareQuery(activeShare)
+    .leftJoin(activeShare, eq(activeShare.learningScenarioId, learningScenarioTable.id))
+    .where(eq(learningScenarioTable.accessLevel, 'community'))
+    .orderBy(desc(learningScenarioTable.createdAt));
+}
+
 export async function dbGetLearningScenariosByUser({
   user,
 }: {
@@ -220,6 +232,7 @@ export async function dbGetAllAccessibleLearningScenarios({
               arrayOverlaps(userTable.schoolIds, user.schoolIds),
             )
           : undefined,
+        eq(learningScenarioTable.accessLevel, 'community'),
         and(
           eq(learningScenarioTable.accessLevel, 'global'),
           eq(learningScenarioTemplateMappingTable.federalStateId, user.federalStateId),

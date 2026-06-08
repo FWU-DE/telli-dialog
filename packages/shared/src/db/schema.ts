@@ -355,7 +355,7 @@ export type InfoBannerUserStateInsertModel = z.infer<typeof infoBannerUserStateI
 /**
  * Schema for table character
  */
-export const accessLevelSchema = z.enum(['private', 'school', 'global']);
+export const accessLevelSchema = z.enum(['private', 'school', 'community', 'global']);
 export const accessLevelEnum = pgEnum('access_level', accessLevelSchema.enum);
 export type AccessLevel = z.infer<typeof accessLevelSchema>;
 

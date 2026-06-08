@@ -19,6 +19,8 @@ export function verifyReadAccess<T extends AuthorizedItem>({
 }) {
   // allow access if shared by link
   if (item.hasLinkAccess && !item.suspended) return;
+  // allow access if shared with the community
+  if (item.accessLevel === 'community' && !item.suspended) return;
   // allow access if shared globally
   if (item.accessLevel === 'global' && !item.suspended) return;
   // allow if owner (disregarding the access-level)
@@ -76,6 +78,18 @@ export function filterReadableCustomChats<T extends AuthorizedItem>({
       throw error;
     }
   });
+}
+
+export function filterCommunitySharedByAssociatedSchool<
+  T extends Pick<AuthorizedItem, 'ownerSchoolIds'>,
+>({ items, user }: { items: T[]; user: Pick<UserModel, 'schoolIds'> }) {
+  if (user.schoolIds.length === 0) {
+    return [];
+  }
+
+  return items.filter((item) =>
+    item.ownerSchoolIds?.some((schoolId) => user.schoolIds.includes(schoolId)),
+  );
 }
 
 export function requireTeacherRole(userRole: UserRole) {

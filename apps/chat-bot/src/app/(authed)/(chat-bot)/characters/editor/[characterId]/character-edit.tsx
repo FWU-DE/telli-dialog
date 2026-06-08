@@ -56,6 +56,10 @@ import { createNewCharacterAction } from '../../actions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
+import {
+  getAccessLevelFromShareForm,
+  getShareFormValues,
+} from '@/components/custom-chat/access-level-sharing';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -97,6 +101,7 @@ function createCharacterFormValuesSchema(t: CharacterTranslator) {
     initialMessage: z.string(),
     modelId: z.string(),
     isSchoolShared: z.boolean(),
+    isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
   });
 }
@@ -131,7 +136,7 @@ export function CharacterEdit({
     instructions: character.instructions ?? '',
     initialMessage: character.initialMessage ?? '',
     modelId: selectedModelId ?? '',
-    isSchoolShared: character.accessLevel === 'school',
+    ...getShareFormValues(character.accessLevel),
     hasLinkAccess: character.hasLinkAccess,
   };
 
@@ -177,8 +182,10 @@ export function CharacterEdit({
   const name = useWatch({ control, name: 'name' });
   const savedAccessLevelRef = useRef(character.accessLevel);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
+  const isCommunityShared = useWatch({ control, name: 'isCommunityShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
-  const showShareInfo = (isSchoolShared || hasLinkAccess) && !character.suspended;
+  const showShareInfo =
+    (isSchoolShared || isCommunityShared || hasLinkAccess) && !character.suspended;
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -268,8 +275,13 @@ export function CharacterEdit({
   }
 
   const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
-    if (name === 'isSchoolShared') {
-      const newAccessLevel = checked ? 'school' : 'private';
+    if (name === 'isSchoolShared' || name === 'isCommunityShared') {
+      const nextShareValues = {
+        isSchoolShared: name === 'isSchoolShared' ? checked : getValues('isSchoolShared'),
+        isCommunityShared: name === 'isCommunityShared' ? checked : getValues('isCommunityShared'),
+      };
+
+      const newAccessLevel = getAccessLevelFromShareForm(nextShareValues);
 
       if (newAccessLevel !== savedAccessLevelRef.current) {
         const result = await updateCharacterAccessLevelAction({
@@ -278,6 +290,9 @@ export function CharacterEdit({
         });
 
         if (!result.success) {
+          const savedShareValues = getShareFormValues(savedAccessLevelRef.current);
+          setValue('isSchoolShared', savedShareValues.isSchoolShared);
+          setValue('isCommunityShared', savedShareValues.isCommunityShared);
           toast.error(t('toasts.edit-toast-error'));
           return;
         }
@@ -450,6 +465,7 @@ export function CharacterEdit({
           <CustomShareSection
             control={control}
             schoolSharingName="isSchoolShared"
+            communitySharingName="isCommunityShared"
             linkSharingName="hasLinkAccess"
             linkToShare={`/characters/${character.id}`}
             onShareChange={handleSharingChange}

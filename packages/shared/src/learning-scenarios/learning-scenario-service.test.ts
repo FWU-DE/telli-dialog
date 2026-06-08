@@ -20,6 +20,7 @@ import {
 import {
   dbGetAllAccessibleLearningScenarios,
   dbGetAllLearningScenariosByUser,
+  dbGetCommunityLearningScenarios,
   dbCreateLearningScenarioShare,
   dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
@@ -41,6 +42,7 @@ import { duplicateLearningScenario } from './learning-scenario-admin-service';
 vi.mock('../db/functions/learning-scenario', () => ({
   dbGetAllAccessibleLearningScenarios: vi.fn(),
   dbGetAllLearningScenariosByUser: vi.fn(),
+  dbGetCommunityLearningScenarios: vi.fn(),
   dbCreateLearningScenarioShare: vi.fn(),
   dbGetGlobalLearningScenarios: vi.fn(),
   dbGetLearningScenarioById: vi.fn(),
@@ -67,12 +69,12 @@ vi.mock('../s3', () => ({
   uploadFileToS3: vi.fn(),
   deleteFileFromS3: vi.fn(),
 }));
-const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
+const { mockDbReturning, mockDbSet, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
   const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
   const mockDbSet = vi.fn(() => ({ where: mockDbWhere }));
   const mockDbUpdate = vi.fn(() => ({ set: mockDbSet }));
-  return { mockDbReturning, mockDbUpdate };
+  return { mockDbReturning, mockDbSet, mockDbUpdate };
 });
 vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 
@@ -365,6 +367,63 @@ describe('learning-scenario-service', () => {
           accessLevel: 'global',
         }),
       ).rejects.toThrow(ForbiddenError);
+    });
+  });
+
+  describe('sharing updates preserve updatedAt', () => {
+    it('preserves updatedAt when only accessLevel changes', async () => {
+      const user = mockUser('teacher');
+      const learningScenarioId = generateUUID();
+      const updatedAt = new Date('2026-06-01T10:00:00.000Z');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        updatedAt,
+      } as Partial<LearningScenarioSelectModel>;
+
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+      mockDbReturning.mockResolvedValue([
+        { ...learningScenario, accessLevel: 'school' } as LearningScenarioSelectModel,
+      ]);
+
+      await updateLearningScenarioAccessLevel({ learningScenarioId, user, accessLevel: 'school' });
+
+      expect(mockDbSet).toHaveBeenCalledWith({ accessLevel: 'school', updatedAt });
+    });
+
+    it('preserves updatedAt when only hasLinkAccess changes', async () => {
+      const user = mockUser('teacher');
+      const learningScenarioId = generateUUID();
+      const updatedAt = new Date('2026-06-01T10:00:00.000Z');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        hasLinkAccess: false,
+        updatedAt,
+      } as Partial<LearningScenarioSelectModel>;
+
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+      mockDbReturning.mockResolvedValue([
+        { ...learningScenario, hasLinkAccess: true } as LearningScenarioSelectModel,
+      ]);
+
+      await updateLearningScenario({
+        learningScenarioId,
+        user,
+        data: { id: learningScenarioId, hasLinkAccess: true } as LearningScenarioSelectModel,
+      });
+
+      expect(mockDbSet).toHaveBeenCalledWith({
+        id: learningScenarioId,
+        hasLinkAccess: true,
+        updatedAt,
+      });
     });
   });
 
@@ -776,6 +835,10 @@ describe('learning-scenario-service', () => {
 
     it.each([
       {
+        accessLevel: 'community' as const,
+        expectedMock: dbGetCommunityLearningScenarios,
+      },
+      {
         accessLevel: 'global' as const,
         expectedMock: dbGetGlobalLearningScenarios,
       },
@@ -869,7 +932,6 @@ describe('learning-scenario-service', () => {
     it.each([
       { filter: 'mine' as const, expectedMock: dbGetAllLearningScenariosByUser },
       { filter: 'official' as const, expectedMock: dbGetGlobalLearningScenarios },
-      { filter: 'school' as const, expectedMock: dbGetLearningScenariosByAssociatedSchools },
     ])('routes filter=$filter to the correct db function', async ({ filter, expectedMock }) => {
       (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(scenarios as never);
 
@@ -877,6 +939,62 @@ describe('learning-scenario-service', () => {
 
       expect(result).toEqual(scenarios);
       expect(expectedMock).toHaveBeenCalledWith({ user });
+    });
+
+    it('routes filter=community to dbGetCommunityLearningScenarios', async () => {
+      (
+        dbGetCommunityLearningScenarios as MockedFunction<typeof dbGetCommunityLearningScenarios>
+      ).mockResolvedValue(scenarios as never);
+
+      const result = await getLearningScenariosByOverviewFilter({ filter: 'community', user });
+
+      expect(result).toEqual(scenarios);
+      expect(dbGetCommunityLearningScenarios).toHaveBeenCalledWith({ user });
+    });
+
+    it('routes filter=school to the school and community db functions', async () => {
+      const schoolScenario = {
+        id: generateUUID(),
+        name: 'School scenario',
+        userId: generateUUID(),
+        accessLevel: 'school',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as unknown as LearningScenarioSelectModel;
+      const communityScenario = {
+        id: generateUUID(),
+        name: 'Community scenario',
+        userId: generateUUID(),
+        accessLevel: 'community',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: user.schoolIds,
+      } as unknown as LearningScenarioSelectModel;
+      const otherSchoolCommunityScenario = {
+        id: generateUUID(),
+        name: 'Other school community scenario',
+        userId: generateUUID(),
+        accessLevel: 'community',
+        hasLinkAccess: false,
+        suspended: false,
+        ownerSchoolIds: [],
+      } as unknown as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenariosByAssociatedSchools as MockedFunction<
+          typeof dbGetLearningScenariosByAssociatedSchools
+        >
+      ).mockResolvedValue([schoolScenario] as never);
+      (
+        dbGetCommunityLearningScenarios as MockedFunction<typeof dbGetCommunityLearningScenarios>
+      ).mockResolvedValue([communityScenario, otherSchoolCommunityScenario] as never);
+
+      const result = await getLearningScenariosByOverviewFilter({ filter: 'school', user });
+
+      expect(result).toEqual([schoolScenario, communityScenario]);
+      expect(dbGetLearningScenariosByAssociatedSchools).toHaveBeenCalledWith({ user });
+      expect(dbGetCommunityLearningScenarios).toHaveBeenCalledWith({ user });
     });
 
     it('returns an empty list for unsupported overview filters', async () => {

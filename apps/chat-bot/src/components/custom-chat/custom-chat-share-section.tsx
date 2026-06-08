@@ -12,7 +12,8 @@ import { Button } from '@ui/components/button';
 
 type CustomShareSectionProps<T extends FieldValues> = {
   control: Control<T>;
-  schoolSharingName?: Path<T>;
+  schoolSharingName: Path<T>;
+  communitySharingName: Path<T>;
   linkSharingName: Path<T>;
   linkToShare: string;
   onShareChange?: (change: { name: Path<T>; checked: boolean }) => void;
@@ -22,6 +23,7 @@ type CustomShareSectionProps<T extends FieldValues> = {
 export default function CustomShareSection<T extends FieldValues>({
   control,
   schoolSharingName,
+  communitySharingName,
   linkSharingName,
   linkToShare,
   onShareChange,
@@ -33,6 +35,12 @@ export default function CustomShareSection<T extends FieldValues>({
     useWatch({
       control,
       name: linkSharingName,
+    }),
+  );
+  const isCommunityShared = Boolean(
+    useWatch({
+      control,
+      name: communitySharingName as Path<T>,
     }),
   );
 
@@ -60,9 +68,22 @@ export default function CustomShareSection<T extends FieldValues>({
               label={t('school')}
               tooltip={t('school-tooltip')}
               testId="school-sharing-checkbox"
-              disabled={suspended}
+              disabled={suspended || isCommunityShared}
               onCheckedChange={(checked) => {
                 onShareChange?.({ name: schoolSharingName, checked });
+              }}
+            />
+          )}
+          {communitySharingName && (
+            <CheckboxWithInfo
+              name={communitySharingName}
+              control={control}
+              label={t('community')}
+              tooltip={t('community-tooltip')}
+              testId="community-sharing-checkbox"
+              disabled={suspended}
+              onCheckedChange={(checked) => {
+                onShareChange?.({ name: communitySharingName, checked });
               }}
             />
           )}
@@ -71,7 +92,7 @@ export default function CustomShareSection<T extends FieldValues>({
             control={control}
             label={t('link')}
             tooltip={t('link-tooltip')}
-            disabled={suspended}
+            disabled={suspended || isCommunityShared}
             onCheckedChange={(checked) => {
               onShareChange?.({ name: linkSharingName, checked });
             }}
@@ -79,7 +100,7 @@ export default function CustomShareSection<T extends FieldValues>({
 
           <Button
             className="shrink-0"
-            disabled={!isLinkSharingEnabled || suspended}
+            disabled={(!isLinkSharingEnabled && !isCommunityShared) || suspended}
             onClick={handleCopyLink}
             aria-label={t('copy-link')}
             type="button"

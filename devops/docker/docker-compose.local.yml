@@ -35,7 +35,7 @@ services:
       retries: 5
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.6.2
+    image: quay.io/keycloak/keycloak:26.6.3
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
@@ -76,7 +76,7 @@ services:
       retries: 5
 
   crawl4ai:
-    image: unclecode/crawl4ai:0.8.6
+    image: unclecode/crawl4ai:0.8.9
     ports:
       - '11235:11235'
     deploy:

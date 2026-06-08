@@ -126,6 +126,7 @@ export async function dbGetCharacters({
       or(
         eq(characterTable.userId, user.id),
         schoolCondition,
+        eq(characterTable.accessLevel, 'community'),
         eq(characterTable.accessLevel, 'global'),
       ),
       eq(characterTable.isDeleted, false),
@@ -254,6 +255,20 @@ export async function dbGetGlobalCharacters({
   return characters;
 }
 
+export async function dbGetCommunityCharacters({
+  user,
+}: {
+  user: Pick<UserModel, 'id'>;
+}): Promise<CharacterOptionalShareDataModel[]> {
+  const activeShare = latestActiveCharacterShare(user);
+  const characters = await baseCharacterWithShareQuery(activeShare)
+    .leftJoin(activeShare, eq(activeShare.characterId, characterTable.id))
+    .where(eq(characterTable.accessLevel, 'community'))
+    .orderBy(desc(characterTable.createdAt));
+
+  return characters;
+}
+
 /**
  * Retrieves all characters shared at the school level that are accessible to a user.
  *
@@ -337,6 +352,7 @@ export async function dbGetAllAccessibleCharacters({
               arrayOverlaps(userTable.schoolIds, user.schoolIds),
             )
           : undefined,
+        eq(characterTable.accessLevel, 'community'),
         and(
           eq(characterTable.accessLevel, 'global'),
           eq(characterTemplateMappingTable.federalStateId, federalStateId),

@@ -7,6 +7,7 @@ import {
   dbGetCharacterById,
   dbGetCharacterByIdOptionalShareData,
   dbGetCharacterByIdWithShareData,
+  dbGetCommunityCharacters,
   dbGetCharacters,
   dbGetCharactersByAssociatedSchools,
   dbGetCharactersByUser,
@@ -46,6 +47,10 @@ import {
 } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
+import {
+  getChangedKeys,
+  getPreservedUpdatedAtForExemptedKeys,
+} from '@shared/utils/preserve-updated-at';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, inArray } from 'drizzle-orm';
 import z from 'zod';
@@ -55,6 +60,7 @@ import {
   verifySuspensionState,
   verifyReadAccess,
   verifyWriteAccess,
+  filterCommunitySharedByAssociatedSchool,
   filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
 
@@ -241,7 +247,7 @@ export const linkFileToCharacter = async ({
 };
 
 /**
- * User can share a character he owns with the school (access level = school)
+ * User can share a character he owns with the school or community
  * or unshare it (access level = private).
  * User is not allowed to set the access level to global.
  */
@@ -257,7 +263,6 @@ export const updateCharacterAccessLevel = async ({
   checkParameterUUID(characterId);
   accessLevelSchema.parse(accessLevel);
 
-  // Authorization check
   if (accessLevel === 'global') {
     throw new ForbiddenError('Not authorized to set the access level to global');
   }
@@ -266,10 +271,20 @@ export const updateCharacterAccessLevel = async ({
   verifyWriteAccess({ item: character, user });
   verifySuspensionState({ item: character });
 
+  if (character.accessLevel === accessLevel) {
+    return character;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: character,
+    values: { accessLevel },
+    exemptedKeys: ['accessLevel'],
+  });
+
   // Update the access level in database
   const [updatedCharacter] = await db
     .update(characterTable)
-    .set({ accessLevel })
+    .set({ accessLevel, ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}) })
     .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
     .returning();
 
@@ -309,10 +324,27 @@ export const updateCharacter = async ({
   if (cleanedCharacter === undefined) return;
 
   const parsedCharacterValues = updateCharacterSchema.parse(cleanedCharacter);
+  const changedKeys = getChangedKeys({
+    entity: existingCharacter,
+    values: parsedCharacterValues,
+  });
+
+  if (changedKeys.length === 0) {
+    return existingCharacter;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: existingCharacter,
+    values: parsedCharacterValues,
+    exemptedKeys: ['hasLinkAccess'],
+  });
 
   const [updatedCharacter] = await db
     .update(characterTable)
-    .set({ ...parsedCharacterValues })
+    .set({
+      ...parsedCharacterValues,
+      ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}),
+    })
     .where(and(eq(characterTable.id, character.id), eq(characterTable.userId, user.id)))
     .returning();
 
@@ -562,6 +594,9 @@ export async function getCharacterByAccessLevel({
   let characters: CharacterOptionalShareDataModel[];
 
   switch (accessLevel) {
+    case 'community':
+      characters = await dbGetCommunityCharacters({ user });
+      break;
     case 'global':
       characters = await dbGetGlobalCharacters({ user });
       break;
@@ -597,9 +632,20 @@ export async function getCharactersByOverviewFilter({
     case 'official':
       characters = await dbGetGlobalCharacters({ user });
       break;
-    case 'school':
-      characters = await dbGetCharactersByAssociatedSchools({ user });
+    case 'community':
+      characters = await dbGetCommunityCharacters({ user });
       break;
+    case 'school': {
+      const [schoolCharacters, communityCharacters] = await Promise.all([
+        dbGetCharactersByAssociatedSchools({ user }),
+        dbGetCommunityCharacters({ user }),
+      ]);
+      characters = [
+        ...schoolCharacters,
+        ...filterCommunitySharedByAssociatedSchool({ items: communityCharacters, user }),
+      ];
+      break;
+    }
     default:
       return [];
   }
