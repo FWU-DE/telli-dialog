@@ -23,7 +23,7 @@ function formatRetrievedChunksForTool(
 
   const chunkText = chunks
     .map(
-      (chunk, index) =>
+      (chunk) =>
         `Datei: ${chunk.fileName ?? 'Unbekannte Datei'}${chunk.sourceUrl ? `\nQuelle: ${chunk.sourceUrl}` : ''}\nAbschnitt: ${chunk.orderIndex + 1}\n${chunk.content}`,
     )
     .join('\n\n---\n\n');
@@ -109,6 +109,13 @@ export async function buildTools({
             description:
               'A concise search string that captures the exact topic or passage you want to retrieve.',
           },
+          limit: {
+            type: 'integer',
+            minimum: 1,
+            maximum: VECTOR_SEARCH_LIMIT,
+            description:
+              'Optional number of chunks to return. Values outside the allowed range are clamped.',
+          },
         },
         required: ['search'],
         additionalProperties: false,
@@ -117,10 +124,16 @@ export async function buildTools({
 
     toolHandlers['retrieve_text_chunks'] = async (args) => {
       const search = typeof args.search === 'string' ? args.search : '';
+      const requestedLimit =
+        typeof args.limit === 'number' && Number.isFinite(args.limit)
+          ? Math.trunc(args.limit)
+          : VECTOR_SEARCH_LIMIT;
+      const limit = Math.min(Math.max(requestedLimit, 1), VECTOR_SEARCH_LIMIT);
       const chunks = await retrieveChunksByQuery({
         searchQuery: search,
         federalStateId: user.federalState.id,
         relatedFileEntities,
+        limit,
       });
 
       return formatRetrievedChunksForTool(chunks, attachedFileNames);

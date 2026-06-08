@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FileModelAndContent, UserAndContext } from '@shared/db/schema';
+import type { FileModelAndContent } from '@shared/db/schema';
+import type { UserAndContext } from '@/auth/types';
 import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 
 const mocks = vi.hoisted(() => ({
@@ -90,7 +91,7 @@ describe('buildTools', () => {
       },
     });
 
-    const result = await toolHandlers.retrieve_text_chunks({
+    const result = await toolHandlers.retrieve_text_chunks!({
       search: 'relevante Passage',
       limit: VECTOR_SEARCH_LIMIT + 5,
     });
