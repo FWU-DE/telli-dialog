@@ -23,8 +23,8 @@ export default function LoginForm() {
         </div>
         <Button
           variant="outline"
-          size="default"
-          className="w-full py-3 h-auto"
+          size="xl"
+          className="w-full"
           onClick={() => signIn('vidis', { callbackUrl })}
           aria-label="Mit VIDIS einloggen"
           data-testid="vidis-login-button"

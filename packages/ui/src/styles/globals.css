@@ -149,6 +149,12 @@
   }
 }
 
+@layer utilities {
+  .h-12\.5 {
+    height: 3.125rem;
+  }
+}
+
 @theme inline {
   --spacing: 0.25rem;
 

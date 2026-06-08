@@ -54,7 +54,7 @@ export default function SharedChatLoginForm() {
         }}
         className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
       />
-      <Button type="button" onClick={handleInviteCodeSubmit} className="py-3 h-auto mt-4">
+      <Button type="button" size="xl" onClick={handleInviteCodeSubmit} className="mt-4">
         {t('enter-chat')}
       </Button>
     </form>

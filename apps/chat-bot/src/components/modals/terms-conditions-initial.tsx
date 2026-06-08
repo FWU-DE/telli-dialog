@@ -82,24 +82,20 @@ export default function TermsConditionsModal({
   const navigationBar = (
     <div className="gap-6 flex flex-row">
       {pageNumber >= 1 ? (
-        <Button onClick={prevPage} variant="outline" className="py-3 h-auto">
+        <Button onClick={prevPage} variant="outline" size="xl">
           {tCommon('back')}
         </Button>
       ) : null}
       {pageNumber === disclaimerConfig.pageContents.length - 1 ? (
         <Button
           onClick={acceptAndClose}
-          className="py-3 h-auto"
+          size="xl"
           disabled={!checked && disclaimerConfig.showCheckBox}
         >
           {tCommon('accept')}
         </Button>
       ) : (
-        <Button
-          onClick={nextPage}
-          className="py-3 h-auto"
-          disabled={pageNumber > 0 && !scrollFinished}
-        >
+        <Button onClick={nextPage} size="xl" disabled={pageNumber > 0 && !scrollFinished}>
           {tCommon('continue')}
         </Button>
       )}
