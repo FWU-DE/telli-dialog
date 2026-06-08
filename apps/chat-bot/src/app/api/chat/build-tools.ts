@@ -8,6 +8,7 @@ import type { WebSource } from '@shared/db/types';
 import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { retrieveChunksByQuery } from '../rag/rag-service';
 import { webScraper } from '../web-scraper/web-scraper';
+import { isIP } from 'node:net';
 
 function formatRetrievedChunksForTool(
   chunks: Awaited<ReturnType<typeof retrieveChunksByQuery>>,
@@ -37,11 +38,42 @@ function formatWebScrapedContentForTool(result: WebSource) {
   const title = result.name?.trim() || 'Unbekannter Titel';
   const content = result.content?.trim();
 
+  if (result.error) {
+    return `Titel: ${title}\nURL: ${result.link}\n\nFehler beim Abrufen der Seite.`;
+  }
+
   if (!content) {
     return `Titel: ${title}\nURL: ${result.link}\n\nKeine verwertbaren Inhalte gefunden.`;
   }
 
   return `Titel: ${title}\nURL: ${result.link}\n\n${content}`;
+}
+
+function validateWebScraperUrl(inputUrl: string): { url: string; error?: string } {
+  let parsedUrl: URL;
+
+  try {
+    parsedUrl = new URL(inputUrl);
+  } catch {
+    return { url: '', error: 'Error: Invalid URL.' };
+  }
+
+  if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+    return { url: '', error: 'Error: Only http and https URLs are allowed.' };
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase();
+
+  if (
+    hostname === 'localhost' ||
+    hostname.endsWith('.localhost') ||
+    hostname.endsWith('.local') ||
+    isIP(hostname) !== 0
+  ) {
+    return { url: '', error: 'Error: Only domain hosts are allowed.' };
+  }
+
+  return { url: parsedUrl.toString() };
 }
 
 type BuildToolsParams = {
@@ -134,7 +166,13 @@ export async function buildTools({
         return 'Error: Missing URL.';
       }
 
-      const result = await webScraper(url);
+      const validationResult = validateWebScraperUrl(url);
+
+      if (validationResult.error) {
+        return validationResult.error;
+      }
+
+      const result = await webScraper(validationResult.url);
       return formatWebScrapedContentForTool(result);
     };
   }

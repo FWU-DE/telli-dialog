@@ -130,12 +130,17 @@ describe('buildTools', () => {
       relatedFileEntities: [],
     });
 
-    expect(tools).toHaveLength(2);
-    expect(tools[1]).toMatchObject({
+    const webSearchTool = tools.find((tool) => tool.name === 'web_search');
+    const webScraperTool = tools.find((tool) => tool.name === 'web_scraper');
+
+    expect(webSearchTool).toMatchObject({
+      name: 'web_search',
+    });
+    expect(webScraperTool).toMatchObject({
       name: 'web_scraper',
     });
-    expect(tools[1]?.description).toContain('single webpage URL');
-    expect(tools[1]?.parameters).toMatchObject({
+    expect(webScraperTool?.description).toContain('single webpage URL');
+    expect(webScraperTool?.parameters).toMatchObject({
       required: ['url'],
       properties: {
         url: {
