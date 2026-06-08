@@ -4,8 +4,10 @@ import { isWebSearchEnabled, searchWeb } from './websearch';
 import type { ToolHandler } from './agent-loop';
 import type { WebSearchResult } from '@shared/db/schema';
 import type { FileModelAndContent } from '@shared/db/schema';
+import type { WebSource } from '@shared/db/types';
 import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { retrieveChunksByQuery } from '../rag/rag-service';
+import { webScraper } from '../web-scraper/web-scraper';
 
 function formatRetrievedChunksForTool(
   chunks: Awaited<ReturnType<typeof retrieveChunksByQuery>>,
@@ -29,6 +31,17 @@ function formatRetrievedChunksForTool(
     .join('\n\n---\n\n');
 
   return `Dateien:\n${fileList}\n\n${chunkText}`;
+}
+
+function formatWebScrapedContentForTool(result: WebSource) {
+  const title = result.name?.trim() || 'Unbekannter Titel';
+  const content = result.content?.trim();
+
+  if (!content) {
+    return `Titel: ${title}\nURL: ${result.link}\n\nKeine verwertbaren Inhalte gefunden.`;
+  }
+
+  return `Titel: ${title}\nURL: ${result.link}\n\n${content}`;
 }
 
 type BuildToolsParams = {
@@ -94,6 +107,35 @@ export async function buildTools({
         return 'No results found.';
       }
       return results.map((r) => `[${r.name}](${r.url})\n${r.content}`).join('\n\n---\n\n');
+    };
+
+    tools.push({
+      name: 'web_scraper',
+      description:
+        'Fetch and extract the main text from one specific URL. Use this tool when the user gives you a single webpage URL and you need its content. Use web_search instead when you need to discover relevant pages or compare multiple sources.',
+      parameters: {
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            description:
+              'The exact URL of the page to scrape. It must be a single http or https URL.',
+          },
+        },
+        required: ['url'],
+        additionalProperties: false,
+      },
+    });
+
+    toolHandlers['web_scraper'] = async (args) => {
+      const url = typeof args.url === 'string' ? args.url.trim() : '';
+
+      if (url.length === 0) {
+        return 'Error: Missing URL.';
+      }
+
+      const result = await webScraper(url);
+      return formatWebScrapedContentForTool(result);
     };
   }
 

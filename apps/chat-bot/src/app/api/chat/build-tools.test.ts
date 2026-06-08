@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   isWebSearchEnabledMock: vi.fn(),
   searchWebMock: vi.fn(),
   retrieveChunksByQueryMock: vi.fn(),
+  webScraperMock: vi.fn(),
 }));
 
 vi.mock('./websearch', () => ({
@@ -16,6 +17,10 @@ vi.mock('./websearch', () => ({
 
 vi.mock('../rag/rag-service', () => ({
   retrieveChunksByQuery: mocks.retrieveChunksByQueryMock,
+}));
+
+vi.mock('../web-scraper/web-scraper', () => ({
+  webScraper: mocks.webScraperMock,
 }));
 
 const user = {
@@ -64,6 +69,11 @@ beforeEach(() => {
       sourceUrl: null,
     },
   ]);
+  mocks.webScraperMock.mockResolvedValue({
+    name: 'Beispielseite',
+    link: 'https://example.com/article',
+    content: 'Das ist der extrahierte Inhalt.',
+  });
 });
 
 describe('buildTools', () => {
@@ -108,5 +118,39 @@ describe('buildTools', () => {
     expect(result).toContain('Arbeitsblatt.pdf');
     expect(result).toContain('Leitfaden.txt');
     expect(result).toContain('Erster relevanter Abschnitt.');
+  });
+
+  it('adds a web scraper tool and returns scraped page content', async () => {
+    mocks.isWebSearchEnabledMock.mockResolvedValue(true);
+    const { buildTools } = await import('./build-tools');
+
+    const { tools, toolHandlers } = await buildTools({
+      user,
+      conversationId: 'conversation-1',
+      relatedFileEntities: [],
+    });
+
+    expect(tools).toHaveLength(2);
+    expect(tools[1]).toMatchObject({
+      name: 'web_scraper',
+    });
+    expect(tools[1]?.description).toContain('single webpage URL');
+    expect(tools[1]?.parameters).toMatchObject({
+      required: ['url'],
+      properties: {
+        url: {
+          type: 'string',
+        },
+      },
+    });
+
+    const result = await toolHandlers.web_scraper!({
+      url: 'https://example.com/article',
+    });
+
+    expect(mocks.webScraperMock).toHaveBeenCalledWith('https://example.com/article');
+    expect(result).toContain('Titel: Beispielseite');
+    expect(result).toContain('URL: https://example.com/article');
+    expect(result).toContain('Das ist der extrahierte Inhalt.');
   });
 });
