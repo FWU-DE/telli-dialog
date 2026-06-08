@@ -115,6 +115,7 @@ export function constructAzureImageGenerationFn(model: AiModel): ImageGeneration
           span.setAttribute('error', true);
 
           if (isResponsibleAiPolicyError(error)) {
+            span.setAttribute('gen_ai.response.finish_reasons', [error.code]);
             throw new ResponsibleAIError(
               `Azure OpenAI Responsible AI Policy Violation: ${error.message}`,
             );
