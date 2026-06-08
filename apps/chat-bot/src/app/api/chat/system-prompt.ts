@@ -8,7 +8,7 @@ import { NotFoundError } from '@shared/error';
 import { RetrievedChunk } from '../rag/types';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { constructCharacterSystemPrompt } from '../character/system-prompt';
-import { constructLearningScenarioSystemPrompt } from '../shared-chat/system-prompt';
+import { constructLearningScenarioSystemPrompt } from '../learning-scenario/system-prompt';
 import {
   constructRagContext,
   FORMAT_GUIDELINES,
@@ -161,7 +161,7 @@ export async function constructChatSystemPrompt({
     }
 
     return constructLearningScenarioSystemPrompt({
-      sharedChat: learningScenario,
+      learningScenario,
       chunks,
     });
   }

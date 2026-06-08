@@ -13,7 +13,7 @@ import { getPriceInCentByUser } from '@/app/school';
 import { UserAndContext } from '@/auth/types';
 import {
   sharedCharacterChatHasReachedTokenPointsLimit,
-  sharedChatHasReachedTokenPointsLimit,
+  sharedLearningScenarioChatHasReachedTokenPointsLimit,
 } from '@/app/api/chat/usage';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
@@ -138,9 +138,9 @@ test.describe('costs', () => {
 
     expect(sharedChatUsageInCent).toBe(90);
 
-    let hasReachedLimit = await sharedChatHasReachedTokenPointsLimit({
+    let hasReachedLimit = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
       user: user,
-      sharedChat: sharedLearningScenario,
+      learningScenario: sharedLearningScenario,
     });
 
     // Used 90 cents of 100 cents -> under the limit
@@ -156,9 +156,9 @@ test.describe('costs', () => {
     };
     await db.insert(sharedLearningScenarioUsageTracking).values(sharedSchoolConversationUsage);
 
-    hasReachedLimit = await sharedChatHasReachedTokenPointsLimit({
+    hasReachedLimit = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
       user: user,
-      sharedChat: sharedLearningScenario,
+      learningScenario: sharedLearningScenario,
     });
 
     // Used 120 cents of 100 cents -> over the limit

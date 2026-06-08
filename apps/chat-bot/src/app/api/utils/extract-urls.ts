@@ -1,10 +1,10 @@
 import { parseHyperlinks } from '@/utils/web-search/parsing';
-import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { dbGetLearningScenarioByIdOptionalShareData } from '@shared/db/functions/learning-scenario';
 import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
 import { ChatMessage } from '../chat/actions';
+import { dbGetCharacterByIdOptionalShareData } from '@shared/db/functions/character';
 
 // Extract unique URLs from message content
 function extractUniqueUrls(content: string): string[] {
@@ -23,7 +23,10 @@ async function getAttachedLinks(
     return assistant?.attachedLinks.filter((l) => l !== '') ?? [];
   }
   if (characterId) {
-    const character = await dbGetCharacterByIdWithShareData({ characterId, user: { id: userId } });
+    const character = await dbGetCharacterByIdOptionalShareData({
+      characterId,
+      user: { id: userId },
+    });
     return character?.attachedLinks.filter((l) => l !== '') ?? [];
   }
   if (learningScenarioId) {

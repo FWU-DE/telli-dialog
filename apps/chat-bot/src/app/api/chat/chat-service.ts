@@ -218,7 +218,7 @@ export async function sendChatMessage({
   const relatedFileEntities = await dbGetAttachedFileByEntityId({
     conversationId: conversation.id,
     characterId,
-    sharedChatId: learningScenarioId,
+    learningScenarioId,
     assistantId: assistantId,
   });
 

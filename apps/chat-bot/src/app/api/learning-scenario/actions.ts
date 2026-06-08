@@ -1,18 +1,18 @@
 'use server';
 import { requireValidInviteCode } from '@/auth/requireValidInviteCode';
-import { sendSharedChatMessage } from './shared-chat-service';
+import { sendLearningScenarioMessage } from './learning-scenario-chat-service';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { SharedChatExpiredError } from '@ais-chat/ai-core/errors';
 
 export type { ChatMessage, SendMessageResult } from '@/types/chat';
 
-export async function sendSharedChatMessageAction({
-  sharedChatId,
+export async function sendLearningScenarioMessageAction({
+  learningScenarioId,
   inviteCode,
   messages,
   modelId,
 }: {
-  sharedChatId: string;
+  learningScenarioId: string;
   inviteCode: string;
   messages: ChatMessage[];
   modelId: string;
@@ -23,8 +23,8 @@ export async function sendSharedChatMessageAction({
     return createErrorResult(new SharedChatExpiredError());
   }
 
-  return sendSharedChatMessage({
-    sharedChatId,
+  return sendLearningScenarioMessage({
+    learningScenarioId,
     inviteCode,
     messages,
     modelId,

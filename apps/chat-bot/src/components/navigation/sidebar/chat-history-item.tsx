@@ -22,6 +22,7 @@ import {
   DotsThreeIcon,
   ImageSquareIcon,
   LegoSmileyIcon,
+  MountainsIcon,
   QuestionIcon,
   StudentIcon,
   TrashIcon,
@@ -214,7 +215,7 @@ function determineConversationIcon(
         return <StudentIcon />;
       }
       if (conversation.learningScenarioId) {
-        return <StudentIcon />;
+        return <MountainsIcon />;
       }
       if (conversation.assistantId) {
         if (conversation.assistantId === HELP_MODE_ASSISTANT_ID) {
