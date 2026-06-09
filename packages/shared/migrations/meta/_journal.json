@@ -526,6 +526,13 @@
       "when": 1780651373605,
       "tag": "0074_secret_tomas",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1780995048476,
+      "tag": "0075_cold_namora",
+      "breakpoints": true
     }
   ]
 }
