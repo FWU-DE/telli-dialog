@@ -12,7 +12,7 @@ export function convertMessageModelToMessage(
 ): Array<ChatMessage> {
   return messages.map((message) => ({
     id: message.id,
-    role: message.role as 'user' | 'assistant' | 'system' | 'tool',
+    role: message.role,
     content: message.content,
     createdAt: message.createdAt,
     webSearchResults: message.webSearchResults ?? undefined,

@@ -1,7 +1,7 @@
 import type { SharedChatExpiredError, TokenPointsExceededError } from '@ais-chat/ai-core/errors';
 import type { NotFoundError } from '@shared/error';
 import type { WebSearchResult } from '@shared/db/schema';
-import { ChatAttachment, ToolCall } from '@ais-chat/ai-core/chat/types';
+import { ChatAttachment, ConversationRole, ToolCall } from '@ais-chat/ai-core/chat/types';
 
 /**
  * Serialized error that can be safely transmitted across the Server Action boundary.
@@ -27,7 +27,7 @@ export type ChatStatus = 'ready' | 'submitted' | 'reasoning' | 'streaming' | 'er
  */
 export type ChatMessage = {
   id: string;
-  role: 'user' | 'assistant' | 'system' | 'tool';
+  role: ConversationRole;
   content: string;
   createdAt?: Date;
   attachments?: ChatAttachment[];
