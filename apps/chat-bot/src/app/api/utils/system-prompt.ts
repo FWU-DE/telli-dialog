@@ -19,7 +19,7 @@ export function constructToolGuidelines(activeTools: ToolDefinition[]) {
 
   if (hasTool(activeTools, 'retrieve_text_chunks')) {
     sections.push(
-      `- Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Ausschließlich folgende Formate werden unterstützt: ${[...SUPPORTED_DOCUMENTS_EXTENSIONS, ...SUPPORTED_IMAGE_EXTENSIONS].map((ext) => ext.toUpperCase()).join(', ')}. Biete niemals an, andere Formate zu verarbeiten. Der Inhalt dieser Dateien steht dir im Kontext zur Verfügung.`,
+      `- Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Ausschließlich folgende Formate werden unterstützt: ${[...SUPPORTED_DOCUMENTS_EXTENSIONS, ...SUPPORTED_IMAGE_EXTENSIONS].map((ext) => ext.toUpperCase()).join(', ')}. Biete niemals an, andere Formate zu verarbeiten. Der Inhalt dieser Dateien steht dir zur Verfügung.`,
     );
   }
 
