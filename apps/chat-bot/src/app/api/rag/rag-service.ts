@@ -77,6 +77,32 @@ export async function retrieveChunks({
   const lastUserMessage = messages.findLast((m) => m.role === 'user');
   const searchQuery = lastUserMessage?.content ?? '';
 
+  return retrieveChunksByQuery({
+    searchQuery,
+    federalStateId,
+    relatedFileEntities,
+    sourceUrls,
+    limit: VECTOR_SEARCH_LIMIT,
+  });
+}
+
+export async function retrieveChunksByQuery({
+  searchQuery,
+  federalStateId,
+  relatedFileEntities,
+  sourceUrls,
+  limit = VECTOR_SEARCH_LIMIT,
+}: {
+  searchQuery: string;
+  federalStateId: string;
+  relatedFileEntities: FileModelAndContent[];
+  sourceUrls?: string[];
+  limit?: number;
+}): Promise<RetrievedChunk[]> {
+  if (relatedFileEntities.length === 0 && (!sourceUrls || sourceUrls.length === 0)) {
+    return [];
+  }
+
   if (searchQuery.trim() === '') {
     return [];
   }
@@ -97,7 +123,7 @@ export async function retrieveChunks({
     embedding: queryEmbedding,
     fileIds,
     sourceUrls,
-    limit: VECTOR_SEARCH_LIMIT,
+    limit,
   });
 
   return chunks;

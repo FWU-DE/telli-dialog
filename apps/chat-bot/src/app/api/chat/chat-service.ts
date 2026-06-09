@@ -37,6 +37,7 @@ import { runAgentLoop } from './agent-loop';
 import { buildTools } from './build-tools';
 import { runWebSearchPipeline } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
+import { RetrievedChunk } from '../rag/types';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -154,41 +155,6 @@ export async function sendChatMessage({
     federalStateId: user.federalState.id,
   });
 
-  let webSearchResults: WebSearchResult[] = [];
-  let tools: Awaited<ReturnType<typeof buildTools>>['tools'] | undefined;
-  let toolHandlers: Awaited<ReturnType<typeof buildTools>>['toolHandlers'] | undefined;
-
-  if (agenticChatEnabled) {
-    const builtTools = await buildTools({
-      user,
-      characterId,
-      assistantId,
-      conversationId: activeConversation.id,
-      onWebSearchResults: (results) => {
-        update(
-          encodeChatStreamEvent({
-            type: 'web_search_results',
-            webSearchResults: results,
-          }),
-        );
-      },
-    });
-
-    tools = builtTools.tools;
-    toolHandlers = builtTools.toolHandlers;
-    webSearchResults = builtTools.webSearchResults;
-  } else {
-    webSearchResults = await runWebSearchPipeline({
-      messages,
-      user,
-      characterId,
-      assistantId,
-      modelId: auxiliaryModel.id,
-      apiKeyId: activeAuxiliaryModelAndApiKey.apiKeyId,
-      conversationId: activeConversation.id,
-    });
-  }
-
   // Save user message to DB
   await dbInsertChatContent({
     conversationId: activeConversation.id,
@@ -216,12 +182,27 @@ export async function sendChatMessage({
     assistantId: assistantId,
   });
 
-  const chunks = await retrieveChunks({
-    messages,
-    federalStateId: user.federalState.id,
-    relatedFileEntities,
-    sourceUrls: processedUrls,
-  });
+  let webSearchResults: WebSearchResult[] = [];
+  let chunks: RetrievedChunk[] = [];
+
+  if (!agenticChatEnabled) {
+    // Fallback implementations of Websearch and Chunk Retrieval
+    webSearchResults = await runWebSearchPipeline({
+      messages,
+      user,
+      characterId,
+      assistantId,
+      modelId: auxiliaryModel.id,
+      apiKeyId: activeAuxiliaryModelAndApiKey.apiKeyId,
+      conversationId: activeConversation.id,
+    });
+    chunks = await retrieveChunks({
+      messages,
+      federalStateId: user.federalState.id,
+      relatedFileEntities,
+      sourceUrls: processedUrls,
+    });
+  }
 
   // Update last used model
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
@@ -336,13 +317,29 @@ export async function sendChatMessage({
   }
 
   if (agenticChatEnabled) {
+    const builtTools = await buildTools({
+      user,
+      characterId,
+      assistantId,
+      conversationId: activeConversation.id,
+      relatedFileEntities,
+      onWebSearchResults: (results) => {
+        update(
+          encodeChatStreamEvent({
+            type: 'web_search_results',
+            webSearchResults: results,
+          }),
+        );
+      },
+    });
+    webSearchResults = builtTools.webSearchResults;
     // Start the agent loop in the background
     runAgentLoop({
       modelId: definedModel.id,
       apiKeyId,
       messages: aiCoreMessages,
-      tools,
-      toolHandlers,
+      tools: builtTools.tools,
+      toolHandlers: builtTools.toolHandlers,
       onTextChunk: (delta) => {
         update(delta);
       },

@@ -73,12 +73,12 @@ vi.mock('../templates/template-service', () => ({
   copyEntityPictureIfExists: vi.fn(),
   copyRelatedTemplateFiles: vi.fn(),
 }));
-const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
+const { mockDbReturning, mockDbSet, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
   const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
   const mockDbSet = vi.fn(() => ({ where: mockDbWhere }));
   const mockDbUpdate = vi.fn(() => ({ set: mockDbSet }));
-  return { mockDbReturning, mockDbUpdate };
+  return { mockDbReturning, mockDbSet, mockDbUpdate };
 });
 vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 
@@ -328,6 +328,59 @@ describe('character-service', () => {
           user: viewerUser,
         }),
       ).resolves.toEqual([]);
+    });
+  });
+
+  describe('sharing updates preserve updatedAt', () => {
+    it('preserves updatedAt when only accessLevel changes', async () => {
+      const userId = generateUUID();
+      const characterId = generateUUID();
+      const updatedAt = new Date('2026-06-01T10:00:00.000Z');
+      const character = {
+        id: characterId,
+        userId,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        updatedAt,
+      } as Partial<CharacterSelectModel>;
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        character as never,
+      );
+      mockDbReturning.mockResolvedValue([
+        { ...character, accessLevel: 'school' } as CharacterSelectModel,
+      ]);
+
+      await updateCharacterAccessLevel({
+        characterId,
+        user: { id: userId },
+        accessLevel: 'school',
+      });
+
+      expect(mockDbSet).toHaveBeenCalledWith({ accessLevel: 'school', updatedAt });
+    });
+
+    it('preserves updatedAt when only hasLinkAccess changes', async () => {
+      const userId = generateUUID();
+      const characterId = generateUUID();
+      const updatedAt = new Date('2026-06-01T10:00:00.000Z');
+      const character = {
+        id: characterId,
+        userId,
+        hasLinkAccess: false,
+        updatedAt,
+      } as Partial<CharacterSelectModel>;
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        character as never,
+      );
+      mockDbReturning.mockResolvedValue([
+        { ...character, hasLinkAccess: true } as CharacterSelectModel,
+      ]);
+
+      await updateCharacter({ id: characterId, user: { id: userId }, hasLinkAccess: true });
+
+      expect(mockDbSet).toHaveBeenCalledWith({ id: characterId, hasLinkAccess: true, updatedAt });
     });
   });
 

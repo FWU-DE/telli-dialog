@@ -28,7 +28,9 @@ export async function dbGetAssistantsByUserId({
 }: {
   user: Pick<UserModel, 'id'>;
 }): Promise<AssistantSelectModel[]> {
-  return baseAssistantQuery().where(eq(assistantTable.userId, user.id));
+  return baseAssistantQuery()
+    .where(eq(assistantTable.userId, user.id))
+    .orderBy(desc(assistantTable.createdAt));
 }
 
 export async function dbGetAssistantById({

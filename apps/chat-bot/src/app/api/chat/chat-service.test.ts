@@ -328,11 +328,9 @@ describe('sendChatMessage', () => {
 
     if (isAgenticChatEnabled) {
       expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
+      expect(mocks.retrieveChunksMock).not.toHaveBeenCalled();
       expect(mocks.runWebSearchPipelineMock).not.toHaveBeenCalled();
       expect(result.webSearchResults).toEqual(webSearchResults);
-      expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
-        expect.objectContaining({ webSearchResults }),
-      );
       expect(streamedText).toBe('agentic chunk');
     } else {
       expect(mocks.buildToolsMock).not.toHaveBeenCalled();

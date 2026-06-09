@@ -28,16 +28,14 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@eslint/js": "9.39.2",
+    "@ais-chat/eslint-config": "workspace:*",
     "@ais-chat/typescript-config": "workspace:*",
     "@types/node": "24.12.4",
     "@types/pg": "8.20.0",
     "dotenv-cli": "11.0.0",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
-    "eslint-config-turbo": "2.9.16",
     "tsx": "4.22.3",
-    "typescript": "6.0.3",
-    "typescript-eslint": "8.60.0"
+    "typescript": "6.0.3"
   }
 }
