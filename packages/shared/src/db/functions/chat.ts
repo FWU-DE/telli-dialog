@@ -8,6 +8,7 @@ export async function dbGetOrCreateConversation({
   conversationId,
   userId,
   characterId,
+  learningScenarioId,
   assistantId,
   type,
   name,
@@ -15,6 +16,7 @@ export async function dbGetOrCreateConversation({
   conversationId: string;
   userId: string;
   characterId?: string;
+  learningScenarioId?: string;
   assistantId?: string;
   type?: 'chat' | 'image-generation';
   name?: string;
@@ -26,6 +28,7 @@ export async function dbGetOrCreateConversation({
         id: conversationId,
         userId,
         characterId: characterId ?? null,
+        learningScenarioId: learningScenarioId ?? null,
         assistantId: assistantId ?? null,
         type: type ?? 'chat',
         name: name ?? null,

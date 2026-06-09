@@ -21,31 +21,31 @@ async function calculateSharedChatLimitInCent(
   return ((priceLimitInCent ?? 0) * tokenPointsPercentageLimit) / 100;
 }
 
-export async function sharedChatHasReachedTokenPointsLimit({
+export async function sharedLearningScenarioChatHasReachedTokenPointsLimit({
   user,
-  sharedChat,
+  learningScenario,
 }: {
   user: UserAndContext | undefined;
-  sharedChat: LearningScenarioWithShareDataModel;
+  learningScenario: LearningScenarioWithShareDataModel;
 }) {
   if (user === undefined || user.federalState === undefined) {
     return true;
   }
 
-  if (sharedChatHasExpired(sharedChat)) {
+  if (sharedChatHasExpired(learningScenario)) {
     return true;
   }
 
   const sharedChatUsageInCent = await dbGetSharedChatUsageInCentBySharedChatId({
-    sharedChatId: sharedChat.id,
-    maxUsageTimeLimit: sharedChat.maxUsageTimeLimit,
-    startedAt: sharedChat.startedAt,
+    sharedChatId: learningScenario.id,
+    maxUsageTimeLimit: learningScenario.maxUsageTimeLimit,
+    startedAt: learningScenario.startedAt,
   });
 
   if (
     user.userRole === 'teacher' &&
     sharedChatUsageInCent <
-      (await calculateSharedChatLimitInCent(user, sharedChat.tokenPointsLimit))
+      (await calculateSharedChatLimitInCent(user, learningScenario.tokenPointsLimit))
   ) {
     return false;
   }

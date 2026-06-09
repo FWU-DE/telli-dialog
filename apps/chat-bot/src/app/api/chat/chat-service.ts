@@ -66,6 +66,7 @@ export async function sendChatMessage({
   messages,
   modelId,
   characterId,
+  learningScenarioId,
   assistantId,
   fileIds,
   user,
@@ -74,6 +75,7 @@ export async function sendChatMessage({
   messages: ChatMessage[];
   modelId: string;
   characterId?: string;
+  learningScenarioId?: string;
   assistantId?: string;
   fileIds?: string[];
   user: UserAndContext;
@@ -108,6 +110,7 @@ export async function sendChatMessage({
     conversationId,
     userId: user.id,
     characterId,
+    learningScenarioId,
     assistantId,
   });
 
@@ -149,7 +152,7 @@ export async function sendChatMessage({
 
   const activeUserMessage = userMessage;
 
-  const urls = await extractUrls(assistantId, characterId, user, messages);
+  const urls = await extractUrls(assistantId, characterId, learningScenarioId, user, messages);
   const { processedUrls, errorUrls } = await ingestWebContent({
     urls,
     federalStateId: user.federalState.id,
@@ -179,6 +182,7 @@ export async function sendChatMessage({
   const relatedFileEntities = await dbGetAttachedFileByEntityId({
     conversationId: conversation.id,
     characterId,
+    learningScenarioId,
     assistantId: assistantId,
   });
 
@@ -191,6 +195,7 @@ export async function sendChatMessage({
       messages,
       user,
       characterId,
+      learningScenarioId,
       assistantId,
       modelId: auxiliaryModel.id,
       apiKeyId: activeAuxiliaryModelAndApiKey.apiKeyId,
@@ -218,6 +223,7 @@ export async function sendChatMessage({
   // Build system prompt
   const systemPrompt = await constructChatSystemPrompt({
     characterId,
+    learningScenarioId,
     assistantId: assistantId,
     isTeacher: user.userRole === 'teacher',
     federalState: user.federalState,
@@ -320,6 +326,7 @@ export async function sendChatMessage({
     const builtTools = await buildTools({
       user,
       characterId,
+      learningScenarioId,
       assistantId,
       conversationId: activeConversation.id,
       relatedFileEntities,

@@ -1,10 +1,10 @@
 import { parseHyperlinks } from '@/utils/web-search/parsing';
-import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
+import { dbGetLearningScenarioByIdOptionalShareData } from '@shared/db/functions/learning-scenario';
 import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
 import { ChatMessage } from '../chat/actions';
-import { dbGetUserById } from '@shared/db/functions/user';
+import { dbGetCharacterByIdOptionalShareData } from '@shared/db/functions/character';
 
 // Extract unique URLs from message content
 function extractUniqueUrls(content: string): string[] {
@@ -15,6 +15,7 @@ function extractUniqueUrls(content: string): string[] {
 async function getAttachedLinks(
   assistantId: string | undefined,
   characterId: string | undefined,
+  learningScenarioId: string | undefined,
   userId: string,
 ): Promise<string[] | null> {
   if (assistantId) {
@@ -22,11 +23,18 @@ async function getAttachedLinks(
     return assistant?.attachedLinks.filter((l) => l !== '') ?? [];
   }
   if (characterId) {
-    const user = await dbGetUserById({ userId });
-    if (user) {
-      const character = await dbGetCharacterByIdWithShareData({ characterId, user });
-      return character?.attachedLinks.filter((l) => l !== '') ?? [];
-    }
+    const character = await dbGetCharacterByIdOptionalShareData({
+      characterId,
+      user: { id: userId },
+    });
+    return character?.attachedLinks.filter((l) => l !== '') ?? [];
+  }
+  if (learningScenarioId) {
+    const learningScenario = await dbGetLearningScenarioByIdOptionalShareData({
+      learningScenarioId,
+      user: { id: userId },
+    });
+    return learningScenario?.attachedLinks.filter((l) => l !== '') ?? [];
   }
   return null;
 }
@@ -46,13 +54,19 @@ async function getAttachedLinks(
 export async function extractUrls(
   assistantId: string | undefined,
   characterId: string | undefined,
+  learningScenarioId: string | undefined,
   user: UserAndContext,
   messages: ChatMessage[],
 ): Promise<string[]> {
-  const attachedLinks = await getAttachedLinks(assistantId, characterId, user.id);
+  const attachedLinks = await getAttachedLinks(
+    assistantId,
+    characterId,
+    learningScenarioId,
+    user.id,
+  );
 
   // For characters, just return their attached links
-  if (characterId) {
+  if (characterId || learningScenarioId) {
     return attachedLinks ?? [];
   }
 

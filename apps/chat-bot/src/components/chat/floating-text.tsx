@@ -2,6 +2,8 @@
 
 import useBreakpoints from '../hooks/use-breakpoints';
 import React from 'react';
+import { createPortal } from 'react-dom';
+import { useChatOverlayRoot } from '@/components/layout/chat-overlay-root-context';
 import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import ChevronDownIcon from '../icons/chevron-down';
@@ -15,6 +17,7 @@ export function FloatingText({
   dialogStarted,
   title,
   parentRef,
+  parentElement,
   maxWidth,
   maxHeight,
   minMargin,
@@ -22,17 +25,23 @@ export function FloatingText({
   learningContext: string;
   dialogStarted: boolean;
   title: string;
-  parentRef: React.RefObject<HTMLDivElement>;
+  parentRef?: React.RefObject<HTMLElement>;
+  parentElement?: HTMLElement | null;
   maxWidth: number;
   maxHeight: number;
   minMargin: number;
 }) {
   const { isAtLeast } = useBreakpoints();
+  const overlayTarget = useChatOverlayRoot();
   const [isMinimized, setIsMinimized] = React.useState(false);
   const [position, setPosition] = React.useState({ x: minMargin, y: minMargin });
   const [dragging, setDragging] = React.useState(false);
   const [rel, setRel] = React.useState<{ x: number; y: number } | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const getParentElement = React.useCallback(() => {
+    return overlayTarget ?? parentElement ?? parentRef?.current ?? null;
+  }, [overlayTarget, parentElement, parentRef]);
 
   // Helper to clamp position within parent bounds
   function clampPosition({
@@ -46,8 +55,9 @@ export function FloatingText({
     containerWidth: number;
     containerHeight: number;
   }) {
-    if (!parentRef.current) return { x, y };
-    const parentRect = parentRef.current.getBoundingClientRect();
+    const parent = getParentElement();
+    if (!parent) return { x, y };
+    const parentRect = parent.getBoundingClientRect();
     const newX = Math.max(minMargin, Math.min(x, parentRect.width - containerWidth - minMargin));
     const newY = Math.max(minMargin, Math.min(y, parentRect.height - containerHeight - minMargin));
     return { x: newX, y: newY };
@@ -55,25 +65,26 @@ export function FloatingText({
 
   React.useEffect(() => {
     // Set initial position within parent (top-left corner with minMargin)
-    if (parentRef.current && containerRef.current) {
+    if (getParentElement() && containerRef.current) {
       setPosition({
         x: minMargin,
         y: minMargin,
       });
     }
-  }, [minMargin, parentRef, containerRef]);
+  }, [minMargin, containerRef, getParentElement]);
 
   React.useEffect(() => {
     function onMouseMove(e: MouseEvent) {
       if (!dragging || !rel) return;
-      if (!containerRef.current || !parentRef.current) return;
+      const parent = getParentElement();
+      if (!containerRef.current || !parent) return;
 
       const container = containerRef.current;
       const containerRect = container.getBoundingClientRect();
       const containerWidth = containerRect.width;
       const containerHeight = containerRect.height;
 
-      const parentRect = parentRef.current.getBoundingClientRect();
+      const parentRect = parent.getBoundingClientRect();
       const newX = e.clientX - parentRect.left - rel.x;
       const newY = e.clientY - parentRect.top - rel.y;
 
@@ -88,7 +99,8 @@ export function FloatingText({
     // Touch event handlers
     function onTouchMove(e: TouchEvent) {
       if (!dragging || !rel) return;
-      if (!containerRef.current || !parentRef.current) return;
+      const parent = getParentElement();
+      if (!containerRef.current || !parent) return;
       if (e.touches.length !== 1) return;
       const touch = e.touches[0];
       if (!touch?.clientX || !touch?.clientY) return;
@@ -97,7 +109,7 @@ export function FloatingText({
       const containerWidth = containerRect.width;
       const containerHeight = containerRect.height;
 
-      const parentRect = parentRef.current.getBoundingClientRect();
+      const parentRect = parent.getBoundingClientRect();
       const newX = touch.clientX - parentRect.left - rel.x;
       const newY = touch.clientY - parentRect.top - rel.y;
 
@@ -127,7 +139,7 @@ export function FloatingText({
       window.removeEventListener('touchend', onTouchEnd);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dragging, rel, parentRef]);
+  }, [dragging, rel, getParentElement]);
 
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     if (containerRef.current) {
@@ -150,18 +162,18 @@ export function FloatingText({
 
   if (!dialogStarted) return null;
 
-  return (
+  const floatingTextElement = (
     <aside
       ref={containerRef}
       aria-labelledby="floating-text-title"
       className={cn(
-        'flex flex-col z-200 bg-secondary rounded-xl border select-none',
+        'pointer-events-auto flex flex-col z-200 bg-secondary rounded-xl border select-none',
         // using string interpolations is extremely flaky, so we're using a static class name
-        isAtLeast.lg ? `absolute` : 'sticky',
+        isAtLeast.lg ? 'absolute' : 'sticky',
         dragging ? 'cursor-grabbing' : 'cursor-grab',
       )}
       style={{
-        left: position.x,
+        left: isAtLeast.lg ? position.x : undefined,
         top: isAtLeast.lg ? position.y : 0,
         maxWidth: isAtLeast.lg ? maxWidth : '100%',
         maxHeight: isAtLeast.lg ? maxHeight : '40%',
@@ -185,8 +197,9 @@ export function FloatingText({
           onClick={() => {
             setIsMinimized(!isMinimized);
             setTimeout(() => {
-              if (containerRef.current && parentRef.current) {
-                const parentRect = parentRef.current.getBoundingClientRect();
+              const parent = getParentElement();
+              if (containerRef.current && parent) {
+                const parentRect = parent.getBoundingClientRect();
                 const rect = containerRef.current.getBoundingClientRect();
                 const newPos = {
                   x: Math.max(
@@ -220,4 +233,10 @@ export function FloatingText({
       )}
     </aside>
   );
+
+  if (isAtLeast.lg && overlayTarget) {
+    return createPortal(floatingTextElement, overlayTarget);
+  }
+
+  return floatingTextElement;
 }

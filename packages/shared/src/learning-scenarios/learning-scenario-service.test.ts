@@ -8,6 +8,7 @@ import {
   getLearningScenariosByOverviewFilter,
   getLearningScenariosForUser,
   getLearningScenario,
+  getLearningScenarioForChatSession,
   getSharedLearningScenario,
   linkFileToLearningScenario,
   removeFileFromLearningScenario,
@@ -566,6 +567,87 @@ describe('learning-scenario-service', () => {
           }),
         ).rejects.toThrow(ForbiddenError);
       });
+    });
+  });
+
+  describe('getLearningScenarioForChatSession', () => {
+    const learningScenarioId = generateUUID();
+
+    it('returns the learning scenario when user has read access', async () => {
+      const user = mockUser('teacher');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+      } as unknown as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+
+      const result = await getLearningScenarioForChatSession({
+        learningScenarioId,
+        user,
+      });
+
+      expect(result).toBe(learningScenario);
+    });
+
+    it('throws NotFoundError when learning scenario does not exist', async () => {
+      const user = mockUser('teacher');
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(null as never);
+
+      await expect(
+        getLearningScenarioForChatSession({
+          learningScenarioId,
+          user,
+        }),
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    it('throws ForbiddenError for private learning scenarios when user is not owner', async () => {
+      const user = mockUser('teacher');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: generateUUID(),
+        accessLevel: 'private',
+        hasLinkAccess: false,
+      } as unknown as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+
+      await expect(
+        getLearningScenarioForChatSession({
+          learningScenarioId,
+          user,
+        }),
+      ).rejects.toThrow(ForbiddenError);
+    });
+
+    it('allows access when hasLinkAccess is true', async () => {
+      const user = mockUser('teacher');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: generateUUID(),
+        accessLevel: 'private',
+        hasLinkAccess: true,
+      } as unknown as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+
+      await expect(
+        getLearningScenarioForChatSession({
+          learningScenarioId,
+          user,
+        }),
+      ).resolves.toBe(learningScenario);
     });
   });
 

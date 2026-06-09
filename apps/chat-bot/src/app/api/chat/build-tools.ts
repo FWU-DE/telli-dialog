@@ -34,6 +34,7 @@ function formatRetrievedChunksForTool(
 type BuildToolsParams = {
   user: UserAndContext;
   characterId?: string;
+  learningScenarioId?: string;
   assistantId?: string;
   conversationId: string;
   relatedFileEntities: FileModelAndContent[];
@@ -49,6 +50,7 @@ type BuildToolsResult = {
 export async function buildTools({
   user,
   characterId,
+  learningScenarioId,
   assistantId,
   conversationId,
   relatedFileEntities,
@@ -59,7 +61,12 @@ export async function buildTools({
   const webSearchResults: WebSearchResult[] = [];
   const attachedFileNames = relatedFileEntities.map((file) => file.name);
 
-  const webSearchEnabled = await isWebSearchEnabled({ user, characterId, assistantId });
+  const webSearchEnabled = await isWebSearchEnabled({
+    user,
+    characterId,
+    learningScenarioId,
+    assistantId,
+  });
 
   if (webSearchEnabled) {
     tools.push({

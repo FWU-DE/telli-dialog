@@ -22,6 +22,7 @@ import {
   DotsThreeIcon,
   ImageSquareIcon,
   LegoSmileyIcon,
+  MountainsIcon,
   QuestionIcon,
   StudentIcon,
   TrashIcon,
@@ -190,6 +191,10 @@ function buildConversationUrl({ conversation }: { conversation: ConversationMode
     return `/characters/d/${conversation.characterId}/${conversation.id}`;
   }
 
+  if (conversation.learningScenarioId !== null) {
+    return `/learning-scenarios/d/${conversation.learningScenarioId}/${conversation.id}`;
+  }
+
   if (conversation.assistantId !== null) {
     return `/assistants/d/${conversation.assistantId}/${conversation.id}`;
   }
@@ -208,6 +213,9 @@ function determineConversationIcon(
     case 'chat':
       if (conversation.characterId) {
         return <StudentIcon />;
+      }
+      if (conversation.learningScenarioId) {
+        return <MountainsIcon />;
       }
       if (conversation.assistantId) {
         if (conversation.assistantId === HELP_MODE_ASSISTANT_ID) {

@@ -1,5 +1,5 @@
 {
-  "id": "dbfaa33f-91ed-4d8a-8fc6-54601f29fe71",
+  "id": "5399d18e-5782-475a-a165-63660e316417",
   "prevId": "505f1222-5e94-4ec9-9670-2b9d8af62bc1",
   "version": "7",
   "dialect": "postgresql",
@@ -524,13 +524,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "author": {
-          "name": "author",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "''"
-        },
         "name": {
           "name": "name",
           "type": "text",
@@ -745,13 +738,6 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
-        },
-        "author": {
-          "name": "author",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "''"
         },
         "user_id": {
           "name": "user_id",
@@ -1279,6 +1265,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "learning_scenario_id": {
+          "name": "learning_scenario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "assistant_id": {
           "name": "assistant_id",
           "type": "uuid",
@@ -1327,6 +1319,21 @@
           "columns": [
             {
               "expression": "character_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "conversation_learning_scenario_id_index": {
+          "name": "conversation_learning_scenario_id_index",
+          "columns": [
+            {
+              "expression": "learning_scenario_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1395,6 +1402,19 @@
           "tableTo": "character",
           "columnsFrom": [
             "character_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "conversation_learning_scenario_id_learning_scenario_id_fk": {
+          "name": "conversation_learning_scenario_id_learning_scenario_id_fk",
+          "tableFrom": "conversation",
+          "tableTo": "learning_scenario",
+          "columnsFrom": [
+            "learning_scenario_id"
           ],
           "columnsTo": [
             "id"
@@ -2114,13 +2134,6 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
-        },
-        "author": {
-          "name": "author",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "''"
         },
         "name": {
           "name": "name",

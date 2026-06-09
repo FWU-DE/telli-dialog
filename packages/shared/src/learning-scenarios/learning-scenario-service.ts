@@ -456,6 +456,28 @@ export async function getLearningScenario({
 }
 
 /**
+ * This function is called when a user wants to start a chat session with a learning scenario.
+ * Access rules are the same as for read access in the overview/view pages.
+ *
+ * @throws NotFoundError if learning scenario does not exist
+ * @throws ForbiddenError if user is not authorized to access the learning scenario
+ */
+export async function getLearningScenarioForChatSession({
+  learningScenarioId,
+  user,
+}: {
+  learningScenarioId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds'>;
+}) {
+  checkParameterUUID(learningScenarioId);
+  const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
+  if (!learningScenario) throw new NotFoundError('Learning scenario not found');
+  verifyReadAccess({ item: learningScenario, user });
+
+  return learningScenario;
+}
+
+/**
  * Get files linked to a learning scenario.
  *
  * If the learning scenario is private, only the owner can fetch file mappings.

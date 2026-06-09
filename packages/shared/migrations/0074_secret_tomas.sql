@@ -1,0 +1,3 @@
+ALTER TABLE "conversation" ADD COLUMN "learning_scenario_id" uuid;--> statement-breakpoint
+ALTER TABLE "conversation" ADD CONSTRAINT "conversation_learning_scenario_id_learning_scenario_id_fk" FOREIGN KEY ("learning_scenario_id") REFERENCES "public"."learning_scenario"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "conversation_learning_scenario_id_index" ON "conversation" USING btree ("learning_scenario_id");

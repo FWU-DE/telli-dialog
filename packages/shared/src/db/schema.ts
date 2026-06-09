@@ -77,6 +77,9 @@ export const conversationTable = pgTable(
       .references(() => userTable.id)
       .notNull(),
     characterId: uuid('character_id').references(() => characterTable.id, { onDelete: 'cascade' }),
+    learningScenarioId: uuid('learning_scenario_id').references(() => learningScenarioTable.id, {
+      onDelete: 'cascade',
+    }),
     assistantId: uuid('assistant_id').references(() => assistantTable.id, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
@@ -85,6 +88,7 @@ export const conversationTable = pgTable(
   (table) => [
     index().on(table.userId),
     index().on(table.characterId),
+    index().on(table.learningScenarioId),
     index().on(table.assistantId),
     index().on(table.userId, table.createdAt.desc()).where(isNull(table.deletedAt)),
   ],
