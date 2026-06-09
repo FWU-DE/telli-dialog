@@ -19,6 +19,7 @@ type AgentLoopParams = {
   messages: AiCoreMessage[];
   tools?: ToolDefinition[];
   toolHandlers?: Record<string, ToolHandler>;
+  agentName: string;
   onTextChunk: (delta: string) => void;
   onToolCall?: (call: ToolCall) => void;
   onComplete: (result: { fullText: string; usage: TokenUsage; priceInCents: number }) => void;
@@ -31,6 +32,7 @@ export function runAgentLoop({
   messages,
   tools,
   toolHandlers,
+  agentName,
   onTextChunk,
   onComplete,
   onError,
@@ -45,12 +47,12 @@ export function runAgentLoop({
       await Sentry.startSpan(
         {
           op: 'gen_ai.invoke_agent',
-          name: 'invoke_agent AIS.chat',
+          name: `invoke_agent ${agentName}`,
           attributes: {
             'gen_ai.operation.name': 'invoke_agent',
             'gen_ai.operation.type': 'agent',
             'gen_ai.request.model': model.name,
-            'gen_ai.agent.name': 'AIS.chat',
+            'gen_ai.agent.name': agentName,
           },
         },
         async (agentSpan) => {

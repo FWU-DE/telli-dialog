@@ -38,6 +38,7 @@ import { buildTools } from './build-tools';
 import { runWebSearchPipeline } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -55,6 +56,24 @@ function convertToAiCoreMessages(systemPrompt: string, messages: ChatMessage[]):
   }
 
   return result;
+}
+
+function resolveAgentNameForTracing({
+  characterId,
+  learningScenarioId,
+  assistantId,
+}: {
+  characterId?: string;
+  learningScenarioId?: string;
+  assistantId?: string;
+}): string {
+  if (characterId) return 'Character';
+  if (learningScenarioId) return 'Learning Scenario';
+  if (assistantId) {
+    if (assistantId === HELP_MODE_ASSISTANT_ID) return 'Help Mode';
+    return 'Assistant';
+  }
+  return 'Chat';
 }
 
 /**
@@ -340,6 +359,8 @@ export async function sendChatMessage({
       },
     });
     webSearchResults = builtTools.webSearchResults;
+    const agentName = resolveAgentNameForTracing({ characterId, learningScenarioId, assistantId });
+
     // Start the agent loop in the background
     runAgentLoop({
       model: definedModel,
@@ -347,6 +368,7 @@ export async function sendChatMessage({
       messages: aiCoreMessages,
       tools: builtTools.tools,
       toolHandlers: builtTools.toolHandlers,
+      agentName,
       onTextChunk: (delta) => {
         update(delta);
       },
