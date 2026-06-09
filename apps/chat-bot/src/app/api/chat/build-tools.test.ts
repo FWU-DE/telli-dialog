@@ -114,10 +114,16 @@ describe('buildTools', () => {
         limit: VECTOR_SEARCH_LIMIT,
       }),
     );
-    expect(result).toContain('Dateien:');
-    expect(result).toContain('Arbeitsblatt.pdf');
-    expect(result).toContain('Leitfaden.txt');
-    expect(result).toContain('Erster relevanter Abschnitt.');
+    expect(JSON.parse(result)).toEqual({
+      chunks: [
+        {
+          fileName: 'Arbeitsblatt.pdf',
+          orderIndex: 0,
+          content: 'Erster relevanter Abschnitt.',
+        },
+      ],
+      error: null,
+    });
   });
 
   it('adds a web scraper tool and returns scraped page content', async () => {
@@ -154,8 +160,52 @@ describe('buildTools', () => {
     });
 
     expect(mocks.webScraperMock).toHaveBeenCalledWith('https://example.com/article');
-    expect(result).toContain('Titel: Beispielseite');
-    expect(result).toContain('URL: https://example.com/article');
-    expect(result).toContain('Das ist der extrahierte Inhalt.');
+    expect(JSON.parse(result)).toEqual({
+      title: 'Beispielseite',
+      url: 'https://example.com/article',
+      content: 'Das ist der extrahierte Inhalt.',
+      error: null,
+    });
+  });
+
+  it('adds a web search tool and returns search results as JSON', async () => {
+    mocks.isWebSearchEnabledMock.mockResolvedValue(true);
+    mocks.searchWebMock.mockResolvedValue([
+      {
+        name: 'Beispielartikel',
+        url: 'https://example.com/search-result',
+        content: 'Kurzer Auszug aus dem Suchergebnis.',
+      },
+    ]);
+
+    const { buildTools } = await import('./build-tools');
+
+    const { toolHandlers } = await buildTools({
+      user,
+      conversationId: 'conversation-1',
+      relatedFileEntities: [],
+    });
+
+    const result = await toolHandlers.web_search!({
+      query: 'aktuelle information',
+    });
+
+    expect(mocks.searchWebMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: 'aktuelle information',
+        conversationId: 'conversation-1',
+        userId: 'user-1',
+      }),
+    );
+    expect(JSON.parse(result)).toEqual({
+      results: [
+        {
+          title: 'Beispielartikel',
+          url: 'https://example.com/search-result',
+          content: 'Kurzer Auszug aus dem Suchergebnis.',
+        },
+      ],
+      error: null,
+    });
   });
 });

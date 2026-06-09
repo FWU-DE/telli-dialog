@@ -10,43 +10,77 @@ import { retrieveChunksByQuery } from '../rag/rag-service';
 import { webScraper } from '../web-scraper/web-scraper';
 import { isIP } from 'node:net';
 
-function formatRetrievedChunksForTool(
-  chunks: Awaited<ReturnType<typeof retrieveChunksByQuery>>,
-  fileNames: string[],
-) {
-  const normalizedFileNames = fileNames.filter((fileName) => fileName.trim().length > 0);
-  const fileList =
-    normalizedFileNames.length > 0
-      ? normalizedFileNames.map((fileName) => `- ${fileName}`).join('\n')
-      : '- Keine Dateien verfügbar';
+type WebScraperToolResult = {
+  title: string | null;
+  url: string | null;
+  content: string | null;
+  error: string | null;
+};
+
+type WebSearchToolResult = {
+  title: string | null;
+  url: string | null;
+  content: string | null;
+};
+
+type WebSearchToolResponse = {
+  results: WebSearchToolResult[];
+  error: string | null;
+};
+
+type SemanticFileSearchChunkResult = {
+  fileName: string | null;
+  orderIndex: number | null;
+  content: string | null;
+};
+
+type SemanticFileSearchToolResponse = {
+  chunks: SemanticFileSearchChunkResult[];
+  error: string | null;
+};
+
+function formatRetrievedChunksForTool(chunks: Awaited<ReturnType<typeof retrieveChunksByQuery>>) {
+  const formattedChunks: SemanticFileSearchChunkResult[] = chunks.map((chunk) => ({
+    fileName: chunk.fileName ?? null,
+    orderIndex: chunk.orderIndex ?? null,
+    content: chunk.content ?? null,
+  }));
+
+  const response: SemanticFileSearchToolResponse = {
+    chunks: formattedChunks,
+    error: null,
+  };
 
   if (chunks.length === 0) {
-    return `Dateien:\n${fileList}\n\nKeine passenden Textstellen gefunden.`;
+    response.error = 'Keine passenden Textstellen gefunden.';
   }
 
-  const chunkText = chunks
-    .map(
-      (chunk) =>
-        `Datei: ${chunk.fileName ?? 'Unbekannte Datei'}${chunk.sourceUrl ? `\nQuelle: ${chunk.sourceUrl}` : ''}\nAbschnitt: ${chunk.orderIndex + 1}\n${chunk.content}`,
-    )
-    .join('\n\n---\n\n');
-
-  return `Dateien:\n${fileList}\n\n${chunkText}`;
+  return JSON.stringify(response);
 }
 
 function formatWebScrapedContentForTool(result: WebSource) {
-  const title = result.name?.trim() || 'Unbekannter Titel';
-  const content = result.content?.trim();
+  const title = result.name?.trim() || null;
+  const content = result.content?.trim() || null;
+
+  const response: WebScraperToolResult = {
+    title,
+    url: result.link ?? null,
+    content: null,
+    error: null,
+  };
 
   if (result.error) {
-    return `Titel: ${title}\nURL: ${result.link}\n\nFehler beim Abrufen der Seite.`;
+    response.error = 'Fehler beim Abrufen der Seite.';
+    return JSON.stringify(response);
   }
 
   if (!content) {
-    return `Titel: ${title}\nURL: ${result.link}\n\nKeine verwertbaren Inhalte gefunden.`;
+    response.error = 'Keine verwertbaren Inhalte gefunden.';
+    return JSON.stringify(response);
   }
 
-  return `Titel: ${title}\nURL: ${result.link}\n\n${content}`;
+  response.content = content;
+  return JSON.stringify(response);
 }
 
 function validateWebScraperUrl(inputUrl: string): { url: string; error?: string } {
@@ -126,19 +160,31 @@ export async function buildTools({
     });
 
     toolHandlers['web_search'] = async (args) => {
+      const query = typeof args.query === 'string' ? args.query : '';
       const results = await searchWeb({
-        query: args.query as string,
+        query,
         conversationId,
         userId: user.id,
       });
+
+      const response: WebSearchToolResponse = {
+        results: results.map((result) => ({
+          title: result.name?.trim() ?? null,
+          url: result.url ?? null,
+          content: result.content?.trim() ?? null,
+        })),
+        error: null,
+      };
 
       webSearchResults.push(...results);
       onWebSearchResults?.(results);
 
       if (results.length === 0) {
-        return 'No results found.';
+        response.error = 'No results found.';
+        return JSON.stringify(response);
       }
-      return results.map((r) => `[${r.name}](${r.url})\n${r.content}`).join('\n\n---\n\n');
+
+      return JSON.stringify(response);
     };
 
     tools.push({
@@ -216,7 +262,7 @@ export async function buildTools({
         limit,
       });
 
-      return formatRetrievedChunksForTool(chunks, attachedFileNames);
+      return formatRetrievedChunksForTool(chunks);
     };
   }
 
