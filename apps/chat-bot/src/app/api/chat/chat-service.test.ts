@@ -55,6 +55,9 @@ const mocks = vi.hoisted(() => ({
   ingestWebContentMock: vi.fn(),
   userHasReachedTokenPointsLimitMock: vi.fn(),
   logErrorMock: vi.fn(),
+  getCharacterForChatSessionMock: vi.fn(),
+  getLearningScenarioForChatSessionMock: vi.fn(),
+  getAssistantForNewChatMock: vi.fn(),
 }));
 
 vi.mock('@ais-chat/ai-core', () => ({
@@ -144,6 +147,18 @@ vi.mock('../rag/ingestWebContent', () => ({
 
 vi.mock('@shared/logging', () => ({
   logError: mocks.logErrorMock,
+}));
+
+vi.mock('@shared/characters/character-service', () => ({
+  getCharacterForChatSession: mocks.getCharacterForChatSessionMock,
+}));
+
+vi.mock('@shared/learning-scenarios/learning-scenario-service', () => ({
+  getLearningScenarioForChatSession: mocks.getLearningScenarioForChatSessionMock,
+}));
+
+vi.mock('@shared/assistants/assistant-service', () => ({
+  getAssistantForNewChat: mocks.getAssistantForNewChatMock,
 }));
 
 const mainModel = {
