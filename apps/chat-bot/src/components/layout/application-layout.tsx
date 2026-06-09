@@ -43,11 +43,7 @@ export function ApplicationLayout({
             >
               {children}
             </main>
-            <div
-              ref={overlayRootRef}
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
-            />
+            <div ref={overlayRootRef} className="pointer-events-none absolute inset-0" />
           </div>
         </div>
       </ChatOverlayRootContext.Provider>

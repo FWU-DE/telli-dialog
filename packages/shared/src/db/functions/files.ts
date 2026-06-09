@@ -89,9 +89,9 @@ export async function dbGetRelatedFiles(conversationId: string): Promise<Map<str
 }
 
 export async function dbGetRelatedLearningScenarioFiles(
-  conversationId?: string,
+  learningScenarioId?: string,
 ): Promise<FileModel[]> {
-  if (conversationId === undefined) return [];
+  if (learningScenarioId === undefined) return [];
   const files = await db
     .select({
       id: LearningScenarioFileMapping.fileId,
@@ -104,7 +104,7 @@ export async function dbGetRelatedLearningScenarioFiles(
     })
     .from(LearningScenarioFileMapping)
     .innerJoin(fileTable, eq(LearningScenarioFileMapping.fileId, fileTable.id))
-    .where(eq(LearningScenarioFileMapping.learningScenarioId, conversationId));
+    .where(eq(LearningScenarioFileMapping.learningScenarioId, learningScenarioId));
 
   return files;
 }
@@ -273,7 +273,7 @@ export async function dbGetFilesInIds(fileIds: string[]): Promise<FileModelAndCo
 export async function dbGetAttachedFileByEntityId({
   conversationId,
   characterId,
-  learningScenarioId: sharedChatId,
+  learningScenarioId,
   assistantId,
 }: {
   conversationId?: string;
@@ -282,7 +282,7 @@ export async function dbGetAttachedFileByEntityId({
   assistantId?: string;
 }): Promise<(FileModel & { conversationMessageId?: string })[]> {
   const combinedFiles = await Promise.all([
-    dbGetRelatedLearningScenarioFiles(sharedChatId),
+    dbGetRelatedLearningScenarioFiles(learningScenarioId),
     dbGetRelatedCharacterFiles(characterId),
     dbGetAllFileIdByConversationId(conversationId),
     dbGetRelatedAssistantFiles(assistantId),
