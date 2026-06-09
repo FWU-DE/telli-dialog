@@ -144,7 +144,7 @@ export async function buildTools({
     tools.push({
       name: 'web_scraper',
       description:
-        'Fetch and extract the main text from one specific URL. Use this tool when the user gives you a single webpage URL and you need its content. Use web_search instead when you need to discover relevant pages or compare multiple sources.',
+        'Fetch and extract the main text from one specific URL. Use this tool when the user gives you a single webpage URL or when you can derive a concrete URL yourself, for example to scrape a documentation page or another known target. Use web_search instead when you need to discover relevant pages or compare multiple sources.',
       parameters: {
         type: 'object',
         properties: {
