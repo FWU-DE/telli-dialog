@@ -48,23 +48,25 @@ import { getCharacterForChatSession } from '@shared/characters/character-service
 import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
 import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 
+type CustomChatIds = {
+  characterId?: string | undefined;
+  learningScenarioId?: string | undefined;
+  assistantId?: string | undefined;
+};
+
 function ensureConversationCustomChatIdsMatch({
   incomingIds,
   storedIds,
 }: {
-  incomingIds: Array<string | undefined>;
-  storedIds: Array<string | null | undefined>;
+  incomingIds: CustomChatIds;
+  storedIds: CustomChatIds;
 }) {
-  const hasMismatch = incomingIds.some((incomingId, index) => {
-    if (incomingId === undefined) {
-      return false;
-    }
-
-    return incomingId !== storedIds[index];
+  const hasMismatch = Object.keys(incomingIds).some((key) => {
+    return incomingIds[key as keyof CustomChatIds] !== storedIds[key as keyof CustomChatIds];
   });
 
   if (hasMismatch) {
-    throw new Error('Conversation context mismatch');
+    throw new NotFoundError('Conversation not found');
   }
 }
 
@@ -162,12 +164,12 @@ export async function sendChatMessage({
   const agenticChatEnabled = user.federalState.featureToggles.isAgenticChatEnabled ?? false;
 
   ensureConversationCustomChatIdsMatch({
-    incomingIds: [characterId, learningScenarioId, assistantId],
-    storedIds: [
-      activeConversation.characterId,
-      activeConversation.learningScenarioId,
-      activeConversation.assistantId,
-    ],
+    incomingIds: { characterId, learningScenarioId, assistantId },
+    storedIds: {
+      characterId: activeConversation.characterId ?? undefined,
+      learningScenarioId: activeConversation.learningScenarioId ?? undefined,
+      assistantId: activeConversation.assistantId ?? undefined,
+    },
   });
 
   let activeCharacter: CharacterSelectModel | undefined;

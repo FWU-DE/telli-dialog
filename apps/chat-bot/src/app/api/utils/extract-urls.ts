@@ -1,6 +1,6 @@
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION } from '@/configuration-text-inputs/const';
-import { ChatMessage } from '../chat/actions';
+import { type ChatMessage } from '../chat/actions';
 import type {
   AssistantSelectModel,
   CharacterSelectModel,
