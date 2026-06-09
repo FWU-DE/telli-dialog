@@ -38,6 +38,7 @@ export default tseslint.config(
     ...packageJson.configs.recommended,
     files: ['package.json'],
     rules: {
+      ...packageJson.configs.recommended.rules,
       'package-json/restrict-dependency-ranges': ['error', { rangeType: 'pin' }],
     },
   },
