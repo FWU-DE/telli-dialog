@@ -1,20 +1,21 @@
 {
   "name": "@ais-chat/shared-core",
   "version": "0.0.1",
+  "description": "Shared utilities and helpers for all apps",
   "type": "module",
   "private": true,
   "exports": {
     "./*": "./src/*.ts"
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "types": "tsc --noEmit",
-    "check-types": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "types": "tsc --noEmit"
   },
   "dependencies": {
     "@sentry/core": "10.55.0"

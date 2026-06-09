@@ -1,6 +1,7 @@
 {
   "name": "@ais-chat/ai-core",
   "version": "0.0.1",
+  "description": "AI and LLM integration layer for communicating with AI providers",
   "main": "src/index.ts",
   "type": "module",
   "private": true,
@@ -9,19 +10,19 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "types": "tsc --noEmit",
-    "check-types": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "types": "tsc --noEmit"
   },
   "dependencies": {
     "@ais-chat/api-database": "workspace:*",
-    "@sentry/core": "10.55.0",
     "@google/genai": "2.7.0",
+    "@sentry/core": "10.55.0",
     "js-tiktoken": "1.0.21",
     "openai": "6.39.1",
     "openaiv4": "npm:openai@4.104.0",

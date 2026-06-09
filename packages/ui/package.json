@@ -1,6 +1,7 @@
 {
   "name": "@ais-chat/ui",
   "version": "0.0.0",
+  "description": "Reusable shadcn/ui-based component library",
   "private": true,
   "type": "module",
   "scripts": {
@@ -39,12 +40,12 @@
     "typescript": "6.0.3"
   },
   "exports": {
+    "./components/*": "./src/components/*.tsx",
     "./globals.css": "./src/styles/globals.css",
+    "./hooks/*": "./src/hooks/*.ts",
+    "./lib/*": "./src/lib/*.ts",
     "./postcss.config": "./postcss.config.mjs",
     "./tailwind.config": "./tailwind.config.ts",
-    "./lib/*": "./src/lib/*.ts",
-    "./components/*": "./src/components/*.tsx",
-    "./hooks/*": "./src/hooks/*.ts",
     "./types/*": "./src/types/*.ts"
   }
 }
