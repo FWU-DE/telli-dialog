@@ -3,31 +3,37 @@ import { constructAzureImageGenerationFn } from './azure';
 import { AiGenerationError, ProviderConfigurationError, ResponsibleAIError } from '../../errors';
 import type { AiModel } from '../types';
 
-const { generateMock, openAiConstructorMock, instrumentOpenAiClientMock, MockOpenAI } = vi.hoisted(
-  () => {
-    const generateMock = vi.fn();
-    const openAiConstructorMock = vi.fn();
+const {
+  generateMock,
+  openAiConstructorMock,
+  instrumentOpenAiClientMock,
+  startSpanMock,
+  MockOpenAI,
+} = vi.hoisted(() => {
+  const generateMock = vi.fn();
+  const openAiConstructorMock = vi.fn();
+  const startSpanMock = vi.fn((_, callback) => callback({ setAttribute: vi.fn() }));
 
-    class MockOpenAI {
-      images = {
-        generate: generateMock,
-      };
-
-      constructor(options: unknown) {
-        openAiConstructorMock(options);
-      }
-    }
-
-    const instrumentOpenAiClientMock = vi.fn((client) => client);
-
-    return {
-      generateMock,
-      openAiConstructorMock,
-      instrumentOpenAiClientMock,
-      MockOpenAI,
+  class MockOpenAI {
+    images = {
+      generate: generateMock,
     };
-  },
-);
+
+    constructor(options: unknown) {
+      openAiConstructorMock(options);
+    }
+  }
+
+  const instrumentOpenAiClientMock = vi.fn((client) => client);
+
+  return {
+    generateMock,
+    openAiConstructorMock,
+    instrumentOpenAiClientMock,
+    startSpanMock,
+    MockOpenAI,
+  };
+});
 
 vi.mock('openai', () => ({
   default: MockOpenAI,
@@ -35,6 +41,7 @@ vi.mock('openai', () => ({
 
 vi.mock('@sentry/core', () => ({
   instrumentOpenAiClient: instrumentOpenAiClientMock,
+  startSpan: startSpanMock,
 }));
 
 function createAzureModel(baseUrl: string): AiModel {

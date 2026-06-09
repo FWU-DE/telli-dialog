@@ -9,7 +9,7 @@ import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import {
   sharedChatHasExpired,
-  sharedChatHasReachedTokenPointsLimit,
+  sharedLearningScenarioChatHasReachedTokenPointsLimit,
   userHasReachedTokenPointsLimit,
 } from '../chat/usage';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
@@ -17,7 +17,7 @@ import {
   dbGetLearningScenarioByIdAndInviteCode,
   dbUpdateTokenUsageBySharedLearningScenarioId,
 } from '@shared/db/functions/learning-scenario';
-import { dbGetRelatedSharedChatFiles } from '@shared/db/functions/files';
+import { dbGetRelatedLearningScenarioFiles } from '@shared/db/functions/files';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
@@ -35,30 +35,32 @@ import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 
 /**
- * Server Action to send a shared chat (learning scenario) message and stream the response.
+ * Server Action to send a learning scenario message and stream the response.
  */
-export async function sendSharedChatMessage({
-  sharedChatId,
+export async function sendLearningScenarioMessage({
+  learningScenarioId,
   inviteCode,
   messages,
   modelId,
 }: {
-  sharedChatId: string;
+  learningScenarioId: string;
   inviteCode: string;
   messages: ChatMessage[];
   modelId: string;
 }): Promise<SendMessageResult> {
-  // Get shared chat
-  const sharedChat = await dbGetLearningScenarioByIdAndInviteCode({
-    learningScenarioId: sharedChatId,
+  // Get learning scenario
+  const learningScenario = await dbGetLearningScenarioByIdAndInviteCode({
+    learningScenarioId: learningScenarioId,
     inviteCode,
   });
-  if (sharedChat === undefined || sharedChat.suspended) {
-    return createErrorResult(new NotFoundError('Shared chat not found'));
+  if (learningScenario === undefined || learningScenario.suspended) {
+    return createErrorResult(new NotFoundError('Learning scenario not found'));
   }
 
   // Get teacher user context
-  const teacherUserAndContext = await getUserAndContextByUserId({ userId: sharedChat.startedBy });
+  const teacherUserAndContext = await getUserAndContextByUserId({
+    userId: learningScenario.startedBy,
+  });
   const productAccess = checkProductAccess(teacherUserAndContext);
 
   if (!productAccess.hasAccess) {
@@ -82,15 +84,15 @@ export async function sendSharedChatMessage({
   const { model: definedModel, apiKeyId } = modelAndApiKey;
 
   // Check expiry
-  if (sharedChatHasExpired(sharedChat)) {
+  if (sharedChatHasExpired(learningScenario)) {
     return createErrorResult(new SharedChatExpiredError());
   }
 
   // Check limits
   const [sharedChatLimitReached, tokenPointsLimitReached] = await Promise.all([
-    sharedChatHasReachedTokenPointsLimit({
+    sharedLearningScenarioChatHasReachedTokenPointsLimit({
       user: teacherUserAndContext,
-      sharedChat,
+      learningScenario: learningScenario,
     }),
     userHasReachedTokenPointsLimit({ user: teacherUserAndContext }),
   ]);
@@ -100,7 +102,7 @@ export async function sendSharedChatMessage({
       constructTokenBudgetExceededEvent({
         anonymous: true,
         user: teacherUserAndContext,
-        sharedChat,
+        sharedChat: learningScenario,
       }),
     );
   }
@@ -110,8 +112,8 @@ export async function sendSharedChatMessage({
   }
 
   // Get related files and web sources
-  const relatedFileEntities = await dbGetRelatedSharedChatFiles(sharedChat.id);
-  const urls = sharedChat.attachedLinks.filter((l) => l !== '');
+  const relatedFileEntities = await dbGetRelatedLearningScenarioFiles(learningScenario.id);
+  const urls = learningScenario.attachedLinks.filter((l) => l !== '');
   const { processedUrls } = await ingestWebContent({
     urls,
     federalStateId: teacherUserAndContext.federalState.id,
@@ -126,7 +128,7 @@ export async function sendSharedChatMessage({
 
   // Build system prompt
   const systemPrompt = constructLearningScenarioSystemPrompt({
-    sharedChat,
+    learningScenario: learningScenario,
     chunks,
   });
 
@@ -173,7 +175,7 @@ export async function sendSharedChatMessage({
             modelId: definedModel.id,
             completionTokens,
             promptTokens,
-            learningScenarioId: sharedChat.id,
+            learningScenarioId: learningScenario.id,
             userId: teacherUserAndContext.id,
             costsInCent: priceInCents,
           });
@@ -186,7 +188,7 @@ export async function sendSharedChatMessage({
               completionTokens,
               costsInCent: priceInCents,
               anonymous: true,
-              sharedChat,
+              sharedChat: learningScenario,
             }),
           );
         },

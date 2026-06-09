@@ -1,6 +1,7 @@
 {
   "name": "@ais-chat/shared",
   "version": "0.0.1",
+  "description": "Shared application services and database schema for the chat app",
   "main": "src/index.ts",
   "type": "module",
   "private": true,
@@ -8,8 +9,9 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "db:generate": "dotenvx run -f ../../apps/chat-bot/.env.local -- drizzle-kit generate --config=./drizzle.config.ts",
+    "check-types": "tsc --noEmit",
     "db:drop": "dotenvx run -f ../../apps/chat-bot/.env.local -- drizzle-kit drop --config=./drizzle.config.ts",
+    "db:generate": "dotenvx run -f ../../apps/chat-bot/.env.local -- drizzle-kit generate --config=./drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config=./drizzle.config.ts",
     "db:migrate:local": "dotenvx run -f ../../apps/chat-bot/.env.local -- drizzle-kit migrate --config=./drizzle.config.ts",
     "db:seed": "tsx src/db/seed/index.ts",
@@ -17,12 +19,11 @@
     "db:seed:local": "ENVIRONMENT=development dotenvx run -f ../../apps/chat-bot/.env.local -- pnpm tsx src/db/seed/index.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "types": "tsc --noEmit",
-    "check-types": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "types": "tsc --noEmit"
   },
   "dependencies": {
     "@ais-chat/ai-core": "workspace:*",

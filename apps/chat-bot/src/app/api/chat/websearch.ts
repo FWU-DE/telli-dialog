@@ -23,14 +23,16 @@ export function isWebSearchAvailableForFederalState(
 export async function isWebSearchEnabled({
   user,
   characterId,
+  learningScenarioId,
   assistantId,
 }: {
   user: UserAndContext;
   characterId?: string;
+  learningScenarioId?: string;
   assistantId?: string;
 }): Promise<boolean> {
   if (!isWebSearchAvailableForFederalState(user.federalState)) return false;
-  if (characterId) return false;
+  if (characterId || learningScenarioId) return false;
   if (!assistantId) return true;
   if (assistantId === HELP_MODE_ASSISTANT_ID) return false;
   return (await dbGetAssistantById({ assistantId }))?.isWebSearchEnabled ?? false;
@@ -221,6 +223,7 @@ export async function runWebSearchPipeline({
   messages,
   user,
   characterId,
+  learningScenarioId,
   assistantId,
   modelId,
   apiKeyId,
@@ -229,12 +232,18 @@ export async function runWebSearchPipeline({
   messages: Message[];
   user: UserAndContext;
   characterId?: string;
+  learningScenarioId?: string;
   assistantId?: string;
   modelId: string;
   apiKeyId: string;
   conversationId: string;
 }): Promise<WebSearchResult[]> {
-  const enabled = await isWebSearchEnabled({ user, characterId, assistantId });
+  const enabled = await isWebSearchEnabled({
+    user,
+    characterId,
+    learningScenarioId,
+    assistantId,
+  });
   if (!enabled) return [];
 
   const decision = await isWebSearchNeeded({ messages, modelId, apiKeyId });

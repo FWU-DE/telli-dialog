@@ -1,6 +1,7 @@
 {
   "name": "ais-chat",
   "version": "0.1.0",
+  "description": "AIS.chat monorepo",
   "private": true,
   "scripts": {
     "build": "turbo run build",

@@ -78,6 +78,9 @@ export const conversationTable = pgTable(
       .references(() => userTable.id)
       .notNull(),
     characterId: uuid('character_id').references(() => characterTable.id, { onDelete: 'cascade' }),
+    learningScenarioId: uuid('learning_scenario_id').references(() => learningScenarioTable.id, {
+      onDelete: 'cascade',
+    }),
     assistantId: uuid('assistant_id').references(() => assistantTable.id, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
@@ -86,6 +89,7 @@ export const conversationTable = pgTable(
   (table) => [
     index().on(table.userId),
     index().on(table.characterId),
+    index().on(table.learningScenarioId),
     index().on(table.assistantId),
     index().on(table.userId, table.createdAt.desc()).where(isNull(table.deletedAt)),
   ],
@@ -382,6 +386,7 @@ export const characterTable = pgTable(
   'character',
   {
     id: uuid('id').defaultRandom().primaryKey(),
+    author: text('author').notNull().default(''),
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
@@ -595,6 +600,7 @@ export const learningScenarioTable = pgTable(
   'learning_scenario',
   {
     id: uuid('id').defaultRandom().primaryKey(),
+    author: text('author').notNull().default(''),
     name: text('name').notNull(),
     description: text('description').notNull().default(''),
     modelId: uuid('model_id')
@@ -1048,6 +1054,7 @@ export const assistantTable = pgTable(
   'assistant',
   {
     id: uuid('id').defaultRandom().primaryKey(),
+    author: text('author').notNull().default(''),
     name: text('name').notNull(),
     systemPrompt: text('system_prompt').notNull(),
     userId: uuid('user_id').references(() => userTable.id),

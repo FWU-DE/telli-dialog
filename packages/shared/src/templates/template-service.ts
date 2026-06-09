@@ -94,6 +94,7 @@ async function getCharacterTemplates(): Promise<TemplateModel[]> {
   const templates = await db
     .select({
       id: characterTable.id,
+      author: characterTable.author,
       name: characterTable.name,
       createdAt: characterTable.createdAt,
       originalId: characterTable.originalCharacterId,
@@ -113,6 +114,7 @@ async function getAssistantTemplates(): Promise<TemplateModel[]> {
   const templates = await db
     .select({
       id: assistantTable.id,
+      author: assistantTable.author,
       name: assistantTable.name,
       createdAt: assistantTable.createdAt,
       originalId: assistantTable.originalAssistantId,
@@ -132,6 +134,7 @@ async function getLearningScenarioTemplates(): Promise<TemplateModel[]> {
   const templates = await db
     .select({
       id: learningScenarioTable.id,
+      author: learningScenarioTable.author,
       name: learningScenarioTable.name,
       createdAt: learningScenarioTable.createdAt,
       originalId: learningScenarioTable.originalLearningScenarioId,
@@ -156,6 +159,7 @@ export async function getTemplateById(
       .select({
         id: characterTable.id,
         originalId: characterTable.originalCharacterId,
+        author: characterTable.author,
         name: characterTable.name,
         createdAt: characterTable.createdAt,
         isDeleted: characterTable.isDeleted,
@@ -176,6 +180,7 @@ export async function getTemplateById(
       .select({
         id: assistantTable.id,
         originalId: assistantTable.originalAssistantId,
+        author: assistantTable.author,
         name: assistantTable.name,
         createdAt: assistantTable.createdAt,
         isDeleted: assistantTable.isDeleted,
@@ -196,6 +201,7 @@ export async function getTemplateById(
       .select({
         id: learningScenarioTable.id,
         originalId: learningScenarioTable.originalLearningScenarioId,
+        author: learningScenarioTable.author,
         name: learningScenarioTable.name,
         createdAt: learningScenarioTable.createdAt,
         isDeleted: learningScenarioTable.isDeleted,
@@ -211,6 +217,32 @@ export async function getTemplateById(
       ...learningScenario,
       type: 'learning-scenario',
     };
+  } else {
+    throw new Error('Invalid template type');
+  }
+}
+
+/** Admin is allowed to update the author of a template. */
+export async function updateAuthorOfTemplate(
+  templateType: TemplateTypes,
+  templateId: string,
+  newAuthor: string,
+) {
+  if (templateType === 'character') {
+    await db
+      .update(characterTable)
+      .set({ author: newAuthor })
+      .where(eq(characterTable.id, templateId));
+  } else if (templateType === 'assistant') {
+    await db
+      .update(assistantTable)
+      .set({ author: newAuthor })
+      .where(eq(assistantTable.id, templateId));
+  } else if (templateType === 'learning-scenario') {
+    await db
+      .update(learningScenarioTable)
+      .set({ author: newAuthor })
+      .where(eq(learningScenarioTable.id, templateId));
   } else {
     throw new Error('Invalid template type');
   }
