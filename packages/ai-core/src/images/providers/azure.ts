@@ -16,6 +16,17 @@ type AzureImageGenerationError = {
   status?: unknown;
 };
 
+function setUsageAttributes(span: Sentry.Span, usage: OpenAI.Images.ImagesResponse.Usage) {
+  span.setAttribute('gen_ai.usage.input_tokens', usage.input_tokens);
+  span.setAttribute('gen_ai.usage.output_tokens', usage.output_tokens);
+  span.setAttribute('gen_ai.usage.total_tokens', usage.total_tokens);
+
+  if (usage.output_tokens_details) {
+    span.setAttribute('gen_ai.usage.output_text_tokens', usage.output_tokens_details.text_tokens);
+    span.setAttribute('gen_ai.usage.output_image_tokens', usage.output_tokens_details.image_tokens);
+  }
+}
+
 function isResponsibleAiPolicyError(
   error: unknown,
 ): error is AzureImageGenerationError & { code: string; message: string } {
@@ -97,6 +108,7 @@ export function constructAzureImageGenerationFn(model: AiModel): ImageGeneration
             throw new AiGenerationError('No usage data received from Azure OpenAI');
           }
 
+          setUsageAttributes(span, result.usage);
           span.setAttribute('gen_ai.response.finish_reasons', ['success']);
           span.setAttribute('gen_ai.response.model', model.name);
 
