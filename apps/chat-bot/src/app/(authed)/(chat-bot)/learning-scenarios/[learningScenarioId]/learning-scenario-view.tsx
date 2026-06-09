@@ -161,7 +161,7 @@ export function LearningScenarioView({
         initialLinks={initialLinks}
         onDownloadFile={handleDownloadFile}
       />
-      {learningScenario.hasLinkAccess && (
+      {(learningScenario.hasLinkAccess || learningScenario.accessLevel === 'community') && (
         <CustomChatCreateSuspensionRequestButton
           entityRef={{ entityType: 'learningScenario', entityId: learningScenario.id }}
         />
