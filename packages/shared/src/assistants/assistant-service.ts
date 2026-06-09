@@ -5,6 +5,7 @@ import {
 } from '@shared/conversation/conversation-service';
 import { db } from '@shared/db';
 import {
+  dbGetAssistantsByUserId,
   dbDeleteAssistantByIdAndUser,
   dbGetAssistantById,
   dbGetCommunityGpts,
@@ -40,6 +41,10 @@ import {
 } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { generateUUID } from '@shared/utils/uuid';
+import {
+  getChangedKeys,
+  getPreservedUpdatedAtForExemptedKeys,
+} from '@shared/utils/preserve-updated-at';
 import { and, eq } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
@@ -209,7 +214,7 @@ export async function getAssistantsByOverviewFilter({
       break;
     }
     case 'mine':
-      assistants = await dbGetGptsByUser({ user });
+      assistants = await dbGetAssistantsByUserId({ user });
       break;
     case 'official':
       assistants = await dbGetGlobalGpts({ user });
@@ -414,9 +419,19 @@ export async function updateAssistantAccessLevel({
   verifyWriteAccess({ item: assistant, user });
   verifySuspensionState({ item: assistant });
 
+  if (assistant.accessLevel === accessLevel) {
+    return assistant;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: assistant,
+    values: { accessLevel },
+    exemptedKeys: ['accessLevel'],
+  });
+
   const [updatedAssistant] = await db
     .update(assistantTable)
-    .set({ accessLevel })
+    .set({ accessLevel, ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}) })
     .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, user.id)))
     .returning();
 
@@ -453,10 +468,24 @@ export async function updateAssistant({
   verifyWriteAccess({ item: assistant, user });
 
   const parsedValues = updateAssistantSchema.parse(assistantProps);
+  const changedKeys = getChangedKeys({
+    entity: assistant,
+    values: parsedValues,
+  });
+
+  if (changedKeys.length === 0) {
+    return assistant;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: assistant,
+    values: parsedValues,
+    exemptedKeys: ['hasLinkAccess'],
+  });
 
   const [updatedAssistant] = await db
     .update(assistantTable)
-    .set(parsedValues)
+    .set({ ...parsedValues, ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}) })
     .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, user.id)))
     .returning();
 

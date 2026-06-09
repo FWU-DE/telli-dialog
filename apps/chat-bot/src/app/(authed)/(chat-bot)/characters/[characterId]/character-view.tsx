@@ -13,6 +13,7 @@ import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
+import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-update';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
@@ -86,6 +87,7 @@ export function CharacterView({
       <CustomChatActions>
         <CustomChatActionUse onClick={handleUseChat} />
         <CustomChatActionDuplicate onClick={handleDuplicateCharacter} />
+        <CustomChatLastUpdate date={character.updatedAt} />
       </CustomChatActions>
 
       <CustomChatShareWithLearners

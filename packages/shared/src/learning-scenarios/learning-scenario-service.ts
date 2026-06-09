@@ -54,6 +54,10 @@ import {
 } from '@shared/auth/authorization-service';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
+import {
+  getChangedKeys,
+  getPreservedUpdatedAtForExemptedKeys,
+} from '@shared/utils/preserve-updated-at';
 
 export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -236,10 +240,24 @@ export async function updateLearningScenario({
   verifyWriteAccess({ item: learningScenario, user });
 
   const parsedData = updateLearningScenarioSchema.parse(data);
+  const changedKeys = getChangedKeys({
+    entity: learningScenario,
+    values: parsedData,
+  });
+
+  if (changedKeys.length === 0) {
+    return learningScenario;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: learningScenario,
+    values: parsedData,
+    exemptedKeys: ['hasLinkAccess'],
+  });
 
   const [updatedLearningScenario] = await db
     .update(learningScenarioTable)
-    .set({ ...parsedData })
+    .set({ ...parsedData, ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}) })
     .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 
@@ -276,10 +294,20 @@ export async function updateLearningScenarioAccessLevel({
   verifyWriteAccess({ item: learningScenario, user });
   verifySuspensionState({ item: learningScenario });
 
+  if (learningScenario.accessLevel === accessLevel) {
+    return learningScenario;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: learningScenario,
+    values: { accessLevel },
+    exemptedKeys: ['accessLevel'],
+  });
+
   // Update the access level in database
   const [updatedLearningScenario] = await db
     .update(learningScenarioTable)
-    .set({ accessLevel })
+    .set({ accessLevel, ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}) })
     .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 

@@ -47,6 +47,10 @@ import {
 } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
+import {
+  getChangedKeys,
+  getPreservedUpdatedAtForExemptedKeys,
+} from '@shared/utils/preserve-updated-at';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, inArray } from 'drizzle-orm';
 import z from 'zod';
@@ -267,10 +271,20 @@ export const updateCharacterAccessLevel = async ({
   verifyWriteAccess({ item: character, user });
   verifySuspensionState({ item: character });
 
+  if (character.accessLevel === accessLevel) {
+    return character;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: character,
+    values: { accessLevel },
+    exemptedKeys: ['accessLevel'],
+  });
+
   // Update the access level in database
   const [updatedCharacter] = await db
     .update(characterTable)
-    .set({ accessLevel })
+    .set({ accessLevel, ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}) })
     .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
     .returning();
 
@@ -310,10 +324,27 @@ export const updateCharacter = async ({
   if (cleanedCharacter === undefined) return;
 
   const parsedCharacterValues = updateCharacterSchema.parse(cleanedCharacter);
+  const changedKeys = getChangedKeys({
+    entity: existingCharacter,
+    values: parsedCharacterValues,
+  });
+
+  if (changedKeys.length === 0) {
+    return existingCharacter;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: existingCharacter,
+    values: parsedCharacterValues,
+    exemptedKeys: ['hasLinkAccess'],
+  });
 
   const [updatedCharacter] = await db
     .update(characterTable)
-    .set({ ...parsedCharacterValues })
+    .set({
+      ...parsedCharacterValues,
+      ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}),
+    })
     .where(and(eq(characterTable.id, character.id), eq(characterTable.userId, user.id)))
     .returning();
 
