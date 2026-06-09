@@ -29,6 +29,7 @@ export function initSentry({
     debug: false,
     dsn: env.sentryDsn,
     environment: env.sentryEnvironment,
+    streamGenAiSpans: true,
     integrations: [
       Sentry.captureConsoleIntegration({ levels: ['fatal', 'error', 'warn', 'info'] }),
     ],

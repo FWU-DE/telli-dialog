@@ -342,7 +342,7 @@ export async function sendChatMessage({
     webSearchResults = builtTools.webSearchResults;
     // Start the agent loop in the background
     runAgentLoop({
-      modelId: definedModel.id,
+      model: definedModel,
       apiKeyId,
       messages: aiCoreMessages,
       tools: builtTools.tools,
