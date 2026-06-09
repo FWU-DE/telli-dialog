@@ -196,7 +196,9 @@ export async function buildTools({
         return JSON.stringify(response);
       },
     };
+  }
 
+  if (!characterId && !learningScenarioId) {
     const webScraperToolDefinition: ToolDefinition = {
       name: 'web_scraper',
       description:
