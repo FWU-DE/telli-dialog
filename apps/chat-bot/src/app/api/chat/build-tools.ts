@@ -1,4 +1,4 @@
-import type { ToolDefinition, ToolHandler, ToolRegistry } from '@ais-chat/ai-core';
+import type { ToolDefinition, ToolRegistry } from '@ais-chat/ai-core';
 import { UserAndContext } from '@/auth/types';
 import { isWebSearchEnabled, searchWeb } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
