@@ -38,8 +38,13 @@ export function SimpleInputDialog<T extends Record<string, unknown>>({
   const [values, setValues] = React.useState<T>(initialValues);
 
   async function handleSubmitButtonClicked() {
-    await onSubmit(values);
-    setOpen(false);
+    try {
+      // error handling is the responsibility of the caller
+      await onSubmit(values);
+      setOpen(false);
+    } catch {
+      // keep dialog open
+    }
   }
 
   function handleOpenChanged(isOpen: boolean) {
@@ -58,7 +63,12 @@ export function SimpleInputDialog<T extends Record<string, unknown>>({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmitButtonClicked}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSubmitButtonClicked();
+          }}
+        >
           <div className="overflow-y-auto mb-8">{content(values, setValues)}</div>
           <DialogFooter>
             <DialogClose asChild>
