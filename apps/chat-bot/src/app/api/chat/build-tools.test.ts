@@ -128,6 +128,37 @@ describe('buildTools', () => {
     });
   });
 
+  it('adds a chunk retrieval tool for linked pages and forwards source urls', async () => {
+    const { buildTools } = await import('./build-tools');
+
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conversation-1',
+      relatedFileEntities: [],
+      sourceUrls: ['https://example.com/shared-page'],
+    });
+
+    expect(Object.keys(toolRegistry)).toEqual(['retrieve_text_chunks']);
+    const retrieveTextChunksTool = toolRegistry.retrieve_text_chunks!;
+
+    expect(retrieveTextChunksTool.definition.description).toContain(
+      'https://example.com/shared-page',
+    );
+
+    await retrieveTextChunksTool.handler({
+      search: 'verlinkter Inhalt',
+    });
+
+    expect(mocks.retrieveChunksByQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        searchQuery: 'verlinkter Inhalt',
+        federalStateId: 'federal-state-1',
+        relatedFileEntities: [],
+        sourceUrls: ['https://example.com/shared-page'],
+      }),
+    );
+  });
+
   it('adds a web scraper tool and returns scraped page content', async () => {
     mocks.isWebSearchEnabledMock.mockResolvedValue(true);
     const { buildTools } = await import('./build-tools');

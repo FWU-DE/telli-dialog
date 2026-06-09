@@ -1,8 +1,10 @@
 import {
   generateTextStreamWithBilling,
   type Message as AiCoreMessage,
+  type ToolDefinition,
   TokenPointsExceededError,
   SharedChatExpiredError,
+  runAgentLoop,
 } from '@ais-chat/ai-core';
 import { NotFoundError } from '@shared/error';
 import { createTextStream } from '@/utils/streaming';
@@ -26,6 +28,7 @@ import { constructCharacterSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, limitChatHistory } from '../chat/utils';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
+import { buildTools } from '../chat/build-tools';
 import {
   KEEP_FIRST_MESSAGES,
   KEEP_RECENT_MESSAGES,
@@ -34,6 +37,7 @@ import {
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
+import { RetrievedChunk } from '../rag/types';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -95,6 +99,8 @@ export async function sendCharacterMessage({
   }
 
   const { model: definedModel, apiKeyId } = modelAndApiKey;
+  const agenticChatEnabled =
+    teacherUserAndContext.federalState.featureToggles.isAgenticChatEnabled ?? false;
 
   // Check expiry
   if (sharedChatHasExpired(character)) {
@@ -132,17 +138,40 @@ export async function sendCharacterMessage({
     federalStateId: teacherUserAndContext.federalState.id,
   });
 
-  const chunks = await retrieveChunks({
-    messages,
-    federalStateId: teacherUserAndContext.federalState.id,
-    relatedFileEntities,
-    sourceUrls: processedUrls,
-  });
+  let toolRegistry:
+    | Record<
+        string,
+        { definition: ToolDefinition; handler: (args: Record<string, unknown>) => Promise<string> }
+      >
+    | undefined;
+  let activeToolDefinitions: ToolDefinition[] = [];
+  let chunks: RetrievedChunk[] = [];
+
+  if (agenticChatEnabled) {
+    const builtTools = await buildTools({
+      user: teacherUserAndContext,
+      characterId: character.id,
+      conversationId: `shared-character:${character.id}`,
+      relatedFileEntities,
+      sourceUrls: processedUrls,
+    });
+
+    toolRegistry = builtTools.toolRegistry;
+    activeToolDefinitions = Object.values(toolRegistry).map((entry) => entry.definition);
+  } else {
+    chunks = await retrieveChunks({
+      messages,
+      federalStateId: teacherUserAndContext.federalState.id,
+      relatedFileEntities,
+      sourceUrls: processedUrls,
+    });
+  }
 
   // Build system prompt
   const systemPrompt = constructCharacterSystemPrompt({
     character,
     chunks,
+    activeToolDefinitions,
   });
 
   // Prune messages
@@ -174,49 +203,91 @@ export async function sendCharacterMessage({
   const { stream, update, done, error: streamError } = createTextStream();
   const assistantMessageId = crypto.randomUUID();
 
-  // Start streaming in the background
-  (async () => {
-    try {
-      const textStream = generateTextStreamWithBilling(
-        definedModel.id,
-        aiCoreMessages,
-        apiKeyId,
-        async ({ usage, priceInCents }) => {
-          const { promptTokens, completionTokens } = usage;
+  if (agenticChatEnabled) {
+    runAgentLoop({
+      modelId: definedModel.id,
+      apiKeyId,
+      messages: aiCoreMessages,
+      toolRegistry,
+      onTextChunk: (delta) => {
+        update(delta);
+      },
+      onComplete: async ({ usage, priceInCents }) => {
+        const { promptTokens, completionTokens } = usage;
 
-          await dbUpdateTokenUsageByCharacterChatId({
-            modelId: definedModel.id,
-            completionTokens,
+        await dbUpdateTokenUsageByCharacterChatId({
+          modelId: definedModel.id,
+          completionTokens,
+          promptTokens,
+          characterId: character.id,
+          userId: teacherUserAndContext.id,
+          costsInCent: priceInCents,
+        });
+
+        await sendRabbitmqEvent(
+          constructNewMessageEvent({
+            user: teacherUserAndContext,
             promptTokens,
-            characterId: character.id,
-            userId: teacherUserAndContext.id,
+            completionTokens,
             costsInCent: priceInCents,
-          });
+            provider: definedModel.provider,
+            anonymous: true,
+            character,
+          }),
+        );
 
-          await sendRabbitmqEvent(
-            constructNewMessageEvent({
-              user: teacherUserAndContext,
-              promptTokens,
+        done();
+      },
+      onError: (error) => {
+        logError('Error during character chat streaming:', error);
+        streamError(error);
+      },
+    });
+  } else {
+    // Start streaming in the background
+    void (async () => {
+      try {
+        const textStream = generateTextStreamWithBilling(
+          definedModel.id,
+          aiCoreMessages,
+          apiKeyId,
+          async ({ usage, priceInCents }) => {
+            const { promptTokens, completionTokens } = usage;
+
+            await dbUpdateTokenUsageByCharacterChatId({
+              modelId: definedModel.id,
               completionTokens,
+              promptTokens,
+              characterId: character.id,
+              userId: teacherUserAndContext.id,
               costsInCent: priceInCents,
-              provider: definedModel.provider,
-              anonymous: true,
-              character,
-            }),
-          );
-        },
-      );
+            });
 
-      for await (const chunk of textStream) {
-        update(chunk);
+            await sendRabbitmqEvent(
+              constructNewMessageEvent({
+                user: teacherUserAndContext,
+                promptTokens,
+                completionTokens,
+                costsInCent: priceInCents,
+                provider: definedModel.provider,
+                anonymous: true,
+                character,
+              }),
+            );
+          },
+        );
+
+        for await (const chunk of textStream) {
+          update(chunk);
+        }
+
+        done();
+      } catch (error) {
+        logError('Error during character chat streaming:', error);
+        streamError(error instanceof Error ? error : new Error('Unknown error'));
       }
-
-      done();
-    } catch (error) {
-      logError('Error during character chat streaming:', error);
-      streamError(error instanceof Error ? error : new Error('Unknown error'));
-    }
-  })();
+    })();
+  }
 
   return {
     stream,

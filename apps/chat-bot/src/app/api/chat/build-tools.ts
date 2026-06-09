@@ -116,6 +116,7 @@ type BuildToolsParams = {
   assistantId?: string;
   conversationId: string;
   relatedFileEntities: FileModelAndContent[];
+  sourceUrls?: string[];
   onWebSearchResults?: (results: WebSearchResult[]) => void;
 };
 
@@ -131,11 +132,13 @@ export async function buildTools({
   assistantId,
   conversationId,
   relatedFileEntities,
+  sourceUrls = [],
   onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
   const toolRegistry: ToolRegistry = {};
   const webSearchResults: WebSearchResult[] = [];
   const attachedFileNames = relatedFileEntities.map((file) => file.name);
+  const attachedSourceUrls = sourceUrls;
 
   const webSearchEnabled = await isWebSearchEnabled({
     user,
@@ -233,10 +236,10 @@ export async function buildTools({
     };
   }
 
-  if (relatedFileEntities.length > 0) {
+  if (relatedFileEntities.length > 0 || attachedSourceUrls.length > 0) {
     const retrieveTextChunksToolDefinition: ToolDefinition = {
       name: 'retrieve_text_chunks',
-      description: `Retrieve relevant text chunks from the attached files. Available files right now: ${attachedFileNames.join(', ')}. Use this tool when you need exact passages from the files or want to inspect a specific topic inside the attachments. You can request up to ${VECTOR_SEARCH_LIMIT} chunks per call. Call it with a short, specific search string in the same language as the user.`,
+      description: `Retrieve relevant text chunks from the attached sources. Available files right now: ${attachedFileNames.join(', ') || 'none'}. Available linked pages right now: ${attachedSourceUrls.join(', ') || 'none'}. Use this tool when you need exact passages from the files or linked pages or want to inspect a specific topic inside the available sources. You can request up to ${VECTOR_SEARCH_LIMIT} chunks per call. Call it with a short, specific search string in the same language as the user.`,
       parameters: {
         type: 'object',
         properties: {
@@ -271,6 +274,7 @@ export async function buildTools({
           searchQuery: search,
           federalStateId: user.federalState.id,
           relatedFileEntities,
+          sourceUrls: attachedSourceUrls,
           limit,
         });
 
