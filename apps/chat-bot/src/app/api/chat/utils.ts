@@ -1,7 +1,7 @@
 import { ImageAttachment } from '@/utils/files/types';
 import { logError } from '@shared/logging';
-import { type ChatMessage as Message } from '@/types/chat';
-import { generateTextWithBilling } from '@ais-chat/ai-core';
+import { ChatMessage, type ChatMessage as Message } from '@/types/chat';
+import { generateTextWithBilling, type Message as AiCoreMessage } from '@ais-chat/ai-core';
 
 /**
  * Format messages to include images for models that support vision
@@ -26,7 +26,7 @@ export function formatMessagesWithImages(
     if (messageImages.length === 0) {
       continue;
     }
-    message.experimental_attachments = messageImages.map((image) => ({
+    message.attachments = messageImages.map((image) => ({
       contentType: image.mimeType ?? 'image/jpeg',
       url: image.url,
       type: 'image' as const,
@@ -179,4 +179,25 @@ export async function getChatTitle({
     logError('Error generating chat title, using default title as fallback:', error);
     return fallbackTitle;
   }
+}
+
+/**
+ * Converts frontend messages to ai-core message format
+ */
+export function convertToAiCoreMessages(
+  systemPrompt: string,
+  messages: ChatMessage[],
+): AiCoreMessage[] {
+  return [
+    { role: 'system', content: systemPrompt },
+    ...messages
+      .filter((msg) => msg.role !== 'system')
+      .map(({ role, content, attachments, toolCalls, toolCallId }) => ({
+        role,
+        content,
+        attachments,
+        toolCalls,
+        toolCallId,
+      })),
+  ];
 }

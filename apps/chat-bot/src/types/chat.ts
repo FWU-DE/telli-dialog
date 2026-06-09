@@ -1,6 +1,7 @@
 import type { SharedChatExpiredError, TokenPointsExceededError } from '@ais-chat/ai-core/errors';
 import type { NotFoundError } from '@shared/error';
 import type { WebSearchResult } from '@shared/db/schema';
+import { ChatAttachment, ToolCall } from '@ais-chat/ai-core/chat/types';
 
 /**
  * Serialized error that can be safely transmitted across the Server Action boundary.
@@ -21,25 +22,18 @@ export type SerializedError = {
 export type ChatStatus = 'ready' | 'submitted' | 'reasoning' | 'streaming' | 'error';
 
 /**
- * Attachment type for images in messages.
- */
-export type ChatAttachment = {
-  contentType: string;
-  url: string;
-  type: 'image';
-};
-
-/**
  * Basic chat message type used throughout the application.
  * This replaces the Message type from the 'ai' package.
  */
 export type ChatMessage = {
   id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system' | 'tool';
   content: string;
   createdAt?: Date;
-  experimental_attachments?: ChatAttachment[];
+  attachments?: ChatAttachment[];
   webSearchResults?: WebSearchResult[];
+  toolCalls?: ToolCall[];
+  toolCallId?: string;
 };
 
 /**

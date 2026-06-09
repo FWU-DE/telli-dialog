@@ -12,6 +12,7 @@ import {
   dbGetOrCreateConversation,
   dbUpdateConversationTitle,
   dbInsertChatContent,
+  dbInsertChatContentBatch,
 } from '@shared/db/functions/chat';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
@@ -20,7 +21,12 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructChatSystemPrompt } from './system-prompt';
-import { formatMessagesWithImages, getChatTitle, limitChatHistory } from './utils';
+import {
+  convertToAiCoreMessages,
+  formatMessagesWithImages,
+  getChatTitle,
+  limitChatHistory,
+} from './utils';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import {
@@ -38,24 +44,6 @@ import { buildTools } from './build-tools';
 import { runWebSearchPipeline } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
-
-/**
- * Converts frontend messages to ai-core message format
- */
-function convertToAiCoreMessages(systemPrompt: string, messages: ChatMessage[]): AiCoreMessage[] {
-  const result: AiCoreMessage[] = [{ role: 'system', content: systemPrompt }];
-
-  for (const msg of messages) {
-    if (msg.role === 'system') continue; // Skip system messages, we add our own
-    result.push({
-      role: msg.role === 'user' ? 'user' : 'assistant',
-      content: msg.content,
-      attachments: msg.experimental_attachments,
-    });
-  }
-
-  return result;
-}
 
 /**
  * Server Action to send a chat message and stream the response.
@@ -253,20 +241,37 @@ export async function sendChatMessage({
     fullText,
     usage,
     priceInCents,
+    intermediateMessages = [],
   }: {
     fullText: string;
     usage: TokenUsage;
     priceInCents: number;
+    intermediateMessages?: AiCoreMessage[];
   }) {
-    await dbInsertChatContent({
-      content: fullText,
-      role: 'assistant',
-      userId: user.id,
-      orderNumber: assistantMessageOrderNumber,
-      modelName: definedModel.name,
-      conversationId: activeConversation.id,
-      webSearchResults,
-    });
+    // Persist intermediate tool call/result messages and the final assistant message in one query
+    const messagesToInsert = [
+      ...intermediateMessages.map((msg, index) => ({
+        content: msg.content,
+        role: msg.role as 'assistant' | 'tool',
+        userId: user.id,
+        orderNumber: assistantMessageOrderNumber + index,
+        modelName: definedModel.name,
+        conversationId: activeConversation.id,
+        toolCalls: msg.toolCalls ?? null,
+        toolCallId: msg.toolCallId ?? null,
+      })),
+      {
+        content: fullText,
+        role: 'assistant' as const,
+        userId: user.id,
+        orderNumber: assistantMessageOrderNumber + intermediateMessages.length,
+        modelName: definedModel.name,
+        conversationId: activeConversation.id,
+        webSearchResults,
+      },
+    ];
+
+    await dbInsertChatContentBatch(messagesToInsert);
 
     if (messages.length <= 2 || activeConversation.name === null) {
       const chatTitle = await getChatTitle({
@@ -343,9 +348,9 @@ export async function sendChatMessage({
       onTextChunk: (delta) => {
         update(delta);
       },
-      onComplete: async ({ fullText, usage, priceInCents }) => {
+      onComplete: async ({ fullText, usage, priceInCents, intermediateMessages }) => {
         try {
-          await persistAssistantMessage({ fullText, usage, priceInCents });
+          await persistAssistantMessage({ fullText, usage, priceInCents, intermediateMessages });
           done();
         } catch (error) {
           logError('Error during agent loop completion:', error);
