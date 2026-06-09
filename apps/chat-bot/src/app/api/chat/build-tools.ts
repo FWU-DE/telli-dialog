@@ -1,7 +1,6 @@
-import type { ToolDefinition } from '@ais-chat/ai-core';
+import type { ToolDefinition, ToolHandler, ToolRegistry } from '@ais-chat/ai-core';
 import { UserAndContext } from '@/auth/types';
 import { isWebSearchEnabled, searchWeb } from './websearch';
-import type { ToolHandler } from './agent-loop';
 import type { WebSearchResult } from '@shared/db/schema';
 import type { FileModelAndContent } from '@shared/db/schema';
 import type { WebSource } from '@shared/db/types';
@@ -121,8 +120,7 @@ type BuildToolsParams = {
 };
 
 type BuildToolsResult = {
-  tools: ToolDefinition[];
-  toolHandlers: Record<string, ToolHandler>;
+  toolRegistry: ToolRegistry;
   webSearchResults: WebSearchResult[];
 };
 
@@ -135,8 +133,7 @@ export async function buildTools({
   relatedFileEntities,
   onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
-  const tools: ToolDefinition[] = [];
-  const toolHandlers: Record<string, ToolHandler> = {};
+  const toolRegistry: ToolRegistry = {};
   const webSearchResults: WebSearchResult[] = [];
   const attachedFileNames = relatedFileEntities.map((file) => file.name);
 
@@ -148,7 +145,7 @@ export async function buildTools({
   });
 
   if (webSearchEnabled) {
-    tools.push({
+    const webSearchToolDefinition: ToolDefinition = {
       name: 'web_search',
       description:
         'Search the web for current information. Call this tool immediately and without asking for permission whenever the user asks about recent events, news, current data (weather, prices, scores), or any facts that may have changed after your knowledge cutoff. Call this tool at most ONCE per user message. After receiving the results, synthesize them into a direct answer — do not call the tool again with a different query.',
@@ -164,37 +161,40 @@ export async function buildTools({
         required: ['query'],
         additionalProperties: false,
       },
-    });
-
-    toolHandlers['web_search'] = async (args) => {
-      const query = typeof args.query === 'string' ? args.query : '';
-      const results = await searchWeb({
-        query,
-        conversationId,
-        userId: user.id,
-      });
-
-      const response: WebSearchToolResponse = {
-        results: results.map((result) => ({
-          title: result.name?.trim() ?? null,
-          url: result.url ?? null,
-          content: result.content?.trim() ?? null,
-        })),
-        error: null,
-      };
-
-      webSearchResults.push(...results);
-      onWebSearchResults?.(results);
-
-      if (results.length === 0) {
-        response.error = 'No results found.';
-        return JSON.stringify(response);
-      }
-
-      return JSON.stringify(response);
     };
 
-    tools.push({
+    toolRegistry.web_search = {
+      definition: webSearchToolDefinition,
+      handler: async (args) => {
+        const query = typeof args.query === 'string' ? args.query : '';
+        const results = await searchWeb({
+          query,
+          conversationId,
+          userId: user.id,
+        });
+
+        const response: WebSearchToolResponse = {
+          results: results.map((result) => ({
+            title: result.name?.trim() ?? null,
+            url: result.url ?? null,
+            content: result.content?.trim() ?? null,
+          })),
+          error: null,
+        };
+
+        webSearchResults.push(...results);
+        onWebSearchResults?.(results);
+
+        if (results.length === 0) {
+          response.error = 'No results found.';
+          return JSON.stringify(response);
+        }
+
+        return JSON.stringify(response);
+      },
+    };
+
+    const webScraperToolDefinition: ToolDefinition = {
       name: 'web_scraper',
       description:
         'Fetch and extract the main text from one specific URL. Use this tool when the user gives you a single webpage URL or when you can derive a concrete URL yourself, for example to scrape a documentation page or another known target. Use web_search instead when you need to discover relevant pages or compare multiple sources.',
@@ -210,28 +210,31 @@ export async function buildTools({
         required: ['url'],
         additionalProperties: false,
       },
-    });
+    };
 
-    toolHandlers['web_scraper'] = async (args) => {
-      const url = typeof args.url === 'string' ? args.url.trim() : '';
+    toolRegistry.web_scraper = {
+      definition: webScraperToolDefinition,
+      handler: async (args) => {
+        const url = typeof args.url === 'string' ? args.url.trim() : '';
 
-      if (url.length === 0) {
-        return 'Error: Missing URL.';
-      }
+        if (url.length === 0) {
+          return 'Error: Missing URL.';
+        }
 
-      const validationResult = validateWebScraperUrl(url);
+        const validationResult = validateWebScraperUrl(url);
 
-      if (validationResult.error) {
-        return validationResult.error;
-      }
+        if (validationResult.error) {
+          return validationResult.error;
+        }
 
-      const result = await webScraper(validationResult.url);
-      return formatWebScrapedContentForTool(result);
+        const result = await webScraper(validationResult.url);
+        return formatWebScrapedContentForTool(result);
+      },
     };
   }
 
   if (relatedFileEntities.length > 0) {
-    tools.push({
+    const retrieveTextChunksToolDefinition: ToolDefinition = {
       name: 'retrieve_text_chunks',
       description: `Retrieve relevant text chunks from the attached files. Available files right now: ${attachedFileNames.join(', ')}. Use this tool when you need exact passages from the files or want to inspect a specific topic inside the attachments. You can request up to ${VECTOR_SEARCH_LIMIT} chunks per call. Call it with a short, specific search string in the same language as the user.`,
       parameters: {
@@ -253,25 +256,28 @@ export async function buildTools({
         required: ['search'],
         additionalProperties: false,
       },
-    });
+    };
 
-    toolHandlers['retrieve_text_chunks'] = async (args) => {
-      const search = typeof args.search === 'string' ? args.search : '';
-      const requestedLimit =
-        typeof args.limit === 'number' && Number.isFinite(args.limit)
-          ? Math.trunc(args.limit)
-          : VECTOR_SEARCH_LIMIT;
-      const limit = Math.min(Math.max(requestedLimit, 1), VECTOR_SEARCH_LIMIT);
-      const chunks = await retrieveChunksByQuery({
-        searchQuery: search,
-        federalStateId: user.federalState.id,
-        relatedFileEntities,
-        limit,
-      });
+    toolRegistry.retrieve_text_chunks = {
+      definition: retrieveTextChunksToolDefinition,
+      handler: async (args) => {
+        const search = typeof args.search === 'string' ? args.search : '';
+        const requestedLimit =
+          typeof args.limit === 'number' && Number.isFinite(args.limit)
+            ? Math.trunc(args.limit)
+            : VECTOR_SEARCH_LIMIT;
+        const limit = Math.min(Math.max(requestedLimit, 1), VECTOR_SEARCH_LIMIT);
+        const chunks = await retrieveChunksByQuery({
+          searchQuery: search,
+          federalStateId: user.federalState.id,
+          relatedFileEntities,
+          limit,
+        });
 
-      return formatRetrievedChunksForTool(chunks);
+        return formatRetrievedChunksForTool(chunks);
+      },
     };
   }
 
-  return { tools, toolHandlers, webSearchResults };
+  return { toolRegistry, webSearchResults };
 }

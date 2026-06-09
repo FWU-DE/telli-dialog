@@ -80,19 +80,21 @@ describe('buildTools', () => {
   it('adds a chunk retrieval tool that exposes file names and forwards the search query', async () => {
     const { buildTools } = await import('./build-tools');
 
-    const { tools, toolHandlers } = await buildTools({
+    const { toolRegistry } = await buildTools({
       user,
       conversationId: 'conversation-1',
       relatedFileEntities,
     });
 
-    expect(tools).toHaveLength(1);
-    expect(tools[0]).toMatchObject({
+    expect(Object.keys(toolRegistry)).toEqual(['retrieve_text_chunks']);
+    const retrieveTextChunksTool = toolRegistry.retrieve_text_chunks!;
+
+    expect(retrieveTextChunksTool.definition).toMatchObject({
       name: 'retrieve_text_chunks',
     });
-    expect(tools[0]?.description).toContain('Arbeitsblatt.pdf');
-    expect(tools[0]?.description).toContain('Leitfaden.txt');
-    expect(tools[0]?.parameters).toMatchObject({
+    expect(retrieveTextChunksTool.definition.description).toContain('Arbeitsblatt.pdf');
+    expect(retrieveTextChunksTool.definition.description).toContain('Leitfaden.txt');
+    expect(retrieveTextChunksTool.definition.parameters).toMatchObject({
       required: ['search'],
       properties: {
         limit: {
@@ -101,7 +103,7 @@ describe('buildTools', () => {
       },
     });
 
-    const result = await toolHandlers.retrieve_text_chunks!({
+    const result = await retrieveTextChunksTool.handler({
       search: 'relevante Passage',
       limit: VECTOR_SEARCH_LIMIT + 5,
     });
@@ -130,23 +132,24 @@ describe('buildTools', () => {
     mocks.isWebSearchEnabledMock.mockResolvedValue(true);
     const { buildTools } = await import('./build-tools');
 
-    const { tools, toolHandlers } = await buildTools({
+    const { toolRegistry } = await buildTools({
       user,
       conversationId: 'conversation-1',
       relatedFileEntities: [],
     });
 
-    const webSearchTool = tools.find((tool) => tool.name === 'web_search');
-    const webScraperTool = tools.find((tool) => tool.name === 'web_scraper');
+    const webSearchTool = toolRegistry.web_search!;
+    const webScraperTool = toolRegistry.web_scraper!;
 
-    expect(webSearchTool).toMatchObject({
+    expect(Object.keys(toolRegistry).sort()).toEqual(['web_scraper', 'web_search']);
+    expect(webSearchTool.definition).toMatchObject({
       name: 'web_search',
     });
-    expect(webScraperTool).toMatchObject({
+    expect(webScraperTool.definition).toMatchObject({
       name: 'web_scraper',
     });
-    expect(webScraperTool?.description).toContain('single webpage URL');
-    expect(webScraperTool?.parameters).toMatchObject({
+    expect(webScraperTool.definition.description).toContain('single webpage URL');
+    expect(webScraperTool.definition.parameters).toMatchObject({
       required: ['url'],
       properties: {
         url: {
@@ -155,7 +158,7 @@ describe('buildTools', () => {
       },
     });
 
-    const result = await toolHandlers.web_scraper!({
+    const result = await webScraperTool.handler({
       url: 'https://example.com/article',
     });
 
@@ -180,13 +183,15 @@ describe('buildTools', () => {
 
     const { buildTools } = await import('./build-tools');
 
-    const { toolHandlers } = await buildTools({
+    const { toolRegistry } = await buildTools({
       user,
       conversationId: 'conversation-1',
       relatedFileEntities: [],
     });
 
-    const result = await toolHandlers.web_search!({
+    expect(Object.keys(toolRegistry).sort()).toEqual(['web_scraper', 'web_search']);
+
+    const result = await toolRegistry.web_search!.handler({
       query: 'aktuelle information',
     });
 

@@ -3,6 +3,7 @@ import {
   type Message as AiCoreMessage,
   type TokenUsage,
   TokenPointsExceededError,
+  type ToolDefinition,
 } from '@ais-chat/ai-core';
 import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { userHasReachedTokenPointsLimit } from './usage';
@@ -33,9 +34,9 @@ import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
-import { runAgentLoop } from './agent-loop';
 import { buildTools } from './build-tools';
 import { runWebSearchPipeline } from './websearch';
+import { runAgentLoop } from '@ais-chat/ai-core';
 import type { WebSearchResult } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
@@ -207,8 +208,35 @@ export async function sendChatMessage({
 
   let webSearchResults: WebSearchResult[] = [];
   let chunks: RetrievedChunk[] = [];
+  let toolRegistry:
+    | Record<
+        string,
+        { definition: ToolDefinition; handler: (args: Record<string, unknown>) => Promise<string> }
+      >
+    | undefined;
+  let activeToolDefinitions: ToolDefinition[] = [];
 
-  if (!agenticChatEnabled) {
+  if (agenticChatEnabled) {
+    const builtTools = await buildTools({
+      user,
+      characterId,
+      assistantId,
+      conversationId: activeConversation.id,
+      relatedFileEntities,
+      onWebSearchResults: (results) => {
+        update(
+          encodeChatStreamEvent({
+            type: 'web_search_results',
+            webSearchResults: results,
+          }),
+        );
+      },
+    });
+
+    webSearchResults = builtTools.webSearchResults;
+    toolRegistry = builtTools.toolRegistry;
+    activeToolDefinitions = Object.values(toolRegistry).map((entry) => entry.definition);
+  } else {
     // Fallback implementations of Websearch and Chunk Retrieval
     webSearchResults = await runWebSearchPipeline({
       messages,
@@ -249,6 +277,7 @@ export async function sendChatMessage({
     chunks,
     errorUrls,
     webSearchResults,
+    activeToolDefinitions,
   });
 
   // Check if the model supports images based on supportedImageFormats
@@ -342,37 +371,24 @@ export async function sendChatMessage({
   }
 
   if (agenticChatEnabled) {
-    const builtTools = await buildTools({
-      user,
-      characterId,
-      learningScenarioId,
-      assistantId,
-      conversationId: activeConversation.id,
-      relatedFileEntities,
-      onWebSearchResults: (results) => {
-        update(
-          encodeChatStreamEvent({
-            type: 'web_search_results',
-            webSearchResults: results,
-          }),
-        );
-      },
-    });
-    webSearchResults = builtTools.webSearchResults;
-    const agentName = resolveAgentNameForTracing({ characterId, learningScenarioId, assistantId });
-
     // Start the agent loop in the background
     runAgentLoop({
-      model: definedModel,
+      modelId: definedModel.id,
       apiKeyId,
       messages: aiCoreMessages,
-      tools: builtTools.tools,
-      toolHandlers: builtTools.toolHandlers,
-      agentName,
-      onTextChunk: (delta) => {
+      toolRegistry,
+      onTextChunk: (delta: string) => {
         update(delta);
       },
-      onComplete: async ({ fullText, usage, priceInCents }) => {
+      onComplete: async ({
+        fullText,
+        usage,
+        priceInCents,
+      }: {
+        fullText: string;
+        usage: TokenUsage;
+        priceInCents: number;
+      }) => {
         try {
           await persistAssistantMessage({ fullText, usage, priceInCents });
           done();
@@ -381,7 +397,7 @@ export async function sendChatMessage({
           streamError(error instanceof Error ? error : new Error('Unknown error'));
         }
       },
-      onError: async (error) => {
+      onError: async (error: Error) => {
         await persistEmptyAssistantMessage();
 
         streamError(error);

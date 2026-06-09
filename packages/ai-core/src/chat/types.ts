@@ -27,6 +27,15 @@ export type ToolDefinition = {
   parameters: Record<string, unknown>;
 };
 
+export type ToolHandler = (args: Record<string, unknown>) => Promise<string>;
+
+export type ToolRegistryEntry = {
+  definition: ToolDefinition;
+  handler: ToolHandler;
+};
+
+export type ToolRegistry = Record<string, ToolRegistryEntry>;
+
 export type Message = {
   role: 'system' | 'user' | 'assistant' | 'tool';
   content: string;

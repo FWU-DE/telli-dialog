@@ -2,17 +2,20 @@ import { type LearningScenarioSelectModel } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
 import {
   constructRagContext,
+  constructToolGuidelines,
   FORMAT_GUIDELINES,
   LANGUAGE_GUIDELINES,
-  TOOL_GUIDELINES,
 } from '../utils/system-prompt';
+import type { ToolDefinition } from '@ais-chat/ai-core';
 
 export function constructLearningScenarioSystemPrompt({
   learningScenario,
   chunks,
+  activeToolDefinitions = [],
 }: {
   learningScenario: LearningScenarioSelectModel;
   chunks: RetrievedChunk[];
+  activeToolDefinitions?: ToolDefinition[];
 }) {
   // error urls are intentionally not included in the learning scenario system prompt
   const ragContext = constructRagContext(chunks);
@@ -20,7 +23,7 @@ export function constructLearningScenarioSystemPrompt({
   return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen. Verwende eine Sprache, Tonalität und Inhalte, die für den Einsatz in der jeweiligen Klasse geeignet ist. Vermeide komplizierte Fachbegriffe, es sei denn, sie sind notwendig und werden erklärt. Beachte die folgenden Regeln:
 
 ${LANGUAGE_GUIDELINES}
-${TOOL_GUIDELINES}
+${constructToolGuidelines(activeToolDefinitions)}
 ${FORMAT_GUIDELINES}
 
 Die folgenden Anweisungen wurden von der Lehrkraft erstellt und haben bei Widersprüchen immer Vorrang vor den allgemeinen Richtlinien.
