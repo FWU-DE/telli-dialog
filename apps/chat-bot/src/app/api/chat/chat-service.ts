@@ -37,7 +37,36 @@ import { runAgentLoop } from './agent-loop';
 import { buildTools } from './build-tools';
 import { runWebSearchPipeline } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
+import type {
+  AssistantSelectModel,
+  CharacterSelectModel,
+  LearningScenarioSelectModel,
+} from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
+import { NotFoundError } from '@shared/error';
+import { getCharacterForChatSession } from '@shared/characters/character-service';
+import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
+import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
+
+function ensureConversationCustomChatIdsMatch({
+  incomingIds,
+  storedIds,
+}: {
+  incomingIds: Array<string | undefined>;
+  storedIds: Array<string | null | undefined>;
+}) {
+  const hasMismatch = incomingIds.some((incomingId, index) => {
+    if (incomingId === undefined) {
+      return false;
+    }
+
+    return incomingId !== storedIds[index];
+  });
+
+  if (hasMismatch) {
+    throw new Error('Conversation context mismatch');
+  }
+}
 
 /**
  * Converts frontend messages to ai-core message format
@@ -132,6 +161,52 @@ export async function sendChatMessage({
   const activeConversationObject = conversationObject;
   const agenticChatEnabled = user.federalState.featureToggles.isAgenticChatEnabled ?? false;
 
+  ensureConversationCustomChatIdsMatch({
+    incomingIds: [characterId, learningScenarioId, assistantId],
+    storedIds: [
+      activeConversation.characterId,
+      activeConversation.learningScenarioId,
+      activeConversation.assistantId,
+    ],
+  });
+
+  let activeCharacter: CharacterSelectModel | undefined;
+  let activeLearningScenario: LearningScenarioSelectModel | undefined;
+  let activeAssistant: AssistantSelectModel | undefined;
+
+  if (characterId !== undefined) {
+    activeCharacter = await getCharacterForChatSession({
+      characterId,
+      user: { id: user.id, schoolIds: user.schoolIds },
+    });
+
+    if (activeCharacter.suspended) {
+      throw new NotFoundError('Character not found');
+    }
+  }
+
+  if (learningScenarioId !== undefined) {
+    activeLearningScenario = await getLearningScenarioForChatSession({
+      learningScenarioId,
+      user: { id: user.id, schoolIds: user.schoolIds },
+    });
+
+    if (activeLearningScenario.suspended) {
+      throw new NotFoundError('Learning scenario not found');
+    }
+  }
+
+  if (assistantId !== undefined) {
+    activeAssistant = await getAssistantForNewChat({
+      assistantId,
+      user: { id: user.id, schoolIds: user.schoolIds },
+    });
+
+    if (activeAssistant.suspended) {
+      throw new NotFoundError('Assistant not found');
+    }
+  }
+
   // Check budget limit after we have the conversation for proper event tracking
   if (await userHasReachedTokenPointsLimit({ user })) {
     await sendRabbitmqEvent(
@@ -152,7 +227,12 @@ export async function sendChatMessage({
 
   const activeUserMessage = userMessage;
 
-  const urls = await extractUrls(assistantId, characterId, learningScenarioId, user, messages);
+  const urls = extractUrls({
+    assistant: activeAssistant,
+    character: activeCharacter,
+    learningScenario: activeLearningScenario,
+    messages,
+  });
   const { processedUrls, errorUrls } = await ingestWebContent({
     urls,
     federalStateId: user.federalState.id,
@@ -183,7 +263,7 @@ export async function sendChatMessage({
     conversationId: conversation.id,
     characterId,
     learningScenarioId,
-    assistantId: assistantId,
+    assistantId,
   });
 
   let webSearchResults: WebSearchResult[] = [];
@@ -221,10 +301,10 @@ export async function sendChatMessage({
   });
 
   // Build system prompt
-  const systemPrompt = await constructChatSystemPrompt({
-    characterId,
-    learningScenarioId,
-    assistantId: assistantId,
+  const systemPrompt = constructChatSystemPrompt({
+    character: activeCharacter,
+    learningScenario: activeLearningScenario,
+    assistant: activeAssistant,
     isTeacher: user.userRole === 'teacher',
     federalState: user.federalState,
     chunks,
