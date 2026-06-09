@@ -70,11 +70,15 @@ export function toOpenAIMessages(
 export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.ResponseInputItem[] {
   return messages.flatMap((message): OpenAI.Responses.ResponseInputItem[] => {
     if (message.role === 'tool') {
+      if (!message.toolCallId) {
+        throw new Error('Tool messages require toolCallId');
+      }
+
       return [
         {
           type: 'function_call_output',
-          id: message.toolCallId! + '_output',
-          call_id: message.toolCallId!,
+          id: message.toolCallId + '_output',
+          call_id: message.toolCallId,
           output: message.content,
           status: 'completed',
         } satisfies OpenAI.Responses.ResponseFunctionToolCallOutputItem,

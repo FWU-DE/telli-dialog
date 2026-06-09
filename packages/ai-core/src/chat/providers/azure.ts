@@ -8,7 +8,7 @@ import type {
   TokenUsage,
 } from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
-import { toOpenAIMessages, toOpenAIResponsesInput, toOpenAITools } from '../utils';
+import { toOpenAIMessages, toOpenAIResponsesInput } from '../utils';
 import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
 
 function createAzureClient(model: AiModel): {
