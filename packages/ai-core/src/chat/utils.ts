@@ -85,7 +85,7 @@ export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.Re
       ];
     }
     if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
-      let result: OpenAI.Responses.ResponseInputItem[] = message.toolCalls.map(
+      const result: OpenAI.Responses.ResponseInputItem[] = message.toolCalls.map(
         (toolCall) =>
           ({
             type: 'function_call',
