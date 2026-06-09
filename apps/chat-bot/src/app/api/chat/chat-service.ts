@@ -61,9 +61,8 @@ function ensureConversationCustomChatIdsMatch({
   incomingIds: CustomChatIds;
   storedIds: CustomChatIds;
 }) {
-  const hasMismatch = Object.keys(incomingIds).some((key) => {
-    return incomingIds[key as keyof CustomChatIds] !== storedIds[key as keyof CustomChatIds];
-  });
+  const keys: (keyof CustomChatIds)[] = ['characterId', 'learningScenarioId', 'assistantId'];
+  const hasMismatch = keys.some((key) => incomingIds[key] !== storedIds[key]);
 
   if (hasMismatch) {
     throw new NotFoundError('Conversation not found');

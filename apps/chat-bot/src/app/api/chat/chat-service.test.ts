@@ -358,4 +358,93 @@ describe('sendChatMessage', () => {
       expect(streamedText).toBe('fallback chunk');
     }
   });
+
+  it('throws when conversation context ids do not match', async () => {
+    const { sendChatMessage } = await import('./chat-service');
+
+    mocks.dbGetOrCreateConversationMock.mockResolvedValue({
+      ...conversation,
+      characterId: 'character-1',
+      learningScenarioId: null,
+      assistantId: null,
+    } as never);
+
+    await expect(
+      sendChatMessage({
+        conversationId: conversation.id,
+        messages,
+        modelId: mainModel.id,
+        user: createUser(false),
+      }),
+    ).rejects.toThrow('Conversation not found');
+  });
+
+  it('throws when character is suspended', async () => {
+    const { sendChatMessage } = await import('./chat-service');
+
+    const characterId = 'character-1';
+    mocks.dbGetOrCreateConversationMock.mockResolvedValue({
+      ...conversation,
+      characterId,
+      learningScenarioId: null,
+      assistantId: null,
+    } as never);
+    mocks.getCharacterForChatSessionMock.mockResolvedValue({ suspended: true } as never);
+
+    await expect(
+      sendChatMessage({
+        conversationId: conversation.id,
+        messages,
+        modelId: mainModel.id,
+        characterId,
+        user: createUser(false),
+      }),
+    ).rejects.toThrow('Character not found');
+  });
+
+  it('throws when learning scenario is suspended', async () => {
+    const { sendChatMessage } = await import('./chat-service');
+
+    const learningScenarioId = 'learning-scenario-1';
+    mocks.dbGetOrCreateConversationMock.mockResolvedValue({
+      ...conversation,
+      characterId: null,
+      learningScenarioId,
+      assistantId: null,
+    } as never);
+    mocks.getLearningScenarioForChatSessionMock.mockResolvedValue({ suspended: true } as never);
+
+    await expect(
+      sendChatMessage({
+        conversationId: conversation.id,
+        messages,
+        modelId: mainModel.id,
+        learningScenarioId,
+        user: createUser(false),
+      }),
+    ).rejects.toThrow('Learning scenario not found');
+  });
+
+  it('throws when assistant is suspended', async () => {
+    const { sendChatMessage } = await import('./chat-service');
+
+    const assistantId = 'assistant-1';
+    mocks.dbGetOrCreateConversationMock.mockResolvedValue({
+      ...conversation,
+      characterId: null,
+      learningScenarioId: null,
+      assistantId,
+    } as never);
+    mocks.getAssistantForNewChatMock.mockResolvedValue({ suspended: true } as never);
+
+    await expect(
+      sendChatMessage({
+        conversationId: conversation.id,
+        messages,
+        modelId: mainModel.id,
+        assistantId,
+        user: createUser(false),
+      }),
+    ).rejects.toThrow('Assistant not found');
+  });
 });
