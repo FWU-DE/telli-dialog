@@ -195,6 +195,7 @@ export async function sendChatMessage({
       messages,
       user,
       characterId,
+      learningScenarioId,
       assistantId,
       modelId: auxiliaryModel.id,
       apiKeyId: activeAuxiliaryModelAndApiKey.apiKeyId,
@@ -325,6 +326,7 @@ export async function sendChatMessage({
     const builtTools = await buildTools({
       user,
       characterId,
+      learningScenarioId,
       assistantId,
       conversationId: activeConversation.id,
       relatedFileEntities,
