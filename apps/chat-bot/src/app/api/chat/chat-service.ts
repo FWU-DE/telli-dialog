@@ -27,6 +27,7 @@ import {
   getChatTitle,
   limitChatHistory,
 } from './utils';
+import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import {
@@ -165,6 +166,9 @@ export async function sendChatMessage({
     federalStateId: user.federalState.id,
   });
 
+  // Use DB message count for orderNumber
+  const dbMessageCount = activeConversationObject.messages.length;
+
   // Save user message to DB
   await dbInsertChatContent({
     conversationId: activeConversation.id,
@@ -173,7 +177,7 @@ export async function sendChatMessage({
     role: 'user',
     userId: user.id,
     modelName: definedModel.name,
-    orderNumber: messages.length + 1,
+    orderNumber: dbMessageCount + 1,
   });
 
   // Link files to conversation
@@ -219,9 +223,16 @@ export async function sendChatMessage({
   // Update last used model
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
 
+  // Use DB messages as source of truth — they include intermediate tool call/result
+  // messages from the agent loop that the client doesn't track
+  const fullMessages: ChatMessage[] = [
+    ...convertMessageModelToMessage(activeConversationObject.messages),
+    userMessage,
+  ];
+
   // Prune messages
   const prunedMessages = limitChatHistory({
-    messages: messages,
+    messages: fullMessages,
     limitRecent: KEEP_RECENT_MESSAGES,
     limitFirst: KEEP_FIRST_MESSAGES,
     characterLimit: TOTAL_CHAT_LENGTH_LIMIT,
@@ -259,8 +270,7 @@ export async function sendChatMessage({
   // Create native stream
   const { stream, update, done, error: streamError } = createTextStream();
   const assistantMessageId = crypto.randomUUID();
-  const assistantMessageOrderNumber = messages.length + 2;
-  const emptyAssistantMessageOrderNumber = activeConversationObject.messages.length + 1;
+  const assistantMessageOrderNumber = dbMessageCount + 2;
 
   async function persistAssistantMessage({
     fullText,
@@ -340,7 +350,7 @@ export async function sendChatMessage({
       content: '',
       role: 'assistant',
       userId: user.id,
-      orderNumber: emptyAssistantMessageOrderNumber,
+      orderNumber: assistantMessageOrderNumber,
       modelName: definedModel.name,
       conversationId: activeConversation.id,
     });
