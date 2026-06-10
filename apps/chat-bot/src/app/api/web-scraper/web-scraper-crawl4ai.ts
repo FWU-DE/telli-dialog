@@ -90,7 +90,8 @@ export async function webScraperCrawl4AI(url: string): Promise<WebSource> {
     if (!response.ok) {
       const responseBody = await response.text();
       logWarning(`Crawl4AI request failed with status ${response.status} for URL: ${url}`, {
-        responseBody,
+        responseBody: responseBody.substring(0, 10_000),
+        responseBodyLength: responseBody.length,
       });
       return defaultErrorSource(url);
     }
