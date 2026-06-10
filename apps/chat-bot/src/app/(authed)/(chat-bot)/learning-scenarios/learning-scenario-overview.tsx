@@ -69,6 +69,7 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
                   ? `/learning-scenarios/editor/${scenario.id}`
                   : `/learning-scenarios/${scenario.id}`
               }
+              chatHref={`/learning-scenarios/d/${scenario.id}`}
               shareInfo={scenario}
             />
           );

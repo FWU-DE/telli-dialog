@@ -33,6 +33,7 @@ import {
 } from '../editor/[learningScenarioId]/actions';
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
+import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 
 export function LearningScenarioView({
   learningScenario,
@@ -52,6 +53,10 @@ export function LearningScenarioView({
   const { models } = useLlmModels();
 
   const modelDisplayName = models.find((m) => m.id === learningScenario.modelId)?.displayName;
+
+  const handleUseChat = () => {
+    router.push(`/learning-scenarios/d/${learningScenario.id}`);
+  };
 
   const handleDuplicateLearningScenario = async () => {
     const createResult = await createNewLearningScenarioFromTemplateAction({
@@ -100,6 +105,7 @@ export function LearningScenarioView({
       />
       <CustomChatTitle title={learningScenario.name} />
       <CustomChatActions>
+        <CustomChatActionUse onClick={handleUseChat} />
         <CustomChatActionDuplicate onClick={handleDuplicateLearningScenario} />
         <CustomChatLastUpdate date={learningScenario.updatedAt} />
       </CustomChatActions>
