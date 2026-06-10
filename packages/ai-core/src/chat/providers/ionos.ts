@@ -185,17 +185,12 @@ export function constructIonosAgenticStreamFn(model: AiModel): AgenticStreamFn {
 
     const resolvedToolCalls: ToolCall[] = [...toolCalls.entries()]
       .sort(([left], [right]) => left - right)
-      .map(([, toolCall]) => {
-        if (!toolCall.id || !toolCall.name) {
-          throw new AiGenerationError('Incomplete tool call returned from IONOS stream');
-        }
-
-        return {
-          id: toolCall.id,
-          name: toolCall.name,
-          arguments: toolCall.arguments,
-        };
-      });
+      .filter(([, toolCall]) => toolCall.id && toolCall.name)
+      .map(([, toolCall]) => ({
+        id: toolCall.id,
+        name: toolCall.name,
+        arguments: toolCall.arguments,
+      }));
 
     if (!usage) {
       const completionContent = [
@@ -215,10 +210,6 @@ export function constructIonosAgenticStreamFn(model: AiModel): AgenticStreamFn {
         promptTokens: calculatedUsage.prompt_tokens,
         totalTokens: calculatedUsage.total_tokens,
       };
-    }
-
-    if (!usage) {
-      throw new AiGenerationError('No usage data returned from IONOS stream');
     }
 
     for (const toolCall of resolvedToolCalls) {
