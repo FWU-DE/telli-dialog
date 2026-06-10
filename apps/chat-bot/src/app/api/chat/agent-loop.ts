@@ -24,7 +24,7 @@ type AgentLoopParams = {
     fullText: string;
     usage: TokenUsage;
     priceInCents: number;
-    intermediateMessages: AiCoreMessage[];
+    agentLoopMessages: AiCoreMessage[];
   }) => void;
   onError: (error: Error) => void;
 };
@@ -124,7 +124,7 @@ export function runAgentLoop({
         fullText,
         usage: totalUsage,
         priceInCents: totalPriceInCents,
-        intermediateMessages: loopMessages.slice(messages.length),
+        agentLoopMessages: loopMessages.slice(messages.length),
       });
     } catch (error) {
       logError('Error during agent loop:', error);

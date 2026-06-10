@@ -247,18 +247,18 @@ export async function sendChatMessage({
     fullText,
     usage,
     priceInCents,
-    intermediateMessages = [],
+    agentLoopMessages = [],
   }: {
     fullText: string;
     usage: TokenUsage;
     priceInCents: number;
-    intermediateMessages?: AiCoreMessage[];
+    agentLoopMessages?: AiCoreMessage[];
   }) {
     // Persist intermediate tool call/result messages and the final assistant message in one query
     const messagesToInsert = [
-      ...intermediateMessages.map((msg, index) => ({
+      ...agentLoopMessages.map((msg, index) => ({
         content: msg.content,
-        role: msg.role as 'assistant' | 'tool',
+        role: msg.role,
         userId: user.id,
         orderNumber: assistantMessageOrderNumber + index,
         modelName: definedModel.name,
@@ -270,7 +270,7 @@ export async function sendChatMessage({
         content: fullText,
         role: 'assistant' as const,
         userId: user.id,
-        orderNumber: assistantMessageOrderNumber + intermediateMessages.length,
+        orderNumber: assistantMessageOrderNumber + agentLoopMessages.length,
         modelName: definedModel.name,
         conversationId: activeConversation.id,
         webSearchResults,
@@ -355,9 +355,9 @@ export async function sendChatMessage({
       onTextChunk: (delta) => {
         update(delta);
       },
-      onComplete: async ({ fullText, usage, priceInCents, intermediateMessages }) => {
+      onComplete: async ({ fullText, usage, priceInCents, agentLoopMessages }) => {
         try {
-          await persistAssistantMessage({ fullText, usage, priceInCents, intermediateMessages });
+          await persistAssistantMessage({ fullText, usage, priceInCents, agentLoopMessages });
           done();
         } catch (error) {
           logError('Error during agent loop completion:', error);

@@ -1,16 +1,16 @@
 import { ImageAttachment } from '@/utils/files/types';
 import { logError } from '@shared/logging';
-import { ChatMessage, type ChatMessage as Message } from '@/types/chat';
+import { type ChatMessage } from '@/types/chat';
 import { generateTextWithBilling, type Message as AiCoreMessage } from '@ais-chat/ai-core';
 
 /**
  * Format messages to include images for models that support vision
  */
 export function formatMessagesWithImages(
-  messages: Message[],
+  messages: ChatMessage[],
   images: ImageAttachment[],
   modelSupportsImages: boolean,
-): Message[] {
+): ChatMessage[] {
   if (!modelSupportsImages || images.length === 0) {
     return messages;
   }
@@ -36,13 +36,13 @@ export function formatMessagesWithImages(
   return messagesWithImages;
 }
 
-export function getMostRecentUserMessage(messages: Array<Message>) {
+export function getMostRecentUserMessage(messages: Array<ChatMessage>) {
   const userMessages = messages.filter((message) => message.role === 'user');
   return userMessages.at(-1);
 }
 
-export function consolidateMessages(messages: Array<Message>): Array<Message> {
-  const consolidatedMessages: Array<Message> = [];
+export function consolidateMessages(messages: Array<ChatMessage>): Array<ChatMessage> {
+  const consolidatedMessages: Array<ChatMessage> = [];
 
   for (let i = 0; i < messages.length; i++) {
     const currentMessage = messages[i];
@@ -85,11 +85,11 @@ export function limitChatHistory({
   limitFirst = 2,
   characterLimit,
 }: {
-  messages: Array<Message>;
+  messages: Array<ChatMessage>;
   limitRecent: number;
   limitFirst?: number;
   characterLimit: number;
-}): Array<Message> {
+}): Array<ChatMessage> {
   const consolidatedMessages = consolidateMessages(messages);
 
   // Convert pairs to individual message counts
@@ -116,7 +116,7 @@ export function limitChatHistory({
   let charCount = result.reduce((sum, msg) => sum + msg.content.length, 0);
 
   // Add middle messages that fit within the character limit
-  const middleToAdd: Message[] = [];
+  const middleToAdd: ChatMessage[] = [];
   for (const msg of middleMessages) {
     if (charCount + msg.content.length <= characterLimit) {
       middleToAdd.unshift(msg); // Add to front to maintain chronological order
@@ -144,7 +144,7 @@ export async function getChatTitle({
   modelId,
   apiKeyId,
 }: {
-  message: Message;
+  message: ChatMessage;
   modelId: string;
   apiKeyId: string;
 }): Promise<string> {
