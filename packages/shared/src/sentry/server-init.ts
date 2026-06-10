@@ -29,7 +29,9 @@ export function initSentry({
     debug: false,
     dsn: env.sentryDsn,
     environment: env.sentryEnvironment,
-    streamGenAiSpans: true,
+    // Disable streaming so gen_ai spans are ingested in Sentry
+    // (streaming is broken, possibly due to OTel setup, or it's not available in self-hosted Sentry)
+    streamGenAiSpans: false,
     integrations: [
       Sentry.captureConsoleIntegration({ levels: ['fatal', 'error', 'warn', 'info'] }),
     ],
