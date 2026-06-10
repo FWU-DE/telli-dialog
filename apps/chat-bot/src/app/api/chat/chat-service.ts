@@ -202,7 +202,7 @@ export async function sendChatMessage({
 
   // Prune messages
   const prunedMessages = limitChatHistory({
-    messages: messages.map((m) => ({ id: m.id, role: m.role, content: m.content })),
+    messages: messages,
     limitRecent: KEEP_RECENT_MESSAGES,
     limitFirst: KEEP_FIRST_MESSAGES,
     characterLimit: TOTAL_CHAT_LENGTH_LIMIT,

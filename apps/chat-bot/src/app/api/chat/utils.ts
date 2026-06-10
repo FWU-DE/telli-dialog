@@ -52,7 +52,13 @@ export function consolidateMessages(messages: Array<Message>): Array<Message> {
     const prevMessage = consolidatedMessages[consolidatedMessages.length - 1];
 
     // If this message has the same role as the previous one, merge them
-    if (prevMessage && prevMessage.role === currentMessage?.role) {
+    // Do not merge tool-related messages (they carry toolCalls/toolCallId that must stay separate)
+    const isToolRelated =
+      currentMessage.role === 'tool' ||
+      currentMessage.toolCalls?.length ||
+      prevMessage?.toolCalls?.length;
+
+    if (prevMessage && prevMessage.role === currentMessage?.role && !isToolRelated) {
       prevMessage.content += '\n\n' + currentMessage.content;
     } else {
       // Otherwise add as a new message

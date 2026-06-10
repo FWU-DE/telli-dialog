@@ -91,12 +91,15 @@ export type UIMessage = ChatMessage & {
 
 /**
  * Convert ChatMessage[] to UIMessage[] for rendering.
+ * Filters out tool-related messages.
  */
 export function toUIMessages(messages: ChatMessage[]): UIMessage[] {
-  return messages.map((m) => ({
-    ...m,
-    parts: [{ type: 'text' as const, text: m.content }],
-  }));
+  return messages
+    .filter((m) => m.role !== 'tool' && !m.toolCalls?.length)
+    .map((m) => ({
+      ...m,
+      parts: [{ type: 'text' as const, text: m.content }],
+    }));
 }
 
 /**
