@@ -75,7 +75,7 @@ export async function dbInsertChatContent(chatContent: InsertConversationMessage
 }
 
 export async function dbInsertChatContentBatch(chatContents: InsertConversationMessageModel[]) {
-  return db.insert(conversationMessageTable).values(chatContents).onConflictDoNothing().returning();
+  return db.insert(conversationMessageTable).values(chatContents).onConflictDoNothing();
 }
 
 export async function dbGetConversations(userId: string) {
