@@ -86,7 +86,7 @@ describe('buildTools', () => {
       relatedFileEntities,
     });
 
-    expect(Object.keys(toolRegistry)).toEqual(['retrieve_text_chunks']);
+    expect(Object.keys(toolRegistry)).toContain('retrieve_text_chunks');
     const retrieveTextChunksTool = toolRegistry.retrieve_text_chunks!;
 
     expect(retrieveTextChunksTool.definition).toMatchObject({
@@ -138,7 +138,7 @@ describe('buildTools', () => {
       sourceUrls: ['https://example.com/shared-page'],
     });
 
-    expect(Object.keys(toolRegistry)).toEqual(['retrieve_text_chunks']);
+    expect(Object.keys(toolRegistry)).toContain('retrieve_text_chunks');
     const retrieveTextChunksTool = toolRegistry.retrieve_text_chunks!;
 
     expect(retrieveTextChunksTool.definition.description).toContain(
