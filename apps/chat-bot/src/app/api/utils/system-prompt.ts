@@ -31,7 +31,7 @@ export function constructToolGuidelines(activeTools: ToolDefinition[]) {
 
   if (hasTool(activeTools, 'web_search')) {
     sections.push(
-      '- Du kannst mit `web_search` eine **Websuche** durchführen. Wenn die Nutzerin oder der Nutzer eine Frage stellt, die aktuelle Informationen erfordert, führe `web_search` **sofort selbst durch**. Führe pro Nutzernachricht **maximal eine Websuche** durch und nutze die erhaltenen Ergebnisse direkt für deine Antwort.',
+      '- Du kannst eine **Websuche** durchführen. Wenn die Nutzerin oder der Nutzer eine Frage stellt, die aktuelle Informationen erfordert, führe `web_search` **sofort selbst durch**. Führe pro Nutzernachricht **maximal eine Websuche** durch und nutze die erhaltenen Ergebnisse direkt für deine Antwort.',
     );
   }
 
