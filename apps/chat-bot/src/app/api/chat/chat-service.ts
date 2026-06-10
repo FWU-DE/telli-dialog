@@ -44,6 +44,25 @@ import { buildTools } from './build-tools';
 import { runWebSearchPipeline } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
+
+function resolveAgentNameForTracing({
+  characterId,
+  learningScenarioId,
+  assistantId,
+}: {
+  characterId?: string;
+  learningScenarioId?: string;
+  assistantId?: string;
+}): string {
+  if (characterId) return 'Character';
+  if (learningScenarioId) return 'Learning Scenario';
+  if (assistantId) {
+    if (assistantId === HELP_MODE_ASSISTANT_ID) return 'Help Mode';
+    return 'Assistant';
+  }
+  return 'Chat';
+}
 
 /**
  * Server Action to send a chat message and stream the response.
@@ -345,13 +364,16 @@ export async function sendChatMessage({
       },
     });
     webSearchResults = builtTools.webSearchResults;
+    const agentName = resolveAgentNameForTracing({ characterId, learningScenarioId, assistantId });
+
     // Start the agent loop in the background
     runAgentLoop({
-      modelId: definedModel.id,
+      model: definedModel,
       apiKeyId,
       messages: aiCoreMessages,
       tools: builtTools.tools,
       toolHandlers: builtTools.toolHandlers,
+      agentName,
       onTextChunk: (delta) => {
         update(delta);
       },
