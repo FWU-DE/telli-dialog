@@ -9,7 +9,7 @@ import {
 } from './use-ais-chat';
 import { sendChatMessageAction } from '@/app/api/chat/actions';
 import { sendCharacterMessageAction } from '@/app/api/character/actions';
-import { sendSharedChatMessageAction } from '@/app/api/shared-chat/actions';
+import { sendLearningScenarioMessageAction } from '@/app/api/learning-scenario/actions';
 import { type UIMessage, type ChatStatus } from '@/types/chat';
 
 // Re-export types for convenience
@@ -23,12 +23,13 @@ export function useMainChat(options: {
   initialMessages?: ChatMessage[];
   modelId?: string;
   characterId?: string;
+  learningScenarioId?: string;
   assistantId?: string;
   onError?: (error: Error) => void;
   onFinish?: (message: ChatMessage) => void;
   onMessageCreated?: (messageId: string) => void;
 }): UseChatReturn {
-  const { conversationId, characterId, assistantId, ...rest } = options;
+  const { conversationId, characterId, learningScenarioId, assistantId, ...rest } = options;
 
   const sendMessage: SendMessageFn = useCallback(
     async ({ messages, modelId, fileIds }) => {
@@ -37,11 +38,12 @@ export function useMainChat(options: {
         messages,
         modelId,
         characterId,
+        learningScenarioId,
         assistantId,
         fileIds,
       });
     },
-    [conversationId, characterId, assistantId],
+    [conversationId, characterId, learningScenarioId, assistantId],
   );
 
   return useAisChat({
@@ -84,26 +86,26 @@ export function useCharacterChat(options: {
 /**
  * Hook for shared school chat (learning scenario)
  */
-export function useSharedChat(options: {
-  sharedChatId: string;
+export function useLearningScenarioChat(options: {
+  learningScenarioId: string;
   inviteCode: string;
   initialMessages?: ChatMessage[];
   modelId?: string;
   onError?: (error: Error) => void;
   onFinish?: (message: ChatMessage) => void;
 }): UseChatReturn {
-  const { sharedChatId, inviteCode, ...rest } = options;
+  const { learningScenarioId, inviteCode, ...rest } = options;
 
   const sendMessage: SendMessageFn = useCallback(
     async ({ messages, modelId }) => {
-      return sendSharedChatMessageAction({
-        sharedChatId,
+      return sendLearningScenarioMessageAction({
+        learningScenarioId,
         inviteCode,
         messages,
         modelId,
       });
     },
-    [sharedChatId, inviteCode],
+    [learningScenarioId, inviteCode],
   );
 
   return useAisChat({

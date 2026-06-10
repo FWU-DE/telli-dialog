@@ -33,6 +33,7 @@ import {
   usageTimeValuesInMinutes,
 } from '../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
+import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
 
 export function CharacterView({
   character,
@@ -124,12 +125,10 @@ export function CharacterView({
         </Card>
 
         {character.accessLevel === 'global' && (
-          <Card className="w-full">
-            <CardContent className="flex flex-col items-center">
-              <div className="text-sm text-foreground/70">{t('author-label')}</div>
-              <div className="text-base font-medium">{t('author-text')}</div>
-            </CardContent>
-          </Card>
+          <CustomChatAuthorInfo
+            authorLabel={t('author-label')}
+            authorText={character.author !== '' ? character.author : t('author-text')}
+          />
         )}
 
         <Card>
@@ -158,7 +157,7 @@ export function CharacterView({
           onDownloadFile={handleDownloadFile}
         />
       </div>
-      {character.hasLinkAccess && (
+      {(character.hasLinkAccess || character.accessLevel === 'community') && (
         <CustomChatCreateSuspensionRequestButton
           entityRef={{ entityType: 'character', entityId: character.id }}
         />

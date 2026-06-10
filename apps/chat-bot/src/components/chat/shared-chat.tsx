@@ -1,6 +1,6 @@
 'use client';
 
-import { useSharedChat } from '@/hooks/use-chat-hooks';
+import { useLearningScenarioChat } from '@/hooks/use-chat-hooks';
 import { FormEvent, RefObject, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { LearningScenarioWithShareDataModel } from '@shared/db/schema';
@@ -39,8 +39,8 @@ export default function SharedChat({
     reload,
     stop,
     status,
-  } = useSharedChat({
-    sharedChatId: id,
+  } = useLearningScenarioChat({
+    learningScenarioId: id,
     inviteCode,
     initialMessages: [],
     modelId: modelId ?? undefined,

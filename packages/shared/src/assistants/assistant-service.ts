@@ -147,6 +147,10 @@ export async function getConversationWithMessagesAndAssistant({
     getConversationMessages({ conversationId, userId }),
   ]);
 
+  if (conversation.assistantId !== assistantId) {
+    throw new NotFoundError('Conversation not found');
+  }
+
   return { assistant, conversation, messages };
 }
 

@@ -8,10 +8,10 @@ import {
 } from '../utils/system-prompt';
 
 export function constructLearningScenarioSystemPrompt({
-  sharedChat,
+  learningScenario,
   chunks,
 }: {
-  sharedChat: LearningScenarioSelectModel;
+  learningScenario: LearningScenarioSelectModel;
   chunks: RetrievedChunk[];
 }) {
   // error urls are intentionally not included in the learning scenario system prompt
@@ -27,10 +27,10 @@ Die folgenden Anweisungen wurden von der Lehrkraft erstellt und haben bei Widers
 
 ## Kontext:
 ### Thema des Chats 
-${sharedChat.name}
+${learningScenario.name}
 
-${sharedChat.description?.trim() ? `### Zweck des Dialogs\n${sharedChat.description}\n` : ''}
-${sharedChat.additionalInstructions?.trim() ? `### Folgendes sollst du tun\n${sharedChat.additionalInstructions}\n` : ''}
-${sharedChat.studentExercise?.trim() ? `### Folgendes ist der Auftrag an die Lernenden:\n${sharedChat.studentExercise}\n` : ''}
+${learningScenario.description?.trim() ? `### Zweck des Dialogs\n${learningScenario.description}\n` : ''}
+${learningScenario.additionalInstructions?.trim() ? `### Folgendes sollst du tun\n${learningScenario.additionalInstructions}\n` : ''}
+${learningScenario.studentExercise?.trim() ? `### Folgendes ist der Auftrag an die Lernenden:\n${learningScenario.studentExercise}\n` : ''}
 ${ragContext}`;
 }

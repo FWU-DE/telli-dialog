@@ -1,13 +1,14 @@
 {
   "name": "@ais-chat/api-database",
   "version": "0.0.0",
+  "description": "API database schema",
   "private": true,
   "type": "module",
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./utils": "./src/api-utils/index.ts",
-    "./llm-model": "./src/llm-model/index.ts"
+    "./llm-model": "./src/llm-model/index.ts",
+    "./utils": "./src/api-utils/index.ts"
   },
   "scripts": {
     "db:generate": "dotenv -e ../../apps/api/.env.local -- drizzle-kit generate",
@@ -15,8 +16,8 @@
     "db:migrate:local": "dotenv -e ../../apps/api/.env.local -- drizzle-kit migrate --config=./drizzle.config.ts",
     "db:seed": "dotenv -e ../../apps/api/.env.local -- tsx src/seed.ts",
     "db:seed:from-stage": "dotenv -e ../../apps/api/.env.local -- tsx src/seed-from-stage.ts",
-    "types": "tsc --noEmit",
-    "lint": "eslint . --max-warnings 0"
+    "lint": "eslint . --max-warnings 0",
+    "types": "tsc --noEmit"
   },
   "dependencies": {
     "@t3-oss/env-core": "0.13.11",

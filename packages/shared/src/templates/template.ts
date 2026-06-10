@@ -2,10 +2,11 @@ import { URL_ENTITY_TYPES, UrlEntityType } from '@shared/entities/entity-types';
 
 export type TemplateTypes = UrlEntityType;
 
-/* Unified template model for characters and assistants */
+/* Unified template model for assistants, characters and learning scenarios. */
 export type TemplateModel = {
   id: string;
   originalId: string | null;
+  author: string;
   type: TemplateTypes;
   name: string;
   createdAt: Date;

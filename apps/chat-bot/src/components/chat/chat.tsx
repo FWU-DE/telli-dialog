@@ -5,6 +5,7 @@ import React, { FormEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
 import { type CharacterSelectModel, type AssistantSelectModel, FileModel } from '@shared/db/schema';
+import { type LearningScenarioSelectModel } from '@shared/db/schema';
 import PromptSuggestions from './prompt-suggestions';
 import MarkdownDisplay from './markdown-display';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
@@ -26,12 +27,14 @@ import { getConversationPath } from '@/utils/chat/path';
 import { Messages, type PendingFileModel } from './messages';
 import { WebSource } from '@shared/db/types';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
+import { FloatingText } from './floating-text';
 
 type ChatProps = {
   id: string;
   initialMessages: ChatMessage[];
   assistant?: AssistantSelectModel;
   character?: CharacterSelectModel;
+  learningScenario?: LearningScenarioSelectModel;
   imageSource?: string;
   promptSuggestions?: string[];
   initialFileMapping?: Map<string, FileModel[]>;
@@ -45,6 +48,7 @@ export default function Chat({
   initialMessages,
   assistant,
   character,
+  learningScenario,
   imageSource,
   promptSuggestions = [],
   initialFileMapping,
@@ -53,11 +57,13 @@ export default function Chat({
   logoElement,
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
+  const tLearningScenarioShared = useTranslations('learning-scenarios.shared');
 
   const { selectedModel, setDownloadConversationEnabled } = useLlmModels();
   const conversationPath = getConversationPath({
     customGptId: assistant?.id,
     characterId: character?.id,
+    learningScenarioId: learningScenario?.id,
     conversationId: id,
   });
   const [fileMapping, setFileMapping] = useState<Map<string, FileModel[]>>(
@@ -100,6 +106,7 @@ export default function Chat({
     initialMessages: initialMessages,
     modelId: selectedModel?.id,
     characterId: character?.id,
+    learningScenarioId: learningScenario?.id,
     assistantId: assistant?.id,
     onMessageCreated: (messageId) => {
       // Associate pending files with the message ID immediately when the message is created
@@ -140,6 +147,7 @@ export default function Chat({
   const { error, handleError, resetError } = useCheckStatusCode();
 
   const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, status]);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Skip fetching file mappings if the conversation doesn't exist yet (no messages sent)
@@ -260,6 +268,14 @@ export default function Chat({
         description={character.description}
       />
     );
+  } else if (learningScenario !== undefined) {
+    placeholderElement = (
+      <InitialChatContentDisplay
+        title={learningScenario.name}
+        imageSource={imageSource}
+        description={learningScenario.description}
+      />
+    );
   } else if (assistant !== undefined && assistant.id === HELP_MODE_ASSISTANT_ID) {
     placeholderElement = (
       <div className="flex flex-col items-center justify-center gap-6 h-full p-4">
@@ -291,7 +307,7 @@ export default function Chat({
 
   const assistantIcon = AssistantIcon({
     customGptId: assistant?.id,
-    imageName: character?.name ?? assistant?.name,
+    imageName: character?.name ?? learningScenario?.name ?? assistant?.name,
     imageSource,
   });
 
@@ -299,8 +315,21 @@ export default function Chat({
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <div className="flex flex-col grow justify-between w-full overflow-hidden">
+      <div
+        ref={containerRef}
+        className="relative flex flex-col grow justify-between w-full overflow-hidden"
+      >
         <div ref={scrollRef} className="grow overflow-y-auto">
+          {learningScenario !== undefined && learningScenario.studentExercise.trim() !== '' && (
+            <FloatingText
+              learningContext={learningScenario.studentExercise}
+              dialogStarted={true}
+              title={tLearningScenarioShared('excersise-title')}
+              maxWidth={600}
+              maxHeight={600}
+              minMargin={16}
+            />
+          )}
           {messages.length === 0 ? (
             placeholderElement
           ) : (

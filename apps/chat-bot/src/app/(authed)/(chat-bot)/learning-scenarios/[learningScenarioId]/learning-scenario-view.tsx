@@ -32,6 +32,8 @@ import {
   unshareLearningScenarioAction,
 } from '../editor/[learningScenarioId]/actions';
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
+import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
+import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 
 export function LearningScenarioView({
   learningScenario,
@@ -51,6 +53,10 @@ export function LearningScenarioView({
   const { models } = useLlmModels();
 
   const modelDisplayName = models.find((m) => m.id === learningScenario.modelId)?.displayName;
+
+  const handleUseChat = () => {
+    router.push(`/learning-scenarios/d/${learningScenario.id}`);
+  };
 
   const handleDuplicateLearningScenario = async () => {
     const createResult = await createNewLearningScenarioFromTemplateAction({
@@ -99,6 +105,7 @@ export function LearningScenarioView({
       />
       <CustomChatTitle title={learningScenario.name} />
       <CustomChatActions>
+        <CustomChatActionUse onClick={handleUseChat} />
         <CustomChatActionDuplicate onClick={handleDuplicateLearningScenario} />
         <CustomChatLastUpdate date={learningScenario.updatedAt} />
       </CustomChatActions>
@@ -126,12 +133,10 @@ export function LearningScenarioView({
         </Card>
 
         {learningScenario.accessLevel === 'global' && (
-          <Card className="w-full">
-            <CardContent className="flex flex-col items-center">
-              <div className="text-sm text-foreground/70">{t('author-label')}</div>
-              <div className="text-base font-medium">{t('author-text')}</div>
-            </CardContent>
-          </Card>
+          <CustomChatAuthorInfo
+            authorLabel={t('author-label')}
+            authorText={learningScenario.author !== '' ? learningScenario.author : t('author-text')}
+          />
         )}
 
         <Card>
@@ -162,7 +167,7 @@ export function LearningScenarioView({
         initialLinks={initialLinks}
         onDownloadFile={handleDownloadFile}
       />
-      {learningScenario.hasLinkAccess && (
+      {(learningScenario.hasLinkAccess || learningScenario.accessLevel === 'community') && (
         <CustomChatCreateSuspensionRequestButton
           entityRef={{ entityType: 'learningScenario', entityId: learningScenario.id }}
         />

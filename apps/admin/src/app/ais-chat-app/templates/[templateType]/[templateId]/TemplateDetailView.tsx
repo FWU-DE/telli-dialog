@@ -85,6 +85,17 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
     loadData();
   }, [templateType, templateId]);
 
+  async function handleAuthorChanged() {
+    try {
+      const template = await getTemplateByIdAction(templateType, templateId);
+      setTemplate(template);
+    } catch (error) {
+      toast.error('Fehler beim Laden des Templates.', {
+        description: (error as Error).message,
+      });
+    }
+  }
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -95,7 +106,9 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>{template && <TemplateInfoCard template={template} />}</div>
+      <div>
+        {template && <TemplateInfoCard template={template} onDataChanged={handleAuthorChanged} />}
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Template Zuordnungen</CardTitle>

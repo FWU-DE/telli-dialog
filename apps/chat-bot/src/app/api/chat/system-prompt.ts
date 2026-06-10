@@ -1,5 +1,6 @@
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { dbGetCharacterById } from '@shared/db/functions/character';
+import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 import { ObscuredFederalState } from '@/auth/utils';
 import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { AssistantSelectModel } from '@shared/db/schema';
@@ -7,6 +8,7 @@ import { NotFoundError } from '@shared/error';
 import { RetrievedChunk } from '../rag/types';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { constructCharacterSystemPrompt } from '../character/system-prompt';
+import { constructLearningScenarioSystemPrompt } from '../learning-scenario/system-prompt';
 import {
   constructRagContext,
   FORMAT_GUIDELINES,
@@ -124,6 +126,7 @@ ${ragContext}`;
 
 export async function constructChatSystemPrompt({
   characterId,
+  learningScenarioId,
   assistantId,
   isTeacher,
   federalState,
@@ -132,6 +135,7 @@ export async function constructChatSystemPrompt({
   webSearchResults = [],
 }: {
   characterId?: string;
+  learningScenarioId?: string;
   assistantId?: string;
   isTeacher: boolean;
   federalState: ObscuredFederalState;
@@ -147,6 +151,19 @@ export async function constructChatSystemPrompt({
     }
 
     return constructCharacterSystemPrompt({ character, chunks });
+  }
+
+  if (learningScenarioId !== undefined) {
+    const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
+
+    if (learningScenario === undefined || learningScenario.suspended) {
+      throw new NotFoundError('Learning scenario not found');
+    }
+
+    return constructLearningScenarioSystemPrompt({
+      learningScenario,
+      chunks,
+    });
   }
 
   if (assistantId !== undefined) {
