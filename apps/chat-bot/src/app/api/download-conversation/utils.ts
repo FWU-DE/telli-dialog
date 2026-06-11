@@ -176,9 +176,8 @@ function getConversationMessageMetadata({
       ],
     }),
     new Paragraph({
-      children: [
         new TextRun({
-          text: `Erstellt am: ${formatDateToGermanTimestamp(message.createdAt)}`,
+          text: `Erstellt am: ${formatDateToGermanTimestamp(message.createdAt)} Uhr`,
           size: 22,
         }),
       ],
