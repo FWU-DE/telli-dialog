@@ -222,10 +222,17 @@ Before starting:
 1. Identify target layer: `apps/*` vs `packages/*`
 2. Identify affected database: `packages/shared` (app/admin) vs `packages/api-database` (API)
 
-During implementation: 3. Keep business logic in services, not routes/components 4. Prefer minimal, composable changes that follow existing file/feature structure 5. If schema changes needed:
+During implementation:
 
-- Update correct package (`packages/shared` or `packages/api-database`)
-- Generate migration: `pnpm db:generate` in that package
-- Apply: `pnpm db:migrate` from root
+3. Keep business logic in services, not routes/components
+4. Prefer minimal, composable changes that follow existing file/feature structure
+5. If schema changes needed:
+   - Update correct package (`packages/shared` or `packages/api-database`)
+   - Generate migration: `pnpm db:generate` in that package
+   - Apply: `pnpm db:migrate` from root
 
-After changes: 6. Run quality gates: `pnpm format && pnpm lint && pnpm check-types && pnpm test` 7. Check exit codes (0 = success), not summary messages 8. Treat failures as blocking — fix problems before finishing
+After changes:
+
+6. Run quality gates: `pnpm format && pnpm lint && pnpm check-types && pnpm test`
+7. Check exit codes (0 = success), not summary messages
+8. Treat failures as blocking — fix problems before finishing
