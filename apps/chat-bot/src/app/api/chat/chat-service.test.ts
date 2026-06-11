@@ -39,6 +39,7 @@ const mocks = vi.hoisted(() => ({
   dbGetOrCreateConversationMock: vi.fn(),
   dbUpdateConversationTitleMock: vi.fn(),
   dbInsertChatContentMock: vi.fn(),
+  dbInsertChatContentBatchMock: vi.fn(),
   dbInsertConversationUsageMock: vi.fn(),
   dbUpdateLastUsedModelByUserIdMock: vi.fn(),
   dbGetAttachedFileByEntityIdMock: vi.fn(),
@@ -90,6 +91,7 @@ vi.mock('@shared/db/functions/chat', () => ({
   dbGetOrCreateConversation: mocks.dbGetOrCreateConversationMock,
   dbUpdateConversationTitle: mocks.dbUpdateConversationTitleMock,
   dbInsertChatContent: mocks.dbInsertChatContentMock,
+  dbInsertChatContentBatch: mocks.dbInsertChatContentBatchMock,
 }));
 
 vi.mock('@shared/db/functions/token-usage', () => ({
