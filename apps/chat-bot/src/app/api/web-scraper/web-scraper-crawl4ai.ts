@@ -39,6 +39,7 @@ export async function webScraperCrawl4AI(url: string): Promise<WebSource> {
   const t = await getTranslations('websearch');
 
   try {
+    const timeout = 30_000; // 30 seconds timeout for crawl4ai
     const response = await fetch(`${env.crawl4AIUrl}/crawl`, {
       method: 'POST',
       headers: {
@@ -52,6 +53,7 @@ export async function webScraperCrawl4AI(url: string): Promise<WebSource> {
             word_count_threshold: 10, // Filter out tiny text blocks, e.g. buttons, labels
             remove_overlay_elements: true, // Remove popups
             screenshot: false, // for debugging
+            page_timeout: timeout,
             excluded_tags: [
               'nav',
               'header',
@@ -82,11 +84,15 @@ export async function webScraperCrawl4AI(url: string): Promise<WebSource> {
           },
         },
       }),
-      signal: AbortSignal.timeout(30000), // 30 seconds timeout
+      signal: AbortSignal.timeout(timeout + 5_000), // additional 5 seconds timeout for the request itself
     });
 
     if (!response.ok) {
-      logWarning(`Crawl4AI request failed with status ${response.status} for URL: ${url}`);
+      const responseBody = await response.text();
+      logWarning(`Crawl4AI request failed with status ${response.status} for URL: ${url}`, {
+        responseBody: responseBody.substring(0, 10_000),
+        responseBodyLength: responseBody.length,
+      });
       return defaultErrorSource(url);
     }
 
