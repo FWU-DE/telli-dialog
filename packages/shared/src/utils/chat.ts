@@ -1,7 +1,7 @@
 import { z } from 'zod';
+import { CONVERSATION_ROLES } from '@ais-chat/ai-core/chat/types';
 
-export const conversationRoleSchema = z.enum(['user', 'assistant', 'system', 'data']);
-export type ConversationRole = z.infer<typeof conversationRoleSchema>;
+export const conversationRoleSchema = z.enum(CONVERSATION_ROLES);
 
 const fileMetadataSchema = z.object({
   fileId: z.string(),

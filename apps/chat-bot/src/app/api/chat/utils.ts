@@ -1,16 +1,16 @@
 import { ImageAttachment } from '@/utils/files/types';
 import { logError } from '@shared/logging';
-import { type ChatMessage as Message } from '@/types/chat';
-import { generateTextWithBilling } from '@ais-chat/ai-core';
+import { type ChatMessage } from '@/types/chat';
+import { generateTextWithBilling, type Message as AiCoreMessage } from '@ais-chat/ai-core';
 
 /**
  * Format messages to include images for models that support vision
  */
 export function formatMessagesWithImages(
-  messages: Message[],
+  messages: ChatMessage[],
   images: ImageAttachment[],
   modelSupportsImages: boolean,
-): Message[] {
+): ChatMessage[] {
   if (!modelSupportsImages || images.length === 0) {
     return messages;
   }
@@ -26,7 +26,7 @@ export function formatMessagesWithImages(
     if (messageImages.length === 0) {
       continue;
     }
-    message.experimental_attachments = messageImages.map((image) => ({
+    message.attachments = messageImages.map((image) => ({
       contentType: image.mimeType ?? 'image/jpeg',
       url: image.url,
       type: 'image' as const,
@@ -36,13 +36,13 @@ export function formatMessagesWithImages(
   return messagesWithImages;
 }
 
-export function getMostRecentUserMessage(messages: Array<Message>) {
+export function getMostRecentUserMessage(messages: Array<ChatMessage>) {
   const userMessages = messages.filter((message) => message.role === 'user');
   return userMessages.at(-1);
 }
 
-export function consolidateMessages(messages: Array<Message>): Array<Message> {
-  const consolidatedMessages: Array<Message> = [];
+export function consolidateMessages(messages: Array<ChatMessage>): Array<ChatMessage> {
+  const consolidatedMessages: Array<ChatMessage> = [];
 
   for (let i = 0; i < messages.length; i++) {
     const currentMessage = messages[i];
@@ -52,7 +52,13 @@ export function consolidateMessages(messages: Array<Message>): Array<Message> {
     const prevMessage = consolidatedMessages[consolidatedMessages.length - 1];
 
     // If this message has the same role as the previous one, merge them
-    if (prevMessage && prevMessage.role === currentMessage?.role) {
+    // Do not merge tool-related messages (they carry toolCalls/toolCallId that must stay separate)
+    const isToolRelated =
+      currentMessage.role === 'tool' ||
+      currentMessage.toolCalls?.length ||
+      prevMessage?.toolCalls?.length;
+
+    if (prevMessage && prevMessage.role === currentMessage?.role && !isToolRelated) {
       prevMessage.content += '\n\n' + currentMessage.content;
     } else {
       // Otherwise add as a new message
@@ -79,11 +85,11 @@ export function limitChatHistory({
   limitFirst = 2,
   characterLimit,
 }: {
-  messages: Array<Message>;
+  messages: Array<ChatMessage>;
   limitRecent: number;
   limitFirst?: number;
   characterLimit: number;
-}): Array<Message> {
+}): Array<ChatMessage> {
   const consolidatedMessages = consolidateMessages(messages);
 
   // Convert pairs to individual message counts
@@ -110,7 +116,7 @@ export function limitChatHistory({
   let charCount = result.reduce((sum, msg) => sum + msg.content.length, 0);
 
   // Add middle messages that fit within the character limit
-  const middleToAdd: Message[] = [];
+  const middleToAdd: ChatMessage[] = [];
   for (const msg of middleMessages) {
     if (charCount + msg.content.length <= characterLimit) {
       middleToAdd.unshift(msg); // Add to front to maintain chronological order
@@ -138,7 +144,7 @@ export async function getChatTitle({
   modelId,
   apiKeyId,
 }: {
-  message: Message;
+  message: ChatMessage;
   modelId: string;
   apiKeyId: string;
 }): Promise<string> {
@@ -179,4 +185,25 @@ export async function getChatTitle({
     logError('Error generating chat title, using default title as fallback:', error);
     return fallbackTitle;
   }
+}
+
+/**
+ * Converts frontend messages to ai-core message format
+ */
+export function convertToAiCoreMessages(
+  systemPrompt: string,
+  messages: ChatMessage[],
+): AiCoreMessage[] {
+  return [
+    { role: 'system', content: systemPrompt },
+    ...messages
+      .filter((msg) => msg.role !== 'system')
+      .map(({ role, content, attachments, toolCalls, toolCallId }) => ({
+        role,
+        content,
+        attachments,
+        toolCalls,
+        toolCallId,
+      })),
+  ];
 }

@@ -1,6 +1,7 @@
 import type { SharedChatExpiredError, TokenPointsExceededError } from '@ais-chat/ai-core/errors';
 import type { NotFoundError } from '@shared/error';
 import type { WebSearchResult } from '@shared/db/schema';
+import { ChatAttachment, ConversationRole, ToolCall } from '@ais-chat/ai-core/chat/types';
 
 /**
  * Serialized error that can be safely transmitted across the Server Action boundary.
@@ -21,25 +22,18 @@ export type SerializedError = {
 export type ChatStatus = 'ready' | 'submitted' | 'reasoning' | 'streaming' | 'error';
 
 /**
- * Attachment type for images in messages.
- */
-export type ChatAttachment = {
-  contentType: string;
-  url: string;
-  type: 'image';
-};
-
-/**
  * Basic chat message type used throughout the application.
  * This replaces the Message type from the 'ai' package.
  */
 export type ChatMessage = {
   id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: ConversationRole;
   content: string;
   createdAt?: Date;
-  experimental_attachments?: ChatAttachment[];
+  attachments?: ChatAttachment[];
   webSearchResults?: WebSearchResult[];
+  toolCalls?: ToolCall[];
+  toolCallId?: string;
 };
 
 /**
@@ -97,12 +91,15 @@ export type UIMessage = ChatMessage & {
 
 /**
  * Convert ChatMessage[] to UIMessage[] for rendering.
+ * Filters out tool-related messages.
  */
 export function toUIMessages(messages: ChatMessage[]): UIMessage[] {
-  return messages.map((m) => ({
-    ...m,
-    parts: [{ type: 'text' as const, text: m.content }],
-  }));
+  return messages
+    .filter((m) => m.role !== 'tool' && !m.toolCalls?.length)
+    .map((m) => ({
+      ...m,
+      parts: [{ type: 'text' as const, text: m.content }],
+    }));
 }
 
 /**

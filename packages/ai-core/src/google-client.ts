@@ -1,6 +1,7 @@
 import type { LlmModel } from '@ais-chat/api-database';
 import { GoogleGenAI } from '@google/genai';
 import { ProviderConfigurationError } from './errors';
+import { instrumentGoogleGenAIClient } from '@sentry/core';
 
 const GOOGLE_API_VERSION = 'v1';
 const GOOGLE_CLOUD_PLATFORM_SCOPE = 'https://www.googleapis.com/auth/cloud-platform';
@@ -31,10 +32,8 @@ export function createGoogleClient(model: LlmModel): GoogleClientConfig {
     return cachedClient;
   }
 
-  const client = {
-    projectId,
-    location,
-    client: new GoogleGenAI({
+  const instrumentedClient = instrumentGoogleGenAIClient(
+    new GoogleGenAI({
       enterprise: true,
       project: projectId,
       location,
@@ -43,6 +42,12 @@ export function createGoogleClient(model: LlmModel): GoogleClientConfig {
         scopes: [GOOGLE_CLOUD_PLATFORM_SCOPE],
       },
     }),
+  );
+
+  const client = {
+    projectId,
+    location,
+    client: instrumentedClient,
   };
 
   googleClientCache.set(cacheKey, client);

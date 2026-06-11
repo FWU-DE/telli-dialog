@@ -39,6 +39,7 @@ const mocks = vi.hoisted(() => ({
   dbGetOrCreateConversationMock: vi.fn(),
   dbUpdateConversationTitleMock: vi.fn(),
   dbInsertChatContentMock: vi.fn(),
+  dbInsertChatContentBatchMock: vi.fn(),
   dbInsertConversationUsageMock: vi.fn(),
   dbUpdateLastUsedModelByUserIdMock: vi.fn(),
   dbGetAttachedFileByEntityIdMock: vi.fn(),
@@ -46,6 +47,7 @@ const mocks = vi.hoisted(() => ({
   sendRabbitmqEventMock: vi.fn(),
   constructNewMessageEventMock: vi.fn(),
   constructTokenBudgetExceededEventMock: vi.fn(),
+  convertToAiCoreMessagesMock: vi.fn(),
   formatMessagesWithImagesMock: vi.fn(),
   getChatTitleMock: vi.fn(),
   limitChatHistoryMock: vi.fn(),
@@ -89,6 +91,7 @@ vi.mock('@shared/db/functions/chat', () => ({
   dbGetOrCreateConversation: mocks.dbGetOrCreateConversationMock,
   dbUpdateConversationTitle: mocks.dbUpdateConversationTitleMock,
   dbInsertChatContent: mocks.dbInsertChatContentMock,
+  dbInsertChatContentBatch: mocks.dbInsertChatContentBatchMock,
 }));
 
 vi.mock('@shared/db/functions/token-usage', () => ({
@@ -121,6 +124,7 @@ vi.mock('./system-prompt', () => ({
 }));
 
 vi.mock('./utils', () => ({
+  convertToAiCoreMessages: mocks.convertToAiCoreMessagesMock,
   formatMessagesWithImages: mocks.formatMessagesWithImagesMock,
   getChatTitle: mocks.getChatTitleMock,
   limitChatHistory: mocks.limitChatHistoryMock,
@@ -240,6 +244,9 @@ beforeEach(() => {
   mocks.retrieveChunksMock.mockResolvedValue([]);
   mocks.limitChatHistoryMock.mockImplementation(
     ({ messages }: { messages: ChatMessage[] }) => messages,
+  );
+  mocks.convertToAiCoreMessagesMock.mockImplementation(
+    (_systemPrompt: unknown, messages: unknown[]) => messages,
   );
   mocks.formatMessagesWithImagesMock.mockImplementation((messages: ChatMessage[]) => messages);
   mocks.extractImagesAndUrlMock.mockResolvedValue([]);
