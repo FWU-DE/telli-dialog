@@ -564,6 +564,9 @@ importers:
       '@ais-chat/api-database':
         specifier: workspace:*
         version: link:../api-database
+      '@anthropic-ai/sdk':
+        specifier: 0.104.1
+        version: 0.104.1(zod@4.4.3)
       '@anthropic-ai/vertex-sdk':
         specifier: 0.17.0
         version: 0.17.0(zod@4.4.3)
@@ -959,8 +962,8 @@ packages:
   '@altano/repository-tools@2.0.3':
     resolution: {integrity: sha512-cSR/ZYDF6Wp9OeAJMyLYYN1GenAAhV17W+w38ELP+3c5Ltsy9jkkCymi33nz/qnXyef3n6Fbr1h2yt3dvUN5sQ==}
 
-  '@anthropic-ai/sdk@0.102.0':
-    resolution: {integrity: sha512-cThh3KcPW3lzkFyTz1cjyhJvOVw45NkLMoowO2ZJ/76CBz44ADUon+NsjEc/PypAkARs72Xu8qxTnx6PAOTQUQ==}
+  '@anthropic-ai/sdk@0.104.1':
+    resolution: {integrity: sha512-gGACa/+IaiXzRRmF96aOhamoBgapKRBiFWbmmTFP8aMkpaEcuStF+Q61bjo4vPxBM7gqWJNZqsngslRdnLHv0Q==}
     hasBin: true
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
@@ -10041,7 +10044,7 @@ snapshots:
 
   '@altano/repository-tools@2.0.3': {}
 
-  '@anthropic-ai/sdk@0.102.0(zod@4.4.3)':
+  '@anthropic-ai/sdk@0.104.1(zod@4.4.3)':
     dependencies:
       json-schema-to-ts: 3.1.1
       standardwebhooks: 1.0.0
@@ -10050,7 +10053,7 @@ snapshots:
 
   '@anthropic-ai/vertex-sdk@0.17.0(zod@4.4.3)':
     dependencies:
-      '@anthropic-ai/sdk': 0.102.0(zod@4.4.3)
+      '@anthropic-ai/sdk': 0.104.1(zod@4.4.3)
       google-auth-library: 9.15.1
     transitivePeerDependencies:
       - encoding

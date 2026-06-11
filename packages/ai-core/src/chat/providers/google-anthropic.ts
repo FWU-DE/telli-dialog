@@ -1,3 +1,4 @@
+import { MessageStreamParams } from '@anthropic-ai/sdk/resources';
 import {
   AgenticStreamFn,
   AiModel,
@@ -10,6 +11,7 @@ import {
 } from '../types';
 import { AnthropicVertex } from '@anthropic-ai/vertex-sdk';
 
+/* used by apps/api or as auxiliary model in chat-bot */
 export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGenerationFn {
   const config = getConfigurationByModel(model);
   const client = new AnthropicVertex(config);
@@ -59,6 +61,7 @@ export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGe
   };
 }
 
+/** used by chat-bot for streaming text responses */
 export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStreamFn {
   const config = getConfigurationByModel(model);
   const client = new AnthropicVertex(config);
@@ -78,20 +81,23 @@ export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStream
       const anthropicMessages = conversationMessages.map((msg) => ({
         role: msg.role === 'assistant' ? ('assistant' as const) : ('user' as const),
         content: msg.content,
+        attachments: msg.attachments,
       }));
 
       // Strip "anthropic/" prefix if present (e.g., "anthropic/claude-3-5-sonnet@20240620" -> "claude-3-5-sonnet@20240620")
       const vertexModelName = modelName.replace(/^anthropic\//, '');
 
-      const stream = client.messages.stream({
-        model: vertexModelName,
+      const messageParams: MessageStreamParams = {
         max_tokens: maxTokens ?? 4096,
         messages: anthropicMessages,
+        model: vertexModelName,
+        stream: true,
         ...(systemMessages.length > 0
           ? { system: systemMessages.map((msg) => msg.content).join('\n') }
           : {}),
-        ...(temperature !== undefined ? { temperature } : {}),
-      });
+      };
+
+      const stream = client.messages.stream(messageParams);
 
       let usage:
         | { promptTokens: number; completionTokens: number; totalTokens: number }
@@ -122,6 +128,7 @@ export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStream
   };
 }
 
+/** used by chat-bot for streaming agentic responses if activated */
 export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): AgenticStreamFn {
   const config = getConfigurationByModel(model);
   const client = new AnthropicVertex(config);
