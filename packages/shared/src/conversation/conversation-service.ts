@@ -1,5 +1,6 @@
 import {
   dbGetConversationById,
+  dbGetConversationMessageById,
   dbGetConversationMessages,
   dbGetConversations,
   dbUpdateConversationTitle,
@@ -145,8 +146,7 @@ export async function getConversationMessageForExport({
   userId: string;
 }) {
   const conversation = await getConversation({ conversationId, userId });
-  const messages = await getConversationMessages({ conversationId, userId });
-  const message = messages.find((conversationMessage) => conversationMessage.id === messageId);
+  const message = await dbGetConversationMessageById({ conversationId, messageId, userId });
 
   if (message === undefined) {
     throw new NotFoundError('Conversation message not found');
