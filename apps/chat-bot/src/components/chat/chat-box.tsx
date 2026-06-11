@@ -35,6 +35,7 @@ export function ChatBox({
   isLoading,
   regenerateMessage,
   conversationId,
+  characterName,
   status,
 }: {
   assistantIcon?: ReactNode;
@@ -47,6 +48,7 @@ export function ChatBox({
   isLoading: boolean;
   regenerateMessage: () => void;
   conversationId?: string;
+  characterName?: string;
   status: ChatStatus;
 }) {
   const tCommon = useTranslations('common');
@@ -156,6 +158,7 @@ export function ChatBox({
             <DownloadConversationMessageButton
               conversationId={conversationId}
               messageId={children.id}
+              characterName={characterName}
             />
           )}
         <button

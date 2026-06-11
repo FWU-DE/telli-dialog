@@ -11,21 +11,28 @@ import { downloadFileFromBlob, extractFilenameFromResponse } from '@/utils/files
 type DownloadConversationMessageButtonProps = {
   conversationId: string;
   messageId: string;
+  characterName?: string;
 };
 
 type DownloadConversationMessageParams = {
   conversationId: string;
   messageId: string;
+  characterName?: string;
 };
 
 export async function fetchConversationMessageDownload({
   conversationId,
   messageId,
+  characterName,
 }: DownloadConversationMessageParams) {
   const searchParams = new URLSearchParams({
     conversationId,
     messageId,
   });
+
+  if (characterName !== undefined) {
+    searchParams.append('enterpriseGptName', characterName);
+  }
 
   const response = await fetch(`/api/download-conversation?${searchParams.toString()}`);
   const fileName = extractFilenameFromResponse(response, `Nachricht_${messageId}.docx`);
@@ -43,6 +50,7 @@ export async function fetchConversationMessageDownload({
 export default function DownloadConversationMessageButton({
   conversationId,
   messageId,
+  characterName,
 }: DownloadConversationMessageButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const toast = useToast();
@@ -55,6 +63,7 @@ export default function DownloadConversationMessageButton({
       const { blob, fileName } = await fetchConversationMessageDownload({
         conversationId,
         messageId,
+        characterName,
       });
 
       downloadFileFromBlob(blob, fileName);
