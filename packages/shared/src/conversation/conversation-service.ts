@@ -132,6 +132,33 @@ export async function getConversationAndMessagesForExport({
 }
 
 /**
+ * Authenticated user wants to download a single conversation message.
+ * Only the selected message is exported.
+ */
+export async function getConversationMessageForExport({
+  conversationId,
+  messageId,
+  userId,
+}: {
+  conversationId: string;
+  messageId: string;
+  userId: string;
+}) {
+  const conversation = await getConversation({ conversationId, userId });
+  const messages = await getConversationMessages({ conversationId, userId });
+  const message = messages.find((conversationMessage) => conversationMessage.id === messageId);
+
+  if (message === undefined) {
+    throw new NotFoundError('Conversation message not found');
+  }
+
+  return {
+    conversation,
+    message,
+  };
+}
+
+/**
  * An unauthenticated user (student) wants to download a shared conversation.
  * The messages are sent in the request body and are not stored in the database.
  * The invite code needs to exist in the database, otherwise an error is thrown.

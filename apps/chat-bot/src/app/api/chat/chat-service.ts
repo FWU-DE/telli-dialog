@@ -265,6 +265,7 @@ export async function sendChatMessage({
     priceInCents: number;
   }) {
     await dbInsertChatContent({
+      id: assistantMessageId,
       content: fullText,
       role: 'assistant',
       userId: user.id,
