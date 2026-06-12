@@ -248,3 +248,18 @@ export async function listFilesFromS3({
 
   return allObjects;
 }
+
+/**
+ * Get a file from S3 by its public URL.
+ * Because the url is public, the function uses fetch for simplicity.
+ *
+ * @param url
+ */
+export async function getFileFromS3ByUrl(url: string): Promise<Blob> {
+  return fetch(url).then((response) => {
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file from S3. Status: ${response.status}`);
+    }
+    return response.blob();
+  });
+}

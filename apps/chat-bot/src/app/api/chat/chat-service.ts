@@ -20,7 +20,12 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructChatSystemPrompt } from './system-prompt';
-import { formatMessagesWithImages, getChatTitle, limitChatHistory } from './utils';
+import {
+  formatMessagesWithImages,
+  getChatTitle,
+  enrichWithImageDataIfRequired,
+  limitChatHistory,
+} from './utils';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import {
@@ -238,6 +243,7 @@ export async function sendChatMessage({
 
   // attach the image url to each of the image files within relatedFileEntities
   const extractedImages = await extractImagesAndUrl(relatedFileEntities);
+  console.log('Extracted images:', extractedImages);
 
   // Format messages with images if the model supports vision
   const messagesWithImages = formatMessagesWithImages(
@@ -245,9 +251,23 @@ export async function sendChatMessage({
     extractedImages,
     modelSupportsImages,
   );
+  console.log('Messages with images:', messagesWithImages);
+
+  // Include image data as base64 encoded string into message if the model needs it (like google anthropic)
+  const messagesWithImageData = await enrichWithImageDataIfRequired(
+    definedModel,
+    messagesWithImages,
+  );
+
+  console.log('Messages with image data if required:', messagesWithImageData);
+  messagesWithImageData.map((message) => {
+    message.experimental_attachments?.map((attachment) => {
+      console.log('Attachment:', attachment.type, attachment.url);
+    });
+  });
 
   // Convert to ai-core format
-  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImages);
+  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImageData);
 
   // Create native stream
   const { stream, update, done, error: streamError } = createTextStream();
