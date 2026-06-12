@@ -1,7 +1,16 @@
-import { MessageStreamParams } from '@anthropic-ai/sdk/resources';
+import type {
+  Base64ImageSource,
+  ContentBlockParam,
+  ImageBlockParam,
+  MessageCreateParamsNonStreaming,
+  MessageCreateParamsStreaming,
+  MessageParam,
+  Usage,
+} from '@anthropic-ai/sdk/resources';
 import {
   AgenticStreamFn,
   AiModel,
+  Message,
   StreamEvent,
   TextGenerationArgs,
   TextGenerationFn,
@@ -9,9 +18,10 @@ import {
   TextStreamFn,
   TokenUsage,
 } from '../types';
-import { AnthropicVertex } from '@anthropic-ai/vertex-sdk';
+import { AnthropicVertex, ClientOptions } from '@anthropic-ai/vertex-sdk';
+import { AiGenerationError, RateLimitExceededError } from '../../errors';
 
-/* used by apps/api or as auxiliary model in chat-bot */
+/* used by apps/api when called with stream === false or as auxiliary model in chat-bot */
 export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGenerationFn {
   const config = getConfigurationByModel(model);
   const client = new AnthropicVertex(config);
@@ -19,31 +29,25 @@ export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGe
   return async function generateText({
     messages,
     maxTokens,
-    temperature,
     model: modelName,
   }: TextGenerationArgs): Promise<TextResponse> {
     // Separate system messages from conversation messages
     const systemMessages = messages.filter((msg) => msg.role === 'system');
-    const conversationMessages = messages.filter((msg) => msg.role !== 'system');
+    const conversationMessages = filterUnsupportedMessages(messages).map((msg) =>
+      mapMessageToAnthropicMessageParam(msg),
+    );
 
-    // Convert messages to Anthropic format
-    const anthropicMessages = conversationMessages.map((msg) => ({
-      role: msg.role === 'assistant' ? ('assistant' as const) : ('user' as const),
-      content: msg.content,
-    }));
+    const vertexModelName = resolveModelName(modelName);
 
-    // Strip "anthropic/" prefix if present
-    const vertexModelName = modelName.replace(/^anthropic\//, '');
-
-    const response = await client.messages.create({
-      model: vertexModelName,
+    const messageParams: MessageCreateParamsNonStreaming = {
       max_tokens: maxTokens ?? 4096,
-      messages: anthropicMessages,
-      ...(systemMessages.length > 0
-        ? { system: systemMessages.map((msg) => msg.content).join('\n') }
-        : {}),
-      ...(temperature !== undefined ? { temperature } : {}),
-    });
+      messages: conversationMessages,
+      model: vertexModelName,
+      stream: false,
+      system: buildSystemPrompt(systemMessages),
+    };
+
+    const response = await client.messages.create(messageParams);
 
     const text = response.content
       .filter((block) => block.type === 'text')
@@ -52,16 +56,16 @@ export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGe
 
     return {
       text,
-      usage: {
-        promptTokens: response.usage.input_tokens,
-        completionTokens: response.usage.output_tokens,
-        totalTokens: response.usage.input_tokens + response.usage.output_tokens,
-      },
+      usage: buildTokenUsage(response.usage),
     };
   };
 }
 
-/** used by chat-bot for streaming text responses */
+/**
+ * used by api and chat-bot for streaming text responses
+ * Note: Images are supported at the moment but require special handling.
+ * They needed to be uploaded separately or included as base64 encoded content in the mesage.
+ */
 export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStreamFn {
   const config = getConfigurationByModel(model);
   const client = new AnthropicVertex(config);
@@ -71,37 +75,27 @@ export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStream
     onComplete?: (usage: TokenUsage) => void | Promise<void>,
   ): AsyncGenerator<string> {
     try {
-      const { messages, maxTokens, temperature, model: modelName } = args;
+      const { messages, maxTokens, model: modelName } = args;
 
       // Separate system messages from conversation messages
       const systemMessages = messages.filter((msg) => msg.role === 'system');
-      const conversationMessages = messages.filter((msg) => msg.role !== 'system');
+      const conversationMessages = filterUnsupportedMessages(messages).map((msg) =>
+        mapMessageToAnthropicMessageParam(msg),
+      );
 
-      // Convert messages to Anthropic format
-      const anthropicMessages = conversationMessages.map((msg) => ({
-        role: msg.role === 'assistant' ? ('assistant' as const) : ('user' as const),
-        content: msg.content,
-        attachments: msg.attachments,
-      }));
+      const vertexModelName = resolveModelName(modelName);
 
-      // Strip "anthropic/" prefix if present (e.g., "anthropic/claude-3-5-sonnet@20240620" -> "claude-3-5-sonnet@20240620")
-      const vertexModelName = modelName.replace(/^anthropic\//, '');
-
-      const messageParams: MessageStreamParams = {
+      const messageParams: MessageCreateParamsStreaming = {
         max_tokens: maxTokens ?? 4096,
-        messages: anthropicMessages,
+        messages: conversationMessages,
         model: vertexModelName,
         stream: true,
-        ...(systemMessages.length > 0
-          ? { system: systemMessages.map((msg) => msg.content).join('\n') }
-          : {}),
+        system: buildSystemPrompt(systemMessages),
       };
 
       const stream = client.messages.stream(messageParams);
 
-      let usage:
-        | { promptTokens: number; completionTokens: number; totalTokens: number }
-        | undefined;
+      let usage: TokenUsage | undefined = undefined;
 
       for await (const event of stream) {
         if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
@@ -109,11 +103,7 @@ export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStream
         } else if (event.type === 'message_stop') {
           const message = await stream.finalMessage();
           if (message.usage) {
-            usage = {
-              promptTokens: message.usage.input_tokens,
-              completionTokens: message.usage.output_tokens,
-              totalTokens: message.usage.input_tokens + message.usage.output_tokens,
-            };
+            usage = buildTokenUsage(message.usage);
           }
         }
       }
@@ -122,8 +112,7 @@ export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStream
         await onComplete(usage);
       }
     } catch (error) {
-      console.error('Error in generateTextStream:', error);
-      throw error;
+      handleError(error);
     }
   };
 }
@@ -136,20 +125,24 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
   return async function* generateAgenticStream(
     args: TextGenerationArgs,
   ): AsyncGenerator<StreamEvent> {
-    const { messages, maxTokens, temperature, model: modelName, tools, toolChoice } = args;
+    const { messages, maxTokens, model: modelName, tools, toolChoice } = args;
 
     // Separate system messages from conversation messages
     const systemMessages = messages.filter((msg) => msg.role === 'system');
-    const conversationMessages = messages.filter((msg) => msg.role !== 'system');
-
     // Convert messages to Anthropic format
-    const anthropicMessages = conversationMessages.map((msg) => ({
-      role: msg.role === 'assistant' ? ('assistant' as const) : ('user' as const),
-      content: msg.content,
-    }));
+    const conversationMessages = filterUnsupportedMessages(messages).map((msg) =>
+      mapMessageToAnthropicMessageParam(msg),
+    );
 
-    // Strip "anthropic/" prefix if present
-    const vertexModelName = modelName.replace(/^anthropic\//, '');
+    const vertexModelName = resolveModelName(modelName);
+
+    const messageParams: MessageCreateParamsStreaming = {
+      max_tokens: maxTokens ?? 4096,
+      messages: conversationMessages,
+      model: vertexModelName,
+      stream: true,
+      system: buildSystemPrompt(systemMessages),
+    };
 
     // Convert tools to Anthropic format
     const anthropicTools = tools?.map((tool) => ({
@@ -162,13 +155,8 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
     }));
 
     const stream = client.messages.stream({
-      model: vertexModelName,
-      max_tokens: maxTokens ?? 4096,
-      messages: anthropicMessages,
-      ...(systemMessages.length > 0
-        ? { system: systemMessages.map((msg) => msg.content).join('\n') }
-        : {}),
-      ...(temperature !== undefined ? { temperature } : {}),
+      ...messageParams,
+      system: buildSystemPrompt(systemMessages),
       ...(anthropicTools && anthropicTools.length > 0 ? { tools: anthropicTools } : {}),
       ...(toolChoice === 'required'
         ? { tool_choice: { type: 'any' as const } }
@@ -207,11 +195,7 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
         if (message.usage) {
           yield {
             type: 'finish',
-            usage: {
-              promptTokens: message.usage.input_tokens,
-              completionTokens: message.usage.output_tokens,
-              totalTokens: message.usage.input_tokens + message.usage.output_tokens,
-            },
+            usage: buildTokenUsage(message.usage),
           };
         }
       }
@@ -219,11 +203,141 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
   };
 }
 
-function getConfigurationByModel(model: AiModel) {
+/**
+ * ProjectId and Region is mandatory and taken from model settings.
+ * MaxRetries is set to 2 (which is also the default value).
+ * Errors based on network connectivity, rate limit and internal server errors are automatically retried
+ * Default Timeout is 10 minutes.
+ * @param model
+ * @returns
+ */
+function getConfigurationByModel(model: AiModel): ClientOptions {
   if (model.setting.provider !== 'google') {
     throw new Error('Invalid model configuration for Google Anthropic');
   }
 
   const { projectId, location } = model.setting;
-  return { projectId, region: location };
+  return { projectId, region: location, maxRetries: 2 };
+}
+
+type SupportedMessage = Message & { role: 'user' | 'assistant' };
+
+function mapRoleToAntropic(role: 'user' | 'assistant'): MessageParam['role'] {
+  switch (role) {
+    case 'user':
+      return 'user';
+    case 'assistant':
+      return 'assistant';
+  }
+}
+
+function filterUnsupportedMessages(messages: Message[]): SupportedMessage[] {
+  return messages.filter(
+    (msg): msg is SupportedMessage => msg.role === 'user' || msg.role === 'assistant',
+  );
+}
+
+/**
+ * Urls to images are not supported. There is a type called 'URLImageSource' but it throws an error when used.
+ * Therefore the image data must be included as base64 encoded content in the message.
+ * There is a second option to upload the image but in this case the data retention policy is not used --> not allowed.
+ */
+function mapMessageToAnthropicMessageParam(message: SupportedMessage): MessageParam {
+  // message can have content (string), attachments and tool calls
+  const content: Array<ContentBlockParam> = [
+    { type: 'text', text: message.content },
+    ...(message.attachments
+      ?.filter((attachment) => attachment.type === 'image')
+      ?.map((attachment) => {
+        if (attachment.type === 'image') {
+          return {
+            type: 'image',
+            source: {
+              type: 'base64',
+              media_type: sanitizeMediaType(attachment.contentType),
+              data: sanitizeBase64Data(attachment.url),
+            },
+          } as ImageBlockParam;
+        }
+      })
+      ?.filter((item) => item !== undefined) ?? []),
+  ];
+  return {
+    role: mapRoleToAntropic(message.role),
+    content: content,
+  };
+}
+
+// Strip "anthropic/" prefix if present
+function resolveModelName(modelName: string): string {
+  return modelName.replace(/^anthropic\//, '');
+}
+
+/**
+ * Handle errors from Google Anthropic API
+ * Error codes: https://platform.claude.com/docs/en/cli-sdks-libraries/sdks/typescript#handling-errors
+ * @param error
+ */
+function handleError(error: unknown) {
+  // AiGenerationError are just re-thrown
+  if (error instanceof AiGenerationError) {
+    throw error;
+  }
+  // Special handling of RateLimitError
+  if (error && typeof error === 'object' && 'status' in error && error['status'] === 429) {
+    throw new RateLimitExceededError('Rate limit reached for Google Anthropic API');
+  }
+  // Try to get status code from error object to be more specific
+  if (error && typeof error === 'object' && 'status' in error) {
+    throw new AiGenerationError(
+      'Error during text generation. Status code: ' + String(error['status']),
+    );
+  }
+  throw new AiGenerationError('An error occurred during text generation.');
+}
+
+function buildSystemPrompt(systemMessages: Message[]): string {
+  return systemMessages.length > 0 ? systemMessages.map((msg) => msg.content).join('\n') : '';
+}
+
+/**
+ * removes 'data:image/[image_type];base64,' prefix if present
+ */
+function sanitizeBase64Data(data: string): string {
+  if (!data.startsWith('data:image/')) {
+    throw new AiGenerationError('Images are only supported via base64 encoded content data.');
+  }
+  const prefixPattern = /^data:image\/[a-zA-Z]+;base64,/;
+  return data.replace(prefixPattern, '');
+}
+
+/**
+ * image/jpg is not allowed and must be passed as image/jpeg.
+ * Also checks for unsupported image formats and throws an error in this case.
+ */
+function sanitizeMediaType(contentType: string): Base64ImageSource['media_type'] {
+  switch (contentType) {
+    case 'image/jpg':
+    case 'image/jpeg':
+      return 'image/jpeg';
+    case 'image/png':
+      return 'image/png';
+    case 'image/gif':
+      return 'image/gif';
+    case 'image/webp':
+      return 'image/webp';
+    default:
+      throw new AiGenerationError(`Unsupported image content type: ${contentType}`);
+  }
+}
+
+/**
+ * builds TokenUsage object from Anthropic usage data
+ */
+function buildTokenUsage(usage: Usage): TokenUsage {
+  return {
+    promptTokens: usage.input_tokens,
+    completionTokens: usage.output_tokens,
+    totalTokens: usage.input_tokens + usage.output_tokens,
+  };
 }
