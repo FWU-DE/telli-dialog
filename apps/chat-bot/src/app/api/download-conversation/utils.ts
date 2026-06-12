@@ -120,85 +120,11 @@ export async function generateConversationMessageDocxFile({
   message: ConversationMessageModel;
   gptName: string;
 }): Promise<ArrayBuffer | undefined> {
-  try {
-    const conversationMetadata = getConversationMessageMetadata({
-      conversation,
-      message,
-    });
-    const messageParagraphs = [...markdownToDocx(message.content), new Paragraph({})];
-
-    if (message.role === 'assistant') {
-      const modelDisplayName = await getModelDisplayName({
-        modelName: message.modelName,
-        fallbackName: gptName,
-      });
-
-      messageParagraphs.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `Generiert von AIS.chat unter Nutzung von ${modelDisplayName}`,
-              italics: true,
-              size: 18,
-              color: '666666',
-            }),
-          ],
-          spacing: { before: 400 },
-        }),
-      );
-    }
-
-    const doc = buildDocxDocument({ conversationMetadata, messageParagraphs });
-    const buffer = await Packer.toArrayBuffer(doc);
-
-    return buffer;
-  } catch (error) {
-    logError('Error generating conversation message .docx file', error);
-    return undefined;
-  }
-}
-
-function getConversationMessageMetadata({
-  conversation,
-  message,
-}: {
-  conversation: ConversationModel;
-  message: ConversationMessageModel;
-}) {
-  return [
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: conversation.name ?? 'Konversation',
-          bold: true,
-          size: 40,
-        }),
-      ],
-    }),
-    new Paragraph({
-        new TextRun({
-          text: `Erstellt am: ${formatDateToGermanTimestamp(message.createdAt)} Uhr`,
-          size: 22,
-        }),
-      ],
-    }),
-    new Paragraph({}),
-  ];
-}
-
-async function getModelDisplayName({
-  modelName,
-  fallbackName,
-}: {
-  modelName?: string | null;
-  fallbackName: string;
-}) {
-  if (!modelName) {
-    return fallbackName;
-  }
-
-  const modelDbEntry = await dbGetModelByName(modelName);
-  return modelDbEntry?.displayName ?? modelName;
+  return generateConversationDocxFile({
+    conversation,
+    messages: [message],
+    gptName,
+  });
 }
 
 function buildDocxDocument({
