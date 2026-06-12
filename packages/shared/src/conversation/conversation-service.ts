@@ -148,7 +148,7 @@ export async function getConversationMessageForExport({
   const conversation = await getConversation({ conversationId, userId });
   const message = await dbGetConversationMessageById({ conversationId, messageId, userId });
 
-  if (message === undefined) {
+  if (!message) {
     throw new NotFoundError('Conversation message not found');
   }
 

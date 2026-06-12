@@ -77,8 +77,8 @@ export async function dbGetConversationMessageById({
   conversationId: string;
   messageId: string;
 }) {
-  const [row] = await db
-    .select()
+  const [message] = await db
+    .select({ message: conversationMessageTable })
     .from(conversationMessageTable)
     .innerJoin(conversationTable, eq(conversationMessageTable.conversationId, conversationTable.id))
     .where(
@@ -90,7 +90,7 @@ export async function dbGetConversationMessageById({
       ),
     );
 
-  return row?.conversation_message;
+  return message?.message;
 }
 
 export async function dbInsertChatContent(chatContent: InsertConversationMessageModel) {
