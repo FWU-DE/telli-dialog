@@ -283,16 +283,6 @@ export async function sendChatMessage({
     priceInCents: number;
     agentLoopMessages?: AiCoreMessage[];
   }) {
-    await dbInsertChatContent({
-      id: assistantMessageId,
-      content: fullText,
-      role: 'assistant',
-      userId: user.id,
-      orderNumber: assistantMessageOrderNumber,
-      modelName: definedModel.name,
-      conversationId: activeConversation.id,
-      webSearchResults,
-    });
     // Persist intermediate tool call/result messages and the final assistant message in one query
     const messagesToInsert = [
       ...agentLoopMessages.map((msg, index) => ({
