@@ -151,7 +151,7 @@ export async function generateConversationMessageDocxFile({
       new Paragraph({
         children: [
           new TextRun({
-            text: `generiert in telli unter Verwendung von ${modelDisplayName}`,
+            text: `Generiert von AIS.chat unter Nutzung von ${modelDisplayName}`,
             italics: true,
             size: 18,
             color: '666666',
