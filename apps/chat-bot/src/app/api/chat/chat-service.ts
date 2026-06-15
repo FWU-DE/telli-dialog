@@ -44,8 +44,36 @@ import { runAgentLoop } from './agent-loop';
 import { buildTools } from './build-tools';
 import { runWebSearchPipeline } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
+import type {
+  AssistantSelectModel,
+  CharacterSelectModel,
+  LearningScenarioSelectModel,
+} from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
+import { NotFoundError } from '@shared/error';
+import { getCharacterForChatSession } from '@shared/characters/character-service';
+import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
+import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
+import { deepEqual } from '@/utils/object';
+
+type CustomChatIds = {
+  characterId?: string | undefined;
+  learningScenarioId?: string | undefined;
+  assistantId?: string | undefined;
+};
+
+function ensureConversationCustomChatIdsMatch({
+  incomingIds,
+  storedIds,
+}: {
+  incomingIds: CustomChatIds;
+  storedIds: CustomChatIds;
+}) {
+  if (!deepEqual(incomingIds, storedIds)) {
+    throw new NotFoundError('Conversation not found');
+  }
+}
 
 function resolveAgentNameForTracing({
   characterId,
@@ -113,6 +141,43 @@ export async function sendChatMessage({
 
   const activeAuxiliaryModelAndApiKey = auxiliaryModelAndApiKey;
 
+  let activeCharacter: CharacterSelectModel | undefined;
+  let activeLearningScenario: LearningScenarioSelectModel | undefined;
+  let activeAssistant: AssistantSelectModel | undefined;
+
+  if (characterId !== undefined) {
+    activeCharacter = await getCharacterForChatSession({
+      characterId,
+      user,
+    });
+
+    if (activeCharacter.suspended) {
+      throw new NotFoundError('Character not found');
+    }
+  }
+
+  if (learningScenarioId !== undefined) {
+    activeLearningScenario = await getLearningScenarioForChatSession({
+      learningScenarioId,
+      user,
+    });
+
+    if (activeLearningScenario.suspended) {
+      throw new NotFoundError('Learning scenario not found');
+    }
+  }
+
+  if (assistantId !== undefined) {
+    activeAssistant = await getAssistantForNewChat({
+      assistantId,
+      user,
+    });
+
+    if (activeAssistant.suspended) {
+      throw new NotFoundError('Assistant not found');
+    }
+  }
+
   // Get or create conversation
   const conversation = await dbGetOrCreateConversation({
     conversationId,
@@ -140,6 +205,15 @@ export async function sendChatMessage({
   const activeConversationObject = conversationObject;
   const agenticChatEnabled = user.federalState.featureToggles.isAgenticChatEnabled ?? false;
 
+  ensureConversationCustomChatIdsMatch({
+    incomingIds: { characterId, learningScenarioId, assistantId },
+    storedIds: {
+      characterId: activeConversation.characterId ?? undefined,
+      learningScenarioId: activeConversation.learningScenarioId ?? undefined,
+      assistantId: activeConversation.assistantId ?? undefined,
+    },
+  });
+
   // Check budget limit after we have the conversation for proper event tracking
   if (await userHasReachedTokenPointsLimit({ user })) {
     await sendRabbitmqEvent(
@@ -160,7 +234,12 @@ export async function sendChatMessage({
 
   const activeUserMessage = userMessage;
 
-  const urls = await extractUrls(assistantId, characterId, learningScenarioId, user, messages);
+  const urls = extractUrls({
+    assistant: activeAssistant,
+    character: activeCharacter,
+    learningScenario: activeLearningScenario,
+    messages,
+  });
   const { processedUrls, errorUrls } = await ingestWebContent({
     urls,
     federalStateId: user.federalState.id,
@@ -194,7 +273,7 @@ export async function sendChatMessage({
     conversationId: conversation.id,
     characterId,
     learningScenarioId,
-    assistantId: assistantId,
+    assistantId,
   });
 
   let webSearchResults: WebSearchResult[] = [];
@@ -239,10 +318,10 @@ export async function sendChatMessage({
   });
 
   // Build system prompt
-  const systemPrompt = await constructChatSystemPrompt({
-    characterId,
-    learningScenarioId,
-    assistantId: assistantId,
+  const systemPrompt = constructChatSystemPrompt({
+    character: activeCharacter,
+    learningScenario: activeLearningScenario,
+    assistant: activeAssistant,
     isTeacher: user.userRole === 'teacher',
     federalState: user.federalState,
     chunks,
