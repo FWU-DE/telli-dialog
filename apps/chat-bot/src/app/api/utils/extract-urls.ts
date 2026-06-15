@@ -18,7 +18,7 @@ function sanitizeLinks(links: string[] | null | undefined): string[] {
 
 /**
  * Collects URLs based on the conversation context.
- * For characters, only the attached links are returned.
+ * For characters and learning scenarios, only the attached links are returned.
  * For assistants, both attached links and URLs from user messages are included.
  * For regular chat, only URLs from user messages are included.
  *
@@ -43,7 +43,7 @@ export function extractUrls({
     assistant?.attachedLinks ?? character?.attachedLinks ?? learningScenario?.attachedLinks,
   );
 
-  // For characters, just return their attached links
+  // For characters or learning scenarios, just return their attached links
   if (character || learningScenario) {
     return attachedLinks;
   }

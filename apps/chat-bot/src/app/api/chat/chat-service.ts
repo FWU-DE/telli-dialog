@@ -54,6 +54,8 @@ import { NotFoundError } from '@shared/error';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
 import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
 import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
+import { deepEqual } from '@/utils/object';
 
 type CustomChatIds = {
   characterId?: string | undefined;
@@ -68,14 +70,10 @@ function ensureConversationCustomChatIdsMatch({
   incomingIds: CustomChatIds;
   storedIds: CustomChatIds;
 }) {
-  const keys: (keyof CustomChatIds)[] = ['characterId', 'learningScenarioId', 'assistantId'];
-  const hasMismatch = keys.some((key) => incomingIds[key] !== storedIds[key]);
-
-  if (hasMismatch) {
+  if (!deepEqual(incomingIds, storedIds)) {
     throw new NotFoundError('Conversation not found');
   }
 }
-import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 
 function resolveAgentNameForTracing({
   characterId,
@@ -143,6 +141,43 @@ export async function sendChatMessage({
 
   const activeAuxiliaryModelAndApiKey = auxiliaryModelAndApiKey;
 
+  let activeCharacter: CharacterSelectModel | undefined;
+  let activeLearningScenario: LearningScenarioSelectModel | undefined;
+  let activeAssistant: AssistantSelectModel | undefined;
+
+  if (characterId !== undefined) {
+    activeCharacter = await getCharacterForChatSession({
+      characterId,
+      user,
+    });
+
+    if (activeCharacter.suspended) {
+      throw new NotFoundError('Character not found');
+    }
+  }
+
+  if (learningScenarioId !== undefined) {
+    activeLearningScenario = await getLearningScenarioForChatSession({
+      learningScenarioId,
+      user,
+    });
+
+    if (activeLearningScenario.suspended) {
+      throw new NotFoundError('Learning scenario not found');
+    }
+  }
+
+  if (assistantId !== undefined) {
+    activeAssistant = await getAssistantForNewChat({
+      assistantId,
+      user,
+    });
+
+    if (activeAssistant.suspended) {
+      throw new NotFoundError('Assistant not found');
+    }
+  }
+
   // Get or create conversation
   const conversation = await dbGetOrCreateConversation({
     conversationId,
@@ -178,43 +213,6 @@ export async function sendChatMessage({
       assistantId: activeConversation.assistantId ?? undefined,
     },
   });
-
-  let activeCharacter: CharacterSelectModel | undefined;
-  let activeLearningScenario: LearningScenarioSelectModel | undefined;
-  let activeAssistant: AssistantSelectModel | undefined;
-
-  if (characterId !== undefined) {
-    activeCharacter = await getCharacterForChatSession({
-      characterId,
-      user: { id: user.id, schoolIds: user.schoolIds },
-    });
-
-    if (activeCharacter.suspended) {
-      throw new NotFoundError('Character not found');
-    }
-  }
-
-  if (learningScenarioId !== undefined) {
-    activeLearningScenario = await getLearningScenarioForChatSession({
-      learningScenarioId,
-      user: { id: user.id, schoolIds: user.schoolIds },
-    });
-
-    if (activeLearningScenario.suspended) {
-      throw new NotFoundError('Learning scenario not found');
-    }
-  }
-
-  if (assistantId !== undefined) {
-    activeAssistant = await getAssistantForNewChat({
-      assistantId,
-      user: { id: user.id, schoolIds: user.schoolIds },
-    });
-
-    if (activeAssistant.suspended) {
-      throw new NotFoundError('Assistant not found');
-    }
-  }
 
   // Check budget limit after we have the conversation for proper event tracking
   if (await userHasReachedTokenPointsLimit({ user })) {
