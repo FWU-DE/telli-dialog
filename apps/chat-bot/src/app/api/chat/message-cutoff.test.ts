@@ -9,11 +9,11 @@ function createMessage(role: 'user' | 'assistant', content: string): Message {
 }
 
 describe('limitChatHistory', () => {
-  it('should include first 2 and last 4 messages regardless of content length', () => {
+  it('should keep only the last message when character limit is very small', () => {
     // Create messages
     const messages: Message[] = [
-      createMessage('user', generateRandomString(100)), // First message
-      createMessage('assistant', generateRandomString(100)), // Second message
+      createMessage('user', generateRandomString(100)), // Will be omitted
+      createMessage('assistant', generateRandomString(100)), // Will be omitted
       createMessage('user', generateRandomString(100)), // Will be omitted
       createMessage('assistant', generateRandomString(100)), // Will be omitted
       createMessage('user', generateRandomString(100)), // Will be omitted
@@ -23,98 +23,50 @@ describe('limitChatHistory', () => {
       createMessage('user', generateRandomString(100)),
     ];
 
-    const result = limitChatHistory({
-      messages,
-      limitRecent: 2,
-      limitFirst: 1,
-      characterLimit: 300,
-    });
+    const result = limitChatHistory(messages, 300);
 
-    // Should include first 2 and last 4 messages
-    expect(result.length).toBe(6);
-    expect(result[0]?.content).toBe(messages?.[0]?.content);
-    expect(result[1]?.content).toBe(messages?.[1]?.content);
-    expect(result[2]?.content).toBe(messages?.[5]?.content);
-    expect(result[3]?.content).toBe(messages?.[6]?.content);
-    expect(result[4]?.content).toBe(messages?.[7]?.content);
-    expect(result[5]?.content).toBe(messages?.[8]?.content);
+    // Should include only the last message (all others exceed budget)
+    expect(result.length).toBe(1);
+    expect(result[0]?.content).toBe(messages[8]?.content);
   });
 
-  it('should include first and last messages without overlap', () => {
+  it('should include all messages if character limit allows it', () => {
     // Create messages
     const messages: Message[] = [
-      createMessage('user', generateRandomString(100)), // First message
-      createMessage('assistant', generateRandomString(100)), // Second message
-      createMessage('user', generateRandomString(100)), // Last message
+      createMessage('user', generateRandomString(100)),
+      createMessage('assistant', generateRandomString(100)),
+      createMessage('user', generateRandomString(100)),
       createMessage('assistant', generateRandomString(100)),
     ];
 
-    const result = limitChatHistory({
-      messages,
-      limitRecent: 2,
-      limitFirst: 1,
-      characterLimit: 300,
-    });
+    const result = limitChatHistory(messages, 500);
 
-    // Should include all messages
+    // Should include all messages since total chars fit within limit
     expect(result.length).toBe(4);
-    expect(result[0]?.content).toBe(messages?.[0]?.content);
-    expect(result[1]?.content).toBe(messages?.[1]?.content);
-    expect(result[2]?.content).toBe(messages?.[2]?.content);
-    expect(result[3]?.content).toBe(messages?.[3]?.content);
+    expect(result).toEqual(messages);
   });
 
-  it('should include most recent messages up to character limit after mandatory messages', () => {
+  it('should include most recent older messages up to character limit', () => {
     const messages: Message[] = [
-      createMessage('user', generateRandomString(100)), // First message
-      createMessage('assistant', generateRandomString(100)), // Second message
+      createMessage('user', generateRandomString(100)), // Will be omitted (too large with msg at index 3)
+      createMessage('assistant', generateRandomString(100)), // Will be omitted
       createMessage('user', generateRandomString(70)), // Will be omitted
-      createMessage('assistant', generateRandomString(1000)), // Will be omitted
-      createMessage('user', generateRandomString(50)), // Will be included
+      createMessage('assistant', generateRandomString(1000)), // Will be omitted (too large)
+      createMessage('user', generateRandomString(50)), // Will be included (fits)
       createMessage('assistant', generateRandomString(100)), // Last 4 messages
       createMessage('user', generateRandomString(100)),
       createMessage('assistant', generateRandomString(100)),
       createMessage('user', generateRandomString(100)),
     ];
 
-    const result = limitChatHistory({
-      messages,
-      limitRecent: 2,
-      limitFirst: 1,
-      characterLimit: 700,
-    });
+    const result = limitChatHistory(messages, 500);
 
-    // Should include first 2 and and the last 4 as well as other messages possible within character limit
-    expect(result.length).toBe(7);
-    expect(result[0]?.content).toBe(messages?.[0]?.content);
-    expect(result[1]?.content).toBe(messages?.[1]?.content);
-    expect(result[2]?.content).toBe(messages?.[4]?.content);
-    expect(result[3]?.content).toBe(messages?.[5]?.content);
-    expect(result[4]?.content).toBe(messages?.[6]?.content);
-    expect(result[5]?.content).toBe(messages?.[7]?.content);
-    expect(result[6]?.content).toBe(messages?.[8]?.content);
-  });
-
-  it('should include all messages if character limit allows it', () => {
-    const messages: Message[] = [
-      createMessage('user', generateRandomString(1000)), // First message
-      createMessage('assistant', generateRandomString(1000)), // Second message
-      createMessage('user', generateRandomString(1000)),
-      createMessage('assistant', generateRandomString(1000)),
-      createMessage('user', generateRandomString(1000)), // Last 4 messages
-      createMessage('assistant', generateRandomString(1000)),
-      createMessage('user', generateRandomString(1000)),
-      createMessage('assistant', generateRandomString(1000)),
-    ];
-
-    const result = limitChatHistory({
-      messages,
-      limitRecent: 2,
-      limitFirst: 1,
-      characterLimit: 10000,
-    });
-
-    expect(result.length).toBe(messages.length);
-    expect(result).toEqual(messages);
+    // Should include the most recent messages that fit within 500 chars
+    expect(result.length).toBe(5);
+    expect(result[0]?.content).toBe(messages[4]?.content);
+    expect(result[1]?.content).toBe(messages[5]?.content);
+    expect(result[2]?.content).toBe(messages[6]?.content);
+    expect(result[3]?.content).toBe(messages[7]?.content);
+    expect(result[4]?.content).toBe(messages[8]?.content);
   });
 });

@@ -25,11 +25,6 @@ import { constructLearningScenarioSystemPrompt } from './system-prompt';
 import { convertToAiCoreMessages, formatMessagesWithImages, limitChatHistory } from '../chat/utils';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
-import {
-  KEEP_FIRST_MESSAGES,
-  KEEP_RECENT_MESSAGES,
-  TOTAL_CHAT_LENGTH_LIMIT,
-} from '@/configuration-text-inputs/const';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
@@ -133,12 +128,7 @@ export async function sendLearningScenarioMessage({
   });
 
   // Prune messages
-  const prunedMessages = limitChatHistory({
-    messages: messages.map((m) => ({ id: m.id, role: m.role, content: m.content })),
-    limitRecent: KEEP_RECENT_MESSAGES,
-    limitFirst: KEEP_FIRST_MESSAGES,
-    characterLimit: TOTAL_CHAT_LENGTH_LIMIT,
-  });
+  const prunedMessages = limitChatHistory(messages);
 
   // Check if the model supports images based on supportedImageFormats
   const modelSupportsImages =
