@@ -70,9 +70,48 @@ export function consolidateMessages(messages: Array<ChatMessage>): Array<ChatMes
   return consolidatedMessages;
 }
 
+type MessageBlock = {
+  messages: ChatMessage[];
+  charCount: number;
+};
+
 /**
- * Limits chat history by keeping as many recent messages as fit within the character limit.
- * Always keeps at least the last message.
+ * Groups messages into atomic blocks, splitting at each user message.
+ * A block contains the user message and all subsequent messages until the next user message.
+ * This ensures tool call sequences (assistant with toolCalls + tool results + final response)
+ * are never split from their initiating user message.
+ */
+export function groupIntoBlocks(messages: Array<ChatMessage>): MessageBlock[] {
+  const blocks: MessageBlock[] = [];
+  let current: ChatMessage[] = [];
+
+  for (const msg of messages) {
+    // A new user message starts a new block (flush previous)
+    if (msg.role === 'user' && current.length > 0) {
+      blocks.push({
+        messages: current,
+        charCount: current.reduce((s, m) => s + m.content.length, 0),
+      });
+      current = [];
+    }
+    current.push(msg);
+  }
+
+  if (current.length > 0) {
+    blocks.push({
+      messages: current,
+      charCount: current.reduce((s, m) => s + m.content.length, 0),
+    });
+  }
+
+  return blocks;
+}
+
+/**
+ * Limits chat history by keeping as many recent message blocks as fit within the character limit.
+ * Messages are grouped into blocks at each user message, so tool call sequences are never split.
+ * Always keeps at least the last block (the most recent user message),
+ * so the model always has some input.
  *
  * @param messages - The messages to limit
  * @param characterLimit - Maximum total characters allowed
@@ -85,19 +124,22 @@ export function limitChatHistory(
   const consolidated = consolidateMessages(messages);
   if (consolidated.length === 0) return [];
 
-  // Always keep at least the last message
-  let startIndex = consolidated.length - 1;
-  let charCount = consolidated[startIndex]!.content.length;
+  const blocks = groupIntoBlocks(consolidated);
+  if (blocks.length === 0) return [];
 
-  // Include older messages while within character limit
+  // Always keep at least the last block
+  let startIndex = blocks.length - 1;
+  let charCount = blocks[startIndex]!.charCount;
+
+  // Include older blocks while within character limit
   while (startIndex > 0) {
-    const msg = consolidated[startIndex - 1]!;
-    if (charCount + msg.content.length > characterLimit) break;
-    charCount += msg.content.length;
+    const block = blocks[startIndex - 1]!;
+    if (charCount + block.charCount > characterLimit) break;
+    charCount += block.charCount;
     startIndex--;
   }
 
-  return consolidated.slice(startIndex);
+  return blocks.slice(startIndex).flatMap((b) => b.messages);
 }
 
 /**
