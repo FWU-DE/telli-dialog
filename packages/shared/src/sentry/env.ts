@@ -20,7 +20,7 @@ export const env = createEnv({
     otelMetricExportTimeout: process.env.OTEL_METRIC_EXPORT_TIMEOUT,
     sentryDsn: process.env.SENTRY_DSN,
     sentryEnvironment: process.env.SENTRY_ENVIRONMENT,
-    sentryTraceSampleRate: process.env.SENTRY_TRACES_SAMPLE_RATE,
-    sentryTraceSampleRateClient: process.env.SENTRY_TRACES_SAMPLE_RATE_CLIENT,
+    sentryTracesSampleRate: process.env.SENTRY_TRACES_SAMPLE_RATE,
+    sentryTracesSampleRateClient: process.env.SENTRY_TRACES_SAMPLE_RATE_CLIENT,
   },
 });

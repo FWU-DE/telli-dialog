@@ -110,7 +110,7 @@ export function AssistantView({
       />
       {assistant.isWebSearchEnabled && isWebSearchAvailable && <CustomChatWebSearch readonly />}
 
-      {assistant.hasLinkAccess && (
+      {(assistant.hasLinkAccess || assistant.accessLevel === 'community') && (
         <CustomChatCreateSuspensionRequestButton
           entityRef={{ entityType: 'assistant', entityId: assistant.id }}
         />

@@ -1,13 +1,14 @@
 {
   "name": "@ais-chat/api-database",
   "version": "0.0.0",
+  "description": "API database schema",
   "private": true,
   "type": "module",
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./utils": "./src/api-utils/index.ts",
-    "./llm-model": "./src/llm-model/index.ts"
+    "./llm-model": "./src/llm-model/index.ts",
+    "./utils": "./src/api-utils/index.ts"
   },
   "scripts": {
     "db:generate": "dotenv -e ../../apps/api/.env.local -- drizzle-kit generate",
@@ -15,8 +16,8 @@
     "db:migrate:local": "dotenv -e ../../apps/api/.env.local -- drizzle-kit migrate --config=./drizzle.config.ts",
     "db:seed": "dotenv -e ../../apps/api/.env.local -- tsx src/seed.ts",
     "db:seed:from-stage": "dotenv -e ../../apps/api/.env.local -- tsx src/seed-from-stage.ts",
-    "types": "tsc --noEmit",
-    "lint": "eslint . --max-warnings 0"
+    "lint": "eslint . --max-warnings 0",
+    "types": "tsc --noEmit"
   },
   "dependencies": {
     "@t3-oss/env-core": "0.13.11",
@@ -30,12 +31,12 @@
   "devDependencies": {
     "@ais-chat/eslint-config": "workspace:*",
     "@ais-chat/typescript-config": "workspace:*",
-    "@types/node": "24.12.4",
+    "@types/node": "24.13.1",
     "@types/pg": "8.20.0",
     "dotenv-cli": "11.0.0",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
-    "tsx": "4.22.3",
+    "tsx": "4.22.4",
     "typescript": "6.0.3"
   }
 }

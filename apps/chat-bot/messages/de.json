@@ -32,6 +32,8 @@
     "copy": "Kopieren",
     "edit": "Bearbeiten",
     "copy-clipboard": "In die Zwischenablage kopieren",
+    "message-download": "Nachricht als Word-Datei herunterladen",
+    "message-download-error": "Der Download der Nachricht ist fehlgeschlagen.",
     "regenerate-message": "Antwort erneut generieren",
     "image-load-failed": "Bild konnte nicht geladen werden",
     "rate-limit-error": "Das bereitgestellte Tokenvolumen wurde aufgebraucht.",

@@ -2,17 +2,25 @@ import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import { getConversation, getConversationMessages } from './conversation-service';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
-import { dbGetConversationById, dbGetConversationMessages } from '@shared/db/functions/chat';
+import {
+  dbGetConversationById,
+  dbGetConversationMessageById,
+  dbGetConversationMessages,
+} from '@shared/db/functions/chat';
 import { ConversationModel } from '@shared/db/types';
 
 vi.mock('../db/functions/chat', () => ({
   dbGetConversationById: vi.fn(),
+  dbGetConversationMessageById: vi.fn(),
   dbGetConversationMessages: vi.fn(),
 }));
 
 describe('conversation-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (
+      dbGetConversationMessageById as MockedFunction<typeof dbGetConversationMessageById>
+    ).mockResolvedValue(undefined);
   });
 
   describe('getConversation', () => {

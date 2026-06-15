@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateConversationDocxFile } from './utils';
+import { generateConversationDocxFile, generateConversationMessageDocxFile } from './utils';
 import { getUser } from '@/auth/utils';
 import { type ConversationModel } from '@shared/db/types';
-import { getConversationAndMessagesForExport } from '@shared/conversation/conversation-service';
+import {
+  getConversationAndMessagesForExport,
+  getConversationMessageForExport,
+} from '@shared/conversation/conversation-service';
 import z from 'zod';
 import { handleErrorInRoute } from '@/error/handle-error-in-route';
 
@@ -12,11 +15,12 @@ const DEFAULT_GPT_NAME = 'AIS.chat';
 
 const downloadConversationParamsSchema = z.object({
   conversationId: z.string(),
+  messageId: z.string().optional(),
   enterpriseGptName: z.string().optional(),
 });
 
 /**
- * User wants to download a conversation as a .docx file.
+ * User wants to download a conversation or a single message as a .docx file.
  * We generate the file on the fly and return it as a response.
  * The user must be the owner of the conversation.
  *
@@ -26,31 +30,53 @@ export async function GET(req: NextRequest) {
   try {
     // check and parse search params
     const searchParams = req.nextUrl.searchParams;
-    const { conversationId, enterpriseGptName } = downloadConversationParamsSchema.parse(
+    const { conversationId, messageId, enterpriseGptName } = downloadConversationParamsSchema.parse(
       Object.fromEntries(searchParams.entries()),
     );
 
     // check authentication
     const user = await getUser();
-
-    const { conversation, messages } = await getConversationAndMessagesForExport({
-      conversationId,
-      userId: user.id,
-    });
-
     const gptName = enterpriseGptName || DEFAULT_GPT_NAME;
 
-    const document = await generateConversationDocxFile({
-      conversation,
-      messages,
-      gptName,
-    });
+    let document: ArrayBuffer | undefined;
+    let fileName: string;
+
+    if (messageId === undefined) {
+      const { conversation, messages } = await getConversationAndMessagesForExport({
+        conversationId,
+        userId: user.id,
+      });
+
+      document = await generateConversationDocxFile({
+        conversation,
+        messages,
+        gptName,
+      });
+
+      fileName = generateFileName({ conversation, gptName });
+    } else {
+      const { conversation, message } = await getConversationMessageForExport({
+        conversationId,
+        messageId,
+        userId: user.id,
+      });
+
+      document = await generateConversationMessageDocxFile({
+        conversation,
+        message,
+        gptName,
+      });
+
+      fileName = generateMessageFileName({
+        conversationName: conversation.name,
+        gptName,
+        createdAt: message.createdAt,
+      });
+    }
 
     if (document === undefined) {
       return NextResponse.json({ error: 'Failed to generate the document' }, { status: 500 });
     }
-
-    const fileName = generateFileName({ conversation, gptName });
 
     return new NextResponse(document, {
       status: 200,
@@ -77,4 +103,20 @@ function generateFileName({
   const fileName = `${formattedDate} ${gptName} Gespräch über ${conversation.name}.docx`;
 
   return fileName;
+}
+
+function generateMessageFileName({
+  conversationName,
+  gptName,
+  createdAt,
+}: {
+  conversationName: string | null;
+  gptName: string;
+  createdAt: Date;
+}): string {
+  const formattedDate = createdAt.toISOString().split('T')[0];
+  const safeConversationName =
+    conversationName === null || conversationName.trim() === '' ? 'Konversation' : conversationName;
+
+  return `${formattedDate} ${gptName} Antwort aus ${safeConversationName}.docx`;
 }

@@ -1,6 +1,5 @@
 import {
   generateTextStreamWithBilling,
-  type Message as AiCoreMessage,
   TokenPointsExceededError,
   SharedChatExpiredError,
 } from '@ais-chat/ai-core';
@@ -23,7 +22,7 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructLearningScenarioSystemPrompt } from './system-prompt';
-import { formatMessagesWithImages, limitChatHistory } from '../chat/utils';
+import { convertToAiCoreMessages, formatMessagesWithImages, limitChatHistory } from '../chat/utils';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import {
@@ -34,23 +33,6 @@ import {
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
-
-/**
- * Converts frontend messages to ai-core message format
- */
-function convertToAiCoreMessages(systemPrompt: string, messages: ChatMessage[]): AiCoreMessage[] {
-  const result: AiCoreMessage[] = [{ role: 'system', content: systemPrompt }];
-
-  for (const msg of messages) {
-    if (msg.role === 'system') continue;
-    result.push({
-      role: msg.role === 'user' ? 'user' : 'assistant',
-      content: msg.content,
-    });
-  }
-
-  return result;
-}
 
 /**
  * Server Action to send a learning scenario message and stream the response.

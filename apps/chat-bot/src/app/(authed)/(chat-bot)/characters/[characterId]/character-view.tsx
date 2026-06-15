@@ -157,7 +157,7 @@ export function CharacterView({
           onDownloadFile={handleDownloadFile}
         />
       </div>
-      {character.hasLinkAccess && (
+      {(character.hasLinkAccess || character.accessLevel === 'community') && (
         <CustomChatCreateSuspensionRequestButton
           entityRef={{ entityType: 'character', entityId: character.id }}
         />

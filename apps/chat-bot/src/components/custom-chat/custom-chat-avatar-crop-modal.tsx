@@ -118,7 +118,10 @@ export default function AvatarCropModal({
           <CardTitle>{t('crop-image')}</CardTitle>
         </CardHeader>
         <CardContent className="flex min-h-0 flex-1 flex-col">
-          <div ref={cropViewportRef} className="min-h-0 flex-1 overflow-auto p-2">
+          <div
+            ref={cropViewportRef}
+            className="min-h-0 flex-1 overflow-auto overscroll-contain touch-pan-y p-2"
+          >
             <ReactCrop
               crop={crop}
               onChange={onChange}
@@ -139,6 +142,9 @@ export default function AvatarCropModal({
                   }
                 }}
                 className="h-auto w-auto max-w-none"
+                // Has to be set as a separate style because ReactCrop.css sets explicitly touchAction: 'none' on the image,
+                // which has to be overridden here to allow mobile user to scroll the image in the background.
+                style={{ touchAction: 'pan-y' }}
               />
             </ReactCrop>
           </div>

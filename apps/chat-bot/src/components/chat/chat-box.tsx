@@ -19,6 +19,7 @@ import {
   WebSearchSourcesPanel,
   useWebSearchSourcesDisclosure,
 } from './sources/web-search-sources';
+import DownloadConversationMessageButton from './download-conversation-message-button';
 
 // Re-export for consumers
 export type { PendingFileModel };
@@ -33,6 +34,8 @@ export function ChatBox({
   isLastNonUser,
   isLoading,
   regenerateMessage,
+  conversationId,
+  characterName,
   status,
 }: {
   assistantIcon?: ReactNode;
@@ -44,6 +47,8 @@ export function ChatBox({
   isLastNonUser: boolean;
   isLoading: boolean;
   regenerateMessage: () => void;
+  conversationId?: string;
+  characterName?: string;
   status: ChatStatus;
 }) {
   const tCommon = useTranslations('common');
@@ -147,6 +152,15 @@ export function ChatBox({
     isLastNonUser && status !== 'streaming' ? (
       <div className="flex items-center gap-1 mt-1">
         <CopyToClipboardButton text={children.content} className="size-5" />
+        {status === 'ready' &&
+          conversationId !== undefined &&
+          children.id !== 'initial-message' && (
+            <DownloadConversationMessageButton
+              conversationId={conversationId}
+              messageId={children.id}
+              characterName={characterName}
+            />
+          )}
         <button
           title={tCommon('regenerate-message')}
           type="button"

@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   isWebSearchEnabledMock: vi.fn(),
   searchWebMock: vi.fn(),
   retrieveChunksByQueryMock: vi.fn(),
+  webScraperMock: vi.fn(),
 }));
 
 vi.mock('./websearch', () => ({
@@ -16,6 +17,10 @@ vi.mock('./websearch', () => ({
 
 vi.mock('../rag/rag-service', () => ({
   retrieveChunksByQuery: mocks.retrieveChunksByQueryMock,
+}));
+
+vi.mock('../web-scraper/web-scraper', () => ({
+  webScraper: mocks.webScraperMock,
 }));
 
 const user = {
@@ -64,6 +69,11 @@ beforeEach(() => {
       sourceUrl: null,
     },
   ]);
+  mocks.webScraperMock.mockResolvedValue({
+    name: 'Beispielseite',
+    link: 'https://example.com/article',
+    content: 'Das ist der extrahierte Inhalt.',
+  });
 });
 
 describe('buildTools', () => {
@@ -104,9 +114,98 @@ describe('buildTools', () => {
         limit: VECTOR_SEARCH_LIMIT,
       }),
     );
-    expect(result).toContain('Dateien:');
-    expect(result).toContain('Arbeitsblatt.pdf');
-    expect(result).toContain('Leitfaden.txt');
-    expect(result).toContain('Erster relevanter Abschnitt.');
+    expect(JSON.parse(result)).toEqual({
+      chunks: [
+        {
+          fileName: 'Arbeitsblatt.pdf',
+          orderIndex: 0,
+          content: 'Erster relevanter Abschnitt.',
+        },
+      ],
+      error: null,
+    });
+  });
+
+  it('adds a web scraper tool and returns scraped page content', async () => {
+    mocks.isWebSearchEnabledMock.mockResolvedValue(true);
+    const { buildTools } = await import('./build-tools');
+
+    const { tools, toolHandlers } = await buildTools({
+      user,
+      conversationId: 'conversation-1',
+      relatedFileEntities: [],
+    });
+
+    const webSearchTool = tools.find((tool) => tool.name === 'web_search');
+    const webScraperTool = tools.find((tool) => tool.name === 'web_scraper');
+
+    expect(webSearchTool).toMatchObject({
+      name: 'web_search',
+    });
+    expect(webScraperTool).toMatchObject({
+      name: 'web_scraper',
+    });
+    expect(webScraperTool?.description).toContain('single webpage URL');
+    expect(webScraperTool?.parameters).toMatchObject({
+      required: ['url'],
+      properties: {
+        url: {
+          type: 'string',
+        },
+      },
+    });
+
+    const result = await toolHandlers.web_scraper!({
+      url: 'https://example.com/article',
+    });
+
+    expect(mocks.webScraperMock).toHaveBeenCalledWith('https://example.com/article');
+    expect(JSON.parse(result)).toEqual({
+      title: 'Beispielseite',
+      url: 'https://example.com/article',
+      content: 'Das ist der extrahierte Inhalt.',
+      error: null,
+    });
+  });
+
+  it('adds a web search tool and returns search results as JSON', async () => {
+    mocks.isWebSearchEnabledMock.mockResolvedValue(true);
+    mocks.searchWebMock.mockResolvedValue([
+      {
+        name: 'Beispielartikel',
+        url: 'https://example.com/search-result',
+        content: 'Kurzer Auszug aus dem Suchergebnis.',
+      },
+    ]);
+
+    const { buildTools } = await import('./build-tools');
+
+    const { toolHandlers } = await buildTools({
+      user,
+      conversationId: 'conversation-1',
+      relatedFileEntities: [],
+    });
+
+    const result = await toolHandlers.web_search!({
+      query: 'aktuelle information',
+    });
+
+    expect(mocks.searchWebMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: 'aktuelle information',
+        conversationId: 'conversation-1',
+        userId: 'user-1',
+      }),
+    );
+    expect(JSON.parse(result)).toEqual({
+      results: [
+        {
+          title: 'Beispielartikel',
+          url: 'https://example.com/search-result',
+          content: 'Kurzer Auszug aus dem Suchergebnis.',
+        },
+      ],
+      error: null,
+    });
   });
 });

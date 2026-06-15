@@ -111,6 +111,66 @@ function getConversationMessages({
   ]);
 }
 
+export async function generateConversationMessageDocxFile({
+  conversation,
+  message,
+  gptName,
+}: {
+  conversation: ConversationModel;
+  message: ConversationMessageModel;
+  gptName: string;
+}): Promise<ArrayBuffer | undefined> {
+  try {
+    let modelDisplayName = message.modelName ?? gptName;
+
+    if (message.modelName) {
+      const modelDbEntry = await dbGetModelByName(message.modelName);
+      if (modelDbEntry?.displayName) {
+        modelDisplayName = modelDbEntry.displayName;
+      }
+    }
+
+    const conversationMetadata = [
+      new Paragraph({
+        children: [new TextRun({ text: conversation.name ?? '', bold: true, size: 40 })],
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `Erstellt am: ${formatDateToGermanTimestamp(message.createdAt)} Uhr`,
+            size: 22,
+          }),
+        ],
+      }),
+      new Paragraph({}),
+    ];
+
+    const messageParagraphs = [
+      ...markdownToDocx(message.content),
+      new Paragraph({}),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `generiert in telli unter Verwendung von ${modelDisplayName}`,
+            italics: true,
+            size: 18,
+            color: '666666',
+          }),
+        ],
+        spacing: { before: 400 },
+      }),
+    ];
+
+    const doc = buildDocxDocument({ conversationMetadata, messageParagraphs });
+    const buffer = await Packer.toArrayBuffer(doc);
+
+    return buffer;
+  } catch (error) {
+    logError('Error generating conversation message .docx file', error);
+    return undefined;
+  }
+}
+
 function buildDocxDocument({
   conversationMetadata,
   messageParagraphs,

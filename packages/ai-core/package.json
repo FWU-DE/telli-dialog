@@ -1,6 +1,7 @@
 {
   "name": "@ais-chat/ai-core",
   "version": "0.0.1",
+  "description": "AI and LLM integration layer for communicating with AI providers",
   "main": "src/index.ts",
   "type": "module",
   "private": true,
@@ -9,21 +10,21 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "types": "tsc --noEmit",
-    "check-types": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "types": "tsc --noEmit"
   },
   "dependencies": {
     "@ais-chat/api-database": "workspace:*",
-    "@sentry/core": "10.55.0",
-    "@google/genai": "^2.7.0",
+    "@google/genai": "2.8.0",
+    "@sentry/core": "10.56.0",
     "js-tiktoken": "1.0.21",
-    "openai": "6.39.1",
+    "openai": "6.42.0",
     "openaiv4": "npm:openai@4.104.0",
     "zod": "4.4.3"
   },
@@ -31,13 +32,13 @@
     "@ais-chat/eslint-config": "workspace:*",
     "@ais-chat/typescript-config": "workspace:*",
     "@t3-oss/env-core": "0.13.11",
-    "@types/node": "24.12.4",
-    "@vitest/coverage-v8": "4.1.7",
+    "@types/node": "24.13.1",
+    "@vitest/coverage-v8": "4.1.8",
     "eslint": "9.39.4",
     "prettier": "3.8.3",
     "prettier-eslint": "16.4.2",
-    "tsx": "4.22.3",
+    "tsx": "4.22.4",
     "typescript": "6.0.3",
-    "vitest": "4.1.7"
+    "vitest": "4.1.8"
   }
 }
