@@ -59,6 +59,7 @@ import {
   getShareFormValues,
 } from '@/components/custom-chat/access-level-sharing';
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
+import CustomFilterSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-section';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
@@ -490,6 +491,7 @@ export function LearningScenarioEdit({
               onShareChange={handleSharingChange}
               suspended={learningScenario.suspended}
             />
+            <CustomFilterSection />
           </form>
         </div>
       </CustomChatLayoutContainer>

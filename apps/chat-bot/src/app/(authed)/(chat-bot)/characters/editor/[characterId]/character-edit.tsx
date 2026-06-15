@@ -60,6 +60,7 @@ import {
   getAccessLevelFromShareForm,
   getShareFormValues,
 } from '@/components/custom-chat/access-level-sharing';
+import CustomFilterSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-section';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -471,6 +472,7 @@ export function CharacterEdit({
             onShareChange={handleSharingChange}
             suspended={character.suspended}
           />
+          <CustomFilterSection />
         </form>
       </CustomChatLayoutContainer>
     </>

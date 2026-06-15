@@ -52,6 +52,7 @@ import {
   getAccessLevelFromShareForm,
   getShareFormValues,
 } from '@/components/custom-chat/access-level-sharing';
+import CustomFilterSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-section';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -434,6 +435,7 @@ export function AssistantEdit({
             onShareChange={handleSharingChange}
             suspended={assistant.suspended}
           />
+          <CustomFilterSection />
         </form>
       </CustomChatLayoutContainer>
     </>
