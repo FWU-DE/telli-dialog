@@ -61,6 +61,10 @@ import {
   getShareFormValues,
 } from '@/components/custom-chat/access-level-sharing';
 import CustomFilterSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-section';
+import {
+  extractFilterValues,
+  toFilterAttributes,
+} from '@/components/custom-chat/custom-chat-filter-attributes';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -101,6 +105,12 @@ function createCharacterFormValuesSchema(t: CharacterTranslator) {
     instructions: z.string(),
     initialMessage: z.string(),
     modelId: z.string(),
+    schoolTypes: z.array(z.string()),
+    gradeRanges: z.array(z.string()),
+    subjects: z.array(z.string()),
+    categories: z.array(z.string()),
+    federalStates: z.array(z.string()),
+    languages: z.array(z.string()),
     isSchoolShared: z.boolean(),
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
@@ -130,6 +140,7 @@ export function CharacterEdit({
   const maybeDefaultModelId = getDefaultModel(models)?.id;
   const isModelAvailable = character.modelId && models.some((m) => m.id === character.modelId);
   const selectedModelId = isModelAvailable ? character.modelId : maybeDefaultModelId;
+  const filterValues = extractFilterValues(character);
 
   const initialValues: CharacterFormValues = {
     name: character.name,
@@ -137,6 +148,12 @@ export function CharacterEdit({
     instructions: character.instructions ?? '',
     initialMessage: character.initialMessage ?? '',
     modelId: selectedModelId ?? '',
+    schoolTypes: filterValues.schoolTypes,
+    gradeRanges: filterValues.gradeRanges,
+    subjects: filterValues.subjects,
+    categories: filterValues.categories,
+    federalStates: filterValues.federalStates,
+    languages: filterValues.languages,
     ...getShareFormValues(character.accessLevel),
     hasLinkAccess: character.hasLinkAccess,
   };
@@ -173,6 +190,17 @@ export function CharacterEdit({
           instructions: data.instructions,
           initialMessage: data.initialMessage,
           modelId: data.modelId,
+          schoolType: data.schoolTypes[0] ?? null,
+          gradeLevel: data.gradeRanges[0] ?? null,
+          subject: data.subjects[0] ?? null,
+          filterAttributes: toFilterAttributes({
+            schoolTypes: data.schoolTypes,
+            gradeRanges: data.gradeRanges,
+            subjects: data.subjects,
+            categories: data.categories,
+            federalStates: data.federalStates,
+            languages: data.languages,
+          }),
           hasLinkAccess: data.hasLinkAccess,
         });
 
@@ -181,6 +209,12 @@ export function CharacterEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
+  const schoolTypes = useWatch({ control, name: 'schoolTypes' });
+  const gradeRanges = useWatch({ control, name: 'gradeRanges' });
+  const subjects = useWatch({ control, name: 'subjects' });
+  const categories = useWatch({ control, name: 'categories' });
+  const federalStates = useWatch({ control, name: 'federalStates' });
+  const languages = useWatch({ control, name: 'languages' });
   const savedAccessLevelRef = useRef(character.accessLevel);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const isCommunityShared = useWatch({ control, name: 'isCommunityShared' });
@@ -472,7 +506,40 @@ export function CharacterEdit({
             onShareChange={handleSharingChange}
             suspended={character.suspended}
           />
-          <CustomFilterSection />
+          <CustomFilterSection
+            values={{
+              schoolTypes,
+              gradeRanges,
+              subjects,
+              categories,
+              federalStates,
+              languages,
+            }}
+            onSchoolTypesChange={(values) => {
+              setValue('schoolTypes', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onGradeRangesChange={(values) => {
+              setValue('gradeRanges', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onSubjectsChange={(values) => {
+              setValue('subjects', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onCategoriesChange={(values) => {
+              setValue('categories', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onFederalStatesChange={(values) => {
+              setValue('federalStates', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onLanguagesChange={(values) => {
+              setValue('languages', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+          />
         </form>
       </CustomChatLayoutContainer>
     </>

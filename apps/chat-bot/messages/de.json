@@ -648,7 +648,16 @@
     "psychology": "Psychologie",
     "addiction-prevention": "Sucht und Prävention",
     "comprehensive-subjects": "Übergreifende Themen",
-    "traffic-education": "Verkehrserziehung"
+    "traffic-education": "Verkehrserziehung",
+    "german": "Deutsch",
+    "english": "Englisch",
+    "turkish": "Türkisch",
+    "french": "Französisch",
+    "italian": "Italienisch",
+    "spanish": "Spanisch",
+    "greek": "Griechisch",
+    "latin": "Latein",
+    "russian": "Russisch"
   },
   "languages": {
     "german": "Deutsch",
@@ -707,7 +716,7 @@
     "grammar-school": "Gymnasium",
     "comprehensive-school": "Gesamtschule",
     "vocational-school": "Berufsschule",
-    "technicla-college": "Fachoberschule",
+    "technical-college": "Fachoberschule",
     "other": "Andere"
   },
   "suspension": {

@@ -382,6 +382,128 @@ export const suspensionRequestReasonEnum = pgEnum(
 );
 export type SuspensionRequestReason = z.infer<typeof suspensionRequestReasonSchema>;
 
+// Filter attribute enums have to match with translation keys in de.json
+export const schoolTypesSchema = z.enum([
+  'elementary-school',
+  'special-needs-school',
+  'middle-school',
+  'secondary-school',
+  'grammar-school',
+  'comprehensive-school',
+  'vocational-school',
+  'technical-college',
+  'other',
+]);
+export type SchoolType = z.infer<typeof schoolTypesSchema>;
+
+export const gradeRangesSchema = z.enum(['range-1', 'range-2', 'range-3', 'range-4']);
+export type GradeRange = z.infer<typeof gradeRangesSchema>;
+
+export const categoriesSchema = z.enum([
+  'artificial-intelligence',
+  'writing',
+  'projects',
+  'coaching',
+  'organisation',
+  'feedback',
+  'conversation',
+  'historical-figures',
+  'experts',
+  'lesson-planning',
+  'school-development',
+  'teaching-material',
+]);
+export type Category = z.infer<typeof categoriesSchema>;
+
+export const federalStatesSchema = z.enum([
+  'baden-wuerttemberg',
+  'bavaria',
+  'berlin',
+  'brandenburg',
+  'bremen',
+  'hamburg',
+  'hesse',
+  'mecklenburg-western-pomerania',
+  'lower-saxony',
+  'northrhine-westphalia',
+  'rhineland-palatinate',
+  'saarland',
+  'saxony',
+  'saxony-anhalt',
+  'schleswig-holstein',
+  'thuringia',
+]);
+export type FederalState = z.infer<typeof federalStatesSchema>;
+
+export const languagesSchema = z.enum([
+  'german',
+  'english',
+  'turkish',
+  'french',
+  'italian',
+  'spanish',
+  'greek',
+  'latin',
+  'russian',
+]);
+export type Language = z.infer<typeof languagesSchema>;
+
+export const subjectsSchema = z.enum([
+  // Languages
+  'german',
+  'german-as-second-language',
+  'english',
+  'french',
+  'greek',
+  'italian',
+  'latin',
+  'russian',
+  'spanish',
+  'turkish',
+  // Social sciences
+  'geography',
+  'history',
+  'politics',
+  'economics',
+  // Arts
+  'art',
+  'music',
+  'sports',
+  // Other
+  'business-studies',
+  'health',
+  'intercultural-education',
+  'media-education',
+  'education',
+  'psychology',
+  'addiction-prevention',
+  'comprehensive-subjects',
+  'traffic-education',
+  // STEM
+  'biology',
+  'chemistry',
+  'informatics',
+  'mathematics',
+  'physics',
+  'social-studies',
+  'environmental-studies',
+  // Ethics
+  'ethics',
+  'philosophy',
+  'religion',
+]);
+export type Subject = z.infer<typeof subjectsSchema>;
+
+export const filterAttributesSchema = z.object({
+  school_types: z.array(schoolTypesSchema).default([]),
+  grade_ranges: z.array(gradeRangesSchema).default([]),
+  subjects: z.array(subjectsSchema).default([]),
+  categories: z.array(categoriesSchema).default([]),
+  federal_states: z.array(federalStatesSchema).default([]),
+  languages: z.array(languagesSchema).default([]),
+});
+export type FilterAttributes = z.infer<typeof filterAttributesSchema>;
+
 export const characterTable = pgTable(
   'character',
   {
@@ -403,6 +525,10 @@ export const characterTable = pgTable(
     schoolType: text('school_type'),
     gradeLevel: text('grade_level'),
     subject: text('subject'),
+    filterAttributes: json('filter_attributes')
+      .$type<FilterAttributes>()
+      .notNull()
+      .default(sql`'{}'::json`),
     // not required
     specifications: text('specifications'),
     restrictions: text('restrictions'),
@@ -432,6 +558,7 @@ export const characterSelectSchema = createSelectSchema(characterTable)
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
+    filterAttributes: filterAttributesSchema,
     ownerSchoolIds: z.array(z.string()),
   });
 export const characterInsertSchema = createInsertSchema(characterTable)
@@ -444,6 +571,7 @@ export const characterInsertSchema = createInsertSchema(characterTable)
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     accessLevel: accessLevelSchema,
+    filterAttributes: filterAttributesSchema.optional(),
   });
 export const characterUpdateSchema = createUpdateSchema(characterTable)
   .omit({
@@ -456,6 +584,7 @@ export const characterUpdateSchema = createUpdateSchema(characterTable)
   .extend({
     id: z.string(),
     accessLevel: accessLevelSchema,
+    filterAttributes: filterAttributesSchema.optional(),
   });
 
 export type CharacterSelectModel = z.infer<typeof characterSelectSchema>;
@@ -612,6 +741,10 @@ export const learningScenarioTable = pgTable(
     schoolType: text('school_type'),
     gradeLevel: text('grade_level'),
     subject: text('subject'),
+    filterAttributes: json('filter_attributes')
+      .$type<FilterAttributes>()
+      .notNull()
+      .default(sql`'{}'::json`),
     studentExercise: text('student_exercise').default('').notNull(),
     additionalInstructions: text('additional_instructions'),
     restrictions: text('restrictions'), // Not used anymore
@@ -640,6 +773,7 @@ export const learningScenarioSelectSchema = createSelectSchema(learningScenarioT
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
+    filterAttributes: filterAttributesSchema,
     ownerSchoolIds: z.array(z.string()),
   });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
@@ -651,6 +785,7 @@ export const learningScenarioInsertSchema = createInsertSchema(learningScenarioT
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     accessLevel: accessLevelSchema,
+    filterAttributes: filterAttributesSchema.optional(),
   });
 export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
   .omit({ userId: true, createdAt: true, updatedAt: true, suspended: true })
@@ -658,6 +793,7 @@ export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioT
   .extend({
     id: z.string(),
     accessLevel: accessLevelSchema,
+    filterAttributes: filterAttributesSchema.optional(),
   });
 
 export type LearningScenarioSelectModel = z.infer<typeof learningScenarioSelectSchema>;
@@ -1069,6 +1205,10 @@ export const assistantTable = pgTable(
     pictureId: text('picture_id'),
     description: text('description'),
     instructions: text('instructions'),
+    filterAttributes: json('filter_attributes')
+      .$type<FilterAttributes>()
+      .notNull()
+      .default(sql`'{}'::json`),
     promptSuggestions: text('prompt_suggestions')
       .array()
       .notNull()
@@ -1088,12 +1228,14 @@ export const assistantSelectSchema = createSelectSchema(assistantTable).extend({
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   accessLevel: accessLevelSchema,
+  filterAttributes: filterAttributesSchema,
   ownerSchoolIds: z.array(z.string()),
 });
 export const assistantInsertSchema = createInsertSchema(assistantTable)
   .omit({ id: true, createdAt: true, updatedAt: true, suspended: true })
   .extend({
     accessLevel: accessLevelSchema,
+    filterAttributes: filterAttributesSchema.optional(),
   });
 export const assistantUpdateSchema = createUpdateSchema(assistantTable)
   .omit({
@@ -1106,6 +1248,7 @@ export const assistantUpdateSchema = createUpdateSchema(assistantTable)
     id: z.string(),
     // for any reason accessLevel has a different type so we have to override it here
     accessLevel: accessLevelSchema.optional(),
+    filterAttributes: filterAttributesSchema.optional(),
   });
 
 export type AssistantSelectModel = z.infer<typeof assistantSelectSchema>;

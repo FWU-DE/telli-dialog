@@ -3,7 +3,6 @@
 import { Card, CardRow } from '@ui/components/card';
 import { MultipleSelectDropdown } from '@ui/components/multiple-select-dropdown';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import {
   CATEGORY_KEYS,
   FEDERAL_STATE_KEYS,
@@ -11,19 +10,38 @@ import {
   LANGUAGE_KEYS,
   SCHOOL_TYPE_KEYS,
   SUBJECT_GROUPS,
-} from './custom-chat-filter-keys';
+} from '../filter-enum-keys';
 import { CustomChatHeading2 } from '../custom-chat-heading2';
 
-type CustomFilterSectionProps = Record<string, never>;
+export type CustomFilterSectionValues = {
+  schoolTypes: string[];
+  gradeRanges: string[];
+  subjects: string[];
+  categories: string[];
+  federalStates: string[];
+  languages: string[];
+};
 
-export default function CustomFilterSection({}: CustomFilterSectionProps) {
+type CustomFilterSectionProps = {
+  values: CustomFilterSectionValues;
+  onSchoolTypesChange: (values: string[]) => void;
+  onGradeRangesChange: (values: string[]) => void;
+  onSubjectsChange: (values: string[]) => void;
+  onCategoriesChange: (values: string[]) => void;
+  onFederalStatesChange: (values: string[]) => void;
+  onLanguagesChange: (values: string[]) => void;
+};
+
+export default function CustomFilterSection({
+  values,
+  onSchoolTypesChange,
+  onGradeRangesChange,
+  onSubjectsChange,
+  onCategoriesChange,
+  onFederalStatesChange,
+  onLanguagesChange,
+}: CustomFilterSectionProps) {
   const t = useTranslations();
-  const [schoolType, setSchoolType] = useState<string[]>([]);
-  const [gradeRange, setGradeRange] = useState<string[]>([]);
-  const [subject, setSubject] = useState<string[]>([]);
-  const [category, setCategory] = useState<string[]>([]);
-  const [federalState, setFederalState] = useState<string[]>([]);
-  const [language, setLanguage] = useState<string[]>([]);
 
   const selectPlaceholder = t('common.please-select');
 
@@ -54,9 +72,9 @@ export default function CustomFilterSection({}: CustomFilterSectionProps) {
 
   const subjectOptions = SUBJECT_GROUPS.map((group) => ({
     title: t(group.titleKey),
-    options: group.translationKeys.map((translationKey) => ({
-      value: translationKey.replace(/^[^.]+\./, ''),
-      label: t(translationKey),
+    options: group.values.map((value) => ({
+      value,
+      label: t(`subjects.${value}`),
     })),
   }));
 
@@ -70,8 +88,8 @@ export default function CustomFilterSection({}: CustomFilterSectionProps) {
         <CardRow className="grid grid-cols-1 gap-y-4 gap-x-8 md:grid-cols-2 lg:grid-cols-3">
           <MultipleSelectDropdown
             label={t('filter.school-filter')}
-            value={schoolType}
-            onValueChange={setSchoolType}
+            value={values.schoolTypes}
+            onValueChange={onSchoolTypesChange}
             optionGroups={[{ options: schoolTypeOptions }]}
             placeholder={selectPlaceholder}
             testId="filter-school-type-select"
@@ -79,8 +97,8 @@ export default function CustomFilterSection({}: CustomFilterSectionProps) {
           />
           <MultipleSelectDropdown
             label={t('filter.grade-filter')}
-            value={gradeRange}
-            onValueChange={setGradeRange}
+            value={values.gradeRanges}
+            onValueChange={onGradeRangesChange}
             optionGroups={[{ options: gradeRangeOptions }]}
             placeholder={selectPlaceholder}
             testId="filter-grade-range-select"
@@ -88,8 +106,8 @@ export default function CustomFilterSection({}: CustomFilterSectionProps) {
           />
           <MultipleSelectDropdown
             label={t('filter.subject-filter')}
-            value={subject}
-            onValueChange={setSubject}
+            value={values.subjects}
+            onValueChange={onSubjectsChange}
             optionGroups={subjectOptions}
             placeholder={selectPlaceholder}
             testId="filter-subject-select"
@@ -97,8 +115,8 @@ export default function CustomFilterSection({}: CustomFilterSectionProps) {
           />
           <MultipleSelectDropdown
             label={t('filter.category-filter')}
-            value={category}
-            onValueChange={setCategory}
+            value={values.categories}
+            onValueChange={onCategoriesChange}
             optionGroups={[{ options: categoryOptions }]}
             placeholder={selectPlaceholder}
             testId="filter-category-select"
@@ -106,8 +124,8 @@ export default function CustomFilterSection({}: CustomFilterSectionProps) {
           />
           <MultipleSelectDropdown
             label={t('filter.federal-state-filter')}
-            value={federalState}
-            onValueChange={setFederalState}
+            value={values.federalStates}
+            onValueChange={onFederalStatesChange}
             optionGroups={[{ options: federalStateOptions }]}
             placeholder={selectPlaceholder}
             testId="filter-federal-state-select"
@@ -115,8 +133,8 @@ export default function CustomFilterSection({}: CustomFilterSectionProps) {
           />
           <MultipleSelectDropdown
             label={t('filter.language-filter')}
-            value={language}
-            onValueChange={setLanguage}
+            value={values.languages}
+            onValueChange={onLanguagesChange}
             optionGroups={[{ options: languageOptions }]}
             placeholder={selectPlaceholder}
             testId="filter-language-select"

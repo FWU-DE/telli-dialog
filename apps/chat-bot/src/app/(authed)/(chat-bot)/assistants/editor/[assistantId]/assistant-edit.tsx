@@ -53,6 +53,10 @@ import {
   getShareFormValues,
 } from '@/components/custom-chat/access-level-sharing';
 import CustomFilterSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-section';
+import {
+  extractFilterValues,
+  toFilterAttributes,
+} from '@/components/custom-chat/custom-chat-filter-attributes';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -89,6 +93,12 @@ function createAssistantFormValuesSchema(t: AssistantTranslator) {
     name: z.string().trim().min(1, t('name-required')).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
     description: z.string(),
     instructions: z.string(),
+    schoolTypes: z.array(z.string()),
+    gradeRanges: z.array(z.string()),
+    subjects: z.array(z.string()),
+    categories: z.array(z.string()),
+    federalStates: z.array(z.string()),
+    languages: z.array(z.string()),
     isSchoolShared: z.boolean(),
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
@@ -130,10 +140,17 @@ export function AssistantEdit({
     () => createAssistantFieldValidationConfig(t),
     [t],
   );
+  const filterValues = extractFilterValues(assistant);
   const initialValues: AssistantFormValues = {
     name: assistant.name,
     description: assistant.description ?? '',
     instructions: assistant.instructions ?? '',
+    schoolTypes: filterValues.schoolTypes,
+    gradeRanges: filterValues.gradeRanges,
+    subjects: filterValues.subjects,
+    categories: filterValues.categories,
+    federalStates: filterValues.federalStates,
+    languages: filterValues.languages,
     ...getShareFormValues(assistant.accessLevel),
     hasLinkAccess: assistant.hasLinkAccess,
     isWebSearchEnabled: assistant.isWebSearchEnabled,
@@ -172,6 +189,14 @@ export function AssistantEdit({
           name: data.name.trim(),
           description: data.description,
           instructions: data.instructions,
+          filterAttributes: toFilterAttributes({
+            schoolTypes: data.schoolTypes,
+            gradeRanges: data.gradeRanges,
+            subjects: data.subjects,
+            categories: data.categories,
+            federalStates: data.federalStates,
+            languages: data.languages,
+          }),
           hasLinkAccess: data.hasLinkAccess,
           isWebSearchEnabled: data.isWebSearchEnabled,
           promptSuggestions: data.promptSuggestions
@@ -184,6 +209,12 @@ export function AssistantEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
+  const schoolTypes = useWatch({ control, name: 'schoolTypes' });
+  const gradeRanges = useWatch({ control, name: 'gradeRanges' });
+  const subjects = useWatch({ control, name: 'subjects' });
+  const categories = useWatch({ control, name: 'categories' });
+  const federalStates = useWatch({ control, name: 'federalStates' });
+  const languages = useWatch({ control, name: 'languages' });
   const savedAccessLevelRef = useRef(assistant.accessLevel);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const isCommunityShared = useWatch({ control, name: 'isCommunityShared' });
@@ -435,7 +466,40 @@ export function AssistantEdit({
             onShareChange={handleSharingChange}
             suspended={assistant.suspended}
           />
-          <CustomFilterSection />
+          <CustomFilterSection
+            values={{
+              schoolTypes,
+              gradeRanges,
+              subjects,
+              categories,
+              federalStates,
+              languages,
+            }}
+            onSchoolTypesChange={(values) => {
+              setValue('schoolTypes', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onGradeRangesChange={(values) => {
+              setValue('gradeRanges', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onSubjectsChange={(values) => {
+              setValue('subjects', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onCategoriesChange={(values) => {
+              setValue('categories', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onFederalStatesChange={(values) => {
+              setValue('federalStates', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onLanguagesChange={(values) => {
+              setValue('languages', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+          />
         </form>
       </CustomChatLayoutContainer>
     </>
