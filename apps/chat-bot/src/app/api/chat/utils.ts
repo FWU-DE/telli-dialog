@@ -70,7 +70,7 @@ export function consolidateMessages(messages: Array<ChatMessage>): Array<ChatMes
   return consolidatedMessages;
 }
 
-type MessageBlock = {
+export type MessageBlock = {
   messages: ChatMessage[];
   charCount: number;
 };
