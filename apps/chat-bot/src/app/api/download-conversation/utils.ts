@@ -112,9 +112,17 @@ function getConversationMessages({
 }
 
 export async function generateConversationMessageDocxFile({
+<<<<<<< HEAD
   message,
   gptName,
 }: {
+=======
+  conversation,
+  message,
+  gptName,
+}: {
+  conversation: ConversationModel;
+>>>>>>> 86d23c4a8276f6cfe859188200c0ba27e76e27b6
   message: ConversationMessageModel;
   gptName: string;
 }): Promise<ArrayBuffer | undefined> {
@@ -130,6 +138,12 @@ export async function generateConversationMessageDocxFile({
 
     const conversationMetadata = [
       new Paragraph({
+<<<<<<< HEAD
+=======
+        children: [new TextRun({ text: conversation.name ?? '', bold: true, size: 40 })],
+      }),
+      new Paragraph({
+>>>>>>> 86d23c4a8276f6cfe859188200c0ba27e76e27b6
         children: [
           new TextRun({
             text: `Erstellt am: ${formatDateToGermanTimestamp(message.createdAt)} Uhr`,
@@ -146,7 +160,11 @@ export async function generateConversationMessageDocxFile({
       new Paragraph({
         children: [
           new TextRun({
+<<<<<<< HEAD
             text: `Generiert von AIS.chat unter Nutzung von ${modelDisplayName}`,
+=======
+            text: `generiert in telli unter Verwendung von ${modelDisplayName}`,
+>>>>>>> 86d23c4a8276f6cfe859188200c0ba27e76e27b6
             italics: true,
             size: 18,
             color: '666666',
