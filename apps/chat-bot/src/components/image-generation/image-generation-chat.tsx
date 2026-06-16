@@ -114,6 +114,7 @@ export default function ImageGenerationChat({
     if (result.success) {
       // Update the displayed image
       if (result.value.imageUrl) {
+        setIsImageReady(false);
         setDisplayedImage({
           prompt: currentPrompt,
           imageUrl: result.value.imageUrl,
