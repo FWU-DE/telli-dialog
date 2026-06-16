@@ -32,6 +32,8 @@
     "copy": "Kopieren",
     "edit": "Bearbeiten",
     "copy-clipboard": "In die Zwischenablage kopieren",
+    "copy-clipboard-success": "In die Zwischenablage kopiert",
+    "copy-clipboard-error": "Fehler beim Kopieren in die Zwischenablage",
     "message-download": "Nachricht als Word-Datei herunterladen",
     "message-download-error": "Der Download der Nachricht ist fehlgeschlagen.",
     "regenerate-message": "Antwort erneut generieren",

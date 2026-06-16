@@ -80,7 +80,7 @@ export default async function CustomChatSharePage({
                 text={absoluteShareUrl}
                 variant="outline"
                 size="default"
-                showCopyState={false}
+                defaultIcons={false}
                 aria-label={t('copy-link')}
               >
                 {t('copy-link')}

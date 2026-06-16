@@ -6,6 +6,7 @@ import ClipboardLightIcon from '../icons/clipboard-light';
 import { Button } from '@ui/components/button';
 import { useTranslations } from 'next-intl';
 import type { ComponentProps, ReactNode } from 'react';
+import { useToast } from './toast';
 
 type CopyToClipboardButtonProps = {
   text: string;
@@ -14,7 +15,7 @@ type CopyToClipboardButtonProps = {
   variant?: ComponentProps<typeof Button>['variant'];
   size?: ComponentProps<typeof Button>['size'];
   'aria-label'?: string;
-  showCopyState?: boolean;
+  defaultIcons?: boolean;
 };
 
 export default function CopyToClipboardButton({
@@ -24,8 +25,9 @@ export default function CopyToClipboardButton({
   variant = 'ghost',
   size = 'icon-round',
   'aria-label': ariaLabel,
-  showCopyState = true,
+  defaultIcons = true,
 }: CopyToClipboardButtonProps) {
+  const toast = useToast();
   const t = useTranslations('common');
   const [isCopied, setIsCopied] = React.useState(false);
 
@@ -43,14 +45,16 @@ export default function CopyToClipboardButton({
     };
   }, [isCopied]);
 
-  const handleCopy = React.useCallback(async () => {
+  const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(text);
       setIsCopied(true);
+      toast.success(t('copy-clipboard-success'));
     } catch {
       setIsCopied(false);
+      toast.error(t('copy-clipboard-error'));
     }
-  }, [text]);
+  };
 
   return (
     <Button
@@ -62,7 +66,7 @@ export default function CopyToClipboardButton({
       onClick={handleCopy}
       className="text-primary"
     >
-      {showCopyState &&
+      {defaultIcons &&
         (isCopied ? (
           <CheckIcon className={className} />
         ) : (
