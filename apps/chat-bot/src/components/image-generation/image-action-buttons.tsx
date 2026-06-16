@@ -107,6 +107,7 @@ export function ImageActionButtons({
         size="icon-sm"
         title={t('copy-image-tooltip')}
         aria-label={t('copy-image-tooltip')}
+        data-testid="image-copy-button"
         disabled={!isImageReady}
       >
         <CopyIcon />
@@ -117,6 +118,7 @@ export function ImageActionButtons({
         size="icon-sm"
         title={t('download-image-tooltip')}
         aria-label={t('download-image-tooltip')}
+        data-testid="image-download-button"
         disabled={!isImageReady}
       >
         <DownloadSimpleIcon />
@@ -127,6 +129,7 @@ export function ImageActionButtons({
         size="icon-sm"
         title={t('copy-prompt-tooltip')}
         aria-label={t('copy-prompt-tooltip')}
+        data-testid="image-copy-prompt-button"
       >
         <InfoIcon />
       </Button>

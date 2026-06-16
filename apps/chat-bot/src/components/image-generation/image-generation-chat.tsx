@@ -176,6 +176,7 @@ export default function ImageGenerationChat({
                 ref={imageRef}
                 src={displayedImage.imageUrl}
                 alt={displayedImage.prompt}
+                data-testid="generated-image"
                 className="w-full rounded-xl"
                 width={800}
                 height={800}

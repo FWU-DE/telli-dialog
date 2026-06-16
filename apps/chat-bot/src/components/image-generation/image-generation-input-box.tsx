@@ -24,6 +24,7 @@ export function ImageGenerationInputBox({
           /* eslint-disable-next-line jsx-a11y/no-autofocus */
           autoFocus
           placeholder={tImageGeneration('placeholder')}
+          data-testid="image-prompt-input"
           className="w-full text-base focus:outline-hidden bg-transparent max-h-40 sm:max-h-60 overflow-y-auto placeholder:text-muted-foreground py-3 px-4"
           onChange={handleInputChange}
           value={input}
@@ -36,6 +37,7 @@ export function ImageGenerationInputBox({
           onClick={customHandleSubmit}
           disabled={input.trim().length === 0 || isLoading}
           aria-label={tImageGeneration('generate-button')}
+          data-testid="image-generate-button"
         >
           {tImageGeneration('generate-button')}
         </Button>
