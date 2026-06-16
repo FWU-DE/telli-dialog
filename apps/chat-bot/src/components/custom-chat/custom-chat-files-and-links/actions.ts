@@ -7,7 +7,10 @@ import { runServerAction } from '@shared/actions/run-server-action';
 export async function ingestWebContentAction({ url }: { url: string }) {
   const { federalState } = await requireAuth();
 
-  return runServerAction(ingestWebContent)({
+  return runServerAction(
+    'ingestWebContentAction',
+    ingestWebContent,
+  )({
     urls: [url],
     federalStateId: federalState.id,
   });

@@ -150,6 +150,31 @@ After making any file changes:
 - Prefer self-explanatory code over excessive comments
 - Comments are written in English
 
+### Server Actions
+
+All server actions must use `runServerAction` from `@shared/actions/run-server-action` — it handles error serialization and Sentry instrumentation.
+Auth runs **before** `runServerAction` so navigation errors (e.g., redirect to login) propagate naturally without being caught by the error handler:
+
+```typescript
+export async function createNewAssistantAction({
+  templateId,
+  duplicateAssistantName,
+}: {
+  templateId?: string;
+  duplicateAssistantName?: string;
+}) {
+  const { user } = await requireAuth();
+  return runServerAction(
+    'createNewAssistantAction',
+    createNewAssistant,
+  )({
+    templateId,
+    user,
+    duplicateAssistantName,
+  });
+}
+```
+
 ### Service Boundaries and File Placement
 
 - **Business logic**: Keep in services (`packages/shared/src/**/*.ts`), not routes/components

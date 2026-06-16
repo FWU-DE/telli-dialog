@@ -12,9 +12,10 @@ import MarkdownDisplay from '../chat/markdown-display';
 import { usePortalContainer } from '@ui/components/portal-container';
 import { useSession } from 'next-auth/react';
 import { Button } from '@ui/components/button';
+import type { ServerActionResult } from '@shared/actions/server-action-result';
 
 type TermsConditionsModalProps = {
-  handleAccept(): Promise<boolean>;
+  handleAccept(): Promise<ServerActionResult<boolean>>;
   disclaimerConfig: DisclaimerConfig;
 } & React.ComponentProps<'button'>;
 
@@ -75,7 +76,10 @@ export default function TermsConditionsModal({
   };
 
   const acceptAndClose = async () => {
-    await session.update(await handleAccept());
+    const result = await handleAccept();
+    if (result.success) {
+      await session.update(result.value);
+    }
     router.refresh();
   };
 

@@ -13,22 +13,25 @@ import { EntityRef } from '@shared/entities/entity-types';
 
 export async function getSuspensionRequestEntitiesAction() {
   await requireAdminAuth();
-  return runServerAction(getSuspensionRequestOverviews)();
+  return runServerAction('getSuspensionRequestEntitiesAction', getSuspensionRequestOverviews)();
 }
 
 export async function suspendEntityAction(entityRef: EntityRef) {
   await requireAdminAuth();
-  return runServerAction(suspendEntity)(entityRef);
+  return runServerAction('suspendEntityAction', suspendEntity)(entityRef);
 }
 
 export async function liftSuspensionAction(entityRef: EntityRef) {
   await requireAdminAuth();
-  return runServerAction(liftSuspensionOnEntity)(entityRef);
+  return runServerAction('liftSuspensionAction', liftSuspensionOnEntity)(entityRef);
 }
 
 export async function markSuspensionRequestAsCheckedAction(suspensionRequestId: string) {
   await requireAdminAuth();
-  return runServerAction(markSuspensionRequestAsChecked)(suspensionRequestId);
+  return runServerAction(
+    'markSuspensionRequestAsCheckedAction',
+    markSuspensionRequestAsChecked,
+  )(suspensionRequestId);
 }
 
 export async function getSuspensionRequestItemWithDetailsAction({
@@ -36,7 +39,10 @@ export async function getSuspensionRequestItemWithDetailsAction({
   entityId,
 }: EntityRef) {
   await requireAdminAuth();
-  return runServerAction(getSuspensionRequestItemWithDetails)({
+  return runServerAction(
+    'getSuspensionRequestItemWithDetailsAction',
+    getSuspensionRequestItemWithDetails,
+  )({
     entityType,
     entityId,
   });
