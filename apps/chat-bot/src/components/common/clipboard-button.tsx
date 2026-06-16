@@ -13,7 +13,7 @@ type CopyToClipboardButtonProps = {
   children?: ReactNode;
   variant?: ComponentProps<typeof Button>['variant'];
   size?: ComponentProps<typeof Button>['size'];
-  ariaLabel?: string;
+  'aria-label'?: string;
   showCopyState?: boolean;
 };
 
@@ -23,7 +23,7 @@ export default function CopyToClipboardButton({
   children,
   variant = 'ghost',
   size = 'icon-round',
-  ariaLabel,
+  'aria-label': ariaLabel,
   showCopyState = true,
 }: CopyToClipboardButtonProps) {
   const t = useTranslations('common');

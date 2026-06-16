@@ -35,7 +35,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
       customChatName={character.name}
       inviteCode={inviteCode}
       leftTimeInSeconds={leftTime}
-      shareUrl={shareUrl}
+      relativeShareUrl={shareUrl}
       totalTimeInMinutes={character.maxUsageTimeLimit}
       customChatVariant="character"
     />

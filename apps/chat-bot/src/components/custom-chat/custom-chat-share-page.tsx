@@ -15,7 +15,7 @@ type CustomChatSharePageProps = {
   customChatName: string;
   inviteCode: string;
   leftTimeInSeconds: number;
-  shareUrl: string;
+  relativeShareUrl: string;
   totalTimeInMinutes: number;
   customChatVariant: 'character' | 'learning-scenario';
 };
@@ -25,13 +25,14 @@ export default async function CustomChatSharePage({
   customChatName,
   inviteCode,
   leftTimeInSeconds,
-  shareUrl,
+  relativeShareUrl,
   totalTimeInMinutes,
   customChatVariant,
 }: CustomChatSharePageProps) {
   const t = await getTranslations('custom-chat.share-page');
   const baseUrl = await getBaseUrlByHeaders();
   const host = await getHostByHeaders();
+  const absoluteShareUrl = new URL(relativeShareUrl, baseUrl).href;
   const formattedInviteCode = `${inviteCode.substring(0, 4)} ${inviteCode.substring(4, 8)}`;
 
   return (
@@ -71,12 +72,12 @@ export default async function CustomChatSharePage({
             </div>
             <div className="flex flex-col items-center gap-4 sm:mt-auto">
               <Button asChild>
-                <Link href={shareUrl} target="_blank" rel="noopener noreferrer">
+                <Link href={absoluteShareUrl} target="_blank" rel="noopener noreferrer">
                   {t('open-chat')}
                 </Link>
               </Button>
               <CopyToClipboardButton
-                text={shareUrl}
+                text={absoluteShareUrl}
                 variant="outline"
                 size="default"
                 showCopyState={false}
@@ -91,8 +92,8 @@ export default async function CustomChatSharePage({
             <h2 className="text-2xl sm:text-3xl text-center">{t('use-qr')}</h2>
             <QRCodeSVG
               data-testid="qr-code"
-              className="w-64 h-64 sm:w-85 sm:h-85"
-              value={shareUrl}
+              className="w-full h-full max-w-64 sm:max-w-80 md:max-w-96 max-h-64 sm:max-h-80 md:max-h-96"
+              value={absoluteShareUrl}
             />
           </section>
         </main>

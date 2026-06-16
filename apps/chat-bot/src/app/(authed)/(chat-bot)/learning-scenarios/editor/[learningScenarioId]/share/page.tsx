@@ -39,7 +39,7 @@ export default async function Page(
       customChatName={learningScenario.name}
       inviteCode={inviteCode}
       leftTimeInSeconds={leftTime}
-      shareUrl={shareUrl}
+      relativeShareUrl={shareUrl}
       totalTimeInMinutes={learningScenario.maxUsageTimeLimit}
       customChatVariant="learning-scenario"
     />
