@@ -437,7 +437,9 @@
     "copy-image-error": "Bild konnte nicht kopiert werden",
     "copy-prompt-success": "Prompt in die Zwischenablage kopiert",
     "copy-prompt-error": "Prompt konnte nicht kopiert werden",
+    "download-image-error": "Bild konnte nicht heruntergeladen werden",
     "copy-image-tooltip": "Bild kopieren",
+    "download-image-tooltip": "Bild herunterladen",
     "copy-prompt-tooltip": "Prompt kopieren"
   },
   "authentication": {
