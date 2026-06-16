@@ -40,11 +40,15 @@ export function LearningScenarioView({
   fileMappings,
   pictureUrl,
   initialLinks,
+  usedBudget,
+  maxBudget,
 }: {
   learningScenario: LearningScenarioOptionalShareDataModel;
   fileMappings: FileModel[];
   pictureUrl: string | undefined;
   initialLinks: WebSource[];
+  usedBudget: number;
+  maxBudget: number;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -117,6 +121,8 @@ export function LearningScenarioView({
         tokenPointsLimit={learningScenario.tokenPointsLimit}
         pointsPercentageValues={tokenPointsPercentageValues}
         usageTimeValues={usageTimeValuesInMinutes}
+        usedBudget={usedBudget}
+        maxBudget={maxBudget}
         onShare={handleShareLearningScenario}
         onUnshare={handleUnshareLearningScenario}
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}

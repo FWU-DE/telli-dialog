@@ -114,11 +114,15 @@ export function LearningScenarioEdit({
   relatedFiles,
   initialLinks,
   avatarPictureUrl,
+  usedBudget,
+  maxBudget,
 }: {
   learningScenario: LearningScenarioOptionalShareDataModel;
   relatedFiles: FileModel[];
   initialLinks: WebSource[];
   avatarPictureUrl?: string;
+  usedBudget: number;
+  maxBudget: number;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -372,6 +376,8 @@ export function LearningScenarioEdit({
           tokenPointsLimit={learningScenario.tokenPointsLimit}
           pointsPercentageValues={tokenPointsPercentageValues}
           usageTimeValues={usageTimeValuesInMinutes}
+          usedBudget={usedBudget}
+          maxBudget={maxBudget}
           onShare={async (data) =>
             await shareLearningScenarioAction({
               learningScenarioId: learningScenario.id,

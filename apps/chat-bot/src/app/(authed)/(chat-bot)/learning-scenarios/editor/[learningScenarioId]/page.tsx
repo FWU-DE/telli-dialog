@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,7 @@ export default async function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]'>,
 ) {
   const { learningScenarioId } = await props.params;
-  const { user } = await requireAuth();
+  const { user, federalState } = await requireAuth();
 
   const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
     learningScenarioId: learningScenarioId,
@@ -32,6 +33,9 @@ export default async function Page(
   if (readOnly) {
     redirect(`/learning-scenarios/${learningScenarioId}`);
   }
+
+  const userPriceLimit = await getPriceLimitInCentByUser({ ...user, federalState });
+  const priceInCent = await getPriceInCentByUser({ ...user, federalState });
 
   const initialLinks = learningScenario.attachedLinks
     .filter((l) => l && l !== '')
@@ -50,6 +54,8 @@ export default async function Page(
         relatedFiles={relatedFiles}
         initialLinks={initialLinks}
         avatarPictureUrl={avatarPictureUrl}
+        usedBudget={priceInCent ?? 0}
+        maxBudget={userPriceLimit ?? 500}
       />
     </DefaultPageLayout>
   );

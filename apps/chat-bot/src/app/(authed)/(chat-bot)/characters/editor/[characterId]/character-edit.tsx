@@ -113,11 +113,15 @@ export function CharacterEdit({
   relatedFiles,
   initialLinks,
   avatarPictureUrl,
+  usedBudget,
+  maxBudget,
 }: {
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
   initialLinks: WebSource[];
   avatarPictureUrl?: string;
+  usedBudget: number;
+  maxBudget: number;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -351,6 +355,8 @@ export function CharacterEdit({
           tokenPointsLimit={character.tokenPointsLimit}
           pointsPercentageValues={tokenPointsPercentageValues}
           usageTimeValues={usageTimeValuesInMinutes}
+          usedBudget={usedBudget}
+          maxBudget={maxBudget}
           onShare={async (data) => {
             const result = await shareCharacterAction({
               id: character.id,

@@ -34,6 +34,8 @@ interface CustomChatShareWithLearnersProps {
   tokenPointsLimit: number | null;
   pointsPercentageValues: number[];
   usageTimeValues: number[];
+  usedBudget: number;
+  maxBudget: number;
   onShare: (data: z.infer<typeof shareFormSchema>) => Promise<{ success: boolean }>;
   onUnshare: () => Promise<{ success: boolean }>;
   shareUILink: string;
@@ -47,6 +49,8 @@ export function CustomChatShareWithLearners({
   tokenPointsLimit,
   pointsPercentageValues,
   usageTimeValues,
+  usedBudget,
+  maxBudget,
   onShare,
   onUnshare,
   shareUILink,
@@ -64,6 +68,11 @@ export function CustomChatShareWithLearners({
     manuallyStoppedAt,
   });
   const sharedChatActive = sharedChatTimeLeft > 0;
+
+  const maxAvailablePercentage = 100 - (usedBudget / maxBudget) * 100;
+  const filteredPointsPercentageValues = pointsPercentageValues.filter(
+    (v) => v < maxAvailablePercentage,
+  );
 
   const { getValues: getValuesShare, setValue: setShareValue } = useForm({
     resolver: zodResolver(shareFormSchema),
@@ -124,11 +133,14 @@ export function CustomChatShareWithLearners({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {pointsPercentageValues.map((value) => (
+                    {filteredPointsPercentageValues.map((value) => (
                       <SelectItem key={value} value={String(value)}>
                         {value} %
                       </SelectItem>
                     ))}
+                    <SelectItem key="max" value="100">
+                      {Math.max(Math.ceil(maxAvailablePercentage), 0)} % (Maximum)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
