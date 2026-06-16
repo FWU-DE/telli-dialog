@@ -214,7 +214,7 @@ AIS.chat ist ein Dienst des FWU – Institut für Film und Bild in Wissenschaft 
 Mit der Nutzung von AIS.chat bestätigen Nutzerinnen und Nutzer, diese Bedingungen gelesen zu haben und einzuhalten. Jede Nutzerin bzw. jeder Nutzer muss für die Nutzung von KI freigeschaltet sein.
 
 ## 3 Rechtliche Grundlagen
-Die Bereitstellung erfolgt gemäß VO (EU) 2024/1689 (KI-Verordnung) sowie DSGVO. AIS.chat fällt nach der Risikoclassifizierung als System mit begrenztem Risiko und erfüllt die Transparenzpflichten des Art. 50 KI-VO.
+Die Bereitstellung erfolgt gemäß VO (EU) 2024/1689 (KI-Verordnung) sowie DSGVO. AIS.chat fällt nach der Risikoklassifizierung als System mit begrenztem Risiko und erfüllt die Transparenzpflichten des Art. 50 KI-VO.
 
 ## 4 Kostenfreiheit & Kontingent
 Nutzende erhalten ein begrenztes Nutzungskontingent „Tokenvolumen". Eine Nutzung über das Kontingent hinaus ist nicht möglich, um eine Verfügbarkeit des Dienstes für eine Vielzahl von Lehrkräften gewährleisten zu können. Der Dienst ist für Nutzende kostenlos.
