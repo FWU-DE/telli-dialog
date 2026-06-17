@@ -1,17 +1,19 @@
 import { SUPPORTED_DOCUMENTS_TYPE, TRUNCATE_IMAGE_HEIGHT } from '@/const';
 import { FileMetadata, FileModel } from '@shared/db/schema';
-import { getReadOnlySignedUrl } from '@shared/s3';
+import { getFileFromS3, getReadOnlySignedUrl } from '@shared/s3';
 import { isImageFile } from '@/utils/files/generic';
-import { ImageAttachment } from '@/utils/files/types';
 import sharp from 'sharp';
 import { logError } from '@shared/logging';
+import { Readable } from 'stream';
+import { ChatAttachment } from '@ais-chat/ai-core';
 
 /**
- * fetch the signed url for the image files and return them as ImageAttachment
+ * fetch the signed url for the image files and return them as ChatImageAttachment
  */
-export async function extractImagesAndUrl(
-  relatedFileEntities: (FileModel & { conversationMessageId?: string })[],
-): Promise<ImageAttachment[]> {
+export async function createImageAttachmentsForConversation(
+  relatedFileEntities: FileModel[],
+  imageAttachmentType: 'url' | 'base64',
+): Promise<ChatAttachment[]> {
   const imageFiles = relatedFileEntities.filter((file) => isImageFile(file.name));
 
   if (imageFiles.length === 0) {
@@ -19,24 +21,33 @@ export async function extractImagesAndUrl(
   }
 
   const imagePromises = imageFiles.map(async (file) => {
-    try {
-      const url = await getReadOnlySignedUrl({ key: `message_attachments/${file.id}` });
+    let url: string;
 
-      return {
-        type: 'image' as const,
-        url,
-        mimeType: `image/${file.type}`,
-        id: file.id,
-        conversationMessageId: file.conversationMessageId,
-      };
+    try {
+      if (imageAttachmentType === 'url') {
+        url = await getReadOnlySignedUrl({ key: `message_attachments/${file.id}` });
+      } else if (imageAttachmentType === 'base64') {
+        const fileStream = await getFileFromS3(`message_attachments/${file.id}`);
+        const base64ImageData = await streamToBase64(fileStream);
+        url = `data:image/${file.type};base64,${base64ImageData}`;
+
+        return {
+          type: 'image' as const,
+          url,
+          contentType: `image/${file.type}`,
+        };
+      } else {
+        throw new Error(`Unsupported image attachment type: ${imageAttachmentType}`);
+      }
     } catch (error) {
       logError(`Failed to process image file ${file.id}`, error);
-      return null;
+      return undefined;
     }
   });
 
   const images = await Promise.all(imagePromises);
-  return images.filter((img) => img !== null) as ImageAttachment[];
+  const result = images.filter((img) => img !== undefined);
+  return result;
 }
 
 export async function preprocessImage(
@@ -81,4 +92,16 @@ export async function preprocessImage(
     buffer: processedBuffer,
     metadata: { width, height },
   };
+}
+
+async function streamToBase64(stream: Readable): Promise<string> {
+  const chunks: Buffer[] = [];
+
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+
+  const buffer = Buffer.concat(chunks);
+
+  return buffer.toString('base64');
 }

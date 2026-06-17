@@ -10,12 +10,16 @@ export type {
   Message,
   TokenUsage,
   ChatAttachment,
+  ChatImageAttachment,
   GenerationOptions,
   ToolCall,
   ToolDefinition,
   StreamEvent,
   AgenticStreamFn,
 } from './types';
+
+// Re-export utility functions and guards
+export { isChatImageAttachment } from './types';
 
 /**
  * Generates text using the specified model and messages, with access control and billing.

@@ -21,9 +21,9 @@ import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructChatSystemPrompt } from './system-prompt';
 import {
-  formatMessagesWithImages,
+  determineImageAttachmentTypeForModel,
+  enrichMessagesWithImageData,
   getChatTitle,
-  enrichWithImageDataIfRequired,
   limitChatHistory,
 } from './utils';
 import { retrieveChunks } from '../rag/rag-service';
@@ -36,7 +36,7 @@ import {
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
-import { extractImagesAndUrl } from '../file-operations/preprocess-image';
+import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { runAgentLoop } from './agent-loop';
 import { buildTools } from './build-tools';
@@ -241,33 +241,31 @@ export async function sendChatMessage({
   const modelSupportsImages =
     definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
 
+  const imageAttachmentType = determineImageAttachmentTypeForModel(definedModel);
+
   // attach the image url to each of the image files within relatedFileEntities
-  const extractedImages = await extractImagesAndUrl(relatedFileEntities);
-  console.log('Extracted images:', extractedImages);
+  const extractedImages = await createImageAttachmentsForConversation(
+    relatedFileEntities,
+    imageAttachmentType,
+  );
 
   // Format messages with images if the model supports vision
-  const messagesWithImages = formatMessagesWithImages(
+  const messagesWithImages = enrichMessagesWithImageData(
     prunedMessages,
     extractedImages,
     modelSupportsImages,
+    imageAttachmentType,
   );
   console.log('Messages with images:', messagesWithImages);
 
-  // Include image data as base64 encoded string into message if the model needs it (like google anthropic)
-  const messagesWithImageData = await enrichWithImageDataIfRequired(
-    definedModel,
-    messagesWithImages,
-  );
-
-  console.log('Messages with image data if required:', messagesWithImageData);
-  messagesWithImageData.map((message) => {
+  messagesWithImages.map((message) => {
     message.experimental_attachments?.map((attachment) => {
-      console.log('Attachment:', attachment.type, attachment.url);
+      console.log('Attachment:', attachment);
     });
   });
 
   // Convert to ai-core format
-  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImageData);
+  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImages);
 
   // Create native stream
   const { stream, update, done, error: streamError } = createTextStream();

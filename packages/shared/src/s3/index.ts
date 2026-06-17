@@ -20,6 +20,8 @@ import { nanoid } from 'nanoid';
 import { chunkArray } from '@shared/utils/arrays';
 import { ONE_DAY, ONE_HOUR, S3_DELETE_OBJECTS_MAX } from '@shared/s3/const';
 import { logError } from '@shared/logging';
+import { NotFoundError } from '@shared/error';
+import { UnexpectedError } from '@shared/error/unexpected-error';
 
 /**
  * Encodes a filename for Content-Disposition `filename*` (RFC 5987).
@@ -104,8 +106,7 @@ export async function copyFileInS3({ newKey, copySource }: { newKey: string; cop
 /**
  * Gets a signed URL for read-only access to an S3 object.
  *
- * @returns undefined if key is falsy
- * Otherwise returns a signed URL for read-only access to the object even if the object does not exist in S3.
+ * @returns a signed URL for read-only access to the object.
  */
 export async function getReadOnlySignedUrl({
   key,
@@ -115,7 +116,7 @@ export async function getReadOnlySignedUrl({
   // Default expiry of 1 day
   options: { expiresIn = ONE_DAY } = {},
 }: {
-  key: string | null | undefined;
+  key: string;
   filename?: string;
   contentType?: string;
   attachment?: boolean;
@@ -128,8 +129,6 @@ export async function getReadOnlySignedUrl({
     // Refresh URL in the background before it expires
     revalidate: Math.max(expiresIn - ONE_HOUR, expiresIn / 2),
   });
-
-  if (!key) return undefined;
 
   let contentDisposition = attachment ? 'attachment' : '';
   if (filename !== undefined) {
@@ -249,17 +248,20 @@ export async function listFilesFromS3({
   return allObjects;
 }
 
-/**
- * Get a file from S3 by its public URL.
- * Because the url is public, the function uses fetch for simplicity.
- *
- * @param url
- */
-export async function getFileFromS3ByUrl(url: string): Promise<Blob> {
-  return fetch(url).then((response) => {
-    if (!response.ok) {
-      throw new Error(`Failed to fetch file from S3. Status: ${response.status}`);
-    }
-    return response.blob();
+export async function getFileFromS3(key: string): Promise<Readable> {
+  const command = new GetObjectCommand({
+    Bucket: env.otcBucketName,
+    Key: key,
   });
+
+  try {
+    const response = await s3Client.send(command);
+    if (!response.Body) {
+      throw new NotFoundError('No object found for the given key');
+    }
+    return response.Body as Readable;
+  } catch (error) {
+    logError('Error fetching file from S3', error);
+    throw new UnexpectedError('Failed to fetch file from S3');
+  }
 }

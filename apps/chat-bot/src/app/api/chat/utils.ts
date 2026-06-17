@@ -1,38 +1,43 @@
-import { ImageAttachment } from '@/utils/files/types';
 import { logError } from '@shared/logging';
 import { ChatMessage, type ChatMessage as Message } from '@/types/chat';
-import { generateTextWithBilling } from '@ais-chat/ai-core';
+import {
+  ChatImageAttachment,
+  generateTextWithBilling,
+  isChatImageAttachment,
+} from '@ais-chat/ai-core';
 import { LlmModelSelectModel } from '@shared/db/schema';
-import { getFileFromS3ByUrl } from '@shared/s3';
+import { UnexpectedError } from '@shared/error/unexpected-error';
 
 /**
- * Format messages to include images for models that support vision
+ * Enrich messages with image data from attachments.
+ * If the model supports images, it adds either the image URL
+ * or the base64-encoded image data to the message, depending on the model's requirements.
  */
-export function formatMessagesWithImages(
+export function enrichMessagesWithImageData(
   messages: Message[],
-  images: ImageAttachment[],
+  images: ChatImageAttachment[],
   modelSupportsImages: boolean,
+  imageIntegrationType: 'url' | 'base64',
 ): Message[] {
   if (!modelSupportsImages || images.length === 0) {
     return messages;
   }
 
-  const messagesWithImages = [...messages];
+  const messagesWithImages: ChatMessage[] = [...messages];
 
   for (const message of messagesWithImages) {
     if (message.role !== 'user') {
       continue;
     }
 
-    const messageImages = images.filter((image) => image.conversationMessageId === message.id);
-    if (messageImages.length === 0) {
+    if (images.length === 0) {
       continue;
     }
-    message.experimental_attachments = messageImages.map((image) => ({
-      contentType: image.mimeType ?? 'image/jpeg',
-      url: image.url,
-      type: 'image' as const,
-    }));
+    message.experimental_attachments = images.map((image) => {
+      if (isChatImageAttachment(image)) return image;
+
+      throw new UnexpectedError(`Unsupported image integration type: ${imageIntegrationType}`);
+    });
   }
 
   return messagesWithImages;
@@ -187,24 +192,11 @@ export async function getChatTitle({
  * Some models (like google anthropic) require the image data to be included in the message as a base64 encoded string,
  * while others can work with just the image url. This function conditionally includes the base64 encoded data if required by the model.
  */
-export async function enrichWithImageDataIfRequired(
-  model: LlmModelSelectModel,
-  messages: ChatMessage[],
-): Promise<ChatMessage[]> {
+export function determineImageAttachmentTypeForModel(model: LlmModelSelectModel): 'url' | 'base64' {
   // we do not have settings on the LlmModelSelectModel to determine if the model needs image data,
   // so we will use the model name as a heuristic for now
   if (model.provider === 'google' && model.name.startsWith('anthropic/')) {
-    for (const message of messages) {
-      for (const attachment of message.experimental_attachments || []) {
-        if (attachment.type === 'image' && attachment.url) {
-          // download the image data and convert to base64
-          const blob = await getFileFromS3ByUrl(attachment.url);
-          const arrayBuffer = await blob.arrayBuffer();
-          const base64 = Buffer.from(arrayBuffer).toString('base64');
-          attachment.url = `data:${attachment.contentType};base64,${base64}`;
-        }
-      }
-    }
+    return 'base64';
   }
-  return messages;
+  return 'url';
 }

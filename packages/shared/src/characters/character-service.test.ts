@@ -766,9 +766,7 @@ describe('character-service', () => {
         (
           dbGetRelatedCharacterFiles as MockedFunction<typeof dbGetRelatedCharacterFiles>
         ).mockResolvedValue([]);
-        (getReadOnlySignedUrl as MockedFunction<typeof getReadOnlySignedUrl>).mockResolvedValue(
-          undefined,
-        );
+        (getReadOnlySignedUrl as MockedFunction<typeof getReadOnlySignedUrl>).mockResolvedValue('');
 
         // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getCharacterForEditView({

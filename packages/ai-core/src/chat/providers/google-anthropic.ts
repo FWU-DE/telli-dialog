@@ -10,6 +10,7 @@ import type {
 import {
   AgenticStreamFn,
   AiModel,
+  ChatAttachment,
   Message,
   StreamEvent,
   TextGenerationArgs,
@@ -117,7 +118,9 @@ export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStream
   };
 }
 
-/** used by chat-bot for streaming agentic responses if activated */
+/** used by chat-bot for streaming agentic responses if activated
+ * Todo: fix implementation in TD-1320
+ */
 export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): AgenticStreamFn {
   const config = getConfigurationByModel(model);
   const client = new AnthropicVertex(config);
@@ -204,6 +207,32 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
 }
 
 /**
+ * Urls to images are not supported. There is a type called 'URLImageSource' but it throws an error when used.
+ * Therefore the image data must be included as base64 encoded content in the message.
+ * There is a second option to upload the image but in this case the data retention policy is not used --> not allowed.
+ */
+function mapMessageToAnthropicMessageParam(message: SupportedMessage): MessageParam {
+  // message can have content (string), attachments and tool calls
+  const content: Array<ContentBlockParam> = [
+    { type: 'text', text: message.content },
+    ...(message.attachments?.filter(isImageAttachmentWithBase64DataUrl)?.map((attachment) => {
+      return {
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: sanitizeMediaType(attachment.contentType),
+          data: sanitizeBase64DataUrl(attachment.url),
+        },
+      } as ImageBlockParam;
+    }) ?? []),
+  ];
+  return {
+    role: mapRoleToAntropic(message.role),
+    content: content,
+  };
+}
+
+/**
  * ProjectId and Region is mandatory and taken from model settings.
  * MaxRetries is set to 2 (which is also the default value).
  * Errors based on network connectivity, rate limit and internal server errors are automatically retried
@@ -238,42 +267,6 @@ function filterUnsupportedMessages(messages: Message[]): SupportedMessage[] {
 }
 
 /**
- * Urls to images are not supported. There is a type called 'URLImageSource' but it throws an error when used.
- * Therefore the image data must be included as base64 encoded content in the message.
- * There is a second option to upload the image but in this case the data retention policy is not used --> not allowed.
- */
-function mapMessageToAnthropicMessageParam(message: SupportedMessage): MessageParam {
-  // message can have content (string), attachments and tool calls
-  const content: Array<ContentBlockParam> = [
-    { type: 'text', text: message.content },
-    ...(message.attachments
-      ?.filter((attachment) => attachment.type === 'image')
-      ?.map((attachment) => {
-        if (attachment.type === 'image') {
-          return {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: sanitizeMediaType(attachment.contentType),
-              data: sanitizeBase64Data(attachment.url),
-            },
-          } as ImageBlockParam;
-        }
-      })
-      ?.filter((item) => item !== undefined) ?? []),
-  ];
-  return {
-    role: mapRoleToAntropic(message.role),
-    content: content,
-  };
-}
-
-// Strip "anthropic/" prefix if present
-function resolveModelName(modelName: string): string {
-  return modelName.replace(/^anthropic\//, '');
-}
-
-/**
  * Handle errors from Google Anthropic API
  * Error codes: https://platform.claude.com/docs/en/cli-sdks-libraries/sdks/typescript#handling-errors
  * @param error
@@ -296,19 +289,32 @@ function handleError(error: unknown) {
   throw new AiGenerationError('An error occurred during text generation.');
 }
 
+// Strip "anthropic/" prefix if present
+function resolveModelName(modelName: string): string {
+  return modelName.replace(/^anthropic\//, '');
+}
+
 function buildSystemPrompt(systemMessages: Message[]): string {
   return systemMessages.length > 0 ? systemMessages.map((msg) => msg.content).join('\n') : '';
 }
 
+function isImageAttachmentWithBase64DataUrl(attachment: ChatAttachment): boolean {
+  return attachment.type === 'image' && isBase64DataUrl(attachment.url);
+}
+
+function isBase64DataUrl(url: string): boolean {
+  return url.startsWith('data:image/') && url.includes(';base64,');
+}
+
 /**
- * removes 'data:image/[image_type];base64,' prefix if present
+ * removes 'data:image/[image_type];base64,' prefix
  */
-function sanitizeBase64Data(data: string): string {
-  if (!data.startsWith('data:image/')) {
+function sanitizeBase64DataUrl(base64DataUrl: string): string {
+  if (!base64DataUrl.startsWith('data:image/')) {
     throw new AiGenerationError('Images are only supported via base64 encoded content data.');
   }
   const prefixPattern = /^data:image\/[a-zA-Z]+;base64,/;
-  return data.replace(prefixPattern, '');
+  return base64DataUrl.replace(prefixPattern, '');
 }
 
 /**
