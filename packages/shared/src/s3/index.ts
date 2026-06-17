@@ -261,7 +261,9 @@ export async function getFileFromS3(key: string): Promise<Readable> {
     }
     return response.Body as Readable;
   } catch (error) {
-    logError('Error fetching file from S3', error);
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
     throw new UnexpectedError('Failed to fetch file from S3');
   }
 }

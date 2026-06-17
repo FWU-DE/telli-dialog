@@ -268,7 +268,7 @@ beforeEach(() => {
     (_systemPrompt: unknown, messages: unknown[]) => messages,
   );
   mocks.constructChatSystemPromptMock.mockResolvedValue('system-prompt');
-  mocks.determineImageAttachmentTypeForModelMock.mockResolvedValue('url');
+  mocks.determineImageAttachmentTypeForModelMock.mockImplementation(() => 'url');
   mocks.dbInsertChatContentMock.mockResolvedValue(undefined);
   mocks.dbInsertConversationUsageMock.mockResolvedValue(undefined);
   mocks.dbUpdateLastUsedModelByUserIdMock.mockResolvedValue(undefined);

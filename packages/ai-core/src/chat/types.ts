@@ -11,7 +11,7 @@ export type ChatAttachment = ChatImageAttachment;
 
 /**
  * An image attachment in a chat message.
- * Url is a public link to the image or an base64-encoded data URL.
+ * Url is a public link to the image or a base64-encoded data URL.
  */
 export type ChatImageAttachment = {
   contentType: string;
@@ -20,7 +20,7 @@ export type ChatImageAttachment = {
 };
 
 export function isChatImageAttachment(
-  attachment: ChatImageAttachment,
+  attachment: ChatAttachment,
 ): attachment is ChatImageAttachment {
   return attachment.type === 'image';
 }

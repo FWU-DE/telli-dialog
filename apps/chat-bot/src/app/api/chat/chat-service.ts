@@ -339,13 +339,6 @@ export async function sendChatMessage({
     modelSupportsImages,
     imageAttachmentType,
   );
-  console.log('Messages with images:', messagesWithImages);
-
-  messagesWithImages.map((message) => {
-    message.attachments?.map((attachment) => {
-      console.log('Attachment:', attachment);
-    });
-  });
 
   // Convert to ai-core format
   const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImages);

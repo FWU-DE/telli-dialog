@@ -65,7 +65,7 @@ export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGe
 /**
  * used by api and chat-bot for streaming text responses
  * Note: Images are supported at the moment but require special handling.
- * They needed to be uploaded separately or included as base64 encoded content in the mesage.
+ * They needed to be uploaded separately or included as base64 encoded content in the message.
  */
 export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStreamFn {
   const config = getConfigurationByModel(model);

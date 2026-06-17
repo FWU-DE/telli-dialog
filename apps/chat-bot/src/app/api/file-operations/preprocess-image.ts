@@ -30,15 +30,15 @@ export async function createImageAttachmentsForConversation(
         const fileStream = await getFileFromS3(`message_attachments/${file.id}`);
         const base64ImageData = await streamToBase64(fileStream);
         url = `data:image/${file.type};base64,${base64ImageData}`;
-
-        return {
-          type: 'image' as const,
-          url,
-          contentType: `image/${file.type}`,
-        };
       } else {
         throw new Error(`Unsupported image attachment type: ${imageAttachmentType}`);
       }
+
+      return {
+        type: 'image' as const,
+        url,
+        contentType: `image/${file.type}`,
+      };
     } catch (error) {
       logError(`Failed to process image file ${file.id}`, error);
       return undefined;
@@ -46,8 +46,7 @@ export async function createImageAttachmentsForConversation(
   });
 
   const images = await Promise.all(imagePromises);
-  const result = images.filter((img) => img !== undefined);
-  return result;
+  return images.filter((img) => img !== undefined);
 }
 
 export async function preprocessImage(
