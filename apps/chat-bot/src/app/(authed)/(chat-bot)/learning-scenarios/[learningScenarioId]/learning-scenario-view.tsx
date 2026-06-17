@@ -24,10 +24,6 @@ import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
 import {
-  tokenPointsPercentageValues,
-  usageTimeValuesInMinutes,
-} from '../editor/[learningScenarioId]/schema';
-import {
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
 } from '../editor/[learningScenarioId]/actions';
@@ -119,8 +115,6 @@ export function LearningScenarioView({
         manuallyStoppedAt={learningScenario.manuallyStoppedAt}
         maxUsageTimeLimit={learningScenario.maxUsageTimeLimit}
         tokenPointsLimit={learningScenario.tokenPointsLimit}
-        pointsPercentageValues={tokenPointsPercentageValues}
-        usageTimeValues={usageTimeValuesInMinutes}
         usedBudget={usedBudget}
         maxBudget={maxBudget}
         onShare={handleShareLearningScenario}

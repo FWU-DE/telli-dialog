@@ -21,6 +21,15 @@ import { ShareFatIcon, StopIcon } from '@phosphor-icons/react';
 import CountDownTimer from '../../app/(authed)/(chat-bot)/learning-scenarios/_components/count-down';
 import { RichText } from '../common/rich-text';
 import { z } from 'zod';
+import {
+  getMaxAvailablePercentage,
+  resolveTokenPointsPercentageLimit,
+} from './custom-chat-token-points-limit-select';
+import { TokenPointsLimitSelect } from './custom-chat-token-points-limit-select';
+import {
+  tokenPointsPercentageValues,
+  usageTimeValuesInMinutes,
+} from './custom-chat-share-with-learners-limit-params';
 
 const shareFormSchema = z.object({
   tokenPointsPercentageLimit: z.coerce.number(),
@@ -32,8 +41,6 @@ interface CustomChatShareWithLearnersProps {
   manuallyStoppedAt: Date | null;
   maxUsageTimeLimit: number | null;
   tokenPointsLimit: number | null;
-  pointsPercentageValues: number[];
-  usageTimeValues: number[];
   usedBudget: number;
   maxBudget: number;
   onShare: (data: z.infer<typeof shareFormSchema>) => Promise<{ success: boolean }>;
@@ -47,8 +54,6 @@ export function CustomChatShareWithLearners({
   manuallyStoppedAt,
   maxUsageTimeLimit,
   tokenPointsLimit,
-  pointsPercentageValues,
-  usageTimeValues,
   usedBudget,
   maxBudget,
   onShare,
@@ -69,15 +74,19 @@ export function CustomChatShareWithLearners({
   });
   const sharedChatActive = sharedChatTimeLeft > 0;
 
-  const maxAvailablePercentage = 100 - (usedBudget / maxBudget) * 100;
-  const filteredPointsPercentageValues = pointsPercentageValues.filter(
-    (v) => v < maxAvailablePercentage,
-  );
+  const maxAvailablePercentage = getMaxAvailablePercentage({ usedBudget, maxBudget });
+
+  const preselectedTokenPointsPercentageLimit = resolveTokenPointsPercentageLimit({
+    previousTokenPointsLimit: tokenPointsLimit,
+    selectableFixedValues: tokenPointsPercentageValues.filter(
+      (value) => value < maxAvailablePercentage,
+    ),
+  });
 
   const { getValues: getValuesShare, setValue: setShareValue } = useForm({
     resolver: zodResolver(shareFormSchema),
     defaultValues: {
-      tokenPointsPercentageLimit: tokenPointsLimit ?? 10,
+      tokenPointsPercentageLimit: preselectedTokenPointsPercentageLimit,
       usageTimeLimit: maxUsageTimeLimit ?? 45,
     },
   });
@@ -119,32 +128,13 @@ export function CustomChatShareWithLearners({
             <RichText>{(tags) => t.rich('description', tags)}</RichText>
           </p>
           <div className="flex flex-wrap gap-4 items-end">
-            <div className="whitespace-nowrap flex-1">
-              <Field>
-                <FieldLabel>{t('token-points')}</FieldLabel>
-                <Select
-                  defaultValue={String(getValuesShare('tokenPointsPercentageLimit'))}
-                  onValueChange={(value) =>
-                    setShareValue('tokenPointsPercentageLimit', Number(value))
-                  }
-                  disabled={sharedChatActive}
-                >
-                  <SelectTrigger aria-label={t('token-points')} data-testid="token-points-select">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredPointsPercentageValues.map((value) => (
-                      <SelectItem key={value} value={String(value)}>
-                        {value} %
-                      </SelectItem>
-                    ))}
-                    <SelectItem key="max" value="100">
-                      {Math.max(Math.ceil(maxAvailablePercentage), 0)} % (Maximum)
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </Field>
-            </div>
+            <TokenPointsLimitSelect
+              defaultValue={String(getValuesShare('tokenPointsPercentageLimit'))}
+              onValueChange={(value) => setShareValue('tokenPointsPercentageLimit', value)}
+              disabled={sharedChatActive}
+              pointsPercentageValues={tokenPointsPercentageValues}
+              maxAvailablePercentage={maxAvailablePercentage}
+            />
 
             <div className="whitespace-nowrap flex-1">
               <Field>
@@ -158,7 +148,7 @@ export function CustomChatShareWithLearners({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {usageTimeValues.map((value) => {
+                    {usageTimeValuesInMinutes.map((value) => {
                       let displayLabel = `${value} Minuten`;
                       if (value >= 1440) {
                         const days = value / 1440;

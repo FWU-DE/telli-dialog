@@ -500,7 +500,8 @@
       "max-usage": "Maximale Nutzungszeit",
       "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",
-      "share": "Teilen"
+      "share": "Teilen",
+      "maximum": "Maximum"
     },
     "toasts": {
       "share-toast-error": "Das Teilen konnte nicht aktiviert werden.",

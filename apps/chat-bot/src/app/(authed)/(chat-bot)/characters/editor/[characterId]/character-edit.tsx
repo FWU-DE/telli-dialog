@@ -28,10 +28,6 @@ import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-act
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
-import {
-  tokenPointsPercentageValues,
-  usageTimeValuesInMinutes,
-} from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
 import { FieldGroup } from '@ui/components/field';
@@ -353,8 +349,6 @@ export function CharacterEdit({
           manuallyStoppedAt={character.manuallyStoppedAt}
           maxUsageTimeLimit={character.maxUsageTimeLimit}
           tokenPointsLimit={character.tokenPointsLimit}
-          pointsPercentageValues={tokenPointsPercentageValues}
-          usageTimeValues={usageTimeValuesInMinutes}
           usedBudget={usedBudget}
           maxBudget={maxBudget}
           onShare={async (data) => {

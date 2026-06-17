@@ -28,10 +28,6 @@ import {
 } from '../editor/[characterId]/actions';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
-import {
-  tokenPointsPercentageValues,
-  usageTimeValuesInMinutes,
-} from '../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
 
@@ -100,8 +96,6 @@ export function CharacterView({
         manuallyStoppedAt={character.manuallyStoppedAt}
         maxUsageTimeLimit={character.maxUsageTimeLimit}
         tokenPointsLimit={character.tokenPointsLimit}
-        pointsPercentageValues={tokenPointsPercentageValues}
-        usageTimeValues={usageTimeValuesInMinutes}
         usedBudget={usedBudget}
         maxBudget={maxBudget}
         onShare={async (data) => {

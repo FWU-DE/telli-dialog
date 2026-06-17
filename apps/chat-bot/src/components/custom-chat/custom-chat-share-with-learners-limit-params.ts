@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 export const tokenPointsPercentageValues = [1, 5, 10, 25, 50, 100];
+export const MaxTokenPointsPercentageLimit = 100;
+export const DefaultTokenPointsPercentageLimit = 10;
 export const usageTimeValuesInMinutes = [
   30, // 30 minutes
   45,
@@ -12,8 +14,9 @@ export const usageTimeValuesInMinutes = [
   30 * 24 * 60, // 30 days
 ];
 
-export const sharedConversationFormValuesSchema = z.object({
+export const ShareWithLearnersLimitParamsSchema = z.object({
   tokenPointsPercentageLimit: z.coerce.number(),
   usageTimeLimit: z.coerce.number(),
 });
-export type SharedConversationShareFormValues = z.infer<typeof sharedConversationFormValuesSchema>;
+
+export type ShareWithLearnersLimitParams = z.infer<typeof ShareWithLearnersLimitParamsSchema>;
