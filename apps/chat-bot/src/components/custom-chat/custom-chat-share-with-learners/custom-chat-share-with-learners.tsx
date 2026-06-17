@@ -18,8 +18,8 @@ import {
 } from '@ui/components/select';
 import { Button } from '@ui/components/button';
 import { ShareFatIcon, StopIcon } from '@phosphor-icons/react';
-import CountDownTimer from '../../app/(authed)/(chat-bot)/learning-scenarios/_components/count-down';
-import { RichText } from '../common/rich-text';
+import CountDownTimer from '../../../app/(authed)/(chat-bot)/learning-scenarios/_components/count-down';
+import { RichText } from '../../common/rich-text';
 import { z } from 'zod';
 import {
   getMaxAvailablePercentage,
