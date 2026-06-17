@@ -4,7 +4,7 @@ import React from 'react';
 import { OverviewFilter, overviewFilterSchema } from '@shared/overview-filter';
 import { useTranslations } from 'next-intl';
 import { Input } from '@ais-chat/ui/components/input';
-import { MagnifyingGlassIcon, InfoIcon, XCircleIcon } from '@phosphor-icons/react';
+import { MagnifyingGlassIcon, InfoIcon, XCircleIcon, XIcon } from '@phosphor-icons/react';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import { Button } from '@ais-chat/ui/components/button';
 import { FilterTabs } from '@ais-chat/ui/components/filter-tabs';
@@ -27,9 +27,17 @@ type EntityOverviewProps = {
   onFilterChange: (filter: OverviewFilter) => void;
   children: (searchQuery: string, sortBy: SortOption) => React.ReactNode;
   itemCount: number;
+  isFilterPanelOpen?: boolean;
+  onFilterPanelToggle?: () => void;
+  filterPanel?: React.ReactNode;
+  filterActiveCount?: number;
+  activeFilterPills?: Array<{ label: string; group: string; value: string }>;
+  onRemoveFilter?: (group: string, value: string) => void;
 };
 
 const FILTER_OPTIONS = overviewFilterSchema.options;
+const OVERVIEW_CONTROL_TRIGGER_CLASSNAME =
+  'w-fit gap-1 border-0 bg-transparent shadow-none text-sm hover:bg-transparent';
 
 export default function EntityOverview({
   title,
@@ -40,6 +48,12 @@ export default function EntityOverview({
   onFilterChange,
   children,
   itemCount,
+  isFilterPanelOpen = false,
+  onFilterPanelToggle,
+  filterPanel,
+  filterActiveCount = 0,
+  activeFilterPills = [],
+  onRemoveFilter,
 }: EntityOverviewProps) {
   const [searchInput, setSearchInput] = React.useState('');
   const [sortBy, setSortBy] = React.useState<SortOption>('date-desc');
@@ -66,6 +80,9 @@ export default function EntityOverview({
   React.useEffect(() => {
     scrollContainerRef.current?.closest('main')?.scrollTo({ top: 0 });
   }, [activeFilter]);
+
+  const renderedChildren = children(searchInput, sortBy);
+  const renderedCount = React.Children.count(renderedChildren);
 
   return (
     <div className="min-w-full flex flex-col">
@@ -129,6 +146,32 @@ export default function EntityOverview({
           <div className="flex items-end flex-wrap gap-2" aria-label={t('filter-tabs-label')}>
             <FilterTabs tabs={visibleTabs} activeTab={activeFilter} onTabChange={onFilterChange} />
             <div className="grow" />
+            {onFilterPanelToggle ? (
+              <div className="text-primary hover:text-primary-dark">
+                <Select
+                  open={false}
+                  onOpenChange={(open) => {
+                    if (open) {
+                      onFilterPanelToggle();
+                    }
+                  }}
+                >
+                  <SelectTrigger
+                    size="sm"
+                    className={`${OVERVIEW_CONTROL_TRIGGER_CLASSNAME} relative`}
+                    aria-label={t('filter-label')}
+                    aria-expanded={isFilterPanelOpen}
+                  >
+                    <span>{t('filter-label')}</span>
+                    {filterActiveCount > 0 ? (
+                      <span className="absolute -top-1 -right-1 inline-flex size-4 items-center justify-center rounded-full bg-primary text-[10px] leading-none text-primary-foreground">
+                        {filterActiveCount}
+                      </span>
+                    ) : null}
+                  </SelectTrigger>
+                </Select>
+              </div>
+            ) : null}
             <div className="text-primary hover:text-primary-dark">
               <Select
                 value={sortBy}
@@ -140,7 +183,7 @@ export default function EntityOverview({
               >
                 <SelectTrigger
                   size="sm"
-                  className="w-fit gap-1 border-0 bg-transparent shadow-none text-sm"
+                  className={OVERVIEW_CONTROL_TRIGGER_CLASSNAME}
                   aria-label={t('sort-label')}
                 >
                   <SelectValue />
@@ -154,10 +197,42 @@ export default function EntityOverview({
               </Select>
             </div>
           </div>
+
+          {isFilterPanelOpen && filterPanel ? (
+            <div className="mt-3 rounded-xl border border-gray-200 bg-background p-3 sm:p-4">
+              {filterPanel}
+            </div>
+          ) : null}
+
+          {activeFilterPills.length > 0 ? (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="text-sm text-foreground">
+                {t('hits-for', { count: renderedCount })}
+              </span>
+              {activeFilterPills.map((pill) => (
+                <span
+                  key={`${pill.group}-${pill.value}`}
+                  className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                >
+                  <span>{pill.label}</span>
+                  {onRemoveFilter ? (
+                    <button
+                      type="button"
+                      onClick={() => onRemoveFilter(pill.group, pill.value)}
+                      className="ml-1.5 flex items-center justify-center rounded-full hover:bg-primary/20 transition-colors"
+                      aria-label={`Remove ${pill.label} filter`}
+                    >
+                      <XIcon className="size-3" aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <div className="pb-6">
-          <div className="flex flex-col gap-2 w-full py-1">{children(searchInput, sortBy)}</div>
+          <div className="flex flex-col gap-2 w-full py-1">{renderedChildren}</div>
         </div>
       </div>
     </div>

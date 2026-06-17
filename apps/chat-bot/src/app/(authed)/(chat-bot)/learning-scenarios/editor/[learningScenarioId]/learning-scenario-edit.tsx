@@ -59,11 +59,11 @@ import {
   getShareFormValues,
 } from '@/components/custom-chat/access-level-sharing';
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
-import CustomFilterSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-section';
+import CustomFilterSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
 import {
   extractFilterValues,
-  toFilterAttributes,
-} from '@/components/custom-chat/custom-chat-filter-attributes';
+  toFilterCategories,
+} from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
@@ -198,7 +198,7 @@ export function LearningScenarioEdit({
             schoolType: data.schoolTypes[0] ?? null,
             gradeLevel: data.gradeRanges[0] ?? null,
             subject: data.subjects[0] ?? null,
-            filterAttributes: toFilterAttributes({
+            filterCategories: toFilterCategories({
               schoolTypes: data.schoolTypes,
               gradeRanges: data.gradeRanges,
               subjects: data.subjects,

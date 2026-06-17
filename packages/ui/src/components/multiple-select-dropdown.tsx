@@ -1,7 +1,7 @@
 'use client';
 
 import { CaretDownIcon } from '@phosphor-icons/react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Checkbox } from './checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from './dropdown-menu';
 import { Field, FieldLabel } from './field';
@@ -13,6 +13,7 @@ export type MultipleSelectDropdownOptionGroup = {
 
 type MultipleSelectDropdownProps = {
   label: string;
+  tooltip?: string;
   value: string[];
   onValueChange: (values: string[]) => void;
   optionGroups: MultipleSelectDropdownOptionGroup[];
@@ -24,6 +25,7 @@ type MultipleSelectDropdownProps = {
 
 export function MultipleSelectDropdown({
   label,
+  tooltip,
   value,
   onValueChange,
   optionGroups,
@@ -32,6 +34,7 @@ export function MultipleSelectDropdown({
   selectedCountLabel,
   contentClassName,
 }: MultipleSelectDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const options = useMemo(() => optionGroups.flatMap((group) => group.options), [optionGroups]);
 
   const selectedLabel = useMemo(() => {
@@ -62,9 +65,14 @@ export function MultipleSelectDropdown({
 
   return (
     <Field>
-      <FieldLabel>{label}</FieldLabel>
-      <DropdownMenu modal={false}>
+      <FieldLabel tooltip={tooltip}>{label}</FieldLabel>
+      <DropdownMenu modal={false} open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger
+          onClick={() => {
+            if (isOpen) {
+              setIsOpen(false);
+            }
+          }}
           aria-label={label}
           data-testid={testId}
           className="border-input hover:border-primary/60 focus-visible:border-ring focus-visible:ring-ring/50 flex h-8 w-full items-center justify-between rounded-lg border bg-transparent px-2.5 text-left text-sm outline-none focus-visible:ring-3"
@@ -73,7 +81,7 @@ export function MultipleSelectDropdown({
           <CaretDownIcon className="text-muted-foreground size-4 shrink-0" />
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          align="start"
+          align="end"
           sideOffset={8}
           className={[
             'z-300 rounded-enterprise-md border border-gray-200 bg-white p-4 shadow-dropdown w-auto max-w-[calc(100vw-2rem)] scrollbar-gutter-stable',

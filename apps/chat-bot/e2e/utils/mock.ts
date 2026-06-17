@@ -95,7 +95,7 @@ export const mockLearningScenario = (): LearningScenarioSelectModel => {
     schoolType: null,
     gradeLevel: null,
     subject: null,
-    filterAttributes: {
+    filterCategories: {
       school_types: [],
       grade_ranges: [],
       subjects: [],
@@ -158,7 +158,7 @@ export const mockCharacter = (): CharacterSelectModel => {
     schoolType: generateRandomString(10),
     gradeLevel: generateRandomString(10),
     subject: generateRandomString(10),
-    filterAttributes: {
+    filterCategories: {
       school_types: [],
       grade_ranges: [],
       subjects: [],

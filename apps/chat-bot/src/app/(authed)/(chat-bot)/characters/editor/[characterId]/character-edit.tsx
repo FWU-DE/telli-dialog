@@ -60,11 +60,11 @@ import {
   getAccessLevelFromShareForm,
   getShareFormValues,
 } from '@/components/custom-chat/access-level-sharing';
-import CustomFilterSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-section';
+import CustomFilterSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
 import {
   extractFilterValues,
-  toFilterAttributes,
-} from '@/components/custom-chat/custom-chat-filter-attributes';
+  toFilterCategories,
+} from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -193,7 +193,7 @@ export function CharacterEdit({
           schoolType: data.schoolTypes[0] ?? null,
           gradeLevel: data.gradeRanges[0] ?? null,
           subject: data.subjects[0] ?? null,
-          filterAttributes: toFilterAttributes({
+          filterCategories: toFilterCategories({
             schoolTypes: data.schoolTypes,
             gradeRanges: data.gradeRanges,
             subjects: data.subjects,

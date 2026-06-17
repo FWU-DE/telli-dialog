@@ -1,6 +1,8 @@
 'use client';
 
+import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
 import { Card, CardRow } from '@ui/components/card';
+import { Button } from '@ui/components/button';
 import { MultipleSelectDropdown } from '@ui/components/multiple-select-dropdown';
 import { useTranslations } from 'next-intl';
 import {
@@ -10,8 +12,9 @@ import {
   LANGUAGE_KEYS,
   SCHOOL_TYPE_KEYS,
   SUBJECT_GROUPS,
-} from '../filter-enum-keys';
+} from './custom-chat-filter-keys';
 import { CustomChatHeading2 } from '../custom-chat-heading2';
+import { cn } from '@ui/lib/utils';
 
 export type CustomFilterSectionValues = {
   schoolTypes: string[];
@@ -30,6 +33,11 @@ type CustomFilterSectionProps = {
   onCategoriesChange: (values: string[]) => void;
   onFederalStatesChange: (values: string[]) => void;
   onLanguagesChange: (values: string[]) => void;
+  hideHeading?: boolean;
+  isEditView?: boolean;
+  onReset?: () => void;
+  hasActiveValues?: boolean;
+  className?: string;
 };
 
 export default function CustomFilterSection({
@@ -40,6 +48,11 @@ export default function CustomFilterSection({
   onCategoriesChange,
   onFederalStatesChange,
   onLanguagesChange,
+  hideHeading = false,
+  isEditView = true,
+  onReset,
+  hasActiveValues = false,
+  className,
 }: CustomFilterSectionProps) {
   const t = useTranslations();
 
@@ -79,13 +92,34 @@ export default function CustomFilterSection({
   }));
 
   return (
-    <div className="flex flex-col gap-3 mt-10" id="share-settings">
-      <CustomChatHeading2
-        text={t('filter.filter-attributes')}
-        tooltip={t('filter.filter-tooltip')}
-      />
-      <Card>
-        <CardRow className="grid grid-cols-1 gap-y-4 gap-x-8 md:grid-cols-2 lg:grid-cols-3">
+    <div
+      className={cn(isEditView ? 'mt-10 flex flex-col gap-3' : 'flex flex-col gap-2', className)}
+      id="share-settings"
+    >
+      {isEditView && !hideHeading ? (
+        <CustomChatHeading2
+          text={t('filter.filter-attributes')}
+          tooltip={t('filter.filter-edit-tooltip')}
+        />
+      ) : null}
+      {!isEditView ? (
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-base font-medium">{t('filter.filter-label')}</h2>
+          {onReset && hasActiveValues ? (
+            <Button type="button" variant="ghost" size="sm" className="h-7 px-2" onClick={onReset}>
+              <ArrowCounterClockwiseIcon className="mr-1 size-3.5" aria-hidden="true" />
+              {t('entity-overview.filter-reset')}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+      <Card className={cn(!isEditView && 'border-0 pt-0 pb-2 gap-4')}>
+        <CardRow
+          className={cn(
+            'grid grid-cols-1 gap-y-4 gap-x-8 md:grid-cols-2 lg:grid-cols-3',
+            !isEditView && 'px-0',
+          )}
+        >
           <MultipleSelectDropdown
             label={t('filter.school-filter')}
             value={values.schoolTypes}
@@ -134,6 +168,7 @@ export default function CustomFilterSection({
           <MultipleSelectDropdown
             label={t('filter.language-filter')}
             value={values.languages}
+            tooltip={t('filter.language-tooltip')}
             onValueChange={onLanguagesChange}
             optionGroups={[{ options: languageOptions }]}
             placeholder={selectPlaceholder}
