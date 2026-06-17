@@ -428,6 +428,12 @@ export async function sendChatMessage({
   }
 
   if (agenticChatEnabled) {
+    const attachedLinks =
+      activeAssistant?.attachedLinks ??
+      activeCharacter?.attachedLinks ??
+      activeLearningScenario?.attachedLinks ??
+      [];
+
     const builtTools = await buildTools({
       user,
       characterId,
@@ -435,6 +441,7 @@ export async function sendChatMessage({
       assistantId,
       conversationId: activeConversation.id,
       relatedFileEntities,
+      attachedLinks,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({
