@@ -12,6 +12,7 @@ export const env = createEnv({
     sentryDsn: z.string().optional(),
     sentryEnvironment: z.string().optional(),
     sentryTracesSampleRate: z.coerce.number().default(1.0),
+    sentryTracesSampleRateAi: z.coerce.number().default(1.0),
     sentryTracesSampleRateClient: z.coerce.number().default(0.01),
   },
   runtimeEnv: {
@@ -21,6 +22,7 @@ export const env = createEnv({
     sentryDsn: process.env.SENTRY_DSN,
     sentryEnvironment: process.env.SENTRY_ENVIRONMENT,
     sentryTracesSampleRate: process.env.SENTRY_TRACES_SAMPLE_RATE,
+    sentryTracesSampleRateAi: process.env.SENTRY_TRACES_SAMPLE_RATE_AI,
     sentryTracesSampleRateClient: process.env.SENTRY_TRACES_SAMPLE_RATE_CLIENT,
   },
 });
