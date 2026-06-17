@@ -38,16 +38,16 @@ test.describe('create, share, chat, delete', () => {
     // check if created with the correct name (still on the editor page)
     await expect(page.getByRole('heading', { name: data.name })).toBeVisible();
 
-    const stopSharingButton = page.getByRole('button', { name: 'Stop' });
+    const stopSharingButton = page.getByTestId('stop-share-button');
     if (await stopSharingButton.isVisible()) {
       await stopSharingButton.click();
     }
     // test share page
     await page.getByTestId('token-points-select').click();
-    await page.getByRole('option', { name: '50 %' }).click();
+    await page.getByTestId('token-points-option-50').click();
     await page.getByTestId('usage-time-select').click();
-    await page.getByRole('option', { name: '30 Minuten' }).click();
-    await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
+    await page.getByTestId('usage-time-option-30').click();
+    await page.getByTestId('start-share-button').click();
 
     await page.waitForURL('/learning-scenarios/**/share');
     const code = await page.getByTestId('join-code').textContent();
@@ -87,16 +87,16 @@ test.describe('create, share, chat, delete', () => {
     await configureLearningScenario(page, data);
 
     // Still on the editor page after autosave
-    const stopSharingButton = page.getByRole('button', { name: 'Stop' });
+    const stopSharingButton = page.getByTestId('stop-share-button');
     if (await stopSharingButton.isVisible()) {
       await stopSharingButton.click();
     }
     // test share page
     await page.getByTestId('token-points-select').click();
-    await page.getByRole('option', { name: '25 %' }).click();
+    await page.getByTestId('token-points-option-25').click();
     await page.getByTestId('usage-time-select').click();
-    await page.getByRole('option', { name: '30 Minuten' }).click();
-    await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
+    await page.getByTestId('usage-time-option-30').click();
+    await page.getByTestId('start-share-button').click();
 
     // get code
     await page.waitForURL('/learning-scenarios/**/share');
@@ -148,6 +148,39 @@ test.describe('create, share, chat, delete', () => {
 
     await waitForToast(page, 'Das Lernszenario wurde erfolgreich gelöscht.');
     await expect(page.getByRole('heading', { name: data.name })).not.toBeVisible();
+  });
+
+  test('teacher sees previously selected fixed token volume preselected after stopping share', async ({
+    page,
+  }) => {
+    await createLearningScenario(page);
+
+    // configure form
+    await configureLearningScenario(page, data);
+
+    const stopSharingButton = page.getByTestId('stop-share-button');
+    if (await stopSharingButton.isVisible()) {
+      await stopSharingButton.click();
+    }
+
+    await page.getByTestId('token-points-select').click();
+    await page.getByTestId('token-points-option-25').click();
+    await page.getByTestId('usage-time-select').click();
+    await page.getByTestId('usage-time-option-30').click();
+    await page.getByTestId('start-share-button').click();
+
+    await page.waitForURL('/learning-scenarios/**/share');
+    await expect(page.getByTestId('countdown-timer')).toBeVisible();
+
+    await page.getByTestId('stop-share-button').click();
+    await page.reload();
+
+    await expect(page.getByTestId('start-share-button')).toBeVisible();
+    await page.getByTestId('token-points-select').click();
+    await expect(page.getByTestId('token-points-option-25')).toHaveAttribute(
+      'data-state',
+      'checked',
+    );
   });
 });
 

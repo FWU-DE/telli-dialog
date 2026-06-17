@@ -155,7 +155,11 @@ export function CustomChatShareWithLearners({
                         displayLabel = days === 1 ? '1 Tag' : `${days} Tage`;
                       }
                       return (
-                        <SelectItem key={value} value={String(value)}>
+                        <SelectItem
+                          key={value}
+                          value={String(value)}
+                          data-testid={`usage-time-option-${value}`}
+                        >
                           {displayLabel}
                         </SelectItem>
                       );
@@ -167,7 +171,12 @@ export function CustomChatShareWithLearners({
             <div className="grow" />
 
             {!sharedChatActive && (
-              <Button type="button" onClick={handleStartSharing} disabled={sharingDisabled}>
+              <Button
+                type="button"
+                onClick={handleStartSharing}
+                disabled={sharingDisabled}
+                data-testid="start-share-button"
+              >
                 <ShareFatIcon className="size-5" />
                 {t('button-start')}
               </Button>
@@ -188,6 +197,7 @@ export function CustomChatShareWithLearners({
                   onClick={handleStopSharing}
                   aria-label={t('button-stop')}
                   size="icon-round"
+                  data-testid="stop-share-button"
                 >
                   <StopIcon className="size-5" />
                 </Button>
@@ -196,6 +206,7 @@ export function CustomChatShareWithLearners({
                   onClick={() => router.push(shareUILink)}
                   aria-label={t('share')}
                   size="icon-round"
+                  data-testid="open-share-page-button"
                 >
                   <ShareFatIcon className="size-5" />
                 </Button>

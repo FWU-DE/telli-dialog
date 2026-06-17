@@ -107,11 +107,19 @@ export function TokenPointsLimitSelect({
           </SelectTrigger>
           <SelectContent>
             {selectableTokenPointsPercentageValues.map((value) => (
-              <SelectItem key={value} value={String(value)}>
+              <SelectItem
+                key={value}
+                value={String(value)}
+                data-testid={`token-points-option-${value}`}
+              >
                 {value} %
               </SelectItem>
             ))}
-            <SelectItem key="max" value={String(MaxTokenPointsPercentageLimit)}>
+            <SelectItem
+              key="max"
+              value={String(MaxTokenPointsPercentageLimit)}
+              data-testid="token-points-option-max"
+            >
               {Math.max(Math.ceil(maxAvailablePercentage), 0)} % ({t('maximum')})
             </SelectItem>
           </SelectContent>

@@ -43,10 +43,10 @@ test.describe('create, share, chat, delete', () => {
 
     // test share page
     await page.getByTestId('token-points-select').click();
-    await page.getByRole('option', { name: '50 %' }).click();
+    await page.getByTestId('token-points-option-50').click();
     await page.getByTestId('usage-time-select').click();
-    await page.getByRole('option', { name: '45 Minuten' }).click();
-    await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
+    await page.getByTestId('usage-time-option-45').click();
+    await page.getByTestId('start-share-button').click();
 
     await page.waitForURL('/characters/editor/**/share');
     const code = await page.getByTestId('join-code').textContent();
@@ -97,6 +97,40 @@ test.describe('create, share, chat, delete', () => {
 
     await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
     await expect(page.getByRole('heading', { name: characterName }).first()).not.toBeVisible();
+  });
+
+  test('teacher sees maximum token volume preselected after stopping share', async ({ page }) => {
+    const maxCharacterName = 'Max Token Character ' + nanoid(8);
+
+    await createCharacter(page);
+
+    await configureCharacter(page, {
+      name: maxCharacterName,
+      description: 'Test character for maximum token preselection after unsharing.',
+      instructions: 'Respond in short answers.',
+    });
+
+    await page.getByTestId('token-points-select').click();
+    await page.getByTestId('token-points-option-max').click();
+    await page.getByTestId('usage-time-select').click();
+    await page.getByTestId('usage-time-option-45').click();
+    await page.getByTestId('start-share-button').click();
+
+    await page.waitForURL('/characters/editor/**/share');
+    await expect(page.getByTestId('countdown-timer')).toBeVisible();
+
+    await page.getByTestId('stop-share-button').click();
+    await page.reload();
+
+    await expect(page.getByTestId('start-share-button')).toBeVisible();
+    await page.getByTestId('token-points-select').click();
+    await expect(page.getByTestId('token-points-option-max')).toHaveAttribute(
+      'data-state',
+      'checked',
+    );
+
+    await deleteCharacterFromDetailPage(page);
+    await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
   });
 });
 
