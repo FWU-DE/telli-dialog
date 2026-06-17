@@ -16,7 +16,7 @@ type CustomChatSharePageProps = {
   inviteCode: string;
   leftTimeInSeconds: number;
   relativeShareUrl: string;
-  totalTimeInMinutes: number;
+  totalTimeInSeconds: number;
   customChatVariant: 'character' | 'learning-scenario';
 };
 
@@ -26,7 +26,7 @@ export default async function CustomChatSharePage({
   inviteCode,
   leftTimeInSeconds,
   relativeShareUrl,
-  totalTimeInMinutes,
+  totalTimeInSeconds,
   customChatVariant,
 }: CustomChatSharePageProps) {
   const t = await getTranslations('custom-chat.share-page');
@@ -50,7 +50,7 @@ export default async function CustomChatSharePage({
         <h1 className="text-4xl sm:text-5xl font-medium mb-10">{customChatName}</h1>
         <CountDownTimer
           leftTimeInSeconds={leftTimeInSeconds}
-          totalTimeInMinutes={totalTimeInMinutes}
+          totalTimeInSeconds={totalTimeInSeconds}
           stopWatchClassName="w-8 h-8"
         />
         <main className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">

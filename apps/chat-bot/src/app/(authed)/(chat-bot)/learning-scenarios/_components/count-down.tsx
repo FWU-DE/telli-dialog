@@ -7,13 +7,13 @@ import { useTranslations } from 'next-intl';
 
 type CountDownTimerProps = {
   leftTimeInSeconds: number;
-  totalTimeInMinutes: number;
+  totalTimeInSeconds: number;
   className?: string;
   stopWatchClassName?: string;
 };
 export default function CountDownTimer({
   leftTimeInSeconds,
-  totalTimeInMinutes,
+  totalTimeInSeconds,
   className,
   stopWatchClassName,
 }: CountDownTimerProps) {
@@ -33,7 +33,7 @@ export default function CountDownTimer({
     return () => clearInterval(timer);
   }, [leftTimeInSeconds]);
 
-  const textClassName = getColorByLeftAndTotalTime({ leftTimeInSeconds, totalTimeInMinutes });
+  const textClassName = getColorByLeftAndTotalTime({ leftTimeInSeconds, totalTimeInSeconds });
 
   return (
     <div
@@ -69,9 +69,8 @@ function formatTime(totalSeconds: number) {
 
 function getColorByLeftAndTotalTime({
   leftTimeInSeconds,
-  totalTimeInMinutes,
+  totalTimeInSeconds,
 }: CountDownTimerProps) {
-  const totalTimeInSeconds = totalTimeInMinutes * 60;
   const percentage = leftTimeInSeconds / totalTimeInSeconds;
 
   if (percentage > 0.2) {

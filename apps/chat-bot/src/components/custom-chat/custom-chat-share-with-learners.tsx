@@ -60,7 +60,7 @@ export function CustomChatShareWithLearners({
 
   const sharedChatTimeLeft = calculateTimeLeft({
     startedAt,
-    maxUsageTimeLimit,
+    maxUsageTimeLimit: maxUsageTimeLimit,
     manuallyStoppedAt,
   });
   const sharedChatActive = sharedChatTimeLeft > 0;
@@ -174,7 +174,7 @@ export function CustomChatShareWithLearners({
             {sharedChatActive && (
               <CountDownTimer
                 leftTimeInSeconds={sharedChatTimeLeft}
-                totalTimeInMinutes={maxUsageTimeLimit ?? 0}
+                totalTimeInSeconds={(maxUsageTimeLimit ?? 0) * 60}
                 stopWatchClassName="w-4 h-4"
               />
             )}
