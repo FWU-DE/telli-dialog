@@ -7,14 +7,20 @@ import { logError } from '@shared/logging';
 import { Readable } from 'stream';
 import { ChatAttachment } from '@ais-chat/ai-core';
 
+export type ChatAttachmentWithMessageId = ChatAttachment & {
+  messageId: string;
+};
+
 /**
  * fetch the signed url for the image files and return them as ChatImageAttachment
  */
 export async function createImageAttachmentsForConversation(
-  relatedFileEntities: FileModel[],
+  relatedFileEntities: (FileModel & { conversationMessageId?: string })[],
   imageAttachmentType: 'url' | 'base64',
-): Promise<ChatAttachment[]> {
-  const imageFiles = relatedFileEntities.filter((file) => isImageFile(file.name));
+): Promise<ChatAttachmentWithMessageId[]> {
+  const imageFiles = relatedFileEntities
+    .filter((file) => isImageFile(file.name))
+    .filter(hasMessageId);
 
   if (imageFiles.length === 0) {
     return [];
@@ -38,6 +44,7 @@ export async function createImageAttachmentsForConversation(
         type: 'image' as const,
         url,
         contentType: `image/${file.type}`,
+        messageId: file.conversationMessageId,
       };
     } catch (error) {
       logError(`Failed to process image file ${file.id}`, error);
@@ -103,4 +110,13 @@ async function streamToBase64(stream: Readable): Promise<string> {
   const buffer = Buffer.concat(chunks);
 
   return buffer.toString('base64');
+}
+
+// returns true if the file has a conversationMessageId which is needed to
+// associate the image with the correct message in the chat history
+// An image file without a conversationMessageId is likely not possible atm.
+function hasMessageId(
+  file: FileModel & { conversationMessageId?: string },
+): file is FileModel & { conversationMessageId: string } {
+  return file.conversationMessageId !== undefined;
 }

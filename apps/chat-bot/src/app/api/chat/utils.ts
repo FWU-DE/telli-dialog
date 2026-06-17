@@ -3,12 +3,12 @@ import { type ChatMessage } from '@/types/chat';
 import {
   generateTextWithBilling,
   type Message as AiCoreMessage,
-  ChatImageAttachment,
   isChatImageAttachment,
 } from '@ais-chat/ai-core';
 import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { LlmModelSelectModel } from '@shared/db/schema';
 import { UnexpectedError } from '@shared/error/unexpected-error';
+import { ChatAttachmentWithMessageId } from '../file-operations/preprocess-image';
 
 /**
  * Enrich messages with image data from attachments.
@@ -17,7 +17,7 @@ import { UnexpectedError } from '@shared/error/unexpected-error';
  */
 export function enrichMessagesWithImageData(
   messages: ChatMessage[],
-  images: ChatImageAttachment[],
+  images: ChatAttachmentWithMessageId[],
   modelSupportsImages: boolean,
   imageIntegrationType: 'url' | 'base64',
 ): ChatMessage[] {
@@ -32,10 +32,12 @@ export function enrichMessagesWithImageData(
       continue;
     }
 
-    if (images.length === 0) {
+    const relatedImages = images.filter((img) => img.messageId === message.id);
+
+    if (relatedImages.length === 0) {
       continue;
     }
-    message.attachments = images.map((image) => {
+    message.attachments = relatedImages.map((image) => {
       if (isChatImageAttachment(image)) return image;
 
       throw new UnexpectedError(`Unsupported image integration type: ${imageIntegrationType}`);
