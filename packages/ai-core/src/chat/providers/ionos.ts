@@ -3,13 +3,13 @@ import OpenAI from 'openai';
 import type {
   AgenticStreamFn,
   AiModel,
+  ToolCall,
   TextGenerationFn,
   TextStreamFn,
   TokenUsage,
 } from '../types';
 import { ProviderConfigurationError } from '../../errors';
-import { calculateCompletionUsage, toOpenAIMessages } from '../utils';
-import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
+import { calculateCompletionUsage, toOpenAIChatTools, toOpenAIMessages } from '../utils';
 
 function createIonosClient(model: AiModel): OpenAI {
   if (model.setting.provider !== 'ionos') {
@@ -118,34 +118,104 @@ export function constructIonosAgenticStreamFn(model: AiModel): AgenticStreamFn {
     tools,
     toolChoice,
   }) {
-    yield* streamOpenAICompatibleAgenticResponse({
-      client,
-      messages,
-      modelName,
-      maxTokens,
+    const stream = await client.chat.completions.create({
+      model: modelName,
+      messages: toOpenAIMessages(messages),
+      stream: true,
+      stream_options: { include_usage: true },
+      max_tokens: maxTokens,
       temperature,
-      tools,
-      toolChoice,
-      getUsage: ({ content, toolCalls }) => {
-        const completionContent = [
-          content,
-          ...toolCalls.map((toolCall) =>
-            JSON.stringify({ name: toolCall.name, arguments: toolCall.arguments }),
-          ),
-        ].join('');
-
-        const calculatedUsage = calculateCompletionUsage({
-          messages,
-          modelMessage: { role: 'assistant', content: completionContent },
-        });
-
-        return {
-          completionTokens: calculatedUsage.completion_tokens,
-          promptTokens: calculatedUsage.prompt_tokens,
-          totalTokens: calculatedUsage.total_tokens,
-        };
-      },
-      providerName: 'IONOS',
+      tools: toOpenAIChatTools(tools),
+      tool_choice: toolChoice,
     });
+
+    type ToolCallAccumulator = {
+      id: string;
+      name: string;
+      arguments: string;
+    };
+
+    let content = '';
+    let usage: TokenUsage | undefined;
+    const toolCalls = new Map<number, ToolCallAccumulator>();
+
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta;
+      const chunkContent = delta?.content;
+
+      if (chunkContent) {
+        content += chunkContent;
+        yield { type: 'text', delta: chunkContent };
+      }
+
+      if (chunk.usage) {
+        usage = {
+          completionTokens: chunk.usage.completion_tokens,
+          promptTokens: chunk.usage.prompt_tokens,
+          totalTokens: chunk.usage.total_tokens,
+        };
+      }
+
+      if (!delta?.tool_calls) {
+        continue;
+      }
+
+      for (const toolCallDelta of delta.tool_calls) {
+        const existingToolCall = toolCalls.get(toolCallDelta.index) ?? {
+          id: '',
+          name: '',
+          arguments: '',
+        };
+
+        if (toolCallDelta.id) {
+          existingToolCall.id = toolCallDelta.id;
+        }
+
+        if (toolCallDelta.function?.name) {
+          existingToolCall.name = toolCallDelta.function.name;
+        }
+
+        if (toolCallDelta.function?.arguments) {
+          existingToolCall.arguments += toolCallDelta.function.arguments;
+        }
+
+        toolCalls.set(toolCallDelta.index, existingToolCall);
+      }
+    }
+
+    const resolvedToolCalls: ToolCall[] = [...toolCalls.entries()]
+      .sort(([left], [right]) => left - right)
+      .filter(([, toolCall]) => toolCall.id && toolCall.name)
+      .map(([, toolCall]) => ({
+        id: toolCall.id,
+        name: toolCall.name,
+        arguments: toolCall.arguments,
+      }));
+
+    if (!usage) {
+      const completionContent = [
+        content,
+        ...resolvedToolCalls.map((toolCall) =>
+          JSON.stringify({ name: toolCall.name, arguments: toolCall.arguments }),
+        ),
+      ].join('');
+
+      const calculatedUsage = calculateCompletionUsage({
+        messages,
+        modelMessage: { role: 'assistant', content: completionContent },
+      });
+
+      usage = {
+        completionTokens: calculatedUsage.completion_tokens,
+        promptTokens: calculatedUsage.prompt_tokens,
+        totalTokens: calculatedUsage.total_tokens,
+      };
+    }
+
+    for (const toolCall of resolvedToolCalls) {
+      yield { type: 'tool_call', call: toolCall };
+    }
+
+    yield { type: 'finish', usage };
   };
 }

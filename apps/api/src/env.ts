@@ -45,6 +45,6 @@ export const env = createEnv({
     port: process.env.PORT,
     sentryEnvironment: process.env.SENTRY_ENVIRONMENT,
     sentryProfileSessionSampleRate: process.env.SENTRY_PROFILE_SESSION_SAMPLE_RATE,
-    sentryTraceSampleRate: process.env.SENTRY_TRACES_SAMPLE_RATE,
+    sentryTracesSampleRate: process.env.SENTRY_TRACES_SAMPLE_RATE,
   },
 });

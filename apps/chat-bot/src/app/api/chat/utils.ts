@@ -1,10 +1,12 @@
 import { logError } from '@shared/logging';
-import { ChatMessage, type ChatMessage as Message } from '@/types/chat';
+import { type ChatMessage } from '@/types/chat';
 import {
-  ChatImageAttachment,
   generateTextWithBilling,
+  type Message as AiCoreMessage,
+  ChatImageAttachment,
   isChatImageAttachment,
 } from '@ais-chat/ai-core';
+import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { LlmModelSelectModel } from '@shared/db/schema';
 import { UnexpectedError } from '@shared/error/unexpected-error';
 
@@ -14,11 +16,11 @@ import { UnexpectedError } from '@shared/error/unexpected-error';
  * or the base64-encoded image data to the message, depending on the model's requirements.
  */
 export function enrichMessagesWithImageData(
-  messages: Message[],
+  messages: ChatMessage[],
   images: ChatImageAttachment[],
   modelSupportsImages: boolean,
   imageIntegrationType: 'url' | 'base64',
-): Message[] {
+): ChatMessage[] {
   if (!modelSupportsImages || images.length === 0) {
     return messages;
   }
@@ -33,7 +35,7 @@ export function enrichMessagesWithImageData(
     if (images.length === 0) {
       continue;
     }
-    message.experimental_attachments = images.map((image) => {
+    message.attachments = images.map((image) => {
       if (isChatImageAttachment(image)) return image;
 
       throw new UnexpectedError(`Unsupported image integration type: ${imageIntegrationType}`);
@@ -43,13 +45,13 @@ export function enrichMessagesWithImageData(
   return messagesWithImages;
 }
 
-export function getMostRecentUserMessage(messages: Array<Message>) {
+export function getMostRecentUserMessage(messages: Array<ChatMessage>) {
   const userMessages = messages.filter((message) => message.role === 'user');
   return userMessages.at(-1);
 }
 
-export function consolidateMessages(messages: Array<Message>): Array<Message> {
-  const consolidatedMessages: Array<Message> = [];
+export function consolidateMessages(messages: Array<ChatMessage>): Array<ChatMessage> {
+  const consolidatedMessages: Array<ChatMessage> = [];
 
   for (let i = 0; i < messages.length; i++) {
     const currentMessage = messages[i];
@@ -59,7 +61,13 @@ export function consolidateMessages(messages: Array<Message>): Array<Message> {
     const prevMessage = consolidatedMessages[consolidatedMessages.length - 1];
 
     // If this message has the same role as the previous one, merge them
-    if (prevMessage && prevMessage.role === currentMessage?.role) {
+    // Do not merge tool-related messages (they carry toolCalls/toolCallId that must stay separate)
+    const isToolRelated =
+      currentMessage.role === 'tool' ||
+      currentMessage.toolCalls?.length ||
+      prevMessage?.toolCalls?.length;
+
+    if (prevMessage && prevMessage.role === currentMessage?.role && !isToolRelated) {
       prevMessage.content += '\n\n' + currentMessage.content;
     } else {
       // Otherwise add as a new message
@@ -70,67 +78,76 @@ export function consolidateMessages(messages: Array<Message>): Array<Message> {
   return consolidatedMessages;
 }
 
+export type MessageBlock = {
+  messages: ChatMessage[];
+  charCount: number;
+};
+
 /**
- * Limits chat history by keeping the first message pairs, last message pairs, and filling remaining space
- * with middle messages (prioritizing more recent ones), while respecting character limits.
+ * Groups messages into atomic blocks, splitting at each user message.
+ * A block contains the user message and all subsequent messages until the next user message.
+ * This ensures tool call sequences (assistant with toolCalls + tool results + final response)
+ * are never split from their initiating user message.
+ */
+export function groupIntoBlocks(messages: Array<ChatMessage>): MessageBlock[] {
+  const blocks: MessageBlock[] = [];
+  let current: ChatMessage[] = [];
+
+  for (const msg of messages) {
+    // A new user message starts a new block (flush previous)
+    if (msg.role === 'user' && current.length > 0) {
+      blocks.push({
+        messages: current,
+        charCount: current.reduce((s, m) => s + m.content.length, 0),
+      });
+      current = [];
+    }
+    current.push(msg);
+  }
+
+  if (current.length > 0) {
+    blocks.push({
+      messages: current,
+      charCount: current.reduce((s, m) => s + m.content.length, 0),
+    });
+  }
+
+  return blocks;
+}
+
+/**
+ * Limits chat history by keeping as many recent message blocks as fit within the character limit.
+ * Messages are grouped into blocks at each user message, so tool call sequences are never split.
+ * Always keeps at least the last block (the most recent user message),
+ * so the model always has some input.
  *
  * @param messages - The messages to limit
- * @param limitRecent - Number of recent message pairs to keep (e.g. 2 means 2 user + 2 assistant messages)
- * @param limitFirst - Number of first message pairs to keep (default: 2)
  * @param characterLimit - Maximum total characters allowed
- * @returns Limited message array with prioritized recent context
+ * @returns Limited message array with the most recent context that fits
  */
-export function limitChatHistory({
-  messages,
-  limitRecent,
-  limitFirst = 2,
-  characterLimit,
-}: {
-  messages: Array<Message>;
-  limitRecent: number;
-  limitFirst?: number;
-  characterLimit: number;
-}): Array<Message> {
-  const consolidatedMessages = consolidateMessages(messages);
+export function limitChatHistory(
+  messages: Array<ChatMessage>,
+  characterLimit: number = TOTAL_CHAT_LENGTH_LIMIT,
+): Array<ChatMessage> {
+  const consolidated = consolidateMessages(messages);
+  if (consolidated.length === 0) return [];
 
-  // Convert pairs to individual message counts
-  const maxFirst = limitFirst * 2;
-  const maxRecent = limitRecent * 2;
+  const blocks = groupIntoBlocks(consolidated);
+  if (blocks.length === 0) return [];
 
-  // If we have fewer messages or less characters than the limits, just return all messages
-  const totalChars = consolidatedMessages.reduce((sum, msg) => sum + msg.content.length, 0);
-  if (consolidatedMessages.length <= maxFirst + maxRecent || totalChars <= characterLimit) {
-    return consolidatedMessages;
+  // Always keep at least the last block
+  let startIndex = blocks.length - 1;
+  let charCount = blocks[startIndex]!.charCount;
+
+  // Include older blocks while within character limit
+  while (startIndex > 0) {
+    const block = blocks[startIndex - 1]!;
+    if (charCount + block.charCount > characterLimit) break;
+    charCount += block.charCount;
+    startIndex--;
   }
 
-  // Get mandatory messages
-  const firstMessages = consolidatedMessages.slice(0, maxFirst);
-  const recentMessages = consolidatedMessages.slice(-maxRecent);
-
-  // Get middle messages in reverse order (most recent first)
-  const startIndex = maxFirst;
-  const endIndex = consolidatedMessages.length - maxRecent;
-  const middleMessages = consolidatedMessages.slice(startIndex, endIndex).reverse();
-
-  // Build result: first + recent, as they are mandatory
-  const result = [...firstMessages, ...recentMessages];
-  let charCount = result.reduce((sum, msg) => sum + msg.content.length, 0);
-
-  // Add middle messages that fit within the character limit
-  const middleToAdd: Message[] = [];
-  for (const msg of middleMessages) {
-    if (charCount + msg.content.length <= characterLimit) {
-      middleToAdd.unshift(msg); // Add to front to maintain chronological order
-      charCount += msg.content.length;
-    } else {
-      break;
-    }
-  }
-
-  // Insert middle messages between first and recent
-  result.splice(firstMessages.length, 0, ...middleToAdd);
-
-  return result;
+  return blocks.slice(startIndex).flatMap((b) => b.messages);
 }
 
 /**
@@ -145,7 +162,7 @@ export async function getChatTitle({
   modelId,
   apiKeyId,
 }: {
-  message: Message;
+  message: ChatMessage;
   modelId: string;
   apiKeyId: string;
 }): Promise<string> {
@@ -199,4 +216,25 @@ export function determineImageAttachmentTypeForModel(model: LlmModelSelectModel)
     return 'base64';
   }
   return 'url';
+}
+
+/**
+ *  Converts frontend messages to ai-core message format
+ */
+export function convertToAiCoreMessages(
+  systemPrompt: string,
+  messages: ChatMessage[],
+): AiCoreMessage[] {
+  return [
+    { role: 'system', content: systemPrompt },
+    ...messages
+      .filter((msg) => msg.role !== 'system')
+      .map(({ role, content, attachments, toolCalls, toolCallId }) => ({
+        role,
+        content,
+        attachments,
+        toolCalls,
+        toolCallId,
+      })),
+  ];
 }

@@ -1,5 +1,8 @@
 import type { LlmModel } from '@ais-chat/api-database';
 
+export const CONVERSATION_ROLES = ['system', 'user', 'assistant', 'tool'] as const;
+export type ConversationRole = (typeof CONVERSATION_ROLES)[number];
+
 /**
  * Attachment type in messages.
  * We only support images for now.
@@ -41,7 +44,7 @@ export type ToolDefinition = {
 };
 
 export type Message = {
-  role: 'system' | 'user' | 'assistant' | 'tool';
+  role: ConversationRole;
   content: string;
   attachments?: ChatAttachment[];
   toolCalls?: ToolCall[];

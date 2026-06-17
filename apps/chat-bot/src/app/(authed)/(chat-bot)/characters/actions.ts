@@ -18,7 +18,6 @@ export async function createNewCharacterAction({
 }) {
   const { user, federalState } = await requireAuth();
 
-  // Todo: Will be implemented in TD-701
   return runServerAction(createNewCharacter)({
     federalStateId: federalState.id,
     modelId: modelId,

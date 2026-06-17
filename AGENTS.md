@@ -1,53 +1,238 @@
 # AGENTS.md
 
+This file provides comprehensive guidance for coding agents working in the `ais-chat` repository.
+
 ## Purpose
 
-- Help coding agents ship safe changes quickly in the `ais-chat` monorepo (TypeScript + Turborepo).
-- Prefer repository conventions from `.github/copilot-instructions.md` and concrete patterns in existing code.
+Help coding agents ship safe changes quickly in the `ais-chat` monorepo (TypeScript + Turborepo). Follow repository conventions and concrete patterns in existing code.
 
-## Architecture at a glance
+## Documentation Index
 
-- Monorepo layout: `apps/*` (deployables) + `packages/*` (shared libs), defined in `pnpm-workspace.yaml`.
-- User-facing apps are Next.js: `apps/chat-bot` (main product) and `apps/admin` (configuration UI).
-- Backend is Fastify: `apps/api` (`src/app.ts`, `src/handlers.ts`) exposing `/v1/*` and `/docs`.
-- Two separate Postgres databases:
-  - App/Admin DB in `packages/shared/src/db` (migrations + seed).
-  - API DB in `packages/api-database/src` (schema in `schema.ts`, seed in `seed.ts`).
-- AI flow: UI/apps call shared services, then API/LLM integration goes through `@ais-chat/ai-core`; `packages/shared/src/knotenpunkt/index.ts` calls `${env.apiUrl}/v1/models`.
+- **[README.md](README.md)** — Setup instructions, quick start, local development, Docker usage
+- **[docs/structure.md](docs/structure.md)** — Detailed project structure and directory purpose
+- **[apps/chat-bot/e2e/README.md](apps/chat-bot/e2e/README.md)** — E2E and load testing guide
+- **[SECURITY.md](SECURITY.md)** — Security issue reporting
+- **[packages/ui/README.md](packages/ui/README.md)** — shadcn/ui component library usage
 
-## Service boundaries and code placement
+## Tech Stack
 
-- Keep business logic out of routes/components; put it in services/shared packages.
-- Example pattern: `apps/admin/src/app/.../actions.ts` performs auth/validation and delegates to `apps/admin/src/services/*`.
-- Keep cross-app logic framework-agnostic in `packages/shared-core/src`.
-- Reuse UI from `@ais-chat/ui` before creating local components (`packages/ui/README.md`).
+TypeScript monorepo (Turborepo + pnpm) with:
 
-## Developer workflows (root)
+- **Frontend**: Next.js 16 App Router, React Server Components, TailwindCSS, shadcn/ui
+- **Backend**: Fastify API with OpenAPI/Swagger at `/docs`
+- **Databases**: Two separate PostgreSQL databases (see Architecture section)
+- **Auth**: Keycloak | **Cache**: Valkey | **Storage**: S3-compatible (RustFS/OTC)
+- **Testing**: Vitest (unit), Playwright (e2e)
+- **Observability**: Sentry + OpenTelemetry
 
-- Install/tooling: `nvm use && corepack enable && corepack prepare && pnpm i`.
-- Run all apps: `pnpm dev` (Turbo). Run one app: `pnpm dev:chat-bot`, `pnpm dev:admin`, `pnpm dev:api`.
-- Quality gates: `pnpm format`, `pnpm lint`, `pnpm check-types`, `pnpm test`.
-- DB lifecycle (both DBs): `pnpm db:migrate` then `pnpm db:seed`.
-- Local infra dependencies: `docker compose -f devops/docker/docker-compose.local.yml up -d`.
+## Architecture
 
-## Project-specific conventions
+### Monorepo Layout
 
-- TypeScript only; keep modules small and explicit.
-- Prefer React Server Components; add client components only for state/events/browser APIs.
-- Internationalize UI text (chat-bot uses `next-intl`; see `apps/chat-bot/src/components/**` for `useTranslations(...)`).
-- Do not add direct `console.*` in app code; use shared logging (`packages/shared/src/logging/logging.ts`) or API logger (`apps/api/src/logger.ts`).
-- API request validation convention: Fastify implicit validator is disabled in `apps/api/src/app.ts`; validate using Zod schemas.
+- `apps/*` — Deployable applications (chat-bot, admin, api)
+- `packages/*` — Shared libraries, defined in `pnpm-workspace.yaml`
+- User-facing apps: `apps/chat-bot` (main product), `apps/admin` (configuration UI)
+- Backend: `apps/api` — Fastify (`src/app.ts`, `src/handlers.ts`) exposing `/v1/*` and `/docs`
 
-## Integrations and operational context
+### Two Database Architecture
 
-- Auth: Keycloak (local realm in `devops/docker/keycloak/ais-chat-local-realm.json`).
-- Session/cache: Valkey from local docker compose.
-- Storage: S3-compatible RustFS/OTC vars (`OTC_*` in `turbo.json` globalEnv).
-- Observability: Sentry + OpenTelemetry across apps/packages (see dependencies and `turbo.json` envs).
+**Critical insight**: Two separate PostgreSQL databases with different purposes:
 
-## Agent execution checklist
+1. **App/Admin DB** (`packages/shared/src/db/`)
+   - Used by: `apps/chat-bot/` and `apps/admin/`
+   - Connection: `DATABASE_URL`
+   - Migrations + seed in `packages/shared/src/db/`
 
-- Before edits, identify target layer (`apps/*` vs `packages/*`) and affected database.
-- If schema changes are needed, update the correct package (`packages/shared` or `packages/api-database`) and generate/apply migrations there.
-- After edits, run quality gates from repo root and treat failures as blocking.
-- Prefer minimal, composable changes that follow existing file/feature structure.
+2. **API DB** (`packages/api-database/`)
+   - Used by: `apps/api/`
+   - Connection: `API_DATABASE_URL`
+   - Schema in `schema.ts`, seed in `seed.ts`
+
+### AI Request Flow
+
+UI/apps → shared services → `@ais-chat/ai-core` → knotenpunkt → `${env.apiUrl}/v1/models`
+
+Key file: `packages/shared/src/knotenpunkt/index.ts`
+
+### Critical Patterns
+
+- **Fastify validation**: Implicit validation is **disabled** in `apps/api/src/app.ts` — always validate with Zod schemas
+- **Business logic placement**: Keep logic in services (`packages/shared/src/**/*.ts`), not routes/components
+- **Cross-app utilities**: Framework-agnostic code goes in `packages/shared-core/src`
+- **Component reuse**: Check `packages/ui/` (shadcn/ui) before creating custom components
+
+## Developer Workflows
+
+### Initial Setup
+
+```sh
+nvm use && corepack enable && corepack prepare && pnpm i
+```
+
+### Running Applications
+
+```sh
+pnpm dev                 # Run all apps (Turbo)
+pnpm dev:chat-bot        # Run chat-bot only
+pnpm dev:admin           # Run admin only
+pnpm dev:api             # Run API only
+```
+
+### Database Management
+
+**Both databases required:**
+
+```sh
+pnpm db:migrate          # Migrate both databases
+pnpm db:generate         # Generate migration (run in specific package)
+pnpm db:seed             # Seed both databases (requires API keys + LLM credentials in .env.local)
+```
+
+**Database change workflow:**
+
+1. Identify target: `packages/shared` (app/admin) vs `packages/api-database` (API)
+2. Update schema in correct package
+3. Generate migration: `pnpm db:generate` in that package
+4. Apply: `pnpm db:migrate` from root
+
+### Quality Gates (Always Run After Changes)
+
+```sh
+pnpm format && pnpm lint && pnpm check-types && pnpm test
+```
+
+**Critical**: Check exit codes (0 = success, non-zero = error). Turbo cache may show "successful" even when packages failed.
+
+### Testing
+
+```sh
+pnpm test                           # Unit tests (Vitest)
+cd apps/chat-bot && pnpm e2e        # E2E tests (Playwright)
+```
+
+**Testing policy**: Only write tests when user asks for them.
+
+### Docker Infrastructure
+
+```sh
+docker compose -f devops/docker/docker-compose.local.yml up -d  # Local services
+docker compose -f devops/docker/monitoring.yml up -d            # Observability stack
+```
+
+### Verification Process
+
+After making any file changes:
+
+1. Run quality gates: `pnpm format && pnpm lint && pnpm check-types && pnpm test`
+2. **Always check exit codes**: 0 = success; non-zero = error
+3. **Do not rely on summary messages**: Turbo cache may show "successful" when packages failed
+4. Treat issues as blocking — fix problems before finishing
+5. If verification cannot run (missing deps, env issues), clearly report that
+
+## Code Conventions
+
+### General Principles
+
+- TypeScript only; keep modules small and explicit
+- Prefer clean, readable, maintainable code over clever solutions
+- Follow modular architecture and keep files small
+- Avoid code duplication
+
+### Naming Conventions
+
+- `camelCase` for variables and functions
+- `PascalCase` for classes and interfaces
+- `UPPER_SNAKE_CASE` for constants
+
+### Comments
+
+- Write comments only when intent is not obvious or for reusable functions/components
+- Prefer self-explanatory code over excessive comments
+- Comments are written in English
+
+### Service Boundaries and File Placement
+
+- **Business logic**: Keep in services (`packages/shared/src/**/*.ts`), not routes/components
+- **Cross-app utilities**: Framework-agnostic code in `packages/shared-core/src`
+- **Example pattern**: `apps/admin/src/app/.../actions.ts` performs auth/validation, delegates to `apps/admin/src/services/*`
+
+**Component file organization**:
+
+```
+apps/<app_name>/src/components/        # App-specific use case components
+apps/<app_name>/src/components/common/ # Reusable UI components
+apps/<app_name>/src/components/hooks/  # Custom hooks
+apps/<app_name>/src/components/utils/  # Custom utility functions
+```
+
+### React and UI Components
+
+- **Prefer React Server Components**; add client components only for state/events/browser APIs
+- Keep components small and reusable
+- **Prefer composition over complex props**
+- Use shadcn components from `@ais-chat/ui` before creating custom UI components
+- Follow shadcn patterns for accessibility and responsiveness
+
+**Always ensure**:
+
+- Components are accessible (ARIA, keyboard navigation)
+- Components are responsive (mobile, tablet, desktop)
+- Cross-browser compatibility
+- All text content is internationalized and can be easily translated
+
+### State Management
+
+- Prefer React hooks
+- Keep state close to where it is used
+- Avoid global state unless necessary
+
+### Error Handling
+
+- Use try-catch blocks to handle exceptions
+
+### Logging (Never Console)
+
+**DO NOT use `console.*`** in application code:
+
+- **Next.js apps**: Use `packages/shared/src/logging/logging.ts`
+- **API**: Use `apps/api/src/logger.ts`
+
+### Internationalization
+
+**All UI text must be internationalized** — chat-bot uses `next-intl`
+
+Example: See `apps/chat-bot/src/components/**` for `useTranslations(...)` pattern
+
+### Validation
+
+- Fastify's implicit validation is **disabled** in `apps/api/src/app.ts`
+- Always validate API requests with Zod schemas
+
+## Integrations and Operational Context
+
+- **Auth**: Keycloak (local realm in `devops/docker/keycloak/ais-chat-local-realm.json`)
+- **Session/cache**: Valkey from local docker compose
+- **Storage**: S3-compatible RustFS/OTC vars (`OTC_*` in `turbo.json` globalEnv)
+- **Observability**: Sentry + OpenTelemetry across apps/packages (see dependencies and `turbo.json` envs)
+
+## Agent Execution Checklist
+
+Before starting:
+
+1. Identify target layer: `apps/*` vs `packages/*`
+2. Identify affected database: `packages/shared` (app/admin) vs `packages/api-database` (API)
+
+During implementation:
+
+3. Keep business logic in services, not routes/components
+4. Prefer minimal, composable changes that follow existing file/feature structure
+5. If schema changes needed:
+   - Update correct package (`packages/shared` or `packages/api-database`)
+   - Generate migration: `pnpm db:generate` in that package
+   - Apply: `pnpm db:migrate` from root
+
+After changes:
+
+6. Run quality gates: `pnpm format && pnpm lint && pnpm check-types && pnpm test`
+7. Check exit codes (0 = success), not summary messages
+8. Treat failures as blocking — fix problems before finishing

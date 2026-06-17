@@ -164,6 +164,7 @@ export async function handleImageGeneration({
     return {
       imageUrl: signedUrl,
       conversationId,
+      fileId,
     };
   } catch (error) {
     if (conversationId) {

@@ -1,10 +1,11 @@
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
-import { dbGetCharacterById } from '@shared/db/functions/character';
-import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 import { ObscuredFederalState } from '@/auth/utils';
-import { dbGetAssistantById } from '@shared/db/functions/assistants';
-import { AssistantSelectModel } from '@shared/db/schema';
-import { NotFoundError } from '@shared/error';
+import type {
+  AssistantSelectModel,
+  CharacterSelectModel,
+  LearningScenarioSelectModel,
+  WebSearchResult,
+} from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { constructCharacterSystemPrompt } from '../character/system-prompt';
@@ -16,7 +17,6 @@ import {
   SUGGESTION_GUIDELINES,
   TOOL_GUIDELINES,
 } from '../utils/system-prompt';
-import type { WebSearchResult } from '@shared/db/schema';
 
 function constructAisChatSystemPrompt(
   chunks: RetrievedChunk[],
@@ -124,55 +124,37 @@ ${FORMAT_GUIDELINES}
 ${ragContext}`;
 }
 
-export async function constructChatSystemPrompt({
-  characterId,
-  learningScenarioId,
-  assistantId,
+export function constructChatSystemPrompt({
+  character,
+  learningScenario,
+  assistant,
   isTeacher,
   federalState,
   chunks,
   errorUrls,
   webSearchResults = [],
 }: {
-  characterId?: string;
-  learningScenarioId?: string;
-  assistantId?: string;
+  character?: CharacterSelectModel;
+  learningScenario?: LearningScenarioSelectModel;
+  assistant?: AssistantSelectModel;
   isTeacher: boolean;
   federalState: ObscuredFederalState;
   chunks: RetrievedChunk[];
   errorUrls: string[];
   webSearchResults?: WebSearchResult[];
 }) {
-  if (characterId !== undefined) {
-    const character = await dbGetCharacterById({ characterId });
-
-    if (character === undefined || character.suspended) {
-      throw new NotFoundError('Character not found');
-    }
-
+  if (character !== undefined) {
     return constructCharacterSystemPrompt({ character, chunks });
   }
 
-  if (learningScenarioId !== undefined) {
-    const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
-
-    if (learningScenario === undefined || learningScenario.suspended) {
-      throw new NotFoundError('Learning scenario not found');
-    }
-
+  if (learningScenario !== undefined) {
     return constructLearningScenarioSystemPrompt({
       learningScenario,
       chunks,
     });
   }
 
-  if (assistantId !== undefined) {
-    const assistant = await dbGetAssistantById({ assistantId });
-
-    if (assistant.suspended) {
-      throw new NotFoundError('Assistant not found');
-    }
-
+  if (assistant !== undefined) {
     if (assistant.id === HELP_MODE_ASSISTANT_ID) {
       return constructHelpModeSystemPrompt({
         isTeacher,

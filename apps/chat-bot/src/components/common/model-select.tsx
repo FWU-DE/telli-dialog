@@ -68,6 +68,7 @@ export default function ModelSelect({
             type="button"
             className="flex items-center gap-2 cursor-pointer disabled:cursor-default"
             aria-label={`Select ${modelType} Model Dropdown`}
+            data-testid={`${modelType}-model-dropdown`}
           >
             <span className="text-primary text-base font-medium">
               {currentSelectedModel?.displayName ?? noModelsLabel}

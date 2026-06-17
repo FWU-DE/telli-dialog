@@ -13,6 +13,8 @@ type OpenAICompatibleAgenticStreamArgs = {
   toolChoice?: 'auto' | 'none' | 'required';
   getUsage?: (result: { content: string; toolCalls: ToolCall[] }) => TokenUsage;
   providerName: string;
+  createOptions?: Parameters<OpenAI['responses']['create']>[1];
+  additionalParameters?: Record<string, unknown>;
 };
 
 type ToolCallAccumulator = {
@@ -32,16 +34,22 @@ export async function* streamOpenAICompatibleAgenticResponse({
   toolChoice,
   getUsage,
   providerName,
+  createOptions,
+  additionalParameters,
 }: OpenAICompatibleAgenticStreamArgs): AsyncGenerator<StreamEvent> {
-  const stream = await client.responses.create({
-    model: modelName,
-    input: toOpenAIResponsesInput(messages),
-    stream: true,
-    max_output_tokens: maxTokens,
-    temperature,
-    tools: toOpenAITools(tools),
-    tool_choice: toolChoice,
-  });
+  const stream = await client.responses.create(
+    {
+      model: modelName,
+      input: toOpenAIResponsesInput(messages),
+      stream: true,
+      max_output_tokens: maxTokens,
+      temperature,
+      tools: toOpenAITools(tools),
+      tool_choice: toolChoice,
+      ...additionalParameters,
+    },
+    createOptions,
+  );
 
   let content = '';
   let usage: TokenUsage | undefined;

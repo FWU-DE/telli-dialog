@@ -4,31 +4,110 @@ import { isWebSearchEnabled, searchWeb } from './websearch';
 import type { ToolHandler } from './agent-loop';
 import type { WebSearchResult } from '@shared/db/schema';
 import type { FileModelAndContent } from '@shared/db/schema';
+import type { WebSource } from '@shared/db/types';
 import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { retrieveChunksByQuery } from '../rag/rag-service';
+import { webScraper } from '../web-scraper/web-scraper';
+import { isIP } from 'node:net';
 
-function formatRetrievedChunksForTool(
-  chunks: Awaited<ReturnType<typeof retrieveChunksByQuery>>,
-  fileNames: string[],
-) {
-  const normalizedFileNames = fileNames.filter((fileName) => fileName.trim().length > 0);
-  const fileList =
-    normalizedFileNames.length > 0
-      ? normalizedFileNames.map((fileName) => `- ${fileName}`).join('\n')
-      : '- Keine Dateien verfügbar';
+type WebScraperToolResult = {
+  title: string | null;
+  url: string | null;
+  content: string | null;
+  error: string | null;
+};
+
+type WebSearchToolResult = {
+  title: string | null;
+  url: string | null;
+  content: string | null;
+};
+
+type WebSearchToolResponse = {
+  results: WebSearchToolResult[];
+  error: string | null;
+};
+
+type SemanticFileSearchChunkResult = {
+  fileName: string | null;
+  orderIndex: number | null;
+  content: string | null;
+};
+
+type SemanticFileSearchToolResponse = {
+  chunks: SemanticFileSearchChunkResult[];
+  error: string | null;
+};
+
+function formatRetrievedChunksForTool(chunks: Awaited<ReturnType<typeof retrieveChunksByQuery>>) {
+  const formattedChunks: SemanticFileSearchChunkResult[] = chunks.map((chunk) => ({
+    fileName: chunk.fileName ?? null,
+    orderIndex: chunk.orderIndex ?? null,
+    content: chunk.content ?? null,
+  }));
+
+  const response: SemanticFileSearchToolResponse = {
+    chunks: formattedChunks,
+    error: null,
+  };
 
   if (chunks.length === 0) {
-    return `Dateien:\n${fileList}\n\nKeine passenden Textstellen gefunden.`;
+    response.error = 'Keine passenden Textstellen gefunden.';
   }
 
-  const chunkText = chunks
-    .map(
-      (chunk) =>
-        `Datei: ${chunk.fileName ?? 'Unbekannte Datei'}${chunk.sourceUrl ? `\nQuelle: ${chunk.sourceUrl}` : ''}\nAbschnitt: ${chunk.orderIndex + 1}\n${chunk.content}`,
-    )
-    .join('\n\n---\n\n');
+  return JSON.stringify(response);
+}
 
-  return `Dateien:\n${fileList}\n\n${chunkText}`;
+function formatWebScrapedContentForTool(result: WebSource) {
+  const title = result.name?.trim() || null;
+  const content = result.content?.trim() || null;
+
+  const response: WebScraperToolResult = {
+    title,
+    url: result.link ?? null,
+    content: null,
+    error: null,
+  };
+
+  if (result.error) {
+    response.error = 'Fehler beim Abrufen der Seite.';
+    return JSON.stringify(response);
+  }
+
+  if (!content) {
+    response.error = 'Keine verwertbaren Inhalte gefunden.';
+    return JSON.stringify(response);
+  }
+
+  response.content = content;
+  return JSON.stringify(response);
+}
+
+function validateWebScraperUrl(inputUrl: string): { url: string; error?: string } {
+  let parsedUrl: URL;
+
+  try {
+    parsedUrl = new URL(inputUrl);
+  } catch {
+    return { url: '', error: 'Error: Invalid URL.' };
+  }
+
+  if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+    return { url: '', error: 'Error: Only http and https URLs are allowed.' };
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase();
+
+  if (
+    hostname === 'localhost' ||
+    hostname.endsWith('.localhost') ||
+    hostname.endsWith('.local') ||
+    isIP(hostname) !== 0
+  ) {
+    return { url: '', error: 'Error: Only domain hosts are allowed.' };
+  }
+
+  return { url: parsedUrl.toString() };
 }
 
 type BuildToolsParams = {
@@ -88,19 +167,66 @@ export async function buildTools({
     });
 
     toolHandlers['web_search'] = async (args) => {
+      const query = typeof args.query === 'string' ? args.query : '';
       const results = await searchWeb({
-        query: args.query as string,
+        query,
         conversationId,
         userId: user.id,
       });
+
+      const response: WebSearchToolResponse = {
+        results: results.map((result) => ({
+          title: result.name?.trim() ?? null,
+          url: result.url ?? null,
+          content: result.content?.trim() ?? null,
+        })),
+        error: null,
+      };
 
       webSearchResults.push(...results);
       onWebSearchResults?.(results);
 
       if (results.length === 0) {
-        return 'No results found.';
+        response.error = 'No results found.';
+        return JSON.stringify(response);
       }
-      return results.map((r) => `[${r.name}](${r.url})\n${r.content}`).join('\n\n---\n\n');
+
+      return JSON.stringify(response);
+    };
+
+    tools.push({
+      name: 'web_scraper',
+      description:
+        'Fetch and extract the main text from one specific URL. Use this tool when the user gives you a single webpage URL or when you can derive a concrete URL yourself, for example to scrape a documentation page or another known target. Use web_search instead when you need to discover relevant pages or compare multiple sources.',
+      parameters: {
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            description:
+              'The exact URL of the page to scrape. It must be a single http or https URL. Only domain hosts are allowed (no localhost, .local, or IP addresses).',
+          },
+        },
+        required: ['url'],
+        additionalProperties: false,
+      },
+    });
+
+    toolHandlers['web_scraper'] = async (args) => {
+      const url = typeof args.url === 'string' ? args.url.trim() : '';
+
+      if (url.length === 0) {
+        return 'Error: Missing URL.';
+      }
+
+      const validationResult = validateWebScraperUrl(url);
+
+      if (validationResult.error) {
+        return validationResult.error;
+      }
+
+      const result = await webScraper(validationResult.url);
+      return formatWebScrapedContentForTool(result);
     };
   }
 
@@ -143,7 +269,7 @@ export async function buildTools({
         limit,
       });
 
-      return formatRetrievedChunksForTool(chunks, attachedFileNames);
+      return formatRetrievedChunksForTool(chunks);
     };
   }
 
