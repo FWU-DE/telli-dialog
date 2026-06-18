@@ -156,7 +156,9 @@ export default function Chat({
     }
 
     const fetchData = async () => {
-      const newFileMapping = await refetchFileMapping(id);
+      const result = await refetchFileMapping(id);
+      if (!result.success) return;
+      const newFileMapping = result.value;
       setFileMapping(newFileMapping);
 
       // Clean up pending files that now have DB entries

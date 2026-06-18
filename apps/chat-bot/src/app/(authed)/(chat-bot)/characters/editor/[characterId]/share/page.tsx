@@ -1,20 +1,11 @@
-import Link from 'next/link';
-import { Button } from '@ui/components/button';
-import SidebarCloseIcon from '@/components/icons/sidebar-close';
-import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
-import Footer from '@/components/navigation/footer';
-import CountDownTimer from '@/app/(authed)/(chat-bot)/learning-scenarios/_components/count-down';
-import { QRCodeSVG } from 'qrcode.react';
 import { getTranslations } from 'next-intl/server';
-import CopyToClipboardButton from '@/components/common/clipboard-button';
 import { requireAuth } from '@/auth/requireAuth';
 import { getSharedCharacter } from '@shared/characters/character-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
-import CollapseSidebar from '@/components/common/collapse-sidebar';
-import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 import { type Metadata } from 'next';
+import CustomChatSharePage from '@/components/custom-chat/custom-chat-share-page';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('characters.page-titles');
@@ -35,68 +26,18 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   if (!character.inviteCode) notFound();
 
   const inviteCode = character.inviteCode;
-  const formattedInviteCode = `${inviteCode.substring(0, 4)} ${inviteCode.substring(4, 8)}`;
-  const shareUrl = `${await getBaseUrlByHeaders()}/ua/characters/${character.id}/dialog?inviteCode=${inviteCode}`;
+  const shareUrl = `/ua/characters/${character.id}/dialog?inviteCode=${inviteCode}`;
   const leftTime = calculateTimeLeft(character);
-  const t = await getTranslations('characters.share-page');
 
   return (
-    <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
-      <CollapseSidebar />
-      <CustomChatHeader />
-      <Link
-        href={`/characters/editor/${character.id}`}
-        className="flex gap-2 items-center text-primary w-full"
-      >
-        <SidebarCloseIcon className="w-4 h-4" />
-        <span className="text-base font-normal hover:underline">{t('back-button')}</span>
-      </Link>
-      <div className="mx-auto mt-2 flex flex-col justify-center items-center text-center w-full">
-        <h1 className="text-4xl sm:text-5xl font-medium mb-10">{t('join')}</h1>
-        <CountDownTimer
-          leftTimeInSeconds={leftTime}
-          totalTimeInMinutes={character.maxUsageTimeLimit}
-          stopWatchClassName="w-4 h-4"
-        />
-        <main className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">
-          <section className="flex flex-col justify-between gap-4 items-center">
-            <div className="flex flex-col items-center gap-4">
-              <p className="text-2xl sm:text-3xl">{t('go-to')}</p>
-              <Link href={await getBaseUrlByHeaders()} target="_blank" rel="noopener noreferrer">
-                <p className="text-3xl sm:text-5xl text-primary font-bold">
-                  {await getHostByHeaders()}
-                </p>
-              </Link>
-            </div>
-            <div className="flex flex-col items-center gap-4">
-              <p className="text-2xl sm:text-3xl">{t('enter-code')}</p>
-              <div className="flex items-center gap-2">
-                <p data-testid="join-code" className="text-3xl sm:text-5xl text-primary font-bold">
-                  {formattedInviteCode}
-                </p>
-                <CopyToClipboardButton text={formattedInviteCode} className="size-7 sm:size-9" />
-              </div>
-            </div>
-            <Button asChild className="mt-10 sm:mt-16">
-              <Link href={shareUrl} target="_blank" rel="noopener noreferrer">
-                {t('open-chat')}
-              </Link>
-            </Button>
-          </section>
-          <div className="hidden sm:block w-1 border-r" />
-          <section className="flex flex-col justify-between items-center gap-8 sm:gap-12">
-            <h2 className="text-2xl sm:text-3xl text-center">{t('use-qr')}</h2>
-            <QRCodeSVG
-              data-testid="qr-code"
-              className="w-64 h-64 sm:w-100 sm:h-100"
-              value={shareUrl}
-            />
-          </section>
-        </main>
-      </div>
-      <div className="grow" />
-      <hr className="w-full" />
-      <Footer />
-    </div>
+    <CustomChatSharePage
+      backHref={`/characters/editor/${character.id}`}
+      customChatName={character.name}
+      inviteCode={inviteCode}
+      leftTimeInSeconds={leftTime}
+      relativeShareUrl={shareUrl}
+      totalTimeInSeconds={character.maxUsageTimeLimit * 60}
+      customChatVariant="character"
+    />
   );
 }

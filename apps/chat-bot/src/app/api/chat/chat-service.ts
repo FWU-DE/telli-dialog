@@ -30,11 +30,6 @@ import {
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
-import {
-  KEEP_FIRST_MESSAGES,
-  KEEP_RECENT_MESSAGES,
-  TOTAL_CHAT_LENGTH_LIMIT,
-} from '@/configuration-text-inputs/const';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
@@ -310,12 +305,7 @@ export async function sendChatMessage({
   ];
 
   // Prune messages
-  const prunedMessages = limitChatHistory({
-    messages: fullMessages,
-    limitRecent: KEEP_RECENT_MESSAGES,
-    limitFirst: KEEP_FIRST_MESSAGES,
-    characterLimit: TOTAL_CHAT_LENGTH_LIMIT,
-  });
+  const prunedMessages = limitChatHistory(fullMessages);
 
   // Build system prompt
   const systemPrompt = constructChatSystemPrompt({

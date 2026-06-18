@@ -21,7 +21,10 @@ export async function generateImageAction({
 }) {
   const { user, federalState } = await requireAuth();
 
-  return runServerAction(handleImageGeneration)({
+  return runServerAction(
+    'generateImageAction',
+    handleImageGeneration,
+  )({
     prompt,
     model,
     style,

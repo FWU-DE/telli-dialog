@@ -62,7 +62,6 @@ export async function GET(req: NextRequest) {
       });
 
       document = await generateConversationMessageDocxFile({
-        conversation,
         message,
         gptName,
       });
