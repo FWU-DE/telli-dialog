@@ -16,15 +16,23 @@ import { env } from './env';
  */
 export function initSentry({
   scrubSensitiveData = true,
+  aiServerActionNames = [],
   serviceName,
   traceExcludedUrls,
 }: {
   serviceName: string;
   /** List of URL paths, which should not be traced */
   traceExcludedUrls: string[];
+  /**
+   * Server Action names that are known to call LLM/AI services.
+   * These actions will be traced with a different sampling rate.
+   */
+  aiServerActionNames?: string[];
   /** Whether to scrub sensitive data from Sentry events before sending */
   scrubSensitiveData?: boolean;
 }) {
+  const aiServerActionNameSet = new Set(aiServerActionNames.map((name) => `serverAction/${name}`));
+
   const sentryClient = Sentry.init({
     debug: false,
     dsn: env.sentryDsn,
@@ -35,7 +43,7 @@ export function initSentry({
     integrations: [
       Sentry.captureConsoleIntegration({ levels: ['fatal', 'error', 'warn', 'info'] }),
     ],
-    tracesSampler: ({ normalizedRequest, inheritOrSampleWith }) => {
+    tracesSampler: ({ name, normalizedRequest, inheritOrSampleWith }) => {
       const url = normalizedRequest?.url ?? '';
       // Extract pathname if it's a full URL, otherwise use as-is
       const pathname = url.startsWith('http') ? new URL(url).pathname : url.split('?')[0];
@@ -43,6 +51,10 @@ export function initSentry({
       const isExcludedUrl = traceExcludedUrls.includes(pathname ?? '');
       if (isExcludedUrl) {
         return 0;
+      }
+
+      if (aiServerActionNameSet.has(name)) {
+        return inheritOrSampleWith(env.sentryTracesSampleRateAi);
       }
 
       return inheritOrSampleWith(env.sentryTracesSampleRate);

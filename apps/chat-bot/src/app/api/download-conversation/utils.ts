@@ -112,11 +112,9 @@ function getConversationMessages({
 }
 
 export async function generateConversationMessageDocxFile({
-  conversation,
   message,
   gptName,
 }: {
-  conversation: ConversationModel;
   message: ConversationMessageModel;
   gptName: string;
 }): Promise<ArrayBuffer | undefined> {
@@ -131,9 +129,6 @@ export async function generateConversationMessageDocxFile({
     }
 
     const conversationMetadata = [
-      new Paragraph({
-        children: [new TextRun({ text: conversation.name ?? '', bold: true, size: 40 })],
-      }),
       new Paragraph({
         children: [
           new TextRun({
@@ -151,7 +146,7 @@ export async function generateConversationMessageDocxFile({
       new Paragraph({
         children: [
           new TextRun({
-            text: `generiert in telli unter Verwendung von ${modelDisplayName}`,
+            text: `Generiert von AIS.chat unter Nutzung von ${modelDisplayName}`,
             italics: true,
             size: 18,
             color: '666666',

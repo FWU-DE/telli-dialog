@@ -352,12 +352,19 @@ describe('sendChatMessage', () => {
       expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
       expect(mocks.retrieveChunksMock).not.toHaveBeenCalled();
       expect(mocks.runWebSearchPipelineMock).not.toHaveBeenCalled();
+      expect(mocks.extractUrlsMock).not.toHaveBeenCalled();
+      expect(mocks.ingestWebContentMock).not.toHaveBeenCalled();
+      expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
+        expect.objectContaining({ errorUrls: [] }),
+      );
       expect(result.webSearchResults).toEqual(webSearchResults);
       expect(streamedText).toBe('agentic chunk');
     } else {
       expect(mocks.buildToolsMock).not.toHaveBeenCalled();
       expect(mocks.runAgentLoopMock).not.toHaveBeenCalled();
       expect(mocks.runWebSearchPipelineMock).toHaveBeenCalledTimes(1);
+      expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
+      expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
       expect(result.webSearchResults).toEqual(webSearchResults);
       expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
         expect.objectContaining({ webSearchResults }),

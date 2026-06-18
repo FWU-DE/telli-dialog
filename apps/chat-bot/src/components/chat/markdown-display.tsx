@@ -14,6 +14,10 @@ type MarkdownDisplayProps = {
   children: string;
 };
 
+const KATEX_RENDER_OPTIONS = {
+  strict: false,
+};
+
 function preprocessMathDelimiters(markdown: string) {
   return (
     markdown
@@ -34,7 +38,7 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
     <div className={cn('wrap-break-word text-base', removeTopPaddingAfterHrClass)}>
       <Markdown
         remarkPlugins={[RemarkMathPlugin, remarkGfm]}
-        rehypePlugins={[RehypeKatex]}
+        rehypePlugins={[[RehypeKatex, KATEX_RENDER_OPTIONS]]}
         components={{
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           h1({ children, className, node, ...props }) {
@@ -116,7 +120,10 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
             return (
               <span
                 dangerouslySetInnerHTML={{
-                  __html: katex.renderToString(value, { displayMode: false }),
+                  __html: katex.renderToString(value, {
+                    ...KATEX_RENDER_OPTIONS,
+                    displayMode: false,
+                  }),
                 }}
               />
             );

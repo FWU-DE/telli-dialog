@@ -229,17 +229,6 @@ export async function sendChatMessage({
 
   const activeUserMessage = userMessage;
 
-  const urls = extractUrls({
-    assistant: activeAssistant,
-    character: activeCharacter,
-    learningScenario: activeLearningScenario,
-    messages,
-  });
-  const { processedUrls, errorUrls } = await ingestWebContent({
-    urls,
-    federalStateId: user.federalState.id,
-  });
-
   // Use DB message count for orderNumber
   const dbMessageCount = activeConversationObject.messages.length;
 
@@ -273,9 +262,22 @@ export async function sendChatMessage({
 
   let webSearchResults: WebSearchResult[] = [];
   let chunks: RetrievedChunk[] = [];
+  let errorUrls: string[] = [];
 
   if (!agenticChatEnabled) {
-    // Fallback implementations of Websearch and Chunk Retrieval
+    // Fallback implementations of Websearch and Chunk Retrieval.
+    const urls = extractUrls({
+      assistant: activeAssistant,
+      character: activeCharacter,
+      learningScenario: activeLearningScenario,
+      messages,
+    });
+    const ingestResult = await ingestWebContent({
+      urls,
+      federalStateId: user.federalState.id,
+    });
+    errorUrls = ingestResult.errorUrls;
+
     webSearchResults = await runWebSearchPipeline({
       messages,
       user,
@@ -290,7 +292,7 @@ export async function sendChatMessage({
       messages,
       federalStateId: user.federalState.id,
       relatedFileEntities,
-      sourceUrls: processedUrls,
+      sourceUrls: ingestResult.processedUrls,
     });
   }
 
@@ -426,6 +428,12 @@ export async function sendChatMessage({
   }
 
   if (agenticChatEnabled) {
+    const attachedLinks =
+      activeAssistant?.attachedLinks ??
+      activeCharacter?.attachedLinks ??
+      activeLearningScenario?.attachedLinks ??
+      [];
+
     const builtTools = await buildTools({
       user,
       characterId,
@@ -433,6 +441,7 @@ export async function sendChatMessage({
       assistantId,
       conversationId: activeConversation.id,
       relatedFileEntities,
+      attachedLinks,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({
