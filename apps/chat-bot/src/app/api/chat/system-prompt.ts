@@ -17,7 +17,6 @@ import {
   LANGUAGE_GUIDELINES,
   SUGGESTION_GUIDELINES,
 } from '../utils/system-prompt';
-import type { WebSearchResult } from '@shared/db/schema';
 import type { ToolDefinition } from '@ais-chat/ai-core';
 
 function constructAisChatSystemPrompt(

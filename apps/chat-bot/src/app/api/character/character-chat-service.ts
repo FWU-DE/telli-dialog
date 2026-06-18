@@ -117,6 +117,12 @@ export async function sendCharacterMessage({
 
   let activeToolDefinitions: ToolDefinition[] = [];
   let chunks: RetrievedChunk[] = [];
+  let toolRegistry:
+    | Record<
+        string,
+        { definition: ToolDefinition; handler: (args: Record<string, unknown>) => Promise<string> }
+      >
+    | undefined;
 
   if (agenticChatEnabled) {
     const builtTools = await buildTools({
@@ -130,47 +136,7 @@ export async function sendCharacterMessage({
 
     activeToolDefinitions = Object.values(builtTools.toolRegistry).map((entry) => entry.definition);
 
-    const toolRegistry = builtTools.toolRegistry;
-
-    runAgentLoop({
-      modelId: definedModel.id,
-      apiKeyId,
-      messages: aiCoreMessages,
-      toolRegistry,
-      onTextChunk: (delta) => {
-        update(delta);
-      },
-      onComplete: async ({ usage, priceInCents }) => {
-        const { promptTokens, completionTokens } = usage;
-
-        await dbUpdateTokenUsageByCharacterChatId({
-          modelId: definedModel.id,
-          completionTokens,
-          promptTokens,
-          characterId: character.id,
-          userId: teacherUserAndContext.id,
-          costsInCent: priceInCents,
-        });
-
-        await sendRabbitmqEvent(
-          constructNewMessageEvent({
-            user: teacherUserAndContext,
-            promptTokens,
-            completionTokens,
-            costsInCent: priceInCents,
-            provider: definedModel.provider,
-            anonymous: true,
-            character,
-          }),
-        );
-
-        done();
-      },
-      onError: (error) => {
-        logError('Error during character chat streaming:', error);
-        streamError(error);
-      },
-    });
+    toolRegistry = builtTools.toolRegistry;
   } else {
     chunks = await retrieveChunks({
       messages,
@@ -211,7 +177,47 @@ export async function sendCharacterMessage({
   const { stream, update, done, error: streamError } = createTextStream();
   const assistantMessageId = crypto.randomUUID();
 
-  if (!agenticChatEnabled) {
+  if (agenticChatEnabled) {
+    runAgentLoop({
+      modelId: definedModel.id,
+      apiKeyId,
+      messages: aiCoreMessages,
+      toolRegistry,
+      onTextChunk: (delta) => {
+        update(delta);
+      },
+      onComplete: async ({ usage, priceInCents }) => {
+        const { promptTokens, completionTokens } = usage;
+
+        await dbUpdateTokenUsageByCharacterChatId({
+          modelId: definedModel.id,
+          completionTokens,
+          promptTokens,
+          characterId: character.id,
+          userId: teacherUserAndContext.id,
+          costsInCent: priceInCents,
+        });
+
+        await sendRabbitmqEvent(
+          constructNewMessageEvent({
+            user: teacherUserAndContext,
+            promptTokens,
+            completionTokens,
+            costsInCent: priceInCents,
+            provider: definedModel.provider,
+            anonymous: true,
+            character,
+          }),
+        );
+
+        done();
+      },
+      onError: (error) => {
+        logError('Error during character chat streaming:', error);
+        streamError(error);
+      },
+    });
+  } else {
     // Start streaming in the background
     void (async () => {
       try {
