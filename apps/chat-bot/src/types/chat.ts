@@ -1,7 +1,8 @@
 import type { SharedChatExpiredError, TokenPointsExceededError } from '@ais-chat/ai-core/errors';
 import type { NotFoundError } from '@shared/error';
 import type { WebSearchResult } from '@shared/db/schema';
-import { ChatAttachment, ConversationRole, ToolCall } from '@ais-chat/ai-core/chat/types';
+import type { ChatAttachment } from '@ais-chat/ai-core';
+import type { ConversationRole, ToolCall } from '@ais-chat/ai-core/chat/types';
 
 /**
  * Serialized error that can be safely transmitted across the Server Action boundary.
