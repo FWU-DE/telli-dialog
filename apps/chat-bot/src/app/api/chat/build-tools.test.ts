@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FileModelAndContent } from '@shared/db/schema';
 import type { UserAndContext } from '@/auth/types';
-import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT,
+  VECTOR_SEARCH_LIMIT,
+} from '@/configuration-text-inputs/const';
 
 const mocks = vi.hoisted(() => ({
   isWebSearchEnabledMock: vi.fn(),
@@ -47,10 +50,12 @@ const relatedFileEntities = [
   {
     id: 'file-1',
     name: 'Arbeitsblatt.pdf',
+    content: 'Erster Abschnitt. Zweiter Abschnitt. Dritter Abschnitt.',
   },
   {
     id: 'file-2',
     name: 'Leitfaden.txt',
+    content: 'Kurzer Leitfaden.',
   },
 ] as FileModelAndContent[];
 
@@ -77,6 +82,75 @@ beforeEach(() => {
 });
 
 describe('buildTools', () => {
+  it('adds a whole-file retrieval tool that returns the selected file content', async () => {
+    const { buildTools } = await import('./build-tools');
+
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conversation-1',
+      relatedFileEntities,
+    });
+
+    expect(Object.keys(toolRegistry)).toContain('retrieve_entire_file');
+    const retrieveEntireFileTool = toolRegistry.retrieve_entire_file!;
+
+    expect(retrieveEntireFileTool.definition).toMatchObject({
+      name: 'retrieve_entire_file',
+    });
+    expect(retrieveEntireFileTool.definition.description).toContain('Arbeitsblatt.pdf');
+    expect(retrieveEntireFileTool.definition.description).toContain('Leitfaden.txt');
+    expect(retrieveEntireFileTool.definition.parameters).toMatchObject({
+      required: ['fileName'],
+    });
+
+    const result = await retrieveEntireFileTool.handler({
+      fileName: 'Arbeitsblatt.pdf',
+    });
+
+    expect(JSON.parse(result)).toEqual({
+      fileName: 'Arbeitsblatt.pdf',
+      content: 'Erster Abschnitt. Zweiter Abschnitt. Dritter Abschnitt.',
+      truncated: false,
+      tokenCount: expect.any(Number),
+      maxTokens: RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT,
+      error: null,
+    });
+  });
+
+  it('caps whole-file retrieval at the configured token limit', async () => {
+    const { buildTools } = await import('./build-tools');
+
+    const veryLongFile = {
+      id: 'file-3',
+      name: 'Grossdatei.txt',
+      content: 'a '.repeat(100_000),
+    } as FileModelAndContent;
+
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conversation-1',
+      relatedFileEntities: [veryLongFile],
+    });
+
+    const result = await toolRegistry.retrieve_entire_file!.handler({
+      fileName: 'Grossdatei.txt',
+    });
+
+    const parsed = JSON.parse(result) as {
+      truncated: boolean;
+      maxTokens: number;
+      error: string | null;
+      tokenCount: number;
+      content: string | null;
+    };
+
+    expect(parsed.truncated).toBe(true);
+    expect(parsed.maxTokens).toBe(RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT);
+    expect(parsed.tokenCount).toBeGreaterThan(RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT);
+    expect(parsed.error).toContain('Tokenlimits');
+    expect(parsed.content).not.toBeNull();
+  });
+
   it('adds a chunk retrieval tool that exposes file names and forwards the search query', async () => {
     const { buildTools } = await import('./build-tools');
 

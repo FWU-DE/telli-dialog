@@ -1,10 +1,13 @@
-import type { ToolDefinition, ToolRegistry } from '@ais-chat/ai-core';
+import { countTokens, type ToolDefinition, type ToolRegistry } from '@ais-chat/ai-core';
 import { UserAndContext } from '@/auth/types';
 import { isWebSearchEnabled, searchWeb } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
 import type { FileModelAndContent } from '@shared/db/schema';
 import type { WebSource } from '@shared/db/types';
-import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT,
+  VECTOR_SEARCH_LIMIT,
+} from '@/configuration-text-inputs/const';
 import { retrieveChunksByQuery } from '../rag/rag-service';
 import { webScraper } from '../web-scraper/web-scraper';
 import { isIP } from 'node:net';
@@ -38,6 +41,15 @@ type SemanticFileSearchToolResponse = {
   error: string | null;
 };
 
+type RetrieveEntireFileToolResponse = {
+  fileName: string | null;
+  content: string | null;
+  truncated: boolean;
+  tokenCount: number;
+  maxTokens: number;
+  error: string | null;
+};
+
 function formatRetrievedChunksForTool(chunks: Awaited<ReturnType<typeof retrieveChunksByQuery>>) {
   const formattedChunks: SemanticFileSearchChunkResult[] = chunks.map((chunk) => ({
     fileName: chunk.fileName ?? null,
@@ -52,6 +64,52 @@ function formatRetrievedChunksForTool(chunks: Awaited<ReturnType<typeof retrieve
 
   if (chunks.length === 0) {
     response.error = 'Keine passenden Textstellen gefunden.';
+  }
+
+  return JSON.stringify(response);
+}
+
+function truncateToTokenLimit(text: string, maxTokens: number) {
+  if (countTokens(text) <= maxTokens) {
+    return text;
+  }
+
+  let low = 0;
+  let high = text.length;
+
+  while (low < high) {
+    const mid = Math.ceil((low + high) / 2);
+    const candidate = text.slice(0, mid);
+
+    if (countTokens(candidate) <= maxTokens) {
+      low = mid;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  return text.slice(0, low);
+}
+
+function formatEntireFileForTool(file: FileModelAndContent) {
+  const content = file.content?.trim() ?? '';
+  const tokenCount = countTokens(content);
+  const truncatedContent = truncateToTokenLimit(content, RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT);
+  const truncated = truncatedContent.length !== content.length;
+
+  const response: RetrieveEntireFileToolResponse = {
+    fileName: file.name ?? null,
+    content: content.length > 0 ? truncatedContent : null,
+    truncated,
+    tokenCount,
+    maxTokens: RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT,
+    error: null,
+  };
+
+  if (!content) {
+    response.error = 'Keine verwertbaren Inhalte gefunden.';
+  } else if (truncated) {
+    response.error = 'Dateiinhalt wurde wegen des Tokenlimits gekürzt.';
   }
 
   return JSON.stringify(response);
@@ -251,6 +309,61 @@ export async function buildTools({
       const result = await webScraper(validationResult.url);
       return formatWebScrapedContentForTool(result);
     });
+  }
+
+  if (relatedFileEntities.length > 0) {
+    const retrieveEntireFileToolDefinition: ToolDefinition = {
+      name: 'retrieve_entire_file',
+      description: `Retrieve the full content of one attached file by name. Available files right now: ${attachedFileNames.join(', ') || 'none'}. Use this tool when you need the full text of a specific attached file instead of only relevant excerpts. The returned content is capped at ${RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT} tokens.`,
+      parameters: {
+        type: 'object',
+        properties: {
+          fileName: {
+            type: 'string',
+            description: 'The exact name of the attached file to retrieve.',
+          },
+        },
+        required: ['fileName'],
+        additionalProperties: false,
+      },
+    };
+
+    toolRegistry.retrieve_entire_file = {
+      definition: retrieveEntireFileToolDefinition,
+      handler: async (args) => {
+        const fileName = typeof args.fileName === 'string' ? args.fileName.trim() : '';
+
+        if (fileName.length === 0) {
+          const response: RetrieveEntireFileToolResponse = {
+            fileName: null,
+            content: null,
+            truncated: false,
+            tokenCount: 0,
+            maxTokens: RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT,
+            error: 'Fehlender Dateiname.',
+          };
+
+          return JSON.stringify(response);
+        }
+
+        const matchedFile = relatedFileEntities.find((file) => file.name === fileName);
+
+        if (matchedFile === undefined) {
+          const response: RetrieveEntireFileToolResponse = {
+            fileName,
+            content: null,
+            truncated: false,
+            tokenCount: 0,
+            maxTokens: RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT,
+            error: 'Datei nicht gefunden.',
+          };
+
+          return JSON.stringify(response);
+        }
+
+        return formatEntireFileForTool(matchedFile);
+      },
+    };
   }
 
   if (relatedFileEntities.length > 0 || attachedSourceUrls.length > 0) {
