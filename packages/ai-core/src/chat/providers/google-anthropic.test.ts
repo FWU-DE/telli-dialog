@@ -638,6 +638,16 @@ describe('constructGoogleAnthropicAgenticStreamFn', () => {
       events.push(event);
     }
 
+    expect(streamMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tools: [
+          expect.objectContaining({
+            name: 'get_weather',
+          }),
+        ],
+      }),
+    );
+
     expect(events).toEqual([
       {
         type: 'tool_call',
@@ -706,7 +716,10 @@ describe('constructGoogleAnthropicAgenticStreamFn', () => {
               { type: 'tool_use', id: 'toolu_123', name: 'get_weather', input: { city: 'Paris' } },
             ],
           },
-          { role: 'user', content: [{ type: 'tool_result', tool_use_id: 'toolu_123', content: '72°F and sunny' }] },
+          {
+            role: 'user',
+            content: [{ type: 'tool_result', tool_use_id: 'toolu_123', content: '72°F and sunny' }],
+          },
         ],
       }),
     );

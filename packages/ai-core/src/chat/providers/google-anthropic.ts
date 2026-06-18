@@ -154,8 +154,8 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
         name: tool.name,
         description: tool.description,
         input_schema: {
-          type: 'object' as const,
           ...tool.parameters,
+          type: 'object' as const,
         },
       }));
 
