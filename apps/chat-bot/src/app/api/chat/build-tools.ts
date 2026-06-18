@@ -1,11 +1,11 @@
-import { countTokens, type ToolDefinition, type ToolRegistry } from '@ais-chat/ai-core';
+import { type ToolDefinition, type ToolRegistry } from '@ais-chat/ai-core';
 import { UserAndContext } from '@/auth/types';
 import { isWebSearchEnabled, searchWeb } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
 import type { FileModelAndContent } from '@shared/db/schema';
 import type { WebSource } from '@shared/db/types';
 import {
-  RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT,
+  RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
   VECTOR_SEARCH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { retrieveChunksByQuery } from '../rag/rag-service';
@@ -45,8 +45,8 @@ type RetrieveEntireFileToolResponse = {
   fileName: string | null;
   content: string | null;
   truncated: boolean;
-  tokenCount: number;
-  maxTokens: number;
+  characterCount: number;
+  maxCharacters: number;
   error: string | null;
 };
 
@@ -69,47 +69,33 @@ function formatRetrievedChunksForTool(chunks: Awaited<ReturnType<typeof retrieve
   return JSON.stringify(response);
 }
 
-function truncateToTokenLimit(text: string, maxTokens: number) {
-  if (countTokens(text) <= maxTokens) {
+function truncateToCharacterLimit(text: string, maxCharacters: number) {
+  if (text.length <= maxCharacters) {
     return text;
   }
 
-  let low = 0;
-  let high = text.length;
-
-  while (low < high) {
-    const mid = Math.ceil((low + high) / 2);
-    const candidate = text.slice(0, mid);
-
-    if (countTokens(candidate) <= maxTokens) {
-      low = mid;
-    } else {
-      high = mid - 1;
-    }
-  }
-
-  return text.slice(0, low);
+  return text.slice(0, maxCharacters);
 }
 
 function formatEntireFileForTool(file: FileModelAndContent) {
   const content = file.content?.trim() ?? '';
-  const tokenCount = countTokens(content);
-  const truncatedContent = truncateToTokenLimit(content, RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT);
+  const characterCount = content.length;
+  const truncatedContent = truncateToCharacterLimit(content, RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT);
   const truncated = truncatedContent.length !== content.length;
 
   const response: RetrieveEntireFileToolResponse = {
     fileName: file.name ?? null,
     content: content.length > 0 ? truncatedContent : null,
     truncated,
-    tokenCount,
-    maxTokens: RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT,
+    characterCount,
+    maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
     error: null,
   };
 
   if (!content) {
     response.error = 'Keine verwertbaren Inhalte gefunden.';
   } else if (truncated) {
-    response.error = 'Dateiinhalt wurde wegen des Tokenlimits gekürzt.';
+    response.error = 'Dateiinhalt wurde wegen des Zeichenlimits gekürzt.';
   }
 
   return JSON.stringify(response);
@@ -201,7 +187,9 @@ export async function buildTools({
   const tools: ToolDefinition[] = [];
   const toolHandlers: Record<string, (args: Record<string, unknown>) => Promise<string>> = {};
   const webSearchResults: WebSearchResult[] = [];
-  const attachedFileNames = relatedFileEntities.map((file) => file.name);
+  const attachedFileDescriptions = relatedFileEntities.map(
+    (file) => `${file.name} (${file.size} bytes)`,
+  );
   const attachedSourceUrls = sourceUrls.length > 0 ? sourceUrls : attachedLinks;
 
   function addTool(
@@ -215,7 +203,6 @@ export async function buildTools({
     tools.push(definition);
     toolHandlers[definition.name] = handler;
   }
-
   const webSearchEnabled = await isWebSearchEnabled({
     user,
     characterId,
@@ -314,7 +301,7 @@ export async function buildTools({
   if (relatedFileEntities.length > 0) {
     const retrieveEntireFileToolDefinition: ToolDefinition = {
       name: 'retrieve_entire_file',
-      description: `Retrieve the full content of one attached file by name. Available files right now: ${attachedFileNames.join(', ') || 'none'}. Use this tool when you need the full text of a specific attached file instead of only relevant excerpts. The returned content is capped at ${RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT} tokens.`,
+      description: `Retrieve the full content of one attached file by name. Available files right now: ${attachedFileDescriptions.join(', ') || 'none'}. Use this tool when you need the full text of a specific attached file instead of only relevant excerpts. The returned content is capped at ${RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT} characters.`,
       parameters: {
         type: 'object',
         properties: {
@@ -338,8 +325,8 @@ export async function buildTools({
             fileName: null,
             content: null,
             truncated: false,
-            tokenCount: 0,
-            maxTokens: RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT,
+            characterCount: 0,
+            maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
             error: 'Fehlender Dateiname.',
           };
 
@@ -353,8 +340,8 @@ export async function buildTools({
             fileName,
             content: null,
             truncated: false,
-            tokenCount: 0,
-            maxTokens: RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT,
+            characterCount: 0,
+            maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
             error: 'Datei nicht gefunden.',
           };
 
@@ -369,7 +356,7 @@ export async function buildTools({
   if (relatedFileEntities.length > 0 || attachedSourceUrls.length > 0) {
     const retrieveTextChunksToolDefinition: ToolDefinition = {
       name: 'retrieve_text_chunks',
-      description: `Retrieve relevant text chunks from the attached sources. Available files right now: ${attachedFileNames.join(', ') || 'none'}. Available linked pages right now: ${attachedSourceUrls.join(', ') || 'none'}. Use this tool when you need exact passages from the files or linked pages or want to inspect a specific topic inside the available sources. You can request up to ${VECTOR_SEARCH_LIMIT} chunks per call. Call it with a short, specific search string in the same language as the user.`,
+      description: `Retrieve relevant text chunks from the attached sources. Available files right now: ${attachedFileDescriptions.join(', ') || 'none'}. Available linked pages right now: ${attachedSourceUrls.join(', ') || 'none'}. Use this tool when you need exact passages from the files or linked pages or want to inspect a specific topic inside the available sources. You can request up to ${VECTOR_SEARCH_LIMIT} chunks per call. Call it with a short, specific search string in the same language as the user.`,
       parameters: {
         type: 'object',
         properties: {

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FileModelAndContent } from '@shared/db/schema';
 import type { UserAndContext } from '@/auth/types';
 import {
-  RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT,
+  RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
   VECTOR_SEARCH_LIMIT,
 } from '@/configuration-text-inputs/const';
 
@@ -50,11 +50,13 @@ const relatedFileEntities = [
   {
     id: 'file-1',
     name: 'Arbeitsblatt.pdf',
+    size: 120_000,
     content: 'Erster Abschnitt. Zweiter Abschnitt. Dritter Abschnitt.',
   },
   {
     id: 'file-2',
     name: 'Leitfaden.txt',
+    size: 8_000,
     content: 'Kurzer Leitfaden.',
   },
 ] as FileModelAndContent[];
@@ -97,8 +99,10 @@ describe('buildTools', () => {
     expect(retrieveEntireFileTool.definition).toMatchObject({
       name: 'retrieve_entire_file',
     });
-    expect(retrieveEntireFileTool.definition.description).toContain('Arbeitsblatt.pdf');
-    expect(retrieveEntireFileTool.definition.description).toContain('Leitfaden.txt');
+    expect(retrieveEntireFileTool.definition.description).toContain(
+      'Arbeitsblatt.pdf (120000 bytes)',
+    );
+    expect(retrieveEntireFileTool.definition.description).toContain('Leitfaden.txt (8000 bytes)');
     expect(retrieveEntireFileTool.definition.parameters).toMatchObject({
       required: ['fileName'],
     });
@@ -111,19 +115,19 @@ describe('buildTools', () => {
       fileName: 'Arbeitsblatt.pdf',
       content: 'Erster Abschnitt. Zweiter Abschnitt. Dritter Abschnitt.',
       truncated: false,
-      tokenCount: expect.any(Number),
-      maxTokens: RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT,
+      characterCount: expect.any(Number),
+      maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
       error: null,
     });
   });
 
-  it('caps whole-file retrieval at the configured token limit', async () => {
+  it('caps whole-file retrieval at the configured character limit', async () => {
     const { buildTools } = await import('./build-tools');
 
     const veryLongFile = {
       id: 'file-3',
       name: 'Grossdatei.txt',
-      content: 'a '.repeat(100_000),
+      content: 'a'.repeat(100_001),
     } as FileModelAndContent;
 
     const { toolRegistry } = await buildTools({
@@ -138,16 +142,16 @@ describe('buildTools', () => {
 
     const parsed = JSON.parse(result) as {
       truncated: boolean;
-      maxTokens: number;
+      maxCharacters: number;
       error: string | null;
-      tokenCount: number;
+      characterCount: number;
       content: string | null;
     };
 
     expect(parsed.truncated).toBe(true);
-    expect(parsed.maxTokens).toBe(RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT);
-    expect(parsed.tokenCount).toBeGreaterThan(RETRIEVE_ENTIRE_FILE_TOKEN_LIMIT);
-    expect(parsed.error).toContain('Tokenlimits');
+    expect(parsed.maxCharacters).toBe(RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT);
+    expect(parsed.characterCount).toBeGreaterThan(RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT);
+    expect(parsed.error).toContain('Zeichenlimits');
     expect(parsed.content).not.toBeNull();
   });
 
@@ -167,8 +171,10 @@ describe('buildTools', () => {
     expect(retrieveTextChunksTool.definition).toMatchObject({
       name: 'retrieve_text_chunks',
     });
-    expect(retrieveTextChunksTool.definition.description).toContain('Arbeitsblatt.pdf');
-    expect(retrieveTextChunksTool.definition.description).toContain('Leitfaden.txt');
+    expect(retrieveTextChunksTool.definition.description).toContain(
+      'Arbeitsblatt.pdf (120000 bytes)',
+    );
+    expect(retrieveTextChunksTool.definition.description).toContain('Leitfaden.txt (8000 bytes)');
     expect(retrieveTextChunksTool.definition.parameters).toMatchObject({
       required: ['search'],
       properties: {
