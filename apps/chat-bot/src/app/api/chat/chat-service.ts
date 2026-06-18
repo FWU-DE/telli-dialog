@@ -50,7 +50,6 @@ import { NotFoundError } from '@shared/error';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
 import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
 import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
-import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { deepEqual } from '@/utils/object';
 
 type CustomChatIds = {
@@ -69,24 +68,6 @@ function ensureConversationCustomChatIdsMatch({
   if (!deepEqual(incomingIds, storedIds)) {
     throw new NotFoundError('Conversation not found');
   }
-}
-
-function resolveAgentNameForTracing({
-  characterId,
-  learningScenarioId,
-  assistantId,
-}: {
-  characterId?: string;
-  learningScenarioId?: string;
-  assistantId?: string;
-}): string {
-  if (characterId) return 'Character';
-  if (learningScenarioId) return 'Learning Scenario';
-  if (assistantId) {
-    if (assistantId === HELP_MODE_ASSISTANT_ID) return 'Help Mode';
-    return 'Assistant';
-  }
-  return 'Chat';
 }
 
 /**
