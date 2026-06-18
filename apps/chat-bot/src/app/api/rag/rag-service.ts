@@ -77,7 +77,6 @@ export async function retrieveChunks({
   relatedFileEntities: FileModelAndContent[];
   sourceUrls?: string[];
 }): Promise<RetrievedChunk[]> {
-  // Todo RL. Filter out images
   const relatedFiles = relatedFileEntities.filter(isSupportedTextType);
 
   if (relatedFiles.length === 0 && (!sourceUrls || sourceUrls.length === 0)) {
