@@ -167,15 +167,18 @@ test.describe('create, share, chat, delete', () => {
     await page.getByTestId('token-points-option-25').click();
     await page.getByTestId('usage-time-select').click();
     await page.getByTestId('usage-time-option-30').click();
+    const editorUrl = page.url();
     await page.getByTestId('start-share-button').click();
 
     await page.waitForURL('/learning-scenarios/**/share');
     await expect(page.getByTestId('countdown-timer')).toBeVisible();
 
+    await page.goto(editorUrl);
+    await page.waitForURL('/learning-scenarios/**');
     await page.getByTestId('stop-share-button').click();
+    await expect(page.getByTestId('start-share-button')).toBeVisible();
     await page.reload();
 
-    await expect(page.getByTestId('start-share-button')).toBeVisible();
     await page.getByTestId('token-points-select').click();
     await expect(page.getByTestId('token-points-option-25')).toHaveAttribute(
       'data-state',
