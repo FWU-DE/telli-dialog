@@ -23,7 +23,8 @@ import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { constructChatSystemPrompt } from './system-prompt';
 import {
   convertToAiCoreMessages,
-  formatMessagesWithImages,
+  determineImageAttachmentTypeForModel,
+  enrichMessagesWithImageData,
   getChatTitle,
   limitChatHistory,
 } from './utils';
@@ -33,7 +34,7 @@ import { logError } from '@shared/logging';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
-import { extractImagesAndUrl } from '../file-operations/preprocess-image';
+import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { runAgentLoop } from './agent-loop';
 import { buildTools } from './build-tools';
@@ -229,17 +230,6 @@ export async function sendChatMessage({
 
   const activeUserMessage = userMessage;
 
-  const urls = extractUrls({
-    assistant: activeAssistant,
-    character: activeCharacter,
-    learningScenario: activeLearningScenario,
-    messages,
-  });
-  const { processedUrls, errorUrls } = await ingestWebContent({
-    urls,
-    federalStateId: user.federalState.id,
-  });
-
   // Use DB message count for orderNumber
   const dbMessageCount = activeConversationObject.messages.length;
 
@@ -273,9 +263,22 @@ export async function sendChatMessage({
 
   let webSearchResults: WebSearchResult[] = [];
   let chunks: RetrievedChunk[] = [];
+  let errorUrls: string[] = [];
 
   if (!agenticChatEnabled) {
-    // Fallback implementations of Websearch and Chunk Retrieval
+    // Fallback implementations of Websearch and Chunk Retrieval.
+    const urls = extractUrls({
+      assistant: activeAssistant,
+      character: activeCharacter,
+      learningScenario: activeLearningScenario,
+      messages,
+    });
+    const ingestResult = await ingestWebContent({
+      urls,
+      federalStateId: user.federalState.id,
+    });
+    errorUrls = ingestResult.errorUrls;
+
     webSearchResults = await runWebSearchPipeline({
       messages,
       user,
@@ -290,7 +293,7 @@ export async function sendChatMessage({
       messages,
       federalStateId: user.federalState.id,
       relatedFileEntities,
-      sourceUrls: processedUrls,
+      sourceUrls: ingestResult.processedUrls,
     });
   }
 
@@ -323,14 +326,20 @@ export async function sendChatMessage({
   const modelSupportsImages =
     definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
 
+  const imageAttachmentType = determineImageAttachmentTypeForModel(definedModel);
+
   // attach the image url to each of the image files within relatedFileEntities
-  const extractedImages = await extractImagesAndUrl(relatedFileEntities);
+  const extractedImages = await createImageAttachmentsForConversation(
+    relatedFileEntities,
+    imageAttachmentType,
+  );
 
   // Format messages with images if the model supports vision
-  const messagesWithImages = formatMessagesWithImages(
+  const messagesWithImages = enrichMessagesWithImageData(
     prunedMessages,
     extractedImages,
     modelSupportsImages,
+    imageAttachmentType,
   );
 
   // Convert to ai-core format
@@ -426,6 +435,12 @@ export async function sendChatMessage({
   }
 
   if (agenticChatEnabled) {
+    const attachedLinks =
+      activeAssistant?.attachedLinks ??
+      activeCharacter?.attachedLinks ??
+      activeLearningScenario?.attachedLinks ??
+      [];
+
     const builtTools = await buildTools({
       user,
       characterId,
@@ -433,6 +448,7 @@ export async function sendChatMessage({
       assistantId,
       conversationId: activeConversation.id,
       relatedFileEntities,
+      attachedLinks,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

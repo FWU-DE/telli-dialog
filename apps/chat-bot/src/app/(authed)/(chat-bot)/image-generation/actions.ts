@@ -5,6 +5,7 @@ import { handleImageGeneration } from './image-generation-service';
 import { ImageStyle } from '@shared/utils/chat';
 import { runServerAction } from '@shared/actions/run-server-action';
 import { requireAuth } from '@/auth/requireAuth';
+import { GENERATE_IMAGE_ACTION_NAME } from '@/server-action-names';
 
 /**
  * Generates an image within an existing conversation using the image generation service
@@ -22,7 +23,7 @@ export async function generateImageAction({
   const { user, federalState } = await requireAuth();
 
   return runServerAction(
-    'generateImageAction',
+    GENERATE_IMAGE_ACTION_NAME,
     handleImageGeneration,
   )({
     prompt,

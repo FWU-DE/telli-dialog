@@ -4,13 +4,26 @@ export const CONVERSATION_ROLES = ['system', 'user', 'assistant', 'tool'] as con
 export type ConversationRole = (typeof CONVERSATION_ROLES)[number];
 
 /**
- * Attachment type for images in messages.
+ * Attachment type in messages.
+ * We only support images for now.
  */
-export type ChatAttachment = {
+export type ChatAttachment = ChatImageAttachment;
+
+/**
+ * An image attachment in a chat message.
+ * Url is a public link to the image or a base64-encoded data URL.
+ */
+export type ChatImageAttachment = {
   contentType: string;
   url: string;
   type: 'image';
 };
+
+export function isChatImageAttachment(
+  attachment: ChatAttachment,
+): attachment is ChatImageAttachment {
+  return attachment.type === 'image';
+}
 
 /**
  * A tool call requested by the assistant.
