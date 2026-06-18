@@ -16,7 +16,10 @@ export async function createSuspensionRequestAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(createSuspensionRequest)({
+  return runServerAction(
+    'createSuspensionRequestAction',
+    createSuspensionRequest,
+  )({
     entityType,
     entityId,
     requesterId: user.id,

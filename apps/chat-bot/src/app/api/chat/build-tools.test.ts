@@ -84,6 +84,7 @@ describe('buildTools', () => {
       user,
       conversationId: 'conversation-1',
       relatedFileEntities,
+      attachedLinks: [],
     });
 
     expect(tools).toHaveLength(1);
@@ -134,6 +135,7 @@ describe('buildTools', () => {
       user,
       conversationId: 'conversation-1',
       relatedFileEntities: [],
+      attachedLinks: [],
     });
 
     const webSearchTool = tools.find((tool) => tool.name === 'web_search');
@@ -184,6 +186,7 @@ describe('buildTools', () => {
       user,
       conversationId: 'conversation-1',
       relatedFileEntities: [],
+      attachedLinks: [],
     });
 
     const result = await toolHandlers.web_search!({

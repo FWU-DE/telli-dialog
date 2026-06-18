@@ -2,6 +2,7 @@ import { ImageAttachment } from '@/utils/files/types';
 import { logError } from '@shared/logging';
 import { type ChatMessage } from '@/types/chat';
 import { generateTextWithBilling, type Message as AiCoreMessage } from '@ais-chat/ai-core';
+import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 
 /**
  * Format messages to include images for models that support vision
@@ -69,67 +70,76 @@ export function consolidateMessages(messages: Array<ChatMessage>): Array<ChatMes
   return consolidatedMessages;
 }
 
+export type MessageBlock = {
+  messages: ChatMessage[];
+  charCount: number;
+};
+
 /**
- * Limits chat history by keeping the first message pairs, last message pairs, and filling remaining space
- * with middle messages (prioritizing more recent ones), while respecting character limits.
+ * Groups messages into atomic blocks, splitting at each user message.
+ * A block contains the user message and all subsequent messages until the next user message.
+ * This ensures tool call sequences (assistant with toolCalls + tool results + final response)
+ * are never split from their initiating user message.
+ */
+export function groupIntoBlocks(messages: Array<ChatMessage>): MessageBlock[] {
+  const blocks: MessageBlock[] = [];
+  let current: ChatMessage[] = [];
+
+  for (const msg of messages) {
+    // A new user message starts a new block (flush previous)
+    if (msg.role === 'user' && current.length > 0) {
+      blocks.push({
+        messages: current,
+        charCount: current.reduce((s, m) => s + m.content.length, 0),
+      });
+      current = [];
+    }
+    current.push(msg);
+  }
+
+  if (current.length > 0) {
+    blocks.push({
+      messages: current,
+      charCount: current.reduce((s, m) => s + m.content.length, 0),
+    });
+  }
+
+  return blocks;
+}
+
+/**
+ * Limits chat history by keeping as many recent message blocks as fit within the character limit.
+ * Messages are grouped into blocks at each user message, so tool call sequences are never split.
+ * Always keeps at least the last block (the most recent user message),
+ * so the model always has some input.
  *
  * @param messages - The messages to limit
- * @param limitRecent - Number of recent message pairs to keep (e.g. 2 means 2 user + 2 assistant messages)
- * @param limitFirst - Number of first message pairs to keep (default: 2)
  * @param characterLimit - Maximum total characters allowed
- * @returns Limited message array with prioritized recent context
+ * @returns Limited message array with the most recent context that fits
  */
-export function limitChatHistory({
-  messages,
-  limitRecent,
-  limitFirst = 2,
-  characterLimit,
-}: {
-  messages: Array<ChatMessage>;
-  limitRecent: number;
-  limitFirst?: number;
-  characterLimit: number;
-}): Array<ChatMessage> {
-  const consolidatedMessages = consolidateMessages(messages);
+export function limitChatHistory(
+  messages: Array<ChatMessage>,
+  characterLimit: number = TOTAL_CHAT_LENGTH_LIMIT,
+): Array<ChatMessage> {
+  const consolidated = consolidateMessages(messages);
+  if (consolidated.length === 0) return [];
 
-  // Convert pairs to individual message counts
-  const maxFirst = limitFirst * 2;
-  const maxRecent = limitRecent * 2;
+  const blocks = groupIntoBlocks(consolidated);
+  if (blocks.length === 0) return [];
 
-  // If we have fewer messages or less characters than the limits, just return all messages
-  const totalChars = consolidatedMessages.reduce((sum, msg) => sum + msg.content.length, 0);
-  if (consolidatedMessages.length <= maxFirst + maxRecent || totalChars <= characterLimit) {
-    return consolidatedMessages;
+  // Always keep at least the last block
+  let startIndex = blocks.length - 1;
+  let charCount = blocks[startIndex]!.charCount;
+
+  // Include older blocks while within character limit
+  while (startIndex > 0) {
+    const block = blocks[startIndex - 1]!;
+    if (charCount + block.charCount > characterLimit) break;
+    charCount += block.charCount;
+    startIndex--;
   }
 
-  // Get mandatory messages
-  const firstMessages = consolidatedMessages.slice(0, maxFirst);
-  const recentMessages = consolidatedMessages.slice(-maxRecent);
-
-  // Get middle messages in reverse order (most recent first)
-  const startIndex = maxFirst;
-  const endIndex = consolidatedMessages.length - maxRecent;
-  const middleMessages = consolidatedMessages.slice(startIndex, endIndex).reverse();
-
-  // Build result: first + recent, as they are mandatory
-  const result = [...firstMessages, ...recentMessages];
-  let charCount = result.reduce((sum, msg) => sum + msg.content.length, 0);
-
-  // Add middle messages that fit within the character limit
-  const middleToAdd: ChatMessage[] = [];
-  for (const msg of middleMessages) {
-    if (charCount + msg.content.length <= characterLimit) {
-      middleToAdd.unshift(msg); // Add to front to maintain chronological order
-      charCount += msg.content.length;
-    } else {
-      break;
-    }
-  }
-
-  // Insert middle messages between first and recent
-  result.splice(firstMessages.length, 0, ...middleToAdd);
-
-  return result;
+  return blocks.slice(startIndex).flatMap((b) => b.messages);
 }
 
 /**
