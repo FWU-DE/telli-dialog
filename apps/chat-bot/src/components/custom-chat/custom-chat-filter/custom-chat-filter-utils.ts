@@ -1,5 +1,5 @@
 import {
-  type FilterCategories,
+  type filterGroup,
   type SchoolType,
   type GradeRange,
   type Subject,
@@ -27,7 +27,7 @@ export const EMPTY_FILTER_VALUES: FilterValues = {
 };
 
 type EntityWithFilterValues = {
-  filterCategories?: {
+  filterGroup?: {
     school_types?: string[];
     grade_ranges?: string[];
     subjects?: string[];
@@ -72,24 +72,24 @@ export function matchesFilterValues(
 }
 
 export function extractFilterValues(entity: EntityWithFilterValues): FilterValues {
-  const filterCategories = entity.filterCategories;
+  const filterGroup = entity.filterGroup;
   const schoolTypes =
-    filterCategories?.school_types && filterCategories.school_types.length > 0
-      ? filterCategories.school_types
+    filterGroup?.school_types && filterGroup.school_types.length > 0
+      ? filterGroup.school_types
       : entity.schoolType
         ? [entity.schoolType]
         : [];
 
   const gradeRanges =
-    filterCategories?.grade_ranges && filterCategories.grade_ranges.length > 0
-      ? filterCategories.grade_ranges
+    filterGroup?.grade_ranges && filterGroup.grade_ranges.length > 0
+      ? filterGroup.grade_ranges
       : entity.gradeLevel
         ? [entity.gradeLevel]
         : [];
 
   const subjects =
-    filterCategories?.subjects && filterCategories.subjects.length > 0
-      ? filterCategories.subjects
+    filterGroup?.subjects && filterGroup.subjects.length > 0
+      ? filterGroup.subjects
       : entity.subject
         ? [entity.subject]
         : [];
@@ -98,13 +98,13 @@ export function extractFilterValues(entity: EntityWithFilterValues): FilterValue
     schoolTypes: unique(schoolTypes),
     gradeRanges: unique(gradeRanges),
     subjects: unique(subjects),
-    categories: unique(filterCategories?.categories ?? []),
-    federalStates: unique(filterCategories?.federal_states ?? []),
-    languages: unique(filterCategories?.languages ?? []),
+    categories: unique(filterGroup?.categories ?? []),
+    federalStates: unique(filterGroup?.federal_states ?? []),
+    languages: unique(filterGroup?.languages ?? []),
   };
 }
 
-export function toFilterCategories(values: FilterValues): FilterCategories {
+export function tofilterGroup(values: FilterValues): filterGroup {
   return {
     school_types: unique(values.schoolTypes) as SchoolType[],
     grade_ranges: unique(values.gradeRanges) as GradeRange[],

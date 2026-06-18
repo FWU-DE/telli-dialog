@@ -11,7 +11,7 @@ import { useOverviewFilters } from '@/components/hooks/use-overview-filters';
 import { getCharactersByFilterAction } from '../actions/entity-filter-actions';
 import { filterAndSortEntities } from '@/components/entity-overview/utils';
 import { RichText } from '@/components/common/rich-text';
-import CustomFilterSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
+import FilterSelectSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
 import {
   extractFilterValues,
   matchesFilterValues,
@@ -72,7 +72,7 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
       activeFilterPills={activeFilterPills}
       onRemoveFilter={handleRemoveFilter}
       filterPanel={
-        <CustomFilterSection
+        <FilterSelectSection
           className="mt-0"
           isEditView={false}
           onReset={resetSelectedFilters}

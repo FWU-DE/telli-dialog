@@ -92,7 +92,7 @@ export const mockLearningScenario = (): LearningScenarioSelectModel => {
     userId: generateUUID(),
     studentExercise: generateRandomString(10),
     attachedLinks: [],
-    filterCategories: {
+    filterGroup: {
       school_types: [],
       grade_ranges: [],
       subjects: [],
@@ -152,7 +152,7 @@ export const mockCharacter = (): CharacterSelectModel => {
     instructions: generateRandomString(10),
     learningContext: generateRandomString(10),
     competence: generateRandomString(10),
-    filterCategories: {
+    filterGroup: {
       school_types: [],
       grade_ranges: [],
       subjects: [],

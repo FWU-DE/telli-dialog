@@ -11,12 +11,12 @@ import {
   GRADE_RANGE_KEYS,
   LANGUAGE_KEYS,
   SCHOOL_TYPE_KEYS,
-  SUBJECT_GROUPS,
+  SUBJECT_SUBGROUPS,
 } from './custom-chat-filter-keys';
 import { CustomChatHeading2 } from '../custom-chat-heading2';
 import { cn } from '@ui/lib/utils';
 
-export type CustomFilterSectionValues = {
+export type FilterSelectSectionValues = {
   schoolTypes: string[];
   gradeRanges: string[];
   subjects: string[];
@@ -25,8 +25,8 @@ export type CustomFilterSectionValues = {
   languages: string[];
 };
 
-type CustomFilterSectionProps = {
-  values: CustomFilterSectionValues;
+type FilterSelectSectionProps = {
+  values: FilterSelectSectionValues;
   onSchoolTypesChange: (values: string[]) => void;
   onGradeRangesChange: (values: string[]) => void;
   onSubjectsChange: (values: string[]) => void;
@@ -40,7 +40,7 @@ type CustomFilterSectionProps = {
   className?: string;
 };
 
-export default function CustomFilterSection({
+export default function FilterSelectSection({
   values,
   onSchoolTypesChange,
   onGradeRangesChange,
@@ -53,7 +53,7 @@ export default function CustomFilterSection({
   onReset,
   hasActiveValues = false,
   className,
-}: CustomFilterSectionProps) {
+}: FilterSelectSectionProps) {
   const t = useTranslations();
 
   const selectPlaceholder = t('common.please-select');
@@ -83,7 +83,7 @@ export default function CustomFilterSection({
     label: t(`languages.${key}`),
   }));
 
-  const subjectOptions = SUBJECT_GROUPS.map((group) => ({
+  const subjectOptions = SUBJECT_SUBGROUPS.map((group) => ({
     title: t(group.titleKey),
     options: group.values.map((value) => ({
       value,

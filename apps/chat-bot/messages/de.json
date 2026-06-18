@@ -622,12 +622,12 @@
     "federal-state-filter": "Bundesland",
     "language-filter": "Sprache",
     "selected-count": "{count} ausgewählt",
-    "subject-group-languages": "Sprachen",
-    "subject-group-social-sciences": "Gesellschaftswissenschaften",
-    "subject-group-arts": "Kunst, Musik, Sport",
-    "subject-group-other": "Weitere",
-    "subject-group-stem": "MINT",
-    "subject-group-ethics": "Ethik, Philosophie, Religion"
+    "subject-subgroup-languages": "Sprachen",
+    "subject-subgroup-social-sciences": "Gesellschaftswissenschaften",
+    "subject-subgroup-arts": "Kunst, Musik, Sport",
+    "subject-subgroup-other": "Weitere",
+    "subject-subgroup-stem": "MINT",
+    "subject-subgroup-ethics": "Ethik, Philosophie, Religion"
   },
   "subjects": {
     "german-as-second-language": "Deutsch als Zweitsprache",

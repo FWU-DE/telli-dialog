@@ -14,9 +14,9 @@ export const FEDERAL_STATE_KEYS = Object.values(federalStatesSchema.enum);
 export const LANGUAGE_KEYS = Object.values(languagesSchema.enum);
 export const SUBJECT_KEYS = Object.values(subjectsSchema.enum);
 
-export const SUBJECT_GROUPS = [
+export const SUBJECT_SUBGROUPS = [
   {
-    titleKey: 'filter.subject-group-languages',
+    titleKey: 'filter.subject-subgroup-languages',
     values: [
       'german',
       'english',
@@ -31,15 +31,15 @@ export const SUBJECT_GROUPS = [
     ] as const,
   },
   {
-    titleKey: 'filter.subject-group-social-sciences',
+    titleKey: 'filter.subject-subgroup-social-sciences',
     values: ['geography', 'history', 'politics', 'economics'] as const,
   },
   {
-    titleKey: 'filter.subject-group-arts',
+    titleKey: 'filter.subject-subgroup-arts',
     values: ['art', 'music', 'sports'] as const,
   },
   {
-    titleKey: 'filter.subject-group-other',
+    titleKey: 'filter.subject-subgroup-other',
     values: [
       'business-studies',
       'health',
@@ -53,7 +53,7 @@ export const SUBJECT_GROUPS = [
     ] as const,
   },
   {
-    titleKey: 'filter.subject-group-stem',
+    titleKey: 'filter.subject-subgroup-stem',
     values: [
       'biology',
       'chemistry',
@@ -65,7 +65,7 @@ export const SUBJECT_GROUPS = [
     ] as const,
   },
   {
-    titleKey: 'filter.subject-group-ethics',
+    titleKey: 'filter.subject-subgroup-ethics',
     values: ['ethics', 'philosophy', 'religion'] as const,
   },
 ] as const;
