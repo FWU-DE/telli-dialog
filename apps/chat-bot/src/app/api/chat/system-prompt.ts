@@ -1,10 +1,11 @@
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
-import { dbGetCharacterById } from '@shared/db/functions/character';
-import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 import { ObscuredFederalState } from '@/auth/utils';
-import { dbGetAssistantById } from '@shared/db/functions/assistants';
-import { AssistantSelectModel } from '@shared/db/schema';
-import { NotFoundError } from '@shared/error';
+import type {
+  AssistantSelectModel,
+  CharacterSelectModel,
+  LearningScenarioSelectModel,
+  WebSearchResult,
+} from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { constructCharacterSystemPrompt } from '../character/system-prompt';
@@ -129,10 +130,10 @@ ${FORMAT_GUIDELINES}
 ${ragContext}`;
 }
 
-export async function constructChatSystemPrompt({
-  characterId,
-  learningScenarioId,
-  assistantId,
+export function constructChatSystemPrompt({
+  character,
+  learningScenario,
+  assistant,
   isTeacher,
   federalState,
   chunks,
@@ -140,9 +141,9 @@ export async function constructChatSystemPrompt({
   webSearchResults = [],
   activeToolDefinitions = [],
 }: {
-  characterId?: string;
-  learningScenarioId?: string;
-  assistantId?: string;
+  character?: CharacterSelectModel;
+  learningScenario?: LearningScenarioSelectModel;
+  assistant?: AssistantSelectModel;
   isTeacher: boolean;
   federalState: ObscuredFederalState;
   chunks: RetrievedChunk[];
@@ -150,23 +151,11 @@ export async function constructChatSystemPrompt({
   webSearchResults?: WebSearchResult[];
   activeToolDefinitions?: ToolDefinition[];
 }) {
-  if (characterId !== undefined) {
-    const character = await dbGetCharacterById({ characterId });
-
-    if (character === undefined || character.suspended) {
-      throw new NotFoundError('Character not found');
-    }
-
+  if (character !== undefined) {
     return constructCharacterSystemPrompt({ character, chunks, activeToolDefinitions });
   }
 
-  if (learningScenarioId !== undefined) {
-    const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
-
-    if (learningScenario === undefined || learningScenario.suspended) {
-      throw new NotFoundError('Learning scenario not found');
-    }
-
+  if (learningScenario !== undefined) {
     return constructLearningScenarioSystemPrompt({
       learningScenario,
       chunks,
@@ -174,13 +163,7 @@ export async function constructChatSystemPrompt({
     });
   }
 
-  if (assistantId !== undefined) {
-    const assistant = await dbGetAssistantById({ assistantId });
-
-    if (assistant.suspended) {
-      throw new NotFoundError('Assistant not found');
-    }
-
+  if (assistant !== undefined) {
     if (assistant.id === HELP_MODE_ASSISTANT_ID) {
       return constructHelpModeSystemPrompt({
         isTeacher,
@@ -190,15 +173,15 @@ export async function constructChatSystemPrompt({
         errorUrls,
         activeToolDefinitions,
       });
-    } else {
-      return constructAssistantSystemPrompt(
-        assistant,
-        chunks,
-        errorUrls,
-        webSearchResults,
-        activeToolDefinitions,
-      );
     }
+
+    return constructAssistantSystemPrompt(
+      assistant,
+      chunks,
+      errorUrls,
+      webSearchResults,
+      activeToolDefinitions,
+    );
   }
 
   return constructAisChatSystemPrompt(chunks, errorUrls, webSearchResults, activeToolDefinitions);

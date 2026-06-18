@@ -117,11 +117,14 @@ type BuildToolsParams = {
   conversationId: string;
   relatedFileEntities: FileModelAndContent[];
   sourceUrls?: string[];
+  attachedLinks?: string[];
   onWebSearchResults?: (results: WebSearchResult[]) => void;
 };
 
 type BuildToolsResult = {
   toolRegistry: ToolRegistry;
+  tools: ToolDefinition[];
+  toolHandlers: Record<string, (args: Record<string, unknown>) => Promise<string>>;
   webSearchResults: WebSearchResult[];
 };
 
@@ -133,12 +136,27 @@ export async function buildTools({
   conversationId,
   relatedFileEntities,
   sourceUrls = [],
+  attachedLinks = [],
   onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
   const toolRegistry: ToolRegistry = {};
+  const tools: ToolDefinition[] = [];
+  const toolHandlers: Record<string, (args: Record<string, unknown>) => Promise<string>> = {};
   const webSearchResults: WebSearchResult[] = [];
   const attachedFileNames = relatedFileEntities.map((file) => file.name);
-  const attachedSourceUrls = sourceUrls;
+  const attachedSourceUrls = sourceUrls.length > 0 ? sourceUrls : attachedLinks;
+
+  function addTool(
+    definition: ToolDefinition,
+    handler: (args: Record<string, unknown>) => Promise<string>,
+  ) {
+    toolRegistry[definition.name] = {
+      definition,
+      handler,
+    };
+    tools.push(definition);
+    toolHandlers[definition.name] = handler;
+  }
 
   const webSearchEnabled = await isWebSearchEnabled({
     user,
@@ -166,43 +184,43 @@ export async function buildTools({
       },
     };
 
-    toolRegistry.web_search = {
-      definition: webSearchToolDefinition,
-      handler: async (args) => {
-        const query = typeof args.query === 'string' ? args.query : '';
-        const results = await searchWeb({
-          query,
-          conversationId,
-          userId: user.id,
-        });
+    addTool(webSearchToolDefinition, async (args) => {
+      const query = typeof args.query === 'string' ? args.query : '';
+      const results = await searchWeb({
+        query,
+        conversationId,
+        userId: user.id,
+      });
 
-        const response: WebSearchToolResponse = {
-          results: results.map((result) => ({
-            title: result.name?.trim() ?? null,
-            url: result.url ?? null,
-            content: result.content?.trim() ?? null,
-          })),
-          error: null,
-        };
+      const response: WebSearchToolResponse = {
+        results: results.map((result) => ({
+          title: result.name?.trim() ?? null,
+          url: result.url ?? null,
+          content: result.content?.trim() ?? null,
+        })),
+        error: null,
+      };
 
-        webSearchResults.push(...results);
-        onWebSearchResults?.(results);
+      webSearchResults.push(...results);
+      onWebSearchResults?.(results);
 
-        if (results.length === 0) {
-          response.error = 'No results found.';
-          return JSON.stringify(response);
-        }
-
+      if (results.length === 0) {
+        response.error = 'No results found.';
         return JSON.stringify(response);
-      },
-    };
+      }
+
+      return JSON.stringify(response);
+    });
   }
 
   if (!characterId && !learningScenarioId) {
     const webScraperToolDefinition: ToolDefinition = {
       name: 'web_scraper',
       description:
-        'Fetch and extract the main text from one specific URL. Use this tool when the user gives you a single webpage URL or when you can derive a concrete URL yourself, for example to scrape a documentation page or another known target. Use web_search instead when you need to discover relevant pages or compare multiple sources.',
+        'Fetch and extract the main text from one specific URL. Use this tool when the user gives you a single webpage URL or when you can derive a concrete URL yourself, for example to scrape a documentation page or another known target. Use web_search instead when you need to discover relevant pages or compare multiple sources.' +
+        (attachedSourceUrls.length > 0
+          ? `\n\nThe following URLs were pinned for this conversation and are likely relevant — consider scraping them when appropriate:\n${attachedSourceUrls.map((link) => `- ${link}`).join('\n')}`
+          : ''),
       parameters: {
         type: 'object',
         properties: {
@@ -217,25 +235,22 @@ export async function buildTools({
       },
     };
 
-    toolRegistry.web_scraper = {
-      definition: webScraperToolDefinition,
-      handler: async (args) => {
-        const url = typeof args.url === 'string' ? args.url.trim() : '';
+    addTool(webScraperToolDefinition, async (args) => {
+      const url = typeof args.url === 'string' ? args.url.trim() : '';
 
-        if (url.length === 0) {
-          return 'Error: Missing URL.';
-        }
+      if (url.length === 0) {
+        return 'Error: Missing URL.';
+      }
 
-        const validationResult = validateWebScraperUrl(url);
+      const validationResult = validateWebScraperUrl(url);
 
-        if (validationResult.error) {
-          return validationResult.error;
-        }
+      if (validationResult.error) {
+        return validationResult.error;
+      }
 
-        const result = await webScraper(validationResult.url);
-        return formatWebScrapedContentForTool(result);
-      },
-    };
+      const result = await webScraper(validationResult.url);
+      return formatWebScrapedContentForTool(result);
+    });
   }
 
   if (relatedFileEntities.length > 0 || attachedSourceUrls.length > 0) {
@@ -263,27 +278,24 @@ export async function buildTools({
       },
     };
 
-    toolRegistry.retrieve_text_chunks = {
-      definition: retrieveTextChunksToolDefinition,
-      handler: async (args) => {
-        const search = typeof args.search === 'string' ? args.search : '';
-        const requestedLimit =
-          typeof args.limit === 'number' && Number.isFinite(args.limit)
-            ? Math.trunc(args.limit)
-            : VECTOR_SEARCH_LIMIT;
-        const limit = Math.min(Math.max(requestedLimit, 1), VECTOR_SEARCH_LIMIT);
-        const chunks = await retrieveChunksByQuery({
-          searchQuery: search,
-          federalStateId: user.federalState.id,
-          relatedFileEntities,
-          sourceUrls: attachedSourceUrls,
-          limit,
-        });
+    addTool(retrieveTextChunksToolDefinition, async (args) => {
+      const search = typeof args.search === 'string' ? args.search : '';
+      const requestedLimit =
+        typeof args.limit === 'number' && Number.isFinite(args.limit)
+          ? Math.trunc(args.limit)
+          : VECTOR_SEARCH_LIMIT;
+      const limit = Math.min(Math.max(requestedLimit, 1), VECTOR_SEARCH_LIMIT);
+      const chunks = await retrieveChunksByQuery({
+        searchQuery: search,
+        federalStateId: user.federalState.id,
+        relatedFileEntities,
+        sourceUrls: attachedSourceUrls,
+        limit,
+      });
 
-        return formatRetrievedChunksForTool(chunks);
-      },
-    };
+      return formatRetrievedChunksForTool(chunks);
+    });
   }
 
-  return { toolRegistry, webSearchResults };
+  return { toolRegistry, tools, toolHandlers, webSearchResults };
 }

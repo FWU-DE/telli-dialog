@@ -84,6 +84,7 @@ describe('buildTools', () => {
       user,
       conversationId: 'conversation-1',
       relatedFileEntities,
+      attachedLinks: [],
     });
 
     expect(Object.keys(toolRegistry)).toContain('retrieve_text_chunks');
@@ -167,6 +168,7 @@ describe('buildTools', () => {
       user,
       conversationId: 'conversation-1',
       relatedFileEntities: [],
+      attachedLinks: [],
     });
 
     const webSearchTool = toolRegistry.web_search!;
@@ -218,6 +220,7 @@ describe('buildTools', () => {
       user,
       conversationId: 'conversation-1',
       relatedFileEntities: [],
+      attachedLinks: [],
     });
 
     expect(Object.keys(toolRegistry).sort()).toEqual(['web_scraper', 'web_search']);

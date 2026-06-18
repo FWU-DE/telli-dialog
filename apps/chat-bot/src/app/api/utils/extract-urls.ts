@@ -1,73 +1,51 @@
 import { parseHyperlinks } from '@/utils/web-search/parsing';
-import { dbGetLearningScenarioByIdOptionalShareData } from '@shared/db/functions/learning-scenario';
-import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION } from '@/configuration-text-inputs/const';
-import { UserAndContext } from '@/auth/types';
-import { ChatMessage } from '../chat/actions';
-import { dbGetCharacterByIdOptionalShareData } from '@shared/db/functions/character';
+import { type ChatMessage } from '../chat/actions';
+import type {
+  AssistantSelectModel,
+  CharacterSelectModel,
+  LearningScenarioSelectModel,
+} from '@shared/db/schema';
 
 // Extract unique URLs from message content
 function extractUniqueUrls(content: string): string[] {
   return [...new Set(parseHyperlinks(content) ?? [])].filter((l) => l !== '');
 }
 
-// Get attached links from assistant or character
-async function getAttachedLinks(
-  assistantId: string | undefined,
-  characterId: string | undefined,
-  learningScenarioId: string | undefined,
-  userId: string,
-): Promise<string[] | null> {
-  if (assistantId) {
-    const assistant = await dbGetAssistantById({ assistantId: assistantId });
-    return assistant?.attachedLinks.filter((l) => l !== '') ?? [];
-  }
-  if (characterId) {
-    const character = await dbGetCharacterByIdOptionalShareData({
-      characterId,
-      user: { id: userId },
-    });
-    return character?.attachedLinks.filter((l) => l !== '') ?? [];
-  }
-  if (learningScenarioId) {
-    const learningScenario = await dbGetLearningScenarioByIdOptionalShareData({
-      learningScenarioId,
-      user: { id: userId },
-    });
-    return learningScenario?.attachedLinks.filter((l) => l !== '') ?? [];
-  }
-  return null;
+function sanitizeLinks(links: string[] | null | undefined): string[] {
+  return links?.filter((link) => link !== '') ?? [];
 }
 
 /**
  * Collects URLs based on the conversation context.
- * For characters, only the attached links are returned.
+ * For characters and learning scenarios, only the attached links are returned.
  * For assistants, both attached links and URLs from user messages are included.
  * For regular chat, only URLs from user messages are included.
  *
- * @param assistantId The ID of the assistant, if applicable.
- * @param characterId The ID of the character, if applicable.
- * @param user The user and context information.
+ * @param assistant The active assistant, if applicable.
+ * @param character The active character, if applicable.
+ * @param learningScenario The active learning scenario, if applicable.
  * @param messages The conversation history messages.
  * @returns The aggregated URLs.
  */
-export async function extractUrls(
-  assistantId: string | undefined,
-  characterId: string | undefined,
-  learningScenarioId: string | undefined,
-  user: UserAndContext,
-  messages: ChatMessage[],
-): Promise<string[]> {
-  const attachedLinks = await getAttachedLinks(
-    assistantId,
-    characterId,
-    learningScenarioId,
-    user.id,
+export function extractUrls({
+  assistant,
+  character,
+  learningScenario,
+  messages,
+}: {
+  assistant?: AssistantSelectModel;
+  character?: CharacterSelectModel;
+  learningScenario?: LearningScenarioSelectModel;
+  messages: ChatMessage[];
+}): string[] {
+  const attachedLinks = sanitizeLinks(
+    assistant?.attachedLinks ?? character?.attachedLinks ?? learningScenario?.attachedLinks,
   );
 
-  // For characters, just return their attached links
-  if (characterId || learningScenarioId) {
-    return attachedLinks ?? [];
+  // For characters or learning scenarios, just return their attached links
+  if (character || learningScenario) {
+    return attachedLinks;
   }
 
   const userMessageUrls = [
@@ -76,7 +54,7 @@ export async function extractUrls(
     ),
   ];
 
-  const urls = [...new Set([...(attachedLinks ?? []), ...userMessageUrls])].slice(
+  const urls = [...new Set([...attachedLinks, ...userMessageUrls])].slice(
     0,
     MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION,
   );

@@ -12,6 +12,7 @@ interface MessagesProps {
   isLoading: boolean;
   status: ChatStatus;
   reload: () => void;
+  conversationId?: string;
   assistantIcon?: React.ReactNode;
   containerClassName: string;
   fileMapping?: Map<string, FileModel[]>;
@@ -24,6 +25,7 @@ export function Messages({
   isLoading,
   status,
   reload,
+  conversationId,
   assistantIcon,
   containerClassName,
   fileMapping,
@@ -41,6 +43,7 @@ export function Messages({
           isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
           isLoading={isLoading}
           regenerateMessage={reload}
+          conversationId={conversationId}
           assistantIcon={assistantIcon}
           webSources={message.role === 'user' ? webSourceMapping?.get(message.id) : undefined}
           status={status}

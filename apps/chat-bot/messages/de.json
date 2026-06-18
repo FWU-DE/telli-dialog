@@ -32,6 +32,10 @@
     "copy": "Kopieren",
     "edit": "Bearbeiten",
     "copy-clipboard": "In die Zwischenablage kopieren",
+    "copy-clipboard-success": "In die Zwischenablage kopiert",
+    "copy-clipboard-error": "Fehler beim Kopieren in die Zwischenablage",
+    "message-download": "Nachricht als Word-Datei herunterladen",
+    "message-download-error": "Der Download der Nachricht ist fehlgeschlagen.",
     "regenerate-message": "Antwort erneut generieren",
     "image-load-failed": "Bild konnte nicht geladen werden",
     "rate-limit-error": "Das bereitgestellte Tokenvolumen wurde aufgebraucht.",
@@ -197,14 +201,6 @@
       "delete-chat-modal-description": "Es wird ein neuer Chat begonnen. Der aktuelle Chat wird unwiderruflich gelöscht.",
       "delete-chat-modal-confirm-button": "Löschen",
       "expired-modal-description": "Der Dialog ist abgelaufen"
-    },
-    "share-page": {
-      "back-button": "Zum Dialogpartner",
-      "join": "Dem Dialog beitreten",
-      "go-to": "Gehe auf",
-      "enter-code": "Gib den Code ein",
-      "open-chat": "Chat öffnen",
-      "use-qr": "Oder nutze den QR-Code"
     },
     "copy-modal": {
       "title": "Dialogpartner kopieren",
@@ -374,14 +370,6 @@
       "button-stop": "Stoppen",
       "share": "Teilen"
     },
-    "share-page": {
-      "back-button": "Zum Lernszenario",
-      "join": "Das Lernszenario beginnen",
-      "go-to": "Gehe auf",
-      "enter-code": "Gib den Code ein.",
-      "open-chat": "Chat öffnen",
-      "use-qr": "Scanne den QR-Code."
-    },
     "toasts": {
       "create-toast-success": "Das Lernszenario wurde erfolgreich erstellt.",
       "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
@@ -435,7 +423,9 @@
     "copy-image-error": "Bild konnte nicht kopiert werden",
     "copy-prompt-success": "Prompt in die Zwischenablage kopiert",
     "copy-prompt-error": "Prompt konnte nicht kopiert werden",
+    "download-image-error": "Bild konnte nicht heruntergeladen werden",
     "copy-image-tooltip": "Bild kopieren",
+    "download-image-tooltip": "Bild herunterladen",
     "copy-prompt-tooltip": "Prompt kopieren"
   },
   "authentication": {
@@ -497,6 +487,23 @@
       "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",
       "share": "Teilen"
+    },
+    "share-page": {
+      "go-to": "Gehe auf",
+      "enter-code": "Gib den Code ein.",
+      "open-chat": "Chat öffnen",
+      "use-qr": "Scanne den QR-Code.",
+      "copy-link": "Startlink kopieren",
+      "learning-scenario": {
+        "sub-header": "Lernszenario",
+        "back-button": "Zum Lernszenario",
+        "join": "Das Lernszenario beginnen"
+      },
+      "character": {
+        "sub-header": "Dialogpartner",
+        "back-button": "Zum Dialogpartner",
+        "join": "Dem Dialog beitreten"
+      }
     },
     "toasts": {
       "share-toast-error": "Das Teilen konnte nicht aktiviert werden.",

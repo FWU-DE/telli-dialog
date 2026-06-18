@@ -1,5 +1,6 @@
 import {
   dbGetConversationById,
+  dbGetConversationMessageById,
   dbGetConversationMessages,
   dbGetConversations,
   dbUpdateConversationTitle,
@@ -128,6 +129,32 @@ export async function getConversationAndMessagesForExport({
   return {
     conversation,
     messages,
+  };
+}
+
+/**
+ * Authenticated user wants to download a single conversation message.
+ * Only the selected message is exported.
+ */
+export async function getConversationMessageForExport({
+  conversationId,
+  messageId,
+  userId,
+}: {
+  conversationId: string;
+  messageId: string;
+  userId: string;
+}) {
+  const conversation = await getConversation({ conversationId, userId });
+  const message = await dbGetConversationMessageById({ conversationId, messageId, userId });
+
+  if (!message) {
+    throw new NotFoundError('Conversation message not found');
+  }
+
+  return {
+    conversation,
+    message,
   };
 }
 

@@ -68,27 +68,41 @@ export function toOpenAIMessages(
  * Handles image attachments by converting them to multimodal content arrays.
  */
 export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.ResponseInputItem[] {
-  return messages.map((message) => {
+  return messages.flatMap((message): OpenAI.Responses.ResponseInputItem[] => {
     if (message.role === 'tool') {
-      return {
-        type: 'function_call_output',
-        id: message.toolCallId! + '_output',
-        call_id: message.toolCallId!,
-        output: message.content,
-        status: 'completed',
-      } satisfies OpenAI.Responses.ResponseFunctionToolCallOutputItem;
+      if (!message.toolCallId) {
+        throw new Error('Tool messages require toolCallId');
+      }
+
+      return [
+        {
+          type: 'function_call_output',
+          id: message.toolCallId + '_output',
+          call_id: message.toolCallId,
+          output: message.content,
+          status: 'completed',
+        } satisfies OpenAI.Responses.ResponseFunctionToolCallOutputItem,
+      ];
     }
     if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
-      // TODO: The Assistant might include messages in the future.
-      // TODO: This might include multiple tool calls in the future, we would need to handle that as well.
-      return {
-        type: 'function_call',
-        id: message.toolCalls[0]!.id + '_call',
-        status: 'completed',
-        arguments: message.toolCalls[0]!.arguments,
-        call_id: message.toolCalls[0]!.id,
-        name: message.toolCalls[0]!.name,
-      } satisfies OpenAI.Responses.ResponseFunctionToolCallItem;
+      const result: OpenAI.Responses.ResponseInputItem[] = message.toolCalls.map(
+        (toolCall) =>
+          ({
+            type: 'function_call',
+            id: toolCall.id + '_call',
+            status: 'completed',
+            arguments: toolCall.arguments,
+            call_id: toolCall.id,
+            name: toolCall.name,
+          }) satisfies OpenAI.Responses.ResponseFunctionToolCallItem,
+      );
+      if (message.content) {
+        result.unshift({
+          role: message.role,
+          content: message.content,
+        } satisfies OpenAI.Responses.EasyInputMessage);
+      }
+      return result;
     }
 
     // If message has image attachments, convert to multimodal content format
@@ -107,17 +121,21 @@ export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.Re
           ),
       ];
 
-      return {
-        role: message.role as 'user' | 'assistant' | 'system',
-        content: contentParts,
-      } satisfies OpenAI.Responses.EasyInputMessage;
+      return [
+        {
+          role: message.role as 'user' | 'assistant' | 'system',
+          content: contentParts,
+        } satisfies OpenAI.Responses.EasyInputMessage,
+      ];
     }
 
     // Simple text message
-    return {
-      role: message.role as 'user' | 'assistant' | 'system',
-      content: message.content,
-    } satisfies OpenAI.Responses.EasyInputMessage;
+    return [
+      {
+        role: message.role as 'user' | 'assistant' | 'system',
+        content: message.content,
+      } satisfies OpenAI.Responses.EasyInputMessage,
+    ];
   });
 }
 

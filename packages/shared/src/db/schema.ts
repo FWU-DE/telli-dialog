@@ -25,6 +25,7 @@ import {
 } from '../utils/chat';
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
+import { ToolCall } from '@ais-chat/ai-core/chat/types';
 
 // can be expanded to include other metadata of other file types
 export type FileMetadata = {
@@ -154,6 +155,8 @@ export const conversationMessageTable = pgTable(
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
     parameters: json('parameters').$type<ConversationMessageParameters>(),
     webSearchResults: json('web_search_results').$type<ConversationMessageWebSearchResult[]>(),
+    toolCalls: json('tool_calls').$type<ToolCall[]>(),
+    toolCallId: text('tool_call_id'),
   },
   (table) => [index().on(table.conversationId), index().on(table.userId)],
 );

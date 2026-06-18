@@ -23,6 +23,16 @@ const buildToolsOutput = {
       handler: vi.fn(),
     },
   },
+  tools: [
+    {
+      name: 'web_search',
+      description: 'web search tool',
+      parameters: {},
+    },
+  ],
+  toolHandlers: {
+    web_search: vi.fn(),
+  },
   webSearchResults,
 };
 
@@ -39,6 +49,7 @@ const mocks = vi.hoisted(() => ({
   dbGetOrCreateConversationMock: vi.fn(),
   dbUpdateConversationTitleMock: vi.fn(),
   dbInsertChatContentMock: vi.fn(),
+  dbInsertChatContentBatchMock: vi.fn(),
   dbInsertConversationUsageMock: vi.fn(),
   dbUpdateLastUsedModelByUserIdMock: vi.fn(),
   dbGetAttachedFileByEntityIdMock: vi.fn(),
@@ -46,6 +57,7 @@ const mocks = vi.hoisted(() => ({
   sendRabbitmqEventMock: vi.fn(),
   constructNewMessageEventMock: vi.fn(),
   constructTokenBudgetExceededEventMock: vi.fn(),
+  convertToAiCoreMessagesMock: vi.fn(),
   formatMessagesWithImagesMock: vi.fn(),
   getChatTitleMock: vi.fn(),
   limitChatHistoryMock: vi.fn(),
@@ -55,6 +67,9 @@ const mocks = vi.hoisted(() => ({
   ingestWebContentMock: vi.fn(),
   userHasReachedTokenPointsLimitMock: vi.fn(),
   logErrorMock: vi.fn(),
+  getCharacterForChatSessionMock: vi.fn(),
+  getLearningScenarioForChatSessionMock: vi.fn(),
+  getAssistantForNewChatMock: vi.fn(),
 }));
 
 vi.mock('@ais-chat/ai-core', () => ({
@@ -86,6 +101,7 @@ vi.mock('@shared/db/functions/chat', () => ({
   dbGetOrCreateConversation: mocks.dbGetOrCreateConversationMock,
   dbUpdateConversationTitle: mocks.dbUpdateConversationTitleMock,
   dbInsertChatContent: mocks.dbInsertChatContentMock,
+  dbInsertChatContentBatch: mocks.dbInsertChatContentBatchMock,
 }));
 
 vi.mock('@shared/db/functions/token-usage', () => ({
@@ -118,6 +134,7 @@ vi.mock('./system-prompt', () => ({
 }));
 
 vi.mock('./utils', () => ({
+  convertToAiCoreMessages: mocks.convertToAiCoreMessagesMock,
   formatMessagesWithImages: mocks.formatMessagesWithImagesMock,
   getChatTitle: mocks.getChatTitleMock,
   limitChatHistory: mocks.limitChatHistoryMock,
@@ -141,6 +158,18 @@ vi.mock('../rag/ingestWebContent', () => ({
 
 vi.mock('@shared/logging', () => ({
   logError: mocks.logErrorMock,
+}));
+
+vi.mock('@shared/characters/character-service', () => ({
+  getCharacterForChatSession: mocks.getCharacterForChatSessionMock,
+}));
+
+vi.mock('@shared/learning-scenarios/learning-scenario-service', () => ({
+  getLearningScenarioForChatSession: mocks.getLearningScenarioForChatSessionMock,
+}));
+
+vi.mock('@shared/assistants/assistant-service', () => ({
+  getAssistantForNewChat: mocks.getAssistantForNewChatMock,
 }));
 
 const mainModel = {
@@ -238,6 +267,9 @@ beforeEach(() => {
   mocks.limitChatHistoryMock.mockImplementation(
     ({ messages }: { messages: ChatMessage[] }) => messages,
   );
+  mocks.convertToAiCoreMessagesMock.mockImplementation(
+    (_systemPrompt: unknown, messages: unknown[]) => messages,
+  );
   mocks.formatMessagesWithImagesMock.mockImplementation((messages: ChatMessage[]) => messages);
   mocks.extractImagesAndUrlMock.mockResolvedValue([]);
   mocks.constructChatSystemPromptMock.mockResolvedValue('system-prompt');
@@ -324,6 +356,11 @@ describe('sendChatMessage', () => {
       expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
       expect(mocks.retrieveChunksMock).not.toHaveBeenCalled();
       expect(mocks.runWebSearchPipelineMock).not.toHaveBeenCalled();
+      expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
+      expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
+      expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
+        expect.objectContaining({ errorUrls: [] }),
+      );
       expect(result.webSearchResults).toEqual(webSearchResults);
       expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -336,11 +373,102 @@ describe('sendChatMessage', () => {
       expect(mocks.buildToolsMock).not.toHaveBeenCalled();
       expect(mocks.runAgentLoopMock).not.toHaveBeenCalled();
       expect(mocks.runWebSearchPipelineMock).toHaveBeenCalledTimes(1);
+      expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
+      expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
       expect(result.webSearchResults).toEqual(webSearchResults);
       expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
         expect.objectContaining({ webSearchResults, activeToolDefinitions: [] }),
       );
       expect(streamedText).toBe('fallback chunk');
     }
+  });
+
+  it('throws when conversation context ids do not match', async () => {
+    const { sendChatMessage } = await import('./chat-service');
+
+    mocks.dbGetOrCreateConversationMock.mockResolvedValue({
+      ...conversation,
+      characterId: 'character-1',
+      learningScenarioId: null,
+      assistantId: null,
+    } as never);
+
+    await expect(
+      sendChatMessage({
+        conversationId: conversation.id,
+        messages,
+        modelId: mainModel.id,
+        user: createUser(false),
+      }),
+    ).rejects.toThrow('Conversation not found');
+  });
+
+  it('throws when character is suspended', async () => {
+    const { sendChatMessage } = await import('./chat-service');
+
+    const characterId = 'character-1';
+    mocks.dbGetOrCreateConversationMock.mockResolvedValue({
+      ...conversation,
+      characterId,
+      learningScenarioId: null,
+      assistantId: null,
+    } as never);
+    mocks.getCharacterForChatSessionMock.mockResolvedValue({ suspended: true } as never);
+
+    await expect(
+      sendChatMessage({
+        conversationId: conversation.id,
+        messages,
+        modelId: mainModel.id,
+        characterId,
+        user: createUser(false),
+      }),
+    ).rejects.toThrow('Character not found');
+  });
+
+  it('throws when learning scenario is suspended', async () => {
+    const { sendChatMessage } = await import('./chat-service');
+
+    const learningScenarioId = 'learning-scenario-1';
+    mocks.dbGetOrCreateConversationMock.mockResolvedValue({
+      ...conversation,
+      characterId: null,
+      learningScenarioId,
+      assistantId: null,
+    } as never);
+    mocks.getLearningScenarioForChatSessionMock.mockResolvedValue({ suspended: true } as never);
+
+    await expect(
+      sendChatMessage({
+        conversationId: conversation.id,
+        messages,
+        modelId: mainModel.id,
+        learningScenarioId,
+        user: createUser(false),
+      }),
+    ).rejects.toThrow('Learning scenario not found');
+  });
+
+  it('throws when assistant is suspended', async () => {
+    const { sendChatMessage } = await import('./chat-service');
+
+    const assistantId = 'assistant-1';
+    mocks.dbGetOrCreateConversationMock.mockResolvedValue({
+      ...conversation,
+      characterId: null,
+      learningScenarioId: null,
+      assistantId,
+    } as never);
+    mocks.getAssistantForNewChatMock.mockResolvedValue({ suspended: true } as never);
+
+    await expect(
+      sendChatMessage({
+        conversationId: conversation.id,
+        messages,
+        modelId: mainModel.id,
+        assistantId,
+        user: createUser(false),
+      }),
+    ).rejects.toThrow('Assistant not found');
   });
 });

@@ -4,6 +4,7 @@ import {
   type TokenUsage,
   TokenPointsExceededError,
   type ToolDefinition,
+  runAgentLoop,
 } from '@ais-chat/ai-core';
 import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { userHasReachedTokenPointsLimit } from './usage';
@@ -13,6 +14,7 @@ import {
   dbGetOrCreateConversation,
   dbUpdateConversationTitle,
   dbInsertChatContent,
+  dbInsertChatContentBatch,
 } from '@shared/db/functions/chat';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
@@ -21,14 +23,15 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructChatSystemPrompt } from './system-prompt';
-import { formatMessagesWithImages, getChatTitle, limitChatHistory } from './utils';
+import {
+  convertToAiCoreMessages,
+  formatMessagesWithImages,
+  getChatTitle,
+  limitChatHistory,
+} from './utils';
+import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
-import {
-  KEEP_FIRST_MESSAGES,
-  KEEP_RECENT_MESSAGES,
-  TOTAL_CHAT_LENGTH_LIMIT,
-} from '@/configuration-text-inputs/const';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
@@ -36,27 +39,36 @@ import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { buildTools } from './build-tools';
 import { runWebSearchPipeline } from './websearch';
-import { runAgentLoop } from '@ais-chat/ai-core';
 import type { WebSearchResult } from '@shared/db/schema';
+import type {
+  AssistantSelectModel,
+  CharacterSelectModel,
+  LearningScenarioSelectModel,
+} from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
+import { NotFoundError } from '@shared/error';
+import { getCharacterForChatSession } from '@shared/characters/character-service';
+import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
+import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
+import { deepEqual } from '@/utils/object';
 
-/**
- * Converts frontend messages to ai-core message format
- */
-function convertToAiCoreMessages(systemPrompt: string, messages: ChatMessage[]): AiCoreMessage[] {
-  const result: AiCoreMessage[] = [{ role: 'system', content: systemPrompt }];
+type CustomChatIds = {
+  characterId?: string | undefined;
+  learningScenarioId?: string | undefined;
+  assistantId?: string | undefined;
+};
 
-  for (const msg of messages) {
-    if (msg.role === 'system') continue; // Skip system messages, we add our own
-    result.push({
-      role: msg.role === 'user' ? 'user' : 'assistant',
-      content: msg.content,
-      attachments: msg.experimental_attachments,
-    });
+function ensureConversationCustomChatIdsMatch({
+  incomingIds,
+  storedIds,
+}: {
+  incomingIds: CustomChatIds;
+  storedIds: CustomChatIds;
+}) {
+  if (!deepEqual(incomingIds, storedIds)) {
+    throw new NotFoundError('Conversation not found');
   }
-
-  return result;
 }
 
 function resolveAgentNameForTracing({
@@ -125,6 +137,43 @@ export async function sendChatMessage({
 
   const activeAuxiliaryModelAndApiKey = auxiliaryModelAndApiKey;
 
+  let activeCharacter: CharacterSelectModel | undefined;
+  let activeLearningScenario: LearningScenarioSelectModel | undefined;
+  let activeAssistant: AssistantSelectModel | undefined;
+
+  if (characterId !== undefined) {
+    activeCharacter = await getCharacterForChatSession({
+      characterId,
+      user,
+    });
+
+    if (activeCharacter.suspended) {
+      throw new NotFoundError('Character not found');
+    }
+  }
+
+  if (learningScenarioId !== undefined) {
+    activeLearningScenario = await getLearningScenarioForChatSession({
+      learningScenarioId,
+      user,
+    });
+
+    if (activeLearningScenario.suspended) {
+      throw new NotFoundError('Learning scenario not found');
+    }
+  }
+
+  if (assistantId !== undefined) {
+    activeAssistant = await getAssistantForNewChat({
+      assistantId,
+      user,
+    });
+
+    if (activeAssistant.suspended) {
+      throw new NotFoundError('Assistant not found');
+    }
+  }
+
   // Get or create conversation
   const conversation = await dbGetOrCreateConversation({
     conversationId,
@@ -152,6 +201,15 @@ export async function sendChatMessage({
   const activeConversationObject = conversationObject;
   const agenticChatEnabled = user.federalState.featureToggles.isAgenticChatEnabled ?? false;
 
+  ensureConversationCustomChatIdsMatch({
+    incomingIds: { characterId, learningScenarioId, assistantId },
+    storedIds: {
+      characterId: activeConversation.characterId ?? undefined,
+      learningScenarioId: activeConversation.learningScenarioId ?? undefined,
+      assistantId: activeConversation.assistantId ?? undefined,
+    },
+  });
+
   // Check budget limit after we have the conversation for proper event tracking
   if (await userHasReachedTokenPointsLimit({ user })) {
     await sendRabbitmqEvent(
@@ -172,11 +230,8 @@ export async function sendChatMessage({
 
   const activeUserMessage = userMessage;
 
-  const urls = await extractUrls(assistantId, characterId, learningScenarioId, user, messages);
-  const { processedUrls, errorUrls } = await ingestWebContent({
-    urls,
-    federalStateId: user.federalState.id,
-  });
+  // Use DB message count for orderNumber
+  const dbMessageCount = activeConversationObject.messages.length;
 
   // Save user message to DB
   await dbInsertChatContent({
@@ -186,7 +241,7 @@ export async function sendChatMessage({
     role: 'user',
     userId: user.id,
     modelName: definedModel.name,
-    orderNumber: messages.length + 1,
+    orderNumber: dbMessageCount + 1,
   });
 
   // Link files to conversation
@@ -203,11 +258,12 @@ export async function sendChatMessage({
     conversationId: conversation.id,
     characterId,
     learningScenarioId,
-    assistantId: assistantId,
+    assistantId,
   });
 
   let webSearchResults: WebSearchResult[] = [];
   let chunks: RetrievedChunk[] = [];
+  let errorUrls: string[] = [];
   let toolRegistry:
     | Record<
         string,
@@ -216,13 +272,34 @@ export async function sendChatMessage({
     | undefined;
   let activeToolDefinitions: ToolDefinition[] = [];
 
+  const urls = extractUrls({
+    assistant: activeAssistant,
+    character: activeCharacter,
+    learningScenario: activeLearningScenario,
+    messages,
+  });
+  const ingestResult = await ingestWebContent({
+    urls,
+    federalStateId: user.federalState.id,
+  });
+  errorUrls = ingestResult.errorUrls;
+
   if (agenticChatEnabled) {
+    const attachedLinks =
+      activeAssistant?.attachedLinks ??
+      activeCharacter?.attachedLinks ??
+      activeLearningScenario?.attachedLinks ??
+      [];
+
     const builtTools = await buildTools({
       user,
       characterId,
+      learningScenarioId,
       assistantId,
       conversationId: activeConversation.id,
       relatedFileEntities,
+      attachedLinks,
+      sourceUrls: ingestResult.processedUrls,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({
@@ -237,7 +314,7 @@ export async function sendChatMessage({
     toolRegistry = builtTools.toolRegistry;
     activeToolDefinitions = Object.values(toolRegistry).map((entry) => entry.definition);
   } else {
-    // Fallback implementations of Websearch and Chunk Retrieval
+    // Fallback implementations of Websearch and Chunk Retrieval.
     webSearchResults = await runWebSearchPipeline({
       messages,
       user,
@@ -252,26 +329,28 @@ export async function sendChatMessage({
       messages,
       federalStateId: user.federalState.id,
       relatedFileEntities,
-      sourceUrls: processedUrls,
+      sourceUrls: ingestResult.processedUrls,
     });
   }
 
   // Update last used model
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
 
+  // Use DB messages as source of truth — they include intermediate tool call/result
+  // messages from the agent loop that the client doesn't track
+  const fullMessages: ChatMessage[] = [
+    ...convertMessageModelToMessage(activeConversationObject.messages),
+    userMessage,
+  ];
+
   // Prune messages
-  const prunedMessages = limitChatHistory({
-    messages: messages.map((m) => ({ id: m.id, role: m.role, content: m.content })),
-    limitRecent: KEEP_RECENT_MESSAGES,
-    limitFirst: KEEP_FIRST_MESSAGES,
-    characterLimit: TOTAL_CHAT_LENGTH_LIMIT,
-  });
+  const prunedMessages = limitChatHistory(fullMessages);
 
   // Build system prompt
-  const systemPrompt = await constructChatSystemPrompt({
-    characterId,
-    learningScenarioId,
-    assistantId: assistantId,
+  const systemPrompt = constructChatSystemPrompt({
+    character: activeCharacter,
+    learningScenario: activeLearningScenario,
+    assistant: activeAssistant,
     isTeacher: user.userRole === 'teacher',
     federalState: user.federalState,
     chunks,
@@ -300,27 +379,43 @@ export async function sendChatMessage({
   // Create native stream
   const { stream, update, done, error: streamError } = createTextStream();
   const assistantMessageId = crypto.randomUUID();
-  const assistantMessageOrderNumber = messages.length + 2;
-  const emptyAssistantMessageOrderNumber = activeConversationObject.messages.length + 1;
+  const assistantMessageOrderNumber = dbMessageCount + 2;
 
   async function persistAssistantMessage({
     fullText,
     usage,
     priceInCents,
+    agentLoopMessages = [],
   }: {
     fullText: string;
     usage: TokenUsage;
     priceInCents: number;
+    agentLoopMessages?: AiCoreMessage[];
   }) {
-    await dbInsertChatContent({
-      content: fullText,
-      role: 'assistant',
-      userId: user.id,
-      orderNumber: assistantMessageOrderNumber,
-      modelName: definedModel.name,
-      conversationId: activeConversation.id,
-      webSearchResults,
-    });
+    // Persist intermediate tool call/result messages and the final assistant message in one query
+    const messagesToInsert = [
+      ...agentLoopMessages.map((msg, index) => ({
+        content: msg.content,
+        role: msg.role,
+        userId: user.id,
+        orderNumber: assistantMessageOrderNumber + index,
+        modelName: definedModel.name,
+        conversationId: activeConversation.id,
+        toolCalls: msg.toolCalls ?? null,
+        toolCallId: msg.toolCallId ?? null,
+      })),
+      {
+        content: fullText,
+        role: 'assistant' as const,
+        userId: user.id,
+        orderNumber: assistantMessageOrderNumber + agentLoopMessages.length,
+        modelName: definedModel.name,
+        conversationId: activeConversation.id,
+        webSearchResults,
+      },
+    ];
+
+    await dbInsertChatContentBatch(messagesToInsert);
 
     if (messages.length <= 2 || activeConversation.name === null) {
       const chatTitle = await getChatTitle({
@@ -364,7 +459,7 @@ export async function sendChatMessage({
       content: '',
       role: 'assistant',
       userId: user.id,
-      orderNumber: emptyAssistantMessageOrderNumber,
+      orderNumber: assistantMessageOrderNumber,
       modelName: definedModel.name,
       conversationId: activeConversation.id,
     });
@@ -380,15 +475,7 @@ export async function sendChatMessage({
       onTextChunk: (delta: string) => {
         update(delta);
       },
-      onComplete: async ({
-        fullText,
-        usage,
-        priceInCents,
-      }: {
-        fullText: string;
-        usage: TokenUsage;
-        priceInCents: number;
-      }) => {
+      onComplete: async ({ fullText, usage, priceInCents }) => {
         try {
           await persistAssistantMessage({ fullText, usage, priceInCents });
           done();

@@ -1,6 +1,5 @@
 import {
   generateTextStreamWithBilling,
-  type Message as AiCoreMessage,
   type ToolDefinition,
   TokenPointsExceededError,
   SharedChatExpiredError,
@@ -25,36 +24,14 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructLearningScenarioSystemPrompt } from './system-prompt';
-import { formatMessagesWithImages, limitChatHistory } from '../chat/utils';
+import { convertToAiCoreMessages, formatMessagesWithImages, limitChatHistory } from '../chat/utils';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import { buildTools } from '../chat/build-tools';
-import {
-  KEEP_FIRST_MESSAGES,
-  KEEP_RECENT_MESSAGES,
-  TOTAL_CHAT_LENGTH_LIMIT,
-} from '@/configuration-text-inputs/const';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { RetrievedChunk } from '../rag/types';
-
-/**
- * Converts frontend messages to ai-core message format
- */
-function convertToAiCoreMessages(systemPrompt: string, messages: ChatMessage[]): AiCoreMessage[] {
-  const result: AiCoreMessage[] = [{ role: 'system', content: systemPrompt }];
-
-  for (const msg of messages) {
-    if (msg.role === 'system') continue;
-    result.push({
-      role: msg.role === 'user' ? 'user' : 'assistant',
-      content: msg.content,
-    });
-  }
-
-  return result;
-}
 
 /**
  * Server Action to send a learning scenario message and stream the response.
@@ -72,7 +49,7 @@ export async function sendLearningScenarioMessage({
 }): Promise<SendMessageResult> {
   // Get learning scenario
   const learningScenario = await dbGetLearningScenarioByIdAndInviteCode({
-    learningScenarioId: learningScenarioId,
+    learningScenarioId,
     inviteCode,
   });
   if (learningScenario === undefined || learningScenario.suspended) {
@@ -143,14 +120,14 @@ export async function sendLearningScenarioMessage({
     federalStateId: teacherUserAndContext.federalState.id,
   });
 
+  let activeToolDefinitions: ToolDefinition[] = [];
+  let chunks: RetrievedChunk[] = [];
   let toolRegistry:
     | Record<
         string,
         { definition: ToolDefinition; handler: (args: Record<string, unknown>) => Promise<string> }
       >
     | undefined;
-  let activeToolDefinitions: ToolDefinition[] = [];
-  let chunks: RetrievedChunk[] = [];
 
   if (agenticChatEnabled) {
     const builtTools = await buildTools({
@@ -158,11 +135,13 @@ export async function sendLearningScenarioMessage({
       learningScenarioId: learningScenario.id,
       conversationId: `shared-learning-scenario:${learningScenario.id}`,
       relatedFileEntities,
+      attachedLinks: learningScenario.attachedLinks,
       sourceUrls: processedUrls,
     });
 
+    activeToolDefinitions = Object.values(builtTools.toolRegistry).map((entry) => entry.definition);
+
     toolRegistry = builtTools.toolRegistry;
-    activeToolDefinitions = Object.values(toolRegistry).map((entry) => entry.definition);
   } else {
     chunks = await retrieveChunks({
       messages,
@@ -180,12 +159,7 @@ export async function sendLearningScenarioMessage({
   });
 
   // Prune messages
-  const prunedMessages = limitChatHistory({
-    messages: messages.map((m) => ({ id: m.id, role: m.role, content: m.content })),
-    limitRecent: KEEP_RECENT_MESSAGES,
-    limitFirst: KEEP_FIRST_MESSAGES,
-    characterLimit: TOTAL_CHAT_LENGTH_LIMIT,
-  });
+  const prunedMessages = limitChatHistory(messages);
 
   // Check if the model supports images based on supportedImageFormats
   const modelSupportsImages =
@@ -202,8 +176,6 @@ export async function sendLearningScenarioMessage({
   );
 
   // Convert to ai-core format
-  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImages);
-
   // Create native stream
   const { stream, update, done, error: streamError } = createTextStream();
   const assistantMessageId = crypto.randomUUID();
@@ -212,7 +184,7 @@ export async function sendLearningScenarioMessage({
     runAgentLoop({
       modelId: definedModel.id,
       apiKeyId,
-      messages: aiCoreMessages,
+      messages: convertToAiCoreMessages(systemPrompt, messagesWithImages),
       toolRegistry,
       onTextChunk: (delta) => {
         update(delta);
@@ -254,7 +226,7 @@ export async function sendLearningScenarioMessage({
       try {
         const textStream = generateTextStreamWithBilling(
           definedModel.id,
-          aiCoreMessages,
+          convertToAiCoreMessages(systemPrompt, messagesWithImages),
           apiKeyId,
           async ({ usage, priceInCents }) => {
             const { promptTokens, completionTokens } = usage;

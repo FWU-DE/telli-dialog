@@ -22,7 +22,10 @@ export async function updateLearningScenarioAccessLevelAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(updateLearningScenarioAccessLevel)({
+  return runServerAction(
+    'updateLearningScenarioAccessLevelAction',
+    updateLearningScenarioAccessLevel,
+  )({
     learningScenarioId,
     accessLevel,
     user,
@@ -38,7 +41,10 @@ export async function updateLearningScenarioAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(updateLearningScenario)({
+  return runServerAction(
+    'updateLearningScenarioAction',
+    updateLearningScenario,
+  )({
     learningScenarioId,
     user,
     data,
@@ -54,7 +60,10 @@ export async function shareLearningScenarioAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(shareLearningScenario)({
+  return runServerAction(
+    'shareLearningScenarioAction',
+    shareLearningScenario,
+  )({
     learningScenarioId,
     user,
     data,
@@ -68,7 +77,13 @@ export async function unshareLearningScenarioAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(unshareLearningScenario)({ learningScenarioId, user });
+  return runServerAction(
+    'unshareLearningScenarioAction',
+    unshareLearningScenario,
+  )({
+    learningScenarioId,
+    user,
+  });
 }
 
 export async function removeFileFromLearningScenarioAction({
@@ -79,7 +94,10 @@ export async function removeFileFromLearningScenarioAction({
   fileId: string;
 }) {
   const { user } = await requireAuth();
-  return runServerAction(removeFileFromLearningScenario)({
+  return runServerAction(
+    'removeFileFromLearningScenarioAction',
+    removeFileFromLearningScenario,
+  )({
     learningScenarioId,
     fileId,
     user,
@@ -95,7 +113,10 @@ export async function uploadAvatarPictureForLearningScenarioAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(uploadAvatarPictureForLearningScenario)({
+  return runServerAction(
+    'uploadAvatarPictureForLearningScenarioAction',
+    uploadAvatarPictureForLearningScenario,
+  )({
     learningScenarioId,
     croppedImageBlob,
     user,

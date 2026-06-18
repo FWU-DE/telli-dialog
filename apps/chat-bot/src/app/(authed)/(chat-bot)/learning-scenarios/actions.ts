@@ -12,13 +12,22 @@ import {
 
 export async function deleteLearningScenarioAction({ id }: { id: string }) {
   const { user } = await requireAuth();
-  return runServerAction(deleteLearningScenario)({ learningScenarioId: id, user });
+  return runServerAction(
+    'deleteLearningScenarioAction',
+    deleteLearningScenario,
+  )({
+    learningScenarioId: id,
+    user,
+  });
 }
 
 export async function createNewLearningScenarioAction({ modelId }: { modelId: string }) {
   const { user } = await requireAuth();
 
-  return runServerAction(createNewLearningScenario)({
+  return runServerAction(
+    'createNewLearningScenarioAction',
+    createNewLearningScenario,
+  )({
     modelId,
     user,
   });
@@ -33,7 +42,10 @@ export async function createNewLearningScenarioFromTemplateAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(createNewLearningScenarioFromTemplate)({
+  return runServerAction(
+    'createNewLearningScenarioFromTemplateAction',
+    createNewLearningScenarioFromTemplate,
+  )({
     originalLearningScenarioId: templateId,
     user,
     duplicateLearningScenarioName,
@@ -48,7 +60,10 @@ export async function linkFileToLearningScenarioAction({
   learningScenarioId: string;
 }) {
   const { user } = await requireAuth();
-  return runServerAction(linkFileToLearningScenario)({
+  return runServerAction(
+    'linkFileToLearningScenarioAction',
+    linkFileToLearningScenario,
+  )({
     fileId,
     learningScenarioId,
     user,
@@ -64,7 +79,10 @@ export async function downloadFileFromLearningScenarioAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(downloadFileFromLearningScenario)({
+  return runServerAction(
+    'downloadFileFromLearningScenarioAction',
+    downloadFileFromLearningScenario,
+  )({
     learningScenarioId,
     fileId,
     user,

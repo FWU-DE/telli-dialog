@@ -98,7 +98,7 @@ export function sharedChatHasExpired({
     return true;
   }
 
-  const timeLeft = calculateTimeLeft({ startedAt, maxUsageTimeLimit });
+  const timeLeft = calculateTimeLeft({ startedAt, maxUsageTimeLimit: maxUsageTimeLimit });
   if (timeLeft < 1) {
     // the shared chat is no viable anymore so the limit is reached
     return true;

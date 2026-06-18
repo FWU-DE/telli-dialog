@@ -1,6 +1,5 @@
 import {
   generateTextStreamWithBilling,
-  type Message as AiCoreMessage,
   type ToolDefinition,
   TokenPointsExceededError,
   SharedChatExpiredError,
@@ -25,36 +24,14 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructCharacterSystemPrompt } from './system-prompt';
-import { formatMessagesWithImages, limitChatHistory } from '../chat/utils';
+import { convertToAiCoreMessages, formatMessagesWithImages, limitChatHistory } from '../chat/utils';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import { buildTools } from '../chat/build-tools';
-import {
-  KEEP_FIRST_MESSAGES,
-  KEEP_RECENT_MESSAGES,
-  TOTAL_CHAT_LENGTH_LIMIT,
-} from '@/configuration-text-inputs/const';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { RetrievedChunk } from '../rag/types';
-
-/**
- * Converts frontend messages to ai-core message format
- */
-function convertToAiCoreMessages(systemPrompt: string, messages: ChatMessage[]): AiCoreMessage[] {
-  const result: AiCoreMessage[] = [{ role: 'system', content: systemPrompt }];
-
-  for (const msg of messages) {
-    if (msg.role === 'system') continue;
-    result.push({
-      role: msg.role === 'user' ? 'user' : 'assistant',
-      content: msg.content,
-    });
-  }
-
-  return result;
-}
 
 /**
  * Sends a character chat message and streams the response.
@@ -138,12 +115,6 @@ export async function sendCharacterMessage({
     federalStateId: teacherUserAndContext.federalState.id,
   });
 
-  let toolRegistry:
-    | Record<
-        string,
-        { definition: ToolDefinition; handler: (args: Record<string, unknown>) => Promise<string> }
-      >
-    | undefined;
   let activeToolDefinitions: ToolDefinition[] = [];
   let chunks: RetrievedChunk[] = [];
 
@@ -153,57 +124,14 @@ export async function sendCharacterMessage({
       characterId: character.id,
       conversationId: `shared-character:${character.id}`,
       relatedFileEntities,
+      attachedLinks: character.attachedLinks,
       sourceUrls: processedUrls,
     });
 
-    toolRegistry = builtTools.toolRegistry;
-    activeToolDefinitions = Object.values(toolRegistry).map((entry) => entry.definition);
-  } else {
-    chunks = await retrieveChunks({
-      messages,
-      federalStateId: teacherUserAndContext.federalState.id,
-      relatedFileEntities,
-      sourceUrls: processedUrls,
-    });
-  }
+    activeToolDefinitions = Object.values(builtTools.toolRegistry).map((entry) => entry.definition);
 
-  // Build system prompt
-  const systemPrompt = constructCharacterSystemPrompt({
-    character,
-    chunks,
-    activeToolDefinitions,
-  });
+    const toolRegistry = builtTools.toolRegistry;
 
-  // Prune messages
-  const prunedMessages = limitChatHistory({
-    messages: messages.map((m) => ({ id: m.id, role: m.role, content: m.content })),
-    limitRecent: KEEP_RECENT_MESSAGES,
-    limitFirst: KEEP_FIRST_MESSAGES,
-    characterLimit: TOTAL_CHAT_LENGTH_LIMIT,
-  });
-
-  // Check if the model supports images based on supportedImageFormats
-  const modelSupportsImages =
-    definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
-
-  // attach the image url to each of the image files within relatedFileEntities
-  const extractedImages = await extractImagesAndUrl(relatedFileEntities);
-
-  // Format messages with images if the model supports vision
-  const messagesWithImages = formatMessagesWithImages(
-    prunedMessages,
-    extractedImages,
-    modelSupportsImages,
-  );
-
-  // Convert to ai-core format
-  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImages);
-
-  // Create native stream
-  const { stream, update, done, error: streamError } = createTextStream();
-  const assistantMessageId = crypto.randomUUID();
-
-  if (agenticChatEnabled) {
     runAgentLoop({
       modelId: definedModel.id,
       apiKeyId,
@@ -244,6 +172,46 @@ export async function sendCharacterMessage({
       },
     });
   } else {
+    chunks = await retrieveChunks({
+      messages,
+      federalStateId: teacherUserAndContext.federalState.id,
+      relatedFileEntities,
+      sourceUrls: processedUrls,
+    });
+  }
+
+  // Build system prompt
+  const systemPrompt = constructCharacterSystemPrompt({
+    character,
+    chunks,
+    activeToolDefinitions,
+  });
+
+  // Prune messages
+  const prunedMessages = limitChatHistory(messages);
+
+  // Check if the model supports images based on supportedImageFormats
+  const modelSupportsImages =
+    definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
+
+  // attach the image url to each of the image files within relatedFileEntities
+  const extractedImages = await extractImagesAndUrl(relatedFileEntities);
+
+  // Format messages with images if the model supports vision
+  const messagesWithImages = formatMessagesWithImages(
+    prunedMessages,
+    extractedImages,
+    modelSupportsImages,
+  );
+
+  // Convert to ai-core format
+  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImages);
+
+  // Create native stream
+  const { stream, update, done, error: streamError } = createTextStream();
+  const assistantMessageId = crypto.randomUUID();
+
+  if (!agenticChatEnabled) {
     // Start streaming in the background
     void (async () => {
       try {

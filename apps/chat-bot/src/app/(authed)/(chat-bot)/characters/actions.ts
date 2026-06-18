@@ -18,9 +18,12 @@ export async function createNewCharacterAction({
 }) {
   const { user, federalState } = await requireAuth();
 
-  return runServerAction(createNewCharacter)({
+  return runServerAction(
+    'createNewCharacterAction',
+    createNewCharacter,
+  )({
     federalStateId: federalState.id,
-    modelId: modelId,
+    modelId,
     user,
     templateId,
     duplicateCharacterName,
@@ -36,7 +39,10 @@ export async function downloadFileFromCharacterAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(downloadFileFromCharacter)({
+  return runServerAction(
+    'downloadFileFromCharacterAction',
+    downloadFileFromCharacter,
+  )({
     characterId,
     fileId,
     user,
