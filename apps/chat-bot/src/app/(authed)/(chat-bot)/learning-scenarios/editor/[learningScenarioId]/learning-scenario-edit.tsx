@@ -195,9 +195,6 @@ export function LearningScenarioEdit({
             name: data.name.trim(),
             description: data.description ?? '',
             studentExercise: data.studentExercise ?? '',
-            schoolType: data.schoolTypes[0] ?? null,
-            gradeLevel: data.gradeRanges[0] ?? null,
-            subject: data.subjects[0] ?? null,
             filterCategories: toFilterCategories({
               schoolTypes: data.schoolTypes,
               gradeRanges: data.gradeRanges,

@@ -547,6 +547,13 @@
       "when": 1781537921418,
       "tag": "0077_remarkable_vindicator",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1781711056187,
+      "tag": "0078_burly_silver_fox",
+      "breakpoints": true
     }
   ]
 }

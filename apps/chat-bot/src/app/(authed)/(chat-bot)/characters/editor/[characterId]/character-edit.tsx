@@ -190,9 +190,6 @@ export function CharacterEdit({
           instructions: data.instructions,
           initialMessage: data.initialMessage,
           modelId: data.modelId,
-          schoolType: data.schoolTypes[0] ?? null,
-          gradeLevel: data.gradeRanges[0] ?? null,
-          subject: data.subjects[0] ?? null,
           filterCategories: toFilterCategories({
             schoolTypes: data.schoolTypes,
             gradeRanges: data.gradeRanges,

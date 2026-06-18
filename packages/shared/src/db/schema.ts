@@ -521,10 +521,6 @@ export const characterTable = pgTable(
     instructions: text('instructions').notNull().default(''),
     learningContext: text('learning_context').notNull().default(''),
     competence: text('competence').notNull().default(''),
-    // new
-    schoolType: text('school_type'),
-    gradeLevel: text('grade_level'),
-    subject: text('subject'),
     filterCategories: json('filter_attributes')
       .$type<FilterCategories>()
       .notNull()
@@ -738,9 +734,6 @@ export const learningScenarioTable = pgTable(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
-    schoolType: text('school_type'),
-    gradeLevel: text('grade_level'),
-    subject: text('subject'),
     filterCategories: json('filter_attributes')
       .$type<FilterCategories>()
       .notNull()

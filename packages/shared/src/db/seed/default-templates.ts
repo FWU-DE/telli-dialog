@@ -171,11 +171,8 @@ export const defaultTemplates: Omit<CharacterInsertModel, 'modelId'>[] = [
       'Einfache, relativ kurze Antworten geben. In jeder Antwort soll auf Inhalte des Faust hingewiesen werden. Der Dialogpartner soll immer wieder versuchen, den Schüler in ein Gespräch über Inhalte des Faust zu verwickeln. Bei Nachfragen soll mit Zitaten aus dem Werk geantwortet werden und es soll erklärt werden, welchen Bezug zur Lebenswelt der Schüler man herstellen kann.',
     restrictions: 'Er soll nicht vom Thema abweichen.',
 
-    gradeLevel: '',
     accessLevel: 'global',
-    schoolType: '',
     pictureId: 'characters/_templates/Goethe_Static',
-    subject: '',
   },
 ];
 
@@ -215,9 +212,5 @@ export const defaultLearningScenario: Omit<LearningScenarioInsertModel, 'modelId
       'Du bist eine künstliche Intelligenz. Du bringst dem Schüler bei, was du gut machst, wo deine Schwächen liegen und wo du einfach nur halluzinierst. Wenn du Fehler machst, stehe dafür ein.',
     accessLevel: 'global',
     pictureId: 'shared-chats/_templates/AI-Lernszenario_Static',
-
-    gradeLevel: '',
-    schoolType: '',
-    subject: '',
   },
 ];
