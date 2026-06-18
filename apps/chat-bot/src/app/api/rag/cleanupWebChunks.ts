@@ -10,11 +10,12 @@ import { addDays } from '@shared/utils/date';
  * @returns number of deleted web chunks in db
  */
 export async function cleanupWebChunks() {
-  const cutoffDate = addDays(new Date(), -30);
+  // TODO: Re-enable web chunk retention cleanup once we want old webpage chunks to expire again.
+  // const cutoffDate = addDays(new Date(), -30);
+  // const result = await db
+  //   .delete(chunkTable)
+  //   .where(and(eq(chunkTable.sourceType, 'webpage'), lt(chunkTable.createdAt, cutoffDate)));
+  // return result.rowCount ?? 0;
 
-  const result = await db
-    .delete(chunkTable)
-    .where(and(eq(chunkTable.sourceType, 'webpage'), lt(chunkTable.createdAt, cutoffDate)));
-
-  return result.rowCount ?? 0;
+  return 0;
 }

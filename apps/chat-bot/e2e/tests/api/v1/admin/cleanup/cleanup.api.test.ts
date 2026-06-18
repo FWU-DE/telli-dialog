@@ -164,7 +164,7 @@ test.describe('cleanup', () => {
     expect(resultExisting).toHaveLength(1);
   });
 
-  test('should delete web chunks older than 30 days', async ({ request }) => {
+  test('should keep web chunks during cleanup', async ({ request }) => {
     const oldChunk = await createWebChunk(addDays(new Date(), -31));
     const newChunk = await createWebChunk(new Date());
 
@@ -173,10 +173,10 @@ test.describe('cleanup', () => {
 
     expect(response.ok()).toBeTruthy();
     const json = await response.json();
-    expect(json.deletedWebChunks).toBeGreaterThanOrEqual(1);
+    expect(json.deletedWebChunks).toBe(0);
 
     const resultDeleted = await db.select().from(chunkTable).where(eq(chunkTable.id, oldChunk.id));
-    expect(resultDeleted).toHaveLength(0);
+    expect(resultDeleted).toHaveLength(1);
 
     const resultExisting = await db.select().from(chunkTable).where(eq(chunkTable.id, newChunk.id));
     expect(resultExisting).toHaveLength(1);
