@@ -7,6 +7,13 @@ import { RetrievedChunk, UnembeddedChunk } from './types';
 import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { logError } from '@shared/logging';
 
+export const SUPPORTED_TEXT_TYPES = ['txt', 'pdf', 'docx', 'md'] as const;
+type SupportedTextType = (typeof SUPPORTED_TEXT_TYPES)[number];
+
+function isSupportedTextType({ type }: { type: string }): boolean {
+  return SUPPORTED_TEXT_TYPES.includes(type as SupportedTextType);
+}
+
 /**
  * Chunks and embeds text.
  *
@@ -70,7 +77,9 @@ export async function retrieveChunks({
   relatedFileEntities: FileModelAndContent[];
   sourceUrls?: string[];
 }): Promise<RetrievedChunk[]> {
-  if (relatedFileEntities.length === 0 && (!sourceUrls || sourceUrls.length === 0)) {
+  const relatedFiles = relatedFileEntities.filter(isSupportedTextType);
+
+  if (relatedFiles.length === 0 && (!sourceUrls || sourceUrls.length === 0)) {
     return [];
   }
 
@@ -80,7 +89,7 @@ export async function retrieveChunks({
   return retrieveChunksByQuery({
     searchQuery,
     federalStateId,
-    relatedFileEntities,
+    relatedFileEntities: relatedFiles,
     sourceUrls,
     limit: VECTOR_SEARCH_LIMIT,
   });

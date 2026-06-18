@@ -540,9 +540,11 @@ export const getCharacterForEditView = async ({
     characterId,
     user,
   });
-  const maybeSignedPictureUrl = await getReadOnlySignedUrl({
-    key: character.pictureId,
-  });
+  const maybeSignedPictureUrl = character.pictureId
+    ? await getReadOnlySignedUrl({
+        key: character.pictureId,
+      })
+    : undefined;
   return { character, relatedFiles, maybeSignedPictureUrl };
 };
 

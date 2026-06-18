@@ -22,11 +22,16 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructCharacterSystemPrompt } from './system-prompt';
-import { convertToAiCoreMessages, formatMessagesWithImages, limitChatHistory } from '../chat/utils';
+import {
+  convertToAiCoreMessages,
+  determineImageAttachmentTypeForModel,
+  enrichMessagesWithImageData,
+  limitChatHistory,
+} from '../chat/utils';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
-import { extractImagesAndUrl } from '../file-operations/preprocess-image';
+import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 
 /**
@@ -129,14 +134,20 @@ export async function sendCharacterMessage({
   const modelSupportsImages =
     definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
 
+  const imageAttachmentType = determineImageAttachmentTypeForModel(definedModel);
+
   // attach the image url to each of the image files within relatedFileEntities
-  const extractedImages = await extractImagesAndUrl(relatedFileEntities);
+  const extractedImages = await createImageAttachmentsForConversation(
+    relatedFileEntities,
+    imageAttachmentType,
+  );
 
   // Format messages with images if the model supports vision
-  const messagesWithImages = formatMessagesWithImages(
+  const messagesWithImages = enrichMessagesWithImageData(
     prunedMessages,
     extractedImages,
     modelSupportsImages,
+    imageAttachmentType,
   );
 
   // Convert to ai-core format

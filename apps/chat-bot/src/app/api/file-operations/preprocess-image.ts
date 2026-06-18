@@ -1,42 +1,59 @@
 import { SUPPORTED_DOCUMENTS_TYPE, TRUNCATE_IMAGE_HEIGHT } from '@/const';
 import { FileMetadata, FileModel } from '@shared/db/schema';
-import { getReadOnlySignedUrl } from '@shared/s3';
+import { getFileFromS3, getReadOnlySignedUrl } from '@shared/s3';
 import { isImageFile } from '@/utils/files/generic';
-import { ImageAttachment } from '@/utils/files/types';
 import sharp from 'sharp';
 import { logError } from '@shared/logging';
+import { Readable } from 'stream';
+import { ChatAttachment } from '@ais-chat/ai-core';
+
+export type ChatAttachmentWithMessageId = ChatAttachment & {
+  messageId: string;
+};
 
 /**
- * fetch the signed url for the image files and return them as ImageAttachment
+ * fetch the signed url for the image files and return them as ChatImageAttachment
  */
-export async function extractImagesAndUrl(
+export async function createImageAttachmentsForConversation(
   relatedFileEntities: (FileModel & { conversationMessageId?: string })[],
-): Promise<ImageAttachment[]> {
-  const imageFiles = relatedFileEntities.filter((file) => isImageFile(file.name));
+  imageAttachmentType: 'url' | 'base64',
+): Promise<ChatAttachmentWithMessageId[]> {
+  const imageFiles = relatedFileEntities
+    .filter((file) => isImageFile(file.name))
+    .filter(hasMessageId);
 
   if (imageFiles.length === 0) {
     return [];
   }
 
   const imagePromises = imageFiles.map(async (file) => {
+    let url: string;
+
     try {
-      const url = await getReadOnlySignedUrl({ key: `message_attachments/${file.id}` });
+      if (imageAttachmentType === 'url') {
+        url = await getReadOnlySignedUrl({ key: `message_attachments/${file.id}` });
+      } else if (imageAttachmentType === 'base64') {
+        const fileStream = await getFileFromS3(`message_attachments/${file.id}`);
+        const base64ImageData = await streamToBase64(fileStream);
+        url = `data:image/${file.type};base64,${base64ImageData}`;
+      } else {
+        throw new Error(`Unsupported image attachment type: ${imageAttachmentType}`);
+      }
 
       return {
         type: 'image' as const,
         url,
-        mimeType: `image/${file.type}`,
-        id: file.id,
-        conversationMessageId: file.conversationMessageId,
+        contentType: `image/${file.type}`,
+        messageId: file.conversationMessageId,
       };
     } catch (error) {
       logError(`Failed to process image file ${file.id}`, error);
-      return null;
+      return undefined;
     }
   });
 
   const images = await Promise.all(imagePromises);
-  return images.filter((img) => img !== null) as ImageAttachment[];
+  return images.filter((img) => img !== undefined);
 }
 
 export async function preprocessImage(
@@ -81,4 +98,25 @@ export async function preprocessImage(
     buffer: processedBuffer,
     metadata: { width, height },
   };
+}
+
+async function streamToBase64(stream: Readable): Promise<string> {
+  const chunks: Buffer[] = [];
+
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+
+  const buffer = Buffer.concat(chunks);
+
+  return buffer.toString('base64');
+}
+
+// returns true if the file has a conversationMessageId which is needed to
+// associate the image with the correct message in the chat history
+// An image file without a conversationMessageId is likely not possible atm.
+function hasMessageId(
+  file: FileModel & { conversationMessageId?: string },
+): file is FileModel & { conversationMessageId: string } {
+  return file.conversationMessageId !== undefined;
 }
