@@ -8,6 +8,7 @@ import { MagnifyingGlassIcon, InfoIcon, XCircleIcon, XIcon } from '@phosphor-ico
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import { Button } from '@ais-chat/ui/components/button';
 import { FilterTabs } from '@ais-chat/ui/components/filter-tabs';
+import ChevronDownIcon from '@/components/icons/chevron-down';
 import {
   Select,
   SelectContent,
@@ -61,6 +62,7 @@ export default function EntityOverview({
   const t = useTranslations('entity-overview');
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const filterPanelId = React.useId();
 
   const handleClearSearch = () => {
     setSearchInput('');
@@ -148,28 +150,24 @@ export default function EntityOverview({
             <div className="grow" />
             {onFilterPanelToggle ? (
               <div className="text-primary hover:text-primary-dark">
-                <Select
-                  open={false}
-                  onOpenChange={(open) => {
-                    if (open) {
-                      onFilterPanelToggle();
-                    }
-                  }}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={onFilterPanelToggle}
+                  className={`${OVERVIEW_CONTROL_TRIGGER_CLASSNAME} relative`}
+                  aria-label={t('filter-label')}
+                  aria-expanded={isFilterPanelOpen}
+                  aria-controls={filterPanelId}
                 >
-                  <SelectTrigger
-                    size="sm"
-                    className={`${OVERVIEW_CONTROL_TRIGGER_CLASSNAME} relative`}
-                    aria-label={t('filter-label')}
-                    aria-expanded={isFilterPanelOpen}
-                  >
-                    <span>{t('filter-label')}</span>
-                    {filterActiveCount > 0 ? (
-                      <span className="absolute -top-1 -right-1 inline-flex size-4 items-center justify-center rounded-full bg-primary text-[10px] leading-none text-primary-foreground">
-                        {filterActiveCount}
-                      </span>
-                    ) : null}
-                  </SelectTrigger>
-                </Select>
+                  <span>{t('filter-label')}</span>
+                  <ChevronDownIcon className="size-2 transition-transform" aria-hidden="true" />
+                  {filterActiveCount > 0 ? (
+                    <span className="absolute -top-1 -right-1 inline-flex size-4 items-center justify-center rounded-full bg-primary text-[10px] leading-none text-primary-foreground">
+                      {filterActiveCount}
+                    </span>
+                  ) : null}
+                </Button>
               </div>
             ) : null}
             <div className="text-primary hover:text-primary-dark">
@@ -199,7 +197,10 @@ export default function EntityOverview({
           </div>
 
           {isFilterPanelOpen && filterPanel ? (
-            <div className="mt-3 rounded-xl border border-gray-200 bg-background p-3 sm:p-4">
+            <div
+              id={filterPanelId}
+              className="mt-3 rounded-xl border border-gray-200 bg-background p-3 sm:p-4"
+            >
               {filterPanel}
             </div>
           ) : null}
@@ -220,7 +221,7 @@ export default function EntityOverview({
                       type="button"
                       onClick={() => onRemoveFilter(pill.group, pill.value)}
                       className="ml-1.5 flex items-center justify-center rounded-full hover:bg-primary/20 transition-colors"
-                      aria-label={`Remove ${pill.label} filter`}
+                      aria-label={`${pill.label}-Filter zurücksetzen`}
                     >
                       <XIcon className="size-3" aria-hidden="true" />
                     </button>

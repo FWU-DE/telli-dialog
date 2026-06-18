@@ -94,7 +94,6 @@ export default function CustomFilterSection({
   return (
     <div
       className={cn(isEditView ? 'mt-10 flex flex-col gap-3' : 'flex flex-col gap-2', className)}
-      id="share-settings"
     >
       {isEditView && !hideHeading ? (
         <CustomChatHeading2

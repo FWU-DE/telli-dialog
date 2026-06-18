@@ -47,11 +47,7 @@ export function MultipleSelectDropdown({
       return option?.label ?? placeholder;
     }
 
-    if (selectedCountLabel) {
-      return selectedCountLabel(value.length);
-    }
-
-    return `${value.length} selected`;
+    return selectedCountLabel?.(value.length) ?? String(value.length);
   }, [options, placeholder, selectedCountLabel, value]);
 
   const toggleValue = (optionValue: string) => {
