@@ -5,7 +5,7 @@ type TokenPointsProgressBarProps = {
 export default function TokenPointsProgressBar({
   percentage: _percentage,
 }: TokenPointsProgressBarProps) {
-  const percentage = Math.max(Math.ceil(_percentage), 0);
+  const percentage = Math.max(Math.floor(_percentage), 0);
 
   function getColorByProgress() {
     if (percentage > 20) {

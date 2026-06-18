@@ -21,13 +21,15 @@ export default async function Page(props: PageProps<'/characters/[characterId]'>
   const { characterId } = await props.params;
   const { user, federalState } = await requireAuth();
 
-  const { character, relatedFiles, maybeSignedPictureUrl } = await getCharacterForEditView({
-    characterId,
-    user,
-  }).catch(handleErrorInServerComponent);
-
-  const userPriceLimit = await getPriceLimitInCentByUser({ ...user, federalState });
-  const priceInCent = await getPriceInCentByUser({ ...user, federalState });
+  const [{ character, relatedFiles, maybeSignedPictureUrl }, userPriceLimit, priceInCent] =
+    await Promise.all([
+      getCharacterForEditView({
+        characterId,
+        user,
+      }).catch(handleErrorInServerComponent),
+      getPriceLimitInCentByUser({ ...user, federalState }),
+      getPriceInCentByUser({ ...user, federalState }),
+    ]);
 
   const initialLinks = character.attachedLinks
     .filter((l) => l !== '')

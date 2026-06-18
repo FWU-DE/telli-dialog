@@ -24,18 +24,20 @@ export default async function Page(
   const { learningScenarioId } = await props.params;
   const { user, federalState } = await requireAuth();
 
-  const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
-    learningScenarioId: learningScenarioId,
-    user,
-  }).catch(handleErrorInServerComponent);
+  const [{ learningScenario, relatedFiles, avatarPictureUrl }, userPriceLimit, priceInCent] =
+    await Promise.all([
+      getLearningScenario({
+        learningScenarioId: learningScenarioId,
+        user,
+      }).catch(handleErrorInServerComponent),
+      getPriceLimitInCentByUser({ ...user, federalState }),
+      getPriceInCentByUser({ ...user, federalState }),
+    ]);
   const readOnly = user.id !== learningScenario.userId;
 
   if (readOnly) {
     redirect(`/learning-scenarios/${learningScenarioId}`);
   }
-
-  const userPriceLimit = await getPriceLimitInCentByUser({ ...user, federalState });
-  const priceInCent = await getPriceInCentByUser({ ...user, federalState });
 
   const initialLinks = learningScenario.attachedLinks
     .filter((l) => l && l !== '')

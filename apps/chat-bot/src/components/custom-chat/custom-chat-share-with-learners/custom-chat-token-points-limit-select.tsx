@@ -120,7 +120,7 @@ export function TokenPointsLimitSelect({
               value={String(MaxTokenPointsPercentageLimit)}
               data-testid="token-points-option-max"
             >
-              {Math.max(Math.ceil(maxAvailablePercentage), 0)} % ({t('maximum')})
+              {Math.max(Math.floor(maxAvailablePercentage), 0)} % ({t('maximum')})
             </SelectItem>
           </SelectContent>
         </Select>

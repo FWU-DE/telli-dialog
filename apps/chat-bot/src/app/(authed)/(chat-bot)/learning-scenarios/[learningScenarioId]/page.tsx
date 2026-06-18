@@ -20,13 +20,15 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
   const { learningScenarioId } = await props.params;
   const { user, federalState } = await requireAuth();
 
-  const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
-    learningScenarioId,
-    user,
-  }).catch(handleErrorInServerComponent);
-
-  const userPriceLimit = await getPriceLimitInCentByUser({ ...user, federalState });
-  const priceInCent = await getPriceInCentByUser({ ...user, federalState });
+  const [{ learningScenario, relatedFiles, avatarPictureUrl }, userPriceLimit, priceInCent] =
+    await Promise.all([
+      getLearningScenario({
+        learningScenarioId,
+        user,
+      }).catch(handleErrorInServerComponent),
+      getPriceLimitInCentByUser({ ...user, federalState }),
+      getPriceInCentByUser({ ...user, federalState }),
+    ]);
 
   const initialLinks = learningScenario.attachedLinks.map((url) => ({ link: url }));
 
