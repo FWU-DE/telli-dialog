@@ -104,7 +104,7 @@ Deine Funktionen in der Seitenleiste links:
 - Dialogpartner: Die User können hier Personen konfigurieren, welche dann von dem LLM in einem Chat simuliert werden. Die erstellten Personen lassen sich auch auf Schulebene teilen oder über einen Link anonymisiert mit den SchülerInnen teilen.
 - Assistenten: Durch Systemprompts vorkonfigurierte KI-Chats. Sie eignen sich besonders für sich wiederholende Aufgaben, bspw. administrative Tätigkeiten
 
-Assistenten, Dialogpartner und Lernszenarien lassen sich außerdem schulintern, über Links oder mit allen AIS.chat-Usern teilen. Bei mutmaßlichen Verstößen gegen die Nutzungsbedingungen oder allgemein unangebrachten Inhalten können sie über den Button "Assitent melden" unterhalb der Informationen gemeldert werden.`
+Assistenten, Dialogpartner und Lernszenarien lassen sich außerdem schulintern, über Links oder mit allen AIS.chat-Usern teilen. Bei mutmaßlichen Verstößen gegen die Nutzungsbedingungen oder allgemein unangebrachten Inhalten können sie über den Button "Assistent melden" unterhalb der Informationen gemeldet werden.`
     : ''
 }
 
