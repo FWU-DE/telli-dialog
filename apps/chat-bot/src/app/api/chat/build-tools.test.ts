@@ -182,7 +182,7 @@ describe('buildTools', () => {
     );
     expect(retrieveTextChunksTool.definition.description).toContain('Leitfaden.txt (8000 bytes)');
     expect(retrieveTextChunksTool.definition.parameters).toMatchObject({
-      required: ['search'],
+      required: ['search', 'limit'],
       properties: {
         limit: {
           maximum: VECTOR_SEARCH_LIMIT,
