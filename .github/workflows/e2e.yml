@@ -75,7 +75,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # Keycloak container cannot be started under services, because it needs to mount files from the repo
       - name: Start keycloak container (in background)
