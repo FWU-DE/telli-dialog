@@ -9,6 +9,7 @@ import {
 const mocks = vi.hoisted(() => ({
   isWebSearchEnabledMock: vi.fn(),
   searchWebMock: vi.fn(),
+  ingestWebContentMock: vi.fn(),
   retrieveChunksByQueryMock: vi.fn(),
   webScraperMock: vi.fn(),
 }));
@@ -16,6 +17,10 @@ const mocks = vi.hoisted(() => ({
 vi.mock('./websearch', () => ({
   isWebSearchEnabled: mocks.isWebSearchEnabledMock,
   searchWeb: mocks.searchWebMock,
+}));
+
+vi.mock('../rag/ingestWebContent', () => ({
+  ingestWebContent: mocks.ingestWebContentMock,
 }));
 
 vi.mock('../rag/rag-service', () => ({
@@ -76,6 +81,7 @@ beforeEach(() => {
       sourceUrl: null,
     },
   ]);
+  mocks.ingestWebContentMock.mockResolvedValue({ processedUrls: [], errorUrls: [] });
   mocks.webScraperMock.mockResolvedValue({
     name: 'Beispielseite',
     link: 'https://example.com/article',
@@ -238,6 +244,52 @@ describe('buildTools', () => {
         sourceUrls: ['https://example.com/shared-page'],
       }),
     );
+  });
+
+  it('re-downloads linked pages when no chunks are available', async () => {
+    mocks.retrieveChunksByQueryMock.mockResolvedValueOnce([]).mockResolvedValueOnce([
+      {
+        id: 'chunk-2',
+        content: 'Neu abgerufener Seitenabschnitt.',
+        fileId: null,
+        fileName: null,
+        orderIndex: 0,
+        sourceType: 'webpage',
+        sourceUrl: 'https://example.com/shared-page',
+      },
+    ]);
+    mocks.ingestWebContentMock.mockResolvedValueOnce({
+      processedUrls: ['https://example.com/shared-page'],
+      errorUrls: [],
+    });
+
+    const { buildTools } = await import('./build-tools');
+
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conversation-1',
+      relatedFileEntities: [],
+      sourceUrls: ['https://example.com/shared-page'],
+    });
+
+    const result = await toolRegistry.retrieve_text_chunks!.handler({
+      search: 'verlinkter Inhalt',
+    });
+
+    expect(mocks.ingestWebContentMock).toHaveBeenCalledWith({
+      urls: ['https://example.com/shared-page'],
+      federalStateId: 'federal-state-1',
+    });
+    expect(JSON.parse(result)).toEqual({
+      chunks: [
+        {
+          fileName: null,
+          orderIndex: 0,
+          content: 'Neu abgerufener Seitenabschnitt.',
+        },
+      ],
+      error: null,
+    });
   });
 
   it('adds a web scraper tool and returns scraped page content', async () => {

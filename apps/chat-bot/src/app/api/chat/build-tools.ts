@@ -8,6 +8,7 @@ import {
   RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
   VECTOR_SEARCH_LIMIT,
 } from '@/configuration-text-inputs/const';
+import { ingestWebContent } from '../rag/ingestWebContent';
 import { retrieveChunksByQuery } from '../rag/rag-service';
 import { webScraper } from '../web-scraper/web-scraper';
 import { isIP } from 'node:net';
@@ -379,6 +380,12 @@ export async function buildTools({
     };
 
     addTool(retrieveTextChunksToolDefinition, async (args) => {
+      if (attachedSourceUrls.length > 0) {
+        await ingestWebContent({
+          urls: attachedSourceUrls,
+          federalStateId: user.federalState.id,
+        });
+      }
       const search = typeof args.search === 'string' ? args.search : '';
       const requestedLimit =
         typeof args.limit === 'number' && Number.isFinite(args.limit)
