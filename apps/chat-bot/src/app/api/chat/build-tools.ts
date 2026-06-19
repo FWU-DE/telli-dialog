@@ -374,7 +374,7 @@ export async function buildTools({
               'Optional number of chunks to return. Values outside the allowed range are clamped.',
           },
         },
-        required: ['search'],
+        required: ['search', 'limit'],
         additionalProperties: false,
       },
     };
