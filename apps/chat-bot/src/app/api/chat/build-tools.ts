@@ -1,10 +1,13 @@
-import type { ToolDefinition, ToolRegistry } from '@ais-chat/ai-core';
+import { type ToolDefinition, type ToolRegistry } from '@ais-chat/ai-core';
 import { UserAndContext } from '@/auth/types';
 import { isWebSearchEnabled, searchWeb } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
 import type { FileModelAndContent } from '@shared/db/schema';
 import type { WebSource } from '@shared/db/types';
-import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
+  VECTOR_SEARCH_LIMIT,
+} from '@/configuration-text-inputs/const';
 import { retrieveChunksByQuery } from '../rag/rag-service';
 import { webScraper } from '../web-scraper/web-scraper';
 import { isIP } from 'node:net';
@@ -38,6 +41,15 @@ type SemanticFileSearchToolResponse = {
   error: string | null;
 };
 
+type RetrieveEntireFileToolResponse = {
+  fileName: string | null;
+  content: string | null;
+  truncated: boolean;
+  characterCount: number;
+  maxCharacters: number;
+  error: string | null;
+};
+
 function formatRetrievedChunksForTool(chunks: Awaited<ReturnType<typeof retrieveChunksByQuery>>) {
   const formattedChunks: SemanticFileSearchChunkResult[] = chunks.map((chunk) => ({
     fileName: chunk.fileName ?? null,
@@ -52,6 +64,38 @@ function formatRetrievedChunksForTool(chunks: Awaited<ReturnType<typeof retrieve
 
   if (chunks.length === 0) {
     response.error = 'Keine passenden Textstellen gefunden.';
+  }
+
+  return JSON.stringify(response);
+}
+
+function truncateToCharacterLimit(text: string, maxCharacters: number) {
+  if (text.length <= maxCharacters) {
+    return text;
+  }
+
+  return text.slice(0, maxCharacters);
+}
+
+function formatEntireFileForTool(file: FileModelAndContent) {
+  const content = file.content?.trim() ?? '';
+  const characterCount = content.length;
+  const truncatedContent = truncateToCharacterLimit(content, RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT);
+  const truncated = truncatedContent.length !== content.length;
+
+  const response: RetrieveEntireFileToolResponse = {
+    fileName: file.name ?? null,
+    content: content.length > 0 ? truncatedContent : null,
+    truncated,
+    characterCount,
+    maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
+    error: null,
+  };
+
+  if (!content) {
+    response.error = 'Keine verwertbaren Inhalte gefunden.';
+  } else if (truncated) {
+    response.error = 'Dateiinhalt wurde wegen des Zeichenlimits gekürzt.';
   }
 
   return JSON.stringify(response);
@@ -143,7 +187,9 @@ export async function buildTools({
   const tools: ToolDefinition[] = [];
   const toolHandlers: Record<string, (args: Record<string, unknown>) => Promise<string>> = {};
   const webSearchResults: WebSearchResult[] = [];
-  const attachedFileNames = relatedFileEntities.map((file) => file.name);
+  const attachedFileDescriptions = relatedFileEntities.map(
+    (file) => `${file.name} (${file.size} bytes)`,
+  );
   const attachedSourceUrls = sourceUrls.length > 0 ? sourceUrls : attachedLinks;
 
   function addTool(
@@ -157,7 +203,6 @@ export async function buildTools({
     tools.push(definition);
     toolHandlers[definition.name] = handler;
   }
-
   const webSearchEnabled = await isWebSearchEnabled({
     user,
     characterId,
@@ -253,10 +298,65 @@ export async function buildTools({
     });
   }
 
+  if (relatedFileEntities.length > 0) {
+    const retrieveEntireFileToolDefinition: ToolDefinition = {
+      name: 'retrieve_entire_file',
+      description: `Retrieve the full content of one attached file by name. Available files right now: ${attachedFileDescriptions.join(', ') || 'none'}. Use this tool when you need the full text of a specific attached file instead of only relevant excerpts. The returned content is capped at ${RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT} characters.`,
+      parameters: {
+        type: 'object',
+        properties: {
+          fileName: {
+            type: 'string',
+            description: 'The exact name of the attached file to retrieve.',
+          },
+        },
+        required: ['fileName'],
+        additionalProperties: false,
+      },
+    };
+
+    toolRegistry.retrieve_entire_file = {
+      definition: retrieveEntireFileToolDefinition,
+      handler: async (args) => {
+        const fileName = typeof args.fileName === 'string' ? args.fileName.trim() : '';
+
+        if (fileName.length === 0) {
+          const response: RetrieveEntireFileToolResponse = {
+            fileName: null,
+            content: null,
+            truncated: false,
+            characterCount: 0,
+            maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
+            error: 'Fehlender Dateiname.',
+          };
+
+          return JSON.stringify(response);
+        }
+
+        const matchedFile = relatedFileEntities.find((file) => file.name === fileName);
+
+        if (matchedFile === undefined) {
+          const response: RetrieveEntireFileToolResponse = {
+            fileName,
+            content: null,
+            truncated: false,
+            characterCount: 0,
+            maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
+            error: 'Datei nicht gefunden.',
+          };
+
+          return JSON.stringify(response);
+        }
+
+        return formatEntireFileForTool(matchedFile);
+      },
+    };
+  }
+
   if (relatedFileEntities.length > 0 || attachedSourceUrls.length > 0) {
     const retrieveTextChunksToolDefinition: ToolDefinition = {
       name: 'retrieve_text_chunks',
-      description: `Retrieve relevant text chunks from the attached sources. Available files right now: ${attachedFileNames.join(', ') || 'none'}. Available linked pages right now: ${attachedSourceUrls.join(', ') || 'none'}. Use this tool when you need exact passages from the files or linked pages or want to inspect a specific topic inside the available sources. You can request up to ${VECTOR_SEARCH_LIMIT} chunks per call. Call it with a short, specific search string in the same language as the user.`,
+      description: `Retrieve relevant text chunks from the attached sources. Available files right now: ${attachedFileDescriptions.join(', ') || 'none'}. Available linked pages right now: ${attachedSourceUrls.join(', ') || 'none'}. Use this tool when you need exact passages from the files or linked pages or want to inspect a specific topic inside the available sources. You can request up to ${VECTOR_SEARCH_LIMIT} chunks per call. Call it with a short, specific search string in the same language as the user.`,
       parameters: {
         type: 'object',
         properties: {

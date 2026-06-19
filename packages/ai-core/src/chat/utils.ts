@@ -189,7 +189,7 @@ function getEncoder(): Tiktoken {
  * @param text - The text to count tokens for.
  * @returns Token count.
  */
-function countTokens(text: string): number {
+export function countTokens(text: string): number {
   return getEncoder().encode(text).length;
 }
 
