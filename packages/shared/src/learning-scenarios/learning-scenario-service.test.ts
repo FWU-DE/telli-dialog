@@ -690,9 +690,7 @@ describe('learning-scenario-service', () => {
       (
         dbGetFileForLearningScenario as MockedFunction<typeof dbGetFileForLearningScenario>
       ).mockResolvedValue({} as never);
-      (getReadOnlySignedUrl as MockedFunction<typeof getReadOnlySignedUrl>).mockResolvedValue(
-        undefined,
-      );
+      (getReadOnlySignedUrl as MockedFunction<typeof getReadOnlySignedUrl>).mockResolvedValue('');
     });
 
     describe('user is owner', () => {

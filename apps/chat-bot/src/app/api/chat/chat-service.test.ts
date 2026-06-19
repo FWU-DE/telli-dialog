@@ -45,6 +45,7 @@ const mocks = vi.hoisted(() => ({
   constructChatSystemPromptMock: vi.fn(),
   getModelAndApiKeyWithResultMock: vi.fn(),
   getAuxiliaryModelMock: vi.fn(),
+  determineImageAttachmentTypeForModelMock: vi.fn(),
   dbGetConversationAndMessagesMock: vi.fn(),
   dbGetOrCreateConversationMock: vi.fn(),
   dbUpdateConversationTitleMock: vi.fn(),
@@ -57,13 +58,13 @@ const mocks = vi.hoisted(() => ({
   sendRabbitmqEventMock: vi.fn(),
   constructNewMessageEventMock: vi.fn(),
   constructTokenBudgetExceededEventMock: vi.fn(),
+  enrichMessagesWithImageDataMock: vi.fn(),
   convertToAiCoreMessagesMock: vi.fn(),
-  formatMessagesWithImagesMock: vi.fn(),
   getChatTitleMock: vi.fn(),
   limitChatHistoryMock: vi.fn(),
   retrieveChunksMock: vi.fn(),
   extractUrlsMock: vi.fn(),
-  extractImagesAndUrlMock: vi.fn(),
+  createImageAttachmentsForConversationMock: vi.fn(),
   ingestWebContentMock: vi.fn(),
   userHasReachedTokenPointsLimitMock: vi.fn(),
   logErrorMock: vi.fn(),
@@ -134,8 +135,9 @@ vi.mock('./system-prompt', () => ({
 }));
 
 vi.mock('./utils', () => ({
+  determineImageAttachmentTypeForModel: mocks.determineImageAttachmentTypeForModelMock,
+  enrichMessagesWithImageData: mocks.enrichMessagesWithImageDataMock,
   convertToAiCoreMessages: mocks.convertToAiCoreMessagesMock,
-  formatMessagesWithImages: mocks.formatMessagesWithImagesMock,
   getChatTitle: mocks.getChatTitleMock,
   limitChatHistory: mocks.limitChatHistoryMock,
 }));
@@ -149,7 +151,7 @@ vi.mock('../utils/extract-urls', () => ({
 }));
 
 vi.mock('../file-operations/preprocess-image', () => ({
-  extractImagesAndUrl: mocks.extractImagesAndUrlMock,
+  createImageAttachmentsForConversation: mocks.createImageAttachmentsForConversationMock,
 }));
 
 vi.mock('../rag/ingestWebContent', () => ({
@@ -267,12 +269,13 @@ beforeEach(() => {
   mocks.limitChatHistoryMock.mockImplementation(
     ({ messages }: { messages: ChatMessage[] }) => messages,
   );
+  mocks.enrichMessagesWithImageDataMock.mockImplementation((messages: ChatMessage[]) => messages);
+  mocks.createImageAttachmentsForConversationMock.mockResolvedValue([]);
   mocks.convertToAiCoreMessagesMock.mockImplementation(
     (_systemPrompt: unknown, messages: unknown[]) => messages,
   );
-  mocks.formatMessagesWithImagesMock.mockImplementation((messages: ChatMessage[]) => messages);
-  mocks.extractImagesAndUrlMock.mockResolvedValue([]);
   mocks.constructChatSystemPromptMock.mockResolvedValue('system-prompt');
+  mocks.determineImageAttachmentTypeForModelMock.mockImplementation(() => 'url');
   mocks.dbInsertChatContentMock.mockResolvedValue(undefined);
   mocks.dbInsertConversationUsageMock.mockResolvedValue(undefined);
   mocks.dbUpdateLastUsedModelByUserIdMock.mockResolvedValue(undefined);

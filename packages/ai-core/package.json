@@ -21,6 +21,8 @@
   },
   "dependencies": {
     "@ais-chat/api-database": "workspace:*",
+    "@anthropic-ai/sdk": "0.104.1",
+    "@anthropic-ai/vertex-sdk": "0.17.0",
     "@google/genai": "2.8.0",
     "@sentry/core": "10.56.0",
     "js-tiktoken": "1.0.21",

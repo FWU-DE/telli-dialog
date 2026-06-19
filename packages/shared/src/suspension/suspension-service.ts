@@ -35,7 +35,7 @@ import {
 } from '@shared/entities/entity-types';
 import { InvalidArgumentError, NotFoundError, checkParameterUUID } from '@shared/error';
 
-const suspensionRequestDescriptionSchema = z.string().min(1).max(500);
+const suspensionRequestDescriptionSchema = z.string().max(500);
 
 type SuspensionRequestEntityOverviewStatus = 'new' | 'suspended' | 'checked';
 

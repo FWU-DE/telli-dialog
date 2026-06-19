@@ -28,6 +28,11 @@ import type {
 import { AiGenerationError, ResponsibleAIError } from '../../errors';
 import { createGoogleClient, formatGoogleError } from '../../google-client';
 import { calculateCompletionUsage } from '../utils';
+import {
+  constructGoogleAnthropicAgenticStreamFn,
+  constructGoogleAnthropicTextGenerationFn,
+  constructGoogleAnthropicTextStreamFn,
+} from './google-anthropic';
 
 const RESPONSIBLE_AI_FINISH_REASONS = new Set<FinishReason>([
   FinishReason.SAFETY,
@@ -216,6 +221,9 @@ function toTokenUsage({
 }
 
 export function constructGoogleTextStreamFn(model: AiModel): TextStreamFn {
+  if (model.name.startsWith('anthropic/')) {
+    return constructGoogleAnthropicTextStreamFn(model);
+  }
   const clientConfig = createGoogleClient(model);
 
   return async function* getGoogleTextStream(
@@ -269,6 +277,9 @@ export function constructGoogleTextStreamFn(model: AiModel): TextStreamFn {
 }
 
 export function constructGoogleTextGenerationFn(model: AiModel): TextGenerationFn {
+  if (model.name.startsWith('anthropic/')) {
+    return constructGoogleAnthropicTextGenerationFn(model);
+  }
   const clientConfig = createGoogleClient(model);
 
   return async function getGoogleTextGeneration({
@@ -310,6 +321,9 @@ export function constructGoogleTextGenerationFn(model: AiModel): TextGenerationF
 }
 
 export function constructGoogleAgenticStreamFn(model: AiModel): AgenticStreamFn {
+  if (model.name.startsWith('anthropic/')) {
+    return constructGoogleAnthropicAgenticStreamFn(model);
+  }
   const clientConfig = createGoogleClient(model);
 
   return async function* getGoogleAgenticStream({

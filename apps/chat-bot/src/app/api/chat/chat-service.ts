@@ -25,7 +25,8 @@ import { constructTokenBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { constructChatSystemPrompt } from './system-prompt';
 import {
   convertToAiCoreMessages,
-  formatMessagesWithImages,
+  determineImageAttachmentTypeForModel,
+  enrichMessagesWithImageData,
   getChatTitle,
   limitChatHistory,
 } from './utils';
@@ -35,7 +36,7 @@ import { logError } from '@shared/logging';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
-import { extractImagesAndUrl } from '../file-operations/preprocess-image';
+import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { buildTools } from './build-tools';
 import { runWebSearchPipeline } from './websearch';
@@ -211,8 +212,10 @@ export async function sendChatMessage({
 
   const activeUserMessage = userMessage;
 
-  // Use DB message count for orderNumber
-  const dbMessageCount = activeConversationObject.messages.length;
+  // Use the max existing orderNumber from DB for the next message orderNumber
+  const dbMessageCount =
+    activeConversationObject.messages[activeConversationObject.messages.length - 1]?.orderNumber ??
+    0;
 
   // Save user message to DB
   await dbInsertChatContent({
@@ -344,14 +347,20 @@ export async function sendChatMessage({
   const modelSupportsImages =
     definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
 
+  const imageAttachmentType = determineImageAttachmentTypeForModel(definedModel);
+
   // attach the image url to each of the image files within relatedFileEntities
-  const extractedImages = await extractImagesAndUrl(relatedFileEntities);
+  const extractedImages = await createImageAttachmentsForConversation(
+    relatedFileEntities,
+    imageAttachmentType,
+  );
 
   // Format messages with images if the model supports vision
-  const messagesWithImages = formatMessagesWithImages(
+  const messagesWithImages = enrichMessagesWithImageData(
     prunedMessages,
     extractedImages,
     modelSupportsImages,
+    imageAttachmentType,
   );
 
   // Convert to ai-core format
