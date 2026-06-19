@@ -4,11 +4,16 @@ import React from 'react';
 import { OverviewFilter, overviewFilterSchema } from '@shared/overview-filter';
 import { useTranslations } from 'next-intl';
 import { Input } from '@ais-chat/ui/components/input';
-import { MagnifyingGlassIcon, InfoIcon, XCircleIcon, XIcon } from '@phosphor-icons/react';
+import {
+  MagnifyingGlassIcon,
+  InfoIcon,
+  XCircleIcon,
+  XIcon,
+  CaretDownIcon,
+} from '@phosphor-icons/react';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import { Button } from '@ais-chat/ui/components/button';
 import { FilterTabs } from '@ais-chat/ui/components/filter-tabs';
-import ChevronDownIcon from '@/components/icons/chevron-down';
 import {
   Select,
   SelectContent,
@@ -145,54 +150,63 @@ export default function EntityOverview({
         </div>
 
         <div className="py-2 pb-4 sticky top-0 z-10 bg-background-2">
-          <div className="flex items-end flex-wrap gap-2" aria-label={t('filter-tabs-label')}>
+          <div
+            className="flex items-end flex-wrap gap-y-2 gap-x-4"
+            aria-label={t('filter-tabs-label')}
+          >
             <FilterTabs tabs={visibleTabs} activeTab={activeFilter} onTabChange={onFilterChange} />
             <div className="grow" />
-            {onFilterPanelToggle ? (
+            <div className="flex gap-2 whitespace-nowrap">
+              {onFilterPanelToggle ? (
+                <div className="text-primary hover:text-primary-dark">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={onFilterPanelToggle}
+                    className={`${OVERVIEW_CONTROL_TRIGGER_CLASSNAME} relative aria-expanded:bg-transparent aria-expanded:text-primary`}
+                    aria-label={t('filter-label')}
+                    aria-expanded={isFilterPanelOpen}
+                    aria-controls={filterPanelId}
+                  >
+                    <span className="font-normal text-primary">{t('filter-label')}</span>
+                    <CaretDownIcon
+                      className="size-4 transition-transform"
+                      aria-hidden="true"
+                      weight="bold"
+                    />
+                    {filterActiveCount > 0 ? (
+                      <span className="absolute -top-1 -right-1 inline-flex size-4 items-center justify-center rounded-full bg-primary text-[10px] leading-none text-primary-foreground">
+                        {filterActiveCount}
+                      </span>
+                    ) : null}
+                  </Button>
+                </div>
+              ) : null}
               <div className="text-primary hover:text-primary-dark">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={onFilterPanelToggle}
-                  className={`${OVERVIEW_CONTROL_TRIGGER_CLASSNAME} relative`}
-                  aria-label={t('filter-label')}
-                  aria-expanded={isFilterPanelOpen}
-                  aria-controls={filterPanelId}
+                <Select
+                  value={sortBy}
+                  onValueChange={(v) => {
+                    if (isSortOption(v)) {
+                      setSortBy(v);
+                    }
+                  }}
                 >
-                  <span>{t('filter-label')}</span>
-                  <ChevronDownIcon className="size-2 transition-transform" aria-hidden="true" />
-                  {filterActiveCount > 0 ? (
-                    <span className="absolute -top-1 -right-1 inline-flex size-4 items-center justify-center rounded-full bg-primary text-[10px] leading-none text-primary-foreground">
-                      {filterActiveCount}
-                    </span>
-                  ) : null}
-                </Button>
+                  <SelectTrigger
+                    size="sm"
+                    className={OVERVIEW_CONTROL_TRIGGER_CLASSNAME}
+                    aria-label={t('sort-label')}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent align="end" position="popper">
+                    <SelectItem value="date-desc">{t('sort-date-desc')}</SelectItem>
+                    <SelectItem value="date-asc">{t('sort-date-asc')}</SelectItem>
+                    <SelectItem value="name-asc">{t('sort-name-asc')}</SelectItem>
+                    <SelectItem value="name-desc">{t('sort-name-desc')}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            ) : null}
-            <div className="text-primary hover:text-primary-dark">
-              <Select
-                value={sortBy}
-                onValueChange={(v) => {
-                  if (isSortOption(v)) {
-                    setSortBy(v);
-                  }
-                }}
-              >
-                <SelectTrigger
-                  size="sm"
-                  className={OVERVIEW_CONTROL_TRIGGER_CLASSNAME}
-                  aria-label={t('sort-label')}
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent align="end" position="popper">
-                  <SelectItem value="date-desc">{t('sort-date-desc')}</SelectItem>
-                  <SelectItem value="date-asc">{t('sort-date-asc')}</SelectItem>
-                  <SelectItem value="name-asc">{t('sort-name-asc')}</SelectItem>
-                  <SelectItem value="name-desc">{t('sort-name-desc')}</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 
