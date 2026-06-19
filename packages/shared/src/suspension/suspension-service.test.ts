@@ -141,6 +141,50 @@ describe('suspension-request-service', () => {
       expect(result).toEqual({ id: suspensionRequestId });
     });
 
+    it('creates a suspension request for an accessible assistant with empty description', async () => {
+      const assistantId = generateUUID();
+      const requesterId = generateUUID();
+      const suspensionRequestId = generateUUID();
+
+      (dbGetUserById as MockedFunction<typeof dbGetUserById>).mockResolvedValue({
+        id: requesterId,
+        schoolIds: [generateUUID()],
+      } as never);
+      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue({
+        id: assistantId,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        userId: requesterId,
+        ownerSchoolIds: [generateUUID()],
+      } as never);
+      (
+        dbCreateSuspensionRequest as MockedFunction<typeof dbCreateSuspensionRequest>
+      ).mockResolvedValue({
+        id: suspensionRequestId,
+      } as never);
+
+      const result = await createSuspensionRequest({
+        entityType: 'assistant',
+        entityId: assistantId,
+        requesterId,
+        reason: 'other',
+        description: '',
+      });
+
+      expect(verifyReadAccess).toHaveBeenCalledTimes(1);
+      expect(dbCreateSuspensionRequest).toHaveBeenCalledWith({
+        suspensionRequest: {
+          assistantId,
+          characterId: undefined,
+          learningScenarioId: undefined,
+          requesterId,
+          reason: 'other',
+          description: '',
+        },
+      });
+      expect(result).toEqual({ id: suspensionRequestId });
+    });
+
     it('throws for invalid entity id', async () => {
       const requesterId = generateUUID();
       (dbGetUserById as MockedFunction<typeof dbGetUserById>).mockResolvedValue({

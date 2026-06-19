@@ -230,8 +230,10 @@ export async function sendChatMessage({
 
   const activeUserMessage = userMessage;
 
-  // Use DB message count for orderNumber
-  const dbMessageCount = activeConversationObject.messages.length;
+  // Use the max existing orderNumber from DB for the next message orderNumber
+  const dbMessageCount =
+    activeConversationObject.messages[activeConversationObject.messages.length - 1]?.orderNumber ??
+    0;
 
   // Save user message to DB
   await dbInsertChatContent({
@@ -374,6 +376,7 @@ export async function sendChatMessage({
         toolCallId: msg.toolCallId ?? null,
       })),
       {
+        id: assistantMessageId,
         content: fullText,
         role: 'assistant' as const,
         userId: user.id,
@@ -425,6 +428,7 @@ export async function sendChatMessage({
 
   async function persistEmptyAssistantMessage() {
     await dbInsertChatContent({
+      id: assistantMessageId,
       content: '',
       role: 'assistant',
       userId: user.id,

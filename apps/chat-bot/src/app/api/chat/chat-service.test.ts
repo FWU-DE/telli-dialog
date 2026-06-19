@@ -374,6 +374,15 @@ describe('sendChatMessage', () => {
       );
       expect(streamedText).toBe('fallback chunk');
     }
+
+    expect(mocks.dbInsertChatContentBatchMock).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: result.messageId,
+          role: 'assistant',
+        }),
+      ]),
+    );
   });
 
   it('throws when conversation context ids do not match', async () => {
