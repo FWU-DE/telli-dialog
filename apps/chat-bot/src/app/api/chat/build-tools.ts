@@ -380,11 +380,15 @@ export async function buildTools({
     };
 
     addTool(retrieveTextChunksToolDefinition, async (args) => {
+      let processedSourceUrls = attachedSourceUrls;
+
       if (attachedSourceUrls.length > 0) {
-        await ingestWebContent({
+        const { processedUrls } = await ingestWebContent({
           urls: attachedSourceUrls,
           federalStateId: user.federalState.id,
         });
+
+        processedSourceUrls = processedUrls;
       }
       const search = typeof args.search === 'string' ? args.search : '';
       const requestedLimit =
@@ -396,7 +400,7 @@ export async function buildTools({
         searchQuery: search,
         federalStateId: user.federalState.id,
         relatedFileEntities,
-        sourceUrls: attachedSourceUrls,
+        sourceUrls: processedSourceUrls,
         limit,
       });
 

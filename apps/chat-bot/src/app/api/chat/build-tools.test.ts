@@ -216,6 +216,11 @@ describe('buildTools', () => {
   });
 
   it('adds a chunk retrieval tool for linked pages and forwards source urls', async () => {
+    mocks.ingestWebContentMock.mockResolvedValueOnce({
+      processedUrls: ['https://example.com/shared-page'],
+      errorUrls: [],
+    });
+
     const { buildTools } = await import('./build-tools');
 
     const { toolRegistry } = await buildTools({
@@ -246,8 +251,8 @@ describe('buildTools', () => {
     );
   });
 
-  it('re-downloads linked pages when no chunks are available', async () => {
-    mocks.retrieveChunksByQueryMock.mockResolvedValueOnce([]).mockResolvedValueOnce([
+  it('ingests linked pages before retrieving chunks', async () => {
+    mocks.retrieveChunksByQueryMock.mockResolvedValueOnce([
       {
         id: 'chunk-2',
         content: 'Neu abgerufener Seitenabschnitt.',
@@ -280,6 +285,14 @@ describe('buildTools', () => {
       urls: ['https://example.com/shared-page'],
       federalStateId: 'federal-state-1',
     });
+    expect(mocks.retrieveChunksByQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        searchQuery: 'verlinkter Inhalt',
+        federalStateId: 'federal-state-1',
+        relatedFileEntities: [],
+        sourceUrls: ['https://example.com/shared-page'],
+      }),
+    );
     expect(JSON.parse(result)).toEqual({
       chunks: [
         {
