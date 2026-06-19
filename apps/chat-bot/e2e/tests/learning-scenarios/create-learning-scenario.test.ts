@@ -163,6 +163,7 @@ test.describe('create, share, chat, delete', () => {
       await stopSharingButton.click();
     }
 
+    // set share with learners limit params
     await page.getByTestId('token-points-select').click();
     await page.getByTestId('token-points-option-25').click();
     await page.getByTestId('usage-time-select').click();
@@ -170,20 +171,31 @@ test.describe('create, share, chat, delete', () => {
     const editorUrl = page.url();
     await page.getByTestId('start-share-button').click();
 
+    // verify share page
     await page.waitForURL('/learning-scenarios/**/share');
     await expect(page.getByTestId('countdown-timer')).toBeVisible();
 
+    // stop share
     await page.goto(editorUrl);
     await page.waitForURL('/learning-scenarios/**');
     await page.getByTestId('stop-share-button').click();
     await expect(page.getByTestId('start-share-button')).toBeVisible();
     await page.reload();
 
+    // verify maximum token points is preselected
     await page.getByTestId('token-points-select').click();
     await expect(page.getByTestId('token-points-option-25')).toHaveAttribute(
       'data-state',
       'checked',
     );
+
+    // Close the select popover so it cannot intercept subsequent clicks
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('token-points-option-25')).not.toBeVisible();
+
+    // cleanup
+    await deleteLearningScenarioFromDetailPage(page);
+    await waitForToast(page);
   });
 });
 
