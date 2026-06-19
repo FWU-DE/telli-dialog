@@ -230,11 +230,10 @@ export async function sendChatMessage({
 
   const activeUserMessage = userMessage;
 
-  // Use DB message count for orderNumber ()
-  const dbMessageCount = activeConversationObject.messages.reduce(
-    (maxOrder, message) => Math.max(maxOrder, message.orderNumber),
-    0,
-  );
+  // Use the max existing orderNumber from DB for the next message orderNumber
+  const dbMessageCount =
+    activeConversationObject.messages[activeConversationObject.messages.length - 1]?.orderNumber ??
+    0;
 
   // Save user message to DB
   await dbInsertChatContent({
