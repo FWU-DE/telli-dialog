@@ -18,7 +18,7 @@ export const env = createEnv({
     vidisClientSecret: z.string(),
     vidisIssuerUri: z.string(),
     crawl4AIUrl: z.url().default('http://localhost:11235'),
-    crawl4AIToken: z.string().optional(),
+    crawl4AIToken: z.string().default('ais-chat-local-crawl4ai-token'),
     linkupApiKey: z.string().optional(),
   },
   runtimeEnv: {
