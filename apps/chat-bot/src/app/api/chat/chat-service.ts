@@ -3,6 +3,8 @@ import {
   type Message as AiCoreMessage,
   type TokenUsage,
   TokenPointsExceededError,
+  type ToolDefinition,
+  runAgentLoop,
 } from '@ais-chat/ai-core';
 import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { userHasReachedTokenPointsLimit } from './usage';
@@ -36,7 +38,6 @@ import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
-import { runAgentLoop } from './agent-loop';
 import { buildTools } from './build-tools';
 import { runWebSearchPipeline } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
@@ -50,7 +51,6 @@ import { NotFoundError } from '@shared/error';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
 import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
 import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
-import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { deepEqual } from '@/utils/object';
 
 type CustomChatIds = {
@@ -69,24 +69,6 @@ function ensureConversationCustomChatIdsMatch({
   if (!deepEqual(incomingIds, storedIds)) {
     throw new NotFoundError('Conversation not found');
   }
-}
-
-function resolveAgentNameForTracing({
-  characterId,
-  learningScenarioId,
-  assistantId,
-}: {
-  characterId?: string;
-  learningScenarioId?: string;
-  assistantId?: string;
-}): string {
-  if (characterId) return 'Character';
-  if (learningScenarioId) return 'Learning Scenario';
-  if (assistantId) {
-    if (assistantId === HELP_MODE_ASSISTANT_ID) return 'Help Mode';
-    return 'Assistant';
-  }
-  return 'Chat';
 }
 
 /**
@@ -266,21 +248,57 @@ export async function sendChatMessage({
   let webSearchResults: WebSearchResult[] = [];
   let chunks: RetrievedChunk[] = [];
   let errorUrls: string[] = [];
+  let toolRegistry:
+    | Record<
+        string,
+        { definition: ToolDefinition; handler: (args: Record<string, unknown>) => Promise<string> }
+      >
+    | undefined;
+  let activeToolDefinitions: ToolDefinition[] = [];
 
-  if (!agenticChatEnabled) {
+  const urls = extractUrls({
+    assistant: activeAssistant,
+    character: activeCharacter,
+    learningScenario: activeLearningScenario,
+    messages,
+  });
+  const ingestResult = await ingestWebContent({
+    urls,
+    federalStateId: user.federalState.id,
+  });
+  errorUrls = ingestResult.errorUrls;
+
+  if (agenticChatEnabled) {
+    const attachedLinks =
+      activeAssistant?.attachedLinks ??
+      activeCharacter?.attachedLinks ??
+      activeLearningScenario?.attachedLinks ??
+      [];
+
+    const builtTools = await buildTools({
+      user,
+      characterId,
+      learningScenarioId,
+      assistantId,
+      conversationId: activeConversation.id,
+      relatedFileEntities,
+      attachedLinks,
+      sourceUrls: ingestResult.processedUrls,
+      onWebSearchResults: (results) => {
+        update(
+          encodeChatStreamEvent({
+            type: 'web_search_results',
+            webSearchResults: results,
+          }),
+        );
+      },
+    });
+
+    webSearchResults = builtTools.webSearchResults;
+    toolRegistry = builtTools.toolRegistry;
+    activeToolDefinitions = Object.values(toolRegistry).map((entry) => entry.definition);
+  } else {
     // Fallback implementations of Websearch and Chunk Retrieval.
-    const urls = extractUrls({
-      assistant: activeAssistant,
-      character: activeCharacter,
-      learningScenario: activeLearningScenario,
-      messages,
-    });
-    const ingestResult = await ingestWebContent({
-      urls,
-      federalStateId: user.federalState.id,
-    });
-    errorUrls = ingestResult.errorUrls;
-
     webSearchResults = await runWebSearchPipeline({
       messages,
       user,
@@ -322,6 +340,7 @@ export async function sendChatMessage({
     chunks,
     errorUrls,
     webSearchResults,
+    activeToolDefinitions,
   });
 
   // Check if the model supports images based on supportedImageFormats
@@ -439,53 +458,25 @@ export async function sendChatMessage({
   }
 
   if (agenticChatEnabled) {
-    const attachedLinks =
-      activeAssistant?.attachedLinks ??
-      activeCharacter?.attachedLinks ??
-      activeLearningScenario?.attachedLinks ??
-      [];
-
-    const builtTools = await buildTools({
-      user,
-      characterId,
-      learningScenarioId,
-      assistantId,
-      conversationId: activeConversation.id,
-      relatedFileEntities,
-      attachedLinks,
-      onWebSearchResults: (results) => {
-        update(
-          encodeChatStreamEvent({
-            type: 'web_search_results',
-            webSearchResults: results,
-          }),
-        );
-      },
-    });
-    webSearchResults = builtTools.webSearchResults;
-    const agentName = resolveAgentNameForTracing({ characterId, learningScenarioId, assistantId });
-
     // Start the agent loop in the background
     runAgentLoop({
-      model: definedModel,
+      modelId: definedModel.id,
       apiKeyId,
       messages: aiCoreMessages,
-      tools: builtTools.tools,
-      toolHandlers: builtTools.toolHandlers,
-      agentName,
-      onTextChunk: (delta) => {
+      toolRegistry,
+      onTextChunk: (delta: string) => {
         update(delta);
       },
-      onComplete: async ({ fullText, usage, priceInCents, agentLoopMessages }) => {
+      onComplete: async ({ fullText, usage, priceInCents }) => {
         try {
-          await persistAssistantMessage({ fullText, usage, priceInCents, agentLoopMessages });
+          await persistAssistantMessage({ fullText, usage, priceInCents });
           done();
         } catch (error) {
           logError('Error during agent loop completion:', error);
           streamError(error instanceof Error ? error : new Error('Unknown error'));
         }
       },
-      onError: async (error) => {
+      onError: async (error: Error) => {
         await persistEmptyAssistantMessage();
 
         streamError(error);

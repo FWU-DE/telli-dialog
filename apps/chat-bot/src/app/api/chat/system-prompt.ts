@@ -12,16 +12,18 @@ import { constructCharacterSystemPrompt } from '../character/system-prompt';
 import { constructLearningScenarioSystemPrompt } from '../learning-scenario/system-prompt';
 import {
   constructRagContext,
+  constructToolGuidelines,
   FORMAT_GUIDELINES,
   LANGUAGE_GUIDELINES,
   SUGGESTION_GUIDELINES,
-  TOOL_GUIDELINES,
 } from '../utils/system-prompt';
+import type { ToolDefinition } from '@ais-chat/ai-core';
 
 function constructAisChatSystemPrompt(
   chunks: RetrievedChunk[],
   errorUrls: string[],
   webSearchResults: WebSearchResult[],
+  activeToolDefinitions: ToolDefinition[],
 ) {
   const ragContext = constructRagContext(chunks, errorUrls, webSearchResults);
 
@@ -30,7 +32,7 @@ Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und 
 Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. 
 Heute ist der ${formatDateToGermanTimestamp(new Date())}.
 ${LANGUAGE_GUIDELINES}
-${TOOL_GUIDELINES}
+${constructToolGuidelines(activeToolDefinitions)}
 ${FORMAT_GUIDELINES}
 ${SUGGESTION_GUIDELINES}
 ${ragContext}`;
@@ -41,13 +43,14 @@ function constructAssistantSystemPrompt(
   chunks: RetrievedChunk[],
   errorUrls: string[],
   webSearchResults: WebSearchResult[] = [],
+  activeToolDefinitions: ToolDefinition[] = [],
 ) {
   const ragContext = constructRagContext(chunks, errorUrls, webSearchResults);
 
   return `Du bist ein hilfreicher Assistent, der in einer Schule eingesetzt wird, um eine Lehrkraft zu unterstützen. Dein Name ist ${assistant.name}.
 
 ${LANGUAGE_GUIDELINES}
-${TOOL_GUIDELINES}
+${constructToolGuidelines(activeToolDefinitions)}
 ${FORMAT_GUIDELINES}
 ${SUGGESTION_GUIDELINES}
 
@@ -64,12 +67,14 @@ function constructHelpModeSystemPrompt({
   chatStorageDuration,
   chunks,
   errorUrls,
+  activeToolDefinitions,
 }: {
   isTeacher: boolean;
   federalStateSupportEmails: string[] | null;
   chatStorageDuration: number;
   chunks: RetrievedChunk[];
   errorUrls: string[];
+  activeToolDefinitions: ToolDefinition[];
 }) {
   const ragContext = constructRagContext(chunks, errorUrls);
 
@@ -119,7 +124,7 @@ Befolge folgende Anweisungen:
 ${federalStateSupportEmails !== null ? `- Kannst du nicht weiterhelfen, verweise auf den Support des Landes ${federalStateSupportEmails.join(', ')}.` : ''}
 - Du unterstützt die User auch bei der Erstellung von guten Prompts, beschränkst dich aber auf Hilfen zu AIS.chat und dem Einsatz von generativer KI.
 ${LANGUAGE_GUIDELINES}
-${TOOL_GUIDELINES}
+${constructToolGuidelines(activeToolDefinitions)}
 ${FORMAT_GUIDELINES}
 ${ragContext}`;
 }
@@ -133,6 +138,7 @@ export function constructChatSystemPrompt({
   chunks,
   errorUrls,
   webSearchResults = [],
+  activeToolDefinitions = [],
 }: {
   character?: CharacterSelectModel;
   learningScenario?: LearningScenarioSelectModel;
@@ -142,15 +148,17 @@ export function constructChatSystemPrompt({
   chunks: RetrievedChunk[];
   errorUrls: string[];
   webSearchResults?: WebSearchResult[];
+  activeToolDefinitions?: ToolDefinition[];
 }) {
   if (character !== undefined) {
-    return constructCharacterSystemPrompt({ character, chunks });
+    return constructCharacterSystemPrompt({ character, chunks, activeToolDefinitions });
   }
 
   if (learningScenario !== undefined) {
     return constructLearningScenarioSystemPrompt({
       learningScenario,
       chunks,
+      activeToolDefinitions,
     });
   }
 
@@ -162,11 +170,18 @@ export function constructChatSystemPrompt({
         chatStorageDuration: federalState.chatStorageTime,
         chunks,
         errorUrls,
+        activeToolDefinitions,
       });
-    } else {
-      return constructAssistantSystemPrompt(assistant, chunks, errorUrls, webSearchResults);
     }
+
+    return constructAssistantSystemPrompt(
+      assistant,
+      chunks,
+      errorUrls,
+      webSearchResults,
+      activeToolDefinitions,
+    );
   }
 
-  return constructAisChatSystemPrompt(chunks, errorUrls, webSearchResults);
+  return constructAisChatSystemPrompt(chunks, errorUrls, webSearchResults, activeToolDefinitions);
 }

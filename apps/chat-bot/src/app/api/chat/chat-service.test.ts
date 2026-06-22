@@ -13,6 +13,16 @@ const webSearchResults = [
 ];
 
 const buildToolsOutput = {
+  toolRegistry: {
+    web_search: {
+      definition: {
+        name: 'web_search',
+        description: 'web search tool',
+        parameters: {},
+      },
+      handler: vi.fn(),
+    },
+  },
   tools: [
     {
       name: 'web_search',
@@ -66,15 +76,12 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@ais-chat/ai-core', () => ({
   generateTextStreamWithBilling: mocks.generateTextStreamWithBillingMock,
   generateAgenticStreamWithBilling: mocks.generateAgenticStreamWithBillingMock,
+  runAgentLoop: mocks.runAgentLoopMock,
   TokenPointsExceededError: class TokenPointsExceededError extends Error {},
 }));
 
 vi.mock('./build-tools', () => ({
   buildTools: mocks.buildToolsMock,
-}));
-
-vi.mock('./agent-loop', () => ({
-  runAgentLoop: mocks.runAgentLoopMock,
 }));
 
 vi.mock('./websearch', () => ({
@@ -303,8 +310,7 @@ beforeEach(() => {
     ({
       onTextChunk,
       onComplete,
-      tools,
-      toolHandlers,
+      toolRegistry,
     }: {
       onTextChunk: (delta: string) => void;
       onComplete: ({
@@ -316,11 +322,9 @@ beforeEach(() => {
         usage: { promptTokens: number; completionTokens: number; totalTokens: number };
         priceInCents: number;
       }) => Promise<void> | void;
-      tools?: unknown[];
-      toolHandlers?: Record<string, unknown>;
+      toolRegistry?: Record<string, unknown>;
     }) => {
-      expect(tools).toEqual(buildToolsOutput.tools);
-      expect(toolHandlers).toEqual(buildToolsOutput.toolHandlers);
+      expect(toolRegistry).toEqual(buildToolsOutput.toolRegistry);
 
       onTextChunk('agentic chunk');
       void onComplete({
@@ -355,12 +359,18 @@ describe('sendChatMessage', () => {
       expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
       expect(mocks.retrieveChunksMock).not.toHaveBeenCalled();
       expect(mocks.runWebSearchPipelineMock).not.toHaveBeenCalled();
-      expect(mocks.extractUrlsMock).not.toHaveBeenCalled();
-      expect(mocks.ingestWebContentMock).not.toHaveBeenCalled();
+      expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
+      expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
       expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
         expect.objectContaining({ errorUrls: [] }),
       );
       expect(result.webSearchResults).toEqual(webSearchResults);
+      expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          webSearchResults,
+          activeToolDefinitions: [buildToolsOutput.toolRegistry.web_search.definition],
+        }),
+      );
       expect(streamedText).toBe('agentic chunk');
     } else {
       expect(mocks.buildToolsMock).not.toHaveBeenCalled();
@@ -370,7 +380,7 @@ describe('sendChatMessage', () => {
       expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
       expect(result.webSearchResults).toEqual(webSearchResults);
       expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
-        expect.objectContaining({ webSearchResults }),
+        expect.objectContaining({ webSearchResults, activeToolDefinitions: [] }),
       );
       expect(streamedText).toBe('fallback chunk');
     }
