@@ -2,6 +2,7 @@ import { Field, FieldLabel } from '@ui/components/field';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -106,22 +107,26 @@ export function TokenPointsLimitSelect({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {selectableTokenPointsPercentageValues.map((value) => (
-              <SelectItem
-                key={value}
-                value={String(value)}
-                data-testid={`token-points-option-${value}`}
-              >
-                {value} %
-              </SelectItem>
-            ))}
-            <SelectItem
-              key="max"
-              value={String(MaxTokenPointsPercentageLimit)}
-              data-testid="token-points-option-max"
-            >
-              {Math.max(Math.floor(maxAvailablePercentage), 0)} % ({t('maximum')})
-            </SelectItem>
+            <SelectGroup>
+              {selectableTokenPointsPercentageValues.map((value) => (
+                <SelectItem
+                  key={value}
+                  value={String(value)}
+                  data-testid={`token-points-option-${value}`}
+                >
+                  {value} %
+                </SelectItem>
+              ))}
+              {maxAvailablePercentage > 0 && (
+                <SelectItem
+                  key="max"
+                  value={String(MaxTokenPointsPercentageLimit)}
+                  data-testid="token-points-option-max"
+                >
+                  {Math.floor(maxAvailablePercentage)} % ({t('maximum')})
+                </SelectItem>
+              )}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </Field>

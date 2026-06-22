@@ -131,7 +131,7 @@ export function CustomChatShareWithLearners({
             <TokenPointsLimitSelect
               defaultValue={String(getValuesShare('tokenPointsPercentageLimit'))}
               onValueChange={(value) => setShareValue('tokenPointsPercentageLimit', value)}
-              disabled={sharedChatActive}
+              disabled={sharedChatActive || maxAvailablePercentage <= 0}
               pointsPercentageValues={tokenPointsPercentageValues}
               maxAvailablePercentage={maxAvailablePercentage}
             />
@@ -174,7 +174,7 @@ export function CustomChatShareWithLearners({
               <Button
                 type="button"
                 onClick={handleStartSharing}
-                disabled={sharingDisabled}
+                disabled={sharingDisabled || maxAvailablePercentage <= 0}
                 data-testid="start-share-button"
               >
                 <ShareFatIcon className="size-5" />
