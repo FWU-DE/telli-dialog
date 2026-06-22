@@ -395,6 +395,7 @@ export async function sendChatMessage({
         toolCallId: msg.toolCallId ?? null,
       })),
       {
+        id: assistantMessageId,
         content: fullText,
         role: 'assistant' as const,
         userId: user.id,
@@ -446,6 +447,7 @@ export async function sendChatMessage({
 
   async function persistEmptyAssistantMessage() {
     await dbInsertChatContent({
+      id: assistantMessageId,
       content: '',
       role: 'assistant',
       userId: user.id,
