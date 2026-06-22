@@ -49,6 +49,7 @@ const mocks = vi.hoisted(() => ({
   dbGetConversationAndMessagesMock: vi.fn(),
   dbGetOrCreateConversationMock: vi.fn(),
   dbUpdateConversationTitleMock: vi.fn(),
+  dbDeleteRegeneratedConversationMessageMock: vi.fn(),
   dbInsertChatContentMock: vi.fn(),
   dbInsertChatContentBatchMock: vi.fn(),
   dbInsertConversationUsageMock: vi.fn(),
@@ -101,6 +102,7 @@ vi.mock('@shared/db/functions/chat', () => ({
   dbGetConversationAndMessages: mocks.dbGetConversationAndMessagesMock,
   dbGetOrCreateConversation: mocks.dbGetOrCreateConversationMock,
   dbUpdateConversationTitle: mocks.dbUpdateConversationTitleMock,
+  dbDeleteRegeneratedConversationMessage: mocks.dbDeleteRegeneratedConversationMessageMock,
   dbInsertChatContent: mocks.dbInsertChatContentMock,
   dbInsertChatContentBatch: mocks.dbInsertChatContentBatchMock,
 }));
@@ -482,5 +484,130 @@ describe('sendChatMessage', () => {
         user: createUser(false),
       }),
     ).rejects.toThrow('Assistant not found');
+  });
+});
+
+describe('Message preparation helpers', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('handleRegenerationProcessing', () => {
+    it('deletes regenerated messages and filters conversation messages', async () => {
+      const { handleRegenerationProcessing } = await import('./chat-service');
+
+      const conversationId = 'conv-1';
+      const latestStoredUserMsg = { id: 'msg-2', orderNumber: 2, role: 'user' } as any;
+      const activeConversationMessages = [
+        { id: 'msg-1', orderNumber: 1, role: 'user' },
+        { id: 'msg-2', orderNumber: 2, role: 'user' },
+        { id: 'msg-3', orderNumber: 3, role: 'assistant' },
+      ] as any;
+
+      mocks.dbDeleteRegeneratedConversationMessageMock.mockResolvedValue(undefined);
+
+      const result = await handleRegenerationProcessing({
+        conversationId,
+        latestStoredUserMsg,
+        activeConversationMessages,
+      });
+
+      // Should delete messages after orderNumber 2
+      expect(mocks.dbDeleteRegeneratedConversationMessageMock).toHaveBeenCalledWith({
+        conversationId,
+        orderNumber: 2,
+      });
+
+      // Should return only messages up to and including orderNumber 2
+      expect(result).toHaveLength(2);
+      expect(result).toEqual([
+        { id: 'msg-1', orderNumber: 1, role: 'user' },
+        { id: 'msg-2', orderNumber: 2, role: 'user' },
+      ]);
+    });
+
+    it('handles single message scenario correctly', async () => {
+      const { handleRegenerationProcessing } = await import('./chat-service');
+
+      const conversationId = 'conv-1';
+      const latestStoredUserMsg = { id: 'msg-1', orderNumber: 1, role: 'user' } as any;
+      const activeConversationMessages = [{ id: 'msg-1', orderNumber: 1, role: 'user' }] as any;
+
+      mocks.dbDeleteRegeneratedConversationMessageMock.mockResolvedValue(undefined);
+
+      const result = await handleRegenerationProcessing({
+        conversationId,
+        latestStoredUserMsg,
+        activeConversationMessages,
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(latestStoredUserMsg);
+    });
+  });
+
+  describe('prepareMessageForProcessing', () => {
+    it('detects new message and calculates correct order number', async () => {
+      const { prepareMessageForProcessing } = await import('./chat-service');
+
+      const conversationId = 'conv-1';
+      const userMessage: ChatMessage = { id: 'new-msg', role: 'user', content: 'new message' };
+      const activeConversationMessages = [
+        { id: 'msg-1', orderNumber: 1, role: 'user', content: 'old' },
+        { id: 'msg-2', orderNumber: 2, role: 'assistant', content: 'response' },
+      ] as any;
+
+      const result = await prepareMessageForProcessing({
+        conversationId,
+        userMessage,
+        activeConversationMessages,
+      });
+
+      expect(result.isRegeneration).toBe(false);
+      expect(result.userMessageOrderNumber).toBe(3); // latestOrderNumber + 1
+      expect(result.conversationMessages).toEqual(activeConversationMessages);
+    });
+
+    it('detects regeneration and processes correctly', async () => {
+      const { prepareMessageForProcessing } = await import('./chat-service');
+
+      const conversationId = 'conv-1';
+      const userMessage: ChatMessage = { id: 'msg-1', role: 'user', content: 'regenerate' };
+      const activeConversationMessages = [
+        { id: 'msg-1', orderNumber: 1, role: 'user', content: 'old message' },
+        { id: 'msg-2', orderNumber: 2, role: 'assistant', content: 'old response' },
+        { id: 'msg-3', orderNumber: 3, role: 'assistant', content: 'to be deleted' },
+      ] as any;
+
+      mocks.dbDeleteRegeneratedConversationMessageMock.mockResolvedValue(undefined);
+
+      const result = await prepareMessageForProcessing({
+        conversationId,
+        userMessage,
+        activeConversationMessages,
+      });
+
+      expect(result.isRegeneration).toBe(true);
+      expect(result.userMessageOrderNumber).toBe(1); // reuse existing orderNumber
+      expect(result.conversationMessages).toHaveLength(1); // only msg-1
+    });
+
+    it('handles empty conversation messages', async () => {
+      const { prepareMessageForProcessing } = await import('./chat-service');
+
+      const conversationId = 'conv-1';
+      const userMessage: ChatMessage = { id: 'first-msg', role: 'user', content: 'first message' };
+      const activeConversationMessages: any[] = [];
+
+      const result = await prepareMessageForProcessing({
+        conversationId,
+        userMessage,
+        activeConversationMessages,
+      });
+
+      expect(result.isRegeneration).toBe(false);
+      expect(result.userMessageOrderNumber).toBe(1); // 0 + 1
+      expect(result.conversationMessages).toEqual([]);
+    });
   });
 });

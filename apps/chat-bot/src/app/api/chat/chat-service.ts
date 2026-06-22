@@ -13,6 +13,7 @@ import {
   dbGetConversationAndMessages,
   dbGetOrCreateConversation,
   dbUpdateConversationTitle,
+  dbDeleteRegeneratedConversationMessage,
   dbInsertChatContent,
   dbInsertChatContentBatch,
 } from '@shared/db/functions/chat';
@@ -46,12 +47,16 @@ import type {
   CharacterSelectModel,
   LearningScenarioSelectModel,
 } from '@shared/db/schema';
+import type { ConversationMessageModel } from '@shared/db/types';
 import { RetrievedChunk } from '../rag/types';
 import { NotFoundError } from '@shared/error';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
 import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
 import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { deepEqual } from '@/utils/object';
+
+// Exports for testing
+export { handleRegenerationProcessing, prepareMessageForProcessing };
 
 type CustomChatIds = {
   characterId?: string | undefined;
@@ -69,6 +74,71 @@ function ensureConversationCustomChatIdsMatch({
   if (!deepEqual(incomingIds, storedIds)) {
     throw new NotFoundError('Conversation not found');
   }
+}
+
+/**
+ * Prepares message state for processing by handling regeneration vs new message logic.
+ * Returns normalized state for the caller to use consistently.
+ */
+async function prepareMessageForProcessing({
+  conversationId,
+  userMessage,
+  activeConversationMessages,
+}: {
+  conversationId: string;
+  userMessage: ChatMessage;
+  activeConversationMessages: ConversationMessageModel[];
+}): Promise<{
+  isRegeneration: boolean;
+  conversationMessages: ConversationMessageModel[];
+  userMessageOrderNumber: number;
+}> {
+  // In case of regneration, we need to find the latest stored user message as the base msg.
+  const latestStoredUserMsg = activeConversationMessages.find(
+    (message) => message.id === userMessage.id && message.role === 'user',
+  );
+  const isRegeneration = latestStoredUserMsg !== undefined;
+
+  let updatedConversationMessages = activeConversationMessages;
+
+  if (isRegeneration && latestStoredUserMsg) {
+    updatedConversationMessages = await handleRegenerationProcessing({
+      conversationId,
+      latestStoredUserMsg: latestStoredUserMsg,
+      activeConversationMessages,
+    });
+  }
+
+  const latestOrderNumber =
+    updatedConversationMessages[updatedConversationMessages.length - 1]?.orderNumber ?? 0;
+  const userMessageOrderNumber = latestStoredUserMsg?.orderNumber ?? latestOrderNumber + 1;
+
+  return {
+    isRegeneration,
+    conversationMessages: updatedConversationMessages,
+    userMessageOrderNumber,
+  };
+}
+
+async function handleRegenerationProcessing({
+  conversationId,
+  latestStoredUserMsg,
+  activeConversationMessages,
+}: {
+  conversationId: string;
+  latestStoredUserMsg: ConversationMessageModel;
+  activeConversationMessages: ConversationMessageModel[];
+}): Promise<ConversationMessageModel[]> {
+  await dbDeleteRegeneratedConversationMessage({
+    conversationId,
+    orderNumber: latestStoredUserMsg.orderNumber,
+  });
+
+  // The old regenerated messages is now soft deleted in the DB, but activeConversationMessages still contains them until a reload.
+  // We need to filter them out for the rest of the processing.
+  return activeConversationMessages.filter(
+    (message) => message.orderNumber <= latestStoredUserMsg.orderNumber,
+  );
 }
 
 /**
@@ -212,21 +282,27 @@ export async function sendChatMessage({
 
   const activeUserMessage = userMessage;
 
-  // Use the max existing orderNumber from DB for the next message orderNumber
-  const dbMessageCount =
-    activeConversationObject.messages[activeConversationObject.messages.length - 1]?.orderNumber ??
-    0;
-
-  // Save user message to DB
-  await dbInsertChatContent({
+  const {
+    isRegeneration,
+    conversationMessages: activeConversationMessages,
+    userMessageOrderNumber,
+  } = await prepareMessageForProcessing({
     conversationId: activeConversation.id,
-    id: userMessage.id,
-    content: userMessage.content,
-    role: 'user',
-    userId: user.id,
-    modelName: definedModel.name,
-    orderNumber: dbMessageCount + 1,
+    userMessage: activeUserMessage,
+    activeConversationMessages: activeConversationObject.messages,
   });
+
+  if (!isRegeneration) {
+    await dbInsertChatContent({
+      conversationId: activeConversation.id,
+      id: userMessage.id,
+      content: userMessage.content,
+      role: 'user',
+      userId: user.id,
+      modelName: definedModel.name,
+      orderNumber: userMessageOrderNumber,
+    });
+  }
 
   // Link files to conversation
   if (fileIds && fileIds.length > 0) {
@@ -322,10 +398,9 @@ export async function sendChatMessage({
 
   // Use DB messages as source of truth — they include intermediate tool call/result
   // messages from the agent loop that the client doesn't track
-  const fullMessages: ChatMessage[] = [
-    ...convertMessageModelToMessage(activeConversationObject.messages),
-    userMessage,
-  ];
+  const fullMessages: ChatMessage[] = isRegeneration
+    ? convertMessageModelToMessage(activeConversationMessages)
+    : [...convertMessageModelToMessage(activeConversationMessages), userMessage];
 
   // Prune messages
   const prunedMessages = limitChatHistory(fullMessages);
@@ -369,7 +444,7 @@ export async function sendChatMessage({
   // Create native stream
   const { stream, update, done, error: streamError } = createTextStream();
   const assistantMessageId = crypto.randomUUID();
-  const assistantMessageOrderNumber = dbMessageCount + 2;
+  const assistantMessageOrderNumber = userMessageOrderNumber + 1;
 
   async function persistAssistantMessage({
     fullText,

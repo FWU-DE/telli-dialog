@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, gt, isNull } from 'drizzle-orm';
 import { db } from '..';
 import { conversationMessageTable, conversationTable } from '../schema';
 import type { ConversationMessageModel, InsertConversationMessageModel } from '../types';
@@ -153,6 +153,25 @@ export async function dbDeleteConversation(conversationId: string) {
     .update(conversationTable)
     .set({ name: ' ', deletedAt: new Date() })
     .where(eq(conversationTable.id, conversationId));
+}
+
+export async function dbDeleteRegeneratedConversationMessage({
+  conversationId,
+  orderNumber,
+}: {
+  conversationId: string;
+  orderNumber: number;
+}) {
+  await db
+    .update(conversationMessageTable)
+    .set({ content: ' ', deletedAt: new Date() })
+    .where(
+      and(
+        eq(conversationMessageTable.conversationId, conversationId),
+        gt(conversationMessageTable.orderNumber, orderNumber),
+        isNull(conversationMessageTable.deletedAt),
+      ),
+    );
 }
 
 function getLatestMessages(messages: ConversationMessageModel[]): ConversationMessageModel[] {
