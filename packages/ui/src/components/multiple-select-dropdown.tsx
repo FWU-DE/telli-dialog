@@ -6,7 +6,7 @@ import { Checkbox } from './checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from './dropdown-menu';
 import { Field, FieldLabel } from './field';
 
-export type MultipleSelectDropdownoptionGroups<T extends string = string> = {
+export type MultipleSelectDropdownOptionGroup<T extends string = string> = {
   title?: string;
   options: Array<{ value: T; label: string }>;
 };
@@ -16,7 +16,7 @@ type MultipleSelectDropdownProps<T extends string = string> = {
   tooltip?: string;
   value: T[];
   onValueChange: (values: T[]) => void;
-  optionGroups: MultipleSelectDropdownoptionGroups<T>[];
+  optionGroups: MultipleSelectDropdownOptionGroup<T>[];
   placeholder?: string;
   testId: string;
   selectedCountLabel?: (count: number) => string;

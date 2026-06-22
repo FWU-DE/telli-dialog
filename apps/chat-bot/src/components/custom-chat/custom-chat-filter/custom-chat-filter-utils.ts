@@ -119,7 +119,7 @@ export function toFilterGroup(values: FilterValues): filterGroup {
 export type ActiveFilterPill = {
   label: string;
   group: keyof FilterValues;
-  value: string;
+  value: FilterValues[keyof FilterValues][number];
 };
 
 export function getActiveFilterPills(
