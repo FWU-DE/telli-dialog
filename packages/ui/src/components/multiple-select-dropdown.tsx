@@ -6,24 +6,24 @@ import { Checkbox } from './checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from './dropdown-menu';
 import { Field, FieldLabel } from './field';
 
-export type MultipleSelectDropdownoptionGroups = {
+export type MultipleSelectDropdownoptionGroups<T extends string = string> = {
   title?: string;
-  options: Array<{ value: string; label: string }>;
+  options: Array<{ value: T; label: string }>;
 };
 
-type MultipleSelectDropdownProps = {
+type MultipleSelectDropdownProps<T extends string = string> = {
   label: string;
   tooltip?: string;
-  value: string[];
-  onValueChange: (values: string[]) => void;
-  optionGroups: MultipleSelectDropdownoptionGroups[];
+  value: T[];
+  onValueChange: (values: T[]) => void;
+  optionGroups: MultipleSelectDropdownoptionGroups<T>[];
   placeholder?: string;
   testId: string;
   selectedCountLabel?: (count: number) => string;
   contentClassName?: string;
 };
 
-export function MultipleSelectDropdown({
+export function MultipleSelectDropdown<T extends string = string>({
   label,
   tooltip,
   value,
@@ -33,7 +33,7 @@ export function MultipleSelectDropdown({
   testId,
   selectedCountLabel,
   contentClassName,
-}: MultipleSelectDropdownProps) {
+}: MultipleSelectDropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const options = useMemo(() => optionGroups.flatMap((group) => group.options), [optionGroups]);
 
@@ -50,7 +50,7 @@ export function MultipleSelectDropdown({
     return selectedCountLabel?.(value.length) ?? String(value.length);
   }, [options, placeholder, selectedCountLabel, value]);
 
-  const toggleValue = (optionValue: string) => {
+  const toggleValue = (optionValue: T) => {
     if (value.includes(optionValue)) {
       onValueChange(value.filter((selectedValue) => selectedValue !== optionValue));
       return;

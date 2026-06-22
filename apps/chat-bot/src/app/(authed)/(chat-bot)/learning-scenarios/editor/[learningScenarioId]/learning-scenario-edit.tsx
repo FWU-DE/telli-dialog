@@ -6,7 +6,16 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
+import {
+  FileModel,
+  LearningScenarioOptionalShareDataModel,
+  schoolTypesSchema,
+  gradeRangesSchema,
+  subjectsSchema,
+  categoriesSchema,
+  federalStatesSchema,
+  languagesSchema,
+} from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/card';
 import { FieldGroup } from '@ui/components/field';
@@ -62,7 +71,7 @@ import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action
 import FilterSelectSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
 import {
   extractFilterValues,
-  tofilterGroup,
+  toFilterGroup,
 } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
@@ -104,12 +113,12 @@ function createLearningScenarioFormValuesSchema(t: LearningScenarioTranslator) {
     additionalInstructions: z.string(),
     studentExercise: z.string(),
     modelId: z.string(),
-    schoolTypes: z.array(z.string()),
-    gradeRanges: z.array(z.string()),
-    subjects: z.array(z.string()),
-    categories: z.array(z.string()),
-    federalStates: z.array(z.string()),
-    languages: z.array(z.string()),
+    schoolTypes: z.array(schoolTypesSchema),
+    gradeRanges: z.array(gradeRangesSchema),
+    subjects: z.array(subjectsSchema),
+    categories: z.array(categoriesSchema),
+    federalStates: z.array(federalStatesSchema),
+    languages: z.array(languagesSchema),
     isSchoolShared: z.boolean(),
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
@@ -195,7 +204,7 @@ export function LearningScenarioEdit({
             name: data.name.trim(),
             description: data.description ?? '',
             studentExercise: data.studentExercise ?? '',
-            filterGroup: tofilterGroup({
+            filterGroup: toFilterGroup({
               schoolTypes: data.schoolTypes,
               gradeRanges: data.gradeRanges,
               subjects: data.subjects,

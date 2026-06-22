@@ -13,12 +13,12 @@ import {
   ethicsSubjects,
 } from '@shared/db/schema';
 
-export const SCHOOL_TYPE_KEYS = Object.values(schoolTypesSchema.enum);
-export const GRADE_RANGE_KEYS = Object.values(gradeRangesSchema.enum);
-export const CATEGORY_KEYS = Object.values(categoriesSchema.enum);
-export const FEDERAL_STATE_KEYS = Object.values(federalStatesSchema.enum);
-export const LANGUAGE_KEYS = Object.values(languagesSchema.enum);
-export const SUBJECT_KEYS = Object.values(subjectsSchema.enum);
+export const SCHOOL_TYPE_KEYS = schoolTypesSchema.options;
+export const GRADE_RANGE_KEYS = gradeRangesSchema.options;
+export const CATEGORY_KEYS = categoriesSchema.options;
+export const FEDERAL_STATE_KEYS = federalStatesSchema.options;
+export const LANGUAGE_KEYS = languagesSchema.options;
+export const SUBJECT_KEYS = subjectsSchema.options;
 
 export const SUBJECT_SUBGROUPS = [
   {

@@ -44,7 +44,7 @@ export default function AssistantOverview({ currentUserId }: AssistantOverviewPr
   } = useOverviewFilters({
     entityType: 'assistants',
     onLoad: fetchAssistants,
-    translateFilterLabel: (key) => tCommon(key as never),
+    translateFilterLabel: tCommon,
   });
 
   async function handleFilterChange(filter: OverviewFilter) {

@@ -24,7 +24,7 @@ const FILTER_GROUP_LABELS: Record<keyof FilterValues, string> = {
 export function FilterDisplaySection({ values }: FilterDisplaySectionProps) {
   const t = useTranslations();
 
-  const pills = getActiveFilterPills(values, (key) => t(key as never));
+  const pills = getActiveFilterPills(values, t);
 
   if (pills.length === 0) {
     return null;

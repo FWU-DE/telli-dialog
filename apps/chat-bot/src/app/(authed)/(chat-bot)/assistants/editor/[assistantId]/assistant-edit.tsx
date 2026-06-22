@@ -7,7 +7,16 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AssistantSelectModel, FileModel } from '@shared/db/schema';
+import {
+  AssistantSelectModel,
+  FileModel,
+  schoolTypesSchema,
+  gradeRangesSchema,
+  subjectsSchema,
+  categoriesSchema,
+  federalStatesSchema,
+  languagesSchema,
+} from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/card';
 import { FieldGroup } from '@ui/components/field';
@@ -55,7 +64,7 @@ import {
 import FilterSelectSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
 import {
   extractFilterValues,
-  tofilterGroup,
+  toFilterGroup,
 } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
@@ -93,12 +102,12 @@ function createAssistantFormValuesSchema(t: AssistantTranslator) {
     name: z.string().trim().min(1, t('name-required')).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
     description: z.string(),
     instructions: z.string(),
-    schoolTypes: z.array(z.string()),
-    gradeRanges: z.array(z.string()),
-    subjects: z.array(z.string()),
-    categories: z.array(z.string()),
-    federalStates: z.array(z.string()),
-    languages: z.array(z.string()),
+    schoolTypes: z.array(schoolTypesSchema),
+    gradeRanges: z.array(gradeRangesSchema),
+    subjects: z.array(subjectsSchema),
+    categories: z.array(categoriesSchema),
+    federalStates: z.array(federalStatesSchema),
+    languages: z.array(languagesSchema),
     isSchoolShared: z.boolean(),
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
@@ -189,7 +198,7 @@ export function AssistantEdit({
           name: data.name.trim(),
           description: data.description,
           instructions: data.instructions,
-          filterGroup: tofilterGroup({
+          filterGroup: toFilterGroup({
             schoolTypes: data.schoolTypes,
             gradeRanges: data.gradeRanges,
             subjects: data.subjects,

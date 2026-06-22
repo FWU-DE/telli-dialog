@@ -3,7 +3,16 @@
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
-import { CharacterOptionalShareDataModel, FileModel } from '@shared/db/schema';
+import {
+  CharacterOptionalShareDataModel,
+  FileModel,
+  schoolTypesSchema,
+  gradeRangesSchema,
+  subjectsSchema,
+  categoriesSchema,
+  federalStatesSchema,
+  languagesSchema,
+} from '@shared/db/schema';
 import { WebSource } from '@shared/db/types';
 import { useTranslations } from 'next-intl';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
@@ -63,7 +72,7 @@ import {
 import FilterSelectSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
 import {
   extractFilterValues,
-  tofilterGroup,
+  toFilterGroup,
 } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
@@ -105,12 +114,12 @@ function createCharacterFormValuesSchema(t: CharacterTranslator) {
     instructions: z.string(),
     initialMessage: z.string(),
     modelId: z.string(),
-    schoolTypes: z.array(z.string()),
-    gradeRanges: z.array(z.string()),
-    subjects: z.array(z.string()),
-    categories: z.array(z.string()),
-    federalStates: z.array(z.string()),
-    languages: z.array(z.string()),
+    schoolTypes: z.array(schoolTypesSchema),
+    gradeRanges: z.array(gradeRangesSchema),
+    subjects: z.array(subjectsSchema),
+    categories: z.array(categoriesSchema),
+    federalStates: z.array(federalStatesSchema),
+    languages: z.array(languagesSchema),
     isSchoolShared: z.boolean(),
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
@@ -190,7 +199,7 @@ export function CharacterEdit({
           instructions: data.instructions,
           initialMessage: data.initialMessage,
           modelId: data.modelId,
-          filterGroup: tofilterGroup({
+          filterGroup: toFilterGroup({
             schoolTypes: data.schoolTypes,
             gradeRanges: data.gradeRanges,
             subjects: data.subjects,

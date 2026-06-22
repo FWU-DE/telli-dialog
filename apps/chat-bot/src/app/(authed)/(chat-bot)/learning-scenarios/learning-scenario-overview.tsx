@@ -46,7 +46,7 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
   } = useOverviewFilters({
     entityType: 'learning-scenarios',
     onLoad: fetchLearningScenarios,
-    translateFilterLabel: (key) => tCommon(key as never),
+    translateFilterLabel: tCommon,
   });
 
   async function handleFilterChange(filter: OverviewFilter) {

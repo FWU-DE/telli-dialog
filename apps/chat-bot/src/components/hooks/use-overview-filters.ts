@@ -12,11 +12,12 @@ import {
   type EntityType,
   usePersistedOverviewFilter,
 } from '@/components/hooks/use-persisted-overview-filter';
+import { useTranslations } from 'next-intl';
 
 type UseOverviewFiltersOptions = {
   entityType: EntityType;
   onLoad: (filter: OverviewFilter) => Promise<void>;
-  translateFilterLabel: (key: string) => string;
+  translateFilterLabel: ReturnType<typeof useTranslations<never>>;
 };
 
 type UseOverviewFiltersResult = {

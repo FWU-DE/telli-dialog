@@ -7,14 +7,15 @@ import {
   type FederalState,
   type Language,
 } from '@shared/db/schema';
+import { useTranslations } from 'next-intl';
 
 export type FilterValues = {
-  schoolTypes: string[];
-  gradeRanges: string[];
-  subjects: string[];
-  categories: string[];
-  federalStates: string[];
-  languages: string[];
+  schoolTypes: SchoolType[];
+  gradeRanges: GradeRange[];
+  subjects: Subject[];
+  categories: Category[];
+  federalStates: FederalState[];
+  languages: Language[];
 };
 
 export const EMPTY_FILTER_VALUES: FilterValues = {
@@ -28,23 +29,23 @@ export const EMPTY_FILTER_VALUES: FilterValues = {
 
 type EntityWithFilterValues = {
   filterGroup?: {
-    school_types?: string[];
-    grade_ranges?: string[];
-    subjects?: string[];
-    categories?: string[];
-    federal_states?: string[];
-    languages?: string[];
+    school_types?: SchoolType[];
+    grade_ranges?: GradeRange[];
+    subjects?: Subject[];
+    categories?: Category[];
+    federal_states?: FederalState[];
+    languages?: Language[];
   };
-  schoolType?: string | null;
-  gradeLevel?: string | null;
-  subject?: string | null;
+  schoolType?: SchoolType | null;
+  gradeLevel?: GradeRange | null;
+  subject?: Subject | null;
 };
 
-function unique(values: string[]): string[] {
+function unique<T>(values: T[]): T[] {
   return [...new Set(values)];
 }
 
-function matchesSelectedGroup(entityValues: string[], selectedValues: string[]): boolean {
+function matchesSelectedGroup<T>(entityValues: T[], selectedValues: T[]): boolean {
   if (selectedValues.length === 0) {
     return true;
   }
@@ -104,14 +105,14 @@ export function extractFilterValues(entity: EntityWithFilterValues): FilterValue
   };
 }
 
-export function tofilterGroup(values: FilterValues): filterGroup {
+export function toFilterGroup(values: FilterValues): filterGroup {
   return {
-    school_types: unique(values.schoolTypes) as SchoolType[],
-    grade_ranges: unique(values.gradeRanges) as GradeRange[],
-    subjects: unique(values.subjects) as Subject[],
-    categories: unique(values.categories) as Category[],
-    federal_states: unique(values.federalStates) as FederalState[],
-    languages: unique(values.languages) as Language[],
+    school_types: unique(values.schoolTypes),
+    grade_ranges: unique(values.gradeRanges),
+    subjects: unique(values.subjects),
+    categories: unique(values.categories),
+    federal_states: unique(values.federalStates),
+    languages: unique(values.languages),
   };
 }
 
@@ -123,7 +124,7 @@ export type ActiveFilterPill = {
 
 export function getActiveFilterPills(
   values: FilterValues,
-  t: (key: string) => string,
+  t: ReturnType<typeof useTranslations<never>>,
 ): ActiveFilterPill[] {
   return [
     ...values.schoolTypes.map((value) => ({
@@ -161,7 +162,7 @@ export function getActiveFilterPills(
 
 export function getActiveFilterPillLabels(
   values: FilterValues,
-  t: (key: string) => string,
+  t: ReturnType<typeof useTranslations<never>>,
 ): string[] {
   return getActiveFilterPills(values, t).map((pill) => pill.label);
 }

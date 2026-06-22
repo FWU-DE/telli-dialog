@@ -15,24 +15,32 @@ import {
 } from './custom-chat-filter-keys';
 import { CustomChatHeading2 } from '../custom-chat-heading2';
 import { cn } from '@ui/lib/utils';
+import type {
+  SchoolType,
+  GradeRange,
+  Subject,
+  Category,
+  FederalState,
+  Language,
+} from '@shared/db/schema';
 
 export type FilterSelectSectionValues = {
-  schoolTypes: string[];
-  gradeRanges: string[];
-  subjects: string[];
-  categories: string[];
-  federalStates: string[];
-  languages: string[];
+  schoolTypes: SchoolType[];
+  gradeRanges: GradeRange[];
+  subjects: Subject[];
+  categories: Category[];
+  federalStates: FederalState[];
+  languages: Language[];
 };
 
 type FilterSelectSectionProps = {
   values: FilterSelectSectionValues;
-  onSchoolTypesChange: (values: string[]) => void;
-  onGradeRangesChange: (values: string[]) => void;
-  onSubjectsChange: (values: string[]) => void;
-  onCategoriesChange: (values: string[]) => void;
-  onFederalStatesChange: (values: string[]) => void;
-  onLanguagesChange: (values: string[]) => void;
+  onSchoolTypesChange: (values: SchoolType[]) => void;
+  onGradeRangesChange: (values: GradeRange[]) => void;
+  onSubjectsChange: (values: Subject[]) => void;
+  onCategoriesChange: (values: Category[]) => void;
+  onFederalStatesChange: (values: FederalState[]) => void;
+  onLanguagesChange: (values: Language[]) => void;
   hideHeading?: boolean;
   isEditView?: boolean;
   onReset?: () => void;

@@ -44,7 +44,7 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
   } = useOverviewFilters({
     entityType: 'characters',
     onLoad: fetchCharacters,
-    translateFilterLabel: (key) => tCommon(key as never),
+    translateFilterLabel: tCommon,
   });
 
   async function handleFilterChange(filter: OverviewFilter) {
