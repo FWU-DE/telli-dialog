@@ -93,7 +93,7 @@ async function prepareMessageForProcessing({
   conversationMessages: ConversationMessageModel[];
   userMessageOrderNumber: number;
 }> {
-  // In case of regneration, we need to find the latest stored user message as the base msg.
+  // In case of regeneration, we need to find the latest stored user message as the base msg.
   const latestStoredUserMsg = activeConversationMessages.find(
     (message) => message.id === userMessage.id && message.role === 'user',
   );
@@ -134,7 +134,7 @@ async function handleRegenerationProcessing({
     orderNumber: latestStoredUserMsg.orderNumber,
   });
 
-  // The old regenerated messages is now soft deleted in the DB, but activeConversationMessages still contains them until a reload.
+  // The old regenerated messages are now soft-deleted in the DB, but activeConversationMessages still contains them until a reload.
   // We need to filter them out for the rest of the processing.
   return activeConversationMessages.filter(
     (message) => message.orderNumber <= latestStoredUserMsg.orderNumber,
