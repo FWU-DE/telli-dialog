@@ -448,8 +448,8 @@ export const languagesSchema = z.enum([
 ]);
 export type Language = z.infer<typeof languagesSchema>;
 
-export const subjectsSchema = z.enum([
-  // Languages
+// Subject enums organized by category
+export const langSubjects = z.enum([
   'german',
   'german-as-second-language',
   'english',
@@ -460,16 +460,13 @@ export const subjectsSchema = z.enum([
   'russian',
   'spanish',
   'turkish',
-  // Social sciences
-  'geography',
-  'history',
-  'politics',
-  'economics',
-  // Arts
-  'art',
-  'music',
-  'sports',
-  // Other
+] as const);
+
+export const socialSciSubjects = z.enum(['geography', 'history', 'politics', 'economics'] as const);
+
+export const artsSubjects = z.enum(['art', 'music', 'sports'] as const);
+
+export const otherSubjects = z.enum([
   'business-studies',
   'health',
   'intercultural-education',
@@ -479,7 +476,9 @@ export const subjectsSchema = z.enum([
   'addiction-prevention',
   'comprehensive-subjects',
   'traffic-education',
-  // STEM
+] as const);
+
+export const stemSubjects = z.enum([
   'biology',
   'chemistry',
   'informatics',
@@ -487,11 +486,18 @@ export const subjectsSchema = z.enum([
   'physics',
   'social-studies',
   'environmental-studies',
-  // Ethics
-  'ethics',
-  'philosophy',
-  'religion',
-]);
+] as const);
+
+export const ethicsSubjects = z.enum(['ethics', 'philosophy', 'religion'] as const);
+
+export const subjectsSchema = z.enum([
+  ...langSubjects.options,
+  ...socialSciSubjects.options,
+  ...artsSubjects.options,
+  ...otherSubjects.options,
+  ...stemSubjects.options,
+  ...ethicsSubjects.options,
+] as const);
 export type Subject = z.infer<typeof subjectsSchema>;
 
 export const filterGroupSchema = z.object({

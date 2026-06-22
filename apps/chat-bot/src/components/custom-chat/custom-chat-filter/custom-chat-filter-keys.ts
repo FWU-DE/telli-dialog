@@ -5,6 +5,12 @@ import {
   federalStatesSchema,
   languagesSchema,
   subjectsSchema,
+  langSubjects,
+  socialSciSubjects,
+  artsSubjects,
+  otherSubjects,
+  stemSubjects,
+  ethicsSubjects,
 } from '@shared/db/schema';
 
 export const SCHOOL_TYPE_KEYS = Object.values(schoolTypesSchema.enum);
@@ -17,55 +23,26 @@ export const SUBJECT_KEYS = Object.values(subjectsSchema.enum);
 export const SUBJECT_SUBGROUPS = [
   {
     titleKey: 'filter.subject-subgroup-languages',
-    values: [
-      'german',
-      'english',
-      'french',
-      'greek',
-      'italian',
-      'latin',
-      'russian',
-      'spanish',
-      'turkish',
-      'german-as-second-language',
-    ] as const,
+    values: langSubjects.options,
   },
   {
     titleKey: 'filter.subject-subgroup-social-sciences',
-    values: ['geography', 'history', 'politics', 'economics'] as const,
+    values: socialSciSubjects.options,
   },
   {
     titleKey: 'filter.subject-subgroup-arts',
-    values: ['art', 'music', 'sports'] as const,
+    values: artsSubjects.options,
   },
   {
     titleKey: 'filter.subject-subgroup-other',
-    values: [
-      'business-studies',
-      'health',
-      'intercultural-education',
-      'media-education',
-      'education',
-      'psychology',
-      'addiction-prevention',
-      'comprehensive-subjects',
-      'traffic-education',
-    ] as const,
+    values: otherSubjects.options,
   },
   {
     titleKey: 'filter.subject-subgroup-stem',
-    values: [
-      'biology',
-      'chemistry',
-      'informatics',
-      'mathematics',
-      'physics',
-      'social-studies',
-      'environmental-studies',
-    ] as const,
+    values: stemSubjects.options,
   },
   {
     titleKey: 'filter.subject-subgroup-ethics',
-    values: ['ethics', 'philosophy', 'religion'] as const,
+    values: ethicsSubjects.options,
   },
 ] as const;

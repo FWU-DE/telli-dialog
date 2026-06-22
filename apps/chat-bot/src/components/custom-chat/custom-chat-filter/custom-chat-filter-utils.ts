@@ -41,7 +41,7 @@ type EntityWithFilterValues = {
 };
 
 function unique(values: string[]): string[] {
-  return values.filter((value, index, allValues) => allValues.indexOf(value) === index);
+  return [...new Set(values)];
 }
 
 function matchesSelectedGroup(entityValues: string[], selectedValues: string[]): boolean {
