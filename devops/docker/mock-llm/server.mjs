@@ -8,6 +8,11 @@
  *   Output can be controlled by including special commands in the user message.
  *   See `MOCK_LLM_COMMANDS` for supported commands.
  *
+ * POST /v1/responses
+ *   Echoes the last user input back using the OpenAI Responses API shape.
+ *   This is used by agentic chat tests because the agentic providers stream
+ *   via the Responses API.
+ *
  * GET /health
  *   Returns {"status":"healthy"} for readiness checks.
  */
@@ -34,28 +39,23 @@ function writeSse(res, data) {
   res.write(`data: ${JSON.stringify(data)}\n\n`);
 }
 
-function extractLastUserMessage(messages) {
-  const content = messages.findLast((msg) => msg.role === 'user')?.content;
+function extractTextContent(content) {
   if (typeof content === 'string') return content;
   if (Array.isArray(content)) {
     return content
-      .filter((p) => p.type === 'text')
+      .filter((p) => p.type === 'text' || p.type === 'input_text')
       .map((p) => p.text)
       .join('');
   }
   return '';
 }
 
+function extractLastUserMessage(messages) {
+  return extractTextContent(messages.findLast((msg) => msg.role === 'user')?.content);
+}
+
 function extractSystemPrompt(messages) {
-  const content = messages.find((msg) => msg.role === 'system')?.content;
-  if (typeof content === 'string') return content;
-  if (Array.isArray(content)) {
-    return content
-      .filter((p) => p.type === 'text')
-      .map((p) => p.text)
-      .join('');
-  }
-  return '';
+  return extractTextContent(messages.find((msg) => msg.role === 'system')?.content);
 }
 
 function estimateTokens(text) {
@@ -166,6 +166,102 @@ async function handleChatCompletions(req, res) {
   }
 }
 
+function makeResponse(id, model, createdAt, responseText, usage) {
+  return {
+    id,
+    object: 'response',
+    created_at: createdAt,
+    status: 'completed',
+    model,
+    output: [
+      {
+        id: `msg_${id}`,
+        type: 'message',
+        status: 'completed',
+        role: 'assistant',
+        content: [
+          {
+            type: 'output_text',
+            text: responseText,
+            annotations: [],
+          },
+        ],
+      },
+    ],
+    usage,
+  };
+}
+
+async function handleResponses(req, res) {
+  let data;
+  try {
+    data = JSON.parse(await readBody(req));
+  } catch {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Invalid JSON' }));
+    return;
+  }
+
+  const input = Array.isArray(data.input) ? data.input : [];
+  const model = data.model ?? 'mock-echo';
+  const isStream = data.stream === true;
+  const lastUserMessage = extractLastUserMessage(input);
+  const responseText = lastUserMessage.includes(MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT)
+    ? extractSystemPrompt(input)
+    : lastUserMessage;
+
+  const id = `resp_mock_${Date.now()}`;
+  const createdAt = Math.floor(Date.now() / 1000);
+  const usage = {
+    input_tokens: input.reduce(
+      (sum, item) => sum + estimateTokens(extractTextContent(item.content)),
+      0,
+    ),
+    output_tokens: estimateTokens(responseText),
+    total_tokens: 0,
+  };
+  usage.total_tokens = usage.input_tokens + usage.output_tokens;
+  const response = makeResponse(id, model, createdAt, responseText, usage);
+
+  if (isStream) {
+    const itemId = `msg_${id}`;
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'Transfer-Encoding': 'chunked',
+    });
+
+    writeSse(res, { type: 'response.created', response: { ...response, status: 'in_progress' } });
+
+    for (const word of responseText.split(/(\s+)/)) {
+      writeSse(res, {
+        type: 'response.output_text.delta',
+        item_id: itemId,
+        output_index: 0,
+        content_index: 0,
+        delta: word,
+      });
+      await sleep(CHUNK_INTERVAL_MS);
+    }
+
+    writeSse(res, {
+      type: 'response.output_text.done',
+      item_id: itemId,
+      output_index: 0,
+      content_index: 0,
+      text: responseText,
+    });
+    writeSse(res, { type: 'response.completed', response });
+    res.write('data: [DONE]\n\n');
+    res.end();
+  } else {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(response));
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     if (req.method === 'GET' && req.url === '/health') {
@@ -176,6 +272,11 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'POST' && req.url === '/v1/chat/completions') {
       await handleChatCompletions(req, res);
+      return;
+    }
+
+    if (req.method === 'POST' && req.url === '/v1/responses') {
+      await handleResponses(req, res);
       return;
     }
 
