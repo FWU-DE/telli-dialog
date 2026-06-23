@@ -33,6 +33,9 @@ const MOCK_LLM_COMMANDS = {
 const EMPTY_PNG_BASE64 =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/l2cL9wAAAABJRU5ErkJggg==';
 const MOCK_EMBEDDING_DIMENSIONS = 1024;
+const MOCK_EMBEDDING = Array.from({ length: MOCK_EMBEDDING_DIMENSIONS }, (_, index) =>
+  index === 0 ? 1 : 0,
+);
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -110,16 +113,15 @@ function getAvailableTool(tools, name) {
 function extractFirstFileName(tools) {
   const tool = getAvailableTool(tools, 'retrieve_entire_file');
   const description = tool?.description ?? tool?.function?.description ?? '';
-  // This mirrors the retrieve_entire_file description format in
-  // apps/chat-bot/src/app/api/chat/build-tools.ts; keep it in sync so the mock
-  // can choose a deterministic file for agentic E2E tests.
+  // Contract with apps/chat-bot/src/app/api/chat/build-tools.ts:
+  // retrieve_entire_file descriptions include
+  // "Available files right now: <name> (<bytes> bytes), ... . Use this tool".
+  // The mock reads that advertised list to choose the first available file
+  // deterministically for agentic E2E tests.
   const fileList = description.match(
     /Available files right now:\s*(.+?)(?:\. Use this tool|$)/,
   )?.[1];
-  return fileList
-    ?.split('), ')[0]
-    ?.replace(/\s+\([^)]*$/, '')
-    .trim();
+  return [...(fileList?.matchAll(/(?:^|,\s*)(.+?)\s+\(\d+\s+bytes\)/g) ?? [])][0]?.[1]?.trim();
 }
 
 function getDeterministicToolCall(data) {
@@ -351,9 +353,6 @@ async function handleEmbeddings(req, res) {
   }
 
   const inputs = Array.isArray(data.input) ? data.input : [data.input ?? ''];
-  const embedding = Array.from({ length: MOCK_EMBEDDING_DIMENSIONS }, (_, index) =>
-    index === 0 ? 1 : 0,
-  );
   const promptTokens = inputs.reduce((sum, input) => sum + estimateTokens(String(input)), 0);
 
   res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -363,7 +362,7 @@ async function handleEmbeddings(req, res) {
       data: inputs.map((_, index) => ({
         object: 'embedding',
         index,
-        embedding,
+        embedding: MOCK_EMBEDDING,
       })),
       model: data.model ?? 'mock-embedding',
       usage: {
