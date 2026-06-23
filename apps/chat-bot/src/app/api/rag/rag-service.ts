@@ -1,4 +1,4 @@
-import { ChunkInsertModel, ChunkSourceType, FileModelAndContent } from '@shared/db/schema';
+import { ChunkInsertModel, ChunkSourceType, type FileModel } from '@shared/db/schema';
 import { type ChatMessage as Message } from '@/types/chat';
 import { chunkText } from './chunking';
 import { embedText, embedChunks } from './embedding';
@@ -74,7 +74,7 @@ export async function retrieveChunks({
 }: {
   messages: Message[];
   federalStateId: string;
-  relatedFileEntities: FileModelAndContent[];
+  relatedFileEntities: FileModel[];
   sourceUrls?: string[];
 }): Promise<RetrievedChunk[]> {
   const relatedFiles = relatedFileEntities.filter(isSupportedTextType);
@@ -104,7 +104,7 @@ export async function retrieveChunksByQuery({
 }: {
   searchQuery: string;
   federalStateId: string;
-  relatedFileEntities: FileModelAndContent[];
+  relatedFileEntities: FileModel[];
   sourceUrls?: string[];
   limit?: number;
 }): Promise<RetrievedChunk[]> {
