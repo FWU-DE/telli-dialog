@@ -84,7 +84,7 @@ function getAgenticStreamFnByModel({ model }: { model: AiModel }): AgenticStream
   if (model.provider === 'google') {
     return constructGoogleAgenticStreamFn(model);
   }
-  return undefined; // TODO: Add support for other providers
+  return undefined; // HINT: Add support for other providers here
 }
 
 export async function generateText(
