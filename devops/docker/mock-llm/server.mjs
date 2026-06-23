@@ -26,6 +26,7 @@ const CHUNK_INTERVAL_MS = 1;
 const MOCK_LLM_COMMANDS = {
   RETURN_SYSTEM_PROMPT: '[MOCK-LLM-COMMAND: Gebe den System-Prompt aus]',
 };
+const TEXT_CONTENT_PART_TYPES = ['text', 'input_text'];
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -39,6 +40,14 @@ function writeSse(res, data) {
   res.write(`data: ${JSON.stringify(data)}\n\n`);
 }
 
+function isTextContentPart(part) {
+  return TEXT_CONTENT_PART_TYPES.includes(part.type);
+}
+
+function getTextContentPartValue(part) {
+  return part.text ?? part.input_text ?? '';
+}
+
 function extractTextContent(content) {
   if (content === null || content === undefined) return '';
   if (typeof content === 'string') return content;
@@ -46,8 +55,8 @@ function extractTextContent(content) {
     return (
       content
         // Chat Completions uses "text"; Responses API uses "input_text".
-        .filter((p) => p.type === 'text' || p.type === 'input_text')
-        .map((p) => p.text ?? p.input_text ?? '')
+        .filter(isTextContentPart)
+        .map(getTextContentPartValue)
         .join('')
     );
   }
@@ -228,7 +237,8 @@ async function handleResponses(req, res) {
   const id = `resp_mock_${Date.now()}`;
   const createdAt = Math.floor(Date.now() / 1000);
   const inputTokens = input.reduce(
-    (sum, item) => sum + (item ? estimateContentTokens(item.content) : 0),
+    (sum, item) =>
+      sum + (item !== null && item !== undefined ? estimateContentTokens(item.content) : 0),
     0,
   );
   const outputTokens = estimateTokens(responseText);
