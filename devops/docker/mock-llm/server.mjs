@@ -98,6 +98,7 @@ function getResponseText(messages) {
 }
 
 function extractUrl(text) {
+  // E2E prompts use plain URLs separated by whitespace; closing parentheses are treated as prose.
   return text.match(/https?:\/\/[^\s)]+/)?.[0];
 }
 
@@ -108,6 +109,8 @@ function getAvailableTool(tools, name) {
 function extractFirstFileName(tools) {
   const tool = getAvailableTool(tools, 'retrieve_entire_file');
   const description = tool?.description ?? tool?.function?.description ?? '';
+  // The mock mirrors the current retrieve_entire_file description format to choose
+  // a deterministic file for agentic E2E tests.
   return description.match(/Available files right now: ([^(,]+?) \(/)?.[1]?.trim();
 }
 
