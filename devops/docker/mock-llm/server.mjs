@@ -98,8 +98,8 @@ function getResponseText(messages) {
 }
 
 function extractUrl(text) {
-  // E2E prompts use plain URLs separated by whitespace; closing parentheses are treated as prose.
-  return text.match(/https?:\/\/[^\s)]+/)?.[0];
+  // E2E prompts use plain URLs separated by whitespace; trim prose punctuation around them.
+  return text.match(/https?:\/\/\S+/)?.[0]?.replace(/[),.!?'"]+$/, '');
 }
 
 function getAvailableTool(tools, name) {
@@ -109,9 +109,15 @@ function getAvailableTool(tools, name) {
 function extractFirstFileName(tools) {
   const tool = getAvailableTool(tools, 'retrieve_entire_file');
   const description = tool?.description ?? tool?.function?.description ?? '';
-  // The mock mirrors the current retrieve_entire_file description format to choose
-  // a deterministic file for agentic E2E tests.
-  return description.match(/Available files right now: ([^(,]+?) \(/)?.[1]?.trim();
+  // This mirrors the retrieve_entire_file description format; keep it in sync so
+  // the mock can choose a deterministic file for agentic E2E tests.
+  const fileList = description.match(
+    /Available files right now:\s*(.+?)(?:\. Use this tool|$)/,
+  )?.[1];
+  return fileList
+    ?.split('), ')[0]
+    ?.replace(/\s+\([^)]*$/, '')
+    .trim();
 }
 
 function getDeterministicToolCall(data) {
