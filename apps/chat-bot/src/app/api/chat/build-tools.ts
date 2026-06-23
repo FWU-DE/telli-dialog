@@ -1,6 +1,7 @@
 import { type ToolDefinition, type ToolRegistry } from '@ais-chat/ai-core';
 import { UserAndContext } from '@/auth/types';
 import { isWebSearchEnabled, searchWeb } from './websearch';
+import { dbGetExtractedFileContent } from '@shared/db/functions/files';
 import type { WebSearchResult } from '@shared/db/schema';
 import type { FileModelAndContent } from '@shared/db/schema';
 import type { WebSource } from '@shared/db/types';
@@ -347,6 +348,10 @@ export async function buildTools({
           };
 
           return JSON.stringify(response);
+        }
+
+        if (matchedFile.content === undefined) {
+          matchedFile.content = await dbGetExtractedFileContent(matchedFile.id);
         }
 
         return formatEntireFileForTool(matchedFile);
