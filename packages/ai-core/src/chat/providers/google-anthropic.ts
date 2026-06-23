@@ -42,9 +42,10 @@ export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGe
   }: TextGenerationArgs): Promise<TextResponse> {
     // Separate system messages from conversation messages
     const systemMessages = getSystemMessages(messages);
-    const conversationMessages = getNonSystemMessages(messages).map((msg) =>
-      mapMessageToAnthropicMessageParam(msg),
-    );
+    // Filter out tool messages for non-agentic text generation
+    const conversationMessages = getNonSystemMessages(messages)
+      .filter((msg) => msg.role !== 'tool')
+      .map((msg) => mapMessageToAnthropicMessageParam(msg));
 
     const vertexModelName = resolveModelName(modelName);
 
@@ -88,9 +89,10 @@ export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStream
 
       // Separate system messages from conversation messages
       const systemMessages = getSystemMessages(messages);
-      const conversationMessages = getNonSystemMessages(messages).map((msg) =>
-        mapMessageToAnthropicMessageParam(msg),
-      );
+      // Filter out tool messages for non-agentic text streaming
+      const conversationMessages = getNonSystemMessages(messages)
+        .filter((msg) => msg.role !== 'tool')
+        .map((msg) => mapMessageToAnthropicMessageParam(msg));
 
       const vertexModelName = resolveModelName(modelName);
 
@@ -139,8 +141,8 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
     try {
       const { messages, maxTokens, model: modelName, tools, toolChoice } = args;
       const systemMessages = getSystemMessages(messages);
-      const conversationMessages = getNonSystemMessages(messages).map((msg) =>
-        mapMessageToAnthropicMessageParam(msg),
+      const conversationMessages = groupToolResults(
+        getNonSystemMessages(messages).map((msg) => mapMessageToAnthropicMessageParam(msg)),
       );
       const vertexModelName = resolveModelName(modelName);
       const messageParams: MessageCreateParamsStreaming = {
@@ -221,6 +223,66 @@ function getSystemMessages(messages: Message[]): Message[] {
 
 function getNonSystemMessages(messages: Message[]): NonSystemMessage[] {
   return messages.filter((msg): msg is NonSystemMessage => msg.role !== 'system');
+}
+
+/**
+ * Groups consecutive tool result messages into single user messages.
+ * Anthropic API requires tool results to be in user messages, and consecutive
+ * tool results should be grouped together in a single user message.
+ */
+function groupToolResults(messages: MessageParam[]): MessageParam[] {
+  const result: MessageParam[] = [];
+  let i = 0;
+
+  while (i < messages.length) {
+    const currentMessage = messages[i];
+    if (!currentMessage) break;
+
+    // Check if this is a user message containing tool results
+    if (
+      currentMessage.role === 'user' &&
+      Array.isArray(currentMessage.content) &&
+      currentMessage.content.some((block) => block.type === 'tool_result')
+    ) {
+      // Collect all consecutive user messages with tool results
+      const toolResultBlocks: ToolResultBlockParam[] = [];
+      let j = i;
+
+      while (j < messages.length) {
+        const msg = messages[j];
+        if (!msg) break;
+
+        if (
+          msg.role === 'user' &&
+          Array.isArray(msg.content) &&
+          msg.content.some((block) => block.type === 'tool_result')
+        ) {
+          // Extract tool_result blocks
+          const toolResults = msg.content.filter(
+            (block): block is ToolResultBlockParam => block.type === 'tool_result',
+          );
+          toolResultBlocks.push(...toolResults);
+          j++;
+        } else {
+          break;
+        }
+      }
+
+      // Create a single user message with all tool results
+      result.push({
+        role: 'user',
+        content: toolResultBlocks,
+      });
+
+      i = j;
+    } else {
+      // Not a tool result message, add as-is
+      result.push(currentMessage);
+      i++;
+    }
+  }
+
+  return result;
 }
 
 /**
