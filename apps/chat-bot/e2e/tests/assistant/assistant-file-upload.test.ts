@@ -28,6 +28,10 @@ test('should upload file and chat with assistant template (Schulorganisationsass
   // Verify file upload was successful
   await expect(page.locator('form').getByRole('img').nth(1)).toBeVisible();
 
+  // Wait for file indexing/retrieval to be available before sending message
+  // This ensures file chunks are available in the RAG context when the system prompt is built
+  await page.waitForTimeout(1000);
+
   // Send message about file contents
   await sendMessage(
     page,
@@ -35,9 +39,11 @@ test('should upload file and chat with assistant template (Schulorganisationsass
   );
 
   // Verify the response contains expected content
-  const assistantMessage = page.getByLabel('assistant message 1');
-  await expect(assistantMessage).toBeVisible();
+  // Get the last assistant message instead of relying on a fixed message index
+  const allAssistantMessages = page.locator('[aria-label^="assistant message"]');
+  const lastAssistantMessage = allAssistantMessages.last();
+  await expect(lastAssistantMessage).toBeVisible({ timeout: 10000 });
   // 'Napoleon Bonaparte' is written in the uploaded file, which is added to the system prompt;
   // the mock LLM echoes the system prompt back.
-  await expect(assistantMessage).toContainText(/Napol[eé]on Bonaparte/i);
+  await expect(lastAssistantMessage).toContainText(/Napol[eé]on Bonaparte/i, { timeout: 10000 });
 });

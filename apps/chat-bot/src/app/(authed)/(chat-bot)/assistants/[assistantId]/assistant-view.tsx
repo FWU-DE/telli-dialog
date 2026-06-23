@@ -20,6 +20,8 @@ import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-fi
 import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
+import { FilterDisplaySection } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-display-section';
+import { extractFilterValues } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 export function AssistantView({
   assistant,
@@ -35,6 +37,7 @@ export function AssistantView({
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('assistants');
+  const filterValues = extractFilterValues(assistant);
 
   const handleDuplicateAssistant = async () => {
     const createResult = await createNewAssistantAction({
@@ -101,6 +104,7 @@ export function AssistantView({
               />
             ))}
           </CustomChatFields>
+          <FilterDisplaySection values={filterValues} />
         </CardContent>
       </Card>
       <CustomChatFilesAndLinks

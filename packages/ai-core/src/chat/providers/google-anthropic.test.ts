@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   constructGoogleAnthropicTextGenerationFn,
   constructGoogleAnthropicTextStreamFn,
+  constructGoogleAnthropicAgenticStreamFn,
 } from './google-anthropic';
 import { AiGenerationError, RateLimitExceededError } from '../../errors';
 import type { AiModel, Message } from '../types';
@@ -558,6 +559,289 @@ describe('constructGoogleAnthropicTextStreamFn', () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _chunk of generateTextStream({
         messages: [{ role: 'user', content: 'test' }],
+        model: 'anthropic/claude',
+      })) {
+        // consume stream
+      }
+    }).rejects.toThrow(AiGenerationError);
+  });
+});
+
+describe('constructGoogleAnthropicAgenticStreamFn', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should yield text deltas from stream events', async () => {
+    const model = createGoogleAnthropicModel();
+
+    streamMock.mockReturnValue({
+      [Symbol.asyncIterator]: async function* () {
+        yield { type: 'content_block_delta', delta: { type: 'text_delta', text: 'Hello' } };
+        yield { type: 'content_block_delta', delta: { type: 'text_delta', text: ' world' } };
+      },
+      finalMessage: finalMessageMock,
+    });
+
+    const generateAgenticStream = constructGoogleAnthropicAgenticStreamFn(model);
+    const events = [];
+
+    for await (const event of generateAgenticStream({
+      messages: [{ role: 'user', content: 'test' }],
+      model: 'anthropic/claude',
+    })) {
+      events.push(event);
+    }
+
+    expect(events).toEqual([
+      { type: 'text', delta: 'Hello' },
+      { type: 'text', delta: ' world' },
+    ]);
+  });
+
+  it('should yield tool calls and usage on message_stop', async () => {
+    const model = createGoogleAnthropicModel();
+
+    finalMessageMock.mockResolvedValue({
+      content: [
+        {
+          type: 'tool_use',
+          id: 'toolu_123',
+          name: 'get_weather',
+          input: { city: 'Paris' },
+        },
+      ],
+      usage: { input_tokens: 50, output_tokens: 100 },
+    });
+
+    streamMock.mockReturnValue({
+      [Symbol.asyncIterator]: async function* () {
+        yield { type: 'message_stop' };
+      },
+      finalMessage: finalMessageMock,
+    });
+
+    const generateAgenticStream = constructGoogleAnthropicAgenticStreamFn(model);
+    const events = [];
+
+    for await (const event of generateAgenticStream({
+      messages: [{ role: 'user', content: 'What is the weather in Paris?' }],
+      model: 'anthropic/claude',
+      tools: [
+        {
+          name: 'get_weather',
+          description: 'Get weather',
+          parameters: { properties: { city: { type: 'string' } }, required: ['city'] },
+        },
+      ],
+    })) {
+      events.push(event);
+    }
+
+    expect(streamMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tools: [
+          expect.objectContaining({
+            name: 'get_weather',
+          }),
+        ],
+      }),
+    );
+
+    expect(events).toEqual([
+      {
+        type: 'tool_call',
+        call: {
+          id: 'toolu_123',
+          name: 'get_weather',
+          arguments: JSON.stringify({ city: 'Paris' }),
+        },
+      },
+      {
+        type: 'finish',
+        usage: {
+          promptTokens: 50,
+          completionTokens: 100,
+          totalTokens: 150,
+        },
+      },
+    ]);
+  });
+
+  it('should handle multi-turn conversation with tool results', async () => {
+    const model = createGoogleAnthropicModel();
+
+    streamMock.mockReturnValue({
+      [Symbol.asyncIterator]: async function* () {
+        yield { type: 'content_block_delta', delta: { type: 'text_delta', text: 'It is sunny' } };
+      },
+      finalMessage: finalMessageMock,
+    });
+
+    const generateAgenticStream = constructGoogleAnthropicAgenticStreamFn(model);
+    const messages: Message[] = [
+      { role: 'user', content: 'What is the weather in Paris?' },
+      {
+        role: 'assistant',
+        content: 'Let me check',
+        toolCalls: [{ id: 'toolu_123', name: 'get_weather', arguments: '{"city":"Paris"}' }],
+      },
+      { role: 'tool', content: '72°F and sunny', toolCallId: 'toolu_123' },
+    ];
+
+    const events = [];
+    for await (const event of generateAgenticStream({
+      messages,
+      model: 'anthropic/claude',
+      tools: [
+        {
+          name: 'get_weather',
+          description: 'Get weather',
+          parameters: { properties: { city: { type: 'string' } }, required: ['city'] },
+        },
+      ],
+    })) {
+      events.push(event);
+    }
+
+    // Verify messages were formatted correctly
+    expect(streamMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: [
+          { role: 'user', content: [{ type: 'text', text: 'What is the weather in Paris?' }] },
+          {
+            role: 'assistant',
+            content: [
+              { type: 'text', text: 'Let me check' },
+              { type: 'tool_use', id: 'toolu_123', name: 'get_weather', input: { city: 'Paris' } },
+            ],
+          },
+          {
+            role: 'user',
+            content: [{ type: 'tool_result', tool_use_id: 'toolu_123', content: '72°F and sunny' }],
+          },
+        ],
+      }),
+    );
+
+    expect(events).toEqual([{ type: 'text', delta: 'It is sunny' }]);
+  });
+
+  it('should group consecutive tool results into one user message', async () => {
+    const model = createGoogleAnthropicModel();
+
+    streamMock.mockReturnValue({
+      [Symbol.asyncIterator]: async function* () {
+        // empty stream
+      },
+      finalMessage: finalMessageMock,
+    });
+
+    const generateAgenticStream = constructGoogleAnthropicAgenticStreamFn(model);
+    const messages: Message[] = [
+      { role: 'user', content: 'Compare weather in Paris and London' },
+      {
+        role: 'assistant',
+        content: 'Let me check both',
+        toolCalls: [
+          { id: 'toolu_1', name: 'get_weather', arguments: '{"city":"Paris"}' },
+          { id: 'toolu_2', name: 'get_weather', arguments: '{"city":"London"}' },
+        ],
+      },
+      { role: 'tool', content: '72°F sunny', toolCallId: 'toolu_1' },
+      { role: 'tool', content: '65°F rainy', toolCallId: 'toolu_2' },
+    ];
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for await (const _event of generateAgenticStream({
+      messages,
+      model: 'anthropic/claude',
+      tools: [
+        {
+          name: 'get_weather',
+          description: 'Get weather',
+          parameters: { properties: { city: { type: 'string' } }, required: ['city'] },
+        },
+      ],
+    })) {
+      // consume stream
+    }
+
+    // Verify consecutive tool results were grouped
+    expect(streamMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: expect.arrayContaining([
+          {
+            role: 'user',
+            content: [
+              { type: 'tool_result', tool_use_id: 'toolu_1', content: '72°F sunny' },
+              { type: 'tool_result', tool_use_id: 'toolu_2', content: '65°F rainy' },
+            ],
+          },
+        ]),
+      }),
+    );
+  });
+
+  it('should handle rate limit errors (status 429)', async () => {
+    const model = createGoogleAnthropicModel();
+
+    streamMock.mockReturnValue({
+      [Symbol.asyncIterator]: async function* () {
+        throw { status: 429 };
+      },
+      finalMessage: finalMessageMock,
+    });
+
+    const generateAgenticStream = constructGoogleAnthropicAgenticStreamFn(model);
+
+    await expect(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _event of generateAgenticStream({
+        messages: [{ role: 'user', content: 'test' }],
+        model: 'anthropic/claude',
+      })) {
+        // consume stream
+      }
+    }).rejects.toThrow(RateLimitExceededError);
+  });
+
+  it('should handle generic errors', async () => {
+    const model = createGoogleAnthropicModel();
+
+    streamMock.mockReturnValue({
+      [Symbol.asyncIterator]: async function* () {
+        throw { status: 500 };
+      },
+      finalMessage: finalMessageMock,
+    });
+
+    const generateAgenticStream = constructGoogleAnthropicAgenticStreamFn(model);
+
+    await expect(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _event of generateAgenticStream({
+        messages: [{ role: 'user', content: 'test' }],
+        model: 'anthropic/claude',
+      })) {
+        // consume stream
+      }
+    }).rejects.toThrow(AiGenerationError);
+  });
+
+  it('should throw error if tool result is missing toolCallId', async () => {
+    const model = createGoogleAnthropicModel();
+
+    const generateAgenticStream = constructGoogleAnthropicAgenticStreamFn(model);
+    const messages: Message[] = [
+      { role: 'user', content: 'test' },
+      { role: 'tool', content: 'result' } as Message, // missing toolCallId
+    ];
+
+    await expect(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _event of generateAgenticStream({
+        messages,
         model: 'anthropic/claude',
       })) {
         // consume stream

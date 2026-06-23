@@ -4,6 +4,8 @@ import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
 import { getTextModelById, getTextModelByName } from '../models';
 import type { Message, TokenUsage, GenerationOptions, StreamEvent } from './types';
+export { runAgentLoop } from './agent-loop';
+export { countTokens } from './utils';
 
 // Re-export types for external consumers
 export type {
@@ -14,6 +16,9 @@ export type {
   GenerationOptions,
   ToolCall,
   ToolDefinition,
+  ToolHandler,
+  ToolRegistry,
+  ToolRegistryEntry,
   StreamEvent,
   AgenticStreamFn,
 } from './types';

@@ -7,10 +7,15 @@ import { AssistantWithImage } from './utils';
 import EntityOverview from '@/components/entity-overview/entity-overview';
 import EntityCard from '@/components/entity-overview/entity-card';
 import CreateNewAssistantButton from './create-new-assistant-button';
-import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
+import { useOverviewFilters } from '@/components/hooks/use-overview-filters';
 import { getAssistantsByFilterAction } from '../actions/entity-filter-actions';
 import { filterAndSortEntities } from '@/components/entity-overview/utils';
 import { RichText } from '@/components/common/rich-text';
+import FilterSelectSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
+import {
+  extractFilterValues,
+  matchesFilterValues,
+} from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 type AssistantOverviewProps = {
   currentUserId: string;
@@ -18,14 +23,29 @@ type AssistantOverviewProps = {
 
 export default function AssistantOverview({ currentUserId }: AssistantOverviewProps) {
   const t = useTranslations('assistants');
+  const tCommon = useTranslations();
   const [visibleAssistants, setVisibleAssistants] = useState<AssistantWithImage[]>([]);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   const fetchAssistants = useCallback(async (filter: OverviewFilter) => {
     const entities = await getAssistantsByFilterAction(filter);
     setVisibleAssistants(entities);
   }, []);
 
-  const [activeFilter, setActiveFilter] = useOverviewFilter('assistants', fetchAssistants);
+  const {
+    activeFilter,
+    setActiveFilter,
+    selectedFilters,
+    updateSelectedFilters,
+    handleRemoveFilter,
+    resetSelectedFilters,
+    activeFilterPills,
+    activeFilterCount,
+  } = useOverviewFilters({
+    entityType: 'assistants',
+    onLoad: fetchAssistants,
+    translateFilterLabel: (key) => tCommon(key as never),
+  });
 
   async function handleFilterChange(filter: OverviewFilter) {
     await setActiveFilter(filter);
@@ -46,9 +66,32 @@ export default function AssistantOverview({ currentUserId }: AssistantOverviewPr
       activeFilter={activeFilter}
       onFilterChange={handleFilterChange}
       itemCount={visibleAssistants.length}
+      isFilterPanelOpen={isFilterPanelOpen}
+      onFilterPanelToggle={() => setIsFilterPanelOpen((previous) => !previous)}
+      filterActiveCount={activeFilterCount}
+      activeFilterPills={activeFilterPills}
+      onRemoveFilter={handleRemoveFilter}
+      filterPanel={
+        <FilterSelectSection
+          className="mt-0"
+          isEditView={false}
+          onReset={resetSelectedFilters}
+          hasActiveValues={activeFilterCount > 0}
+          values={selectedFilters}
+          onSchoolTypesChange={(values) => updateSelectedFilters('schoolTypes', values)}
+          onGradeRangesChange={(values) => updateSelectedFilters('gradeRanges', values)}
+          onSubjectsChange={(values) => updateSelectedFilters('subjects', values)}
+          onCategoriesChange={(values) => updateSelectedFilters('categories', values)}
+          onFederalStatesChange={(values) => updateSelectedFilters('federalStates', values)}
+          onLanguagesChange={(values) => updateSelectedFilters('languages', values)}
+        />
+      }
     >
       {(searchQuery, sortBy) => {
-        const filtered = filterAndSortEntities(visibleAssistants, searchQuery, sortBy);
+        const filteredByAttributes = visibleAssistants.filter((assistant) =>
+          matchesFilterValues(extractFilterValues(assistant), selectedFilters),
+        );
+        const filtered = filterAndSortEntities(filteredByAttributes, searchQuery, sortBy);
 
         return filtered.map((assistant) => (
           <EntityCard

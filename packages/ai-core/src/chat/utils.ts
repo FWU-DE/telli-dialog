@@ -77,11 +77,10 @@ export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.Re
       return [
         {
           type: 'function_call_output',
-          id: message.toolCallId + '_output',
           call_id: message.toolCallId,
           output: message.content,
           status: 'completed',
-        } satisfies OpenAI.Responses.ResponseFunctionToolCallOutputItem,
+        } satisfies OpenAI.Responses.ResponseInputItem.FunctionCallOutput,
       ];
     }
     if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
@@ -89,12 +88,11 @@ export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.Re
         (toolCall) =>
           ({
             type: 'function_call',
-            id: toolCall.id + '_call',
             status: 'completed',
             arguments: toolCall.arguments,
             call_id: toolCall.id,
             name: toolCall.name,
-          }) satisfies OpenAI.Responses.ResponseFunctionToolCallItem,
+          }) satisfies OpenAI.Responses.ResponseFunctionToolCall,
       );
       if (message.content) {
         result.unshift({
@@ -189,7 +187,7 @@ function getEncoder(): Tiktoken {
  * @param text - The text to count tokens for.
  * @returns Token count.
  */
-function countTokens(text: string): number {
+export function countTokens(text: string): number {
   return getEncoder().encode(text).length;
 }
 

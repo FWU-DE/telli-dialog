@@ -1,4 +1,5 @@
 import { SUPPORTED_DOCUMENTS_EXTENSIONS, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
+import type { ToolDefinition } from '@ais-chat/ai-core';
 import { RetrievedChunk } from '../rag/types';
 import type { WebSearchResult } from '@shared/db/schema';
 
@@ -9,15 +10,45 @@ export const LANGUAGE_GUIDELINES = `
 - Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger.
 - Passe die Länge deiner Antworten dem Thema an: Einfache Fragen beantwortest du knapp, komplexe Sachverhalte dürfen ausführlicher sein - aber nie länger als nötig.`;
 
-export const TOOL_GUIDELINES = `
-## Fähigkeiten und Einschränkungen
-- Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Ausschließlich folgende Formate werden unterstützt: ${[...SUPPORTED_DOCUMENTS_EXTENSIONS, ...SUPPORTED_IMAGE_EXTENSIONS].map((ext) => ext.toUpperCase()).join(', ')}. Biete niemals an, andere Formate zu verarbeiten. Der Inhalt dieser Dateien steht dir im Kontext zur Verfügung.
-- Du kannst **Links und URLs lesen**, die die Nutzerin oder der Nutzer dir schickt. Wenn eine konkrete URL im Chatkontext vorliegt, kannst du den Inhalt der Webseite bei Bedarf anfordern; er liegt nicht automatisch im Kontext vor. Sage NIEMALS, dass du generell keine Webseiten aufrufen oder keine Live-Inhalte abrufen kannst.
-- Du kannst mit \`web_search\` eine **Websuche** durchführen. Wenn die Nutzerin oder der Nutzer eine Frage stellt, die aktuelle Informationen erfordert, führe \`web_search\` **sofort selbst durch** – frage niemals erst nach Erlaubnis oder ob du suchen sollst. Führe pro Nutzernachricht **maximal eine Websuche** durch und nutze die erhaltenen Ergebnisse direkt für deine Antwort.
-- Du kannst mit \`web_scraper\` eine **einzelne Webseite direkt aus einer URL auslesen**. Wenn du den Inhalt einer konkreten Seite brauchst, nutze \`web_scraper\`; wenn du erst passende Seiten finden musst, nutze \`web_search\`.
-- Du kannst **ausschließlich Textantworten** generieren.
-- Du kannst **keine Dateien erstellen** (z.B. Word-Dokumente, PDFs, Excel-Tabellen, Bilder etc.). Biete dies niemals an.
-- Wenn du Inhalte aufbereiten sollst, gib sie direkt als formatierten Text in deiner Antwort aus.`;
+function hasTool(activeTools: ToolDefinition[], toolName: string) {
+  return activeTools.some((tool) => tool.name === toolName);
+}
+
+export function constructToolGuidelines(activeTools: ToolDefinition[]) {
+  const sections = ['## Fähigkeiten und Einschränkungen'];
+
+  if (hasTool(activeTools, 'retrieve_text_chunks')) {
+    sections.push(
+      `- Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Ausschließlich folgende Formate werden unterstützt: ${[...SUPPORTED_DOCUMENTS_EXTENSIONS, ...SUPPORTED_IMAGE_EXTENSIONS].map((ext) => ext.toUpperCase()).join(', ')}. Biete niemals an, andere Formate zu verarbeiten. Der Inhalt dieser Dateien steht dir zur Verfügung.`,
+    );
+  }
+
+  if (hasTool(activeTools, 'retrieve_entire_file')) {
+    sections.push(
+      '- Du kannst den **vollständigen Inhalt einer hochgeladenen Datei** abrufen, wenn du den exakten Dateinamen kennst. Beachte, dass dies eine große Menge Tokens verbraucht. Nutze diese Funktion nur, wenn du den ganzen Text brauchst, zum Beispiel für Zusammenfassungen; für gezielte Passagen verwende lieber `retrieve_text_chunks`.',
+    );
+  }
+
+  if (hasTool(activeTools, 'web_scraper')) {
+    sections.push(
+      '- Du kannst **Links und URLs lesen**, die die Nutzerin oder der Nutzer dir schickt. Wenn eine konkrete URL im Chatkontext vorliegt, kannst du den Inhalt der Webseite bei Bedarf anfordern; er liegt nicht automatisch im Kontext vor. Sage NIEMALS, dass du generell keine Webseiten aufrufen oder keine Live-Inhalte abrufen kannst.',
+    );
+  }
+
+  if (hasTool(activeTools, 'web_search')) {
+    sections.push(
+      '- Du kannst eine **Websuche** durchführen. Wenn die Nutzerin oder der Nutzer eine Frage stellt, die aktuelle Informationen erfordert, führe `web_search` **sofort selbst durch**.',
+    );
+  }
+
+  sections.push(
+    '- Du kannst **ausschließlich Textantworten** generieren.',
+    '- Du kannst **keine Dateien erstellen** (z.B. Word-Dokumente, PDFs, Excel-Tabellen, Bilder etc.). Biete dies niemals an.',
+    '- Wenn du Inhalte aufbereiten sollst, gib sie direkt als formatierten Text in deiner Antwort aus.',
+  );
+
+  return sections.join('\n');
+}
 
 export const FORMAT_GUIDELINES = `
 ## Formatierung

@@ -14,6 +14,7 @@ export const TOTAL_CHAT_LENGTH_LIMIT = 60_000; // Maximum total characters in ch
 // RAG
 export const CHUNK_SIZE = 2500; // Number of characters per chunk when splitting text for RAG. Typical sweet spot to balance context richness with retrieval relevance
 export const VECTOR_SEARCH_LIMIT = 10; // Number of chunks to retrieve. One chunk is approximately 300 words or 400-500 tokens
+export const RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT = 100_000; // Maximum number of characters returned when retrieving a whole attached file
 
 // Web search
 export const WEBSEARCH_RESULTS_LIMIT = 5; // Number of websearch results to include in the RAG context

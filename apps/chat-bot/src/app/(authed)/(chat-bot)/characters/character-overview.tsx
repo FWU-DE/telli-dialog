@@ -7,10 +7,15 @@ import { CharacterWithImage } from './utils';
 import EntityOverview from '@/components/entity-overview/entity-overview';
 import EntityCard from '@/components/entity-overview/entity-card';
 import { CreateNewCharacterButton } from './create-new-character-button';
-import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
+import { useOverviewFilters } from '@/components/hooks/use-overview-filters';
 import { getCharactersByFilterAction } from '../actions/entity-filter-actions';
 import { filterAndSortEntities } from '@/components/entity-overview/utils';
 import { RichText } from '@/components/common/rich-text';
+import FilterSelectSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
+import {
+  extractFilterValues,
+  matchesFilterValues,
+} from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 type CharacterOverviewProps = {
   currentUserId: string;
@@ -18,14 +23,29 @@ type CharacterOverviewProps = {
 
 export default function CharacterOverview({ currentUserId }: CharacterOverviewProps) {
   const t = useTranslations('characters');
+  const tCommon = useTranslations();
   const [visibleCharacters, setVisibleCharacters] = useState<CharacterWithImage[]>([]);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   const fetchCharacters = useCallback(async (filter: OverviewFilter) => {
     const entities = await getCharactersByFilterAction(filter);
     setVisibleCharacters(entities);
   }, []);
 
-  const [activeFilter, setActiveFilter] = useOverviewFilter('characters', fetchCharacters);
+  const {
+    activeFilter,
+    setActiveFilter,
+    selectedFilters,
+    updateSelectedFilters,
+    handleRemoveFilter,
+    resetSelectedFilters,
+    activeFilterPills,
+    activeFilterCount,
+  } = useOverviewFilters({
+    entityType: 'characters',
+    onLoad: fetchCharacters,
+    translateFilterLabel: (key) => tCommon(key as never),
+  });
 
   async function handleFilterChange(filter: OverviewFilter) {
     await setActiveFilter(filter);
@@ -46,9 +66,32 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
       activeFilter={activeFilter}
       onFilterChange={handleFilterChange}
       itemCount={visibleCharacters.length}
+      isFilterPanelOpen={isFilterPanelOpen}
+      onFilterPanelToggle={() => setIsFilterPanelOpen((previous) => !previous)}
+      filterActiveCount={activeFilterCount}
+      activeFilterPills={activeFilterPills}
+      onRemoveFilter={handleRemoveFilter}
+      filterPanel={
+        <FilterSelectSection
+          className="mt-0"
+          isEditView={false}
+          onReset={resetSelectedFilters}
+          hasActiveValues={activeFilterCount > 0}
+          values={selectedFilters}
+          onSchoolTypesChange={(values) => updateSelectedFilters('schoolTypes', values)}
+          onGradeRangesChange={(values) => updateSelectedFilters('gradeRanges', values)}
+          onSubjectsChange={(values) => updateSelectedFilters('subjects', values)}
+          onCategoriesChange={(values) => updateSelectedFilters('categories', values)}
+          onFederalStatesChange={(values) => updateSelectedFilters('federalStates', values)}
+          onLanguagesChange={(values) => updateSelectedFilters('languages', values)}
+        />
+      }
     >
       {(searchQuery, sortBy) => {
-        const filtered = filterAndSortEntities(visibleCharacters, searchQuery, sortBy);
+        const filteredByAttributes = visibleCharacters.filter((character) =>
+          matchesFilterValues(extractFilterValues(character), selectedFilters),
+        );
+        const filtered = filterAndSortEntities(filteredByAttributes, searchQuery, sortBy);
 
         return filtered.map((character) => {
           const isOwned = character.userId === currentUserId;
