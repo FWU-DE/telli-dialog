@@ -31,9 +31,11 @@ import type {
 } from '../types';
 import { ProviderConfigurationError } from '../../errors';
 
+const AZURE_RESPONSES_MODEL_NAMES = new Set(['gpt-5', 'gpt-5-mini', 'gpt-5-nano']);
+
 function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerationFn | undefined {
   if (model.provider === 'azure') {
-    if (['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].includes(model.name)) {
+    if (AZURE_RESPONSES_MODEL_NAMES.has(model.name)) {
       return constructAzureResponsesGenerationFn(model);
     }
     return constructAzureChatCompletionGenerationFn(model);
@@ -54,7 +56,7 @@ function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerati
 function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | undefined {
   if (model.provider === 'azure') {
     // GPT-5 is used with Responses endpoint
-    if (['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].includes(model.name)) {
+    if (AZURE_RESPONSES_MODEL_NAMES.has(model.name)) {
       return constructAzureResponsesStreamFn(model);
     }
     return constructAzureChatCompletionStreamFn(model);
@@ -74,7 +76,7 @@ function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | u
 
 function getAgenticStreamFnByModel({ model }: { model: AiModel }): AgenticStreamFn | undefined {
   if (model.provider === 'azure') {
-    if (!['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].includes(model.name)) {
+    if (!AZURE_RESPONSES_MODEL_NAMES.has(model.name)) {
       return constructAzureChatCompletionAgenticStreamFn(model);
     }
     return constructAzureResponsesAgenticStreamFn(model);

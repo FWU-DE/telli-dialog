@@ -89,16 +89,13 @@ function hasTool(tools, toolName) {
 }
 
 function hasFunctionCallOutput(input, toolName) {
-  return input.some(
-    (item) =>
-      item?.type === 'function_call_output' &&
-      input.some(
-        (previousItem) =>
-          previousItem?.type === 'function_call' &&
-          previousItem.call_id === item.call_id &&
-          previousItem.name === toolName,
-      ),
+  const callIds = new Set(
+    input
+      .filter((item) => item?.type === 'function_call' && item.name === toolName)
+      .map((item) => item.call_id),
   );
+
+  return input.some((item) => item?.type === 'function_call_output' && callIds.has(item.call_id));
 }
 
 function shouldCallWebSearch({ input, tools, lastUserMessage }) {
@@ -269,6 +266,15 @@ function makeFunctionCallResponse(id, model, createdAt, toolCall, usage) {
   };
 }
 
+function makeWebSearchToolCall(id, query) {
+  return {
+    itemId: `fc_${id}`,
+    callId: `call_${id}`,
+    name: 'web_search',
+    arguments: JSON.stringify({ query }),
+  };
+}
+
 async function handleResponses(req, res) {
   let data;
   try {
@@ -312,12 +318,6 @@ async function handleResponses(req, res) {
     tools: data.tools,
     lastUserMessage,
   });
-  const toolCall = {
-    itemId: `fc_${id}`,
-    callId: `call_${id}`,
-    name: 'web_search',
-    arguments: JSON.stringify({ query: lastUserMessage }),
-  };
   const response = makeResponse(id, model, createdAt, responseText, usage);
 
   if (isStream) {
@@ -331,6 +331,7 @@ async function handleResponses(req, res) {
     });
 
     if (shouldUseWebSearch) {
+      const toolCall = makeWebSearchToolCall(id, lastUserMessage);
       const functionCallResponse = makeFunctionCallResponse(id, model, createdAt, toolCall, usage);
       writeSse(res, {
         type: 'response.created',
@@ -392,13 +393,13 @@ async function handleResponses(req, res) {
     res.end();
   } else {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(
-      JSON.stringify(
-        shouldUseWebSearch
-          ? makeFunctionCallResponse(id, model, createdAt, toolCall, usage)
-          : response,
-      ),
-    );
+    if (shouldUseWebSearch) {
+      const toolCall = makeWebSearchToolCall(id, lastUserMessage);
+      res.end(JSON.stringify(makeFunctionCallResponse(id, model, createdAt, toolCall, usage)));
+      return;
+    }
+
+    res.end(JSON.stringify(response));
   }
 }
 

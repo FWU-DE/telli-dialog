@@ -12,6 +12,20 @@ import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { toOpenAIChatTools, toOpenAIMessages, toOpenAIResponsesInput } from '../utils';
 import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
 
+type ToolCallAccumulator = {
+  id: string;
+  name: string;
+  arguments: string;
+};
+
+function createToolCallAccumulator(): ToolCallAccumulator {
+  return {
+    id: '',
+    name: '',
+    arguments: '',
+  };
+}
+
 function createAzureClient(model: AiModel): {
   client: OpenAI;
   deployment: string;
@@ -156,12 +170,6 @@ export function constructAzureChatCompletionAgenticStreamFn(model: AiModel): Age
       },
     );
 
-    type ToolCallAccumulator = {
-      id: string;
-      name: string;
-      arguments: string;
-    };
-
     let usage: TokenUsage | undefined;
     const toolCalls = new Map<number, ToolCallAccumulator>();
 
@@ -186,11 +194,7 @@ export function constructAzureChatCompletionAgenticStreamFn(model: AiModel): Age
       }
 
       for (const toolCallDelta of delta.tool_calls) {
-        const existingToolCall = toolCalls.get(toolCallDelta.index) ?? {
-          id: '',
-          name: '',
-          arguments: '',
-        };
+        const existingToolCall = toolCalls.get(toolCallDelta.index) ?? createToolCallAccumulator();
 
         if (toolCallDelta.id) {
           existingToolCall.id = toolCallDelta.id;
