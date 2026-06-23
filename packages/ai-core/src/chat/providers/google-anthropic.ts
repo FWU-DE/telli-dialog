@@ -5,6 +5,9 @@ import type {
   MessageCreateParamsNonStreaming,
   MessageCreateParamsStreaming,
   MessageParam,
+  ToolResultBlockParam,
+  ToolUnion,
+  ToolUseBlockParam,
   Usage,
 } from '@anthropic-ai/sdk/resources';
 import {
@@ -128,80 +131,79 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
   return async function* generateAgenticStream(
     args: TextGenerationArgs,
   ): AsyncGenerator<StreamEvent> {
-    const { messages, maxTokens, model: modelName, tools, toolChoice } = args;
+    try {
+      const { messages, maxTokens, model: modelName, tools, toolChoice } = args;
 
-    // Separate system messages from conversation messages
-    const systemMessages = messages.filter((msg) => msg.role === 'system');
-    // Convert messages to Anthropic format
-    const conversationMessages = filterUnsupportedMessages(messages).map((msg) =>
-      mapMessageToAnthropicMessageParam(msg),
-    );
+      // Separate system messages from conversation messages
+      const systemMessages = messages.filter((msg) => msg.role === 'system');
+      // Convert messages to Anthropic format (with tool_use and tool_result support)
+      const conversationMessages = mapMessagesToAnthropicAgenticParams(messages);
 
-    const vertexModelName = resolveModelName(modelName);
+      const vertexModelName = resolveModelName(modelName);
 
-    const messageParams: MessageCreateParamsStreaming = {
-      max_tokens: maxTokens ?? 4096,
-      messages: conversationMessages,
-      model: vertexModelName,
-      stream: true,
-      system: buildSystemPrompt(systemMessages),
-    };
+      const messageParams: MessageCreateParamsStreaming = {
+        max_tokens: maxTokens ?? 4096,
+        messages: conversationMessages,
+        model: vertexModelName,
+        stream: true,
+        system: buildSystemPrompt(systemMessages),
+      };
 
-    // Convert tools to Anthropic format
-    const anthropicTools = tools?.map((tool) => ({
-      name: tool.name,
-      description: tool.description,
-      input_schema: {
-        type: 'object' as const,
-        ...tool.parameters,
-      },
-    }));
+      // Tell anthropic about the tools available for better agentic decisions
+      const anthropicTools: ToolUnion[] | undefined = tools?.map((tool) => ({
+        name: tool.name,
+        description: tool.description,
+        input_schema: {
+          ...tool.parameters,
+          type: 'object' as const,
+        },
+      }));
 
-    const stream = client.messages.stream({
-      ...messageParams,
-      system: buildSystemPrompt(systemMessages),
-      ...(anthropicTools && anthropicTools.length > 0 ? { tools: anthropicTools } : {}),
-      ...(toolChoice === 'required'
-        ? { tool_choice: { type: 'any' as const } }
-        : toolChoice === 'auto'
-          ? { tool_choice: { type: 'auto' as const } }
-          : {}),
-    });
+      const stream = client.messages.stream({
+        ...messageParams,
+        ...(anthropicTools && anthropicTools.length > 0 ? { tools: anthropicTools } : undefined),
+        ...(toolChoice ? { tool_choice: mapToolChoice(toolChoice) } : undefined),
+      });
 
-    for await (const event of stream) {
-      if (event.type === 'content_block_delta') {
-        if (event.delta.type === 'text_delta') {
-          yield { type: 'text', delta: event.delta.text };
-        }
-      } else if (event.type === 'content_block_start') {
-        if (event.content_block.type === 'tool_use') {
-          // Tool use block started - we'll get the full details in message_stop
-        }
-      } else if (event.type === 'message_stop') {
-        const message = await stream.finalMessage();
+      // The streaming response is a sequence of content block deltas and a final message at the end (message_stop).
+      for await (const event of stream) {
+        if (event.type === 'content_block_delta') {
+          if (event.delta.type === 'text_delta') {
+            yield { type: 'text', delta: event.delta.text };
+          }
+        } else if (event.type === 'content_block_start') {
+          if (event.content_block.type === 'tool_use') {
+            // Tool use block started - we'll get the full details in message_stop
+            // we do not send back to the client that a tool call is happening now
+          }
+        } else if (event.type === 'message_stop') {
+          const message = await stream.finalMessage();
 
-        // Yield tool calls
-        for (const block of message.content) {
-          if (block.type === 'tool_use') {
+          // Yield tool calls
+          for (const block of message.content) {
+            if (block.type === 'tool_use') {
+              yield {
+                type: 'tool_call',
+                call: {
+                  id: block.id,
+                  name: block.name,
+                  arguments: JSON.stringify(block.input),
+                },
+              };
+            }
+          }
+
+          // Yield usage
+          if (message.usage) {
             yield {
-              type: 'tool_call',
-              call: {
-                id: block.id,
-                name: block.name,
-                arguments: JSON.stringify(block.input),
-              },
+              type: 'finish',
+              usage: buildTokenUsage(message.usage),
             };
           }
         }
-
-        // Yield usage
-        if (message.usage) {
-          yield {
-            type: 'finish',
-            usage: buildTokenUsage(message.usage),
-          };
-        }
       }
+    } catch (error) {
+      handleError(error);
     }
   };
 }
@@ -230,6 +232,95 @@ function mapMessageToAnthropicMessageParam(message: SupportedMessage): MessagePa
     role: mapRoleToAntropic(message.role),
     content: content,
   };
+}
+
+/**
+ * Converts the internal Message[] to Anthropic MessageParam[] for agentic conversations.
+ * Handles:
+ * - System messages: filtered out (handled separately as system prompt)
+ * - User messages: mapped with text + image attachments
+ * - Assistant messages with toolCalls: mapped with text + tool_use content blocks
+ * - Tool role messages: mapped as user messages with tool_result content blocks
+ * - Consecutive tool results are grouped into a single user message
+ */
+function mapMessagesToAnthropicAgenticParams(messages: Message[]): MessageParam[] {
+  const result: MessageParam[] = [];
+
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    if (!msg) continue;
+
+    // Skip system messages (handled separately)
+    if (msg.role === 'system') {
+      continue;
+    }
+
+    if (msg.role === 'assistant') {
+      const content: ContentBlockParam[] = [];
+
+      // Add text content if present
+      if (msg.content) {
+        content.push({ type: 'text', text: msg.content });
+      }
+
+      // Add tool_use blocks if present
+      if (msg.toolCalls && msg.toolCalls.length > 0) {
+        for (const toolCall of msg.toolCalls) {
+          content.push({
+            type: 'tool_use',
+            id: toolCall.id,
+            name: toolCall.name,
+            input: JSON.parse(toolCall.arguments),
+          } as ToolUseBlockParam);
+        }
+      }
+
+      result.push({ role: 'assistant', content });
+    } else if (msg.role === 'tool') {
+      // Collect consecutive tool result messages
+      const toolResults: ToolResultBlockParam[] = [];
+
+      let j = i;
+      while (j < messages.length && messages[j]?.role === 'tool') {
+        const toolMsg = messages[j];
+        if (!toolMsg?.toolCallId) {
+          throw new AiGenerationError('Tool result message is missing toolCallId');
+        }
+        toolResults.push({
+          type: 'tool_result',
+          tool_use_id: toolMsg.toolCallId,
+          content: toolMsg.content,
+        });
+        j++;
+      }
+
+      // Advance the loop index past the grouped tool messages
+      // (subtract 1 because the for loop will increment)
+      i = j - 1;
+
+      result.push({ role: 'user', content: toolResults });
+    } else if (msg.role === 'user') {
+      // Reuse existing image handling logic for user messages
+      const content: ContentBlockParam[] = [
+        { type: 'text', text: msg.content },
+        ...(msg.attachments?.filter(isImageAttachmentWithBase64DataUrl)?.map(
+          (attachment) =>
+            ({
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: sanitizeMediaType(attachment.contentType),
+                data: sanitizeBase64DataUrl(attachment.url),
+              },
+            }) as ImageBlockParam,
+        ) ?? []),
+      ];
+
+      result.push({ role: 'user', content });
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -334,6 +425,21 @@ function sanitizeMediaType(contentType: string): Base64ImageSource['media_type']
       return 'image/webp';
     default:
       throw new AiGenerationError(`Unsupported image content type: ${contentType}`);
+  }
+}
+
+function mapToolChoice(toolChoice: 'auto' | 'none' | 'required' | undefined) {
+  switch (toolChoice) {
+    // anthropic also provides 'tool' as an option
+    // in this case the model must choose a specific tool instead of just any tool but we do not support that yet
+    case 'auto':
+      return { type: 'auto' as const };
+    case 'none':
+      return { type: 'none' as const };
+    case 'required':
+      return { type: 'any' as const }; // any means that the model must choose at least one tool
+    default:
+      return undefined;
   }
 }
 

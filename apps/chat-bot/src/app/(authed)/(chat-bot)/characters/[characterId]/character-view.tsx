@@ -34,6 +34,8 @@ import {
 } from '../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
+import { FilterDisplaySection } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-display-section';
+import { extractFilterValues } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 export function CharacterView({
   character,
@@ -55,6 +57,7 @@ export function CharacterView({
   const isModelAvailable = character.modelId && models.some((m) => m.id === character.modelId);
   const selectedModelId = isModelAvailable ? character.modelId : maybeDefaultModelId;
   const selectedModel = models.find((m) => m.id === selectedModelId);
+  const filterValues = extractFilterValues(character);
 
   const handleUseChat = () => {
     router.push(`/characters/d/${character.id}`);
@@ -148,6 +151,7 @@ export function CharacterView({
                 value={character.initialMessage}
               />
             </FieldGroup>
+            <FilterDisplaySection values={filterValues} />
           </CardContent>
         </Card>
 
