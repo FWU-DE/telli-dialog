@@ -99,7 +99,8 @@ function getResponseText(messages) {
 
 function extractUrl(text) {
   // E2E prompts use plain URLs separated by whitespace; trim prose punctuation around them.
-  return text.match(/https?:\/\/\S+/)?.[0]?.replace(/[),.!?'"]+$/, '');
+  const match = text.match(/https?:\/\/\S+/);
+  return match ? match[0].replace(/[),.!?'"]+$/, '') : undefined;
 }
 
 function getAvailableTool(tools, name) {
@@ -109,8 +110,9 @@ function getAvailableTool(tools, name) {
 function extractFirstFileName(tools) {
   const tool = getAvailableTool(tools, 'retrieve_entire_file');
   const description = tool?.description ?? tool?.function?.description ?? '';
-  // This mirrors the retrieve_entire_file description format; keep it in sync so
-  // the mock can choose a deterministic file for agentic E2E tests.
+  // This mirrors the retrieve_entire_file description format in
+  // apps/chat-bot/src/app/api/chat/build-tools.ts; keep it in sync so the mock
+  // can choose a deterministic file for agentic E2E tests.
   const fileList = description.match(
     /Available files right now:\s*(.+?)(?:\. Use this tool|$)/,
   )?.[1];
