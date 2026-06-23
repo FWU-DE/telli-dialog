@@ -47,7 +47,7 @@ function extractTextContent(content) {
       content
         // Chat Completions uses "text"; Responses API uses "input_text".
         .filter((p) => p.type === 'text' || p.type === 'input_text')
-        .map((p) => p.text)
+        .map((p) => p.text ?? p.input_text ?? '')
         .join('')
     );
   }
@@ -227,7 +227,10 @@ async function handleResponses(req, res) {
 
   const id = `resp_mock_${Date.now()}`;
   const createdAt = Math.floor(Date.now() / 1000);
-  const inputTokens = input.reduce((sum, item) => sum + estimateContentTokens(item?.content), 0);
+  const inputTokens = input.reduce(
+    (sum, item) => sum + (item ? estimateContentTokens(item.content) : 0),
+    0,
+  );
   const outputTokens = estimateTokens(responseText);
   const usage = {
     input_tokens: inputTokens,
