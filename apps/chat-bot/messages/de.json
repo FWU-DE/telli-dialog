@@ -488,7 +488,11 @@
       "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",
       "share": "Teilen",
-      "maximum": "Maximum"
+      "maximum": "Maximum",
+      "minutes": "Minuten",
+      "day": "Tag",
+      "days": "Tage",
+      "additional-time": "Zeit hinzufügen"
     },
     "share-page": {
       "go-to": "Gehe auf",
