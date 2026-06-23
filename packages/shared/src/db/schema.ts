@@ -1376,7 +1376,6 @@ export type FileSelectModel = z.infer<typeof fileSelectSchema>;
 export type FileInsertModel = z.infer<typeof fileInsertSchema>;
 export type FileUpdateModel = z.infer<typeof fileUpdateSchema>;
 
-// Keep existing extended types
 export type FileModel = typeof fileTable.$inferSelect;
 export type FileModelAndUrl = FileModel & { signedUrl: string };
 
