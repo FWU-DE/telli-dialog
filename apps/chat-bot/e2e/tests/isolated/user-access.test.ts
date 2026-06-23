@@ -11,6 +11,7 @@ const featureToggleDefaults = {
   isCustomGptEnabled: true,
   isSharedChatEnabled: true,
   isShareTemplateWithSchoolEnabled: true,
+  isAgenticChatEnabled: true,
   isImageGenerationEnabled: true,
 };
 
