@@ -3,26 +3,37 @@ import {
   dbGetChatsUsageInCentByUserId,
   dbGetLearningScenarioUsageInCentByUserId,
 } from '@shared/db/functions/token-points';
-import { type UserAndContext } from '@/auth/types';
 import { dbGetCreditIncreaseForCurrentMonth } from '@shared/db/functions/voucher';
+import { FederalStateModel } from '@shared/federal-states/types';
+import { UserModel } from '@shared/auth/user-model';
 
-export async function getPriceLimitInCentByUser(user: UserAndContext) {
-  if (user.federalState === undefined) return null;
+export async function getMaxBudgetInCentByUser({
+  user,
+  federalState,
+}: {
+  user: Pick<UserModel, 'id' | 'userRole'>;
+  federalState?: FederalStateModel | null;
+}) {
+  if (federalState === undefined || federalState === null) return null;
 
   const codeBonus = await dbGetCreditIncreaseForCurrentMonth(user.id);
 
   if (user.userRole === 'student') {
-    return user.federalState.studentPriceLimit + codeBonus;
+    return federalState.studentPriceLimit + codeBonus;
   }
 
   if (user.userRole === 'teacher') {
-    return user.federalState.teacherPriceLimit + codeBonus;
+    return federalState.teacherPriceLimit + codeBonus;
   }
 
   return 500;
 }
 
-export async function getPriceInCentByUser(user: Omit<UserAndContext, 'subscription'>) {
+export async function getUsedBudgetInCentByUser({
+  user,
+}: {
+  user: Pick<UserModel, 'id' | 'userRole'>;
+}) {
   // students cannot have shared chats
   const sharedChatsUsageInCent =
     user.userRole !== 'student'

@@ -16,6 +16,11 @@ import {
 } from '@shared/db/functions/character';
 import { dbGetFileForCharacter, dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { FederalStateModel } from '@shared/federal-states/types';
+import {
+  getUsedBudgetInCentByUser,
+  getMaxBudgetInCentByUser,
+} from '@shared/users/user-budget-service';
 import {
   AccessLevel,
   accessLevelSchema,
@@ -523,15 +528,20 @@ export const getCharacterForChatSession = async ({
 export const getCharacterForEditView = async ({
   characterId,
   user,
+  federalState,
 }: {
   characterId: string;
-  user: Pick<UserModel, 'id' | 'schoolIds'>;
+  user: Pick<UserModel, 'id' | 'schoolIds' | 'userRole'>;
+  federalState: FederalStateModel;
 }): Promise<{
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
   maybeSignedPictureUrl: string | undefined;
+  maxBudget: number | null;
+  usedBudget: number;
 }> => {
   checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
   const character = await dbGetCharacterByIdOptionalShareData({ characterId, user });
   if (!character) throw new NotFoundError('Character not found');
   verifyReadAccess({ item: character, user });
@@ -545,7 +555,16 @@ export const getCharacterForEditView = async ({
         key: character.pictureId,
       })
     : undefined;
-  return { character, relatedFiles, maybeSignedPictureUrl };
+
+  const maxBudget = await getMaxBudgetInCentByUser({
+    user,
+    federalState,
+  });
+  const usedBudget = await getUsedBudgetInCentByUser({
+    user,
+  });
+
+  return { character, relatedFiles, maybeSignedPictureUrl, maxBudget, usedBudget };
 };
 
 /**

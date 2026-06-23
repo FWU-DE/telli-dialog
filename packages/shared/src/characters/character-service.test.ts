@@ -33,7 +33,9 @@ import { dbGetRelatedCharacterFiles } from '../db/functions/files';
 import { getReadOnlySignedUrl, uploadFileToS3 } from '../s3';
 import { getAvatarPictureUrl } from '../files/fileService';
 import { generateUUID } from '../utils/uuid';
+import { getMaxBudgetInCentByUser, getUsedBudgetInCentByUser } from '../users/user-budget-service';
 import { CharacterSelectModel } from '@shared/db/schema';
+import { FederalStateModel } from '@shared/federal-states/types';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import {
   copyCharacter,
@@ -62,6 +64,10 @@ vi.mock('../s3', () => ({
   getReadOnlySignedUrl: vi.fn(),
   uploadFileToS3: vi.fn(),
   deleteFileFromS3: vi.fn(),
+}));
+vi.mock('../users/user-budget-service', () => ({
+  getMaxBudgetInCentByUser: vi.fn(),
+  getUsedBudgetInCentByUser: vi.fn(),
 }));
 vi.mock('../files/fileService', () => ({
   getAvatarPictureUrl: vi.fn(),
@@ -95,6 +101,13 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
 describe('character-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Set default mock return values for budget functions
+    (getMaxBudgetInCentByUser as MockedFunction<typeof getMaxBudgetInCentByUser>).mockResolvedValue(
+      500,
+    );
+    (
+      getUsedBudgetInCentByUser as MockedFunction<typeof getUsedBudgetInCentByUser>
+    ).mockResolvedValue(0);
   });
 
   describe('NotFoundError scenarios', () => {
@@ -770,6 +783,13 @@ describe('character-service', () => {
 
         // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getCharacterForEditView({
+          federalState: {
+            id: generateUUID(),
+            teacherPriceLimit: 500,
+            studentPriceLimit: 100,
+            createdAt: new Date(),
+            mandatoryCertificationTeacher: null,
+          } as FederalStateModel,
           characterId,
           user: mockUser(),
         });
@@ -866,6 +886,13 @@ describe('character-service', () => {
 
         await expect(
           getCharacterForEditView({
+            federalState: {
+              id: generateUUID(),
+              teacherPriceLimit: 500,
+              studentPriceLimit: 100,
+              createdAt: new Date(),
+              mandatoryCertificationTeacher: null,
+            } as FederalStateModel,
             characterId,
             user: mockUser(),
           }),

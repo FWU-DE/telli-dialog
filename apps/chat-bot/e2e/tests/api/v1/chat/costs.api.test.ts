@@ -9,8 +9,6 @@ import {
   sharedLearningScenarioUsageTracking,
   userTable,
 } from '@shared/db/schema';
-import { getPriceInCentByUser } from '@/app/school';
-import { UserAndContext } from '@/auth/types';
 import {
   sharedCharacterChatHasReachedTokenPointsLimit,
   sharedLearningScenarioChatHasReachedTokenPointsLimit,
@@ -29,6 +27,7 @@ import {
   mockUserAndContext,
 } from '../../../../utils/mock';
 import { generateRandomString } from '../../../../utils/random';
+import { getUsedBudgetInCentByUser } from '@shared/users/user-budget-service';
 
 test.describe('costs', () => {
   test('should calculate total price from all three usage tracking tables', async () => {
@@ -64,18 +63,18 @@ test.describe('costs', () => {
       await db.insert(sharedCharacterChatUsageTrackingTable).values(sharedCharacterChatUsage);
     }
 
-    const priceInCent = await getPriceInCentByUser(user as UserAndContext);
+    const usedBudget = await getUsedBudgetInCentByUser({ user });
 
     // Expected total costs: (150 + 200 + 300)*2 = 1300 cents
-    expect(priceInCent).toBe(1300);
+    expect(usedBudget).toBe(1300);
   });
 
   test('should return 0 if no usage data exists for user', async () => {
     const user = mockUserAndContext();
 
-    const priceInCent = await getPriceInCentByUser(user);
+    const usedBudget = await getUsedBudgetInCentByUser({ user });
 
-    expect(priceInCent).toBe(0);
+    expect(usedBudget).toBe(0);
   });
 
   test('shared chat - should correctly compute token points limit', async () => {

@@ -6,7 +6,6 @@ import { CharacterView } from './character-view';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,15 +20,12 @@ export default async function Page(props: PageProps<'/characters/[characterId]'>
   const { characterId } = await props.params;
   const { user, federalState } = await requireAuth();
 
-  const [{ character, relatedFiles, maybeSignedPictureUrl }, userPriceLimit, priceInCent] =
-    await Promise.all([
-      getCharacterForEditView({
-        characterId,
-        user,
-      }).catch(handleErrorInServerComponent),
-      getPriceLimitInCentByUser({ ...user, federalState }),
-      getPriceInCentByUser({ ...user, federalState }),
-    ]);
+  const { character, relatedFiles, maybeSignedPictureUrl, maxBudget, usedBudget } =
+    await getCharacterForEditView({
+      characterId,
+      user,
+      federalState,
+    }).catch(handleErrorInServerComponent);
 
   const initialLinks = character.attachedLinks
     .filter((l) => l !== '')
@@ -48,8 +44,8 @@ export default async function Page(props: PageProps<'/characters/[characterId]'>
         relatedFiles={relatedFiles}
         initialLinks={initialLinks}
         avatarPictureUrl={maybeSignedPictureUrl}
-        usedBudget={priceInCent ?? 0}
-        maxBudget={userPriceLimit ?? 500}
+        usedBudget={usedBudget ?? 0}
+        maxBudget={maxBudget ?? 500}
       />
     </DefaultPageLayout>
   );

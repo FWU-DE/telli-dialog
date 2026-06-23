@@ -1,11 +1,10 @@
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
-import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { getLearningScenarioForEditView } from '@shared/learning-scenarios/learning-scenario-service';
 import { LearningScenarioView } from './learning-scenario-view';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,15 +19,12 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
   const { learningScenarioId } = await props.params;
   const { user, federalState } = await requireAuth();
 
-  const [{ learningScenario, relatedFiles, avatarPictureUrl }, userPriceLimit, priceInCent] =
-    await Promise.all([
-      getLearningScenario({
-        learningScenarioId,
-        user,
-      }).catch(handleErrorInServerComponent),
-      getPriceLimitInCentByUser({ ...user, federalState }),
-      getPriceInCentByUser({ ...user, federalState }),
-    ]);
+  const { learningScenario, relatedFiles, avatarPictureUrl, maxBudget, usedBudget } =
+    await getLearningScenarioForEditView({
+      learningScenarioId,
+      user,
+      federalState,
+    }).catch(handleErrorInServerComponent);
 
   const initialLinks = learningScenario.attachedLinks.map((url) => ({ link: url }));
 
@@ -39,8 +35,8 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
         fileMappings={relatedFiles}
         pictureUrl={avatarPictureUrl}
         initialLinks={initialLinks}
-        usedBudget={priceInCent ?? 0}
-        maxBudget={userPriceLimit ?? 500}
+        usedBudget={usedBudget ?? 0}
+        maxBudget={maxBudget ?? 500}
       />
     </DefaultPageLayout>
   );

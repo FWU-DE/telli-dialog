@@ -7,7 +7,7 @@ import {
   getLearningScenariosByAccessLevel,
   getLearningScenariosByOverviewFilter,
   getLearningScenariosForUser,
-  getLearningScenario,
+  getLearningScenarioForEditView,
   getLearningScenarioForChatSession,
   getSharedLearningScenario,
   linkFileToLearningScenario,
@@ -37,8 +37,10 @@ import { generateUUID } from '../utils/uuid';
 import { LearningScenarioSelectModel } from '@shared/db/schema';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { UserModel } from '@shared/auth/user-model';
+import { FederalStateModel } from '@shared/federal-states/types';
 import { getReadOnlySignedUrl, uploadFileToS3 } from '../s3';
 import { duplicateLearningScenario } from './learning-scenario-admin-service';
+import { getMaxBudgetInCentByUser, getUsedBudgetInCentByUser } from '../users/user-budget-service';
 
 vi.mock('../db/functions/learning-scenario', () => ({
   dbGetAllAccessibleLearningScenarios: vi.fn(),
@@ -78,6 +80,10 @@ const { mockDbReturning, mockDbSet, mockDbUpdate } = vi.hoisted(() => {
   return { mockDbReturning, mockDbSet, mockDbUpdate };
 });
 vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
+vi.mock('../users/user-budget-service', () => ({
+  getMaxBudgetInCentByUser: vi.fn(),
+  getUsedBudgetInCentByUser: vi.fn(),
+}));
 
 const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
   id: generateUUID(),
@@ -89,19 +95,31 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
   schoolIds: [generateUUID()],
 });
 
+const mockFederalState = (): FederalStateModel =>
+  ({
+    id: generateUUID(),
+    teacherPriceLimit: 500,
+    studentPriceLimit: 100,
+    createdAt: new Date(),
+    mandatoryCertificationTeacher: null,
+  }) as FederalStateModel;
+
 function buildFunctionList(
   {
     learningScenarioId,
     user,
+    federalState,
   }: {
     learningScenarioId?: string;
     user?: UserModel;
+    federalState?: FederalStateModel;
   },
   ...modes: ('read' | 'write' | 'unshare' | 'read-by-invite-code')[]
 ) {
   const fileId = generateUUID();
   learningScenarioId ??= generateUUID();
   user ??= mockUser();
+  federalState ??= mockFederalState();
 
   const writeAccess = [
     {
@@ -160,11 +178,12 @@ function buildFunctionList(
   ];
   const readAccess = [
     {
-      functionName: getLearningScenario.name,
+      functionName: getLearningScenarioForEditView.name,
       testFunction: () =>
-        getLearningScenario({
+        getLearningScenarioForEditView({
           learningScenarioId,
           user,
+          federalState,
         }),
     },
     {
@@ -226,6 +245,13 @@ function buildFunctionList(
 describe('learning-scenario-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Set default mock return values for budget functions
+    (getMaxBudgetInCentByUser as MockedFunction<typeof getMaxBudgetInCentByUser>).mockResolvedValue(
+      500,
+    );
+    (
+      getUsedBudgetInCentByUser as MockedFunction<typeof getUsedBudgetInCentByUser>
+    ).mockResolvedValue(0);
   });
 
   describe('NotFoundError scenarios', () => {
@@ -485,9 +511,10 @@ describe('learning-scenario-service', () => {
         );
 
         // User from different school trying to access - should succeed because hasLinkAccess is true
-        const result = await getLearningScenario({
+        const result = await getLearningScenarioForEditView({
           learningScenarioId,
           user: differentUser,
+          federalState: mockFederalState(),
         });
 
         expect(result.learningScenario).toBe(mockLearningScenario);
@@ -542,9 +569,10 @@ describe('learning-scenario-service', () => {
         ).mockResolvedValue(mockLearningScenario as never);
 
         await expect(
-          getLearningScenario({
+          getLearningScenarioForEditView({
             learningScenarioId,
             user: differentUser,
+            federalState: mockFederalState(),
           }),
         ).rejects.toThrow(ForbiddenError);
       });
