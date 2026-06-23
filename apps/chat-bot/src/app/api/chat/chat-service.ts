@@ -467,9 +467,9 @@ export async function sendChatMessage({
       onTextChunk: (delta: string) => {
         update(delta);
       },
-      onComplete: async ({ fullText, usage, priceInCents }) => {
+      onComplete: async ({ fullText, usage, priceInCents, agentLoopMessages }) => {
         try {
-          await persistAssistantMessage({ fullText, usage, priceInCents });
+          await persistAssistantMessage({ fullText, usage, priceInCents, agentLoopMessages });
           done();
         } catch (error) {
           logError('Error during agent loop completion:', error);
