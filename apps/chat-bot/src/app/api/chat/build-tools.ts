@@ -316,42 +316,39 @@ export async function buildTools({
       },
     };
 
-    toolRegistry.retrieve_entire_file = {
-      definition: retrieveEntireFileToolDefinition,
-      handler: async (args) => {
-        const fileName = typeof args.fileName === 'string' ? args.fileName.trim() : '';
+    addTool(retrieveEntireFileToolDefinition, async (args) => {
+      const fileName = typeof args.fileName === 'string' ? args.fileName.trim() : '';
 
-        if (fileName.length === 0) {
-          const response: RetrieveEntireFileToolResponse = {
-            fileName: null,
-            content: null,
-            truncated: false,
-            characterCount: 0,
-            maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
-            error: 'Fehlender Dateiname.',
-          };
+      if (fileName.length === 0) {
+        const response: RetrieveEntireFileToolResponse = {
+          fileName: null,
+          content: null,
+          truncated: false,
+          characterCount: 0,
+          maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
+          error: 'Fehlender Dateiname.',
+        };
 
-          return JSON.stringify(response);
-        }
+        return JSON.stringify(response);
+      }
 
-        const matchedFile = relatedFileEntities.find((file) => file.name === fileName);
+      const matchedFile = relatedFileEntities.find((file) => file.name === fileName);
 
-        if (matchedFile === undefined) {
-          const response: RetrieveEntireFileToolResponse = {
-            fileName,
-            content: null,
-            truncated: false,
-            characterCount: 0,
-            maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
-            error: 'Datei nicht gefunden.',
-          };
+      if (matchedFile === undefined) {
+        const response: RetrieveEntireFileToolResponse = {
+          fileName,
+          content: null,
+          truncated: false,
+          characterCount: 0,
+          maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
+          error: 'Datei nicht gefunden.',
+        };
 
-          return JSON.stringify(response);
-        }
+        return JSON.stringify(response);
+      }
 
-        return formatEntireFileForTool(matchedFile);
-      },
-    };
+      return formatEntireFileForTool(matchedFile);
+    });
   }
 
   if (relatedFileEntities.length > 0 || attachedSourceUrls.length > 0) {

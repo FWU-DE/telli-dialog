@@ -156,6 +156,10 @@ jobs:
           LLM_GPT5NANO_BASE_URL: ${{ secrets.LLM_GPT5NANO_BASE_URL }}
           LLM_MOCK_API_KEY: mock-api-key
           LLM_MOCK_BASE_URL: http://localhost:6556/v1
+          LLM_EMBEDDING_API_KEY: mock-api-key
+          LLM_EMBEDDING_BASE_URL: http://localhost:6556/v1
+          LLM_IMAGE_API_KEY: mock-api-key
+          LLM_IMAGE_BASE_URL: http://localhost:6556/v1
 
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @ais-chat/shared db:migrate && pnpm --filter @ais-chat/shared db:seed

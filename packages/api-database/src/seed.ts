@@ -25,6 +25,10 @@ const gpt5nanoApiKey = process.env.LLM_GPT5NANO_API_KEY ?? 'API_KEY_PLACEHOLDER'
 const gpt5nanoBaseUrl = process.env.LLM_GPT5NANO_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const mockLlmApiKey = process.env.LLM_MOCK_API_KEY ?? 'API_KEY_PLACEHOLDER';
 const mockLlmBaseUrl = process.env.LLM_MOCK_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
+const embeddingApiKey = process.env.LLM_EMBEDDING_API_KEY ?? ionosApiKey;
+const embeddingBaseUrl = process.env.LLM_EMBEDDING_BASE_URL ?? ionosBaseUrl;
+const imageApiKey = process.env.LLM_IMAGE_API_KEY ?? ionosApiKey;
+const imageBaseUrl = process.env.LLM_IMAGE_BASE_URL ?? ionosBaseUrl;
 
 // Mock LLM: OpenAI-compatible echo server used as the default model in e2e tests.
 // Echoes the last user message back as a streaming response — no real API calls, fully deterministic.
@@ -73,8 +77,8 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     displayName: 'Standard Embedding Model',
     setting: {
       provider: 'ionos',
-      apiKey: ionosApiKey,
-      baseUrl: ionosBaseUrl,
+      apiKey: embeddingApiKey,
+      baseUrl: embeddingBaseUrl,
     },
     priceMetadata: {
       type: 'embedding',
@@ -89,8 +93,8 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     displayName: 'FLUX.1',
     setting: {
       provider: 'ionos',
-      apiKey: ionosApiKey,
-      baseUrl: ionosBaseUrl,
+      apiKey: imageApiKey,
+      baseUrl: imageBaseUrl,
     },
     priceMetadata: {
       type: 'image',
