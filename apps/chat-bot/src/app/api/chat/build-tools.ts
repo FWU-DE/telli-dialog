@@ -351,10 +351,11 @@ export async function buildTools({
           return JSON.stringify(response);
         }
 
-        return await (fileContentCache.get(matchedFile.id) ??
-          fileContentCache
-            .set(matchedFile.id, formatEntireFileForTool(matchedFile))
-            .get(matchedFile.id)!);
+        if (!fileContentCache.has(matchedFile.id)) {
+          fileContentCache.set(matchedFile.id, formatEntireFileForTool(matchedFile));
+        }
+
+        return await fileContentCache.get(matchedFile.id)!;
       },
     };
   }
