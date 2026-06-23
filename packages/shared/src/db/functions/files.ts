@@ -270,17 +270,57 @@ export async function dbGetFilesInIds(fileIds: string[]): Promise<FileModelAndCo
   return [...maybeFiles];
 }
 
-export async function dbGetExtractedFileContent(fileId: string): Promise<string> {
-  const chunks = await db
-    .select({ content: chunkTable.content })
-    .from(chunkTable)
-    .where(eq(chunkTable.fileId, fileId))
-    .orderBy(asc(chunkTable.orderIndex));
+export async function dbGetExtractedFileContent(
+  fileId: string,
+  maxCharacters?: number,
+): Promise<string> {
+  if (maxCharacters === undefined) {
+    const chunks = await db
+      .select({ content: chunkTable.content })
+      .from(chunkTable)
+      .where(eq(chunkTable.fileId, fileId))
+      .orderBy(asc(chunkTable.orderIndex), asc(chunkTable.id));
 
-  return chunks
-    .map((chunk) => chunk.content)
-    .join('\n')
-    .trim();
+    return chunks
+      .map((chunk) => chunk.content)
+      .join('\n')
+      .trim();
+  }
+
+  const pageSize = 100;
+  const contentChunks: string[] = [];
+  let currentLength = 0;
+  let offset = 0;
+
+  while (currentLength <= maxCharacters) {
+    const chunks = await db
+      .select({ content: chunkTable.content })
+      .from(chunkTable)
+      .where(eq(chunkTable.fileId, fileId))
+      .orderBy(asc(chunkTable.orderIndex), asc(chunkTable.id))
+      .limit(pageSize)
+      .offset(offset);
+
+    if (chunks.length === 0) {
+      break;
+    }
+
+    for (const chunk of chunks) {
+      const separatorLength = contentChunks.length > 0 ? 1 : 0;
+      currentLength += separatorLength + chunk.content.length;
+      contentChunks.push(chunk.content);
+      if (currentLength > maxCharacters) {
+        break;
+      }
+    }
+
+    offset += chunks.length;
+    if (chunks.length < pageSize) {
+      break;
+    }
+  }
+
+  return contentChunks.join('\n').trim();
 }
 
 export async function dbGetAttachedFileByEntityId({

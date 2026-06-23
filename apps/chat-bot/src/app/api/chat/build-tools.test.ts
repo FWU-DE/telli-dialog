@@ -76,6 +76,9 @@ const fileContentsById = new Map<string, string>([
 
 beforeEach(() => {
   vi.clearAllMocks();
+  for (const file of relatedFileEntities) {
+    file.content = undefined;
+  }
   mocks.isWebSearchEnabledMock.mockResolvedValue(false);
   mocks.searchWebMock.mockResolvedValue([]);
   mocks.dbGetExtractedFileContentMock.mockImplementation(async (fileId: string) => {
@@ -128,7 +131,10 @@ describe('buildTools', () => {
       fileName: 'Arbeitsblatt.pdf',
     });
 
-    expect(mocks.dbGetExtractedFileContentMock).toHaveBeenCalledWith('file-1');
+    expect(mocks.dbGetExtractedFileContentMock).toHaveBeenCalledWith(
+      'file-1',
+      RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT + 1,
+    );
     expect(JSON.parse(result)).toEqual({
       fileName: 'Arbeitsblatt.pdf',
       content: 'Erster Abschnitt. Zweiter Abschnitt. Dritter Abschnitt.',

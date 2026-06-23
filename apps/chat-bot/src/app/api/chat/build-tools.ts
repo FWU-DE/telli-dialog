@@ -351,7 +351,10 @@ export async function buildTools({
         }
 
         if (matchedFile.content === undefined) {
-          matchedFile.content = await dbGetExtractedFileContent(matchedFile.id);
+          matchedFile.content = await dbGetExtractedFileContent(
+            matchedFile.id,
+            RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT + 1,
+          );
         }
 
         return formatEntireFileForTool(matchedFile);
