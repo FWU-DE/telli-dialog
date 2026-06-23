@@ -40,7 +40,7 @@ function writeSse(res, data) {
 }
 
 function extractTextContent(content) {
-  if (content == null) return '';
+  if (content === null || content === undefined) return '';
   if (typeof content === 'string') return content;
   if (Array.isArray(content)) {
     return content
@@ -203,7 +203,13 @@ async function handleResponses(req, res) {
     return;
   }
 
-  const input = Array.isArray(data.input) ? data.input : [];
+  if (!Array.isArray(data.input)) {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Responses input must be an array' }));
+    return;
+  }
+
+  const input = data.input;
   const model = data.model ?? 'mock-echo';
   const isStream = data.stream === true;
   const lastUserMessage = extractLastUserMessage(input);
@@ -213,15 +219,16 @@ async function handleResponses(req, res) {
 
   const id = `resp_mock_${Date.now()}`;
   const createdAt = Math.floor(Date.now() / 1000);
+  const inputTokens = input.reduce(
+    (sum, item) => sum + estimateTokens(extractTextContent(item?.content)),
+    0,
+  );
+  const outputTokens = estimateTokens(responseText);
   const usage = {
-    input_tokens: input.reduce(
-      (sum, item) => sum + estimateTokens(extractTextContent(item?.content)),
-      0,
-    ),
-    output_tokens: estimateTokens(responseText),
-    total_tokens: 0,
+    input_tokens: inputTokens,
+    output_tokens: outputTokens,
+    total_tokens: inputTokens + outputTokens,
   };
-  usage.total_tokens = usage.input_tokens + usage.output_tokens;
   const response = makeResponse(id, model, createdAt, responseText, usage);
 
   if (isStream) {
