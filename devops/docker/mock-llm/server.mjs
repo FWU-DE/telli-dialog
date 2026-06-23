@@ -43,10 +43,13 @@ function extractTextContent(content) {
   if (content === null || content === undefined) return '';
   if (typeof content === 'string') return content;
   if (Array.isArray(content)) {
-    return content
-      .filter((p) => p.type === 'text' || p.type === 'input_text')
-      .map((p) => p.text)
-      .join('');
+    return (
+      content
+        // Chat Completions uses "text"; Responses API uses "input_text".
+        .filter((p) => p.type === 'text' || p.type === 'input_text')
+        .map((p) => p.text)
+        .join('')
+    );
   }
   return '';
 }
@@ -61,6 +64,11 @@ function extractSystemPrompt(messages) {
 
 function estimateTokens(text) {
   return Math.max(1, Math.ceil(text.length / 4));
+}
+
+function estimateContentTokens(content) {
+  const text = extractTextContent(content);
+  return text === '' ? 0 : estimateTokens(text);
 }
 
 function makeSseChunk(id, model, created, deltaContent, finishReason) {
@@ -219,10 +227,7 @@ async function handleResponses(req, res) {
 
   const id = `resp_mock_${Date.now()}`;
   const createdAt = Math.floor(Date.now() / 1000);
-  const inputTokens = input.reduce(
-    (sum, item) => sum + estimateTokens(extractTextContent(item?.content)),
-    0,
-  );
+  const inputTokens = input.reduce((sum, item) => sum + estimateContentTokens(item?.content), 0);
   const outputTokens = estimateTokens(responseText);
   const usage = {
     input_tokens: inputTokens,
