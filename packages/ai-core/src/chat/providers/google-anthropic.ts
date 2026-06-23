@@ -159,8 +159,6 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
 
       // The streaming response is a sequence of content block deltas and a final message at the end (message_stop).
       for await (const event of stream) {
-        console.debug(`Message ${event.type} received: ${JSON.stringify(event)}`);
-
         if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
           yield { type: 'text', delta: event.delta.text };
         } else if (event.type === 'message_stop') {
