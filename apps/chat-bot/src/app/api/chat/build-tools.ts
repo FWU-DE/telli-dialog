@@ -189,6 +189,7 @@ export async function buildTools({
   const tools: ToolDefinition[] = [];
   const toolHandlers: Record<string, (args: Record<string, unknown>) => Promise<string>> = {};
   const webSearchResults: WebSearchResult[] = [];
+  const fileContentCache = new Map<string, Promise<string>>();
   const attachedFileDescriptions = relatedFileEntities.map(
     (file) => `${file.name} (${file.size} bytes)`,
   );
@@ -350,7 +351,10 @@ export async function buildTools({
           return JSON.stringify(response);
         }
 
-        return await formatEntireFileForTool(matchedFile);
+        return await (fileContentCache.get(matchedFile.id) ??
+          fileContentCache
+            .set(matchedFile.id, formatEntireFileForTool(matchedFile))
+            .get(matchedFile.id)!);
       },
     };
   }
