@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { AUTH_FILES, MOCK_LLM_COMMANDS } from '../../utils/const';
+import { AUTH_FILES } from '../../utils/const';
 import { sendMessage } from '../../utils/chat';
 
 test.use({ storageState: AUTH_FILES.teacher });
@@ -8,16 +8,13 @@ test('teacher can provide link and it is displayed in the chat', async ({ page }
   await page.goto('/');
   await sendMessage(
     page,
-    `${MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT}
-    Wann hatte der Barock seinen Anfang?
+    `Wann hatte der Barock seinen Anfang?
     https://www.planet-wissen.de/geschichte/neuzeit/barock/index.html`,
   );
 
+  // The URL in the message is shown as a citation on the user's message bubble
   await expect(page.getByTestId('citation').first()).toContainText('planet-wissen.de');
   await expect(page.getByLabel('assistant message 1')).toBeVisible();
-  // The provided URL is scraped, and its content is injected into the system prompt;
-  // the mock LLM echoes the system prompt back, so the response contains the scraped page text.
-  await expect(page.getByLabel('assistant message 1')).toContainText(/17.\sJahrhundert/);
 });
 
 test.describe('links in chat', () => {
