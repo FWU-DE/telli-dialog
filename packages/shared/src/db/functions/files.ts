@@ -292,7 +292,7 @@ export async function dbGetExtractedFileContent(
   let currentLength = 0;
   let offset = 0;
 
-  while (currentLength <= maxCharacters) {
+  while (currentLength < maxCharacters) {
     const chunks = await db
       .select({ content: chunkTable.content })
       .from(chunkTable)
@@ -305,13 +305,27 @@ export async function dbGetExtractedFileContent(
       break;
     }
 
+    let hasReachedLimit = false;
     for (const chunk of chunks) {
       const separatorLength = contentChunks.length > 0 ? 1 : 0;
-      currentLength += separatorLength + chunk.content.length;
-      contentChunks.push(chunk.content);
-      if (currentLength > maxCharacters) {
+      const chunkWithSeparatorLength = separatorLength + chunk.content.length;
+      const remainingCharacters = maxCharacters - currentLength;
+
+      if (chunkWithSeparatorLength > remainingCharacters) {
+        if (remainingCharacters > separatorLength) {
+          contentChunks.push(chunk.content.slice(0, remainingCharacters - separatorLength));
+          currentLength = maxCharacters;
+        }
+        hasReachedLimit = true;
         break;
       }
+
+      contentChunks.push(chunk.content);
+      currentLength += chunkWithSeparatorLength;
+    }
+
+    if (hasReachedLimit) {
+      break;
     }
 
     offset += chunks.length;
