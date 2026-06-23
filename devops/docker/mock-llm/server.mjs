@@ -84,7 +84,10 @@ function extractSystemPrompt(messages) {
 function hasTool(tools, toolName) {
   return (
     Array.isArray(tools) &&
-    tools.some((tool) => tool?.type === 'function' && tool.name === toolName)
+    tools.some(
+      (tool) =>
+        tool?.type === 'function' && typeof tool.name === 'string' && tool.name === toolName,
+    )
   );
 }
 
@@ -100,6 +103,7 @@ function hasFunctionCallOutput(input, toolName) {
 
 function shouldCallWebSearch({ input, tools, lastUserMessage }) {
   return (
+    typeof lastUserMessage === 'string' &&
     hasTool(tools, 'web_search') &&
     !hasFunctionCallOutput(input, 'web_search') &&
     CURRENT_INFO_PATTERNS.some((pattern) => pattern.test(lastUserMessage))

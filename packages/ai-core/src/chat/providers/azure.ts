@@ -26,6 +26,19 @@ function createToolCallAccumulator(): ToolCallAccumulator {
   };
 }
 
+function hasValidToolCallArguments(toolCall: ToolCallAccumulator): boolean {
+  if (!toolCall.arguments) {
+    return false;
+  }
+
+  try {
+    JSON.parse(toolCall.arguments);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function createAzureClient(model: AiModel): {
   client: OpenAI;
   deployment: string;
@@ -214,7 +227,7 @@ export function constructAzureChatCompletionAgenticStreamFn(model: AiModel): Age
 
     const resolvedToolCalls: ToolCall[] = [...toolCalls.entries()]
       .sort(([left], [right]) => left - right)
-      .filter(([, toolCall]) => toolCall.id && toolCall.name)
+      .filter(([, toolCall]) => toolCall.id && toolCall.name && hasValidToolCallArguments(toolCall))
       .map(([, toolCall]) => ({
         id: toolCall.id,
         name: toolCall.name,
