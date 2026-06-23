@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   ingestWebContentMock: vi.fn(),
   retrieveChunksByQueryMock: vi.fn(),
   webScraperMock: vi.fn(),
+  dbGetExtractedFileContentMock: vi.fn(),
 }));
 
 vi.mock('./websearch', () => ({
@@ -29,6 +30,10 @@ vi.mock('../rag/rag-service', () => ({
 
 vi.mock('../web-scraper/web-scraper', () => ({
   webScraper: mocks.webScraperMock,
+}));
+
+vi.mock('@shared/db/functions/files', () => ({
+  dbGetExtractedFileContent: mocks.dbGetExtractedFileContentMock,
 }));
 
 const user = {
@@ -56,20 +61,29 @@ const relatedFileEntities = [
     id: 'file-1',
     name: 'Arbeitsblatt.pdf',
     size: 120_000,
-    content: 'Erster Abschnitt. Zweiter Abschnitt. Dritter Abschnitt.',
   },
   {
     id: 'file-2',
     name: 'Leitfaden.txt',
     size: 8_000,
-    content: 'Kurzer Leitfaden.',
   },
 ] as FileModelAndContent[];
 
+const fileContentsById = new Map<string, string>([
+  ['file-1', 'Erster Abschnitt. Zweiter Abschnitt. Dritter Abschnitt.'],
+  ['file-2', 'Kurzer Leitfaden.'],
+]);
+
 beforeEach(() => {
   vi.clearAllMocks();
+  for (const file of relatedFileEntities) {
+    file.content = undefined;
+  }
   mocks.isWebSearchEnabledMock.mockResolvedValue(false);
   mocks.searchWebMock.mockResolvedValue([]);
+  mocks.dbGetExtractedFileContentMock.mockImplementation(async (fileId: string) => {
+    return fileContentsById.get(fileId) ?? '';
+  });
   mocks.retrieveChunksByQueryMock.mockResolvedValue([
     {
       id: 'chunk-1',
@@ -117,6 +131,7 @@ describe('buildTools', () => {
       fileName: 'Arbeitsblatt.pdf',
     });
 
+    expect(mocks.dbGetExtractedFileContentMock).toHaveBeenCalledWith('file-1');
     expect(JSON.parse(result)).toEqual({
       fileName: 'Arbeitsblatt.pdf',
       content: 'Erster Abschnitt. Zweiter Abschnitt. Dritter Abschnitt.',
@@ -133,8 +148,8 @@ describe('buildTools', () => {
     const veryLongFile = {
       id: 'file-3',
       name: 'Grossdatei.txt',
-      content: 'a'.repeat(100_001),
     } as FileModelAndContent;
+    fileContentsById.set('file-3', 'a'.repeat(100_001));
 
     const { toolRegistry } = await buildTools({
       user,
