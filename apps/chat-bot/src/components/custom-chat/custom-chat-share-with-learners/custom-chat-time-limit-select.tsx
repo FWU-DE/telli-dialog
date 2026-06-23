@@ -45,8 +45,8 @@ export function TimeLimitSelect({
             <SelectGroup>
               {usageTimeValuesInMinutes.map((value) => {
                 let displayLabel = `${isAdditionalTime ? '+ ' : ''}${value} ${t('minutes')}`;
-                if (value >= 1440) {
-                  const days = value / 1440;
+                if (value >= 24 * 60) {
+                  const days = value / (24 * 60);
                   displayLabel =
                     days === 1
                       ? `${isAdditionalTime ? '+ ' : ''}1 ${t('day')}`
