@@ -59,6 +59,11 @@ import {
   getShareFormValues,
 } from '@/components/custom-chat/access-level-sharing';
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
+import FilterSelectSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
+import {
+  extractFilterValues,
+  tofilterGroup,
+} from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
@@ -99,6 +104,12 @@ function createLearningScenarioFormValuesSchema(t: LearningScenarioTranslator) {
     additionalInstructions: z.string(),
     studentExercise: z.string(),
     modelId: z.string(),
+    schoolTypes: z.array(z.string()),
+    gradeRanges: z.array(z.string()),
+    subjects: z.array(z.string()),
+    categories: z.array(z.string()),
+    federalStates: z.array(z.string()),
+    languages: z.array(z.string()),
     isSchoolShared: z.boolean(),
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
@@ -135,6 +146,7 @@ export function LearningScenarioEdit({
   const isModelAvailable =
     learningScenario.modelId && models.some((m) => m.id === learningScenario.modelId);
   const selectedModelId = isModelAvailable ? learningScenario.modelId : maybeDefaultModelId;
+  const filterValues = extractFilterValues(learningScenario);
 
   const initialValues: LearningScenarioFormValues = {
     name: learningScenario.name,
@@ -142,6 +154,12 @@ export function LearningScenarioEdit({
     additionalInstructions: learningScenario.additionalInstructions ?? '',
     studentExercise: learningScenario.studentExercise ?? '',
     modelId: selectedModelId ?? '',
+    schoolTypes: filterValues.schoolTypes,
+    gradeRanges: filterValues.gradeRanges,
+    subjects: filterValues.subjects,
+    categories: filterValues.categories,
+    federalStates: filterValues.federalStates,
+    languages: filterValues.languages,
     ...getShareFormValues(learningScenario.accessLevel),
     hasLinkAccess: learningScenario.hasLinkAccess,
   };
@@ -177,6 +195,14 @@ export function LearningScenarioEdit({
             name: data.name.trim(),
             description: data.description ?? '',
             studentExercise: data.studentExercise ?? '',
+            filterGroup: tofilterGroup({
+              schoolTypes: data.schoolTypes,
+              gradeRanges: data.gradeRanges,
+              subjects: data.subjects,
+              categories: data.categories,
+              federalStates: data.federalStates,
+              languages: data.languages,
+            }),
             attachedLinks: attachedLinksRef.current,
           },
         });
@@ -186,6 +212,12 @@ export function LearningScenarioEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
+  const schoolTypes = useWatch({ control, name: 'schoolTypes' });
+  const gradeRanges = useWatch({ control, name: 'gradeRanges' });
+  const subjects = useWatch({ control, name: 'subjects' });
+  const categories = useWatch({ control, name: 'categories' });
+  const federalStates = useWatch({ control, name: 'federalStates' });
+  const languages = useWatch({ control, name: 'languages' });
   const savedAccessLevelRef = useRef(learningScenario.accessLevel);
   const attachedLinksRef = useRef(learningScenario.attachedLinks);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
@@ -489,6 +521,40 @@ export function LearningScenarioEdit({
               linkToShare={`/learning-scenarios/${learningScenario.id}`}
               onShareChange={handleSharingChange}
               suspended={learningScenario.suspended}
+            />
+            <FilterSelectSection
+              values={{
+                schoolTypes,
+                gradeRanges,
+                subjects,
+                categories,
+                federalStates,
+                languages,
+              }}
+              onSchoolTypesChange={(values) => {
+                setValue('schoolTypes', values, { shouldDirty: true });
+                void flushAutoSave();
+              }}
+              onGradeRangesChange={(values) => {
+                setValue('gradeRanges', values, { shouldDirty: true });
+                void flushAutoSave();
+              }}
+              onSubjectsChange={(values) => {
+                setValue('subjects', values, { shouldDirty: true });
+                void flushAutoSave();
+              }}
+              onCategoriesChange={(values) => {
+                setValue('categories', values, { shouldDirty: true });
+                void flushAutoSave();
+              }}
+              onFederalStatesChange={(values) => {
+                setValue('federalStates', values, { shouldDirty: true });
+                void flushAutoSave();
+              }}
+              onLanguagesChange={(values) => {
+                setValue('languages', values, { shouldDirty: true });
+                void flushAutoSave();
+              }}
             />
           </form>
         </div>

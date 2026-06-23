@@ -12,7 +12,11 @@ test('can generate an image and use image actions', async ({ page }) => {
   // select flux as model
   const dropdownLocator = page.getByTestId('image-model-dropdown');
   await dropdownLocator.waitFor();
+
+  // Assert that a model is available and selected
   const currentSelectedText = await dropdownLocator.textContent();
+  expect(currentSelectedText).toBeTruthy();
+
   if (!currentSelectedText?.includes('FLUX')) {
     await dropdownLocator.click();
     await page.locator('div[data-radix-popper-content-wrapper]').waitFor();
@@ -26,9 +30,24 @@ test('can generate an image and use image actions', async ({ page }) => {
   await page.getByTestId('image-prompt-input').fill(prompt);
   await page.getByTestId('image-generate-button').click();
 
-  // wait for image to appear
+  // wait for image to appear, with better error handling
   const generatedImage = page.getByTestId('generated-image');
-  await expect(generatedImage).toBeVisible({ timeout: 30000 });
+  const loadingAnimation = page.getByAltText('Ladeanimation');
+
+  // Wait for loading to finish
+  try {
+    await loadingAnimation.waitFor({ state: 'detached', timeout: 35000 });
+  } catch {
+    // If loading doesn't detach, check if an error appeared
+    const errorMessage = page.getByText('Ein Fehler ist aufgetreten');
+    const hasError = await errorMessage.isVisible().catch(() => false);
+    if (hasError) {
+      throw new Error('Image generation failed: error message appeared');
+    }
+  }
+
+  // Now expect the image to be visible
+  await expect(generatedImage).toBeVisible({ timeout: 5000 });
 
   // test if the image is visible by checking
   // if it has a src attribute and if the width is greater than 0

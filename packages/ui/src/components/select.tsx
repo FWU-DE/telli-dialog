@@ -4,7 +4,8 @@ import * as React from 'react';
 import { Select as SelectPrimitive } from 'radix-ui';
 
 import { cn } from '../lib/utils';
-import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from 'lucide-react';
+import { CheckIcon, ChevronUpIcon } from 'lucide-react';
+import { CaretDownIcon } from '@phosphor-icons/react';
 
 function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />;
@@ -44,7 +45,11 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="text-primary size-4 pointer-events-none" />
+        <CaretDownIcon
+          className="text-primary size-4 pointer-events-none"
+          aria-hidden="true"
+          weight="bold"
+        />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );
@@ -177,7 +182,7 @@ function SelectScrollDownButton({
       )}
       {...props}
     >
-      <ChevronDownIcon />
+      <CaretDownIcon className="size-4" aria-hidden="true" weight="bold" />
     </SelectPrimitive.ScrollDownButton>
   );
 }

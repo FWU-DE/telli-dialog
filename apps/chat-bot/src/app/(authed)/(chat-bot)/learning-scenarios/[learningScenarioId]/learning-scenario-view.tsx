@@ -34,6 +34,8 @@ import {
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
+import { FilterDisplaySection } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-display-section';
+import { extractFilterValues } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 export function LearningScenarioView({
   learningScenario,
@@ -51,6 +53,7 @@ export function LearningScenarioView({
   const t = useTranslations('learning-scenarios');
   const tToast = useTranslations('learning-scenarios.toasts');
   const { models } = useLlmModels();
+  const filterValues = extractFilterValues(learningScenario);
 
   const modelDisplayName = models.find((m) => m.id === learningScenario.modelId)?.displayName;
 
@@ -158,6 +161,7 @@ export function LearningScenarioView({
                 label={t('student-exercise-label')}
                 value={learningScenario.studentExercise}
               />
+              <FilterDisplaySection values={filterValues} />
             </CustomChatFields>
           </CardContent>
         </Card>

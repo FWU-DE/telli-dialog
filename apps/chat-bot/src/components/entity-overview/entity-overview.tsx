@@ -4,7 +4,13 @@ import React from 'react';
 import { OverviewFilter, overviewFilterSchema } from '@shared/overview-filter';
 import { useTranslations } from 'next-intl';
 import { Input } from '@ais-chat/ui/components/input';
-import { MagnifyingGlassIcon, InfoIcon, XCircleIcon } from '@phosphor-icons/react';
+import {
+  MagnifyingGlassIcon,
+  InfoIcon,
+  XCircleIcon,
+  XIcon,
+  CaretDownIcon,
+} from '@phosphor-icons/react';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import { Button } from '@ais-chat/ui/components/button';
 import { FilterTabs } from '@ais-chat/ui/components/filter-tabs';
@@ -27,9 +33,17 @@ type EntityOverviewProps = {
   onFilterChange: (filter: OverviewFilter) => void;
   children: (searchQuery: string, sortBy: SortOption) => React.ReactNode;
   itemCount: number;
+  isFilterPanelOpen?: boolean;
+  onFilterPanelToggle?: () => void;
+  filterPanel?: React.ReactNode;
+  filterActiveCount?: number;
+  activeFilterPills?: Array<{ label: string; group: string; value: string }>;
+  onRemoveFilter?: (group: string, value: string) => void;
 };
 
 const FILTER_OPTIONS = overviewFilterSchema.options;
+const OVERVIEW_CONTROL_TRIGGER_CLASSNAME =
+  'w-fit gap-1 border-0 bg-transparent shadow-none text-sm hover:bg-transparent';
 
 export default function EntityOverview({
   title,
@@ -40,6 +54,12 @@ export default function EntityOverview({
   onFilterChange,
   children,
   itemCount,
+  isFilterPanelOpen = false,
+  onFilterPanelToggle,
+  filterPanel,
+  filterActiveCount = 0,
+  activeFilterPills = [],
+  onRemoveFilter,
 }: EntityOverviewProps) {
   const [searchInput, setSearchInput] = React.useState('');
   const [sortBy, setSortBy] = React.useState<SortOption>('date-desc');
@@ -47,6 +67,7 @@ export default function EntityOverview({
   const t = useTranslations('entity-overview');
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const filterPanelId = React.useId();
 
   const handleClearSearch = () => {
     setSearchInput('');
@@ -66,6 +87,9 @@ export default function EntityOverview({
   React.useEffect(() => {
     scrollContainerRef.current?.closest('main')?.scrollTo({ top: 0 });
   }, [activeFilter]);
+
+  const renderedChildren = children(searchInput, sortBy);
+  const renderedCount = React.Children.count(renderedChildren);
 
   return (
     <div className="min-w-full flex flex-col">
@@ -126,38 +150,104 @@ export default function EntityOverview({
         </div>
 
         <div className="py-2 pb-4 sticky top-0 z-10 bg-background-2">
-          <div className="flex items-end flex-wrap gap-2" aria-label={t('filter-tabs-label')}>
+          <div
+            className="flex items-end flex-wrap gap-y-2 gap-x-4"
+            aria-label={t('filter-tabs-label')}
+          >
             <FilterTabs tabs={visibleTabs} activeTab={activeFilter} onTabChange={onFilterChange} />
             <div className="grow" />
-            <div className="text-primary hover:text-primary-dark">
-              <Select
-                value={sortBy}
-                onValueChange={(v) => {
-                  if (isSortOption(v)) {
-                    setSortBy(v);
-                  }
-                }}
-              >
-                <SelectTrigger
-                  size="sm"
-                  className="w-fit gap-1 border-0 bg-transparent shadow-none text-sm"
-                  aria-label={t('sort-label')}
+            <div className="flex gap-2 whitespace-nowrap">
+              {onFilterPanelToggle ? (
+                <div className="text-primary hover:text-primary-dark">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={onFilterPanelToggle}
+                    className={`${OVERVIEW_CONTROL_TRIGGER_CLASSNAME} relative aria-expanded:bg-transparent aria-expanded:text-primary`}
+                    aria-label={t('filter-label')}
+                    aria-expanded={isFilterPanelOpen}
+                    aria-controls={filterPanelId}
+                  >
+                    <span className="font-normal text-primary">{t('filter-label')}</span>
+                    <CaretDownIcon
+                      className="size-4 transition-transform"
+                      aria-hidden="true"
+                      weight="bold"
+                    />
+                    {filterActiveCount > 0 ? (
+                      <span className="absolute -top-1 -right-1 inline-flex size-4 items-center justify-center rounded-full bg-primary text-[10px] leading-none text-primary-foreground">
+                        {filterActiveCount}
+                      </span>
+                    ) : null}
+                  </Button>
+                </div>
+              ) : null}
+              <div className="text-primary hover:text-primary-dark">
+                <Select
+                  value={sortBy}
+                  onValueChange={(v) => {
+                    if (isSortOption(v)) {
+                      setSortBy(v);
+                    }
+                  }}
                 >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent align="end" position="popper">
-                  <SelectItem value="date-desc">{t('sort-date-desc')}</SelectItem>
-                  <SelectItem value="date-asc">{t('sort-date-asc')}</SelectItem>
-                  <SelectItem value="name-asc">{t('sort-name-asc')}</SelectItem>
-                  <SelectItem value="name-desc">{t('sort-name-desc')}</SelectItem>
-                </SelectContent>
-              </Select>
+                  <SelectTrigger
+                    size="sm"
+                    className={OVERVIEW_CONTROL_TRIGGER_CLASSNAME}
+                    aria-label={t('sort-label')}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent align="end" position="popper">
+                    <SelectItem value="date-desc">{t('sort-date-desc')}</SelectItem>
+                    <SelectItem value="date-asc">{t('sort-date-asc')}</SelectItem>
+                    <SelectItem value="name-asc">{t('sort-name-asc')}</SelectItem>
+                    <SelectItem value="name-desc">{t('sort-name-desc')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
+
+          {isFilterPanelOpen && filterPanel ? (
+            <div
+              id={filterPanelId}
+              className="mt-3 rounded-xl border border-gray-200 bg-background p-3 sm:p-4"
+            >
+              {filterPanel}
+            </div>
+          ) : null}
+
+          {activeFilterPills.length > 0 ? (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="text-sm text-foreground">
+                {t('hits-for', { count: renderedCount })}
+              </span>
+              {activeFilterPills.map((pill) => (
+                <span
+                  key={`${pill.group}-${pill.value}`}
+                  className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                >
+                  <span>{pill.label}</span>
+                  {onRemoveFilter ? (
+                    <button
+                      type="button"
+                      onClick={() => onRemoveFilter(pill.group, pill.value)}
+                      className="ml-1.5 flex items-center justify-center rounded-full hover:bg-primary/20 transition-colors"
+                      aria-label={`${pill.label}-Filter zurücksetzen`}
+                    >
+                      <XIcon className="size-3" aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <div className="pb-6">
-          <div className="flex flex-col gap-2 w-full py-1">{children(searchInput, sortBy)}</div>
+          <div className="flex flex-col gap-2 w-full py-1">{renderedChildren}</div>
         </div>
       </div>
     </div>
