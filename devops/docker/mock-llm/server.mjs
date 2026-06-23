@@ -32,6 +32,7 @@ const MOCK_LLM_COMMANDS = {
 
 const EMPTY_PNG_BASE64 =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/l2cL9wAAAABJRU5ErkJggg==';
+const MOCK_EMBEDDING_DIMENSIONS = 1024;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -69,7 +70,7 @@ function extractSystemPrompt(messages) {
   return '';
 }
 
-function extractToolOutput(messages) {
+function combineToolOutputs(messages) {
   return messages
     .filter((msg) => msg.role === 'tool' || msg.type === 'function_call_output')
     .map((msg) => msg.content ?? msg.output ?? '')
@@ -93,7 +94,7 @@ function getResponseText(messages) {
   const lastUserMessage = extractLastUserMessage(messages);
   if (!lastUserMessage.includes(MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT)) return lastUserMessage;
 
-  return [extractSystemPrompt(messages), extractToolOutput(messages)].filter(Boolean).join('\n');
+  return [extractSystemPrompt(messages), combineToolOutputs(messages)].filter(Boolean).join('\n');
 }
 
 function extractUrl(text) {
@@ -339,7 +340,9 @@ async function handleEmbeddings(req, res) {
   }
 
   const inputs = Array.isArray(data.input) ? data.input : [data.input ?? ''];
-  const embedding = Array.from({ length: 1024 }, (_, index) => (index === 0 ? 1 : 0));
+  const embedding = Array.from({ length: MOCK_EMBEDDING_DIMENSIONS }, (_, index) =>
+    index === 0 ? 1 : 0,
+  );
   const promptTokens = inputs.reduce((sum, input) => sum + estimateTokens(String(input)), 0);
 
   res.writeHead(200, { 'Content-Type': 'application/json' });
