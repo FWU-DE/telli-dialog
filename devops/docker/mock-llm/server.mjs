@@ -40,6 +40,7 @@ function writeSse(res, data) {
 }
 
 function extractTextContent(content) {
+  if (content == null) return '';
   if (typeof content === 'string') return content;
   if (Array.isArray(content)) {
     return content
@@ -214,7 +215,7 @@ async function handleResponses(req, res) {
   const createdAt = Math.floor(Date.now() / 1000);
   const usage = {
     input_tokens: input.reduce(
-      (sum, item) => sum + estimateTokens(extractTextContent(item.content)),
+      (sum, item) => sum + estimateTokens(extractTextContent(item?.content)),
       0,
     ),
     output_tokens: estimateTokens(responseText),
