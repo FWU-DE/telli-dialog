@@ -1,4 +1,5 @@
 import {
+  constructAzureChatCompletionAgenticStreamFn,
   constructAzureChatCompletionGenerationFn,
   constructAzureChatCompletionStreamFn,
   constructAzureResponsesGenerationFn,
@@ -73,6 +74,9 @@ function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | u
 
 function getAgenticStreamFnByModel({ model }: { model: AiModel }): AgenticStreamFn | undefined {
   if (model.provider === 'azure') {
+    if (!['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].includes(model.name)) {
+      return constructAzureChatCompletionAgenticStreamFn(model);
+    }
     return constructAzureResponsesAgenticStreamFn(model);
   }
   if (model.provider === 'ionos') {

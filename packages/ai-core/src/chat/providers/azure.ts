@@ -5,10 +5,11 @@ import type {
   AiModel,
   TextGenerationFn,
   TextStreamFn,
+  ToolCall,
   TokenUsage,
 } from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
-import { toOpenAIMessages, toOpenAIResponsesInput } from '../utils';
+import { toOpenAIChatTools, toOpenAIMessages, toOpenAIResponsesInput } from '../utils';
 import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
 
 function createAzureClient(model: AiModel): {
@@ -126,6 +127,105 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
     if (onComplete) {
       await onComplete(usage);
     }
+  };
+}
+
+export function constructAzureChatCompletionAgenticStreamFn(model: AiModel): AgenticStreamFn {
+  const { client, deployment } = createAzureClient(model);
+
+  return async function* getAzureChatCompletionAgenticTextStream({
+    messages,
+    maxTokens,
+    temperature,
+    tools,
+    toolChoice,
+  }) {
+    const stream = await client.chat.completions.create(
+      {
+        model: deployment,
+        messages: toOpenAIMessages(messages),
+        stream: true,
+        stream_options: { include_usage: true },
+        max_tokens: maxTokens,
+        temperature,
+        tools: toOpenAIChatTools(tools),
+        tool_choice: toolChoice,
+      },
+      {
+        path: `/openai/deployments/${deployment}/chat/completions`,
+      },
+    );
+
+    type ToolCallAccumulator = {
+      id: string;
+      name: string;
+      arguments: string;
+    };
+
+    let usage: TokenUsage | undefined;
+    const toolCalls = new Map<number, ToolCallAccumulator>();
+
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta;
+      const chunkContent = delta?.content;
+
+      if (chunkContent) {
+        yield { type: 'text', delta: chunkContent };
+      }
+
+      if (chunk.usage) {
+        usage = {
+          completionTokens: chunk.usage.completion_tokens,
+          promptTokens: chunk.usage.prompt_tokens,
+          totalTokens: chunk.usage.total_tokens,
+        };
+      }
+
+      if (!delta?.tool_calls) {
+        continue;
+      }
+
+      for (const toolCallDelta of delta.tool_calls) {
+        const existingToolCall = toolCalls.get(toolCallDelta.index) ?? {
+          id: '',
+          name: '',
+          arguments: '',
+        };
+
+        if (toolCallDelta.id) {
+          existingToolCall.id = toolCallDelta.id;
+        }
+
+        if (toolCallDelta.function?.name) {
+          existingToolCall.name = toolCallDelta.function.name;
+        }
+
+        if (toolCallDelta.function?.arguments) {
+          existingToolCall.arguments += toolCallDelta.function.arguments;
+        }
+
+        toolCalls.set(toolCallDelta.index, existingToolCall);
+      }
+    }
+
+    const resolvedToolCalls: ToolCall[] = [...toolCalls.entries()]
+      .sort(([left], [right]) => left - right)
+      .filter(([, toolCall]) => toolCall.id && toolCall.name)
+      .map(([, toolCall]) => ({
+        id: toolCall.id,
+        name: toolCall.name,
+        arguments: toolCall.arguments,
+      }));
+
+    if (!usage) {
+      throw new AiGenerationError('No usage data returned from Azure OpenAI stream');
+    }
+
+    for (const toolCall of resolvedToolCalls) {
+      yield { type: 'tool_call', call: toolCall };
+    }
+
+    yield { type: 'finish', usage };
   };
 }
 

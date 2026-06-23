@@ -27,6 +27,16 @@ const MOCK_LLM_COMMANDS = {
   RETURN_SYSTEM_PROMPT: '[MOCK-LLM-COMMAND: Gebe den System-Prompt aus]',
 };
 const TEXT_CONTENT_PART_TYPES = ['text', 'input_text'];
+const CURRENT_INFO_PATTERNS = [
+  /\baktuell\b/i,
+  /\bheute\b/i,
+  /\bwetter\b/i,
+  /\bneueste\b/i,
+  /\bnews\b/i,
+  /\bprice\b/i,
+  /\bweather\b/i,
+  /\bcurrent\b/i,
+];
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -69,6 +79,34 @@ function extractLastUserMessage(messages) {
 
 function extractSystemPrompt(messages) {
   return extractTextContent(messages.find((msg) => msg.role === 'system')?.content);
+}
+
+function hasTool(tools, toolName) {
+  return (
+    Array.isArray(tools) &&
+    tools.some((tool) => tool?.type === 'function' && tool.name === toolName)
+  );
+}
+
+function hasFunctionCallOutput(input, toolName) {
+  return input.some(
+    (item) =>
+      item?.type === 'function_call_output' &&
+      input.some(
+        (previousItem) =>
+          previousItem?.type === 'function_call' &&
+          previousItem.call_id === item.call_id &&
+          previousItem.name === toolName,
+      ),
+  );
+}
+
+function shouldCallWebSearch({ input, tools, lastUserMessage }) {
+  return (
+    hasTool(tools, 'web_search') &&
+    !hasFunctionCallOutput(input, 'web_search') &&
+    CURRENT_INFO_PATTERNS.some((pattern) => pattern.test(lastUserMessage))
+  );
 }
 
 function estimateTokens(text) {
@@ -210,6 +248,27 @@ function makeResponse(id, model, createdAt, responseText, usage) {
   };
 }
 
+function makeFunctionCallResponse(id, model, createdAt, toolCall, usage) {
+  return {
+    id,
+    object: 'response',
+    created_at: createdAt,
+    status: 'completed',
+    model,
+    output: [
+      {
+        id: toolCall.itemId,
+        type: 'function_call',
+        status: 'completed',
+        name: toolCall.name,
+        call_id: toolCall.callId,
+        arguments: toolCall.arguments,
+      },
+    ],
+    usage,
+  };
+}
+
 async function handleResponses(req, res) {
   let data;
   try {
@@ -247,6 +306,18 @@ async function handleResponses(req, res) {
     output_tokens: outputTokens,
     total_tokens: inputTokens + outputTokens,
   };
+
+  const shouldUseWebSearch = shouldCallWebSearch({
+    input,
+    tools: data.tools,
+    lastUserMessage,
+  });
+  const toolCall = {
+    itemId: `fc_${id}`,
+    callId: `call_${id}`,
+    name: 'web_search',
+    arguments: JSON.stringify({ query: lastUserMessage }),
+  };
   const response = makeResponse(id, model, createdAt, responseText, usage);
 
   if (isStream) {
@@ -258,6 +329,43 @@ async function handleResponses(req, res) {
       Connection: 'keep-alive',
       'Transfer-Encoding': 'chunked',
     });
+
+    if (shouldUseWebSearch) {
+      const functionCallResponse = makeFunctionCallResponse(id, model, createdAt, toolCall, usage);
+      writeSse(res, {
+        type: 'response.created',
+        response: { ...functionCallResponse, status: 'in_progress' },
+      });
+      writeSse(res, {
+        type: 'response.function_call_arguments.delta',
+        item_id: toolCall.itemId,
+        output_index: 0,
+        delta: toolCall.arguments,
+      });
+      writeSse(res, {
+        type: 'response.function_call_arguments.done',
+        item_id: toolCall.itemId,
+        output_index: 0,
+        name: toolCall.name,
+        arguments: toolCall.arguments,
+      });
+      writeSse(res, {
+        type: 'response.output_item.done',
+        output_index: 0,
+        item: {
+          id: toolCall.itemId,
+          type: 'function_call',
+          status: 'completed',
+          name: toolCall.name,
+          call_id: toolCall.callId,
+          arguments: toolCall.arguments,
+        },
+      });
+      writeSse(res, { type: 'response.completed', response: functionCallResponse });
+      res.write('data: [DONE]\n\n');
+      res.end();
+      return;
+    }
 
     writeSse(res, { type: 'response.created', response: { ...response, status: 'in_progress' } });
 
@@ -284,7 +392,13 @@ async function handleResponses(req, res) {
     res.end();
   } else {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(response));
+    res.end(
+      JSON.stringify(
+        shouldUseWebSearch
+          ? makeFunctionCallResponse(id, model, createdAt, toolCall, usage)
+          : response,
+      ),
+    );
   }
 }
 
