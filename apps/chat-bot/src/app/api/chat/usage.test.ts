@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/app/school', () => ({
-  getPriceInCentByUser: vi.fn(),
-  getPriceLimitInCentByUser: vi.fn(),
-}));
-
 vi.mock('@shared/db/functions/token-points', () => ({
   dbGetSharedChatUsageInCentBySharedChatId: vi.fn(),
   dbGetSharedCharacterChatUsageInCentByCharacterId: vi.fn(),
+}));
+
+vi.mock('@shared/users/user-budget-service', () => ({
+  getMaxBudgetInCentByUser: vi.fn(),
+  getUsedBudgetInCentByUser: vi.fn(),
 }));
 
 import { sharedChatHasExpired } from './usage';
