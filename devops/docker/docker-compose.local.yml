@@ -77,6 +77,8 @@ services:
 
   crawl4ai:
     image: unclecode/crawl4ai:0.8.9
+    environment:
+      CRAWL4AI_API_TOKEN: ais-chat-crawl4ai-token
     ports:
       - '11235:11235'
     deploy:

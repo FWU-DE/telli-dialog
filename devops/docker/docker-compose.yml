@@ -87,6 +87,8 @@ services:
   # Crawl4AI for web scraping capabilities
   crawl4ai:
     image: unclecode/crawl4ai:0.8.9
+    environment:
+      CRAWL4AI_API_TOKEN: ais-chat-crawl4ai-token
     restart: unless-stopped
     ports:
       - '11235:11235'
@@ -194,6 +196,7 @@ services:
 
       # Crawl4AI
       CRAWL4AI_URL: http://crawl4ai:11235
+      CRAWL4AI_API_TOKEN: ais-chat-crawl4ai-token
 
       # S3 Object Storage for file uploads and image generation
       # Note: must be changed to a publicly accessible S3 storage, when LLM should have file access (e.g., uploading pictures and asking about content)
