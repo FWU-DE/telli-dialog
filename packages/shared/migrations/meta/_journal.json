@@ -554,6 +554,13 @@
       "when": 1781711056187,
       "tag": "0078_burly_silver_fox",
       "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1719225600000,
+      "tag": "0079_delete_duplicate_assistant_messages",
+      "breakpoints": true
     }
   ]
 }
