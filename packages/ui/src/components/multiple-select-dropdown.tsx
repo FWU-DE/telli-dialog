@@ -27,6 +27,7 @@ type MultipleSelectDropdownProps<T extends string = string> = {
   selectedCountLabel?: (count: number) => string;
   contentClassName?: string;
   showSelectAll?: boolean;
+  selectAllLabel?: string;
 };
 
 export function MultipleSelectDropdown<T extends string = string>({
@@ -40,6 +41,7 @@ export function MultipleSelectDropdown<T extends string = string>({
   selectedCountLabel,
   contentClassName,
   showSelectAll = true,
+  selectAllLabel = 'Alle auswählen',
 }: MultipleSelectDropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const options = useMemo(() => optionGroups.flatMap((group) => group.options), [optionGroups]);
@@ -67,18 +69,26 @@ export function MultipleSelectDropdown<T extends string = string>({
   };
 
   const toggleAllOptions = () => {
-    const allOptionValues = options.map((opt) => opt.value);
+    const allOptionValues = Array.from(new Set(options.map((opt) => opt.value)));
     const allSelected = allOptionValues.every((val) => value.includes(val));
 
     if (allSelected) {
-      onValueChange([]);
+      onValueChange(value.filter((selectedValue) => !allOptionValues.includes(selectedValue)));
     } else {
-      onValueChange(allOptionValues);
+      const nextValues = [...value];
+
+      allOptionValues.forEach((optionValue) => {
+        if (!nextValues.includes(optionValue)) {
+          nextValues.push(optionValue);
+        }
+      });
+
+      onValueChange(nextValues);
     }
   };
 
   const getAllSelectState = () => {
-    const allOptionValues = options.map((opt) => opt.value);
+    const allOptionValues = Array.from(new Set(options.map((opt) => opt.value)));
     const selectedCount = allOptionValues.filter((val) => value.includes(val)).length;
 
     if (selectedCount === 0) {
@@ -125,6 +135,7 @@ export function MultipleSelectDropdown<T extends string = string>({
                 <div className="flex flex-col gap-2">
                   <DropdownMenuCheckboxItem
                     checked={getAllSelectState()}
+                    showIndicator={false}
                     onCheckedChange={toggleAllOptions}
                     onSelect={(event) => event.preventDefault()}
                     className="focus-visible:ring-ring/50 flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-sm font-medium text-gray-700 outline-none focus-visible:ring-3"
@@ -140,7 +151,7 @@ export function MultipleSelectDropdown<T extends string = string>({
                         <CheckIcon className="size-3" />
                       ) : null}
                     </span>
-                    <span>Alle auswählen</span>
+                    <span>{selectAllLabel}</span>
                   </DropdownMenuCheckboxItem>
                 </div>
                 <div className="border-b border-gray-200" />
@@ -162,6 +173,7 @@ export function MultipleSelectDropdown<T extends string = string>({
                         <li key={option.value}>
                           <DropdownMenuCheckboxItem
                             checked={checked}
+                            showIndicator={false}
                             onCheckedChange={() => toggleValue(option.value)}
                             onSelect={(event) => event.preventDefault()}
                             className="focus-visible:ring-ring/50 flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-sm text-gray-700 outline-none focus-visible:ring-3"
