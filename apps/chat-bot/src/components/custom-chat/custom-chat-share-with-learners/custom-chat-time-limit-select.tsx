@@ -44,13 +44,14 @@ export function TimeLimitSelect({
           <SelectContent>
             <SelectGroup>
               {usageTimeValuesInMinutes.map((value) => {
-                let displayLabel = `${isAdditionalTime ? '+ ' : ''}${value} ${t('minutes')}`;
+                let displayLabel = `${isAdditionalTime ? '+ ' : ''}${t('minutes-count', {
+                  count: value,
+                })}`;
                 if (value >= 24 * 60) {
                   const days = value / (24 * 60);
-                  displayLabel =
-                    days === 1
-                      ? `${isAdditionalTime ? '+ ' : ''}1 ${t('day')}`
-                      : `${isAdditionalTime ? '+ ' : ''}${days} ${t('days')}`;
+                  displayLabel = `${isAdditionalTime ? '+ ' : ''}${t('days-count', {
+                    count: days,
+                  })}`;
                 }
                 return (
                   <SelectItem
