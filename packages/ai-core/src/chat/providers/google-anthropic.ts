@@ -198,10 +198,7 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
 }
 
 function createAnthropicClient(options: ClientOptions): AnthropicVertex {
-  return instrumentAnthropicAiClient(new AnthropicVertex(options), {
-    recordInputs: true,
-    recordOutputs: true,
-  });
+  return instrumentAnthropicAiClient(new AnthropicVertex(options));
 }
 
 /**
