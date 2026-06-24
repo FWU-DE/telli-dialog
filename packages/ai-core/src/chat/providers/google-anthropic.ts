@@ -29,11 +29,12 @@ import {
 import { AnthropicVertex, ClientOptions } from '@anthropic-ai/vertex-sdk';
 import { AiGenerationError, RateLimitExceededError } from '../../errors';
 import { ParsedMessage } from '@anthropic-ai/sdk';
+import { instrumentAnthropicAiClient } from '@sentry/core';
 
 /* used by apps/api when called with stream === false or as auxiliary model in chat-bot */
 export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGenerationFn {
   const config = getConfigurationByModel(model);
-  const client = new AnthropicVertex(config);
+  const client = createAnthropicClient(config);
 
   return async function generateText({
     messages,
@@ -78,7 +79,7 @@ export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGe
  */
 export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStreamFn {
   const config = getConfigurationByModel(model);
-  const client = new AnthropicVertex(config);
+  const client = createAnthropicClient(config);
 
   return async function* generateTextStream(
     args: TextGenerationArgs,
@@ -133,7 +134,7 @@ export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStream
  */
 export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): AgenticStreamFn {
   const config = getConfigurationByModel(model);
-  const client = new AnthropicVertex(config);
+  const client = createAnthropicClient(config);
 
   return async function* generateAgenticStream(
     args: TextGenerationArgs,
@@ -194,6 +195,13 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
       handleError(error);
     }
   };
+}
+
+function createAnthropicClient(options: ClientOptions): AnthropicVertex {
+  return instrumentAnthropicAiClient(new AnthropicVertex(options), {
+    recordInputs: true,
+    recordOutputs: true,
+  });
 }
 
 /**
