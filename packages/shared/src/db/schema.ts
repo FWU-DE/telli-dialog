@@ -158,7 +158,14 @@ export const conversationMessageTable = pgTable(
     toolCalls: json('tool_calls').$type<ToolCall[]>(),
     toolCallId: text('tool_call_id'),
   },
-  (table) => [index().on(table.conversationId), index().on(table.userId)],
+  (table) => [
+    index().on(table.conversationId),
+    index().on(table.userId),
+    unique('conversation_message_conversation_id_order_number_unique').on(
+      table.conversationId,
+      table.orderNumber,
+    ),
+  ],
 );
 
 export const conversationMessageSelectSchema = createSelectSchema(conversationMessageTable);

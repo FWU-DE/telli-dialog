@@ -61,11 +61,7 @@ export async function dbGetConversationMessages({
     )
     .orderBy(conversationMessageTable.orderNumber);
 
-  const cleanedMessages = getLatestMessages(
-    messages.map((message) => message.conversation_message),
-  );
-
-  return cleanedMessages;
+  return messages.map((message) => message.conversation_message);
 }
 
 export async function dbGetConversationMessageById({
@@ -174,22 +170,6 @@ export async function dbDeleteRegeneratedConversationMessage({
     );
 }
 
-function getLatestMessages(messages: ConversationMessageModel[]): ConversationMessageModel[] {
-  const messageMap = new Map<number, ConversationMessageModel>();
-
-  messages.forEach((message) => {
-    const existing = messageMap.get(message.orderNumber);
-    // If there's no message for this orderNumber yet,
-    // or if the current message is more recent, update the map.
-    if (!existing || existing.createdAt.getTime() < message.createdAt.getTime()) {
-      messageMap.set(message.orderNumber, message);
-    }
-  });
-
-  // Return the deduplicated messages as an array.
-  return Array.from(messageMap.values());
-}
-
 export async function dbGetConversationAndMessages({
   conversationId,
   userId,
@@ -225,6 +205,6 @@ export async function dbGetConversationAndMessages({
   const nonNullMessages = rows.map((r) => r.conversation_message).filter(isNotNull);
   return {
     conversation: firstRow.conversation,
-    messages: getLatestMessages(nonNullMessages),
+    messages: nonNullMessages,
   };
 }

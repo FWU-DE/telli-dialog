@@ -561,6 +561,13 @@
       "when": 1719225600000,
       "tag": "0079_delete_duplicate_assistant_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1782323324131,
+      "tag": "0080_fix_sequential_order_number",
+      "breakpoints": true
     }
   ]
 }
