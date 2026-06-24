@@ -46,6 +46,10 @@ vi.mock('@anthropic-ai/vertex-sdk', () => ({
   AnthropicVertex: MockAnthropicVertex,
 }));
 
+vi.mock('@sentry/core', () => ({
+  instrumentAnthropicAiClient: vi.fn((client) => client),
+}));
+
 function createGoogleAnthropicModel(projectId = 'test-project', location = 'us-central1'): AiModel {
   return {
     id: 'model-google-anthropic',
