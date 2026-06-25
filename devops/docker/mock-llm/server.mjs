@@ -10,8 +10,9 @@
  *
  * POST /v1/responses
  *   Echoes the last user input back using the OpenAI Responses API shape.
- *   This is used by agentic chat tests because the agentic providers stream
- *   via the Responses API.
+ *   Used by agentic chat tests for models that use the Responses API (e.g.,
+ *   GPT-5 on Azure). Note: other agentic providers (e.g., Azure non-GPT-5
+ *   models) stream via /v1/chat/completions instead.
  *
  * GET /health
  *   Returns {"status":"healthy"} for readiness checks.

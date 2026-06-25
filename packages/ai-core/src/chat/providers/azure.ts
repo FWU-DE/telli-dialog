@@ -227,12 +227,22 @@ export function constructAzureChatCompletionAgenticStreamFn(model: AiModel): Age
 
     const resolvedToolCalls: ToolCall[] = [...toolCalls.entries()]
       .sort(([left], [right]) => left - right)
-      .filter(([, toolCall]) => toolCall.id && toolCall.name && hasValidToolCallArguments(toolCall))
-      .map(([, toolCall]) => ({
-        id: toolCall.id,
-        name: toolCall.name,
-        arguments: toolCall.arguments,
-      }));
+      .map(([, toolCall]) => {
+        if (!toolCall.id) {
+          throw new AiGenerationError('Received tool call with missing id from Azure OpenAI stream');
+        }
+        if (!toolCall.name) {
+          throw new AiGenerationError('Received tool call with missing function name from Azure OpenAI stream');
+        }
+        if (!hasValidToolCallArguments(toolCall)) {
+          throw new AiGenerationError('Received tool call with invalid or missing JSON arguments from Azure OpenAI stream');
+        }
+        return {
+          id: toolCall.id,
+          name: toolCall.name,
+          arguments: toolCall.arguments,
+        };
+      });
 
     if (!usage) {
       throw new AiGenerationError('No usage data returned from Azure OpenAI stream');
