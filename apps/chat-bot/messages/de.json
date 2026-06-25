@@ -520,8 +520,8 @@
       "heading": "Hintergrundwissen",
       "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Die KI bezieht dieses Wissen bei Bedarf in ihre Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: {supported_formats}",
       "files": "Dateien",
-      "links": "Webseiten",
-      "links-tooltip": "Wichtig: Bitte jeweils konkrete Webseiten angeben (z.B. http://wikipedia.org/wiki/Astronomie). Nur http://wikipedia.org ist nicht ausreichend.",
+      "links": "Links",
+      "links-tooltip": "Der Link wird einmalig zum Zeitpunkt des Hinzufügens gelesen.\nBitte jeweils konkrete Webseiten angeben (z.B. http://wikipedia.org/wiki/Astronomie). Nur http://wikipedia.org ist nicht ausreichend.",
       "file-delete-error": "Fehler beim Löschen der Datei"
     },
     "instructions-example": {
@@ -530,7 +530,7 @@
       "close": "Schließen"
     },
     "web-search": {
-      "heading": "Websuche",
+      "heading": "Websuche für Aktuelles",
       "heading-tooltip": "Falls aktiviert, sucht AIS.chat automatisch im Internet, sofern aktuelle Informationen nötig sind.",
       "activated": "Aktiviert"
     }
