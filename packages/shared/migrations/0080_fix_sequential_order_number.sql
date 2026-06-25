@@ -1,5 +1,11 @@
 -- Fix order_number to be sequential per conversation, ordered by created_at.
-WITH ranked_messages AS (
+WITH duplicate_conversations AS (
+  SELECT conversation_id
+  FROM conversation_message
+  GROUP BY conversation_id
+  HAVING COUNT(*) <> COUNT(DISTINCT order_number)
+),
+ranked_messages AS (
   SELECT
     id,
     conversation_id,
@@ -8,6 +14,7 @@ WITH ranked_messages AS (
       ORDER BY created_at ASC, id ASC
     ) AS new_order_number
   FROM conversation_message
+  WHERE conversation_id IN (SELECT conversation_id FROM duplicate_conversations)
 )
 UPDATE conversation_message
 SET order_number = ranked_messages.new_order_number

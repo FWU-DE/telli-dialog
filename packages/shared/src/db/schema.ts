@@ -12,6 +12,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   vector,
   varchar,
@@ -161,10 +162,9 @@ export const conversationMessageTable = pgTable(
   (table) => [
     index().on(table.conversationId),
     index().on(table.userId),
-    unique('conversation_message_conversation_id_order_number_unique').on(
-      table.conversationId,
-      table.orderNumber,
-    ),
+    uniqueIndex('conversation_message_conversation_id_order_number_unique')
+      .on(table.conversationId, table.orderNumber)
+      .where(isNull(table.deletedAt)),
   ],
 );
 
