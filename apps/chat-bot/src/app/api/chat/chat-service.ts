@@ -64,6 +64,44 @@ type CustomChatIds = {
   assistantId?: string | undefined;
 };
 
+function filterPersistedAgentLoopMessages(agentLoopMessages: AiCoreMessage[]) {
+  const excludedToolCallIds = new Set<string>();
+
+  return agentLoopMessages.flatMap((message) => {
+    if (message.role === 'assistant' && message.toolCalls?.length) {
+      const retainedToolCalls = message.toolCalls.filter((toolCall) => {
+        if (toolCall.name === 'retrieve_entire_file') {
+          excludedToolCallIds.add(toolCall.id);
+          return false;
+        }
+
+        return true;
+      });
+
+      if (retainedToolCalls.length === 0 && message.content.trim().length === 0) {
+        return [];
+      }
+
+      return [
+        {
+          ...message,
+          toolCalls: retainedToolCalls.length > 0 ? retainedToolCalls : undefined,
+        },
+      ];
+    }
+
+    if (
+      message.role === 'tool' &&
+      message.toolCallId &&
+      excludedToolCallIds.has(message.toolCallId)
+    ) {
+      return [];
+    }
+
+    return [message];
+  });
+}
+
 function ensureConversationCustomChatIdsMatch({
   incomingIds,
   storedIds,
@@ -457,9 +495,11 @@ export async function sendChatMessage({
     priceInCents: number;
     agentLoopMessages?: AiCoreMessage[];
   }) {
+    const persistedAgentLoopMessages = filterPersistedAgentLoopMessages(agentLoopMessages);
+
     // Persist intermediate tool call/result messages and the final assistant message in one query
     const messagesToInsert = [
-      ...agentLoopMessages.map((msg, index) => ({
+      ...persistedAgentLoopMessages.map((msg, index) => ({
         content: msg.content,
         role: msg.role,
         userId: user.id,
@@ -474,7 +514,7 @@ export async function sendChatMessage({
         content: fullText,
         role: 'assistant' as const,
         userId: user.id,
-        orderNumber: assistantMessageOrderNumber + agentLoopMessages.length,
+        orderNumber: assistantMessageOrderNumber + persistedAgentLoopMessages.length,
         modelName: definedModel.name,
         conversationId: activeConversation.id,
         webSearchResults,

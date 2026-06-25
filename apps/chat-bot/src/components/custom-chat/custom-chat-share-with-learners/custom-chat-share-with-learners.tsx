@@ -8,14 +8,6 @@ import { useTranslations } from 'next-intl';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { Card, CardContent } from '@ui/components/card';
-import { Field, FieldLabel } from '@ui/components/field';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@ui/components/select';
 import { Button } from '@ui/components/button';
 import { ShareFatIcon, StopIcon } from '@phosphor-icons/react';
 import CountDownTimer from '../../../app/(authed)/(chat-bot)/learning-scenarios/_components/count-down';
@@ -30,6 +22,7 @@ import {
   tokenPointsPercentageValues,
   usageTimeValuesInMinutes,
 } from './custom-chat-share-with-learners-limit-params';
+import { TimeLimitSelect } from './custom-chat-time-limit-select';
 
 const shareFormSchema = z.object({
   tokenPointsPercentageLimit: z.coerce.number(),
@@ -135,39 +128,13 @@ export function CustomChatShareWithLearners({
               pointsPercentageValues={tokenPointsPercentageValues}
               maxAvailablePercentage={maxAvailablePercentage}
             />
+            <TimeLimitSelect
+              defaultValue={String(getValuesShare('usageTimeLimit'))}
+              onChange={(value) => setShareValue('usageTimeLimit', value)}
+              disabled={sharedChatActive}
+              usageTimeValuesInMinutes={usageTimeValuesInMinutes}
+            />
 
-            <div className="whitespace-nowrap flex-1">
-              <Field>
-                <FieldLabel>{t('max-usage')}</FieldLabel>
-                <Select
-                  defaultValue={String(getValuesShare('usageTimeLimit'))}
-                  onValueChange={(value) => setShareValue('usageTimeLimit', Number(value))}
-                  disabled={sharedChatActive}
-                >
-                  <SelectTrigger aria-label={t('max-usage')} data-testid="usage-time-select">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {usageTimeValuesInMinutes.map((value) => {
-                      let displayLabel = `${value} Minuten`;
-                      if (value >= 1440) {
-                        const days = value / 1440;
-                        displayLabel = days === 1 ? '1 Tag' : `${days} Tage`;
-                      }
-                      return (
-                        <SelectItem
-                          key={value}
-                          value={String(value)}
-                          data-testid={`usage-time-option-${value}`}
-                        >
-                          {displayLabel}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </Field>
-            </div>
             <div className="grow" />
 
             {!sharedChatActive && (

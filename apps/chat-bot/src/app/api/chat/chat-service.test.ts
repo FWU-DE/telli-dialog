@@ -397,6 +397,101 @@ describe('sendChatMessage', () => {
     );
   });
 
+  it('does not persist retrieve_entire_file tool calls or results', async () => {
+    mocks.runAgentLoopMock.mockImplementationOnce(
+      ({ onComplete }: { onComplete: (args: unknown) => Promise<void> | void }) => {
+        void onComplete({
+          fullText: 'agentic chunk',
+          usage: { promptTokens: 11, completionTokens: 22, totalTokens: 33 },
+          priceInCents: 44,
+          agentLoopMessages: [
+            {
+              role: 'assistant',
+              content: '',
+              toolCalls: [
+                {
+                  id: 'call-retrieve-entire-file',
+                  name: 'retrieve_entire_file',
+                  arguments: '{"fileName":"Arbeitsblatt.pdf"}',
+                },
+                {
+                  id: 'call-web-search',
+                  name: 'web_search',
+                  arguments: '{"query":"test"}',
+                },
+              ],
+            },
+            {
+              role: 'tool',
+              content: 'file content',
+              toolCallId: 'call-retrieve-entire-file',
+            },
+            {
+              role: 'tool',
+              content: 'search content',
+              toolCallId: 'call-web-search',
+            },
+          ],
+        });
+      },
+    );
+
+    const { sendChatMessage } = await import('./chat-service');
+
+    const result = await sendChatMessage({
+      conversationId: conversation.id,
+      messages,
+      modelId: mainModel.id,
+      user: createUser(true),
+    });
+
+    await collectStream(result.stream);
+
+    const insertedMessages = mocks.dbInsertChatContentBatchMock.mock.calls[0]?.[0] as Array<{
+      role: string;
+      toolCallId?: string | null;
+      toolCalls?: Array<{ name: string }> | null;
+      orderNumber: number;
+    }>;
+
+    expect(insertedMessages).toHaveLength(3);
+    expect(insertedMessages).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: 'assistant',
+          toolCalls: [
+            expect.objectContaining({
+              name: 'web_search',
+            }),
+          ],
+        }),
+        expect.objectContaining({
+          role: 'tool',
+          toolCallId: 'call-web-search',
+        }),
+        expect.objectContaining({
+          role: 'assistant',
+          id: result.messageId,
+        }),
+      ]),
+    );
+
+    expect(insertedMessages).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          toolCallId: 'call-retrieve-entire-file',
+        }),
+        expect.objectContaining({
+          toolCalls: expect.arrayContaining([
+            expect.objectContaining({
+              name: 'retrieve_entire_file',
+            }),
+          ]),
+        }),
+      ]),
+    );
+  });
+
   it('throws when conversation context ids do not match', async () => {
     const { sendChatMessage } = await import('./chat-service');
 
