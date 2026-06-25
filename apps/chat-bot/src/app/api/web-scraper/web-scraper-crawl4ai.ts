@@ -44,9 +44,6 @@ export async function webScraperCrawl4AI(url: string): Promise<WebSource> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(env.crawl4AIToken && {
-          Authorization: 'Bearer ' + env.crawl4AIToken,
-        }),
       },
       body: JSON.stringify({
         urls: [url],

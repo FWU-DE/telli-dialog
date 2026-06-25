@@ -72,7 +72,6 @@ jobs:
       # Disable telemetry
       NEXT_TELEMETRY_DISABLED: 1
       TURBO_TELEMETRY_DISABLED: 1
-      CRAWL4AI_API_TOKEN: ais-chat-e2e-crawl4ai-token
 
     steps:
       - name: Checkout code
@@ -96,7 +95,6 @@ jobs:
             --name crawl4ai \
             --shm-size=2gb \
             -p 11235:11235 \
-            -e CRAWL4AI_API_TOKEN=$CRAWL4AI_API_TOKEN \
             unclecode/crawl4ai:0.9.0 > /tmp/crawl4ai.log 2>&1 &
 
       - name: Setup pnpm
