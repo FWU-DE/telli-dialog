@@ -6,6 +6,11 @@ import {
   constructAzureResponsesAgenticStreamFn,
 } from './azure';
 import {
+  constructBifrostAgenticStreamFn,
+  constructBifrostTextGenerationFn,
+  constructBifrostTextStreamFn,
+} from './bifrost';
+import {
   constructGoogleAgenticStreamFn,
   constructGoogleTextGenerationFn,
   constructGoogleTextStreamFn,
@@ -31,6 +36,9 @@ import type {
 import { ProviderConfigurationError } from '../../errors';
 
 function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerationFn | undefined {
+  if (model.provider === 'bifrost') {
+    return constructBifrostTextGenerationFn(model);
+  }
   if (model.provider === 'azure') {
     if (['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].includes(model.name)) {
       return constructAzureResponsesGenerationFn(model);
@@ -51,6 +59,9 @@ function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerati
 }
 
 function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | undefined {
+  if (model.provider === 'bifrost') {
+    return constructBifrostTextStreamFn(model);
+  }
   if (model.provider === 'azure') {
     // GPT-5 is used with Responses endpoint
     if (['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].includes(model.name)) {
@@ -72,6 +83,9 @@ function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | u
 }
 
 function getAgenticStreamFnByModel({ model }: { model: AiModel }): AgenticStreamFn | undefined {
+  if (model.provider === 'bifrost') {
+    return constructBifrostAgenticStreamFn(model);
+  }
   if (model.provider === 'azure') {
     return constructAzureResponsesAgenticStreamFn(model);
   }

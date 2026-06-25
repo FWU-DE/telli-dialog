@@ -101,7 +101,21 @@ services:
     ports:
       - '6556:6556'
 
+  bifrost:
+    image: maximhq/bifrost:latest
+    restart: unless-stopped
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8089
+      LOG_LEVEL: info
+      LOG_STYLE: pretty
+    ports:
+      - '8089:8089'
+    volumes:
+      - bifrost_data:/app/data
+
 volumes:
   keycloak_data:
   postgres_data:
   valkey_data:
+  bifrost_data:

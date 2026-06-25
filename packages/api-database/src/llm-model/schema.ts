@@ -5,7 +5,7 @@ export const defaultLlmProviderProps = z.object({
   name: z.string(),
 });
 
-export const llmModelProviderSchema = z.enum(['ionos', 'openai', 'azure', 'google']);
+export const llmModelProviderSchema = z.enum(['ionos', 'openai', 'azure', 'google', 'bifrost']);
 
 export const llmModelSettingsIonos = z.object({
   provider: z.literal(llmModelProviderSchema.enum.ionos),
@@ -17,6 +17,12 @@ export const llmModelSettingsOpenAiSchema = z.object({
   provider: z.literal(llmModelProviderSchema.enum.openai),
   apiKey: z.string(),
   baseUrl: z.string().default(DEFAULT_OPENAI_BASE_URL),
+});
+
+export const llmModelSettingsBifrostSchema = z.object({
+  provider: z.literal(llmModelProviderSchema.enum.bifrost),
+  apiKey: z.string(),
+  baseUrl: z.string(),
 });
 
 export const llmModelSettingsAzureSchema = z.object({
@@ -33,6 +39,7 @@ export const llmModelSettingsGoogleSchema = z.object({
 
 export const llmModelSettingsSchema = llmModelSettingsIonos
   .or(llmModelSettingsOpenAiSchema)
+  .or(llmModelSettingsBifrostSchema)
   .or(llmModelSettingsAzureSchema)
   .or(llmModelSettingsGoogleSchema);
 
