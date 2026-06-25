@@ -1,9 +1,14 @@
 'use client';
 
 import { CaretDownIcon } from '@phosphor-icons/react';
+import { CheckIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Checkbox } from './checkbox';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from './dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from './dropdown-menu';
 import { Field, FieldLabel } from './field';
 
 export type MultipleSelectDropdownOptionGroup<T extends string = string> = {
@@ -21,6 +26,8 @@ type MultipleSelectDropdownProps<T extends string = string> = {
   testId: string;
   selectedCountLabel?: (count: number) => string;
   contentClassName?: string;
+  showSelectAll?: boolean;
+  selectAllLabel?: string;
 };
 
 export function MultipleSelectDropdown<T extends string = string>({
@@ -33,6 +40,8 @@ export function MultipleSelectDropdown<T extends string = string>({
   testId,
   selectedCountLabel,
   contentClassName,
+  showSelectAll = true,
+  selectAllLabel = 'Alle auswählen',
 }: MultipleSelectDropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const options = useMemo(() => optionGroups.flatMap((group) => group.options), [optionGroups]);
@@ -57,6 +66,40 @@ export function MultipleSelectDropdown<T extends string = string>({
     }
 
     onValueChange([...value, optionValue]);
+  };
+
+  const toggleAllOptions = () => {
+    const allOptionValues = Array.from(new Set(options.map((opt) => opt.value)));
+    const allSelected = allOptionValues.every((val) => value.includes(val));
+
+    if (allSelected) {
+      onValueChange(value.filter((selectedValue) => !allOptionValues.includes(selectedValue)));
+    } else {
+      const nextValues = [...value];
+
+      allOptionValues.forEach((optionValue) => {
+        if (!nextValues.includes(optionValue)) {
+          nextValues.push(optionValue);
+        }
+      });
+
+      onValueChange(nextValues);
+    }
+  };
+
+  const getAllSelectState = () => {
+    const allOptionValues = Array.from(new Set(options.map((opt) => opt.value)));
+    const selectedCount = allOptionValues.filter((val) => value.includes(val)).length;
+
+    if (selectedCount === 0) {
+      return false;
+    }
+
+    if (selectedCount === allOptionValues.length) {
+      return true;
+    }
+
+    return 'indeterminate' as const;
   };
 
   return (
@@ -86,33 +129,71 @@ export function MultipleSelectDropdown<T extends string = string>({
             .filter(Boolean)
             .join(' ')}
         >
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-4 pr-2">
-            {optionGroups.map((group) => (
-              <div key={group.title ?? group.options.map((item) => item.value).join('-')}>
-                {group.title && (
-                  <p className="mb-2 wrap-break-word bg-gray-100 px-2 py-1 text-[10px] font-semibold tracking-[0.2em] text-gray-500 uppercase">
-                    {group.title}
-                  </p>
-                )}
-                <ul className="space-y-2">
-                  {group.options.map((option) => {
-                    const checked = value.includes(option.value);
+          <div className="flex flex-col gap-2">
+            {showSelectAll && (
+              <>
+                <div className="flex flex-col gap-2">
+                  <DropdownMenuCheckboxItem
+                    checked={getAllSelectState()}
+                    showIndicator={false}
+                    onCheckedChange={toggleAllOptions}
+                    onSelect={(event) => event.preventDefault()}
+                    className="focus-visible:ring-ring/50 flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-sm font-medium text-gray-700 outline-none focus-visible:ring-3"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="border-dark-gray data-[checked=true]:border-primary data-[checked=true]:bg-primary data-[checked=true]:text-white flex size-4 shrink-0 items-center justify-center rounded-xs border"
+                      data-checked={getAllSelectState()}
+                    >
+                      {getAllSelectState() === 'indeterminate' ? (
+                        <div className="size-2 bg-primary" />
+                      ) : getAllSelectState() ? (
+                        <CheckIcon className="size-3" />
+                      ) : null}
+                    </span>
+                    <span>{selectAllLabel}</span>
+                  </DropdownMenuCheckboxItem>
+                </div>
+                <div className="border-b border-gray-200" />
+              </>
+            )}
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-4 pr-2">
+              {optionGroups.map((group) => (
+                <div key={group.title ?? group.options.map((item) => item.value).join('-')}>
+                  {group.title && (
+                    <p className="mb-2 wrap-break-word bg-gray-100 px-2 py-1 text-[10px] font-semibold tracking-[0.2em] text-gray-500 uppercase">
+                      {group.title}
+                    </p>
+                  )}
+                  <ul className="space-y-2">
+                    {group.options.map((option) => {
+                      const checked = value.includes(option.value);
 
-                    return (
-                      <li key={option.value}>
-                        <label className="hover:bg-gray-50 flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-sm text-gray-700">
-                          <Checkbox
+                      return (
+                        <li key={option.value}>
+                          <DropdownMenuCheckboxItem
                             checked={checked}
+                            showIndicator={false}
                             onCheckedChange={() => toggleValue(option.value)}
-                          />
-                          <span>{option.label}</span>
-                        </label>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))}
+                            onSelect={(event) => event.preventDefault()}
+                            className="focus-visible:ring-ring/50 flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-sm text-gray-700 outline-none focus-visible:ring-3"
+                          >
+                            <span
+                              aria-hidden="true"
+                              className="border-dark-gray data-[checked=true]:border-primary data-[checked=true]:bg-primary data-[checked=true]:text-white flex size-4 shrink-0 items-center justify-center rounded-xs border"
+                              data-checked={checked}
+                            >
+                              {checked ? <CheckIcon className="size-3" /> : null}
+                            </span>
+                            <span>{option.label}</span>
+                          </DropdownMenuCheckboxItem>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
