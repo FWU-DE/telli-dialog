@@ -39,6 +39,7 @@ export default function SharedChat({
     reload,
     stop,
     status,
+    removeMessagesFromLocalStorage,
   } = useLearningScenarioChat({
     learningScenarioId: id,
     inviteCode,
@@ -63,6 +64,7 @@ export default function SharedChat({
   }
 
   function handleOpenNewChat() {
+    removeMessagesFromLocalStorage();
     setMessages([]);
     resetError();
   }
