@@ -21,5 +21,6 @@ SET order_number = ranked_messages.new_order_number
 FROM ranked_messages
 WHERE conversation_message.id = ranked_messages.id
   AND conversation_message.order_number IS DISTINCT FROM ranked_messages.new_order_number;--> statement-breakpoint
+
 -- Add unique constraint on (conversation_id, order_number) to prevent duplicates in the future
-ALTER TABLE "conversation_message" ADD CONSTRAINT "conversation_message_conversation_id_order_number_unique" UNIQUE("conversation_id", "order_number");
+CREATE UNIQUE INDEX "conversation_message_conversation_id_order_number_unique" ON "conversation_message" USING btree ("conversation_id","order_number") WHERE "conversation_message"."deleted_at" is null;

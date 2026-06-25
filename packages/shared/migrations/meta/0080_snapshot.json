@@ -1,5 +1,5 @@
 {
-  "id": "173110dd-0783-4889-80c0-3fa32c843aad",
+  "id": "3c264ac6-845a-466e-bd00-7d862c90634c",
   "prevId": "a8c64ce6-5d71-4b4e-9898-f4e873caec6a",
   "version": "7",
   "dialect": "postgresql",
@@ -1219,6 +1219,28 @@
             }
           ],
           "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "conversation_message_conversation_id_order_number_unique": {
+          "name": "conversation_message_conversation_id_order_number_unique",
+          "columns": [
+            {
+              "expression": "conversation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "order_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"conversation_message\".\"deleted_at\" is null",
           "concurrently": false,
           "method": "btree",
           "with": {}
