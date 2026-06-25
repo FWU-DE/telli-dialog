@@ -488,7 +488,10 @@
       "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",
       "share": "Teilen",
-      "maximum": "Maximum"
+      "maximum": "Maximum",
+      "minutes-count": "{count, plural, =1 {# Minute} other {# Minuten}}",
+      "days-count": "{count, plural, =1 {# Tag} other {# Tage}}",
+      "additional-time": "Zeit hinzufügen"
     },
     "share-page": {
       "go-to": "Gehe auf",
