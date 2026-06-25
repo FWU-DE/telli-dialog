@@ -31,7 +31,7 @@ export const chatMessageSchema = z.object({
   id: z.string(),
   role: z.enum(CONVERSATION_ROLES),
   content: z.string(),
-  createdAt: z.date().optional(),
+  createdAt: z.coerce.date().optional(),
   attachments: z.array(z.any()).optional(),
   webSearchResults: z.array(z.any()).optional(),
   toolCalls: z.array(z.any()).optional(),

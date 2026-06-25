@@ -58,7 +58,7 @@ export type UseChatReturn = {
   error: Error | null;
   reload: () => Promise<void>;
   stop: () => void;
-  removeMessagesFromLocalStorage: () => void;
+  clearClientPersistedMessages: () => void;
 };
 
 function lastUserMessage(messages: ChatMessage[]): ChatMessage | null {
@@ -104,8 +104,10 @@ export function useAisChat({
   // Mirror message changes into sessionStorage when persistence is enabled.
   useEffect(() => {
     if (persistenceInviteCode === undefined) return;
+    // Do not persist messages during streaming
+    if (status === 'streaming') return;
     saveSharedChatMessages(persistenceInviteCode, messages);
-  }, [messages, persistenceInviteCode]);
+  }, [messages, persistenceInviteCode, status]);
 
   const isLoading = status === 'submitted' || status === 'streaming';
 
@@ -291,7 +293,7 @@ export function useAisChat({
   /**
    * Removes any persisted client-side messages for the configured invite code.
    */
-  const removeMessagesFromLocalStorage = useCallback(() => {
+  const clearClientPersistedMessages = useCallback(() => {
     if (persistenceInviteCode === undefined) return;
     clearSharedChatMessages(persistenceInviteCode);
   }, [persistenceInviteCode]);
@@ -309,6 +311,6 @@ export function useAisChat({
     error,
     reload,
     stop,
-    removeMessagesFromLocalStorage,
+    clearClientPersistedMessages,
   };
 }

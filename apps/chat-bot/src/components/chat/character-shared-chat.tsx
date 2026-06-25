@@ -48,7 +48,7 @@ export default function CharacterSharedChat({
     reload,
     status,
     stop,
-    removeMessagesFromLocalStorage,
+    clearClientPersistedMessages,
   } = useCharacterChat({
     characterId: id,
     inviteCode,
@@ -73,7 +73,7 @@ export default function CharacterSharedChat({
   }
 
   function handleOpenNewChat() {
-    removeMessagesFromLocalStorage();
+    clearClientPersistedMessages();
     setMessages([]);
     resetError();
   }

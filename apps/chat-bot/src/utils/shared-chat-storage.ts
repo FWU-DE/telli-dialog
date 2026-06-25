@@ -15,7 +15,6 @@ const persistedChatMessageSchema = chatMessageSchema
     id: true,
     role: true,
     content: true,
-    createdAt: true,
   })
   .strip();
 
@@ -79,10 +78,9 @@ export function saveSharedChatMessages(inviteCode: string, messages: ChatMessage
   const storage = getSessionStorage();
   if (storage === null) return;
 
-  // strips away any extra properties like attachments, webSearchResults, toolCalls, etc. that are not needed for persistence
-  const parsedMessages = persistedChatMessagesSchema.parse(messages);
-
   try {
+    // strips away any extra properties like attachments, webSearchResults, toolCalls, etc. that are not needed for persistence
+    const parsedMessages = persistedChatMessagesSchema.parse(messages);
     storage.setItem(sharedChatStorageKey(inviteCode), JSON.stringify(parsedMessages));
   } catch (error) {
     logError('Failed to save shared chat messages to sessionStorage', error);
