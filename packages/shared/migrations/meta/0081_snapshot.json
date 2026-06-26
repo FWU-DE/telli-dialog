@@ -2769,7 +2769,7 @@
           "name": "expired_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "manually_stopped_at": {
           "name": "manually_stopped_at",
