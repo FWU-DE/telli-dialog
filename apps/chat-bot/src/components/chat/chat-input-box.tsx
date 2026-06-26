@@ -14,12 +14,12 @@ import { useToast } from '../common/toast';
 import {
   ChangeEvent,
   Dispatch,
-  FormEvent,
   KeyboardEvent,
   SetStateAction,
   startTransition,
   useEffect,
   useState,
+  SyntheticEvent,
 } from 'react';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
@@ -42,7 +42,7 @@ export function ChatInputBox({
   handleDeattachFile?: (localId: string) => void;
   handleInputChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   handleStopGeneration: () => void;
-  customHandleSubmit: (e: FormEvent) => Promise<void>;
+  customHandleSubmit: (e: SyntheticEvent) => Promise<void>;
   input: string;
   enableFileUpload?: boolean;
 }) {
