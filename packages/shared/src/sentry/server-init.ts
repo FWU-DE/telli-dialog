@@ -53,11 +53,18 @@ export function initSentry({
         return 0;
       }
 
-      if (aiServerActionNameSet.has(name)) {
-        return inheritOrSampleWith(env.sentryTracesSampleRateAi);
+      // If parent was sampled, honor that decision
+      const parentSamplingDecision = inheritOrSampleWith(0);
+      if (parentSamplingDecision) {
+        return true;
       }
 
-      return inheritOrSampleWith(env.sentryTracesSampleRate);
+      // Parent was not sampled or absent, use backend's own sampling rates
+      if (aiServerActionNameSet.has(name)) {
+        return env.sentryTracesSampleRateAi;
+      }
+
+      return env.sentryTracesSampleRate;
     },
     ...(scrubSensitiveData && {
       beforeBreadcrumb: (breadcrumb) => scrubSentryEvent(breadcrumb),

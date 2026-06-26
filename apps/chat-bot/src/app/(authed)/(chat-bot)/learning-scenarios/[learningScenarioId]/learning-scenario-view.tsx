@@ -22,11 +22,7 @@ import {
 import { Card, CardContent } from '@ui/components/card';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
-import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
-import {
-  tokenPointsPercentageValues,
-  usageTimeValuesInMinutes,
-} from '../editor/[learningScenarioId]/schema';
+import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners';
 import {
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
@@ -34,23 +30,30 @@ import {
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
+import { FilterDisplaySection } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-display-section';
+import { extractFilterValues } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 export function LearningScenarioView({
   learningScenario,
   fileMappings,
   pictureUrl,
   initialLinks,
+  usedBudget,
+  maxBudget,
 }: {
   learningScenario: LearningScenarioOptionalShareDataModel;
   fileMappings: FileModel[];
   pictureUrl: string | undefined;
   initialLinks: WebSource[];
+  usedBudget: number;
+  maxBudget: number;
 }) {
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('learning-scenarios');
   const tToast = useTranslations('learning-scenarios.toasts');
   const { models } = useLlmModels();
+  const filterValues = extractFilterValues(learningScenario);
 
   const modelDisplayName = models.find((m) => m.id === learningScenario.modelId)?.displayName;
 
@@ -115,8 +118,8 @@ export function LearningScenarioView({
         manuallyStoppedAt={learningScenario.manuallyStoppedAt}
         maxUsageTimeLimit={learningScenario.maxUsageTimeLimit}
         tokenPointsLimit={learningScenario.tokenPointsLimit}
-        pointsPercentageValues={tokenPointsPercentageValues}
-        usageTimeValues={usageTimeValuesInMinutes}
+        usedBudget={usedBudget}
+        maxBudget={maxBudget}
         onShare={handleShareLearningScenario}
         onUnshare={handleUnshareLearningScenario}
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
@@ -158,6 +161,7 @@ export function LearningScenarioView({
                 label={t('student-exercise-label')}
                 value={learningScenario.studentExercise}
               />
+              <FilterDisplaySection values={filterValues} />
             </CustomChatFields>
           </CardContent>
         </Card>

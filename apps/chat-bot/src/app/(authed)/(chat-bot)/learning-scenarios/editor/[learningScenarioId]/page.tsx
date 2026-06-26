@@ -1,5 +1,5 @@
 import { requireAuth } from '@/auth/requireAuth';
-import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { getLearningScenarioForEditView } from '@shared/learning-scenarios/learning-scenario-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebSource } from '@shared/db/types';
 import { LearningScenarioEdit } from './learning-scenario-edit';
@@ -21,12 +21,15 @@ export default async function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]'>,
 ) {
   const { learningScenarioId } = await props.params;
-  const { user } = await requireAuth();
+  const { user, federalState } = await requireAuth();
 
-  const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
-    learningScenarioId: learningScenarioId,
-    user,
-  }).catch(handleErrorInServerComponent);
+  const { learningScenario, relatedFiles, avatarPictureUrl, maxBudget, usedBudget } =
+    await getLearningScenarioForEditView({
+      learningScenarioId: learningScenarioId,
+      user,
+      federalState,
+    }).catch(handleErrorInServerComponent);
+
   const readOnly = user.id !== learningScenario.userId;
 
   if (readOnly) {
@@ -50,6 +53,8 @@ export default async function Page(
         relatedFiles={relatedFiles}
         initialLinks={initialLinks}
         avatarPictureUrl={avatarPictureUrl}
+        usedBudget={usedBudget ?? 0}
+        maxBudget={maxBudget ?? 500}
       />
     </DefaultPageLayout>
   );

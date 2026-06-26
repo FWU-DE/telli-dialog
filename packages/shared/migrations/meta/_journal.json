@@ -540,6 +540,34 @@
       "when": 1781010786947,
       "tag": "0076_reflective_gamma_corps",
       "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1781537921418,
+      "tag": "0077_remarkable_vindicator",
+      "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1781711056187,
+      "tag": "0078_burly_silver_fox",
+      "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1782396876313,
+      "tag": "0079_eminent_thena",
+      "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1782403685677,
+      "tag": "0080_chief_kulan_gath",
+      "breakpoints": true
     }
   ]
 }

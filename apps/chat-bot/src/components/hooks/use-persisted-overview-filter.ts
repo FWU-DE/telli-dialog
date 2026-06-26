@@ -12,7 +12,7 @@ import {
 import type { OverviewFilter } from '@shared/overview-filter';
 import { overviewFilterSchema } from '@shared/overview-filter';
 
-type EntityType = 'characters' | 'learning-scenarios' | 'assistants';
+export type EntityType = 'characters' | 'learning-scenarios' | 'assistants';
 
 function parseFilter(value: string | null): OverviewFilter | null {
   const result = overviewFilterSchema.safeParse(value);
@@ -49,7 +49,7 @@ function resolveInitialFilter(sessionStorageKey: string): OverviewFilter {
  * @param onLoad - Callback to fetch entities for a given filter (called on mount and on change)
  * @returns [filter, setFilter, isLoading]
  */
-export function useOverviewFilter(
+export function usePersistedOverviewFilter(
   entityType: EntityType,
   onLoad: (filter: OverviewFilter) => Promise<void>,
 ): [OverviewFilter, (filter: OverviewFilter) => Promise<void>, boolean] {

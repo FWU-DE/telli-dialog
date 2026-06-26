@@ -6,7 +6,16 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
+import {
+  FileModel,
+  LearningScenarioOptionalShareDataModel,
+  schoolTypesSchema,
+  gradeRangesSchema,
+  subjectsSchema,
+  categoriesSchema,
+  federalStatesSchema,
+  languagesSchema,
+} from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/card';
 import { FieldGroup } from '@ui/components/field';
@@ -46,8 +55,7 @@ import { WebSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
-import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
-import { tokenPointsPercentageValues, usageTimeValuesInMinutes } from './schema';
+import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
@@ -59,6 +67,11 @@ import {
   getShareFormValues,
 } from '@/components/custom-chat/access-level-sharing';
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
+import FilterSelectSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
+import {
+  extractFilterValues,
+  toFilterGroup,
+} from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
@@ -99,6 +112,12 @@ function createLearningScenarioFormValuesSchema(t: LearningScenarioTranslator) {
     additionalInstructions: z.string(),
     studentExercise: z.string(),
     modelId: z.string(),
+    schoolTypes: z.array(schoolTypesSchema),
+    gradeRanges: z.array(gradeRangesSchema),
+    subjects: z.array(subjectsSchema),
+    categories: z.array(categoriesSchema),
+    federalStates: z.array(federalStatesSchema),
+    languages: z.array(languagesSchema),
     isSchoolShared: z.boolean(),
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
@@ -114,11 +133,15 @@ export function LearningScenarioEdit({
   relatedFiles,
   initialLinks,
   avatarPictureUrl,
+  usedBudget,
+  maxBudget,
 }: {
   learningScenario: LearningScenarioOptionalShareDataModel;
   relatedFiles: FileModel[];
   initialLinks: WebSource[];
   avatarPictureUrl?: string;
+  usedBudget: number;
+  maxBudget: number;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -135,6 +158,7 @@ export function LearningScenarioEdit({
   const isModelAvailable =
     learningScenario.modelId && models.some((m) => m.id === learningScenario.modelId);
   const selectedModelId = isModelAvailable ? learningScenario.modelId : maybeDefaultModelId;
+  const filterValues = extractFilterValues(learningScenario);
 
   const initialValues: LearningScenarioFormValues = {
     name: learningScenario.name,
@@ -142,6 +166,12 @@ export function LearningScenarioEdit({
     additionalInstructions: learningScenario.additionalInstructions ?? '',
     studentExercise: learningScenario.studentExercise ?? '',
     modelId: selectedModelId ?? '',
+    schoolTypes: filterValues.schoolTypes,
+    gradeRanges: filterValues.gradeRanges,
+    subjects: filterValues.subjects,
+    categories: filterValues.categories,
+    federalStates: filterValues.federalStates,
+    languages: filterValues.languages,
     ...getShareFormValues(learningScenario.accessLevel),
     hasLinkAccess: learningScenario.hasLinkAccess,
   };
@@ -177,6 +207,14 @@ export function LearningScenarioEdit({
             name: data.name.trim(),
             description: data.description ?? '',
             studentExercise: data.studentExercise ?? '',
+            filterGroup: toFilterGroup({
+              schoolTypes: data.schoolTypes,
+              gradeRanges: data.gradeRanges,
+              subjects: data.subjects,
+              categories: data.categories,
+              federalStates: data.federalStates,
+              languages: data.languages,
+            }),
             attachedLinks: attachedLinksRef.current,
           },
         });
@@ -186,6 +224,12 @@ export function LearningScenarioEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
+  const schoolTypes = useWatch({ control, name: 'schoolTypes' });
+  const gradeRanges = useWatch({ control, name: 'gradeRanges' });
+  const subjects = useWatch({ control, name: 'subjects' });
+  const categories = useWatch({ control, name: 'categories' });
+  const federalStates = useWatch({ control, name: 'federalStates' });
+  const languages = useWatch({ control, name: 'languages' });
   const savedAccessLevelRef = useRef(learningScenario.accessLevel);
   const attachedLinksRef = useRef(learningScenario.attachedLinks);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
@@ -370,8 +414,8 @@ export function LearningScenarioEdit({
           manuallyStoppedAt={learningScenario.manuallyStoppedAt}
           maxUsageTimeLimit={learningScenario.maxUsageTimeLimit}
           tokenPointsLimit={learningScenario.tokenPointsLimit}
-          pointsPercentageValues={tokenPointsPercentageValues}
-          usageTimeValues={usageTimeValuesInMinutes}
+          usedBudget={usedBudget}
+          maxBudget={maxBudget}
           onShare={async (data) =>
             await shareLearningScenarioAction({
               learningScenarioId: learningScenario.id,
@@ -489,6 +533,40 @@ export function LearningScenarioEdit({
               linkToShare={`/learning-scenarios/${learningScenario.id}`}
               onShareChange={handleSharingChange}
               suspended={learningScenario.suspended}
+            />
+            <FilterSelectSection
+              values={{
+                schoolTypes,
+                gradeRanges,
+                subjects,
+                categories,
+                federalStates,
+                languages,
+              }}
+              onSchoolTypesChange={(values) => {
+                setValue('schoolTypes', values, { shouldDirty: true });
+                void flushAutoSave();
+              }}
+              onGradeRangesChange={(values) => {
+                setValue('gradeRanges', values, { shouldDirty: true });
+                void flushAutoSave();
+              }}
+              onSubjectsChange={(values) => {
+                setValue('subjects', values, { shouldDirty: true });
+                void flushAutoSave();
+              }}
+              onCategoriesChange={(values) => {
+                setValue('categories', values, { shouldDirty: true });
+                void flushAutoSave();
+              }}
+              onFederalStatesChange={(values) => {
+                setValue('federalStates', values, { shouldDirty: true });
+                void flushAutoSave();
+              }}
+              onLanguagesChange={(values) => {
+                setValue('languages', values, { shouldDirty: true });
+                void flushAutoSave();
+              }}
             />
           </form>
         </div>

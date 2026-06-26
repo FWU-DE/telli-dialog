@@ -13,6 +13,16 @@ const webSearchResults = [
 ];
 
 const buildToolsOutput = {
+  toolRegistry: {
+    web_search: {
+      definition: {
+        name: 'web_search',
+        description: 'web search tool',
+        parameters: {},
+      },
+      handler: vi.fn(),
+    },
+  },
   tools: [
     {
       name: 'web_search',
@@ -39,6 +49,7 @@ const mocks = vi.hoisted(() => ({
   dbGetConversationAndMessagesMock: vi.fn(),
   dbGetOrCreateConversationMock: vi.fn(),
   dbUpdateConversationTitleMock: vi.fn(),
+  dbDeleteRegeneratedConversationMessageMock: vi.fn(),
   dbInsertChatContentMock: vi.fn(),
   dbInsertChatContentBatchMock: vi.fn(),
   dbInsertConversationUsageMock: vi.fn(),
@@ -66,15 +77,12 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@ais-chat/ai-core', () => ({
   generateTextStreamWithBilling: mocks.generateTextStreamWithBillingMock,
   generateAgenticStreamWithBilling: mocks.generateAgenticStreamWithBillingMock,
+  runAgentLoop: mocks.runAgentLoopMock,
   TokenPointsExceededError: class TokenPointsExceededError extends Error {},
 }));
 
 vi.mock('./build-tools', () => ({
   buildTools: mocks.buildToolsMock,
-}));
-
-vi.mock('./agent-loop', () => ({
-  runAgentLoop: mocks.runAgentLoopMock,
 }));
 
 vi.mock('./websearch', () => ({
@@ -94,6 +102,7 @@ vi.mock('@shared/db/functions/chat', () => ({
   dbGetConversationAndMessages: mocks.dbGetConversationAndMessagesMock,
   dbGetOrCreateConversation: mocks.dbGetOrCreateConversationMock,
   dbUpdateConversationTitle: mocks.dbUpdateConversationTitleMock,
+  dbDeleteRegeneratedConversationMessage: mocks.dbDeleteRegeneratedConversationMessageMock,
   dbInsertChatContent: mocks.dbInsertChatContentMock,
   dbInsertChatContentBatch: mocks.dbInsertChatContentBatchMock,
 }));
@@ -303,8 +312,7 @@ beforeEach(() => {
     ({
       onTextChunk,
       onComplete,
-      tools,
-      toolHandlers,
+      toolRegistry,
     }: {
       onTextChunk: (delta: string) => void;
       onComplete: ({
@@ -316,11 +324,9 @@ beforeEach(() => {
         usage: { promptTokens: number; completionTokens: number; totalTokens: number };
         priceInCents: number;
       }) => Promise<void> | void;
-      tools?: unknown[];
-      toolHandlers?: Record<string, unknown>;
+      toolRegistry?: Record<string, unknown>;
     }) => {
-      expect(tools).toEqual(buildToolsOutput.tools);
-      expect(toolHandlers).toEqual(buildToolsOutput.toolHandlers);
+      expect(toolRegistry).toEqual(buildToolsOutput.toolRegistry);
 
       onTextChunk('agentic chunk');
       void onComplete({
@@ -355,12 +361,18 @@ describe('sendChatMessage', () => {
       expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
       expect(mocks.retrieveChunksMock).not.toHaveBeenCalled();
       expect(mocks.runWebSearchPipelineMock).not.toHaveBeenCalled();
-      expect(mocks.extractUrlsMock).not.toHaveBeenCalled();
-      expect(mocks.ingestWebContentMock).not.toHaveBeenCalled();
+      expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
+      expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
       expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
         expect.objectContaining({ errorUrls: [] }),
       );
       expect(result.webSearchResults).toEqual(webSearchResults);
+      expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          webSearchResults,
+          activeToolDefinitions: [buildToolsOutput.toolRegistry.web_search.definition],
+        }),
+      );
       expect(streamedText).toBe('agentic chunk');
     } else {
       expect(mocks.buildToolsMock).not.toHaveBeenCalled();
@@ -370,10 +382,114 @@ describe('sendChatMessage', () => {
       expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
       expect(result.webSearchResults).toEqual(webSearchResults);
       expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
-        expect.objectContaining({ webSearchResults }),
+        expect.objectContaining({ webSearchResults, activeToolDefinitions: [] }),
       );
       expect(streamedText).toBe('fallback chunk');
     }
+
+    expect(mocks.dbInsertChatContentBatchMock).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: result.messageId,
+          role: 'assistant',
+        }),
+      ]),
+    );
+  });
+
+  it('does not persist retrieve_entire_file tool calls or results', async () => {
+    mocks.runAgentLoopMock.mockImplementationOnce(
+      ({ onComplete }: { onComplete: (args: unknown) => Promise<void> | void }) => {
+        void onComplete({
+          fullText: 'agentic chunk',
+          usage: { promptTokens: 11, completionTokens: 22, totalTokens: 33 },
+          priceInCents: 44,
+          agentLoopMessages: [
+            {
+              role: 'assistant',
+              content: '',
+              toolCalls: [
+                {
+                  id: 'call-retrieve-entire-file',
+                  name: 'retrieve_entire_file',
+                  arguments: '{"fileName":"Arbeitsblatt.pdf"}',
+                },
+                {
+                  id: 'call-web-search',
+                  name: 'web_search',
+                  arguments: '{"query":"test"}',
+                },
+              ],
+            },
+            {
+              role: 'tool',
+              content: 'file content',
+              toolCallId: 'call-retrieve-entire-file',
+            },
+            {
+              role: 'tool',
+              content: 'search content',
+              toolCallId: 'call-web-search',
+            },
+          ],
+        });
+      },
+    );
+
+    const { sendChatMessage } = await import('./chat-service');
+
+    const result = await sendChatMessage({
+      conversationId: conversation.id,
+      messages,
+      modelId: mainModel.id,
+      user: createUser(true),
+    });
+
+    await collectStream(result.stream);
+
+    const insertedMessages = mocks.dbInsertChatContentBatchMock.mock.calls[0]?.[0] as Array<{
+      role: string;
+      toolCallId?: string | null;
+      toolCalls?: Array<{ name: string }> | null;
+      orderNumber: number;
+    }>;
+
+    expect(insertedMessages).toHaveLength(3);
+    expect(insertedMessages).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: 'assistant',
+          toolCalls: [
+            expect.objectContaining({
+              name: 'web_search',
+            }),
+          ],
+        }),
+        expect.objectContaining({
+          role: 'tool',
+          toolCallId: 'call-web-search',
+        }),
+        expect.objectContaining({
+          role: 'assistant',
+          id: result.messageId,
+        }),
+      ]),
+    );
+
+    expect(insertedMessages).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          toolCallId: 'call-retrieve-entire-file',
+        }),
+        expect.objectContaining({
+          toolCalls: expect.arrayContaining([
+            expect.objectContaining({
+              name: 'retrieve_entire_file',
+            }),
+          ]),
+        }),
+      ]),
+    );
   });
 
   it('throws when conversation context ids do not match', async () => {
@@ -463,5 +579,130 @@ describe('sendChatMessage', () => {
         user: createUser(false),
       }),
     ).rejects.toThrow('Assistant not found');
+  });
+});
+
+describe('Message preparation helpers', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('handleRegenerationProcessing', () => {
+    it('deletes regenerated messages and filters conversation messages', async () => {
+      const { handleRegenerationProcessing } = await import('./chat-service');
+
+      const conversationId = 'conv-1';
+      const latestStoredUserMsg = { id: 'msg-2', orderNumber: 2, role: 'user' } as any;
+      const activeConversationMessages = [
+        { id: 'msg-1', orderNumber: 1, role: 'user' },
+        { id: 'msg-2', orderNumber: 2, role: 'user' },
+        { id: 'msg-3', orderNumber: 3, role: 'assistant' },
+      ] as any;
+
+      mocks.dbDeleteRegeneratedConversationMessageMock.mockResolvedValue(undefined);
+
+      const result = await handleRegenerationProcessing({
+        conversationId,
+        latestStoredUserMsg,
+        activeConversationMessages,
+      });
+
+      // Should delete messages after orderNumber 2
+      expect(mocks.dbDeleteRegeneratedConversationMessageMock).toHaveBeenCalledWith({
+        conversationId,
+        orderNumber: 2,
+      });
+
+      // Should return only messages up to and including orderNumber 2
+      expect(result).toHaveLength(2);
+      expect(result).toEqual([
+        { id: 'msg-1', orderNumber: 1, role: 'user' },
+        { id: 'msg-2', orderNumber: 2, role: 'user' },
+      ]);
+    });
+
+    it('handles single message scenario correctly', async () => {
+      const { handleRegenerationProcessing } = await import('./chat-service');
+
+      const conversationId = 'conv-1';
+      const latestStoredUserMsg = { id: 'msg-1', orderNumber: 1, role: 'user' } as any;
+      const activeConversationMessages = [{ id: 'msg-1', orderNumber: 1, role: 'user' }] as any;
+
+      mocks.dbDeleteRegeneratedConversationMessageMock.mockResolvedValue(undefined);
+
+      const result = await handleRegenerationProcessing({
+        conversationId,
+        latestStoredUserMsg,
+        activeConversationMessages,
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(latestStoredUserMsg);
+    });
+  });
+
+  describe('prepareMessageForProcessing', () => {
+    it('detects new message and calculates correct order number', async () => {
+      const { prepareMessageForProcessing } = await import('./chat-service');
+
+      const conversationId = 'conv-1';
+      const userMessage: ChatMessage = { id: 'new-msg', role: 'user', content: 'new message' };
+      const activeConversationMessages = [
+        { id: 'msg-1', orderNumber: 1, role: 'user', content: 'old' },
+        { id: 'msg-2', orderNumber: 2, role: 'assistant', content: 'response' },
+      ] as any;
+
+      const result = await prepareMessageForProcessing({
+        conversationId,
+        userMessage,
+        activeConversationMessages,
+      });
+
+      expect(result.isRegeneration).toBe(false);
+      expect(result.userMessageOrderNumber).toBe(3); // latestOrderNumber + 1
+      expect(result.conversationMessages).toEqual(activeConversationMessages);
+    });
+
+    it('detects regeneration and processes correctly', async () => {
+      const { prepareMessageForProcessing } = await import('./chat-service');
+
+      const conversationId = 'conv-1';
+      const userMessage: ChatMessage = { id: 'msg-1', role: 'user', content: 'regenerate' };
+      const activeConversationMessages = [
+        { id: 'msg-1', orderNumber: 1, role: 'user', content: 'old message' },
+        { id: 'msg-2', orderNumber: 2, role: 'assistant', content: 'old response' },
+        { id: 'msg-3', orderNumber: 3, role: 'assistant', content: 'to be deleted' },
+      ] as any;
+
+      mocks.dbDeleteRegeneratedConversationMessageMock.mockResolvedValue(undefined);
+
+      const result = await prepareMessageForProcessing({
+        conversationId,
+        userMessage,
+        activeConversationMessages,
+      });
+
+      expect(result.isRegeneration).toBe(true);
+      expect(result.userMessageOrderNumber).toBe(1); // reuse existing orderNumber
+      expect(result.conversationMessages).toHaveLength(1); // only msg-1
+    });
+
+    it('handles empty conversation messages', async () => {
+      const { prepareMessageForProcessing } = await import('./chat-service');
+
+      const conversationId = 'conv-1';
+      const userMessage: ChatMessage = { id: 'first-msg', role: 'user', content: 'first message' };
+      const activeConversationMessages: any[] = [];
+
+      const result = await prepareMessageForProcessing({
+        conversationId,
+        userMessage,
+        activeConversationMessages,
+      });
+
+      expect(result.isRegeneration).toBe(false);
+      expect(result.userMessageOrderNumber).toBe(1); // 0 + 1
+      expect(result.conversationMessages).toEqual([]);
+    });
   });
 });

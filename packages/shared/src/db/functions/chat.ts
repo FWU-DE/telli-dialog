@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, gt, isNull } from 'drizzle-orm';
 import { db } from '..';
 import { conversationMessageTable, conversationTable } from '../schema';
 import type { ConversationMessageModel, InsertConversationMessageModel } from '../types';
@@ -61,11 +61,7 @@ export async function dbGetConversationMessages({
     )
     .orderBy(conversationMessageTable.orderNumber);
 
-  const cleanedMessages = getLatestMessages(
-    messages.map((message) => message.conversation_message),
-  );
-
-  return cleanedMessages;
+  return messages.map((message) => message.conversation_message);
 }
 
 export async function dbGetConversationMessageById({
@@ -155,20 +151,23 @@ export async function dbDeleteConversation(conversationId: string) {
     .where(eq(conversationTable.id, conversationId));
 }
 
-function getLatestMessages(messages: ConversationMessageModel[]): ConversationMessageModel[] {
-  const messageMap = new Map<number, ConversationMessageModel>();
-
-  messages.forEach((message) => {
-    const existing = messageMap.get(message.orderNumber);
-    // If there's no message for this orderNumber yet,
-    // or if the current message is more recent, update the map.
-    if (!existing || existing.createdAt.getTime() < message.createdAt.getTime()) {
-      messageMap.set(message.orderNumber, message);
-    }
-  });
-
-  // Return the deduplicated messages as an array.
-  return Array.from(messageMap.values());
+export async function dbDeleteRegeneratedConversationMessage({
+  conversationId,
+  orderNumber,
+}: {
+  conversationId: string;
+  orderNumber: number;
+}) {
+  await db
+    .update(conversationMessageTable)
+    .set({ content: ' ', deletedAt: new Date() })
+    .where(
+      and(
+        eq(conversationMessageTable.conversationId, conversationId),
+        gt(conversationMessageTable.orderNumber, orderNumber),
+        isNull(conversationMessageTable.deletedAt),
+      ),
+    );
 }
 
 export async function dbGetConversationAndMessages({
@@ -206,6 +205,6 @@ export async function dbGetConversationAndMessages({
   const nonNullMessages = rows.map((r) => r.conversation_message).filter(isNotNull);
   return {
     conversation: firstRow.conversation,
-    messages: getLatestMessages(nonNullMessages),
+    messages: nonNullMessages,
   };
 }

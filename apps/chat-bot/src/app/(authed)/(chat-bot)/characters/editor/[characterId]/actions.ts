@@ -1,7 +1,7 @@
 'use server';
 
 import { AccessLevel } from '@shared/db/schema';
-import { SharedConversationShareFormValues } from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
+import { ShareWithLearnersLimitParams } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners-limit-params';
 import { requireAuth } from '@/auth/requireAuth';
 import {
   deleteCharacter,
@@ -64,7 +64,7 @@ export async function shareCharacterAction({
   id,
   tokenPointsPercentageLimit,
   usageTimeLimit,
-}: { id: string } & SharedConversationShareFormValues) {
+}: { id: string } & ShareWithLearnersLimitParams) {
   const { user } = await requireAuth();
 
   return runServerAction(

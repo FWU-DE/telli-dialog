@@ -58,6 +58,11 @@ import {
   getChangedKeys,
   getPreservedUpdatedAtForExemptedKeys,
 } from '@shared/utils/preserve-updated-at';
+import {
+  getMaxBudgetInCentByUser,
+  getUsedBudgetInCentByUser,
+} from '@shared/users/user-budget-service';
+import { FederalStateModel } from '@shared/federal-states/types';
 
 export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -426,16 +431,20 @@ export async function unshareLearningScenario({
  * and any authenticated user can view the learning scenario. Note that link sharing
  * only grants read-only access - editing is still restricted to the owner.
  */
-export async function getLearningScenario({
+export async function getLearningScenarioForEditView({
   learningScenarioId,
   user,
+  federalState,
 }: {
   learningScenarioId: string;
   user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+  federalState: FederalStateModel;
 }): Promise<{
   learningScenario: LearningScenarioOptionalShareDataModel;
   relatedFiles: FileModel[];
   avatarPictureUrl: string | undefined;
+  maxBudget: number | null;
+  usedBudget: number;
 }> {
   checkParameterUUID(learningScenarioId);
   requireTeacherRole(user.userRole);
@@ -452,7 +461,16 @@ export async function getLearningScenario({
     user,
   });
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
-  return { learningScenario, relatedFiles, avatarPictureUrl };
+
+  const maxBudget = await getMaxBudgetInCentByUser({
+    user,
+    federalState,
+  });
+  const usedBudget = await getUsedBudgetInCentByUser({
+    user,
+  });
+
+  return { learningScenario, relatedFiles, avatarPictureUrl, maxBudget, usedBudget };
 }
 
 /**

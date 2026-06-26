@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { decodeChatStreamEvent, readTextStream } from '@/utils/streaming';
+import type { WebSearchResult } from '@shared/db/schema';
 import {
   deserializeError,
   toUIMessages,
@@ -118,7 +119,7 @@ export function useAisChat({
 
         // We need to handle the first chunk separately to avoid missing content
         let firstChunk = true;
-        let assistantWebSearchResults = result.webSearchResults ?? [];
+        let assistantWebSearchResults: WebSearchResult[] = result.webSearchResults ?? [];
 
         const ensureAssistantMessage = () => {
           if (!firstChunk) {
@@ -148,7 +149,10 @@ export function useAisChat({
 
             if (streamEvent?.type === 'web_search_results') {
               assistantWebSearchResults = streamEvent.webSearchResults;
-              ensureAssistantMessage();
+
+              if (firstChunk) {
+                continue;
+              }
 
               setMessages((prev) => {
                 const updated = [...prev];

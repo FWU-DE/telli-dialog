@@ -5,6 +5,11 @@ import type {
   MessageCreateParamsNonStreaming,
   MessageCreateParamsStreaming,
   MessageParam,
+  StopReason,
+  ToolChoice,
+  ToolResultBlockParam,
+  ToolUnion,
+  ToolUseBlockParam,
   Usage,
 } from '@anthropic-ai/sdk/resources';
 import {
@@ -18,14 +23,18 @@ import {
   TextResponse,
   TextStreamFn,
   TokenUsage,
+  ToolCall,
+  ToolDefinition,
 } from '../types';
 import { AnthropicVertex, ClientOptions } from '@anthropic-ai/vertex-sdk';
 import { AiGenerationError, RateLimitExceededError } from '../../errors';
+import { ParsedMessage } from '@anthropic-ai/sdk';
+import { instrumentAnthropicAiClient } from '@sentry/core';
 
 /* used by apps/api when called with stream === false or as auxiliary model in chat-bot */
 export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGenerationFn {
   const config = getConfigurationByModel(model);
-  const client = new AnthropicVertex(config);
+  const client = createAnthropicClient(config);
 
   return async function generateText({
     messages,
@@ -33,10 +42,11 @@ export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGe
     model: modelName,
   }: TextGenerationArgs): Promise<TextResponse> {
     // Separate system messages from conversation messages
-    const systemMessages = messages.filter((msg) => msg.role === 'system');
-    const conversationMessages = filterUnsupportedMessages(messages).map((msg) =>
-      mapMessageToAnthropicMessageParam(msg),
-    );
+    const systemMessages = getSystemMessages(messages);
+    // Filter out tool messages for non-agentic text generation
+    const conversationMessages = getNonSystemMessages(messages)
+      .filter((msg) => msg.role !== 'tool')
+      .map((msg) => mapMessageToAnthropicMessageParam(msg));
 
     const vertexModelName = resolveModelName(modelName);
 
@@ -69,7 +79,7 @@ export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGe
  */
 export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStreamFn {
   const config = getConfigurationByModel(model);
-  const client = new AnthropicVertex(config);
+  const client = createAnthropicClient(config);
 
   return async function* generateTextStream(
     args: TextGenerationArgs,
@@ -79,10 +89,11 @@ export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStream
       const { messages, maxTokens, model: modelName } = args;
 
       // Separate system messages from conversation messages
-      const systemMessages = messages.filter((msg) => msg.role === 'system');
-      const conversationMessages = filterUnsupportedMessages(messages).map((msg) =>
-        mapMessageToAnthropicMessageParam(msg),
-      );
+      const systemMessages = getSystemMessages(messages);
+      // Filter out tool messages for non-agentic text streaming
+      const conversationMessages = getNonSystemMessages(messages)
+        .filter((msg) => msg.role !== 'tool')
+        .map((msg) => mapMessageToAnthropicMessageParam(msg));
 
       const vertexModelName = resolveModelName(modelName);
 
@@ -118,118 +129,76 @@ export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStream
   };
 }
 
-/** used by chat-bot for streaming agentic responses if activated
- * Todo: fix implementation in TD-1320
+/**
+ *  used by chat-bot for streaming agentic responses if activated
  */
 export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): AgenticStreamFn {
   const config = getConfigurationByModel(model);
-  const client = new AnthropicVertex(config);
+  const client = createAnthropicClient(config);
 
   return async function* generateAgenticStream(
     args: TextGenerationArgs,
   ): AsyncGenerator<StreamEvent> {
-    const { messages, maxTokens, model: modelName, tools, toolChoice } = args;
+    try {
+      const { messages, maxTokens, model: modelName, tools, toolChoice } = args;
+      const systemMessages = getSystemMessages(messages);
+      const conversationMessages = groupToolResults(
+        getNonSystemMessages(messages).map((msg) => mapMessageToAnthropicMessageParam(msg)),
+      );
+      const vertexModelName = resolveModelName(modelName);
+      const messageParams: MessageCreateParamsStreaming = {
+        max_tokens: maxTokens ?? 4096,
+        messages: conversationMessages,
+        model: vertexModelName,
+        stream: true,
+        system: buildSystemPrompt(systemMessages),
+        tool_choice: mapToolChoiceToAnthropicToolChoice(toolChoice),
+        tools: mapToolsToAnthropicTools(tools),
+      };
 
-    // Separate system messages from conversation messages
-    const systemMessages = messages.filter((msg) => msg.role === 'system');
-    // Convert messages to Anthropic format
-    const conversationMessages = filterUnsupportedMessages(messages).map((msg) =>
-      mapMessageToAnthropicMessageParam(msg),
-    );
+      const stream = client.messages.stream(messageParams);
 
-    const vertexModelName = resolveModelName(modelName);
-
-    const messageParams: MessageCreateParamsStreaming = {
-      max_tokens: maxTokens ?? 4096,
-      messages: conversationMessages,
-      model: vertexModelName,
-      stream: true,
-      system: buildSystemPrompt(systemMessages),
-    };
-
-    // Convert tools to Anthropic format
-    const anthropicTools = tools?.map((tool) => ({
-      name: tool.name,
-      description: tool.description,
-      input_schema: {
-        type: 'object' as const,
-        ...tool.parameters,
-      },
-    }));
-
-    const stream = client.messages.stream({
-      ...messageParams,
-      system: buildSystemPrompt(systemMessages),
-      ...(anthropicTools && anthropicTools.length > 0 ? { tools: anthropicTools } : {}),
-      ...(toolChoice === 'required'
-        ? { tool_choice: { type: 'any' as const } }
-        : toolChoice === 'auto'
-          ? { tool_choice: { type: 'auto' as const } }
-          : {}),
-    });
-
-    for await (const event of stream) {
-      if (event.type === 'content_block_delta') {
-        if (event.delta.type === 'text_delta') {
+      // The streaming response is a sequence of content block deltas and a final message at the end (message_stop).
+      for await (const event of stream) {
+        if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
           yield { type: 'text', delta: event.delta.text };
-        }
-      } else if (event.type === 'content_block_start') {
-        if (event.content_block.type === 'tool_use') {
-          // Tool use block started - we'll get the full details in message_stop
-        }
-      } else if (event.type === 'message_stop') {
-        const message = await stream.finalMessage();
+        } else if (event.type === 'message_stop') {
+          const message: ParsedMessage<null> = await stream.finalMessage();
+          const { content, usage, stop_reason } = message;
 
-        // Yield tool calls
-        for (const block of message.content) {
-          if (block.type === 'tool_use') {
+          ensureValidStopReason(stop_reason);
+
+          for (const contentBlock of content) {
+            if (contentBlock.type === 'tool_use') {
+              // Yield tool calls
+              yield {
+                type: 'tool_call',
+                call: {
+                  id: contentBlock.id,
+                  name: contentBlock.name,
+                  arguments: JSON.stringify(contentBlock.input),
+                } satisfies ToolCall,
+              };
+            }
+          }
+
+          // Yield usage at the end of the stream
+          if (usage) {
             yield {
-              type: 'tool_call',
-              call: {
-                id: block.id,
-                name: block.name,
-                arguments: JSON.stringify(block.input),
-              },
+              type: 'finish',
+              usage: buildTokenUsage(usage),
             };
           }
         }
-
-        // Yield usage
-        if (message.usage) {
-          yield {
-            type: 'finish',
-            usage: buildTokenUsage(message.usage),
-          };
-        }
       }
+    } catch (error) {
+      handleError(error);
     }
   };
 }
 
-/**
- * Urls to images are not supported. There is a type called 'URLImageSource' but it throws an error when used.
- * Therefore the image data must be included as base64 encoded content in the message.
- * There is a second option to upload the image but in this case the data retention policy is not used --> not allowed.
- */
-function mapMessageToAnthropicMessageParam(message: SupportedMessage): MessageParam {
-  // message can have content (string), attachments and tool calls
-  const content: Array<ContentBlockParam> = [
-    { type: 'text', text: message.content },
-    ...(message.attachments?.filter(isImageAttachmentWithBase64DataUrl)?.map((attachment) => {
-      return {
-        type: 'image',
-        source: {
-          type: 'base64',
-          media_type: sanitizeMediaType(attachment.contentType),
-          data: sanitizeBase64DataUrl(attachment.url),
-        },
-      } as ImageBlockParam;
-    }) ?? []),
-  ];
-  return {
-    role: mapRoleToAntropic(message.role),
-    content: content,
-  };
+function createAnthropicClient(options: ClientOptions): AnthropicVertex {
+  return instrumentAnthropicAiClient(new AnthropicVertex(options));
 }
 
 /**
@@ -249,21 +218,74 @@ function getConfigurationByModel(model: AiModel): ClientOptions {
   return { projectId, region: location, maxRetries: 2 };
 }
 
-type SupportedMessage = Message & { role: 'user' | 'assistant' };
+type NonSystemMessage = Message & { role: 'user' | 'assistant' | 'tool' };
 
-function mapRoleToAntropic(role: 'user' | 'assistant'): MessageParam['role'] {
-  switch (role) {
-    case 'user':
-      return 'user';
-    case 'assistant':
-      return 'assistant';
-  }
+function getSystemMessages(messages: Message[]): Message[] {
+  return messages.filter((msg) => msg.role === 'system');
 }
 
-function filterUnsupportedMessages(messages: Message[]): SupportedMessage[] {
-  return messages.filter(
-    (msg): msg is SupportedMessage => msg.role === 'user' || msg.role === 'assistant',
-  );
+function getNonSystemMessages(messages: Message[]): NonSystemMessage[] {
+  return messages.filter((msg): msg is NonSystemMessage => msg.role !== 'system');
+}
+
+/**
+ * Groups consecutive tool result messages into single user messages.
+ * Anthropic API requires tool results to be in user messages, and consecutive
+ * tool results should be grouped together in a single user message.
+ */
+function groupToolResults(messages: MessageParam[]): MessageParam[] {
+  const result: MessageParam[] = [];
+  let i = 0;
+
+  while (i < messages.length) {
+    const currentMessage = messages[i];
+    if (!currentMessage) break;
+
+    // Check if this is a user message containing tool results
+    if (
+      currentMessage.role === 'user' &&
+      Array.isArray(currentMessage.content) &&
+      currentMessage.content.some((block) => block.type === 'tool_result')
+    ) {
+      // Collect all consecutive user messages with tool results
+      const toolResultBlocks: ToolResultBlockParam[] = [];
+      let j = i;
+
+      while (j < messages.length) {
+        const msg = messages[j];
+        if (!msg) break;
+
+        if (
+          msg.role === 'user' &&
+          Array.isArray(msg.content) &&
+          msg.content.some((block) => block.type === 'tool_result')
+        ) {
+          // Extract tool_result blocks
+          const toolResults = msg.content.filter(
+            (block): block is ToolResultBlockParam => block.type === 'tool_result',
+          );
+          toolResultBlocks.push(...toolResults);
+          j++;
+        } else {
+          break;
+        }
+      }
+
+      // Create a single user message with all tool results
+      result.push({
+        role: 'user',
+        content: toolResultBlocks,
+      });
+
+      i = j;
+    } else {
+      // Not a tool result message, add as-is
+      result.push(currentMessage);
+      i++;
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -297,6 +319,141 @@ function resolveModelName(modelName: string): string {
 function buildSystemPrompt(systemMessages: Message[]): string {
   return systemMessages.length > 0 ? systemMessages.map((msg) => msg.content).join('\n') : '';
 }
+
+/**
+ * builds TokenUsage object from Anthropic usage data
+ */
+function buildTokenUsage(usage: Usage): TokenUsage {
+  return {
+    promptTokens: usage.input_tokens,
+    completionTokens: usage.output_tokens,
+    totalTokens: usage.input_tokens + usage.output_tokens,
+  };
+}
+
+/**
+ * Validates the stop reason.
+ * Some stop reasons may result in an AiGenerationError,
+ * others are considered as normal and some are ignored;
+ */
+function ensureValidStopReason(reason: StopReason | null) {
+  if (reason === null) return; // it is null in message_start events
+  if (reason === 'end_turn') return; // normal stop reason
+  if (reason === 'tool_use') return; // normal tool use stop reason
+  if (reason === 'max_tokens')
+    throw new AiGenerationError('Max tokens reached during agentic generation');
+  if (reason === 'refusal')
+    throw new AiGenerationError('Model refused to generate a response during agentic generation');
+}
+
+/*** Mapping functions ****/
+
+/**
+ * Urls to images are not supported. There is a type called 'URLImageSource' but it throws an error when used.
+ * Therefore the image data must be included as base64 encoded content in the message.
+ * There is a second option to upload the image but in this case the data retention policy is not used --> not allowed.
+ */
+function mapMessageToAnthropicMessageParam(message: NonSystemMessage): MessageParam {
+  const content: Array<ContentBlockParam> = [];
+
+  if (message.role === 'user') {
+    const contentBlocks: Array<ContentBlockParam> = [
+      { type: 'text', text: message.content },
+      ...(message.attachments?.filter(isImageAttachmentWithBase64DataUrl)?.map((attachment) => {
+        return {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: sanitizeMediaType(attachment.contentType),
+            data: sanitizeBase64DataUrl(attachment.url),
+          },
+        } as ImageBlockParam;
+      }) ?? []),
+    ];
+    content.push(...contentBlocks);
+  }
+
+  if (message.role === 'assistant') {
+    if (message.content) {
+      content.push({ type: 'text', text: message.content });
+    }
+
+    if (message.toolCalls) {
+      content.push(
+        ...message.toolCalls.map((toolCall) => {
+          return {
+            type: 'tool_use',
+            id: toolCall.id,
+            name: toolCall.name,
+            input: JSON.parse(toolCall.arguments),
+          } as ToolUseBlockParam;
+        }),
+      );
+    }
+  }
+
+  if (message.role === 'tool') {
+    content.push({
+      type: 'tool_result',
+      tool_use_id: message.toolCallId ?? '',
+      content: message.content,
+    } as ToolResultBlockParam);
+  }
+
+  return {
+    role: mapRoleToAntropic(message.role),
+    content: content,
+  };
+}
+
+/**
+ * Maps ai-core message role to Anthropic message role.
+ */
+function mapRoleToAntropic(role: 'user' | 'assistant' | 'tool'): MessageParam['role'] {
+  switch (role) {
+    case 'tool':
+    case 'user':
+      return 'user';
+    case 'assistant':
+      return 'assistant';
+  }
+}
+
+/**
+ * Maps ai-core ToolDefinition[] to Anthropic ToolUnion[].
+ */
+function mapToolsToAnthropicTools(tools: ToolDefinition[] | undefined): ToolUnion[] | undefined {
+  return tools?.map((tool) => ({
+    name: tool.name,
+    description: tool.description,
+    input_schema: {
+      ...tool.parameters,
+      type: 'object' as const,
+    },
+  }));
+}
+
+/**
+ * Maps ai-core toolChoice to Anthropic tool_choice.
+ */
+function mapToolChoiceToAnthropicToolChoice(
+  toolChoice: 'auto' | 'none' | 'required' | undefined,
+): ToolChoice | undefined {
+  switch (toolChoice) {
+    // anthropic also provides 'tool' as an option
+    // in this case the model must choose a specific tool instead of just any tool but we do not support that yet
+    case 'auto':
+      return { type: 'auto' as const };
+    case 'none':
+      return { type: 'none' as const };
+    case 'required':
+      return { type: 'any' as const }; // any means that the model must choose at least one tool
+    default:
+      return undefined;
+  }
+}
+
+/**** Image support ****/
 
 function isImageAttachmentWithBase64DataUrl(attachment: ChatAttachment): boolean {
   return attachment.type === 'image' && isBase64DataUrl(attachment.url);
@@ -335,15 +492,4 @@ function sanitizeMediaType(contentType: string): Base64ImageSource['media_type']
     default:
       throw new AiGenerationError(`Unsupported image content type: ${contentType}`);
   }
-}
-
-/**
- * builds TokenUsage object from Anthropic usage data
- */
-function buildTokenUsage(usage: Usage): TokenUsage {
-  return {
-    promptTokens: usage.input_tokens,
-    completionTokens: usage.output_tokens,
-    totalTokens: usage.input_tokens + usage.output_tokens,
-  };
 }

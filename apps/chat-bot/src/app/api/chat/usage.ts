@@ -1,4 +1,3 @@
-import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
 import { CharacterWithShareDataModel, LearningScenarioWithShareDataModel } from '@shared/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import {
@@ -6,6 +5,10 @@ import {
   dbGetSharedChatUsageInCentBySharedChatId,
 } from '@shared/db/functions/token-points';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
+import {
+  getMaxBudgetInCentByUser,
+  getUsedBudgetInCentByUser,
+} from '@shared/users/user-budget-service';
 
 /**
  * Calculates the shared chat limit in cents
@@ -17,8 +20,11 @@ async function calculateSharedChatLimitInCent(
   user: UserAndContext,
   tokenPointsPercentageLimit: number,
 ): Promise<number> {
-  const priceLimitInCent = await getPriceLimitInCentByUser(user);
-  return ((priceLimitInCent ?? 0) * tokenPointsPercentageLimit) / 100;
+  const maxBudgetInCent = await getMaxBudgetInCentByUser({
+    user,
+    federalState: user.federalState,
+  });
+  return ((maxBudgetInCent ?? 0) * tokenPointsPercentageLimit) / 100;
 }
 
 export async function sharedLearningScenarioChatHasReachedTokenPointsLimit({
@@ -115,10 +121,10 @@ export async function userHasReachedTokenPointsLimit({
     return false;
   }
 
-  const price = await getPriceInCentByUser(user);
-  const priceLimit = await getPriceLimitInCentByUser(user);
+  const usedBudget = await getUsedBudgetInCentByUser({ user });
+  const maxBudget = await getMaxBudgetInCentByUser({ user, federalState: user.federalState });
 
-  if (price !== null && priceLimit !== null && price > priceLimit) {
+  if (usedBudget !== null && maxBudget !== null && usedBudget > maxBudget) {
     return true;
   }
   return false;

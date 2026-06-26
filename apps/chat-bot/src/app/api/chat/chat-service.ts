@@ -3,6 +3,8 @@ import {
   type Message as AiCoreMessage,
   type TokenUsage,
   TokenPointsExceededError,
+  type ToolDefinition,
+  runAgentLoop,
 } from '@ais-chat/ai-core';
 import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { userHasReachedTokenPointsLimit } from './usage';
@@ -11,6 +13,7 @@ import {
   dbGetConversationAndMessages,
   dbGetOrCreateConversation,
   dbUpdateConversationTitle,
+  dbDeleteRegeneratedConversationMessage,
   dbInsertChatContent,
   dbInsertChatContentBatch,
 } from '@shared/db/functions/chat';
@@ -36,7 +39,6 @@ import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
-import { runAgentLoop } from './agent-loop';
 import { buildTools } from './build-tools';
 import { runWebSearchPipeline } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
@@ -45,19 +47,60 @@ import type {
   CharacterSelectModel,
   LearningScenarioSelectModel,
 } from '@shared/db/schema';
+import type { ConversationMessageModel } from '@shared/db/types';
 import { RetrievedChunk } from '../rag/types';
 import { NotFoundError } from '@shared/error';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
 import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
 import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
-import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { deepEqual } from '@/utils/object';
+
+// Exports for testing
+export { handleRegenerationProcessing, prepareMessageForProcessing };
 
 type CustomChatIds = {
   characterId?: string | undefined;
   learningScenarioId?: string | undefined;
   assistantId?: string | undefined;
 };
+
+function filterPersistedAgentLoopMessages(agentLoopMessages: AiCoreMessage[]) {
+  const excludedToolCallIds = new Set<string>();
+
+  return agentLoopMessages.flatMap((message) => {
+    if (message.role === 'assistant' && message.toolCalls?.length) {
+      const retainedToolCalls = message.toolCalls.filter((toolCall) => {
+        if (toolCall.name === 'retrieve_entire_file') {
+          excludedToolCallIds.add(toolCall.id);
+          return false;
+        }
+
+        return true;
+      });
+
+      if (retainedToolCalls.length === 0 && message.content.trim().length === 0) {
+        return [];
+      }
+
+      return [
+        {
+          ...message,
+          toolCalls: retainedToolCalls.length > 0 ? retainedToolCalls : undefined,
+        },
+      ];
+    }
+
+    if (
+      message.role === 'tool' &&
+      message.toolCallId &&
+      excludedToolCallIds.has(message.toolCallId)
+    ) {
+      return [];
+    }
+
+    return [message];
+  });
+}
 
 function ensureConversationCustomChatIdsMatch({
   incomingIds,
@@ -71,22 +114,69 @@ function ensureConversationCustomChatIdsMatch({
   }
 }
 
-function resolveAgentNameForTracing({
-  characterId,
-  learningScenarioId,
-  assistantId,
+/**
+ * Prepares message state for processing by handling regeneration vs new message logic.
+ * Returns normalized state for the caller to use consistently.
+ */
+async function prepareMessageForProcessing({
+  conversationId,
+  userMessage,
+  activeConversationMessages,
 }: {
-  characterId?: string;
-  learningScenarioId?: string;
-  assistantId?: string;
-}): string {
-  if (characterId) return 'Character';
-  if (learningScenarioId) return 'Learning Scenario';
-  if (assistantId) {
-    if (assistantId === HELP_MODE_ASSISTANT_ID) return 'Help Mode';
-    return 'Assistant';
+  conversationId: string;
+  userMessage: ChatMessage;
+  activeConversationMessages: ConversationMessageModel[];
+}): Promise<{
+  isRegeneration: boolean;
+  conversationMessages: ConversationMessageModel[];
+  userMessageOrderNumber: number;
+}> {
+  // In case of regeneration, we need to find the latest stored user message as the base msg.
+  const latestStoredUserMsg = activeConversationMessages.find(
+    (message) => message.id === userMessage.id && message.role === 'user',
+  );
+  const isRegeneration = latestStoredUserMsg !== undefined;
+
+  let updatedConversationMessages = activeConversationMessages;
+
+  if (isRegeneration && latestStoredUserMsg) {
+    updatedConversationMessages = await handleRegenerationProcessing({
+      conversationId,
+      latestStoredUserMsg: latestStoredUserMsg,
+      activeConversationMessages,
+    });
   }
-  return 'Chat';
+
+  const latestOrderNumber =
+    updatedConversationMessages[updatedConversationMessages.length - 1]?.orderNumber ?? 0;
+  const userMessageOrderNumber = latestStoredUserMsg?.orderNumber ?? latestOrderNumber + 1;
+
+  return {
+    isRegeneration,
+    conversationMessages: updatedConversationMessages,
+    userMessageOrderNumber,
+  };
+}
+
+async function handleRegenerationProcessing({
+  conversationId,
+  latestStoredUserMsg,
+  activeConversationMessages,
+}: {
+  conversationId: string;
+  latestStoredUserMsg: ConversationMessageModel;
+  activeConversationMessages: ConversationMessageModel[];
+}): Promise<ConversationMessageModel[]> {
+  await dbDeleteRegeneratedConversationMessage({
+    conversationId,
+    orderNumber: latestStoredUserMsg.orderNumber,
+  });
+
+  // The old regenerated messages are now soft-deleted in the DB, but activeConversationMessages still contains them until a reload.
+  // We need to filter them out for the rest of the processing.
+  return activeConversationMessages.filter(
+    (message) => message.orderNumber <= latestStoredUserMsg.orderNumber,
+  );
 }
 
 /**
@@ -230,19 +320,27 @@ export async function sendChatMessage({
 
   const activeUserMessage = userMessage;
 
-  // Use DB message count for orderNumber
-  const dbMessageCount = activeConversationObject.messages.length;
-
-  // Save user message to DB
-  await dbInsertChatContent({
+  const {
+    isRegeneration,
+    conversationMessages: activeConversationMessages,
+    userMessageOrderNumber,
+  } = await prepareMessageForProcessing({
     conversationId: activeConversation.id,
-    id: userMessage.id,
-    content: userMessage.content,
-    role: 'user',
-    userId: user.id,
-    modelName: definedModel.name,
-    orderNumber: dbMessageCount + 1,
+    userMessage: activeUserMessage,
+    activeConversationMessages: activeConversationObject.messages,
   });
+
+  if (!isRegeneration) {
+    await dbInsertChatContent({
+      conversationId: activeConversation.id,
+      id: userMessage.id,
+      content: userMessage.content,
+      role: 'user',
+      userId: user.id,
+      modelName: definedModel.name,
+      orderNumber: userMessageOrderNumber,
+    });
+  }
 
   // Link files to conversation
   if (fileIds && fileIds.length > 0) {
@@ -264,21 +362,57 @@ export async function sendChatMessage({
   let webSearchResults: WebSearchResult[] = [];
   let chunks: RetrievedChunk[] = [];
   let errorUrls: string[] = [];
+  let toolRegistry:
+    | Record<
+        string,
+        { definition: ToolDefinition; handler: (args: Record<string, unknown>) => Promise<string> }
+      >
+    | undefined;
+  let activeToolDefinitions: ToolDefinition[] = [];
 
-  if (!agenticChatEnabled) {
+  const urls = extractUrls({
+    assistant: activeAssistant,
+    character: activeCharacter,
+    learningScenario: activeLearningScenario,
+    messages,
+  });
+  const ingestResult = await ingestWebContent({
+    urls,
+    federalStateId: user.federalState.id,
+  });
+  errorUrls = ingestResult.errorUrls;
+
+  if (agenticChatEnabled) {
+    const attachedLinks =
+      activeAssistant?.attachedLinks ??
+      activeCharacter?.attachedLinks ??
+      activeLearningScenario?.attachedLinks ??
+      [];
+
+    const builtTools = await buildTools({
+      user,
+      characterId,
+      learningScenarioId,
+      assistantId,
+      conversationId: activeConversation.id,
+      relatedFileEntities,
+      attachedLinks,
+      sourceUrls: ingestResult.processedUrls,
+      onWebSearchResults: (results) => {
+        update(
+          encodeChatStreamEvent({
+            type: 'web_search_results',
+            webSearchResults: results,
+          }),
+        );
+      },
+    });
+
+    webSearchResults = builtTools.webSearchResults;
+    toolRegistry = builtTools.toolRegistry;
+    activeToolDefinitions = Object.values(toolRegistry).map((entry) => entry.definition);
+  } else {
     // Fallback implementations of Websearch and Chunk Retrieval.
-    const urls = extractUrls({
-      assistant: activeAssistant,
-      character: activeCharacter,
-      learningScenario: activeLearningScenario,
-      messages,
-    });
-    const ingestResult = await ingestWebContent({
-      urls,
-      federalStateId: user.federalState.id,
-    });
-    errorUrls = ingestResult.errorUrls;
-
     webSearchResults = await runWebSearchPipeline({
       messages,
       user,
@@ -302,10 +436,9 @@ export async function sendChatMessage({
 
   // Use DB messages as source of truth — they include intermediate tool call/result
   // messages from the agent loop that the client doesn't track
-  const fullMessages: ChatMessage[] = [
-    ...convertMessageModelToMessage(activeConversationObject.messages),
-    userMessage,
-  ];
+  const fullMessages: ChatMessage[] = isRegeneration
+    ? convertMessageModelToMessage(activeConversationMessages)
+    : [...convertMessageModelToMessage(activeConversationMessages), userMessage];
 
   // Prune messages
   const prunedMessages = limitChatHistory(fullMessages);
@@ -320,6 +453,7 @@ export async function sendChatMessage({
     chunks,
     errorUrls,
     webSearchResults,
+    activeToolDefinitions,
   });
 
   // Check if the model supports images based on supportedImageFormats
@@ -348,7 +482,7 @@ export async function sendChatMessage({
   // Create native stream
   const { stream, update, done, error: streamError } = createTextStream();
   const assistantMessageId = crypto.randomUUID();
-  const assistantMessageOrderNumber = dbMessageCount + 2;
+  const assistantMessageOrderNumber = userMessageOrderNumber + 1;
 
   async function persistAssistantMessage({
     fullText,
@@ -361,9 +495,11 @@ export async function sendChatMessage({
     priceInCents: number;
     agentLoopMessages?: AiCoreMessage[];
   }) {
+    const persistedAgentLoopMessages = filterPersistedAgentLoopMessages(agentLoopMessages);
+
     // Persist intermediate tool call/result messages and the final assistant message in one query
     const messagesToInsert = [
-      ...agentLoopMessages.map((msg, index) => ({
+      ...persistedAgentLoopMessages.map((msg, index) => ({
         content: msg.content,
         role: msg.role,
         userId: user.id,
@@ -374,10 +510,11 @@ export async function sendChatMessage({
         toolCallId: msg.toolCallId ?? null,
       })),
       {
+        id: assistantMessageId,
         content: fullText,
         role: 'assistant' as const,
         userId: user.id,
-        orderNumber: assistantMessageOrderNumber + agentLoopMessages.length,
+        orderNumber: assistantMessageOrderNumber + persistedAgentLoopMessages.length,
         modelName: definedModel.name,
         conversationId: activeConversation.id,
         webSearchResults,
@@ -425,6 +562,7 @@ export async function sendChatMessage({
 
   async function persistEmptyAssistantMessage() {
     await dbInsertChatContent({
+      id: assistantMessageId,
       content: '',
       role: 'assistant',
       userId: user.id,
@@ -435,41 +573,13 @@ export async function sendChatMessage({
   }
 
   if (agenticChatEnabled) {
-    const attachedLinks =
-      activeAssistant?.attachedLinks ??
-      activeCharacter?.attachedLinks ??
-      activeLearningScenario?.attachedLinks ??
-      [];
-
-    const builtTools = await buildTools({
-      user,
-      characterId,
-      learningScenarioId,
-      assistantId,
-      conversationId: activeConversation.id,
-      relatedFileEntities,
-      attachedLinks,
-      onWebSearchResults: (results) => {
-        update(
-          encodeChatStreamEvent({
-            type: 'web_search_results',
-            webSearchResults: results,
-          }),
-        );
-      },
-    });
-    webSearchResults = builtTools.webSearchResults;
-    const agentName = resolveAgentNameForTracing({ characterId, learningScenarioId, assistantId });
-
     // Start the agent loop in the background
     runAgentLoop({
-      model: definedModel,
+      modelId: definedModel.id,
       apiKeyId,
       messages: aiCoreMessages,
-      tools: builtTools.tools,
-      toolHandlers: builtTools.toolHandlers,
-      agentName,
-      onTextChunk: (delta) => {
+      toolRegistry,
+      onTextChunk: (delta: string) => {
         update(delta);
       },
       onComplete: async ({ fullText, usage, priceInCents, agentLoopMessages }) => {
@@ -481,7 +591,7 @@ export async function sendChatMessage({
           streamError(error instanceof Error ? error : new Error('Unknown error'));
         }
       },
-      onError: async (error) => {
+      onError: async (error: Error) => {
         await persistEmptyAssistantMessage();
 
         streamError(error);

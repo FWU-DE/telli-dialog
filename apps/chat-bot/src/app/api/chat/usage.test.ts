@@ -1,16 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/app/school', () => ({
-  getPriceInCentByUser: vi.fn(),
-  getPriceLimitInCentByUser: vi.fn(),
-}));
-
 vi.mock('@shared/db/functions/token-points', () => ({
   dbGetSharedChatUsageInCentBySharedChatId: vi.fn(),
   dbGetSharedCharacterChatUsageInCentByCharacterId: vi.fn(),
 }));
 
+vi.mock('@shared/users/user-budget-service', () => ({
+  getMaxBudgetInCentByUser: vi.fn(),
+  getUsedBudgetInCentByUser: vi.fn(),
+}));
+
 import { sharedChatHasExpired } from './usage';
+import { getMaxBudgetInCentByUser } from '@shared/users/user-budget-service';
+import { dbGetSharedChatUsageInCentBySharedChatId } from '@shared/db/functions/token-points';
 
 describe('sharedChatHasExpired', () => {
   const now = new Date('2024-06-01T10:00:00.000Z');
@@ -72,5 +74,58 @@ describe('sharedChatHasExpired', () => {
       });
       expect(result).toBe(true);
     });
+  });
+});
+
+describe('coverage for uncovered branches', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('sharedLearningScenarioChatHasReachedTokenPointsLimit handles teacher with usage below limit', async () => {
+    const { sharedLearningScenarioChatHasReachedTokenPointsLimit } = await import('./usage');
+
+    const mockUser = {
+      id: 'user-1',
+      userRole: 'teacher' as const,
+      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
+    };
+
+    const mockScenario = {
+      id: 'scenario-1',
+      startedAt: new Date(),
+      maxUsageTimeLimit: 60,
+      tokenPointsLimit: 10,
+    };
+
+    vi.mocked(dbGetSharedChatUsageInCentBySharedChatId).mockResolvedValue(50); // below 100 (10% of 1000)
+    vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
+
+    const result = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
+      user: mockUser as any,
+      learningScenario: mockScenario as any,
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it('userHasReachedTokenPointsLimit handles exceeding budget', async () => {
+    const { userHasReachedTokenPointsLimit } = await import('./usage');
+    const { getUsedBudgetInCentByUser } = await import('@shared/users/user-budget-service');
+
+    const mockUser = {
+      id: 'user-1',
+      userRole: 'teacher' as const,
+      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
+    };
+
+    vi.mocked(getUsedBudgetInCentByUser).mockResolvedValue(1500); // exceeds 1000
+    vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
+
+    const result = await userHasReachedTokenPointsLimit({
+      user: mockUser as any,
+    });
+
+    expect(result).toBe(true);
   });
 });

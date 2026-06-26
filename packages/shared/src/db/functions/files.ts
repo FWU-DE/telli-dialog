@@ -1,4 +1,4 @@
-import { and, eq, getTableColumns, inArray, isNotNull, isNull } from 'drizzle-orm';
+import { and, asc, eq, getTableColumns, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '..';
 import {
   AssistantFileMapping,
@@ -268,6 +268,19 @@ function convertToMap(
 export async function dbGetFilesInIds(fileIds: string[]): Promise<FileModelAndContent[]> {
   const maybeFiles = await db.select().from(fileTable).where(inArray(fileTable.id, fileIds));
   return [...maybeFiles];
+}
+
+export async function dbGetExtractedFileContent(fileId: string): Promise<string> {
+  const chunks = await db
+    .select({ content: chunkTable.content })
+    .from(chunkTable)
+    .where(eq(chunkTable.fileId, fileId))
+    .orderBy(asc(chunkTable.orderIndex), asc(chunkTable.id));
+
+  return chunks
+    .map((chunk) => chunk.content)
+    .join('\n')
+    .trim();
 }
 
 export async function dbGetAttachedFileByEntityId({
