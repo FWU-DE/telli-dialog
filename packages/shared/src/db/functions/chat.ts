@@ -3,6 +3,44 @@ import { db } from '..';
 import { conversationMessageTable, conversationTable } from '../schema';
 import type { ConversationMessageModel, InsertConversationMessageModel } from '../types';
 import { isNotNull } from '../../utils/guard';
+import { logWarning } from '../../logging/logging';
+
+function getConflictLogData(chatContent: InsertConversationMessageModel) {
+  return {
+    conversationId: chatContent.conversationId,
+    messageId: chatContent.id,
+    orderNumber: chatContent.orderNumber,
+    role: chatContent.role,
+    userId: chatContent.userId,
+  };
+}
+
+function logSingleInsertConflict(chatContent: InsertConversationMessageModel) {
+  logWarning(
+    'Skipped conversation message insert due to conflict.',
+    getConflictLogData(chatContent),
+  );
+}
+
+function logBatchInsertConflicts({
+  chatContents,
+  insertedIds,
+}: {
+  chatContents: InsertConversationMessageModel[];
+  insertedIds: Set<string>;
+}) {
+  const skippedMessages = chatContents
+    .filter((chatContent) => chatContent.id && !insertedIds.has(chatContent.id))
+    .map(getConflictLogData);
+
+  if (skippedMessages.length === 0) {
+    return;
+  }
+
+  logWarning('Skipped conversation message batch inserts due to conflict.', {
+    skippedMessages,
+  });
+}
 
 export async function dbGetOrCreateConversation({
   conversationId,
@@ -90,13 +128,32 @@ export async function dbGetConversationMessageById({
 }
 
 export async function dbInsertChatContent(chatContent: InsertConversationMessageModel) {
-  return (
-    await db.insert(conversationMessageTable).values(chatContent).onConflictDoNothing().returning()
-  )[0];
+  const [insertedMessage] = await db
+    .insert(conversationMessageTable)
+    .values(chatContent)
+    .onConflictDoNothing()
+    .returning();
+
+  if (!insertedMessage) {
+    logSingleInsertConflict(chatContent);
+  }
+
+  return insertedMessage;
 }
 
 export async function dbInsertChatContentBatch(chatContents: InsertConversationMessageModel[]) {
-  return db.insert(conversationMessageTable).values(chatContents).onConflictDoNothing();
+  const insertedRows = await db
+    .insert(conversationMessageTable)
+    .values(chatContents)
+    .onConflictDoNothing()
+    .returning({ id: conversationMessageTable.id });
+
+  if (insertedRows.length !== chatContents.length) {
+    const insertedIds = new Set(insertedRows.map((row) => row.id));
+    logBatchInsertConflicts({ chatContents, insertedIds });
+  }
+
+  return insertedRows;
 }
 
 export async function dbGetConversations(userId: string) {
