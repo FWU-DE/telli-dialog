@@ -114,7 +114,7 @@ export function LearningScenarioView({
       </CustomChatActions>
 
       <CustomChatShareWithLearners
-        startedAt={learningScenario.startedAt}
+        expiredAt={learningScenario.expiredAt}
         manuallyStoppedAt={learningScenario.manuallyStoppedAt}
         maxUsageTimeLimit={learningScenario.maxUsageTimeLimit}
         tokenPointsLimit={learningScenario.tokenPointsLimit}

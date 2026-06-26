@@ -887,6 +887,7 @@ export const sharedLearningScenarioInsertSchema = createInsertSchema(
   id: true,
   inviteCode: true,
   startedAt: true,
+  expiredAt: true,
   manuallyStoppedAt: true,
 });
 export const sharedLearningScenarioUpdateSchema = createUpdateSchema(sharedLearningScenarioTable)
@@ -911,8 +912,10 @@ export const learningScenarioOptionalShareDataModel = learningScenarioSelectSche
     inviteCode: z.string().nullable(),
     maxUsageTimeLimit: z.number().nullable(),
     startedAt: z.coerce.date().nullable(),
+    expiredAt: z.coerce.date().nullable(),
     startedBy: z.string().nullable(),
     tokenPointsLimit: z.number().nullable(),
+    manuallyStoppedAt: z.coerce.date().nullable(),
   }),
 );
 export type LearningScenarioWithShareDataModel = z.infer<typeof learningScenarioWithShareDataModel>;
@@ -1103,7 +1106,7 @@ export const sharedCharacterConversationSelectSchema = createSelectSchema(
 });
 export const sharedCharacterConversationInsertSchema = createInsertSchema(
   sharedCharacterConversation,
-).omit({ id: true, inviteCode: true, startedAt: true });
+).omit({ id: true, inviteCode: true, startedAt: true, expiredAt: true, manuallyStoppedAt: true });
 export const sharedCharacterConversationUpdateSchema = createUpdateSchema(
   sharedCharacterConversation,
 )
@@ -1134,8 +1137,10 @@ export const characterOptionalShareDataModel = characterSelectSchema.and(
     inviteCode: z.string().nullable(),
     maxUsageTimeLimit: z.number().nullable(),
     startedAt: z.coerce.date().nullable(),
+    expiredAt: z.coerce.date().nullable(),
     startedBy: z.string().nullable(),
     tokenPointsLimit: z.number().nullable(),
+    manuallyStoppedAt: z.coerce.date().nullable(),
   }),
 );
 export type CharacterWithShareDataModel = z.infer<typeof characterWithShareDataModel>;
