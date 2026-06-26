@@ -860,6 +860,7 @@ export const sharedLearningScenarioTable = pgTable(
     maxUsageTimeLimit: integer('max_usage_time_limit').notNull(),
     inviteCode: text('invite_code').unique().notNull(),
     startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+    expiredAt: timestamp('expired_at', { withTimezone: true }).notNull(),
     manuallyStoppedAt: timestamp('manually_stopped_at', { withTimezone: true }),
   },
   (table) => [
@@ -877,6 +878,7 @@ export const sharedLearningScenarioSelectSchema = createSelectSchema(
   sharedLearningScenarioTable,
 ).extend({
   startedAt: z.coerce.date(),
+  expiredAt: z.coerce.date(),
   manuallyStoppedAt: z.coerce.date().nullable(),
 });
 export const sharedLearningScenarioInsertSchema = createInsertSchema(
@@ -1088,6 +1090,7 @@ export const sharedCharacterConversation = pgTable('shared_character_conversatio
   maxUsageTimeLimit: integer('max_usage_time_limit').notNull(),
   inviteCode: text('invite_code').unique().notNull(),
   startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+  expiredAt: timestamp('expired_at', { withTimezone: true }).notNull(),
   manuallyStoppedAt: timestamp('manually_stopped_at', { withTimezone: true }),
 });
 
@@ -1095,6 +1098,7 @@ export const sharedCharacterConversationSelectSchema = createSelectSchema(
   sharedCharacterConversation,
 ).extend({
   startedAt: z.coerce.date(),
+  expiredAt: z.coerce.date(),
   manuallyStoppedAt: z.coerce.date().nullable(),
 });
 export const sharedCharacterConversationInsertSchema = createInsertSchema(

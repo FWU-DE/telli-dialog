@@ -568,6 +568,13 @@
       "when": 1782403685677,
       "tag": "0080_chief_kulan_gath",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1782473304780,
+      "tag": "0081_lovely_calypso",
+      "breakpoints": true
     }
   ]
 }
