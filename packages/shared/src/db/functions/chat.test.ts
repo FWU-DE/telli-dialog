@@ -88,7 +88,9 @@ describe('chat db functions', () => {
   it('logs skipped messages for batch insert conflicts', async () => {
     const firstMessage = createMessage({ id: 'msg-1', orderNumber: 1 });
     const secondMessage = createMessage({ id: 'msg-2', orderNumber: 2 });
-    const returningMock = vi.fn().mockResolvedValue([{ id: 'msg-1' }]);
+    const returningMock = vi
+      .fn()
+      .mockResolvedValue([{ id: 'msg-1', conversationId: 'conv-1', orderNumber: 1 }]);
     const onConflictDoNothingMock = vi.fn().mockReturnValue({ returning: returningMock });
     const valuesMock = vi.fn().mockReturnValue({ onConflictDoNothing: onConflictDoNothingMock });
 
@@ -99,6 +101,7 @@ describe('chat db functions', () => {
     expect(mocks.logWarning).toHaveBeenCalledWith(
       'Skipped conversation message batch inserts due to conflict.',
       {
+        totalSkipped: 1,
         skippedMessages: [
           {
             conversationId: 'conv-1',
@@ -114,6 +117,10 @@ describe('chat db functions', () => {
 });
 
 describe('conversation message order number uniqueness', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('skips and logs a duplicate order number conflict for dbInsertChatContent', async () => {
     const firstMessage = createMessage({ id: 'msg-1', conversationId: 'conv-1', orderNumber: 3 });
     const duplicateMessage = createMessage({
@@ -155,7 +162,9 @@ describe('conversation message order number uniqueness', () => {
       orderNumber: 7,
     });
 
-    const returningMock = vi.fn().mockResolvedValue([{ id: 'msg-1' }]);
+    const returningMock = vi
+      .fn()
+      .mockResolvedValue([{ id: 'msg-1', conversationId: 'conv-1', orderNumber: 7 }]);
     const onConflictDoNothingMock = vi.fn().mockReturnValue({ returning: returningMock });
     const valuesMock = vi.fn().mockReturnValue({ onConflictDoNothing: onConflictDoNothingMock });
     mocks.insert.mockReturnValue({ values: valuesMock });
@@ -165,11 +174,52 @@ describe('conversation message order number uniqueness', () => {
     expect(mocks.logWarning).toHaveBeenCalledWith(
       'Skipped conversation message batch inserts due to conflict.',
       {
+        totalSkipped: 1,
         skippedMessages: [
           {
             conversationId: 'conv-1',
             messageId: 'msg-2',
             orderNumber: 7,
+            role: 'assistant',
+            userId: 'user-1',
+          },
+        ],
+      },
+    );
+  });
+
+  it('logs batch conflicts when messages lack explicit IDs', async () => {
+    const messageWithId = createMessage({ id: 'msg-1', orderNumber: 1 });
+    const messageWithoutId = createMessage({ id: undefined, orderNumber: 2 });
+    const anotherWithoutId = createMessage({ id: undefined, orderNumber: 3 });
+
+    const returningMock = vi
+      .fn()
+      .mockResolvedValue([{ id: 'msg-1', conversationId: 'conv-1', orderNumber: 1 }]);
+    const onConflictDoNothingMock = vi.fn().mockReturnValue({ returning: returningMock });
+    const valuesMock = vi.fn().mockReturnValue({ onConflictDoNothing: onConflictDoNothingMock });
+
+    mocks.insert.mockReturnValue({ values: valuesMock });
+
+    await dbInsertChatContentBatch([messageWithId, messageWithoutId, anotherWithoutId]);
+
+    // Now can precisely identify skipped messages even without explicit IDs (via conversationId + orderNumber)
+    expect(mocks.logWarning).toHaveBeenCalledWith(
+      'Skipped conversation message batch inserts due to conflict.',
+      {
+        totalSkipped: 2,
+        skippedMessages: [
+          {
+            conversationId: 'conv-1',
+            messageId: undefined,
+            orderNumber: 2,
+            role: 'assistant',
+            userId: 'user-1',
+          },
+          {
+            conversationId: 'conv-1',
+            messageId: undefined,
+            orderNumber: 3,
             role: 'assistant',
             userId: 'user-1',
           },

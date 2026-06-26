@@ -24,22 +24,41 @@ function logSingleInsertConflict(chatContent: InsertConversationMessageModel) {
 
 function logBatchInsertConflicts({
   chatContents,
-  insertedIds,
+  insertedRows,
 }: {
   chatContents: InsertConversationMessageModel[];
-  insertedIds: Set<string>;
+  insertedRows: Array<{ id: string; conversationId: string; orderNumber: number }>;
 }) {
-  const skippedMessages = chatContents
-    .filter((chatContent) => chatContent.id && !insertedIds.has(chatContent.id))
-    .map(getConflictLogData);
+  const totalSkipped = chatContents.length - insertedRows.length;
 
-  if (skippedMessages.length === 0) {
+  if (totalSkipped === 0) {
     return;
   }
 
-  logWarning('Skipped conversation message batch inserts due to conflict.', {
-    skippedMessages,
-  });
+  const insertedIds = new Set(insertedRows.map((row) => row.id));
+  const insertedMessageKeys = new Set(
+    insertedRows.map((row) => `${row.conversationId}:${row.orderNumber}`),
+  );
+
+  const skippedMessages = chatContents
+    .filter((msg) => {
+      if (msg.id) {
+        return !insertedIds.has(msg.id);
+      }
+      return !insertedMessageKeys.has(`${msg.conversationId}:${msg.orderNumber}`);
+    })
+    .map(getConflictLogData);
+
+  type LogDataType = Record<string, unknown>;
+  const logData: LogDataType = {
+    totalSkipped,
+  };
+
+  if (skippedMessages.length > 0) {
+    logData.skippedMessages = skippedMessages;
+  }
+
+  logWarning('Skipped conversation message batch inserts due to conflict.', logData);
 }
 
 export async function dbGetOrCreateConversation({
@@ -146,11 +165,14 @@ export async function dbInsertChatContentBatch(chatContents: InsertConversationM
     .insert(conversationMessageTable)
     .values(chatContents)
     .onConflictDoNothing()
-    .returning({ id: conversationMessageTable.id });
+    .returning({
+      id: conversationMessageTable.id,
+      conversationId: conversationMessageTable.conversationId,
+      orderNumber: conversationMessageTable.orderNumber,
+    });
 
   if (insertedRows.length !== chatContents.length) {
-    const insertedIds = new Set(insertedRows.map((row) => row.id));
-    logBatchInsertConflicts({ chatContents, insertedIds });
+    logBatchInsertConflicts({ chatContents, insertedRows });
   }
 
   return insertedRows;
