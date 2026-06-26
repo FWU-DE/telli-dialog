@@ -27,7 +27,7 @@ function resolveInitialFilter(sessionStorageKey: string): OverviewFilter {
   try {
     const stored = sessionStorage.getItem(sessionStorageKey);
     if (stored) {
-      return parseFilter(stored) ?? 'all';
+      return parseFilter(stored) ?? 'mine';
     }
     // Legacy bookmark support: read URL param once on mount
     const urlFilter = getFilterFromURL();
@@ -37,7 +37,7 @@ function resolveInitialFilter(sessionStorageKey: string): OverviewFilter {
   } catch {
     // Storage access might be blocked
   }
-  return 'all';
+  return 'mine';
 }
 
 /**
@@ -77,7 +77,7 @@ export function usePersistedOverviewFilter(
   // manualFilter holds user-initiated changes; null means "use sessionStorageFilter"
   const [manualFilter, setManualFilter] = useState<OverviewFilter | null>(null);
   const filter = manualFilter ?? sessionStorageFilter;
-  const selectedFilter = filter ?? 'all';
+  const selectedFilter = filter ?? 'mine';
   const [isLoading, setIsLoading] = useState(true);
   const onLoadRef = useRef(onLoad);
   const lastLoadedFilterRef = useRef<OverviewFilter | null>(null);

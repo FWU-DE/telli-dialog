@@ -14,9 +14,7 @@ import { enrichAssistantsWithImage, type AssistantWithImage } from '../assistant
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 
 function resolveFilter(filter: OverviewFilter, isSchoolSharingEnabled: boolean): OverviewFilter {
-  return !isSchoolSharingEnabled && (filter === 'school' || filter === 'community')
-    ? 'all'
-    : filter;
+  return !isSchoolSharingEnabled && filter === 'school' ? 'mine' : filter;
 }
 
 export async function getCharactersByFilterAction(
