@@ -79,6 +79,7 @@ export function useCharacterChat(options: {
 
   return useAisChat({
     sendMessage,
+    persistenceInviteCode: inviteCode,
     ...rest,
   });
 }
@@ -110,6 +111,7 @@ export function useLearningScenarioChat(options: {
 
   return useAisChat({
     sendMessage,
+    persistenceInviteCode: inviteCode,
     ...rest,
   });
 }

@@ -116,6 +116,7 @@ export default function GenericSharedChat({
     reload,
     stop,
     status,
+    clearClientPersistedMessages,
   } = chat;
   const { error, isChatExpired, resetError } = errorState;
 
@@ -138,6 +139,7 @@ export default function GenericSharedChat({
   }
 
   function handleOpenNewChat() {
+    clearClientPersistedMessages();
     setMessages([]);
     resetError();
   }

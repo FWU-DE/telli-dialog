@@ -2,7 +2,12 @@ import type { SharedChatExpiredError, TokenPointsExceededError } from '@ais-chat
 import type { NotFoundError } from '@shared/error';
 import type { WebSearchResult } from '@shared/db/schema';
 import type { ChatAttachment } from '@ais-chat/ai-core';
-import type { ConversationRole, ToolCall } from '@ais-chat/ai-core/chat/types';
+import {
+  CONVERSATION_ROLES,
+  type ConversationRole,
+  type ToolCall,
+} from '@ais-chat/ai-core/chat/types';
+import z from 'zod';
 
 /**
  * Serialized error that can be safely transmitted across the Server Action boundary.
@@ -21,6 +26,17 @@ export type SerializedError = {
  * - 'error': An error occurred
  */
 export type ChatStatus = 'ready' | 'submitted' | 'reasoning' | 'streaming' | 'error';
+
+export const chatMessageSchema = z.object({
+  id: z.string(),
+  role: z.enum(CONVERSATION_ROLES),
+  content: z.string(),
+  createdAt: z.coerce.date().optional(),
+  attachments: z.array(z.any()).optional(),
+  webSearchResults: z.array(z.any()).optional(),
+  toolCalls: z.array(z.any()).optional(),
+  toolCallId: z.string().optional(),
+});
 
 /**
  * Basic chat message type used throughout the application.
