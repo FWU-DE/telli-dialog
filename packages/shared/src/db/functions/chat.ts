@@ -3,26 +3,9 @@ import { db } from '..';
 import { conversationMessageTable, conversationTable } from '../schema';
 import type { ConversationMessageModel, InsertConversationMessageModel } from '../types';
 import { isNotNull } from '../../utils/guard';
-import { logWarning } from '../../logging/logging';
+import { logError } from '../../logging/logging';
 
-function getConflictLogData(chatContent: InsertConversationMessageModel) {
-  return {
-    conversationId: chatContent.conversationId,
-    messageId: chatContent.id,
-    orderNumber: chatContent.orderNumber,
-    role: chatContent.role,
-    userId: chatContent.userId,
-  };
-}
-
-function logSingleInsertConflict(chatContent: InsertConversationMessageModel) {
-  logWarning(
-    'Skipped conversation message insert due to conflict.',
-    getConflictLogData(chatContent),
-  );
-}
-
-function logBatchInsertConflicts({
+function logInsertConflicts({
   chatContents,
   insertedRows,
 }: {
@@ -47,7 +30,25 @@ function logBatchInsertConflicts({
       }
       return !insertedMessageKeys.has(`${msg.conversationId}:${msg.orderNumber}`);
     })
-    .map(getConflictLogData);
+    .map((chatContent) => ({
+      conversationId: chatContent.conversationId,
+      messageId: chatContent.id,
+      orderNumber: chatContent.orderNumber,
+      role: chatContent.role,
+      userId: chatContent.userId,
+    }));
+
+  if (chatContents.length === 1) {
+    const skippedMessage = skippedMessages[0];
+
+    if (skippedMessage) {
+      logError('Skipped conversation message insert due to conflict.', undefined, skippedMessage);
+      return;
+    }
+
+    logError('Skipped conversation message insert due to conflict.', undefined, { totalSkipped });
+    return;
+  }
 
   type LogDataType = Record<string, unknown>;
   const logData: LogDataType = {
@@ -58,7 +59,7 @@ function logBatchInsertConflicts({
     logData.skippedMessages = skippedMessages;
   }
 
-  logWarning('Skipped conversation message batch inserts due to conflict.', logData);
+  logError('Skipped conversation message batch inserts due to conflict.', undefined, logData);
 }
 
 export async function dbGetOrCreateConversation({
@@ -154,7 +155,10 @@ export async function dbInsertChatContent(chatContent: InsertConversationMessage
     .returning();
 
   if (!insertedMessage) {
-    logSingleInsertConflict(chatContent);
+    logInsertConflicts({
+      chatContents: [chatContent],
+      insertedRows: [],
+    });
   }
 
   return insertedMessage;
@@ -172,7 +176,7 @@ export async function dbInsertChatContentBatch(chatContents: InsertConversationM
     });
 
   if (insertedRows.length !== chatContents.length) {
-    logBatchInsertConflicts({ chatContents, insertedRows });
+    logInsertConflicts({ chatContents, insertedRows });
   }
 
   return insertedRows;

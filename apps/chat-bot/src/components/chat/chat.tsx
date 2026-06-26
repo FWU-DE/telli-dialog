@@ -1,7 +1,7 @@
 'use client';
 
 import { useMainChat, type ChatMessage } from '@/hooks/use-chat-hooks';
-import React, { FormEvent, ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, SyntheticEvent, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
 import { type CharacterSelectModel, type AssistantSelectModel, FileModel } from '@shared/db/schema';
@@ -182,7 +182,7 @@ export default function Chat({
     void fetchData();
   }, [countOfFilesInChat, id, messages.length]);
 
-  async function customHandleSubmit(e: FormEvent) {
+  async function customHandleSubmit(e: SyntheticEvent) {
     e.preventDefault();
 
     try {
@@ -326,7 +326,7 @@ export default function Chat({
             <FloatingText
               learningContext={learningScenario.studentExercise}
               dialogStarted={true}
-              title={tLearningScenarioShared('excersise-title')}
+              title={tLearningScenarioShared('excercise-title')}
               maxWidth={600}
               maxHeight={600}
               minMargin={16}

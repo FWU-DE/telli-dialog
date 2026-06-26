@@ -348,7 +348,7 @@
       "delete-confirm": "Soll das Lernszenario wirklich gelöscht werden? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
     },
     "shared": {
-      "excersise-title": "Dein Arbeitsauftrag",
+      "excercise-title": "Dein Arbeitsauftrag",
       "title": "Lernszenario einsetzen",
       "description": "Wie viel des monatlichen Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",

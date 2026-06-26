@@ -3,7 +3,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   insert: vi.fn(),
   update: vi.fn(),
-  logWarning: vi.fn(),
+  logError: vi.fn(),
 }));
 
 vi.mock('..', () => ({
@@ -14,7 +14,7 @@ vi.mock('..', () => ({
 }));
 
 vi.mock('../../logging/logging', () => ({
-  logWarning: mocks.logWarning,
+  logError: mocks.logError,
 }));
 
 import {
@@ -73,8 +73,9 @@ describe('chat db functions', () => {
     const result = await dbInsertChatContent(message);
 
     expect(result).toBeUndefined();
-    expect(mocks.logWarning).toHaveBeenCalledWith(
+    expect(mocks.logError).toHaveBeenCalledWith(
       'Skipped conversation message insert due to conflict.',
+      undefined,
       {
         conversationId: 'conv-1',
         messageId: 'msg-1',
@@ -98,8 +99,9 @@ describe('chat db functions', () => {
 
     await dbInsertChatContentBatch([firstMessage, secondMessage]);
 
-    expect(mocks.logWarning).toHaveBeenCalledWith(
+    expect(mocks.logError).toHaveBeenCalledWith(
       'Skipped conversation message batch inserts due to conflict.',
+      undefined,
       {
         totalSkipped: 1,
         skippedMessages: [
@@ -142,8 +144,9 @@ describe('conversation message order number uniqueness', () => {
 
     expect(firstInsert).toEqual({ id: 'msg-1' });
     expect(secondInsert).toBeUndefined();
-    expect(mocks.logWarning).toHaveBeenCalledWith(
+    expect(mocks.logError).toHaveBeenCalledWith(
       'Skipped conversation message insert due to conflict.',
+      undefined,
       {
         conversationId: 'conv-1',
         messageId: 'msg-2',
@@ -171,8 +174,9 @@ describe('conversation message order number uniqueness', () => {
 
     await dbInsertChatContentBatch([firstMessage, duplicateMessage]);
 
-    expect(mocks.logWarning).toHaveBeenCalledWith(
+    expect(mocks.logError).toHaveBeenCalledWith(
       'Skipped conversation message batch inserts due to conflict.',
+      undefined,
       {
         totalSkipped: 1,
         skippedMessages: [
@@ -204,8 +208,9 @@ describe('conversation message order number uniqueness', () => {
     await dbInsertChatContentBatch([messageWithId, messageWithoutId, anotherWithoutId]);
 
     // Now can precisely identify skipped messages even without explicit IDs (via conversationId + orderNumber)
-    expect(mocks.logWarning).toHaveBeenCalledWith(
+    expect(mocks.logError).toHaveBeenCalledWith(
       'Skipped conversation message batch inserts due to conflict.',
+      undefined,
       {
         totalSkipped: 2,
         skippedMessages: [
