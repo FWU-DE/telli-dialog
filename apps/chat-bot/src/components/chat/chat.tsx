@@ -326,7 +326,7 @@ export default function Chat({
             <FloatingText
               learningContext={learningScenario.studentExercise}
               dialogStarted={true}
-              title={tLearningScenarioShared('excersise-title')}
+              title={tLearningScenarioShared('excercise-title')}
               maxWidth={600}
               maxHeight={600}
               minMargin={16}

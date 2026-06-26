@@ -33,7 +33,7 @@ export default function LearningScenarioSharedChat({
       dialogStartMode="explicit"
       enableFloatingText
       exerciseDescription={sharedSchoolChat.studentExercise}
-      exerciseTitle={t('excersise-title')}
+      exerciseTitle={t('excercise-title')}
     />
   );
 }
