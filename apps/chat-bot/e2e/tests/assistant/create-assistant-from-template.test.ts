@@ -7,7 +7,7 @@ import { confirmDuplicate } from '../../utils/utils';
 test.use({ storageState: AUTH_FILES.teacher });
 
 test('create assistant from template', async ({ page }) => {
-  await page.goto('/assistants');
+  await page.goto('/assistants?filter=all');
 
   const card = page
     .getByTestId('entity-card')

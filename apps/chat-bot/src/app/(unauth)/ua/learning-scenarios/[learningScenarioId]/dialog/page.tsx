@@ -1,4 +1,4 @@
-import SharedChat from '@/components/chat/shared-chat';
+import LearningScenarioSharedChat from '@/components/shared-chat/learning-scenario-shared-chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
@@ -50,10 +50,10 @@ export default async function Page(
   return (
     <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
       <ThemeProvider designConfiguration={designConfiguration}>
-        <SharedChat
+        <LearningScenarioSharedChat
           {...learningScenario}
           inviteCode={searchParams.inviteCode}
-          maybeSignedPictureUrl={avatarPictureUrl}
+          avatarPictureUrl={avatarPictureUrl}
         />
       </ThemeProvider>
     </LlmModelsProvider>

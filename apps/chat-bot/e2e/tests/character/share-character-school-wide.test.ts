@@ -39,7 +39,7 @@ test.describe('share character school-wide', () => {
     test.use({ storageState: AUTH_FILES.teacher });
 
     test('teacher sees character shared by teacher2 (same school)', async ({ page }) => {
-      await page.goto('/characters');
+      await page.goto('/characters?filter=all');
       await page.waitForURL('/characters**');
       await expect(page.getByText(characterTeacher2).first()).toBeVisible();
     });
@@ -47,7 +47,7 @@ test.describe('share character school-wide', () => {
     test('teacher does not see character shared by teacher3 (different schools)', async ({
       page,
     }) => {
-      await page.goto('/characters');
+      await page.goto('/characters?filter=all');
       await page.waitForURL('/characters**');
       await expect(page.getByText(characterTeacher3).first()).not.toBeVisible();
     });
@@ -57,13 +57,13 @@ test.describe('share character school-wide', () => {
     test.use({ storageState: AUTH_FILES.teacher2 });
 
     test('teacher2 sees character shared by teacher (shared school)', async ({ page }) => {
-      await page.goto('/characters');
+      await page.goto('/characters?filter=all');
       await page.waitForURL('/characters**');
       await expect(page.getByText(characterTeacher).first()).toBeVisible();
     });
 
     test('teacher2 sees character shared by teacher3 (shared school)', async ({ page }) => {
-      await page.goto('/characters');
+      await page.goto('/characters?filter=all');
       await page.waitForURL('/characters**');
       await expect(page.getByText(characterTeacher3).first()).toBeVisible();
     });
@@ -73,7 +73,7 @@ test.describe('share character school-wide', () => {
     test.use({ storageState: AUTH_FILES.teacher3 });
 
     test('teacher3 sees character shared by teacher2 (shared school)', async ({ page }) => {
-      await page.goto('/characters');
+      await page.goto('/characters?filter=all');
       await page.waitForURL('/characters**');
       await expect(page.getByText(characterTeacher2).first()).toBeVisible();
     });
@@ -81,7 +81,7 @@ test.describe('share character school-wide', () => {
     test('teacher3 does not see character shared by teacher (different schools)', async ({
       page,
     }) => {
-      await page.goto('/characters');
+      await page.goto('/characters?filter=all');
       await page.waitForURL('/characters**');
       await expect(page.getByText(characterTeacher).first()).not.toBeVisible();
     });

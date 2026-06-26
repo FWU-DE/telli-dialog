@@ -39,7 +39,7 @@ test.describe('share learning scenario school-wide', () => {
     test.use({ storageState: AUTH_FILES.teacher });
 
     test('teacher sees learning scenario shared by teacher2 (same school)', async ({ page }) => {
-      await page.goto('/learning-scenarios');
+      await page.goto('/learning-scenarios?filter=all');
       await page.waitForURL('/learning-scenarios**');
       await expect(page.getByText(learningScenarioTeacher2).first()).toBeVisible();
     });
@@ -47,7 +47,7 @@ test.describe('share learning scenario school-wide', () => {
     test('teacher does not see learning scenario shared by teacher3 (different schools)', async ({
       page,
     }) => {
-      await page.goto('/learning-scenarios');
+      await page.goto('/learning-scenarios?filter=all');
       await page.waitForURL('/learning-scenarios**');
       await expect(page.getByText(learningScenarioTeacher3).first()).not.toBeVisible();
     });
@@ -57,13 +57,13 @@ test.describe('share learning scenario school-wide', () => {
     test.use({ storageState: AUTH_FILES.teacher2 });
 
     test('teacher2 sees learning scenario shared by teacher (shared school)', async ({ page }) => {
-      await page.goto('/learning-scenarios');
+      await page.goto('/learning-scenarios?filter=all');
       await page.waitForURL('/learning-scenarios**');
       await expect(page.getByText(learningScenarioTeacher).first()).toBeVisible();
     });
 
     test('teacher2 sees learning scenario shared by teacher3 (shared school)', async ({ page }) => {
-      await page.goto('/learning-scenarios');
+      await page.goto('/learning-scenarios?filter=all');
       await page.waitForURL('/learning-scenarios**');
       await expect(page.getByText(learningScenarioTeacher3).first()).toBeVisible();
     });
@@ -73,7 +73,7 @@ test.describe('share learning scenario school-wide', () => {
     test.use({ storageState: AUTH_FILES.teacher3 });
 
     test('teacher3 sees learning scenario shared by teacher2 (shared school)', async ({ page }) => {
-      await page.goto('/learning-scenarios');
+      await page.goto('/learning-scenarios?filter=all');
       await page.waitForURL('/learning-scenarios**');
       await expect(page.getByText(learningScenarioTeacher2).first()).toBeVisible();
     });
@@ -81,7 +81,7 @@ test.describe('share learning scenario school-wide', () => {
     test('teacher3 does not see learning scenario shared by teacher (different schools)', async ({
       page,
     }) => {
-      await page.goto('/learning-scenarios');
+      await page.goto('/learning-scenarios?filter=all');
       await page.waitForURL('/learning-scenarios**');
       await expect(page.getByText(learningScenarioTeacher).first()).not.toBeVisible();
     });
