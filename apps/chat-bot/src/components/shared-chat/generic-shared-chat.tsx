@@ -149,14 +149,10 @@ export default function GenericSharedChat({
     void reload();
   }
 
-  async function handleRetry() {
-    try {
-      resetError();
-      reactivateAutoScrolling();
-      await window.location.reload();
-    } catch (error) {
-      logError('Error in handleReload', error);
-    }
+  function handleRetry() {
+    resetError();
+    reactivateAutoScrolling();
+    window.location.reload();
   }
 
   const isLoading = status === 'submitted';
