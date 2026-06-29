@@ -28,6 +28,7 @@ export default function ResilientSessionProvider({
 }: ResilientSessionProviderProps) {
   const lastValidSessionRef = useRef<Session | null>(session);
   const originalFetchRef = useRef<typeof fetch | null>(null);
+  const wrappedFetchRef = useRef<typeof fetch | null>(null);
 
   useEffect(() => {
     // Store original fetch if not already stored
@@ -41,7 +42,7 @@ export default function ResilientSessionProvider({
     }
 
     // Intercept fetch for session endpoint
-    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const wrappedFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
 
       // Only intercept session endpoint requests (exact match on pathname)
@@ -78,20 +79,21 @@ export default function ResilientSessionProvider({
           return response;
         }
 
-        // Non-OK response (4xx, 5xx) - infrastructure error
-        logWarning('Session endpoint returned error status - using cached session', {
-          status: response.status,
-        });
-
-        if (lastValidSessionRef.current) {
-          // Return cached session to prevent logout
-          return new Response(JSON.stringify(lastValidSessionRef.current), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
+        // 5xx response - transient infrastructure error
+        if (response.status >= 500) {
+          logWarning('Session endpoint returned server error - using cached session', {
+            status: response.status,
           });
+
+          if (lastValidSessionRef.current) {
+            return new Response(JSON.stringify(lastValidSessionRef.current), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            });
+          }
         }
 
-        // No cached session - allow the error
+        // 4xx or no cached session - allow the error to propagate
         return response;
       } catch (error) {
         // Network error (fetch failed)
@@ -110,9 +112,12 @@ export default function ResilientSessionProvider({
       }
     };
 
-    // Cleanup: restore original fetch on unmount
+    wrappedFetchRef.current = wrappedFetch;
+    window.fetch = wrappedFetch;
+
+    // Cleanup: restore original fetch only if window.fetch is still our wrapper
     return () => {
-      if (originalFetchRef.current) {
+      if (originalFetchRef.current && window.fetch === wrappedFetchRef.current) {
         window.fetch = originalFetchRef.current;
       }
     };

@@ -9,11 +9,11 @@ test.use({ storageState: AUTH_FILES.teacher });
  *
  * ResilientSessionProvider intercepts fetch requests to /api/auth/session and:
  * 1. Caches valid sessions
- * 2. Returns cached session on network errors or 5xx responses
+ * 2. Returns cached session on network errors or 5xx responses (transient failures)
  * 3. Keeps NextAuth in 'authenticated' state so polling continues
- * 4. Allows genuine logout (200 with null) to proceed normally
+ * 4. Allows genuine logout (200 with null) and 4xx errors to proceed normally
  *
- * SessionWatcher verifies endpoint reachability before logout redirect.
+ * SessionWatcher redirects when NextAuth reports 'unauthenticated' status.
  *
  * Expected behavior:
  * - Network failures (abort, 502, 503, etc.) → SHOULD NOT redirect (cached session used)
