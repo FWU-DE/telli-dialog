@@ -12,7 +12,7 @@ type DrizzleMigrationJournal = {
 /**
  * Tests for Drizzle migration journal validation
  *
- * Drizzle ORM < 1.0.0 uses a "high water mark" approach - it tracks the highest migration
+ * Drizzle ORM < 1.0.0 uses a "high water mark" approach - it tracks the most recent migration
  * timestamp applied and skips migrations with earlier timestamps. If parallel branches create
  * migrations with non-ascending timestamps, some migrations will be silently skipped after merge.
  *
