@@ -95,7 +95,7 @@ export function CharacterView({
       </CustomChatActions>
 
       <CustomChatShareWithLearners
-        startedAt={character.startedAt}
+        expiredAt={character.expiredAt}
         manuallyStoppedAt={character.manuallyStoppedAt}
         maxUsageTimeLimit={character.maxUsageTimeLimit}
         tokenPointsLimit={character.tokenPointsLimit}

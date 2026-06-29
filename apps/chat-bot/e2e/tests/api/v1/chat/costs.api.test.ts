@@ -104,6 +104,7 @@ test.describe('costs', () => {
     await db.insert(llmModelTable).values(model);
 
     // create shared learning scenario
+    const startedAt = new Date();
     const sharedLearningScenario: LearningScenarioWithShareDataModel = {
       ...mockLearningScenario(),
       tokenPointsLimit: tokenPointsLimit,
@@ -111,7 +112,8 @@ test.describe('costs', () => {
       userId: user.id,
       modelId: model.id,
       inviteCode: generateRandomString(8),
-      startedAt: new Date(),
+      startedAt,
+      expiredAt: new Date(startedAt.getTime() + maxUsageTimeLimit * 60 * 1000),
       manuallyStoppedAt: null,
       startedBy: user.id,
     };
@@ -190,12 +192,14 @@ test.describe('costs', () => {
     const model = mockLlmModel();
     await db.insert(llmModelTable).values(model);
 
+    const startedAt = new Date();
     const character: CharacterWithShareDataModel = {
       ...mockCharacter(),
       userId: user.id,
       modelId: model.id,
       accessLevel: 'private' as const,
-      startedAt: new Date(),
+      startedAt,
+      expiredAt: new Date(startedAt.getTime() + maxUsageTimeLimit * 60 * 1000),
       manuallyStoppedAt: null,
       tokenPointsLimit: tokenPointsLimit,
       maxUsageTimeLimit: maxUsageTimeLimit,

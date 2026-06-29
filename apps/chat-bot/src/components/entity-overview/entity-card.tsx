@@ -13,7 +13,7 @@ import CountDownTimer from '@/app/(authed)/(chat-bot)/learning-scenarios/_compon
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 
 type ShareInfo = {
-  startedAt: Date | null;
+  expiredAt: Date | null;
   maxUsageTimeLimit: number | null;
   manuallyStoppedAt?: Date | null;
 };

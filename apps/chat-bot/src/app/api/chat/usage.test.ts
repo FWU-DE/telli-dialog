@@ -28,19 +28,18 @@ describe('sharedChatHasExpired', () => {
 
   describe('manually stopped (manuallyStoppedAt)', () => {
     it('returns true when manuallyStoppedAt is set, even if time limit has not been reached', () => {
-      const startedAt = new Date(now.getTime() - 5 * 60_000); // 5 min ago
+      const expiredAt = new Date(now.getTime() + 55 * 60_000); // expires in 55 minutes
       const result = sharedChatHasExpired({
-        startedAt,
-        maxUsageTimeLimit: 60, // 60-minute limit – plenty of time left
+        expiredAt,
         manuallyStoppedAt: new Date(now.getTime() - 1000),
       });
       expect(result).toBe(true);
     });
 
     it('returns true when manuallyStoppedAt equals now', () => {
+      const expiredAt = new Date(now.getTime() + 20 * 60_000); // expires in 20 minutes
       const result = sharedChatHasExpired({
-        startedAt: new Date(now.getTime() - 10 * 60_000),
-        maxUsageTimeLimit: 30,
+        expiredAt,
         manuallyStoppedAt: now,
       });
       expect(result).toBe(true);
@@ -49,28 +48,25 @@ describe('sharedChatHasExpired', () => {
 
   describe('auto-expiry based on time limit', () => {
     it('returns false when the time limit has not been reached', () => {
-      const startedAt = new Date(now.getTime() - 10 * 60_000); // 10 min ago
+      const expiredAt = new Date(now.getTime() + 20 * 60_000); // expires in 20 minutes
       const result = sharedChatHasExpired({
-        startedAt,
-        maxUsageTimeLimit: 30, // 30-minute limit → 20 min remaining
+        expiredAt,
       });
       expect(result).toBe(false);
     });
 
     it('returns true when the time limit has been exceeded', () => {
-      const startedAt = new Date(now.getTime() - 60 * 60_000); // 60 min ago
+      const expiredAt = new Date(now.getTime() - 30 * 60_000); // expired 30 minutes ago
       const result = sharedChatHasExpired({
-        startedAt,
-        maxUsageTimeLimit: 30, // 30-minute limit → expired
+        expiredAt,
       });
       expect(result).toBe(true);
     });
 
     it('returns true when the time limit has just been reached (0 seconds left)', () => {
-      const startedAt = new Date(now.getTime() - 30 * 60_000); // exactly 30 min ago
+      const expiredAt = new Date(now.getTime()); // expired exactly now
       const result = sharedChatHasExpired({
-        startedAt,
-        maxUsageTimeLimit: 30,
+        expiredAt,
       });
       expect(result).toBe(true);
     });
@@ -94,6 +90,7 @@ describe('coverage for uncovered branches', () => {
     const mockScenario = {
       id: 'scenario-1',
       startedAt: new Date(),
+      expiredAt: new Date(new Date().getTime() + 60 * 60_000),
       maxUsageTimeLimit: 60,
       tokenPointsLimit: 10,
     };

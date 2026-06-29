@@ -30,7 +30,7 @@ const shareFormSchema = z.object({
 });
 
 interface CustomChatShareWithLearnersProps {
-  startedAt: Date | null;
+  expiredAt: Date | null;
   manuallyStoppedAt: Date | null;
   maxUsageTimeLimit: number | null;
   tokenPointsLimit: number | null;
@@ -43,7 +43,7 @@ interface CustomChatShareWithLearnersProps {
 }
 
 export function CustomChatShareWithLearners({
-  startedAt,
+  expiredAt,
   manuallyStoppedAt,
   maxUsageTimeLimit,
   tokenPointsLimit,
@@ -61,8 +61,7 @@ export function CustomChatShareWithLearners({
   const tToast = useTranslations('custom-chat.toasts');
 
   const sharedChatTimeLeft = calculateTimeLeft({
-    startedAt,
-    maxUsageTimeLimit: maxUsageTimeLimit,
+    expiredAt,
     manuallyStoppedAt,
   });
   const sharedChatActive = sharedChatTimeLeft > 0;

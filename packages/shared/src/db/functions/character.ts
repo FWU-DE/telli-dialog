@@ -35,7 +35,7 @@ import { UserModel } from '@shared/auth/user-model';
  *
  * A share is expired if either:
  * - `manually_stopped_at IS NOT NULL` (explicitly stopped), or
- * - `started_at + maxUsageTimeLimit < now` (time limit elapsed; `manually_stopped_at` may still be NULL for these)
+ * - `expired_at < now` (time limit elapsed; `manually_stopped_at` may still be NULL for these)
  *
  * When multiple non-expired rows exist, `DISTINCT ON (character_id) ORDER BY started_at DESC`
  * ensures only the most-recent row is returned, preventing duplicate entity rows in JOINs.
@@ -50,7 +50,7 @@ function latestActiveCharacterShare(user: Pick<UserModel, 'id'>) {
       and(
         eq(sharedCharacterConversation.userId, user.id),
         isNull(sharedCharacterConversation.manuallyStoppedAt),
-        sql`${sharedCharacterConversation.startedAt} + ${sharedCharacterConversation.maxUsageTimeLimit} * interval '1 minute' >= now()`,
+        sql`${sharedCharacterConversation.expiredAt} >= now()`,
       ),
     )
     .orderBy(sharedCharacterConversation.characterId, desc(sharedCharacterConversation.startedAt))
@@ -93,6 +93,7 @@ function baseCharacterWithShareQuery(activeShare: ReturnType<typeof latestActive
       inviteCode: activeShare.inviteCode,
       maxUsageTimeLimit: activeShare.maxUsageTimeLimit,
       startedAt: activeShare.startedAt,
+      expiredAt: activeShare.expiredAt,
       manuallyStoppedAt: activeShare.manuallyStoppedAt,
       startedBy: activeShare.userId,
       ownerSchoolIds: userTable.schoolIds,
@@ -435,6 +436,7 @@ export async function dbGetCharacterByIdAndInviteCode({
       inviteCode: sharedCharacterConversation.inviteCode,
       maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
       startedAt: sharedCharacterConversation.startedAt,
+      expiredAt: sharedCharacterConversation.expiredAt,
       manuallyStoppedAt: sharedCharacterConversation.manuallyStoppedAt,
       startedBy: sharedCharacterConversation.userId,
       ownerSchoolIds: userTable.schoolIds,

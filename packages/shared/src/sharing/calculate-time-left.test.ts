@@ -15,20 +15,18 @@ describe('calculateTimeLeft', () => {
 
   describe('manuallyStoppedAt behavior', () => {
     it('returns -1 when manuallyStoppedAt is set, regardless of remaining time', () => {
-      const startedAt = new Date(now.getTime() - 5 * 60_000); // started 5 min ago
+      const expiredAt = new Date(now.getTime() + 55 * 60_000); // expires in 55 minutes
       const result = calculateTimeLeft({
-        startedAt,
-        maxUsageTimeLimit: 60, // 60-minute limit – plenty of time remaining
+        expiredAt,
         manuallyStoppedAt: new Date(now.getTime() - 1000),
       });
       expect(result).toBe(-1);
     });
 
     it('returns -1 when manuallyStoppedAt is set even when the time limit would not be reached', () => {
-      const startedAt = new Date(now.getTime() - 1000); // started 1 second ago
+      const expiredAt = new Date(now.getTime() + 30 * 24 * 60 * 60_000); // expires in 30 days
       const result = calculateTimeLeft({
-        startedAt,
-        maxUsageTimeLimit: 30 * 24 * 60, // maximum 30-day limit
+        expiredAt,
         manuallyStoppedAt: now,
       });
       expect(result).toBe(-1);
@@ -37,10 +35,9 @@ describe('calculateTimeLeft', () => {
     it.each([null, undefined])(
       'proceeds to time-based calculation when manuallyStoppedAt is $0',
       (manuallyStoppedAt) => {
-        const startedAt = new Date(now.getTime() - 10 * 60_000); // started 10 min ago
+        const expiredAt = new Date(now.getTime() + 20 * 60_000); // expires in 20 minutes
         const result = calculateTimeLeft({
-          startedAt,
-          maxUsageTimeLimit: 30, // 30-minute limit → 20 minutes remaining
+          expiredAt,
           manuallyStoppedAt,
         });
         expect(result).toBe(20 * 60); // 1200 seconds
@@ -49,18 +46,9 @@ describe('calculateTimeLeft', () => {
   });
 
   describe('missing fields', () => {
-    it('returns -1 when startedAt is null', () => {
+    it('returns -1 when expiredAt is null', () => {
       const result = calculateTimeLeft({
-        startedAt: null,
-        maxUsageTimeLimit: 60,
-      });
-      expect(result).toBe(-1);
-    });
-
-    it('returns -1 when maxUsageTimeLimit is null', () => {
-      const result = calculateTimeLeft({
-        startedAt: now,
-        maxUsageTimeLimit: null,
+        expiredAt: null,
       });
       expect(result).toBe(-1);
     });
@@ -68,36 +56,33 @@ describe('calculateTimeLeft', () => {
 
   describe('time-based calculation', () => {
     it('returns the correct seconds remaining when time limit has not been reached', () => {
-      const startedAt = new Date(now.getTime() - 15 * 60_000); // 15 min ago
+      const expiredAt = new Date(now.getTime() + 30 * 60_000); // expires in 30 minutes
       const result = calculateTimeLeft({
-        startedAt,
-        maxUsageTimeLimit: 45, // 45-minute limit → 30 minutes left
+        expiredAt,
       });
       expect(result).toBe(30 * 60); // 1800 seconds
     });
 
     it('returns a negative value when the time limit has been exceeded', () => {
-      const startedAt = new Date(now.getTime() - 60 * 60_000); // 60 min ago
+      const expiredAt = new Date(now.getTime() - 30 * 60_000); // expired 30 minutes ago
       const result = calculateTimeLeft({
-        startedAt,
-        maxUsageTimeLimit: 30, // 30-minute limit → 30 minutes over
+        expiredAt,
       });
       expect(result).toBeLessThan(0);
     });
 
     it('returns approximately 0 when the time limit has just been reached', () => {
-      const startedAt = new Date(now.getTime() - 30 * 60_000); // exactly 30 min ago
+      const expiredAt = new Date(now.getTime()); // expired exactly now
       const result = calculateTimeLeft({
-        startedAt,
-        maxUsageTimeLimit: 30,
+        expiredAt,
       });
       expect(result).toBeLessThanOrEqual(0);
     });
 
     it('returns full limit seconds when the chat was just started', () => {
+      const expiredAt = new Date(now.getTime() + 45 * 60_000); // expires in 45 minutes
       const result = calculateTimeLeft({
-        startedAt: now,
-        maxUsageTimeLimit: 45,
+        expiredAt,
       });
       expect(result).toBe(45 * 60); // 2700 seconds
     });
