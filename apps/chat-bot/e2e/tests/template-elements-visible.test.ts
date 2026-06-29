@@ -44,12 +44,6 @@ test('default overview filter is mine when no filter is set', async ({ page }) =
   await page.goto('/assistants');
   await page.waitForURL('/assistants**');
 
-  await expect(page.getByRole('button', { name: 'Meine', exact: true })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
-  await expect(page.getByRole('button', { name: 'Alle', exact: true })).toHaveAttribute(
-    'aria-pressed',
-    'false',
-  );
+  await expect(page.getByTestId('filter-tab-mine')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('filter-tab-all')).toHaveAttribute('aria-pressed', 'false');
 });
