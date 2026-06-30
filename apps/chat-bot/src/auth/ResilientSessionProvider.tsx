@@ -2,8 +2,10 @@
 
 import { SessionProvider } from 'next-auth/react';
 import { useEffect, useRef } from 'react';
-import { logDebug, logError, logWarning } from '@shared/logging';
+import { logDebug, logWarning } from '@shared/logging';
 import type { Session } from 'next-auth';
+
+const SESSION_ENDPOINT = '/api/auth/session';
 
 type ResilientSessionProviderProps = {
   children: React.ReactNode;
@@ -46,7 +48,6 @@ export default function ResilientSessionProvider({
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
 
       // Only intercept session endpoint requests (exact match on pathname)
-      const SESSION_ENDPOINT = '/api/auth/session';
       const isSessionEndpoint =
         url === SESSION_ENDPOINT ||
         new URL(url, window.location.origin).pathname === SESSION_ENDPOINT;
@@ -97,7 +98,7 @@ export default function ResilientSessionProvider({
         return response;
       } catch (error) {
         // Network error (fetch failed)
-        logError('Session endpoint unreachable - using cached session', error);
+        logWarning('Session endpoint unreachable - using cached session', { error });
 
         if (lastValidSessionRef.current) {
           // Return cached session to prevent logout
