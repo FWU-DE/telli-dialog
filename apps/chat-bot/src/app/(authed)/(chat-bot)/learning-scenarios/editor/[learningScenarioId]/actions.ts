@@ -8,6 +8,7 @@ import {
   removeFileFromLearningScenario,
   shareLearningScenario,
   unshareLearningScenario,
+  updateLearningScenarioShareTokenPointsLimit,
   updateLearningScenario,
   updateLearningScenarioAccessLevel,
   uploadAvatarPictureForLearningScenario,
@@ -102,6 +103,25 @@ export async function extendLearningScenarioShareExpirationAction({
   )({
     learningScenarioId,
     additionalTimeInMinutes,
+    user,
+  });
+}
+
+export async function updateLearningScenarioShareTokenPointsLimitAction({
+  learningScenarioId,
+  tokenPointsPercentageLimit,
+}: {
+  learningScenarioId: string;
+  tokenPointsPercentageLimit: number;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'updateLearningScenarioShareTokenPointsLimitAction',
+    updateLearningScenarioShareTokenPointsLimit,
+  )({
+    learningScenarioId,
+    tokenPointsPercentageLimit,
     user,
   });
 }

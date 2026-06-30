@@ -33,6 +33,7 @@ import {
   removeFileFromLearningScenarioAction,
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
+  updateLearningScenarioShareTokenPointsLimitAction,
   updateLearningScenarioAccessLevelAction,
   updateLearningScenarioAction,
   uploadAvatarPictureForLearningScenarioAction,
@@ -438,6 +439,17 @@ export function LearningScenarioEdit({
             }).then((result) => {
               if (result.success) {
                 return { success: true, expiredAt: result.value.expiredAt };
+              }
+              return { success: false };
+            })
+          }
+          onAdjustTokenLimit={async (data) =>
+            await updateLearningScenarioShareTokenPointsLimitAction({
+              learningScenarioId: learningScenario.id,
+              tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
+            }).then((result) => {
+              if (result.success) {
+                return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
               }
               return { success: false };
             })

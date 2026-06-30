@@ -27,6 +27,7 @@ import {
   extendLearningScenarioShareExpirationAction,
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
+  updateLearningScenarioShareTokenPointsLimitAction,
 } from '../editor/[learningScenarioId]/actions';
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
@@ -110,6 +111,21 @@ export function LearningScenarioView({
     return { success: false };
   };
 
+  const handleAdjustTokenLimitForLearningScenario = async ({
+    tokenPointsPercentageLimit,
+  }: {
+    tokenPointsPercentageLimit: number;
+  }) => {
+    const result = await updateLearningScenarioShareTokenPointsLimitAction({
+      learningScenarioId: learningScenario.id,
+      tokenPointsPercentageLimit,
+    });
+    if (result.success) {
+      return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
+    }
+    return { success: false };
+  };
+
   async function handleDownloadFile(fileId: string) {
     return downloadFileFromLearningScenarioAction({
       learningScenarioId: learningScenario.id,
@@ -142,6 +158,7 @@ export function LearningScenarioView({
         onShare={handleShareLearningScenario}
         onUnshare={handleUnshareLearningScenario}
         onAddTime={handleAddTimeToLearningScenario}
+        onAdjustTokenLimit={handleAdjustTokenLimitForLearningScenario}
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
         sharingDisabled={!learningScenario.name || learningScenario.name.trim().length === 0}
       />

@@ -26,6 +26,7 @@ import {
   extendCharacterShareExpirationAction,
   shareCharacterAction,
   unshareCharacterAction,
+  updateCharacterShareTokenPointsLimitAction,
 } from '../editor/[characterId]/actions';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners';
@@ -126,6 +127,16 @@ export function CharacterView({
           });
           if (result.success) {
             return { success: true, expiredAt: result.value.expiredAt };
+          }
+          return { success: false };
+        }}
+        onAdjustTokenLimit={async (data) => {
+          const result = await updateCharacterShareTokenPointsLimitAction({
+            characterId: character.id,
+            tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
+          });
+          if (result.success) {
+            return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
           }
           return { success: false };
         }}

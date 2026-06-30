@@ -26,6 +26,7 @@ import {
   unshareCharacterAction,
   updateCharacterAccessLevelAction,
   extendCharacterShareExpirationAction,
+  updateCharacterShareTokenPointsLimitAction,
   updateCharacterAction,
   uploadAvatarPictureForCharacterAction,
 } from './actions';
@@ -417,6 +418,16 @@ export function CharacterEdit({
             });
             if (result.success) {
               return { success: true, expiredAt: result.value.expiredAt };
+            }
+            return { success: false };
+          }}
+          onAdjustTokenLimit={async (data) => {
+            const result = await updateCharacterShareTokenPointsLimitAction({
+              characterId: character.id,
+              tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
+            });
+            if (result.success) {
+              return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
             }
             return { success: false };
           }}

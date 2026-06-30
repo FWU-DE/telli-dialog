@@ -25,6 +25,7 @@ import {
 } from './custom-chat-share-with-learners-limit-params';
 import { TimeLimitSelect } from './custom-chat-time-limit-select';
 import { TokenPointsLeftRing } from './custom-chat-token-points-left-ring';
+import { CustomChatAdjustTokenLimitButton } from './custom-chat-adjust-token-limit-button';
 import { CustomChatExtendShareExpirationButton } from './custom-chat-extend-share-expiration-button';
 
 const shareFormSchema = z.object({
@@ -46,6 +47,10 @@ interface CustomChatShareWithLearnersProps {
     success: boolean;
     expiredAt?: Date;
   }>;
+  onAdjustTokenLimit: (data: { tokenPointsPercentageLimit: number }) => Promise<{
+    success: boolean;
+    tokenPointsLimit?: number;
+  }>;
   shareUILink: string;
   sharingDisabled?: boolean;
 }
@@ -61,6 +66,7 @@ export function CustomChatShareWithLearners({
   onShare,
   onUnshare,
   onAddTime,
+  onAdjustTokenLimit,
   shareUILink,
   sharingDisabled = false,
 }: CustomChatShareWithLearnersProps) {
@@ -71,6 +77,7 @@ export function CustomChatShareWithLearners({
   const tToast = useTranslations('custom-chat.toasts');
 
   const [expiredAtOverride, setExpiredAtOverride] = useState<Date | null>(null);
+  const [tokenPointsLimitOverride, setTokenPointsLimitOverride] = useState<number | null>(null);
   const currentExpiredAt = expiredAtOverride ?? expiredAt;
 
   const sharedChatTimeLeft = calculateTimeLeft({
@@ -88,6 +95,8 @@ export function CustomChatShareWithLearners({
       (value) => value < maxAvailablePercentage,
     ),
   });
+  const currentTokenPointsPercentageLimit =
+    tokenPointsLimitOverride ?? preselectedTokenPointsPercentageLimit;
 
   const preselectedUsageTimeLimit =
     maxUsageTimeLimit !== null && usageTimeValuesInMinutes.includes(maxUsageTimeLimit)
@@ -149,10 +158,11 @@ export function CustomChatShareWithLearners({
                         <div className="pr-6">
                           <TokenPointsLimitSelect
                             ariaLabel={t('max-token-points')}
-                            defaultValue={String(getValuesShare('tokenPointsPercentageLimit'))}
+                            defaultValue={String(currentTokenPointsPercentageLimit)}
+                            value={String(currentTokenPointsPercentageLimit)}
                             onValueChange={() => {}}
                             disabled
-                            pointsPercentageValues={[preselectedTokenPointsPercentageLimit]}
+                            pointsPercentageValues={[currentTokenPointsPercentageLimit]}
                             maxAvailablePercentage={maxAvailablePercentage}
                           />
                         </div>
@@ -160,7 +170,7 @@ export function CustomChatShareWithLearners({
                       <div className="mt-3 flex-1 space-y-2">
                         <p className="text-sm">{t('token-points-left')}</p>
                         <TokenPointsLeftRing
-                          tokenLimit={(maxBudget * preselectedTokenPointsPercentageLimit) / 100}
+                          tokenLimit={(maxBudget * currentTokenPointsPercentageLimit) / 100}
                           spentTokens={budgetUsedBySharedChat}
                           spentLabel={t('token-points-spent')}
                           ariaLabel={t('token-points-left')}
@@ -168,7 +178,15 @@ export function CustomChatShareWithLearners({
                         />
                       </div>
                       <div className="mt-4 flex justify-center">
-                        <Button>{t('button-adjust-token-limit')}</Button>
+                        <CustomChatAdjustTokenLimitButton
+                          sharedChatActive={sharedChatActive}
+                          currentTokenPointsPercentageLimit={currentTokenPointsPercentageLimit}
+                          maxAvailablePercentage={maxAvailablePercentage}
+                          onAdjustTokenLimit={onAdjustTokenLimit}
+                          onAdjustTokenLimitSuccess={(newTokenPointsLimit) => {
+                            setTokenPointsLimitOverride(newTokenPointsLimit);
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>

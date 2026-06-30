@@ -8,6 +8,7 @@ import {
   dbCreateLearningScenarioShare,
   dbDeleteLearningScenarioByIdAndUser,
   dbExtendSharedLearningScenarioExpiration,
+  dbUpdateLearningScenarioShareTokenPointsLimit,
   dbGetAllAccessibleLearningScenarios,
   dbGetCommunityLearningScenarios,
   dbGetAllLearningScenariosByUser,
@@ -445,6 +446,52 @@ export async function extendLearningScenarioShareExpiration({
     learningScenarioId,
     user,
     additionalTimeInMinutes,
+  });
+
+  if (!updatedShare) {
+    throw new NotFoundError('No sharing found for this learning scenario');
+  }
+
+  return updatedShare;
+}
+
+export async function updateLearningScenarioShareTokenPointsLimit({
+  learningScenarioId,
+  tokenPointsPercentageLimit,
+  user,
+}: {
+  learningScenarioId: string;
+  tokenPointsPercentageLimit: number;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}) {
+  checkParameterUUID(learningScenarioId);
+  requireTeacherRole(user.userRole);
+
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user);
+  verifyReadAccess({ item: learningScenario, user });
+
+  if (tokenPointsPercentageLimit <= 0 || tokenPointsPercentageLimit > 100) {
+    throw new Error('token points percentage limit must be between 1 and 100');
+  }
+
+  const sharedConversations = await dbGetSharedLearningScenarioConversations({
+    learningScenarioId,
+    user,
+  });
+  const currentShare = sharedConversations[0];
+
+  if (!currentShare) {
+    throw new NotFoundError('No sharing found for this learning scenario');
+  }
+
+  if (tokenPointsPercentageLimit <= currentShare.tokenPointsLimit) {
+    throw new Error('token points percentage limit must be higher than current limit');
+  }
+
+  const updatedShare = await dbUpdateLearningScenarioShareTokenPointsLimit({
+    learningScenarioId,
+    user,
+    tokenPointsLimit: tokenPointsPercentageLimit,
   });
 
   if (!updatedShare) {

@@ -11,6 +11,7 @@ import {
   linkFileToCharacter,
   shareCharacter,
   unshareCharacter,
+  updateCharacterShareTokenPointsLimit,
   updateCharacter,
   updateCharacterAccessLevel,
   UpdateCharacterActionModel,
@@ -106,6 +107,25 @@ export async function extendCharacterShareExpirationAction({
   )({
     characterId,
     additionalTimeInMinutes,
+    user,
+  });
+}
+
+export async function updateCharacterShareTokenPointsLimitAction({
+  characterId,
+  tokenPointsPercentageLimit,
+}: {
+  characterId: string;
+  tokenPointsPercentageLimit: number;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'updateCharacterShareTokenPointsLimitAction',
+    updateCharacterShareTokenPointsLimit,
+  )({
+    characterId,
+    tokenPointsPercentageLimit,
     user,
   });
 }

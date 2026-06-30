@@ -583,3 +583,38 @@ export async function dbExtendSharedCharacterConversationExpiration({
 
   return updatedShare;
 }
+
+export async function dbUpdateCharacterShareTokenPointsLimit({
+  characterId,
+  user,
+  tokenPointsLimit,
+}: {
+  characterId: string;
+  user: Pick<UserModel, 'id'>;
+  tokenPointsLimit: number;
+}) {
+  const [latestUnstoppedShare] = await db
+    .select()
+    .from(sharedCharacterConversation)
+    .where(
+      and(
+        eq(sharedCharacterConversation.characterId, characterId),
+        eq(sharedCharacterConversation.userId, user.id),
+        isNull(sharedCharacterConversation.manuallyStoppedAt),
+      ),
+    )
+    .orderBy(desc(sharedCharacterConversation.startedAt))
+    .limit(1);
+
+  if (!latestUnstoppedShare) {
+    return undefined;
+  }
+
+  const [updatedShare] = await db
+    .update(sharedCharacterConversation)
+    .set({ tokenPointsLimit })
+    .where(eq(sharedCharacterConversation.id, latestUnstoppedShare.id))
+    .returning();
+
+  return updatedShare;
+}

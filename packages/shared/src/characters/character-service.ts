@@ -3,6 +3,7 @@ import { db } from '@shared/db';
 import {
   dbExtendSharedCharacterConversationExpiration,
   dbDeleteCharacterByIdAndUser,
+  dbUpdateCharacterShareTokenPointsLimit,
   dbGetAllAccessibleCharacters,
   dbGetAllCharactersByUser,
   dbGetCharacterById,
@@ -511,6 +512,52 @@ export const extendCharacterShareExpiration = async ({
     characterId,
     user,
     additionalTimeInMinutes,
+  });
+
+  if (!updatedShare) {
+    throw new NotFoundError('No sharing found for this character');
+  }
+
+  return updatedShare;
+};
+
+export const updateCharacterShareTokenPointsLimit = async ({
+  characterId,
+  tokenPointsPercentageLimit,
+  user,
+}: {
+  characterId: string;
+  tokenPointsPercentageLimit: number;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}) => {
+  checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
+
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyReadAccess({ item: character, user });
+
+  if (tokenPointsPercentageLimit <= 0 || tokenPointsPercentageLimit > 100) {
+    throw new Error('token points percentage limit must be between 1 and 100');
+  }
+
+  const sharedConversations = await dbGetSharedCharacterConversations({
+    characterId,
+    user,
+  });
+  const currentShare = sharedConversations[0];
+
+  if (!currentShare) {
+    throw new NotFoundError('No sharing found for this character');
+  }
+
+  if (tokenPointsPercentageLimit <= currentShare.tokenPointsLimit) {
+    throw new Error('token points percentage limit must be higher than current limit');
+  }
+
+  const updatedShare = await dbUpdateCharacterShareTokenPointsLimit({
+    characterId,
+    user,
+    tokenPointsLimit: tokenPointsPercentageLimit,
   });
 
   if (!updatedShare) {

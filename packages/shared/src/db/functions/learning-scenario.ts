@@ -461,6 +461,41 @@ export async function dbExtendSharedLearningScenarioExpiration({
   return updatedShare;
 }
 
+export async function dbUpdateLearningScenarioShareTokenPointsLimit({
+  learningScenarioId,
+  user,
+  tokenPointsLimit,
+}: {
+  learningScenarioId: string;
+  user: Pick<UserModel, 'id'>;
+  tokenPointsLimit: number;
+}) {
+  const [latestUnstoppedShare] = await db
+    .select()
+    .from(sharedLearningScenarioTable)
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioTable.userId, user.id),
+        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
+      ),
+    )
+    .orderBy(desc(sharedLearningScenarioTable.startedAt))
+    .limit(1);
+
+  if (!latestUnstoppedShare) {
+    return undefined;
+  }
+
+  const [updatedShare] = await db
+    .update(sharedLearningScenarioTable)
+    .set({ tokenPointsLimit })
+    .where(eq(sharedLearningScenarioTable.id, latestUnstoppedShare.id))
+    .returning();
+
+  return updatedShare;
+}
+
 /**
  * Create a new shared instance for a learning scenario.
  * Always inserts a new row; the caller is responsible for stopping any existing active share first.

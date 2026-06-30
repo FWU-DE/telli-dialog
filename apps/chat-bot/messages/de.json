@@ -503,7 +503,11 @@
       "additional-time-modal-title": "Nutzungszeit hinzufügen",
       "additional-time-modal-description": "Bitte auswählen, wie viel zusätzliche Nutzungszeit für diesen Chat hinzugefügt werden soll.",
       "additional-time-modal-aria": "Zusätzliche Nutzungszeit auswählen",
-      "button-add": "Hinzufügen"
+      "adjust-token-limit-modal-title": "Maximalen Verbrauch anpassen",
+      "adjust-token-limit-modal-description": "Bitte auswählen, wie viel des monatlichen Tokenvolumens für diesen Chat maximal verbraucht werden darf.",
+      "adjust-token-limit-modal-aria": "Neues maximales Tokenvolumen auswählen",
+      "button-add": "Hinzufügen",
+      "button-save": "Speichern"
     },
     "share-page": {
       "go-to": "Gehe auf",
@@ -528,7 +532,9 @@
       "stop-share-toast-success": "Das Teilen wurde erfolgreich beendet.",
       "stop-share-toast-error": "Das Teilen konnte nicht beendet werden.",
       "add-time-toast-success": "Die zusätzliche Nutzungszeit wurde erfolgreich hinzugefügt.",
-      "add-time-toast-error": "Die zusätzliche Nutzungszeit konnte nicht hinzugefügt werden."
+      "add-time-toast-error": "Die zusätzliche Nutzungszeit konnte nicht hinzugefügt werden.",
+      "adjust-token-limit-toast-success": "Das maximale Tokenvolumen wurde erfolgreich angepasst.",
+      "adjust-token-limit-toast-error": "Das maximale Tokenvolumen konnte nicht angepasst werden."
     },
     "files-and-links": {
       "heading": "Hintergrundwissen",
