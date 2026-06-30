@@ -71,6 +71,8 @@ export function resolveTokenPointsPercentageLimit({
 }
 
 type TokenPointsLimitSelectProps = {
+  label?: string;
+  ariaLabel?: string;
   defaultValue: string;
   onValueChange: (value: number) => void;
   disabled: boolean;
@@ -80,6 +82,8 @@ type TokenPointsLimitSelectProps = {
 };
 
 export function TokenPointsLimitSelect({
+  label,
+  ariaLabel,
   defaultValue,
   onValueChange,
   disabled,
@@ -97,13 +101,13 @@ export function TokenPointsLimitSelect({
   return (
     <div className="whitespace-nowrap flex-1">
       <Field>
-        <FieldLabel>{t('token-points')}</FieldLabel>
+        {label && <FieldLabel>{label}</FieldLabel>}
         <Select
           defaultValue={defaultValue}
           onValueChange={(value) => onValueChange(Number(value))}
           disabled={disabled}
         >
-          <SelectTrigger aria-label={t('token-points')} data-testid="token-points-select">
+          <SelectTrigger aria-label={ariaLabel} data-testid="token-points-select">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

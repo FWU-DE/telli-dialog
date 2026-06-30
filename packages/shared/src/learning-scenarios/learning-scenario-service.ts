@@ -63,6 +63,7 @@ import {
   getUsedBudgetInCentByUser,
 } from '@shared/users/user-budget-service';
 import { FederalStateModel } from '@shared/federal-states/types';
+import { dbGetLearningScenarioChatUsageInCentByLearningScenarioId } from '@shared/db/functions/token-points';
 
 export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -445,6 +446,7 @@ export async function getLearningScenarioForEditView({
   avatarPictureUrl: string | undefined;
   maxBudget: number | null;
   usedBudget: number;
+  budgetUsedBySharedChat: number;
 }> {
   checkParameterUUID(learningScenarioId);
   requireTeacherRole(user.userRole);
@@ -470,7 +472,23 @@ export async function getLearningScenarioForEditView({
     user,
   });
 
-  return { learningScenario, relatedFiles, avatarPictureUrl, maxBudget, usedBudget };
+  let budgetUsedBySharedChat = 0;
+  if (learningScenario.startedAt && learningScenario.expiredAt) {
+    budgetUsedBySharedChat = await dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
+      learningScenarioId: learningScenario.id,
+      expiredAt: learningScenario.expiredAt,
+      startedAt: learningScenario.startedAt,
+    });
+  }
+
+  return {
+    learningScenario,
+    relatedFiles,
+    avatarPictureUrl,
+    maxBudget,
+    usedBudget,
+    budgetUsedBySharedChat,
+  };
 }
 
 /**

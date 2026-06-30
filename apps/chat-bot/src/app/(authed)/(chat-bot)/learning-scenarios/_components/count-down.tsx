@@ -74,7 +74,7 @@ function getColorByLeftAndTotalTime({
   const percentage = leftTimeInSeconds / totalTimeInSeconds;
 
   if (percentage > 0.2) {
-    return 'text-[#00594f] bg-[#6CE9D70D]';
+    return 'text-dark-green bg-light-green';
   }
   return 'text-dark-red bg-light-red';
 }

@@ -40,6 +40,7 @@ export function LearningScenarioView({
   initialLinks,
   usedBudget,
   maxBudget,
+  budgetUsedBySharedChat,
 }: {
   learningScenario: LearningScenarioOptionalShareDataModel;
   fileMappings: FileModel[];
@@ -47,6 +48,7 @@ export function LearningScenarioView({
   initialLinks: WebSource[];
   usedBudget: number;
   maxBudget: number;
+  budgetUsedBySharedChat: number;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -120,6 +122,7 @@ export function LearningScenarioView({
         tokenPointsLimit={learningScenario.tokenPointsLimit}
         usedBudget={usedBudget}
         maxBudget={maxBudget}
+        budgetUsedBySharedChat={budgetUsedBySharedChat}
         onShare={handleShareLearningScenario}
         onUnshare={handleUnshareLearningScenario}
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}

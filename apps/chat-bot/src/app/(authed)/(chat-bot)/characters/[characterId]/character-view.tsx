@@ -40,6 +40,7 @@ export function CharacterView({
   avatarPictureUrl,
   usedBudget,
   maxBudget,
+  budgetUsedBySharedChat,
 }: {
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
@@ -47,6 +48,7 @@ export function CharacterView({
   avatarPictureUrl?: string;
   usedBudget: number;
   maxBudget: number;
+  budgetUsedBySharedChat: number;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -100,6 +102,7 @@ export function CharacterView({
         maxUsageTimeLimit={character.maxUsageTimeLimit}
         tokenPointsLimit={character.tokenPointsLimit}
         usedBudget={usedBudget}
+        budgetUsedBySharedChat={budgetUsedBySharedChat}
         maxBudget={maxBudget}
         onShare={async (data) => {
           const result = await shareCharacterAction({

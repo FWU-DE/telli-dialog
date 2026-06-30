@@ -9,7 +9,7 @@ import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { Card, CardContent } from '@ui/components/card';
 import { Button } from '@ui/components/button';
-import { ShareFatIcon, StopIcon } from '@phosphor-icons/react';
+import { ShareFatIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import CountDownTimer from '../../../app/(authed)/(chat-bot)/learning-scenarios/_components/count-down';
 import { RichText } from '../../common/rich-text';
 import { z } from 'zod';
@@ -23,6 +23,7 @@ import {
   usageTimeValuesInMinutes,
 } from './custom-chat-share-with-learners-limit-params';
 import { TimeLimitSelect } from './custom-chat-time-limit-select';
+import { TokenPointsLeftRing } from './custom-chat-token-points-left-ring';
 
 const shareFormSchema = z.object({
   tokenPointsPercentageLimit: z.coerce.number(),
@@ -35,6 +36,7 @@ interface CustomChatShareWithLearnersProps {
   maxUsageTimeLimit: number | null;
   tokenPointsLimit: number | null;
   usedBudget: number;
+  budgetUsedBySharedChat: number;
   maxBudget: number;
   onShare: (data: z.infer<typeof shareFormSchema>) => Promise<{ success: boolean }>;
   onUnshare: () => Promise<{ success: boolean }>;
@@ -48,6 +50,7 @@ export function CustomChatShareWithLearners({
   maxUsageTimeLimit,
   tokenPointsLimit,
   usedBudget,
+  budgetUsedBySharedChat,
   maxBudget,
   onShare,
   onUnshare,
@@ -75,11 +78,16 @@ export function CustomChatShareWithLearners({
     ),
   });
 
+  const preselectedUsageTimeLimit =
+    maxUsageTimeLimit !== null && usageTimeValuesInMinutes.includes(maxUsageTimeLimit)
+      ? maxUsageTimeLimit
+      : 45;
+
   const { getValues: getValuesShare, setValue: setShareValue } = useForm({
     resolver: zodResolver(shareFormSchema),
     defaultValues: {
       tokenPointsPercentageLimit: preselectedTokenPointsPercentageLimit,
-      usageTimeLimit: maxUsageTimeLimit ?? 45,
+      usageTimeLimit: preselectedUsageTimeLimit,
     },
   });
 
@@ -119,24 +127,111 @@ export function CustomChatShareWithLearners({
           <p className="mb-4">
             <RichText>{(tags) => t.rich('description', tags)}</RichText>
           </p>
-          <div className="flex flex-wrap gap-4 items-end">
-            <TokenPointsLimitSelect
-              defaultValue={String(getValuesShare('tokenPointsPercentageLimit'))}
-              onValueChange={(value) => setShareValue('tokenPointsPercentageLimit', value)}
-              disabled={sharedChatActive || maxAvailablePercentage <= 0}
-              pointsPercentageValues={tokenPointsPercentageValues}
-              maxAvailablePercentage={maxAvailablePercentage}
-            />
-            <TimeLimitSelect
-              defaultValue={String(getValuesShare('usageTimeLimit'))}
-              onChange={(value) => setShareValue('usageTimeLimit', value)}
-              disabled={sharedChatActive}
-              usageTimeValuesInMinutes={usageTimeValuesInMinutes}
-            />
+          {sharedChatActive ? (
+            <>
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch w-full">
+                <div className="flex flex-col lg:flex-row gap-4 items-stretch w-full lg:w-1/2">
+                  <Card className="bg-background-2 min-w-0 flex-1 py-4">
+                    <CardContent className="px-2 h-full flex flex-col">
+                      <div className="space-y-2">
+                        <p className="text-sm">{t('max-token-points')}</p>
+                        <div className="pr-6">
+                          <TokenPointsLimitSelect
+                            defaultValue={String(getValuesShare('tokenPointsPercentageLimit'))}
+                            onValueChange={() => {}}
+                            disabled
+                            pointsPercentageValues={[preselectedTokenPointsPercentageLimit]}
+                            maxAvailablePercentage={maxAvailablePercentage}
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-3 flex-1 space-y-2">
+                        <p className="text-sm">{t('token-points-left')}</p>
+                        <TokenPointsLeftRing
+                          tokenLimit={preselectedTokenPointsPercentageLimit}
+                          spentTokens={budgetUsedBySharedChat}
+                          spentLabel={t('token-points-spent')}
+                          ariaLabel={t('token-points-left')}
+                          className="w-6 h-6"
+                        />
+                      </div>
+                      <div className="mt-4 flex justify-center">
+                        <Button>{t('button-adjust-token-limit')}</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-background-2 min-w-0 flex-1 py-4">
+                    <CardContent className="px-2 h-full flex flex-col">
+                      <div className="space-y-2">
+                        <p className="text-sm">{t('max-usage-time')}</p>
+                        <div className="pr-6">
+                          <TimeLimitSelect
+                            defaultValue={String(getValuesShare('usageTimeLimit'))}
+                            onChange={() => {}}
+                            disabled
+                            usageTimeValuesInMinutes={[preselectedUsageTimeLimit]}
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-3 flex-1 space-y-2">
+                        <p className="text-sm">{t('usage-time-left')}</p>
+                        <CountDownTimer
+                          leftTimeInSeconds={sharedChatTimeLeft}
+                          totalTimeInSeconds={(maxUsageTimeLimit ?? 0) * 60}
+                          className="!bg-transparent"
+                          stopWatchClassName="w-4 h-4"
+                        />
+                      </div>
+                      <div className="mt-4 flex justify-center">
+                        <Button>{t('button-additional-time')}</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                <div className="w-full lg:w-1/2 lg:shrink-0 lg:flex lg:items-center lg:justify-center">
+                  <div className="flex flex-col gap-3">
+                    <Button
+                      type="button"
+                      onClick={() => router.push(shareUILink)}
+                      aria-label={t('share')}
+                      data-testid="open-share-page-button"
+                    >
+                      <ShareFatIcon className="size-5" /> {t('button-to-share-page')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={handleStopSharing}
+                      aria-label={t('button-stop')}
+                      data-testid="stop-share-button"
+                    >
+                      <TrashSimpleIcon className="size-5" /> {t('button-close-session')}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-wrap gap-4 items-end">
+              <TokenPointsLimitSelect
+                label={t('token-points')}
+                ariaLabel={t('token-points')}
+                defaultValue={String(getValuesShare('tokenPointsPercentageLimit'))}
+                onValueChange={(value) => setShareValue('tokenPointsPercentageLimit', value)}
+                disabled={sharedChatActive || maxAvailablePercentage <= 0}
+                pointsPercentageValues={tokenPointsPercentageValues}
+                maxAvailablePercentage={maxAvailablePercentage}
+              />
+              <TimeLimitSelect
+                label={t('max-usage-time')}
+                ariaLabel={t('max-usage-time')}
+                defaultValue={String(getValuesShare('usageTimeLimit'))}
+                onChange={(value) => setShareValue('usageTimeLimit', value)}
+                disabled={sharedChatActive}
+                usageTimeValuesInMinutes={usageTimeValuesInMinutes}
+              />
+              <div className="grow" />
 
-            <div className="grow" />
-
-            {!sharedChatActive && (
               <Button
                 type="button"
                 onClick={handleStartSharing}
@@ -146,39 +241,8 @@ export function CustomChatShareWithLearners({
                 <ShareFatIcon className="size-5" />
                 {t('button-start')}
               </Button>
-            )}
-
-            {sharedChatActive && (
-              <CountDownTimer
-                leftTimeInSeconds={sharedChatTimeLeft}
-                totalTimeInSeconds={(maxUsageTimeLimit ?? 0) * 60}
-                stopWatchClassName="w-4 h-4"
-              />
-            )}
-
-            {sharedChatActive && (
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  onClick={handleStopSharing}
-                  aria-label={t('button-stop')}
-                  size="icon-round"
-                  data-testid="stop-share-button"
-                >
-                  <StopIcon className="size-5" />
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => router.push(shareUILink)}
-                  aria-label={t('share')}
-                  size="icon-round"
-                  data-testid="open-share-page-button"
-                >
-                  <ShareFatIcon className="size-5" />
-                </Button>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

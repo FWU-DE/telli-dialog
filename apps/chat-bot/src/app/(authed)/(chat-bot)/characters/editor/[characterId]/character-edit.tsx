@@ -131,6 +131,7 @@ export function CharacterEdit({
   avatarPictureUrl,
   usedBudget,
   maxBudget,
+  budgetUsedBySharedChat,
 }: {
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
@@ -138,6 +139,7 @@ export function CharacterEdit({
   avatarPictureUrl?: string;
   usedBudget: number;
   maxBudget: number;
+  budgetUsedBySharedChat: number;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -391,6 +393,7 @@ export function CharacterEdit({
           maxUsageTimeLimit={character.maxUsageTimeLimit}
           tokenPointsLimit={character.tokenPointsLimit}
           usedBudget={usedBudget}
+          budgetUsedBySharedChat={budgetUsedBySharedChat}
           maxBudget={maxBudget}
           onShare={async (data) => {
             const result = await shareCharacterAction({

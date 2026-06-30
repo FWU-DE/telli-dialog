@@ -68,6 +68,7 @@ import {
   filterCommunitySharedByAssociatedSchool,
   filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
+import { dbGetSharedCharacterChatUsageInCentByCharacterId } from '@shared/db/functions/token-points';
 
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
@@ -541,6 +542,7 @@ export const getCharacterForEditView = async ({
   maybeSignedPictureUrl: string | undefined;
   maxBudget: number | null;
   usedBudget: number;
+  budgetUsedBySharedChat: number;
 }> => {
   checkParameterUUID(characterId);
   requireTeacherRole(user.userRole);
@@ -566,7 +568,23 @@ export const getCharacterForEditView = async ({
     user,
   });
 
-  return { character, relatedFiles, maybeSignedPictureUrl, maxBudget, usedBudget };
+  let budgetUsedBySharedChat = 0;
+  if (character.startedAt && character.expiredAt) {
+    budgetUsedBySharedChat = await dbGetSharedCharacterChatUsageInCentByCharacterId({
+      characterId: character.id,
+      expiredAt: character.expiredAt,
+      startedAt: character.startedAt,
+    });
+  }
+
+  return {
+    character,
+    relatedFiles,
+    maybeSignedPictureUrl,
+    maxBudget,
+    usedBudget,
+    budgetUsedBySharedChat,
+  };
 };
 
 /**

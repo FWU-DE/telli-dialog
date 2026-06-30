@@ -2,7 +2,7 @@ import { CharacterWithShareDataModel, LearningScenarioWithShareDataModel } from 
 import { type UserAndContext } from '@/auth/types';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
-  dbGetSharedChatUsageInCentBySharedChatId,
+  dbGetLearningScenarioChatUsageInCentByLearningScenarioId,
 } from '@shared/db/functions/token-points';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import {
@@ -42,9 +42,9 @@ export async function sharedLearningScenarioChatHasReachedTokenPointsLimit({
     return true;
   }
 
-  const sharedChatUsageInCent = await dbGetSharedChatUsageInCentBySharedChatId({
-    sharedChatId: learningScenario.id,
-    maxUsageTimeLimit: learningScenario.maxUsageTimeLimit,
+  const sharedChatUsageInCent = await dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
+    learningScenarioId: learningScenario.id,
+    expiredAt: learningScenario.expiredAt,
     startedAt: learningScenario.startedAt,
   });
 
@@ -73,10 +73,9 @@ export async function sharedCharacterChatHasReachedTokenPointsLimit({
   if (sharedChatHasExpired(character)) {
     return true;
   }
-
   const characterUsageInCent = await dbGetSharedCharacterChatUsageInCentByCharacterId({
     characterId: character.id,
-    maxUsageTimeLimit: character.maxUsageTimeLimit,
+    expiredAt: character.expiredAt,
     startedAt: character.startedAt,
   });
 

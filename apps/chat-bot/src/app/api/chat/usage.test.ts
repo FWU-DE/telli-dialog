@@ -12,7 +12,7 @@ vi.mock('@shared/users/user-budget-service', () => ({
 
 import { sharedChatHasExpired } from './usage';
 import { getMaxBudgetInCentByUser } from '@shared/users/user-budget-service';
-import { dbGetSharedChatUsageInCentBySharedChatId } from '@shared/db/functions/token-points';
+import { dbGetLearningScenarioChatUsageInCentByLearningScenarioId } from '@shared/db/functions/token-points';
 
 describe('sharedChatHasExpired', () => {
   const now = new Date('2024-06-01T10:00:00.000Z');
@@ -95,7 +95,7 @@ describe('coverage for uncovered branches', () => {
       tokenPointsLimit: 10,
     };
 
-    vi.mocked(dbGetSharedChatUsageInCentBySharedChatId).mockResolvedValue(50); // below 100 (10% of 1000)
+    vi.mocked(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).mockResolvedValue(50); // below 100 (10% of 1000)
     vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
 
     const result = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
