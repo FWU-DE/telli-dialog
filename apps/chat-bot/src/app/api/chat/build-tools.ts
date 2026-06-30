@@ -65,7 +65,7 @@ function formatRetrievedChunksForTool(chunks: Awaited<ReturnType<typeof retrieve
   };
 
   if (chunks.length === 0) {
-    response.error = 'Keine passenden Textstellen gefunden.';
+    response.error = 'No matching chunks found.';
   }
 
   return JSON.stringify(response);
@@ -95,9 +95,9 @@ function formatEntireFileForTool(file: FileModelAndContent) {
   };
 
   if (!content) {
-    response.error = 'Keine verwertbaren Inhalte gefunden.';
+    response.error = 'No usable content found.';
   } else if (truncated) {
-    response.error = 'Dateiinhalt wurde wegen des Zeichenlimits gekürzt.';
+    response.error = 'File content was truncated to fit the character limit.';
   }
 
   return JSON.stringify(response);
@@ -115,12 +115,12 @@ function formatWebScrapedContentForTool(result: WebSource) {
   };
 
   if (result.error) {
-    response.error = 'Fehler beim Abrufen der Seite.';
+    response.error = 'Failed to fetch the page.';
     return JSON.stringify(response);
   }
 
   if (!content) {
-    response.error = 'Keine verwertbaren Inhalte gefunden.';
+    response.error = 'No usable content found.';
     return JSON.stringify(response);
   }
 
