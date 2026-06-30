@@ -23,6 +23,7 @@ import { useToast } from '@/components/common/toast';
 import { createNewCharacterAction } from '../actions';
 import {
   downloadFileFromCharacterAction,
+  extendCharacterShareExpirationAction,
   shareCharacterAction,
   unshareCharacterAction,
 } from '../editor/[characterId]/actions';
@@ -117,6 +118,16 @@ export function CharacterView({
             characterId: character.id,
           });
           return result;
+        }}
+        onAddTime={async (data) => {
+          const result = await extendCharacterShareExpirationAction({
+            characterId: character.id,
+            additionalTimeInMinutes: data.additionalTimeInMinutes,
+          });
+          if (result.success) {
+            return { success: true, expiredAt: result.value.expiredAt };
+          }
+          return { success: false };
         }}
         shareUILink={`/characters/editor/${character.id}/share`}
       />

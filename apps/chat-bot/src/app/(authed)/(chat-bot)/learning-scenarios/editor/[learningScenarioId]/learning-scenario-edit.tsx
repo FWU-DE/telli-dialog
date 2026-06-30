@@ -29,6 +29,7 @@ import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { useRouter } from 'next/navigation';
 import {
+  extendLearningScenarioShareExpirationAction,
   removeFileFromLearningScenarioAction,
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
@@ -428,6 +429,17 @@ export function LearningScenarioEdit({
           onUnshare={async () =>
             await unshareLearningScenarioAction({
               learningScenarioId: learningScenario.id,
+            })
+          }
+          onAddTime={async (data) =>
+            await extendLearningScenarioShareExpirationAction({
+              learningScenarioId: learningScenario.id,
+              additionalTimeInMinutes: data.additionalTimeInMinutes,
+            }).then((result) => {
+              if (result.success) {
+                return { success: true, expiredAt: result.value.expiredAt };
+              }
+              return { success: false };
             })
           }
           shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}

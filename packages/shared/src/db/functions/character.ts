@@ -544,3 +544,42 @@ export async function dbGetSharedCharacterConversations({
   const activeShare = latestActiveCharacterShare(user);
   return db.select().from(activeShare).where(eq(activeShare.characterId, characterId));
 }
+
+export async function dbExtendSharedCharacterConversationExpiration({
+  characterId,
+  user,
+  additionalTimeInMinutes,
+}: {
+  characterId: string;
+  user: Pick<UserModel, 'id'>;
+  additionalTimeInMinutes: number;
+}) {
+  const [latestUnstoppedShare] = await db
+    .select()
+    .from(sharedCharacterConversation)
+    .where(
+      and(
+        eq(sharedCharacterConversation.characterId, characterId),
+        eq(sharedCharacterConversation.userId, user.id),
+        isNull(sharedCharacterConversation.manuallyStoppedAt),
+      ),
+    )
+    .orderBy(desc(sharedCharacterConversation.startedAt))
+    .limit(1);
+
+  if (!latestUnstoppedShare) {
+    return undefined;
+  }
+
+  const now = new Date();
+  const baseDate = latestUnstoppedShare.expiredAt > now ? latestUnstoppedShare.expiredAt : now;
+  const newExpiredAt = new Date(baseDate.getTime() + additionalTimeInMinutes * 60 * 1000);
+
+  const [updatedShare] = await db
+    .update(sharedCharacterConversation)
+    .set({ expiredAt: newExpiredAt })
+    .where(eq(sharedCharacterConversation.id, latestUnstoppedShare.id))
+    .returning();
+
+  return updatedShare;
+}

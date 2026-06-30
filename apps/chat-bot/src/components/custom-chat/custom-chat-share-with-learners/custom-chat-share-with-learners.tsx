@@ -3,6 +3,7 @@
 import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
@@ -24,6 +25,7 @@ import {
 } from './custom-chat-share-with-learners-limit-params';
 import { TimeLimitSelect } from './custom-chat-time-limit-select';
 import { TokenPointsLeftRing } from './custom-chat-token-points-left-ring';
+import { CustomChatExtendShareExpirationButton } from './custom-chat-extend-share-expiration-button';
 
 const shareFormSchema = z.object({
   tokenPointsPercentageLimit: z.coerce.number(),
@@ -40,6 +42,10 @@ interface CustomChatShareWithLearnersProps {
   maxBudget: number;
   onShare: (data: z.infer<typeof shareFormSchema>) => Promise<{ success: boolean }>;
   onUnshare: () => Promise<{ success: boolean }>;
+  onAddTime: (data: { additionalTimeInMinutes: number }) => Promise<{
+    success: boolean;
+    expiredAt?: Date;
+  }>;
   shareUILink: string;
   sharingDisabled?: boolean;
 }
@@ -54,6 +60,7 @@ export function CustomChatShareWithLearners({
   maxBudget,
   onShare,
   onUnshare,
+  onAddTime,
   shareUILink,
   sharingDisabled = false,
 }: CustomChatShareWithLearnersProps) {
@@ -63,10 +70,14 @@ export function CustomChatShareWithLearners({
   const t = useTranslations('custom-chat.share-with-learners');
   const tToast = useTranslations('custom-chat.toasts');
 
+  const [expiredAtOverride, setExpiredAtOverride] = useState<Date | null>(null);
+  const currentExpiredAt = expiredAtOverride ?? expiredAt;
+
   const sharedChatTimeLeft = calculateTimeLeft({
-    expiredAt,
+    expiredAt: currentExpiredAt,
     manuallyStoppedAt,
   });
+
   const sharedChatActive = sharedChatTimeLeft > 0;
 
   const maxAvailablePercentage = getMaxAvailablePercentage({ usedBudget, maxBudget });
@@ -185,7 +196,14 @@ export function CustomChatShareWithLearners({
                         />
                       </div>
                       <div className="mt-4 flex justify-center">
-                        <Button>{t('button-additional-time')}</Button>
+                        <CustomChatExtendShareExpirationButton
+                          sharedChatActive={sharedChatActive}
+                          preselectedUsageTimeLimit={preselectedUsageTimeLimit}
+                          onAddTime={onAddTime}
+                          onAddTimeSuccess={(newExpiredAt) => {
+                            setExpiredAtOverride(newExpiredAt);
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>

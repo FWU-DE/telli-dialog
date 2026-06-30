@@ -4,6 +4,7 @@ import { AccessLevel, LearningScenarioSelectModel } from '@shared/db/schema';
 import { ShareWithLearnersLimitParams } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners-limit-params';
 import { runServerAction } from '@shared/actions/run-server-action';
 import {
+  extendLearningScenarioShareExpiration,
   removeFileFromLearningScenario,
   shareLearningScenario,
   unshareLearningScenario,
@@ -82,6 +83,25 @@ export async function unshareLearningScenarioAction({
     unshareLearningScenario,
   )({
     learningScenarioId,
+    user,
+  });
+}
+
+export async function extendLearningScenarioShareExpirationAction({
+  learningScenarioId,
+  additionalTimeInMinutes,
+}: {
+  learningScenarioId: string;
+  additionalTimeInMinutes: number;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'extendLearningScenarioShareExpirationAction',
+    extendLearningScenarioShareExpiration,
+  )({
+    learningScenarioId,
+    additionalTimeInMinutes,
     user,
   });
 }

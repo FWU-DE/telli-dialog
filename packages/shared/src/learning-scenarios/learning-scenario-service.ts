@@ -7,6 +7,7 @@ import {
 import {
   dbCreateLearningScenarioShare,
   dbDeleteLearningScenarioByIdAndUser,
+  dbExtendSharedLearningScenarioExpiration,
   dbGetAllAccessibleLearningScenarios,
   dbGetCommunityLearningScenarios,
   dbGetAllLearningScenariosByUser,
@@ -416,6 +417,38 @@ export async function unshareLearningScenario({
 
   if (!updatedShare) {
     throw new Error('Could not unshare learning scenario');
+  }
+
+  return updatedShare;
+}
+
+export async function extendLearningScenarioShareExpiration({
+  learningScenarioId,
+  additionalTimeInMinutes,
+  user,
+}: {
+  learningScenarioId: string;
+  additionalTimeInMinutes: number;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}) {
+  checkParameterUUID(learningScenarioId);
+  requireTeacherRole(user.userRole);
+
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user);
+  verifyReadAccess({ item: learningScenario, user });
+
+  if (additionalTimeInMinutes <= 0 || additionalTimeInMinutes > 30 * 24 * 60) {
+    throw new Error('additional time must be between 1 and 43200 minutes');
+  }
+
+  const updatedShare = await dbExtendSharedLearningScenarioExpiration({
+    learningScenarioId,
+    user,
+    additionalTimeInMinutes,
+  });
+
+  if (!updatedShare) {
+    throw new NotFoundError('No sharing found for this learning scenario');
   }
 
   return updatedShare;

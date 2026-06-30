@@ -422,6 +422,45 @@ export function dbGetSharedLearningScenarioConversations({
     .where(eq(activeShare.learningScenarioId, learningScenarioId));
 }
 
+export async function dbExtendSharedLearningScenarioExpiration({
+  learningScenarioId,
+  user,
+  additionalTimeInMinutes,
+}: {
+  learningScenarioId: string;
+  user: Pick<UserModel, 'id'>;
+  additionalTimeInMinutes: number;
+}) {
+  const [latestUnstoppedShare] = await db
+    .select()
+    .from(sharedLearningScenarioTable)
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioTable.userId, user.id),
+        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
+      ),
+    )
+    .orderBy(desc(sharedLearningScenarioTable.startedAt))
+    .limit(1);
+
+  if (!latestUnstoppedShare) {
+    return undefined;
+  }
+
+  const now = new Date();
+  const baseDate = latestUnstoppedShare.expiredAt > now ? latestUnstoppedShare.expiredAt : now;
+  const newExpiredAt = new Date(baseDate.getTime() + additionalTimeInMinutes * 60 * 1000);
+
+  const [updatedShare] = await db
+    .update(sharedLearningScenarioTable)
+    .set({ expiredAt: newExpiredAt })
+    .where(eq(sharedLearningScenarioTable.id, latestUnstoppedShare.id))
+    .returning();
+
+  return updatedShare;
+}
+
 /**
  * Create a new shared instance for a learning scenario.
  * Always inserts a new row; the caller is responsible for stopping any existing active share first.

@@ -24,6 +24,7 @@ import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners';
 import {
+  extendLearningScenarioShareExpirationAction,
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
 } from '../editor/[learningScenarioId]/actions';
@@ -94,6 +95,21 @@ export function LearningScenarioView({
     return result;
   };
 
+  const handleAddTimeToLearningScenario = async ({
+    additionalTimeInMinutes,
+  }: {
+    additionalTimeInMinutes: number;
+  }) => {
+    const result = await extendLearningScenarioShareExpirationAction({
+      learningScenarioId: learningScenario.id,
+      additionalTimeInMinutes,
+    });
+    if (result.success) {
+      return { success: true, expiredAt: result.value.expiredAt };
+    }
+    return { success: false };
+  };
+
   async function handleDownloadFile(fileId: string) {
     return downloadFileFromLearningScenarioAction({
       learningScenarioId: learningScenario.id,
@@ -125,6 +141,7 @@ export function LearningScenarioView({
         budgetUsedBySharedChat={budgetUsedBySharedChat}
         onShare={handleShareLearningScenario}
         onUnshare={handleUnshareLearningScenario}
+        onAddTime={handleAddTimeToLearningScenario}
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
         sharingDisabled={!learningScenario.name || learningScenario.name.trim().length === 0}
       />

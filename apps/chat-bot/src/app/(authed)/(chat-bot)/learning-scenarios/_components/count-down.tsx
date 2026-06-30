@@ -20,18 +20,28 @@ export default function CountDownTimer({
   const t = useTranslations('sharing');
   const [timeRemaining, setTimeRemaining] = React.useState(Math.max(leftTimeInSeconds, 0));
 
+  // synchronize internal state with changes to leftTimeInSeconds (i.e. extend usage time)
+  React.useEffect(() => {
+    const resetTimer = window.setTimeout(() => {
+      setTimeRemaining(Math.max(leftTimeInSeconds, 0));
+    }, 0);
+
+    return () => window.clearTimeout(resetTimer);
+  }, [leftTimeInSeconds]);
+
+  // countdown timer
   React.useEffect(() => {
     const timer = setInterval(() => {
       setTimeRemaining((prevTime) => {
         if (prevTime <= 1) {
-          clearInterval(timer);
           return 0;
         }
         return prevTime - 1;
       });
     }, 1000);
+
     return () => clearInterval(timer);
-  }, [leftTimeInSeconds]);
+  }, []);
 
   const textClassName = getColorByLeftAndTotalTime({ leftTimeInSeconds, totalTimeInSeconds });
 

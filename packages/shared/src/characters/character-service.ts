@@ -1,6 +1,7 @@
 import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import {
+  dbExtendSharedCharacterConversationExpiration,
   dbDeleteCharacterByIdAndUser,
   dbGetAllAccessibleCharacters,
   dbGetAllCharactersByUser,
@@ -485,6 +486,38 @@ export const unshareCharacter = async ({
   }
 
   return updatedCharacter;
+};
+
+export const extendCharacterShareExpiration = async ({
+  characterId,
+  additionalTimeInMinutes,
+  user,
+}: {
+  characterId: string;
+  additionalTimeInMinutes: number;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}) => {
+  checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
+
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyReadAccess({ item: character, user });
+
+  if (additionalTimeInMinutes <= 0 || additionalTimeInMinutes > 30 * 24 * 60) {
+    throw new Error('additional time must be between 1 and 43200 minutes');
+  }
+
+  const updatedShare = await dbExtendSharedCharacterConversationExpiration({
+    characterId,
+    user,
+    additionalTimeInMinutes,
+  });
+
+  if (!updatedShare) {
+    throw new NotFoundError('No sharing found for this character');
+  }
+
+  return updatedShare;
 };
 
 /**

@@ -7,6 +7,7 @@ import {
   deleteCharacter,
   deleteFileMappingAndEntity,
   downloadFileFromCharacter,
+  extendCharacterShareExpiration,
   linkFileToCharacter,
   shareCharacter,
   unshareCharacter,
@@ -87,6 +88,25 @@ export async function unshareCharacterAction({ characterId }: { characterId: str
   )({
     characterId,
     user: user,
+  });
+}
+
+export async function extendCharacterShareExpirationAction({
+  characterId,
+  additionalTimeInMinutes,
+}: {
+  characterId: string;
+  additionalTimeInMinutes: number;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'extendCharacterShareExpirationAction',
+    extendCharacterShareExpiration,
+  )({
+    characterId,
+    additionalTimeInMinutes,
+    user,
   });
 }
 
