@@ -216,7 +216,7 @@ export async function buildTools({
     const webSearchToolDefinition: ToolDefinition = {
       name: 'web_search',
       description:
-        'Search the web for current information. Call this tool immediately and without asking for permission whenever the user asks about recent events, news, current data (weather, prices, scores), or any facts that may have changed after your knowledge cutoff. Call this tool at most ONCE per user message. After receiving the results, synthesize them into a direct answer — do not call the tool again with a different query.',
+        'Search the web for current information. Call this tool immediately and without asking for permission whenever the user asks about recent events, news, current data (weather, prices, scores), or any facts that may have changed after your knowledge cutoff. After receiving the results, synthesize them into a direct answer — do not call the tool again with a different query.',
       parameters: {
         type: 'object',
         properties: {
@@ -329,7 +329,7 @@ export async function buildTools({
             truncated: false,
             characterCount: 0,
             maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
-            error: 'Fehlender Dateiname.',
+            error: 'Missing file name.',
           };
 
           return JSON.stringify(response);
@@ -344,7 +344,7 @@ export async function buildTools({
             truncated: false,
             characterCount: 0,
             maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
-            error: 'Datei nicht gefunden.',
+            error: 'File not found.',
           };
 
           return JSON.stringify(response);
