@@ -25,7 +25,10 @@ export function TokenPointsLeftRing({
   minimumVisiblePercentage = 3,
 }: TokenPointsLeftRingProps) {
   const remainingPercentageRaw =
-    Number.isFinite(spentTokens) && spentTokens >= 0
+    Number.isFinite(tokenLimit) &&
+    tokenLimit > 0 &&
+    Number.isFinite(spentTokens) &&
+    spentTokens >= 0
       ? ((tokenLimit - spentTokens) / tokenLimit) * 100
       : 0;
   const isSpent = remainingPercentageRaw <= 0;

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@shared/db/functions/token-points', () => ({
-  dbGetSharedChatUsageInCentBySharedChatId: vi.fn(),
+  dbGetLearningScenarioChatUsageInCentByLearningScenarioId: vi.fn(),
   dbGetSharedCharacterChatUsageInCentByCharacterId: vi.fn(),
 }));
 

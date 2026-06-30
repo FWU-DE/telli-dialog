@@ -137,6 +137,7 @@ export function CustomChatShareWithLearners({
                         <p className="text-sm">{t('max-token-points')}</p>
                         <div className="pr-6">
                           <TokenPointsLimitSelect
+                            ariaLabel={t('max-token-points')}
                             defaultValue={String(getValuesShare('tokenPointsPercentageLimit'))}
                             onValueChange={() => {}}
                             disabled
@@ -148,7 +149,7 @@ export function CustomChatShareWithLearners({
                       <div className="mt-3 flex-1 space-y-2">
                         <p className="text-sm">{t('token-points-left')}</p>
                         <TokenPointsLeftRing
-                          tokenLimit={preselectedTokenPointsPercentageLimit}
+                          tokenLimit={(maxBudget * preselectedTokenPointsPercentageLimit) / 100}
                           spentTokens={budgetUsedBySharedChat}
                           spentLabel={t('token-points-spent')}
                           ariaLabel={t('token-points-left')}
@@ -166,6 +167,7 @@ export function CustomChatShareWithLearners({
                         <p className="text-sm">{t('max-usage-time')}</p>
                         <div className="pr-6">
                           <TimeLimitSelect
+                            ariaLabel={t('max-usage-time')}
                             defaultValue={String(getValuesShare('usageTimeLimit'))}
                             onChange={() => {}}
                             disabled
