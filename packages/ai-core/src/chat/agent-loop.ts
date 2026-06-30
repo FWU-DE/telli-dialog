@@ -45,6 +45,12 @@ export function runAgentLoop({
         const pendingToolCalls: ToolCall[] = [];
         let iterationText = '';
 
+        // Add separator before starting a new iteration if the previous iteration produced text
+        if (iteration > 0 && fullText && !fullText.endsWith('\n\n')) {
+          fullText += '\n\n';
+          onTextChunk('\n\n');
+        }
+
         const isLastIteration = iteration === MAX_AGENTIC_ITERATIONS - 1;
         const stream = generateAgenticStreamWithBilling(
           modelId,

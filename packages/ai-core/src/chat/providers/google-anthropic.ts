@@ -158,9 +158,13 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
 
       const stream = client.messages.stream(messageParams);
 
+      // Track whether text was streamed as deltas to avoid duplication from finalMessage
+      let hasStreamedTextDeltas = false;
+
       // The streaming response is a sequence of content block deltas and a final message at the end (message_stop).
       for await (const event of stream) {
         if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+          hasStreamedTextDeltas = true;
           yield { type: 'text', delta: event.delta.text };
         } else if (event.type === 'message_stop') {
           const message: ParsedMessage<null> = await stream.finalMessage();
@@ -179,6 +183,12 @@ export function constructGoogleAnthropicAgenticStreamFn(model: AiModel): Agentic
                   arguments: JSON.stringify(contentBlock.input),
                 } satisfies ToolCall,
               };
+            } else if (contentBlock.type === 'text') {
+              // Only yield text from finalMessage if it wasn't already streamed as deltas
+              // (this can happen for very short responses that skip the streaming phase)
+              if (!hasStreamedTextDeltas && contentBlock.text) {
+                yield { type: 'text', delta: contentBlock.text };
+              }
             }
           }
 
@@ -346,6 +356,23 @@ function ensureValidStopReason(reason: StopReason | null) {
     throw new AiGenerationError('Model refused to generate a response during agentic generation');
 }
 
+/**
+ * Checks if a tool result string represents an error.
+ * Tries to parse it as JSON and checks for an "error" field with a non-null value.
+ */
+function isToolResultError(content: string): boolean {
+  try {
+    if (content.startsWith('Error:')) return true;
+
+    const parsed = JSON.parse(content);
+    // Check if the parsed object has an "error" field with a truthy value
+    return parsed && typeof parsed === 'object' && 'error' in parsed && parsed.error !== null;
+  } catch {
+    // Not valid JSON, not an error response
+    return false;
+  }
+}
+
 /*** Mapping functions ****/
 
 /**
@@ -393,10 +420,17 @@ function mapMessageToAnthropicMessageParam(message: NonSystemMessage): MessagePa
   }
 
   if (message.role === 'tool') {
+    // Ensure tool result content is never empty - Anthropic API requires non-empty content
+    const toolResultContent = message.content.trim() || 'No content returned';
+
+    // Check if this is an error response (either starts with "Error:" or contains error in JSON)
+    const isErrorResult = isToolResultError(toolResultContent);
+
     content.push({
       type: 'tool_result',
       tool_use_id: message.toolCallId ?? '',
-      content: message.content,
+      content: toolResultContent,
+      is_error: isErrorResult,
     } as ToolResultBlockParam);
   }
 
