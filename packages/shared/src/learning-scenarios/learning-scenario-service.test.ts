@@ -41,6 +41,7 @@ import { FederalStateModel } from '@shared/federal-states/types';
 import { getReadOnlySignedUrl, uploadFileToS3 } from '../s3';
 import { duplicateLearningScenario } from './learning-scenario-admin-service';
 import { getMaxBudgetInCentByUser, getUsedBudgetInCentByUser } from '../users/user-budget-service';
+import { dbGetLearningScenarioChatUsageInCentByLearningScenarioId } from '@shared/db/functions/token-points';
 
 vi.mock('../db/functions/learning-scenario', () => ({
   dbGetAllAccessibleLearningScenarios: vi.fn(),
@@ -83,6 +84,9 @@ vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 vi.mock('../users/user-budget-service', () => ({
   getMaxBudgetInCentByUser: vi.fn(),
   getUsedBudgetInCentByUser: vi.fn(),
+}));
+vi.mock('@shared/db/functions/token-points', () => ({
+  dbGetLearningScenarioChatUsageInCentByLearningScenarioId: vi.fn(),
 }));
 
 const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
@@ -595,6 +599,91 @@ describe('learning-scenario-service', () => {
           }),
         ).rejects.toThrow(ForbiddenError);
       });
+    });
+  });
+
+  describe('getLearningScenarioForEditView shared chat usage budget', () => {
+    it('returns 0 when startedAt or expiredAt is missing', async () => {
+      const learningScenarioId = generateUUID();
+      const user = mockUser('teacher');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+      } as unknown as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdOptionalShareData
+        >
+      ).mockResolvedValue(learningScenario as never);
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+      (
+        dbGetFilesForLearningScenario as MockedFunction<typeof dbGetFilesForLearningScenario>
+      ).mockResolvedValue([] as never);
+      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
+        undefined,
+      );
+
+      const result = await getLearningScenarioForEditView({
+        learningScenarioId,
+        user,
+        federalState: mockFederalState(),
+      });
+
+      expect(result.budgetUsedBySharedChat).toBe(0);
+      expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).not.toHaveBeenCalled();
+    });
+
+    it('loads shared chat usage when startedAt and expiredAt are present', async () => {
+      const learningScenarioId = generateUUID();
+      const user = mockUser('teacher');
+      const startedAt = new Date('2026-06-01T10:00:00.000Z');
+      const expiredAt = new Date('2026-06-01T11:00:00.000Z');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        startedAt,
+        expiredAt,
+      } as unknown as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdOptionalShareData
+        >
+      ).mockResolvedValue(learningScenario as never);
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+      (
+        dbGetFilesForLearningScenario as MockedFunction<typeof dbGetFilesForLearningScenario>
+      ).mockResolvedValue([] as never);
+      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
+        undefined,
+      );
+      (
+        dbGetLearningScenarioChatUsageInCentByLearningScenarioId as MockedFunction<
+          typeof dbGetLearningScenarioChatUsageInCentByLearningScenarioId
+        >
+      ).mockResolvedValue(654);
+
+      const result = await getLearningScenarioForEditView({
+        learningScenarioId,
+        user,
+        federalState: mockFederalState(),
+      });
+
+      expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).toHaveBeenCalledWith({
+        learningScenarioId,
+        expiredAt,
+        startedAt,
+      });
+      expect(result.budgetUsedBySharedChat).toBe(654);
     });
   });
 

@@ -37,6 +37,7 @@ import { getMaxBudgetInCentByUser, getUsedBudgetInCentByUser } from '../users/us
 import { CharacterSelectModel } from '@shared/db/schema';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
+import { dbGetSharedCharacterChatUsageInCentByCharacterId } from '@shared/db/functions/token-points';
 import {
   copyCharacter,
   copyEntityPictureIfExists,
@@ -78,6 +79,9 @@ vi.mock('../templates/template-service', () => ({
   copyCharacter: vi.fn(),
   copyEntityPictureIfExists: vi.fn(),
   copyRelatedTemplateFiles: vi.fn(),
+}));
+vi.mock('@shared/db/functions/token-points', () => ({
+  dbGetSharedCharacterChatUsageInCentByCharacterId: vi.fn(),
 }));
 const { mockDbReturning, mockDbSet, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
@@ -917,6 +921,99 @@ describe('character-service', () => {
           }),
         ).rejects.toThrow(ForbiddenError);
       });
+    });
+  });
+
+  describe('getCharacterForEditView shared chat usage budget', () => {
+    it('returns 0 when startedAt or expiredAt is missing', async () => {
+      const characterId = generateUUID();
+      const user = mockUser('teacher');
+      const character = {
+        id: characterId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+      } as unknown as CharacterSelectModel;
+
+      (
+        dbGetCharacterByIdOptionalShareData as MockedFunction<
+          typeof dbGetCharacterByIdOptionalShareData
+        >
+      ).mockResolvedValue(character as never);
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        character as never,
+      );
+      (
+        dbGetRelatedCharacterFiles as MockedFunction<typeof dbGetRelatedCharacterFiles>
+      ).mockResolvedValue([] as never);
+      (getReadOnlySignedUrl as MockedFunction<typeof getReadOnlySignedUrl>).mockResolvedValue('');
+
+      const result = await getCharacterForEditView({
+        characterId,
+        user,
+        federalState: {
+          id: generateUUID(),
+          teacherPriceLimit: 500,
+          studentPriceLimit: 100,
+          createdAt: new Date(),
+          mandatoryCertificationTeacher: null,
+        } as FederalStateModel,
+      });
+
+      expect(result.budgetUsedBySharedChat).toBe(0);
+      expect(dbGetSharedCharacterChatUsageInCentByCharacterId).not.toHaveBeenCalled();
+    });
+
+    it('loads shared chat usage when startedAt and expiredAt are present', async () => {
+      const characterId = generateUUID();
+      const user = mockUser('teacher');
+      const startedAt = new Date('2026-06-01T10:00:00.000Z');
+      const expiredAt = new Date('2026-06-01T11:00:00.000Z');
+      const character = {
+        id: characterId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        startedAt,
+        expiredAt,
+      } as unknown as CharacterSelectModel;
+
+      (
+        dbGetCharacterByIdOptionalShareData as MockedFunction<
+          typeof dbGetCharacterByIdOptionalShareData
+        >
+      ).mockResolvedValue(character as never);
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        character as never,
+      );
+      (
+        dbGetRelatedCharacterFiles as MockedFunction<typeof dbGetRelatedCharacterFiles>
+      ).mockResolvedValue([] as never);
+      (getReadOnlySignedUrl as MockedFunction<typeof getReadOnlySignedUrl>).mockResolvedValue('');
+      (
+        dbGetSharedCharacterChatUsageInCentByCharacterId as MockedFunction<
+          typeof dbGetSharedCharacterChatUsageInCentByCharacterId
+        >
+      ).mockResolvedValue(321);
+
+      const result = await getCharacterForEditView({
+        characterId,
+        user,
+        federalState: {
+          id: generateUUID(),
+          teacherPriceLimit: 500,
+          studentPriceLimit: 100,
+          createdAt: new Date(),
+          mandatoryCertificationTeacher: null,
+        } as FederalStateModel,
+      });
+
+      expect(dbGetSharedCharacterChatUsageInCentByCharacterId).toHaveBeenCalledWith({
+        characterId,
+        expiredAt,
+        startedAt,
+      });
+      expect(result.budgetUsedBySharedChat).toBe(321);
     });
   });
 
