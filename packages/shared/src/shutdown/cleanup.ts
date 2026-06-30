@@ -35,15 +35,13 @@ export function registerCleanupHandler(handler: () => Promise<void>): void {
 
       console.log(`[shutdown] Received ${signal}, starting resource cleanup...`);
 
-      const results = await Promise.allSettled(
-        cleanupHandlers.map(async (handler, index) => {
-          try {
-            await handler();
-          } catch (error) {
-            console.error(`[shutdown] Cleanup handler ${index} failed:`, error);
-          }
-        }),
-      );
+      const results = await Promise.allSettled(cleanupHandlers.map((handler) => handler()));
+
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.error(`[shutdown] Cleanup handler ${index} failed:`, result.reason);
+        }
+      });
 
       const failed = results.filter((r) => r.status === 'rejected').length;
       if (failed > 0) {
