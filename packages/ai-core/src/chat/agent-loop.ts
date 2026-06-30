@@ -1,6 +1,6 @@
 import type { Message as AiCoreMessage, TokenUsage, ToolCall, ToolRegistry } from './types';
 
-const MAX_AGENTIC_ITERATIONS = 8;
+const MAX_AGENTIC_ITERATIONS = 3;
 const MAX_TOOL_CALLS_PER_ITERATION = 2;
 
 function logError(message: string, error: unknown) {
