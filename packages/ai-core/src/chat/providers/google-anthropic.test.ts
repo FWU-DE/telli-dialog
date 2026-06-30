@@ -808,6 +808,66 @@ describe('constructGoogleAnthropicAgenticStreamFn', () => {
     );
   });
 
+  it('should set is_error to true for tool results with errors', async () => {
+    const model = createGoogleAnthropicModel();
+
+    streamMock.mockReturnValue({
+      [Symbol.asyncIterator]: async function* () {
+        yield { type: 'message_stop' };
+      },
+      finalMessage: vi.fn().mockResolvedValue({
+        content: [],
+        usage: { input_tokens: 10, output_tokens: 5 },
+        stop_reason: 'end_turn',
+      }),
+    });
+
+    const generateAgenticStream = constructGoogleAnthropicAgenticStreamFn(model);
+    const messages: Message[] = [
+      { role: 'user', content: 'What is the weather in InvalidCity?' },
+      {
+        role: 'assistant',
+        content: 'Let me check',
+        toolCalls: [{ id: 'toolu_123', name: 'get_weather', arguments: '{"city":"InvalidCity"}' }],
+      },
+      { role: 'tool', content: 'Error: City not found', toolCallId: 'toolu_123' },
+    ];
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for await (const _event of generateAgenticStream({
+      messages,
+      model: 'anthropic/claude',
+      tools: [
+        {
+          name: 'get_weather',
+          description: 'Get weather',
+          parameters: { properties: { city: { type: 'string' } }, required: ['city'] },
+        },
+      ],
+    })) {
+      // consume stream
+    }
+
+    // Verify tool result with error has is_error: true (detected from "Error:" prefix)
+    expect(streamMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: expect.arrayContaining([
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'tool_result',
+                tool_use_id: 'toolu_123',
+                content: 'Error: City not found',
+                is_error: true,
+              },
+            ],
+          },
+        ]),
+      }),
+    );
+  });
+
   it('should handle rate limit errors (status 429)', async () => {
     const model = createGoogleAnthropicModel();
 
