@@ -19,7 +19,7 @@ function hasTool(activeTools: ToolDefinition[], toolName: string) {
 }
 
 export function constructToolGuidelines(activeTools: ToolDefinition[]) {
-  const sections = ['## Fähigkeiten und Einschränkungen'];
+  const sections = ['\n## Fähigkeiten und Einschränkungen'];
 
   if (hasTool(activeTools, 'retrieve_text_chunks')) {
     sections.push(
