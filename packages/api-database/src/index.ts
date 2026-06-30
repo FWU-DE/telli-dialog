@@ -20,6 +20,12 @@ if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
 
 export const db = drizzle({ client: pool });
 
+export async function shutdownDatabase() {
+  console.log('[shutdown] Closing database connection pool...');
+  await pool.end();
+  console.log('[shutdown] Database connection pool closed');
+}
+
 export * from './schema';
 export * from './functions';
 export * from './types';
