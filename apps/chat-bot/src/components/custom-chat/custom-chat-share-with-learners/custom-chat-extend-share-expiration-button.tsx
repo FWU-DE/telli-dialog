@@ -5,16 +5,15 @@ import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/common/toast';
 import { Button } from '@ui/components/button';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@ui/components/alert-dialog';
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@ui/components/dialog';
 import { TimeLimitSelect } from './custom-chat-time-limit-select';
 import { usageTimeValuesInMinutes } from './custom-chat-share-with-learners-limit-params';
 
@@ -70,17 +69,17 @@ export function CustomChatExtendShareExpirationButton({
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={handleOpenChange}>
-      <AlertDialogTrigger asChild>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
         <Button type="button" disabled={!sharedChatActive} data-testid="add-additional-time-button">
           {t('button-additional-time')}
         </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader className="space-y-2">
-          <AlertDialogTitle>{t('additional-time-modal-title')}</AlertDialogTitle>
-          <AlertDialogDescription>{t('additional-time-modal-description')}</AlertDialogDescription>
-        </AlertDialogHeader>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader className="space-y-2">
+          <DialogTitle>{t('additional-time-modal-title')}</DialogTitle>
+          <DialogDescription>{t('additional-time-modal-description')}</DialogDescription>
+        </DialogHeader>
         <div>
           <TimeLimitSelect
             key={selectVersion}
@@ -92,9 +91,13 @@ export function CustomChatExtendShareExpirationButton({
             isAdditionalTime
           />
         </div>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isSubmitting}>{tCommon('cancel')}</AlertDialogCancel>
-          <AlertDialogAction
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline" disabled={isSubmitting}>
+              {tCommon('cancel')}
+            </Button>
+          </DialogClose>
+          <Button
             variant="default"
             disabled={isSubmitting}
             onClick={() => {
@@ -102,9 +105,9 @@ export function CustomChatExtendShareExpirationButton({
             }}
           >
             {t('button-add')}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

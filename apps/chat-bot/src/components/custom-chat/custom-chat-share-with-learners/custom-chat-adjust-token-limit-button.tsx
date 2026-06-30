@@ -5,16 +5,15 @@ import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/common/toast';
 import { Button } from '@ui/components/button';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@ui/components/alert-dialog';
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@ui/components/dialog';
 import { TokenPointsLimitSelect } from './custom-chat-token-points-limit-select';
 import {
   MaxTokenPointsPercentageLimit,
@@ -83,8 +82,8 @@ export function CustomChatAdjustTokenLimitButton({
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={handleOpenChange}>
-      <AlertDialogTrigger asChild>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
         <Button
           type="button"
           disabled={!sharedChatActive || !hasHigherOption}
@@ -92,14 +91,12 @@ export function CustomChatAdjustTokenLimitButton({
         >
           {t('button-adjust-token-limit')}
         </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader className="space-y-2">
-          <AlertDialogTitle>{t('adjust-token-limit-modal-title')}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {t('adjust-token-limit-modal-description')}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader className="space-y-2">
+          <DialogTitle>{t('adjust-token-limit-modal-title')}</DialogTitle>
+          <DialogDescription>{t('adjust-token-limit-modal-description')}</DialogDescription>
+        </DialogHeader>
         <div>
           <TokenPointsLimitSelect
             label={t('token-points')}
@@ -113,9 +110,13 @@ export function CustomChatAdjustTokenLimitButton({
             lowerBoundary={currentTokenPointsPercentageLimit + 1}
           />
         </div>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isSubmitting}>{tCommon('cancel')}</AlertDialogCancel>
-          <AlertDialogAction
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline" disabled={isSubmitting}>
+              {tCommon('cancel')}
+            </Button>
+          </DialogClose>
+          <Button
             variant="default"
             disabled={isSubmitting}
             onClick={() => {
@@ -123,9 +124,9 @@ export function CustomChatAdjustTokenLimitButton({
             }}
           >
             {t('button-save')}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
