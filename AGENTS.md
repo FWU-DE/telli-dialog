@@ -129,6 +129,11 @@ After making any file changes:
 4. Treat issues as blocking — fix problems before finishing
 5. If verification cannot run (missing deps, env issues), clearly report that
 
+### Git Conventions
+
+- **Prefix all commits with JIRA ticket**: `TD-1234: Concise summary`
+- **Keep commit messages concise**: Short subject line, optional body if needed
+
 ## Code Conventions
 
 ### General Principles
