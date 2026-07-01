@@ -52,12 +52,16 @@ export function CustomChatExtendShareExpirationButton({
         toast.success(tToast('add-time-toast-success'));
         setOpen(false);
         onAddTimeSuccess(result.expiredAt);
-      } else {
-        toast.error(tToast('add-time-toast-error'));
+        // early return runs through finally and avoids the error toast
+        return;
       }
+    } catch {
+      // Errors are handled by the generic failure toast below.
     } finally {
       setIsSubmitting(false);
     }
+
+    toast.error(tToast('add-time-toast-error'));
   }
 
   function handleOpenChange(nextOpen: boolean) {

@@ -545,6 +545,10 @@ export async function dbGetSharedCharacterConversations({
   return db.select().from(activeShare).where(eq(activeShare.characterId, characterId));
 }
 
+/**
+ * Extends the expiration timestamp of the latest unstopped character share for the given user.
+ * Returns undefined if no unstopped share exists.
+ */
 export async function dbExtendSharedCharacterConversationExpiration({
   characterId,
   user,
@@ -584,6 +588,10 @@ export async function dbExtendSharedCharacterConversationExpiration({
   return updatedShare;
 }
 
+/**
+ * Updates the token points limit of the latest unstopped character share for the given user.
+ * Returns undefined if no unstopped share exists.
+ */
 export async function dbUpdateCharacterShareTokenPointsLimit({
   characterId,
   user,

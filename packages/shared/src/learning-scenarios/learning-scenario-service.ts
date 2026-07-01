@@ -33,7 +33,12 @@ import {
   LearningScenarioWithShareDataModel,
   sharedLearningScenarioTable,
 } from '@shared/db/schema';
-import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
+import {
+  checkParameterUUID,
+  ForbiddenError,
+  InvalidArgumentError,
+  NotFoundError,
+} from '@shared/error';
 import {
   deleteAvatarPicture,
   deleteMessageAttachments,
@@ -423,6 +428,10 @@ export async function unshareLearningScenario({
   return updatedShare;
 }
 
+/**
+ * Extends the expiration of an active learning scenario share.
+ * @throws NotFoundError if no active sharing exists for the learning scenario.
+ */
 export async function extendLearningScenarioShareExpiration({
   learningScenarioId,
   additionalTimeInMinutes,
@@ -439,7 +448,7 @@ export async function extendLearningScenarioShareExpiration({
   verifyReadAccess({ item: learningScenario, user });
 
   if (additionalTimeInMinutes <= 0 || additionalTimeInMinutes > 30 * 24 * 60) {
-    throw new Error('additional time must be between 1 and 43200 minutes');
+    throw new InvalidArgumentError('additional time must be between 1 and 43200 minutes');
   }
 
   const updatedShare = await dbExtendSharedLearningScenarioExpiration({
@@ -449,12 +458,17 @@ export async function extendLearningScenarioShareExpiration({
   });
 
   if (!updatedShare) {
-    throw new NotFoundError('No sharing found for this learning scenario');
+    throw new NotFoundError('No active sharing found for this learning scenario');
   }
 
   return updatedShare;
 }
 
+/**
+ * Increases the token points limit of an active learning scenario share.
+ * @throws NotFoundError if no sharing exists for the learning scenario.
+ * @throws InvalidArgumentError if the new limit is not higher than the current limit.
+ */
 export async function updateLearningScenarioShareTokenPointsLimit({
   learningScenarioId,
   tokenPointsPercentageLimit,
@@ -471,7 +485,7 @@ export async function updateLearningScenarioShareTokenPointsLimit({
   verifyReadAccess({ item: learningScenario, user });
 
   if (tokenPointsPercentageLimit <= 0 || tokenPointsPercentageLimit > 100) {
-    throw new Error('token points percentage limit must be between 1 and 100');
+    throw new InvalidArgumentError('token points percentage limit must be between 1 and 100');
   }
 
   const sharedConversations = await dbGetSharedLearningScenarioConversations({
@@ -485,7 +499,9 @@ export async function updateLearningScenarioShareTokenPointsLimit({
   }
 
   if (tokenPointsPercentageLimit <= currentShare.tokenPointsLimit) {
-    throw new Error('token points percentage limit must be higher than current limit');
+    throw new InvalidArgumentError(
+      'token points percentage limit must be higher than current limit',
+    );
   }
 
   const updatedShare = await dbUpdateLearningScenarioShareTokenPointsLimit({
