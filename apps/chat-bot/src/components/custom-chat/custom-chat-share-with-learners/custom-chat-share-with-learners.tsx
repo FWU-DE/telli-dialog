@@ -10,7 +10,7 @@ import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { Card, CardContent } from '@ui/components/card';
 import { Button } from '@ui/components/button';
-import { ShareFatIcon, TrashSimpleIcon } from '@phosphor-icons/react';
+import { ShareFatIcon } from '@phosphor-icons/react';
 import CountDownTimer from '../../../app/(authed)/(chat-bot)/learning-scenarios/_components/count-down';
 import { RichText } from '../../common/rich-text';
 import { z } from 'zod';
@@ -27,6 +27,7 @@ import { TimeLimitSelect } from './custom-chat-time-limit-select';
 import { TokenPointsLeftRing } from './custom-chat-token-points-left-ring';
 import { CustomChatAdjustTokenLimitButton } from './custom-chat-adjust-token-limit-button';
 import { CustomChatExtendShareExpirationButton } from './custom-chat-extend-share-expiration-button';
+import { CustomChatStopShareButton } from './custom-chat-stop-share-button';
 
 const shareFormSchema = z.object({
   tokenPointsPercentageLimit: z.coerce.number(),
@@ -128,17 +129,6 @@ export function CustomChatShareWithLearners({
     }
   }
 
-  async function handleStopSharing() {
-    const result = await onUnshare();
-
-    if (result.success) {
-      toast.success(tToast('stop-share-toast-success'));
-      router.refresh();
-    } else {
-      toast.error(tToast('stop-share-toast-error'));
-    }
-  }
-
   return (
     <div className="flex flex-col gap-3 mb-5">
       <CustomChatHeading2 text={t('title')} />
@@ -234,15 +224,12 @@ export function CustomChatShareWithLearners({
                     >
                       <ShareFatIcon className="size-5" /> {t('button-to-share-page')}
                     </Button>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      onClick={handleStopSharing}
-                      aria-label={t('button-stop')}
-                      data-testid="stop-share-button"
-                    >
-                      <TrashSimpleIcon className="size-5" /> {t('button-close-session')}
-                    </Button>
+                    <CustomChatStopShareButton
+                      onUnshare={onUnshare}
+                      onStopShareSuccess={() => {
+                        router.refresh();
+                      }}
+                    />
                   </div>
                 </div>
               </div>
