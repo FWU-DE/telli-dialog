@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, RefObject, SyntheticEvent, useRef, useState } from 'react';
+import { ReactNode, RefObject, SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
@@ -122,7 +122,6 @@ export default function GenericSharedChat({
 
   const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, entity.id, inviteCode]);
   const containerRef = useRef<HTMLDivElement>(null);
-
   const dialogStarted =
     messages.length > 0 || (dialogStartMode === 'explicit' && explicitDialogStarted);
 
@@ -150,8 +149,6 @@ export default function GenericSharedChat({
   }
 
   function handleRetry() {
-    resetError();
-    reactivateAutoScrolling();
     window.location.reload();
   }
 
@@ -163,10 +160,31 @@ export default function GenericSharedChat({
       ? messages.length === 0 && !dialogStarted
       : messages.length === 0;
   const showChatInputBox = dialogStartMode === 'explicit' ? dialogStarted : true;
+  const showExpiredModal = !chatActive || isChatExpired;
+
+  useEffect(() => {
+    if (isChatExpired || !chatActive || messages.length === 0) {
+      return;
+    }
+
+    const lastMessage = messages.at(-1);
+
+    if (!lastMessage) {
+      return;
+    }
+
+    if (lastMessage.role !== 'user') {
+      return;
+    }
+
+    reactivateAutoScrolling();
+    void reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
-      {(!chatActive || isChatExpired) && (
+      {showExpiredModal && (
         <ExpiredChatModal
           conversationMessages={uiMessages}
           title={entity.name}
