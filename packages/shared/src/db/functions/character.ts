@@ -566,6 +566,7 @@ export async function dbExtendSharedCharacterConversationExpiration({
         eq(sharedCharacterConversation.characterId, characterId),
         eq(sharedCharacterConversation.userId, user.id),
         isNull(sharedCharacterConversation.manuallyStoppedAt),
+        sql`${sharedCharacterConversation.expiredAt} >= now()`,
       ),
     )
     .orderBy(desc(sharedCharacterConversation.startedAt))
@@ -609,6 +610,7 @@ export async function dbUpdateCharacterShareTokenPointsLimit({
         eq(sharedCharacterConversation.characterId, characterId),
         eq(sharedCharacterConversation.userId, user.id),
         isNull(sharedCharacterConversation.manuallyStoppedAt),
+        sql`${sharedCharacterConversation.expiredAt} >= now()`,
       ),
     )
     .orderBy(desc(sharedCharacterConversation.startedAt))

@@ -443,6 +443,7 @@ export async function dbExtendSharedLearningScenarioExpiration({
         eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
         eq(sharedLearningScenarioTable.userId, user.id),
         isNull(sharedLearningScenarioTable.manuallyStoppedAt),
+        sql`${sharedLearningScenarioTable.expiredAt} >= now()`,
       ),
     )
     .orderBy(desc(sharedLearningScenarioTable.startedAt))
@@ -486,6 +487,7 @@ export async function dbUpdateLearningScenarioShareTokenPointsLimit({
         eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
         eq(sharedLearningScenarioTable.userId, user.id),
         isNull(sharedLearningScenarioTable.manuallyStoppedAt),
+        sql`${sharedLearningScenarioTable.expiredAt} >= now()`,
       ),
     )
     .orderBy(desc(sharedLearningScenarioTable.startedAt))
