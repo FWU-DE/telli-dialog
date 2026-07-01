@@ -60,10 +60,12 @@ export async function dbGetChatsUsageInCentByUserId({ userId }: { userId: string
 
 export async function dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
   learningScenarioId,
+  userId,
   startedAt,
   expiredAt,
 }: {
   learningScenarioId: string;
+  userId: string;
   startedAt: Date;
   expiredAt: Date;
 }) {
@@ -73,6 +75,7 @@ export async function dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
     .where(
       and(
         eq(sharedLearningScenarioUsageTracking.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioUsageTracking.userId, userId),
         between(sharedLearningScenarioUsageTracking.createdAt, startedAt, expiredAt),
       ),
     );
@@ -82,10 +85,12 @@ export async function dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
 
 export async function dbGetSharedCharacterChatUsageInCentByCharacterId({
   characterId,
+  userId,
   startedAt,
   expiredAt,
 }: {
   characterId: string;
+  userId: string;
   startedAt: Date;
   expiredAt: Date;
 }) {
@@ -95,6 +100,7 @@ export async function dbGetSharedCharacterChatUsageInCentByCharacterId({
     .where(
       and(
         eq(sharedCharacterChatUsageTrackingTable.characterId, characterId),
+        eq(sharedCharacterChatUsageTrackingTable.userId, userId),
         between(sharedCharacterChatUsageTrackingTable.createdAt, startedAt, expiredAt),
       ),
     );

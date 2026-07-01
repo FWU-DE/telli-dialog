@@ -160,7 +160,6 @@ export function CustomChatShareWithLearners({
                             ariaLabel={t('max-token-points')}
                             defaultValue={String(currentTokenPointsPercentageLimit)}
                             value={String(currentTokenPointsPercentageLimit)}
-                            onValueChange={() => {}}
                             disabled
                             pointsPercentageValues={[currentTokenPointsPercentageLimit]}
                             maxAvailablePercentage={maxAvailablePercentage}
@@ -198,7 +197,6 @@ export function CustomChatShareWithLearners({
                           <TimeLimitSelect
                             ariaLabel={t('max-usage-time')}
                             defaultValue={String(getValuesShare('usageTimeLimit'))}
-                            onChange={() => {}}
                             disabled
                             usageTimeValuesInMinutes={[preselectedUsageTimeLimit]}
                           />

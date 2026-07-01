@@ -572,6 +572,7 @@ export async function getLearningScenarioForEditView({
   if (learningScenario.startedAt && learningScenario.expiredAt) {
     budgetUsedBySharedChat = await dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
       learningScenarioId: learningScenario.id,
+      userId: user.id,
       expiredAt: learningScenario.expiredAt,
       startedAt: learningScenario.startedAt,
     });

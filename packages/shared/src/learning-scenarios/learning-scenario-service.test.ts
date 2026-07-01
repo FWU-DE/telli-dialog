@@ -686,6 +686,7 @@ describe('learning-scenario-service', () => {
 
       expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).toHaveBeenCalledWith({
         learningScenarioId,
+        userId: user.id,
         expiredAt,
         startedAt,
       });
