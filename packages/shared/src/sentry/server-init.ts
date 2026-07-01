@@ -9,6 +9,7 @@ import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { SentrySampler, SentrySpanProcessor } from '@sentry/opentelemetry';
 import { scrubSentryEvent } from '@ais-chat/shared-core/sentry/scrub';
+import { registerCleanupHandler } from '../shutdown/cleanup';
 import { env } from './env';
 
 /**
@@ -113,14 +114,11 @@ export function initSentry({
 
   sdk.start();
 
-  // gracefully shut down the SDK on process exit
-  process.on('SIGTERM', () => {
-    sdk
-      .shutdown()
-      .then(() => console.log('Tracing terminated'))
-      .catch((error) => console.log('Error terminating tracing', error))
-      .finally(() => process.exit(0));
-  });
-
   Sentry.validateOpenTelemetrySetup();
+
+  registerCleanupHandler(async () => {
+    console.log('[shutdown] Shutting down OpenTelemetry SDK...');
+    await sdk.shutdown();
+    console.log('[shutdown] OpenTelemetry SDK shutdown completed');
+  });
 }
