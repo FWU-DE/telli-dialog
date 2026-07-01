@@ -545,6 +545,10 @@ export async function dbGetSharedCharacterConversations({
   return db.select().from(activeShare).where(eq(activeShare.characterId, characterId));
 }
 
+/**
+ * Extends the expiration timestamp of the latest unstopped character share for the given user.
+ * Returns undefined if no unstopped share exists.
+ */
 export async function dbExtendSharedCharacterConversationExpiration({
   characterId,
   user,
@@ -562,6 +566,7 @@ export async function dbExtendSharedCharacterConversationExpiration({
         eq(sharedCharacterConversation.characterId, characterId),
         eq(sharedCharacterConversation.userId, user.id),
         isNull(sharedCharacterConversation.manuallyStoppedAt),
+        sql`${sharedCharacterConversation.expiredAt} >= now()`,
       ),
     )
     .orderBy(desc(sharedCharacterConversation.startedAt))
@@ -584,6 +589,10 @@ export async function dbExtendSharedCharacterConversationExpiration({
   return updatedShare;
 }
 
+/**
+ * Updates the token points limit of the latest unstopped character share for the given user.
+ * Returns undefined if no unstopped share exists.
+ */
 export async function dbUpdateCharacterShareTokenPointsLimit({
   characterId,
   user,
@@ -601,6 +610,7 @@ export async function dbUpdateCharacterShareTokenPointsLimit({
         eq(sharedCharacterConversation.characterId, characterId),
         eq(sharedCharacterConversation.userId, user.id),
         isNull(sharedCharacterConversation.manuallyStoppedAt),
+        sql`${sharedCharacterConversation.expiredAt} >= now()`,
       ),
     )
     .orderBy(desc(sharedCharacterConversation.startedAt))

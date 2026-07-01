@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { AUTH_FILES, MOCK_LLM_COMMANDS } from '../../utils/const';
 import { waitForAutosave, waitForToast, waitForToastDisappear } from '../../utils/utils';
 import { sendMessage } from '../../utils/chat';
@@ -11,6 +11,17 @@ import {
 import { nanoid } from 'nanoid';
 
 test.use({ storageState: AUTH_FILES.teacher });
+
+async function stopSharingIfActive(page: Page) {
+  const stopSharingButton = page.getByTestId('stop-share-button');
+  if (await stopSharingButton.isVisible()) {
+    await stopSharingButton.click();
+    const stopShareDialog = page.getByTestId('stop-share-dialog');
+    await expect(stopShareDialog).toBeVisible();
+    await page.getByTestId('stop-share-confirm-button').click();
+    await expect(stopShareDialog).not.toBeVisible();
+  }
+}
 
 test.describe('create, share, chat, delete', () => {
   const data = {
@@ -38,10 +49,7 @@ test.describe('create, share, chat, delete', () => {
     // check if created with the correct name (still on the editor page)
     await expect(page.getByRole('heading', { name: data.name })).toBeVisible();
 
-    const stopSharingButton = page.getByTestId('stop-share-button');
-    if (await stopSharingButton.isVisible()) {
-      await stopSharingButton.click();
-    }
+    await stopSharingIfActive(page);
     // test share page
     await page.getByTestId('token-points-select').click();
     await page.getByTestId('token-points-option-50').click();
@@ -87,10 +95,7 @@ test.describe('create, share, chat, delete', () => {
     await configureLearningScenario(page, data);
 
     // Still on the editor page after autosave
-    const stopSharingButton = page.getByTestId('stop-share-button');
-    if (await stopSharingButton.isVisible()) {
-      await stopSharingButton.click();
-    }
+    await stopSharingIfActive(page);
     // test share page
     await page.getByTestId('token-points-select').click();
     await page.getByTestId('token-points-option-25').click();
@@ -158,10 +163,7 @@ test.describe('create, share, chat, delete', () => {
     // configure form
     await configureLearningScenario(page, data);
 
-    const stopSharingButton = page.getByTestId('stop-share-button');
-    if (await stopSharingButton.isVisible()) {
-      await stopSharingButton.click();
-    }
+    await stopSharingIfActive(page);
 
     // set share with learners limit params
     await page.getByTestId('token-points-select').click();
@@ -178,7 +180,7 @@ test.describe('create, share, chat, delete', () => {
     // stop share
     await page.goto(editorUrl);
     await page.waitForURL('/learning-scenarios/**');
-    await page.getByTestId('stop-share-button').click();
+    await stopSharingIfActive(page);
     await expect(page.getByTestId('start-share-button')).toBeVisible();
     await page.reload();
 

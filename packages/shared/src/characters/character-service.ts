@@ -36,7 +36,7 @@ import {
   fileTable,
   sharedCharacterConversation,
 } from '@shared/db/schema';
-import { checkParameterUUID, ForbiddenError } from '@shared/error';
+import { checkParameterUUID, ForbiddenError, InvalidArgumentError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
 import {
   deleteAvatarPicture,
@@ -419,10 +419,10 @@ export const shareCharacter = async ({
 
   // validate input parameters
   if (tokenPointsPercentageLimit < 0 || tokenPointsPercentageLimit > 100) {
-    throw new Error('token points percentage limit must be between 0 and 100');
+    throw new InvalidArgumentError('token points percentage limit must be between 0 and 100');
   }
   if (usageTimeLimitMinutes <= 0 || usageTimeLimitMinutes > 30 * 24 * 60) {
-    throw new Error('usage time limit must be between 1 and 43200 minutes');
+    throw new InvalidArgumentError('usage time limit must be between 1 and 43200 minutes');
   }
 
   const activeShares = await dbGetSharedCharacterConversations({ characterId, user });
@@ -489,6 +489,10 @@ export const unshareCharacter = async ({
   return updatedCharacter;
 };
 
+/**
+ * Extends the expiration of an active character share.
+ * @throws NotFoundError if no active sharing exists for the character.
+ */
 export const extendCharacterShareExpiration = async ({
   characterId,
   additionalTimeInMinutes,
@@ -505,7 +509,7 @@ export const extendCharacterShareExpiration = async ({
   verifyReadAccess({ item: character, user });
 
   if (additionalTimeInMinutes <= 0 || additionalTimeInMinutes > 30 * 24 * 60) {
-    throw new Error('additional time must be between 1 and 43200 minutes');
+    throw new InvalidArgumentError('additional time must be between 1 and 43200 minutes');
   }
 
   const updatedShare = await dbExtendSharedCharacterConversationExpiration({
@@ -515,12 +519,17 @@ export const extendCharacterShareExpiration = async ({
   });
 
   if (!updatedShare) {
-    throw new NotFoundError('No sharing found for this character');
+    throw new NotFoundError('No active sharing found for this character');
   }
 
   return updatedShare;
 };
 
+/**
+ * Increases the token points limit of an active character share.
+ * @throws NotFoundError if no sharing exists for the character.
+ * @throws InvalidArgumentError if the new limit is not higher than the current limit.
+ */
 export const updateCharacterShareTokenPointsLimit = async ({
   characterId,
   tokenPointsPercentageLimit,
@@ -537,7 +546,7 @@ export const updateCharacterShareTokenPointsLimit = async ({
   verifyReadAccess({ item: character, user });
 
   if (tokenPointsPercentageLimit <= 0 || tokenPointsPercentageLimit > 100) {
-    throw new Error('token points percentage limit must be between 1 and 100');
+    throw new InvalidArgumentError('token points percentage limit must be between 1 and 100');
   }
 
   const sharedConversations = await dbGetSharedCharacterConversations({
@@ -551,7 +560,9 @@ export const updateCharacterShareTokenPointsLimit = async ({
   }
 
   if (tokenPointsPercentageLimit <= currentShare.tokenPointsLimit) {
-    throw new Error('token points percentage limit must be higher than current limit');
+    throw new InvalidArgumentError(
+      'token points percentage limit must be higher than current limit',
+    );
   }
 
   const updatedShare = await dbUpdateCharacterShareTokenPointsLimit({
@@ -652,6 +663,7 @@ export const getCharacterForEditView = async ({
   if (character.startedAt && character.expiredAt) {
     budgetUsedBySharedChat = await dbGetSharedCharacterChatUsageInCentByCharacterId({
       characterId: character.id,
+      userId: user.id,
       expiredAt: character.expiredAt,
       startedAt: character.startedAt,
     });

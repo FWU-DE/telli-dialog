@@ -133,6 +133,7 @@ test.describe('costs', () => {
 
     const sharedChatUsageInCent = await dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
       learningScenarioId: sharedLearningScenario.id,
+      userId: user.id,
       expiredAt: sharedLearningScenario.expiredAt!,
       startedAt: sharedLearningScenario.startedAt!,
     });
@@ -222,6 +223,7 @@ test.describe('costs', () => {
 
     const sharedChatUsageInCent = await dbGetSharedCharacterChatUsageInCentByCharacterId({
       characterId: character.id,
+      userId: user.id,
       expiredAt: character.expiredAt,
       startedAt: character.startedAt!,
     });

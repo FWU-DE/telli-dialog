@@ -422,6 +422,10 @@ export function dbGetSharedLearningScenarioConversations({
     .where(eq(activeShare.learningScenarioId, learningScenarioId));
 }
 
+/**
+ * Extends the expiration timestamp of the latest unstopped learning scenario share for the given user.
+ * Returns undefined if no unstopped share exists.
+ */
 export async function dbExtendSharedLearningScenarioExpiration({
   learningScenarioId,
   user,
@@ -439,6 +443,7 @@ export async function dbExtendSharedLearningScenarioExpiration({
         eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
         eq(sharedLearningScenarioTable.userId, user.id),
         isNull(sharedLearningScenarioTable.manuallyStoppedAt),
+        sql`${sharedLearningScenarioTable.expiredAt} >= now()`,
       ),
     )
     .orderBy(desc(sharedLearningScenarioTable.startedAt))
@@ -461,6 +466,10 @@ export async function dbExtendSharedLearningScenarioExpiration({
   return updatedShare;
 }
 
+/**
+ * Updates the token points limit of the latest unstopped learning scenario share for the given user.
+ * Returns undefined if no unstopped share exists.
+ */
 export async function dbUpdateLearningScenarioShareTokenPointsLimit({
   learningScenarioId,
   user,
@@ -478,6 +487,7 @@ export async function dbUpdateLearningScenarioShareTokenPointsLimit({
         eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
         eq(sharedLearningScenarioTable.userId, user.id),
         isNull(sharedLearningScenarioTable.manuallyStoppedAt),
+        sql`${sharedLearningScenarioTable.expiredAt} >= now()`,
       ),
     )
     .orderBy(desc(sharedLearningScenarioTable.startedAt))

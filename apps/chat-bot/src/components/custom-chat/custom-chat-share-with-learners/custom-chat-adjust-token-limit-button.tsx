@@ -66,12 +66,15 @@ export function CustomChatAdjustTokenLimitButton({
         toast.success(tToast('adjust-token-limit-toast-success'));
         setOpen(false);
         onAdjustTokenLimitSuccess(result.tokenPointsLimit);
-      } else {
-        toast.error(tToast('adjust-token-limit-toast-error'));
+        // early return runs through finally and avoids the error toast
+        return;
       }
+    } catch {
+      // Errors are handled by the generic failure toast below.
     } finally {
       setIsSubmitting(false);
     }
+    toast.error(tToast('adjust-token-limit-toast-error'));
   }
 
   function handleOpenChange(nextOpen: boolean) {
