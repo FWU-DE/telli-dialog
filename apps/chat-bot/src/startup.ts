@@ -1,4 +1,4 @@
-import { runDatabaseMigration } from '@shared/db';
+import { runDatabaseMigration, shutdownDatabase } from '@shared/db';
 import { dbGetFederalStates, dbUpdateFederalState } from '@shared/db/functions/federal-state';
 import { decrypt } from '@shared/db/crypto';
 import { env } from '@shared/env';
@@ -6,6 +6,8 @@ import { env as aiEnv } from '@ais-chat/ai-core/env';
 import { lookupApiKeys } from '@ais-chat/ai-core/api-keys/lookup';
 import { logError, logInfo } from '@shared/logging';
 import { listFilesFromS3 } from '@shared/s3';
+import { registerCleanupHandler } from '@shared/shutdown/cleanup';
+import { shutdownRabbitMQ } from '@/rabbitmq/send';
 
 /**
  * Custom code that will be executed on application startup.
@@ -13,6 +15,9 @@ import { listFilesFromS3 } from '@shared/s3';
 export async function startup() {
   await runDatabaseMigration();
   await postMigration();
+
+  registerCleanupHandler(shutdownDatabase);
+  registerCleanupHandler(shutdownRabbitMQ);
 }
 
 /**

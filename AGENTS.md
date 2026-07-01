@@ -134,6 +134,12 @@ After making any file changes:
 - **Prefix all commits with JIRA ticket**: `TD-1234: Concise summary`
 - **Keep commit messages concise**: Short subject line, optional body if needed
 
+## Pull Requests
+
+- Write concise PR descriptions: 1-3 short paragraphs explaining what changed and why.
+- Avoid formal section headings; keep it simple and direct.
+- PRs must always be opened as draft
+
 ## Code Conventions
 
 ### General Principles
