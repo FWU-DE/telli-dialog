@@ -572,6 +572,7 @@ export const getCharacterForEditView = async ({
   if (character.startedAt && character.expiredAt) {
     budgetUsedBySharedChat = await dbGetSharedCharacterChatUsageInCentByCharacterId({
       characterId: character.id,
+      userId: user.id,
       expiredAt: character.expiredAt,
       startedAt: character.startedAt,
     });

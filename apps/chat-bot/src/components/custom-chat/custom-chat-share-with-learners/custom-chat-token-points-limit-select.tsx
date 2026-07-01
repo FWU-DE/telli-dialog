@@ -74,7 +74,7 @@ type TokenPointsLimitSelectProps = {
   label?: string;
   ariaLabel?: string;
   defaultValue: string;
-  onValueChange: (value: number) => void;
+  onValueChange?: (value: number) => void;
   disabled: boolean;
   pointsPercentageValues: number[];
   maxAvailablePercentage: number;
@@ -104,7 +104,7 @@ export function TokenPointsLimitSelect({
         {label && <FieldLabel>{label}</FieldLabel>}
         <Select
           defaultValue={defaultValue}
-          onValueChange={(value) => onValueChange(Number(value))}
+          onValueChange={(value) => onValueChange?.(Number(value))}
           disabled={disabled}
         >
           <SelectTrigger aria-label={ariaLabel} data-testid="token-points-select">

@@ -1010,6 +1010,7 @@ describe('character-service', () => {
 
       expect(dbGetSharedCharacterChatUsageInCentByCharacterId).toHaveBeenCalledWith({
         characterId,
+        userId: user.id,
         expiredAt,
         startedAt,
       });

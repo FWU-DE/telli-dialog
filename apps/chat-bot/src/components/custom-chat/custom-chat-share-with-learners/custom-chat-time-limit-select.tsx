@@ -13,7 +13,7 @@ type TimeLimitSelectProps = {
   label?: string;
   ariaLabel?: string;
   defaultValue: string;
-  onChange: (value: number) => void;
+  onChange?: (value: number) => void;
   disabled?: boolean;
   usageTimeValuesInMinutes: number[];
   isAdditionalTime?: boolean;
@@ -36,7 +36,7 @@ export function TimeLimitSelect({
         {label && <FieldLabel>{label}</FieldLabel>}
         <Select
           defaultValue={defaultValue}
-          onValueChange={(value) => onChange(Number(value))}
+          onValueChange={(value) => onChange?.(Number(value))}
           disabled={disabled}
         >
           <SelectTrigger aria-label={ariaLabel} data-testid="usage-time-select">

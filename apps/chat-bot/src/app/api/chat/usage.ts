@@ -38,12 +38,9 @@ export async function sharedLearningScenarioChatHasReachedTokenPointsLimit({
     return true;
   }
 
-  if (sharedChatHasExpired(learningScenario)) {
-    return true;
-  }
-
   const sharedChatUsageInCent = await dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
     learningScenarioId: learningScenario.id,
+    userId: user.id,
     expiredAt: learningScenario.expiredAt,
     startedAt: learningScenario.startedAt,
   });
@@ -70,11 +67,9 @@ export async function sharedCharacterChatHasReachedTokenPointsLimit({
     return true;
   }
 
-  if (sharedChatHasExpired(character)) {
-    return true;
-  }
   const characterUsageInCent = await dbGetSharedCharacterChatUsageInCentByCharacterId({
     characterId: character.id,
+    userId: user.id,
     expiredAt: character.expiredAt,
     startedAt: character.startedAt,
   });
