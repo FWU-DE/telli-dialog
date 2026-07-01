@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 
 export interface SharePollingData {
@@ -19,24 +19,23 @@ export function useShareDataPolling({
 }): SharePollingData | null {
   const [polledData, setPolledData] = useState<SharePollingData | null>(null);
 
+  // we store that function in a ref to avoid re-running the effect when the function changes
+  // this is important if the calling component uses a lambda function that is re-created on every render
+  const fetchRef = useRef(fetchShareData);
+
   useEffect(() => {
-    if (!isActive) {
-      return;
-    }
+    if (!isActive) return;
 
     const poll = async () => {
-      const result = await fetchShareData();
+      const result = await fetchRef.current(); // latest version
       if (result.success && result.value) {
         setPolledData(result.value);
       }
     };
 
-    const interval = setInterval(() => {
-      void poll();
-    }, intervalMs);
-
+    const interval = setInterval(() => void poll(), intervalMs);
     return () => clearInterval(interval);
-  }, [fetchShareData, isActive, intervalMs]);
+  }, [isActive, intervalMs]);
 
   return polledData;
 }
