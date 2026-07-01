@@ -65,7 +65,7 @@ function formatRetrievedChunksForTool(chunks: Awaited<ReturnType<typeof retrieve
   };
 
   if (chunks.length === 0) {
-    response.error = 'Keine passenden Textstellen gefunden.';
+    response.error = 'No matching chunks found.';
   }
 
   return JSON.stringify(response);
@@ -95,9 +95,9 @@ function formatEntireFileForTool(file: FileModelAndContent) {
   };
 
   if (!content) {
-    response.error = 'Keine verwertbaren Inhalte gefunden.';
+    response.error = 'No usable content found.';
   } else if (truncated) {
-    response.error = 'Dateiinhalt wurde wegen des Zeichenlimits gekürzt.';
+    response.error = 'File content was truncated to fit the character limit.';
   }
 
   return JSON.stringify(response);
@@ -115,12 +115,12 @@ function formatWebScrapedContentForTool(result: WebSource) {
   };
 
   if (result.error) {
-    response.error = 'Fehler beim Abrufen der Seite.';
+    response.error = 'Failed to fetch the page.';
     return JSON.stringify(response);
   }
 
   if (!content) {
-    response.error = 'Keine verwertbaren Inhalte gefunden.';
+    response.error = 'No usable content found.';
     return JSON.stringify(response);
   }
 
@@ -216,7 +216,7 @@ export async function buildTools({
     const webSearchToolDefinition: ToolDefinition = {
       name: 'web_search',
       description:
-        'Search the web for current information. Call this tool immediately and without asking for permission whenever the user asks about recent events, news, current data (weather, prices, scores), or any facts that may have changed after your knowledge cutoff. Call this tool at most ONCE per user message. After receiving the results, synthesize them into a direct answer — do not call the tool again with a different query.',
+        'Search the web for current information. Call this tool immediately and without asking for permission whenever the user asks about recent events, news, current data (weather, prices, scores), or any facts that may have changed after your knowledge cutoff. After receiving the results, synthesize them into a direct answer — do not call the tool again with a different query.',
       parameters: {
         type: 'object',
         properties: {
@@ -329,7 +329,7 @@ export async function buildTools({
             truncated: false,
             characterCount: 0,
             maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
-            error: 'Fehlender Dateiname.',
+            error: 'Missing file name.',
           };
 
           return JSON.stringify(response);
@@ -344,7 +344,7 @@ export async function buildTools({
             truncated: false,
             characterCount: 0,
             maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
-            error: 'Datei nicht gefunden.',
+            error: 'File not found.',
           };
 
           return JSON.stringify(response);
