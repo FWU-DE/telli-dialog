@@ -5,7 +5,7 @@ import {
 } from '@/const';
 
 export function getFileExtension(fileName: string): string {
-  const lastPart = fileName.split('.').at(-1);
+  const lastPart = fileName.split('.').at(-1)?.toLowerCase();
   if (lastPart === undefined || !SUPPORTED_FILE_EXTENSIONS.includes(lastPart)) {
     throw new Error('file type is not supported or missing');
   }
@@ -21,7 +21,7 @@ export function isImageFile(fileName: string): boolean {
 }
 
 export function validateFileExtension(fileName: string): boolean {
-  const lastPart = fileName.split('.').at(-1);
+  const lastPart = fileName.split('.').at(-1)?.toLowerCase();
   return lastPart !== undefined && SUPPORTED_DOCUMENTS_EXTENSIONS.includes(lastPart);
 }
 
