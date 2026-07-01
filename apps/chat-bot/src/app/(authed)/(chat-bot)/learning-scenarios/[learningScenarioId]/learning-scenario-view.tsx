@@ -25,6 +25,7 @@ import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners';
 import {
   extendLearningScenarioShareExpirationAction,
+  getLearningScenarioShareDataAction,
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
   updateLearningScenarioShareTokenPointsLimitAction,
@@ -161,6 +162,9 @@ export function LearningScenarioView({
         onAdjustTokenLimit={handleAdjustTokenLimitForLearningScenario}
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
         sharingDisabled={!learningScenario.name || learningScenario.name.trim().length === 0}
+        onPollShareData={() =>
+          getLearningScenarioShareDataAction({ learningScenarioId: learningScenario.id })
+        }
       />
 
       <div className="flex flex-col gap-3">

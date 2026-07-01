@@ -8,6 +8,7 @@ import {
   deleteFileMappingAndEntity,
   downloadFileFromCharacter,
   extendCharacterShareExpiration,
+  getActiveCharacterShareData,
   linkFileToCharacter,
   shareCharacter,
   unshareCharacter,
@@ -126,6 +127,18 @@ export async function updateCharacterShareTokenPointsLimitAction({
   )({
     characterId,
     tokenPointsPercentageLimit,
+    user,
+  });
+}
+
+export async function getCharacterShareDataAction({ characterId }: { characterId: string }) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'getCharacterShareDataAction',
+    getActiveCharacterShareData,
+  )({
+    characterId,
     user,
   });
 }

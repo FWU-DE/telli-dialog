@@ -21,6 +21,7 @@ import {
   deleteCharacterAction,
   deleteFileMappingAndEntityAction,
   downloadFileFromCharacterAction,
+  getCharacterShareDataAction,
   linkFileToCharacterAction,
   shareCharacterAction,
   unshareCharacterAction,
@@ -433,6 +434,7 @@ export function CharacterEdit({
           }}
           shareUILink={`/characters/editor/${character.id}/share`}
           sharingDisabled={!name || name.trim().length === 0}
+          onPollShareData={() => getCharacterShareDataAction({ characterId: character.id })}
         />
 
         <div className="flex flex-col gap-3">
