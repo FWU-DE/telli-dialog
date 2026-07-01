@@ -1,4 +1,4 @@
-import { SUPPORTED_DOCUMENTS_TYPE, TRUNCATE_IMAGE_HEIGHT } from '@/const';
+import { SUPPORTED_IMAGE_TYPE, TRUNCATE_IMAGE_HEIGHT } from '@/const';
 import { FileMetadata, FileModel } from '@shared/db/schema';
 import { getFileFromS3, getReadOnlySignedUrl } from '@shared/s3';
 import { isImageFile } from '@/utils/files/generic';
@@ -58,7 +58,7 @@ export async function createImageAttachmentsForConversation(
 
 export async function preprocessImage(
   fileContent: Buffer,
-  type: SUPPORTED_DOCUMENTS_TYPE,
+  type: SUPPORTED_IMAGE_TYPE,
 ): Promise<{ buffer: Buffer; metadata: FileMetadata }> {
   // Convert SVG to PNG if needed
   let processedBuffer = fileContent;

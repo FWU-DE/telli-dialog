@@ -1,9 +1,23 @@
-export const SUPPORTED_DOCUMENTS_EXTENSIONS = ['docx', 'pdf', 'md', 'txt'];
-export type SUPPORTED_DOCUMENTS_TYPE = (typeof SUPPORTED_DOCUMENTS_EXTENSIONS)[number];
+const DOCUMENT_EXTENSIONS_TUPLE = [
+  'docx',
+  'pdf',
+  'md',
+  'txt',
+  'pptx',
+  'odp',
+  'csv',
+  'xlsx',
+  'ods',
+  'odt',
+  'tex',
+] as const;
+export const SUPPORTED_DOCUMENTS_EXTENSIONS: readonly string[] = DOCUMENT_EXTENSIONS_TUPLE;
+export type SUPPORTED_DOCUMENTS_TYPE = (typeof DOCUMENT_EXTENSIONS_TUPLE)[number];
 
 /** This is currently only used to check if a file is an image */
-export const SUPPORTED_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'svg'] as const;
-export type SUPPORTED_IMAGE_TYPE = (typeof SUPPORTED_IMAGE_EXTENSIONS)[number];
+const IMAGE_EXTENSIONS_TUPLE = ['png', 'jpg', 'jpeg', 'webp', 'svg'] as const;
+export const SUPPORTED_IMAGE_EXTENSIONS: readonly string[] = IMAGE_EXTENSIONS_TUPLE;
+export type SUPPORTED_IMAGE_TYPE = (typeof IMAGE_EXTENSIONS_TUPLE)[number];
 /**
  * The maximum size in pixels (width or height) of an avatar. Larger images will be scaled down.
  * The maximum CSS size for avatars is 170px in the UI. For high DPR screens, we allow images up to 2x the maximum CSS size to ensure they look sharp.

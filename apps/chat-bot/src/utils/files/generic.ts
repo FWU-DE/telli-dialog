@@ -5,40 +5,31 @@ import {
   SUPPORTED_IMAGE_TYPE,
 } from '@/const';
 
-export function getFileExtension(fileName: string): SUPPORTED_DOCUMENTS_TYPE {
-  const parts = fileName.split('.');
-
-  const lastPart = parts[parts.length - 1];
-  if (lastPart === undefined) {
-    return fileName;
-  }
-
-  if (
-    !SUPPORTED_DOCUMENTS_EXTENSIONS.includes(lastPart.toString()) &&
-    !SUPPORTED_IMAGE_EXTENSIONS.includes(lastPart as SUPPORTED_IMAGE_TYPE)
-  ) {
+export function getFileExtension(
+  fileName: string,
+): SUPPORTED_DOCUMENTS_TYPE | SUPPORTED_IMAGE_TYPE {
+  const lastPart = fileName.split('.').at(-1);
+  const allExtensions: readonly string[] = [
+    ...SUPPORTED_DOCUMENTS_EXTENSIONS,
+    ...SUPPORTED_IMAGE_EXTENSIONS,
+  ];
+  if (lastPart === undefined || !allExtensions.includes(lastPart)) {
     throw new Error('file type is not supported or missing');
   }
-
-  return lastPart;
+  return lastPart as SUPPORTED_DOCUMENTS_TYPE | SUPPORTED_IMAGE_TYPE;
 }
 
 export function isImageFile(fileName: string): boolean {
   try {
-    const extension = getFileExtension(fileName);
-    return SUPPORTED_IMAGE_EXTENSIONS.includes(extension as SUPPORTED_IMAGE_TYPE);
+    return SUPPORTED_IMAGE_EXTENSIONS.includes(getFileExtension(fileName));
   } catch {
     return false;
   }
 }
 
-export function validateFileExtentsion(fileName: string): boolean {
-  const parts = fileName.split('.');
-  const lastPart = parts[parts.length - 1];
-  if (lastPart === undefined) {
-    return false;
-  }
-  return SUPPORTED_DOCUMENTS_EXTENSIONS.includes(lastPart.toString());
+export function validateFileExtension(fileName: string): boolean {
+  const lastPart = fileName.split('.').at(-1);
+  return lastPart !== undefined && SUPPORTED_DOCUMENTS_EXTENSIONS.includes(lastPart);
 }
 
 export async function blobToBuffer(blob: Blob) {
@@ -83,15 +74,15 @@ export function getFileNameWithoutExtension(fileName: string) {
   return parts.slice(0, -1).join('.');
 }
 
-export function getFileNameAndFileExtention(fileName: string) {
+export function getFileNameAndFileExtension(fileName: string) {
   const parts = fileName.split('.');
 
   if (parts.length === 1) {
     return fileName;
   }
-  const extention = parts[parts.length - 1];
+  const extension = parts[parts.length - 1];
   const fileStem = parts.slice(0, -1).join('.');
-  return [fileStem, extention];
+  return [fileStem, extension];
 }
 
 export function hexToRGBA(hex: string, opacity = 1) {

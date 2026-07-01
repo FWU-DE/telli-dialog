@@ -96,6 +96,22 @@ services:
       retries: 3
       start_period: 40s
 
+  xberg:
+    image: ghcr.io/xberg-io/kreuzberg:4.9.9-core
+    environment:
+      KREUZBERG_MAX_UPLOAD_SIZE_MB: '50'
+    ports:
+      - '8000:8000'
+    volumes:
+      - xberg_cache:/app/.kreuzberg
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'kreuzberg', '--version']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   mock-llm:
     build:
       context: ./mock-llm
@@ -107,3 +123,4 @@ volumes:
   keycloak_data:
   postgres_data:
   valkey_data:
+  xberg_cache:

@@ -8,7 +8,7 @@ import Spinner from '../../icons/spinner';
 import CrossIcon from '../../icons/cross';
 import { LocalFileState } from '../../chat/send-message-form';
 import { getFileIconByFileExtension } from '../../icons/file-upload-icons/file-icons-dict';
-import { formatBytes, getFileNameAndFileExtention, hexToRGBA } from '@/utils/files/generic';
+import { formatBytes, getFileNameAndFileExtension, hexToRGBA } from '@/utils/files/generic';
 import { FileStatus } from '../../chat/upload-file-button';
 import { useToast } from '../../common/toast';
 import { useTranslations } from 'next-intl';
@@ -73,7 +73,7 @@ export default function FilesTable({
       {mergedFiles
         .filter(({ status }) => status !== 'failed')
         .map(({ id, fileName, size, status }) => {
-          const [fileStem, extension] = getFileNameAndFileExtention(fileName);
+          const [fileStem, extension] = getFileNameAndFileExtension(fileName);
           const { Icon, fillColor } = getFileIconByFileExtension(extension);
 
           return (
