@@ -1,5 +1,4 @@
 import { getUser } from '@/auth/utils';
-import { SUPPORTED_IMAGE_TYPE } from '@/const';
 import { getFileExtension, isImageFile } from '@/utils/files/generic';
 import { cnanoid } from '@ais-chat/shared/random/randomService';
 import { NextRequest, NextResponse } from 'next/server';
@@ -65,10 +64,7 @@ async function handleFileUpload(file: File) {
   const fileExtension = getFileExtension(file.name);
 
   if (isImageFile(fileExtension)) {
-    const { buffer: imageBuffer, metadata } = await preprocessImage(
-      buffer,
-      fileExtension as SUPPORTED_IMAGE_TYPE,
-    );
+    const { buffer: imageBuffer, metadata } = await preprocessImage(buffer, fileExtension);
 
     await uploadMessageAttachment({ fileId, fileExtension, buffer: imageBuffer });
     await dbInsertFileWithChunks(

@@ -1,22 +1,15 @@
 import {
   SUPPORTED_DOCUMENTS_EXTENSIONS,
-  SUPPORTED_DOCUMENTS_TYPE,
+  SUPPORTED_FILE_EXTENSIONS,
   SUPPORTED_IMAGE_EXTENSIONS,
-  SUPPORTED_IMAGE_TYPE,
 } from '@/const';
 
-export function getFileExtension(
-  fileName: string,
-): SUPPORTED_DOCUMENTS_TYPE | SUPPORTED_IMAGE_TYPE {
+export function getFileExtension(fileName: string): string {
   const lastPart = fileName.split('.').at(-1);
-  const allExtensions: readonly string[] = [
-    ...SUPPORTED_DOCUMENTS_EXTENSIONS,
-    ...SUPPORTED_IMAGE_EXTENSIONS,
-  ];
-  if (lastPart === undefined || !allExtensions.includes(lastPart)) {
+  if (lastPart === undefined || !SUPPORTED_FILE_EXTENSIONS.includes(lastPart)) {
     throw new Error('file type is not supported or missing');
   }
-  return lastPart as SUPPORTED_DOCUMENTS_TYPE | SUPPORTED_IMAGE_TYPE;
+  return lastPart;
 }
 
 export function isImageFile(fileName: string): boolean {
