@@ -351,7 +351,7 @@ describe('agent-loop', () => {
         onError,
       });
 
-      await expect.poll(() => onComplete.mock.calls.length).toBeGreaterThan(0);
+      await expect.poll(() => onComplete).toHaveBeenCalled();
 
       expect(onError).not.toHaveBeenCalled();
       expect(mockStartSpan).toHaveBeenCalledWith(
@@ -393,7 +393,7 @@ describe('agent-loop', () => {
         onError,
       });
 
-      await expect.poll(() => onComplete.mock.calls.length).toBeGreaterThan(0);
+      await expect.poll(() => onComplete).toHaveBeenCalled();
 
       expect(onError).not.toHaveBeenCalled();
       expect(mockStartSpan).toHaveBeenCalledWith(
@@ -450,7 +450,7 @@ describe('agent-loop', () => {
         onError,
       });
 
-      await expect.poll(() => onComplete.mock.calls.length).toBeGreaterThan(0);
+      await expect.poll(() => onComplete).toHaveBeenCalled();
 
       expect(onError).not.toHaveBeenCalled();
 
