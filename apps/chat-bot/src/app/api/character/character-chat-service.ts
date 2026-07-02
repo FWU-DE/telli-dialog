@@ -37,6 +37,7 @@ import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat'
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { RetrievedChunk } from '../rag/types';
+import { resolveAgentNameForTracing } from '../utils/agent-name';
 
 /**
  * Sends a character chat message and streams the response.
@@ -189,11 +190,15 @@ export async function sendCharacterMessage({
   const assistantMessageId = crypto.randomUUID();
 
   if (agenticChatEnabled) {
+    const agentName = resolveAgentNameForTracing({ characterId: character.id });
+
     runAgentLoop({
       modelId: definedModel.id,
+      modelName: definedModel.name,
       apiKeyId,
       messages: aiCoreMessages,
       toolRegistry,
+      agentName,
       onTextChunk: (delta) => {
         update(delta);
       },
