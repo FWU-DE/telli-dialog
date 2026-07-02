@@ -129,6 +129,7 @@ export function runAgentLoop({
                         const args = JSON.parse(toolCall.arguments) as Record<string, unknown>;
                         result = await registryEntry.handler(args);
                       } catch (error) {
+                        // TODO: the catch clause is usually never executed, because tool handlers return errors as plain string or in the 'error' key of a stringified json
                         const message =
                           error instanceof Error ? error.message : 'Tool execution failed';
                         toolSpan.setStatus({ code: 2, message });
