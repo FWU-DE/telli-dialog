@@ -146,8 +146,9 @@ export default function TermsConditionsModal({
                 <Checkbox
                   checked={checked}
                   onCheckedChange={(checkedState) => setChecked(checkedState === true)}
+                  aria-labelledby="terms-conditions-accept-label"
                 />
-                <div className="flex-1 disclaimer">
+                <div id="terms-conditions-accept-label" className="flex-1 disclaimer">
                   <MarkdownDisplay>{disclaimerConfig.acceptLabel ?? ''}</MarkdownDisplay>
                 </div>
               </div>

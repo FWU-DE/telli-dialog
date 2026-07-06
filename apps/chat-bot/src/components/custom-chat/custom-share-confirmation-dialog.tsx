@@ -27,8 +27,6 @@ export function CustomShareConfirmationDialog({
   onAccept,
 }: CustomShareConfirmationDialogProps) {
   const t = useTranslations('sharing');
-  const [checklistState, setChecklistState] = useState<boolean[]>(Array(11).fill(false));
-
   const checklistItemKeys = useMemo(
     () =>
       [
@@ -47,10 +45,14 @@ export function CustomShareConfirmationDialog({
     [],
   );
 
+  const [checklistState, setChecklistState] = useState<boolean[]>(() =>
+    Array(checklistItemKeys.length).fill(false),
+  );
+
   const allChecklistItemsChecked = checklistState.every(Boolean);
 
   function resetChecklist() {
-    setChecklistState(Array(11).fill(false));
+    setChecklistState(Array(checklistItemKeys.length).fill(false));
   }
 
   function updateChecklist(index: number, checked: boolean) {
@@ -204,6 +206,7 @@ export function CustomShareConfirmationDialog({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary underline"
+                    onClick={(event) => event.stopPropagation()}
                   >
                     {t('community-confirmation.terms-link-label')}
                   </Link>{' '}
