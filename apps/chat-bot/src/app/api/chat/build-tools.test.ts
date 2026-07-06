@@ -341,27 +341,32 @@ describe('buildTools', () => {
     expect(webScraperTool.definition).toMatchObject({
       name: 'web_scraper',
     });
-    expect(webScraperTool.definition.description).toContain('single webpage URL');
+    expect(webScraperTool.definition.description).toContain('one or more URLs');
     expect(webScraperTool.definition.parameters).toMatchObject({
-      required: ['url'],
+      required: ['urls'],
       properties: {
-        url: {
-          type: 'string',
+        urls: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
         },
       },
     });
 
     const result = await webScraperTool.handler({
-      url: 'https://example.com/article',
+      urls: ['https://example.com/article'],
     });
 
     expect(mocks.webScraperMock).toHaveBeenCalledWith('https://example.com/article');
-    expect(JSON.parse(result)).toEqual({
-      title: 'Beispielseite',
-      url: 'https://example.com/article',
-      content: 'Das ist der extrahierte Inhalt.',
-      error: null,
-    });
+    expect(JSON.parse(result)).toEqual([
+      {
+        title: 'Beispielseite',
+        url: 'https://example.com/article',
+        content: 'Das ist der extrahierte Inhalt.',
+        error: null,
+      },
+    ]);
   });
 
   it('adds a web search tool and returns search results as JSON', async () => {
