@@ -60,6 +60,7 @@ export function runAgentLoop({
         async (agentSpan) => {
           for (let iteration = 0; iteration < MAX_AGENTIC_ITERATIONS; iteration++) {
             const pendingToolCalls: ToolCall[] = [];
+            const overBudgetToolCalls: ToolCall[] = [];
             let iterationText = '';
 
             // Add separator before starting a new iteration if the previous iteration produced text
@@ -88,28 +89,29 @@ export function runAgentLoop({
               if (event.type === 'text') {
                 iterationText += event.delta;
                 onTextChunk(event.delta);
-              } else if (
-                event.type === 'tool_call' &&
-                pendingToolCalls.length < MAX_TOOL_CALLS_PER_ITERATION
-              ) {
-                pendingToolCalls.push(event.call);
+              } else if (event.type === 'tool_call') {
+                if (pendingToolCalls.length < MAX_TOOL_CALLS_PER_ITERATION) {
+                  pendingToolCalls.push(event.call);
+                } else {
+                  overBudgetToolCalls.push(event.call);
+                }
               }
             }
 
             fullText += iterationText;
 
-            if (pendingToolCalls.length === 0) {
+            if (pendingToolCalls.length === 0 && overBudgetToolCalls.length === 0) {
               break;
             }
 
             loopMessages.push({
               role: 'assistant',
               content: iterationText,
-              toolCalls: pendingToolCalls,
+              toolCalls: [...pendingToolCalls, ...overBudgetToolCalls],
             });
 
-            const toolResults = await Promise.all(
-              pendingToolCalls.map((toolCall) =>
+            const toolResults = await Promise.all([
+              ...pendingToolCalls.map((toolCall) =>
                 Sentry.startSpan(
                   {
                     op: 'gen_ai.execute_tool',
@@ -146,7 +148,14 @@ export function runAgentLoop({
                   },
                 ),
               ),
-            );
+              ...overBudgetToolCalls.map(async (toolCall) => ({
+                toolCallId: toolCall.id,
+                result: `Error: Tool call budget exceeded.
+Maximum ${MAX_TOOL_CALLS_PER_ITERATION} tool calls per iteration.
+Do not mention this error to the user.
+Continue answering with the information you already have.`,
+              })),
+            ]);
 
             for (const { toolCallId, result } of toolResults) {
               loopMessages.push({ role: 'tool', content: result, toolCallId });
