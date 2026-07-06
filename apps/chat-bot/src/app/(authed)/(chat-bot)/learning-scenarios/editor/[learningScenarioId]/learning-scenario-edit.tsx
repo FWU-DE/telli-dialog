@@ -422,17 +422,17 @@ export function LearningScenarioEdit({
           usedBudget={usedBudget}
           maxBudget={maxBudget}
           budgetUsedBySharedChat={budgetUsedBySharedChat}
-          onShare={async (data) =>
-            await shareLearningScenarioAction({
+          onShare={async (data) => {
+            return await shareLearningScenarioAction({
               learningScenarioId: learningScenario.id,
               data: data as Parameters<typeof shareLearningScenarioAction>[0]['data'],
-            })
-          }
-          onUnshare={async () =>
-            await unshareLearningScenarioAction({
+            });
+          }}
+          onUnshare={async () => {
+            return await unshareLearningScenarioAction({
               learningScenarioId: learningScenario.id,
-            })
-          }
+            });
+          }}
           onAddTime={async (data) =>
             await extendLearningScenarioShareExpirationAction({
               learningScenarioId: learningScenario.id,
@@ -455,11 +455,13 @@ export function LearningScenarioEdit({
               return { success: false };
             })
           }
+          onPollShareData={async () =>
+            await getLearningScenarioShareDataAction({
+              learningScenarioId: learningScenario.id,
+            })
+          }
           shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
           sharingDisabled={!name || name.trim().length === 0}
-          onPollShareData={() =>
-            getLearningScenarioShareDataAction({ learningScenarioId: learningScenario.id })
-          }
         />
 
         <div className="flex flex-col gap-3">

@@ -24,7 +24,13 @@ export function useShareDataPolling({
   const fetchRef = useRef(fetchShareData);
 
   useEffect(() => {
-    if (!isActive) return;
+    fetchRef.current = fetchShareData;
+  }, [fetchShareData]);
+
+  useEffect(() => {
+    if (!isActive) {
+      return;
+    }
 
     const poll = async () => {
       const result = await fetchRef.current(); // latest version
@@ -32,6 +38,8 @@ export function useShareDataPolling({
         setPolledData(result.value);
       }
     };
+
+    void poll();
 
     const interval = setInterval(() => void poll(), intervalMs);
     return () => clearInterval(interval);

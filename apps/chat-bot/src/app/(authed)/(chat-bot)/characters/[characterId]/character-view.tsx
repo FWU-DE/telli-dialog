@@ -108,18 +108,16 @@ export function CharacterView({
         budgetUsedBySharedChat={budgetUsedBySharedChat}
         maxBudget={maxBudget}
         onShare={async (data) => {
-          const result = await shareCharacterAction({
+          return await shareCharacterAction({
             id: character.id,
             tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
             usageTimeLimit: data.usageTimeLimit,
           });
-          return result;
         }}
         onUnshare={async () => {
-          const result = await unshareCharacterAction({
+          return await unshareCharacterAction({
             characterId: character.id,
           });
-          return result;
         }}
         onAddTime={async (data) => {
           const result = await extendCharacterShareExpirationAction({
@@ -141,8 +139,12 @@ export function CharacterView({
           }
           return { success: false };
         }}
+        onPollShareData={async () =>
+          await getCharacterShareDataAction({
+            characterId: character.id,
+          })
+        }
         shareUILink={`/characters/editor/${character.id}/share`}
-        onPollShareData={() => getCharacterShareDataAction({ characterId: character.id })}
       />
 
       <div className="flex flex-col gap-3">

@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { getSharedLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
-import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
+import { calculateShareSessionState } from '@shared/sharing/calculate-time-left';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';
@@ -31,7 +31,7 @@ export default async function Page(
 
   const inviteCode = learningScenario.inviteCode;
   const shareUrl = `/ua/learning-scenarios/${learningScenario.id}/dialog?inviteCode=${inviteCode}`;
-  const leftTime = calculateTimeLeft(learningScenario);
+  const leftTime = calculateShareSessionState(learningScenario).timeLeftInSeconds;
 
   return (
     <CustomChatSharePage

@@ -12,14 +12,14 @@ import { Messages } from '../chat/messages';
 import StreamingFinishedMarker from '../chat/streaming-finished-marker';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
-import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
+import { calculateShareSessionState, ShareSessionState } from '@shared/sharing/calculate-time-left';
 import { logError } from '@shared/logging';
 import type { UseChatReturn } from '@/hooks/use-chat-hooks';
 
-type CalculateTimeLeftInput = Parameters<typeof calculateTimeLeft>[0];
+type ShareSessionInput = Parameters<typeof calculateShareSessionState>[0];
 type Translator = ReturnType<typeof useTranslations>;
 
-type EntityMeta = CalculateTimeLeftInput & {
+type EntityMeta = ShareSessionInput & {
   id: string;
   name: string;
   description: string;
@@ -101,8 +101,8 @@ export default function GenericSharedChat({
   enableFloatingText = false,
   assistantIcon,
 }: SharedChatViewProps) {
-  const timeLeft = calculateTimeLeft(entity);
-  const chatActive = timeLeft > 0;
+  const { shareSessionState } = calculateShareSessionState(entity);
+  const chatActive = shareSessionState === ShareSessionState.RUNNING;
 
   const [explicitDialogStarted, setExplicitDialogStarted] = useState(false);
 

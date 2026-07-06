@@ -83,18 +83,16 @@ export function LearningScenarioView({
   const handleShareLearningScenario = async (
     data: Parameters<typeof shareLearningScenarioAction>[0]['data'],
   ) => {
-    const result = await shareLearningScenarioAction({
+    return await shareLearningScenarioAction({
       learningScenarioId: learningScenario.id,
       data,
     });
-    return result;
   };
 
   const handleUnshareLearningScenario = async () => {
-    const result = await unshareLearningScenarioAction({
+    return await unshareLearningScenarioAction({
       learningScenarioId: learningScenario.id,
     });
-    return result;
   };
 
   const handleAddTimeToLearningScenario = async ({
@@ -160,11 +158,13 @@ export function LearningScenarioView({
         onUnshare={handleUnshareLearningScenario}
         onAddTime={handleAddTimeToLearningScenario}
         onAdjustTokenLimit={handleAdjustTokenLimitForLearningScenario}
+        onPollShareData={async () =>
+          await getLearningScenarioShareDataAction({
+            learningScenarioId: learningScenario.id,
+          })
+        }
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
         sharingDisabled={!learningScenario.name || learningScenario.name.trim().length === 0}
-        onPollShareData={() =>
-          getLearningScenarioShareDataAction({ learningScenarioId: learningScenario.id })
-        }
       />
 
       <div className="flex flex-col gap-3">

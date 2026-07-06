@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
+import { calculateShareSessionState, ShareSessionState } from '@shared/sharing/calculate-time-left';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { Card, CardContent } from '@ui/components/card';
 import { Button } from '@ui/components/button';
@@ -30,6 +30,7 @@ import { CustomChatExtendShareExpirationDialog } from './custom-chat-extend-shar
 import { useShareDataPolling, SharePollingData } from '@/hooks/use-share-data-polling';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { CustomChatStopShareButton } from './custom-chat-stop-share-button';
+import { CustomChatGraceWindowNote } from './custom-chat-grace-window-note';
 
 const shareFormSchema = z.object({
   tokenPointsPercentageLimit: z.number(),
@@ -86,11 +87,10 @@ export function CustomChatShareWithLearners({
   const [expiredAtOverride, setExpiredAtOverride] = useState<Date | null>(null);
   const [tokenPointsLimitOverride, setTokenPointsLimitOverride] = useState<number | null>(null);
 
-  const sharedChatTimeLeftInitial = calculateTimeLeft({
+  const { isExtendable: sharedChatActiveInitial } = calculateShareSessionState({
     expiredAt,
     manuallyStoppedAt,
   });
-  const sharedChatActiveInitial = sharedChatTimeLeftInitial > 0;
 
   const polledData = useShareDataPolling({
     fetchShareData:
@@ -110,12 +110,13 @@ export function CustomChatShareWithLearners({
   const currentExpiredAt = expiredAtOverride ?? polledData?.expiredAt ?? expiredAt;
   const currentManuallyStoppedAt = polledData?.manuallyStoppedAt ?? manuallyStoppedAt;
 
-  const sharedChatTimeLeft = calculateTimeLeft({
+  const { shareSessionState, timeLeftInSeconds, isExtendable } = calculateShareSessionState({
     expiredAt: currentExpiredAt,
     manuallyStoppedAt: currentManuallyStoppedAt,
   });
 
-  const sharedChatActive = sharedChatTimeLeft > 0;
+  // For display purposes, show 0 instead of negative time for expired sessions
+  const sharedChatTimeLeft = Math.max(0, timeLeftInSeconds);
 
   const maxAvailablePercentage = getMaxAvailablePercentage({ usedBudget, maxBudget });
 
@@ -170,7 +171,7 @@ export function CustomChatShareWithLearners({
           <p className="mb-4">
             <RichText>{(tags) => t.rich('description', tags)}</RichText>
           </p>
-          {sharedChatActive ? (
+          {isExtendable ? (
             <>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch w-full">
                 <div className="flex flex-col lg:flex-row gap-4 items-stretch w-full lg:w-1/2">
@@ -206,7 +207,7 @@ export function CustomChatShareWithLearners({
                               {t('button-adjust-token-limit')}
                             </Button>
                           }
-                          sharedChatActive={sharedChatActive}
+                          sharedChatActive={isExtendable}
                           currentTokenPointsPercentageLimit={currentTokenPointsPercentageLimit}
                           maxAvailablePercentage={maxAvailablePercentage}
                           onAdjustTokenLimit={onAdjustTokenLimit}
@@ -256,23 +257,35 @@ export function CustomChatShareWithLearners({
                     </CardContent>
                   </Card>
                 </div>
-                <div className="w-full lg:w-1/2 lg:shrink-0 lg:flex lg:items-center lg:justify-center">
-                  <div className="flex flex-col gap-3">
-                    <Button
-                      type="button"
-                      onClick={() => router.push(shareUILink)}
-                      aria-label={t('share')}
-                      data-testid="open-share-page-button"
-                    >
-                      <ShareFatIcon className="size-5" /> {t('button-to-share-page')}
-                    </Button>
-                    <CustomChatStopShareButton
-                      onUnshare={onUnshare}
-                      onStopShareSuccess={() => {
-                        router.refresh();
-                      }}
+                <div className="w-full lg:w-1/2 lg:shrink-0 lg:grid lg:grid-rows-[1fr_auto_1fr]">
+                  <div className="lg:flex lg:items-start lg:justify-center lg:pt-3">
+                    <CustomChatGraceWindowNote
+                      expiredAt={currentExpiredAt}
+                      shareSessionState={shareSessionState}
                     />
                   </div>
+                  <div className="flex justify-center">
+                    <div className="flex flex-col gap-3 w-fit">
+                      <Button
+                        type="button"
+                        onClick={() => router.push(shareUILink)}
+                        aria-label={t('share')}
+                        data-testid="open-share-page-button"
+                        disabled={shareSessionState === ShareSessionState.EXPIRED_RECENTLY}
+                        className="w-full"
+                      >
+                        <ShareFatIcon className="size-5" /> {t('button-to-share-page')}
+                      </Button>
+                      <CustomChatStopShareButton
+                        onUnshare={onUnshare}
+                        onStopShareSuccess={() => {
+                          router.refresh();
+                        }}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                  <div />
                 </div>
               </div>
             </>
@@ -283,7 +296,7 @@ export function CustomChatShareWithLearners({
                 ariaLabel={t('token-points')}
                 defaultValue={getValuesShare('tokenPointsPercentageLimit')}
                 onValueChange={(value) => setShareValue('tokenPointsPercentageLimit', value)}
-                disabled={sharedChatActive || maxAvailablePercentage <= 0}
+                disabled={isExtendable || maxAvailablePercentage <= 0}
                 pointsPercentageValues={tokenPointsPercentageValues}
                 maxAvailablePercentage={maxAvailablePercentage}
               />
@@ -292,7 +305,7 @@ export function CustomChatShareWithLearners({
                 ariaLabel={t('max-usage-time')}
                 defaultValue={getValuesShare('usageTimeLimit')}
                 onChange={(value) => setShareValue('usageTimeLimit', value)}
-                disabled={sharedChatActive}
+                disabled={isExtendable}
                 usageTimeValuesInMinutes={usageTimeValuesInMinutes}
               />
               <div className="grow" />

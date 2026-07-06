@@ -489,7 +489,7 @@
       "warning-token-points": "Bitte das Maximum des erlaubten Tokenvolumens neu setzen, damit die Lernenden ihre Chats fortsetzen können.",
       "warning-usage-time": "Bitte Zeit hinzufügen, damit die Lernenden ihre Chats fortsetzen können.",
       "warning-token-points-and-usage-time": "Bitte das Maximum des erlaubten Tokenvolumens neu setzen sowie Zeit hinzufügen, damit die Lernenden ihre Chats fortsetzen können.",
-      "session-will-be-closed": "Sitzung wird automatisch beendet in {count, plural, =1 {# Minute} other {# Minuten}}",
+      "session-will-be-closed": "Sitzung wird automatisch beendet in {time}",
       "button-start": "Teilen",
       "button-stop": "Stoppen",
       "button-close-session": "Sitzung beenden",

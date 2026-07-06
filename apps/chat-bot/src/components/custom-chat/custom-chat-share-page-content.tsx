@@ -10,7 +10,9 @@ import Footer from '@/components/navigation/footer';
 import CountDownTimer from '@/app/(authed)/(chat-bot)/learning-scenarios/_components/count-down';
 import CustomChatHeader from './custom-chat-header';
 import { useShareDataPolling } from '@/hooks/use-share-data-polling';
-import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
+import { calculateShareSessionState } from '@shared/sharing/calculate-time-left';
+import type { ServerActionResult } from '@shared/actions/server-action-result';
+import type { SharePollingData } from '@/hooks/use-share-data-polling';
 import { getCharacterShareDataAction } from '@/app/(authed)/(chat-bot)/characters/editor/[characterId]/actions';
 import { getLearningScenarioShareDataAction } from '@/app/(authed)/(chat-bot)/learning-scenarios/editor/[learningScenarioId]/actions';
 
@@ -57,16 +59,32 @@ export default function CustomChatSharePageContent({
 }: CustomChatSharePageContentProps) {
   const formattedInviteCode = `${inviteCode.substring(0, 4)} ${inviteCode.substring(4, 8)}`;
 
-  const sharedChatTimeLeftInitial = calculateTimeLeft({
+  const { timeLeftInSeconds: sharedChatTimeLeftInitial } = calculateShareSessionState({
     expiredAt,
     manuallyStoppedAt,
   });
   const sharedChatActiveInitial = sharedChatTimeLeftInitial > 0;
 
-  const fetchShareData =
-    customChatVariant === 'character'
-      ? () => getCharacterShareDataAction({ characterId: entityId })
-      : () => getLearningScenarioShareDataAction({ learningScenarioId: entityId });
+  const fetchShareData = async (): Promise<ServerActionResult<SharePollingData>> => {
+    const result =
+      customChatVariant === 'character'
+        ? await getCharacterShareDataAction({ characterId: entityId })
+        : await getLearningScenarioShareDataAction({ learningScenarioId: entityId });
+
+    if (result.success) {
+      return {
+        success: true,
+        value: {
+          expiredAt: result.value.expiredAt,
+          manuallyStoppedAt: result.value.manuallyStoppedAt,
+          tokenPointsLimit: result.value.tokenPointsLimit,
+          budgetUsedBySharedChat: result.value.budgetUsedBySharedChat,
+        },
+      };
+    }
+
+    return result;
+  };
 
   const polledData = useShareDataPolling({
     fetchShareData,
@@ -76,7 +94,7 @@ export default function CustomChatSharePageContent({
   const currentExpiredAt = polledData?.expiredAt ?? expiredAt;
   const currentManuallyStoppedAt = polledData?.manuallyStoppedAt ?? manuallyStoppedAt;
 
-  const currentLeftTimeInSeconds = calculateTimeLeft({
+  const { timeLeftInSeconds: currentLeftTimeInSeconds } = calculateShareSessionState({
     expiredAt: currentExpiredAt,
     manuallyStoppedAt: currentManuallyStoppedAt,
   });
