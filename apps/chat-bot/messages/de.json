@@ -62,7 +62,36 @@
     "copy-link": "Link kopieren",
     "link-copied": "Link in die Zwischenablage kopiert",
     "link-copied-error": "Link konnte nicht kopiert werden",
-    "expired-modal-description": "Der Dialog ist abgelaufen"
+    "expired-modal-description": "Der Dialog ist abgelaufen",
+    "community-confirmation": {
+      "title": "Community-Freigabe bestätigen",
+      "description": "Damit alle geteilten Inhalte in der Community hilfreich, hochwertig und rechtlich unbedenklich bleiben, sind vor dem Teilen die folgenden Kriterien sorgfältig zu prüfen und per Checkbox zu bestätigen.",
+      "cancel": "Abbrechen",
+      "accept": "Akzeptieren",
+      "sections": {
+        "copyright": "Urheberrecht",
+        "personal-data": "Personenbezogene oder ‑beziehbare Daten",
+        "ethics": "Ethik und Persönlichkeitsrecht",
+        "content": "Inhalt",
+        "terms": "Nutzungsbedingungen"
+      },
+      "items": {
+        "copyright-material-reviewed": "Im Hintergrundwissen vorhandenes Material ist geprüft (Datei und Link).",
+        "copyright-no-protected-upload": "Die Verwendung der Vorlage erfordert nicht den Upload urheberrechtlich geschützten Materials (z.B. abfotografierter Schüleraufsatz).",
+        "copyright-image-reviewed": "Das Bild zur Visualisierung der Assistenten / Dialogpartner / Lernszenarien ist geprüft.",
+        "copyright-sources-provided": "Hintergrundwissen ist mit Quellenangaben versehen.",
+        "personal-no-data": "Die Vorlage enthält keine personenbezogenen oder ‑beziehbaren Daten.",
+        "personal-no-invitation": "Die Vorlage lädt nicht zur Eingabe personenbezogener oder ‑beziehbarer Daten ein.",
+        "ethics-no-real-person": "Die Vorlage ist nicht nach historischen oder realen Personen benannt.",
+        "ethics-no-discrimination": "Die Vorlage ist in ihrer Konzeption nicht diskriminierend.",
+        "content-no-extremism-violence-sexualized": "Die Vorlage enthält keine extremistischen, gewaltverherrlichenden oder sexualisierten Inhalte.",
+        "content-no-false-outdated": "Die Vorlage enthält keine falschen oder veralteten Inhalte (z.B. telli statt AIS.chat).",
+        "terms-accepted": "Ich habe die Nutzungsbedingungen gelesen und akzeptiere sie."
+      },
+      "terms-prefix": "Ich habe die",
+      "terms-link-label": "Nutzungsbedingungen",
+      "terms-suffix": "gelesen und akzeptiere sie."
+    }
   },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei AIS.chat!",

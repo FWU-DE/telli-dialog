@@ -4,7 +4,6 @@ import React, { startTransition, useEffect, useRef, useState } from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { DisclaimerConfig } from './const';
 import { useTranslations } from 'next-intl';
-import Checkbox from '../common/checkbox';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
@@ -13,6 +12,7 @@ import { usePortalContainer } from '@ui/components/portal-container';
 import { useSession } from 'next-auth/react';
 import { Button } from '@ui/components/button';
 import type { ServerActionResult } from '@shared/actions/server-action-result';
+import { Checkbox } from '@ui/components/checkbox';
 
 type TermsConditionsModalProps = {
   handleAccept(): Promise<ServerActionResult<boolean>>;
@@ -143,7 +143,10 @@ export default function TermsConditionsModal({
             )}
             {pageNumber === contents.length - 1 && disclaimerConfig.showCheckBox && (
               <div className="flex items-center gap-3 justify-center">
-                <Checkbox onCheckedChange={setChecked} checked={checked} />
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={(checkedState) => setChecked(checkedState === true)}
+                />
                 <div className="flex-1 disclaimer">
                   <MarkdownDisplay>{disclaimerConfig.acceptLabel ?? ''}</MarkdownDisplay>
                 </div>
