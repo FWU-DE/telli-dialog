@@ -95,7 +95,6 @@ export default function GenericSharedChat({
   assistantIcon,
 }: SharedChatViewProps) {
   const timeLeft = calculateTimeLeft(entity);
-  const chatActive = timeLeft > 0;
   const tCommon = useTranslations('common');
   const [explicitDialogStarted, setExplicitDialogStarted] = useState(false);
 
@@ -115,6 +114,9 @@ export default function GenericSharedChat({
 
   const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, entity.id, inviteCode]);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const chatActive =
+    timeLeft > 0 && !TokenPointsExceededError.is(error) && !SharedChatExpiredError.is(error);
 
   const dialogStarted =
     dialogStartMode === 'explicit' ? explicitDialogStarted : messages.length > 0;
@@ -150,7 +152,7 @@ export default function GenericSharedChat({
 
   return (
     <>
-      {(!chatActive || TokenPointsExceededError.is(error) || SharedChatExpiredError.is(error)) && (
+      {!chatActive && (
         <ExpiredChatModal
           conversationMessages={uiMessages}
           title={entity.name}
@@ -205,7 +207,8 @@ export default function GenericSharedChat({
                 containerClassName="flex flex-col gap-4"
               />
             )}
-            {error && (
+            {/* If there is a TokenPointsExceededError or SharedChatExpiredError we show a dialog instead */}
+            {error && !TokenPointsExceededError.is(error) && !SharedChatExpiredError.is(error) && (
               <ErrorChatPlaceholder
                 errorMessage={tCommon(getErrorMessageByType(error))}
                 handleReload={handleReload}
