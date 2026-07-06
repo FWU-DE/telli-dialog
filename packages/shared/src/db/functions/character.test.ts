@@ -41,7 +41,7 @@ describe('db character sharing helpers', () => {
   });
 
   describe('dbExtendSharedCharacterConversationExpiration', () => {
-    it('returns undefined when there is no active unstopped share', async () => {
+    it('returns null when there is no active unstopped share', async () => {
       mockSelectLatestShare([]);
 
       const result = await dbExtendSharedCharacterConversationExpiration({
@@ -50,7 +50,7 @@ describe('db character sharing helpers', () => {
         additionalTimeInMinutes: 30,
       });
 
-      expect(result).toBeUndefined();
+      expect(result).toBeNull();
       expect(mocks.update).not.toHaveBeenCalled();
     });
 

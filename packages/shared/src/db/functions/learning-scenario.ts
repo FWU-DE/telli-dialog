@@ -450,7 +450,7 @@ export async function dbExtendSharedLearningScenarioExpiration({
     .limit(1);
 
   if (!latestUnstoppedShare) {
-    return undefined;
+    return null;
   }
 
   const now = new Date();

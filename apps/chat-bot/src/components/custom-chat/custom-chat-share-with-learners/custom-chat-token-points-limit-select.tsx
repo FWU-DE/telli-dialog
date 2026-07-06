@@ -99,13 +99,14 @@ export function TokenPointsLimitSelect({
     maxAvailablePercentage,
     lowerBoundary,
   });
+  const stringValue = value !== undefined ? String(value) : undefined;
 
   return (
     <div className="whitespace-nowrap flex-1">
       <Field>
         {label && <FieldLabel>{label}</FieldLabel>}
         <Select
-          value={String(value)}
+          value={stringValue}
           defaultValue={String(defaultValue)}
           onValueChange={(value) => onValueChange?.(Number(value))}
           disabled={disabled}
