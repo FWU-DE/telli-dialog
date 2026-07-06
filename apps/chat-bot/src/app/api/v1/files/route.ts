@@ -64,15 +64,23 @@ async function handleFileUpload(file: File) {
   const fileExtension = getFileExtension(file.name);
 
   if (isImageFile(fileExtension)) {
-    const { buffer: imageBuffer, metadata } = await preprocessImage(buffer, fileExtension);
+    const {
+      buffer: imageBuffer,
+      metadata,
+      type: processedType,
+    } = await preprocessImage(buffer, fileExtension);
+    const processedName =
+      processedType === fileExtension
+        ? file.name
+        : `${file.name.replace(/\.[^.]+$/, '')}.${processedType}`;
 
-    await uploadMessageAttachment({ fileId, fileExtension, buffer: imageBuffer });
+    await uploadMessageAttachment({ fileId, fileExtension: processedType, buffer: imageBuffer });
     await dbInsertFileWithChunks(
       {
         id: fileId,
-        name: file.name,
+        name: processedName,
         size: imageBuffer.length,
-        type: fileExtension,
+        type: processedType,
         metadata,
         userId: user.id,
       },

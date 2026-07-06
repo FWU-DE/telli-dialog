@@ -29,10 +29,7 @@ export async function fileExtractionXberg({
     });
 
     if (!response.ok) {
-      const responseBody = await response.text();
-      throw new Error(
-        `Xberg request failed with status ${response.status} for file: ${filename}: ${responseBody.substring(0, 500)}`,
-      );
+      throw new Error(`Xberg request failed with status ${response.status} for file: ${filename}`);
     }
 
     const results = (await response.json()) as XbergResult[];

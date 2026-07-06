@@ -67,13 +67,13 @@ export function getFileNameWithoutExtension(fileName: string) {
   return parts.slice(0, -1).join('.');
 }
 
-export function getFileNameAndFileExtension(fileName: string) {
+export function getFileNameAndFileExtension(fileName: string): [string, string] {
   const parts = fileName.split('.');
 
   if (parts.length === 1) {
-    return fileName;
+    return [fileName, ''];
   }
-  const extension = parts[parts.length - 1];
+  const extension = parts.at(-1) ?? '';
   const fileStem = parts.slice(0, -1).join('.');
   return [fileStem, extension];
 }

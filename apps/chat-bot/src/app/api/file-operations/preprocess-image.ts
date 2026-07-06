@@ -59,12 +59,14 @@ export async function createImageAttachmentsForConversation(
 export async function preprocessImage(
   fileContent: Buffer,
   type: string,
-): Promise<{ buffer: Buffer; metadata: FileMetadata }> {
+): Promise<{ buffer: Buffer; metadata: FileMetadata; type: string }> {
   // Convert SVG to PNG if needed
   let processedBuffer = fileContent;
+  let processedType = type;
   if (type === 'svg') {
     try {
       processedBuffer = await sharp(fileContent).png().toBuffer();
+      processedType = 'png';
     } catch {
       throw new Error('Failed to convert SVG to PNG');
     }
@@ -90,6 +92,7 @@ export async function preprocessImage(
     return {
       buffer: finalBuffer,
       metadata: { width, height },
+      type: processedType,
     };
   }
 
@@ -97,6 +100,7 @@ export async function preprocessImage(
   return {
     buffer: processedBuffer,
     metadata: { width, height },
+    type: processedType,
   };
 }
 

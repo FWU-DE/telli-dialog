@@ -50,6 +50,17 @@ jobs:
         env:
           RABBITMQ_DEFAULT_PASS: password
           RABBITMQ_DEFAULT_USER: user
+      xberg:
+        image: ghcr.io/xberg-io/kreuzberg:4.9.9-core
+        ports:
+          - 8000:8000
+        env:
+          KREUZBERG_MAX_UPLOAD_SIZE_MB: '50'
+        options: >-
+          --health-cmd "curl -f http://localhost:8000/health"
+          --health-interval 30s
+          --health-timeout 10s
+          --health-retries 3
 
     env:
       DATABASE_URL: postgresql://admin:test1234@127.0.0.1:5432/app_db
@@ -73,6 +84,7 @@ jobs:
       NEXT_TELEMETRY_DISABLED: 1
       TURBO_TELEMETRY_DISABLED: 1
       CRAWL4AI_API_TOKEN: ais-chat-crawl4ai-token
+      XBERG_URL: http://localhost:8000
 
     steps:
       - name: Checkout code
@@ -91,13 +103,6 @@ jobs:
 
       # crawl4ai is not started under services because its large image (~40s pull) would delay the whole pipeline
       - name: Start crawl4ai container (in background)
-        run: |
-          docker run \
-            --name crawl4ai \
-            --shm-size=2gb \
-            -p 11235:11235 \
-            -e CRAWL4AI_API_TOKEN=$CRAWL4AI_API_TOKEN \
-            unclecode/crawl4ai:0.9.0 > /tmp/crawl4ai.log 2>&1 &
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
