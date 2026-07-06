@@ -30,9 +30,6 @@ const buildToolsOutput = {
       parameters: {},
     },
   ],
-  toolHandlers: {
-    web_search: vi.fn(),
-  },
   webSearchResults,
 };
 
