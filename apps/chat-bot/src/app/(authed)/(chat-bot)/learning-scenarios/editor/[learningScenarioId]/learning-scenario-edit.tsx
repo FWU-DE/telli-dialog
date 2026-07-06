@@ -30,6 +30,7 @@ import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-act
 import { useRouter } from 'next/navigation';
 import {
   extendLearningScenarioShareExpirationAction,
+  getLearningScenarioShareDataAction,
   removeFileFromLearningScenarioAction,
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
@@ -456,6 +457,9 @@ export function LearningScenarioEdit({
           }
           shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
           sharingDisabled={!name || name.trim().length === 0}
+          onPollShareData={() =>
+            getLearningScenarioShareDataAction({ learningScenarioId: learningScenario.id })
+          }
         />
 
         <div className="flex flex-col gap-3">

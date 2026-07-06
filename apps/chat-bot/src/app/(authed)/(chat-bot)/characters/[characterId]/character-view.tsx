@@ -24,6 +24,7 @@ import { createNewCharacterAction } from '../actions';
 import {
   downloadFileFromCharacterAction,
   extendCharacterShareExpirationAction,
+  getCharacterShareDataAction,
   shareCharacterAction,
   unshareCharacterAction,
   updateCharacterShareTokenPointsLimitAction,
@@ -141,6 +142,7 @@ export function CharacterView({
           return { success: false };
         }}
         shareUILink={`/characters/editor/${character.id}/share`}
+        onPollShareData={() => getCharacterShareDataAction({ characterId: character.id })}
       />
 
       <div className="flex flex-col gap-3">

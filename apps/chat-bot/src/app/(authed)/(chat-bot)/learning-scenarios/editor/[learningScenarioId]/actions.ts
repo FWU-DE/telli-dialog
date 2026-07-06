@@ -5,6 +5,7 @@ import { ShareWithLearnersLimitParams } from '@/components/custom-chat/custom-ch
 import { runServerAction } from '@shared/actions/run-server-action';
 import {
   extendLearningScenarioShareExpiration,
+  getActiveLearningScenarioShareData,
   removeFileFromLearningScenario,
   shareLearningScenario,
   unshareLearningScenario,
@@ -122,6 +123,22 @@ export async function updateLearningScenarioShareTokenPointsLimitAction({
   )({
     learningScenarioId,
     tokenPointsPercentageLimit,
+    user,
+  });
+}
+
+export async function getLearningScenarioShareDataAction({
+  learningScenarioId,
+}: {
+  learningScenarioId: string;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'getLearningScenarioShareDataAction',
+    getActiveLearningScenarioShareData,
+  )({
+    learningScenarioId,
     user,
   });
 }

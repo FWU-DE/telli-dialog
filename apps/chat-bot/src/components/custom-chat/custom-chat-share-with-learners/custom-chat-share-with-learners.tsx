@@ -27,6 +27,8 @@ import { TimeLimitSelect } from './custom-chat-time-limit-select';
 import { TokenPointsLeftRing } from './custom-chat-token-points-left-ring';
 import { CustomChatAdjustTokenLimitButton } from './custom-chat-adjust-token-limit-button';
 import { CustomChatExtendShareExpirationButton } from './custom-chat-extend-share-expiration-button';
+import { useShareDataPolling, SharePollingData } from '@/hooks/use-share-data-polling';
+import { ServerActionResult } from '@shared/actions/server-action-result';
 import { CustomChatStopShareButton } from './custom-chat-stop-share-button';
 
 const shareFormSchema = z.object({
@@ -54,6 +56,7 @@ interface CustomChatShareWithLearnersProps {
   }>;
   shareUILink: string;
   sharingDisabled?: boolean;
+  onPollShareData?: () => Promise<ServerActionResult<SharePollingData>>;
 }
 
 export function CustomChatShareWithLearners({
@@ -70,6 +73,7 @@ export function CustomChatShareWithLearners({
   onAdjustTokenLimit,
   shareUILink,
   sharingDisabled = false,
+  onPollShareData,
 }: CustomChatShareWithLearnersProps) {
   const toast = useToast();
   const router = useRouter();
@@ -79,25 +83,52 @@ export function CustomChatShareWithLearners({
 
   const [expiredAtOverride, setExpiredAtOverride] = useState<Date | null>(null);
   const [tokenPointsLimitOverride, setTokenPointsLimitOverride] = useState<number | null>(null);
-  const currentExpiredAt = expiredAtOverride ?? expiredAt;
+
+  const sharedChatTimeLeftInitial = calculateTimeLeft({
+    expiredAt,
+    manuallyStoppedAt,
+  });
+  const sharedChatActiveInitial = sharedChatTimeLeftInitial > 0;
+
+  const polledData = useShareDataPolling({
+    fetchShareData:
+      onPollShareData ??
+      (async () => ({
+        success: true as const,
+        value: {
+          expiredAt: null,
+          manuallyStoppedAt: null,
+          tokenPointsLimit: null,
+          budgetUsedBySharedChat: 0,
+        },
+      })),
+    isActive: sharedChatActiveInitial && !!onPollShareData,
+  });
+
+  const currentExpiredAt = expiredAtOverride ?? polledData?.expiredAt ?? expiredAt;
+  const currentManuallyStoppedAt = polledData?.manuallyStoppedAt ?? manuallyStoppedAt;
 
   const sharedChatTimeLeft = calculateTimeLeft({
     expiredAt: currentExpiredAt,
-    manuallyStoppedAt,
+    manuallyStoppedAt: currentManuallyStoppedAt,
   });
 
   const sharedChatActive = sharedChatTimeLeft > 0;
 
   const maxAvailablePercentage = getMaxAvailablePercentage({ usedBudget, maxBudget });
 
+  const currentTokenPointsLimit =
+    tokenPointsLimitOverride ?? polledData?.tokenPointsLimit ?? tokenPointsLimit;
   const preselectedTokenPointsPercentageLimit = resolveTokenPointsPercentageLimit({
-    previousTokenPointsLimit: tokenPointsLimit,
+    previousTokenPointsLimit: currentTokenPointsLimit,
     selectableFixedValues: tokenPointsPercentageValues.filter(
       (value) => value < maxAvailablePercentage,
     ),
   });
-  const currentTokenPointsPercentageLimit =
-    tokenPointsLimitOverride ?? preselectedTokenPointsPercentageLimit;
+  const currentTokenPointsPercentageLimit = preselectedTokenPointsPercentageLimit;
+
+  const currentBudgetUsedBySharedChat =
+    polledData?.budgetUsedBySharedChat ?? budgetUsedBySharedChat;
 
   const preselectedUsageTimeLimit =
     maxUsageTimeLimit !== null && usageTimeValuesInMinutes.includes(maxUsageTimeLimit)
@@ -160,7 +191,7 @@ export function CustomChatShareWithLearners({
                         <p className="text-sm">{t('token-points-left')}</p>
                         <TokenPointsLeftRing
                           tokenLimit={(maxBudget * currentTokenPointsPercentageLimit) / 100}
-                          spentTokens={budgetUsedBySharedChat}
+                          spentTokens={currentBudgetUsedBySharedChat}
                           spentLabel={t('token-points-spent')}
                           ariaLabel={t('token-points-left')}
                           className="w-6 h-6"

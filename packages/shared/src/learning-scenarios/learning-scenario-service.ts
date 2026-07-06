@@ -223,6 +223,52 @@ export async function getSharedLearningScenario({
 }
 
 /**
+ * Returns lightweight share data for polling updates (no files, signed URLs, etc).
+ * Used by teacher views to poll for external changes to share state.
+ * @throws NotFoundError if learning scenario does not exist
+ */
+export async function getActiveLearningScenarioShareData({
+  learningScenarioId,
+  user,
+}: {
+  learningScenarioId: string;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}): Promise<{
+  expiredAt: Date | null;
+  manuallyStoppedAt: Date | null;
+  tokenPointsLimit: number | null;
+  budgetUsedBySharedChat: number;
+}> {
+  checkParameterUUID(learningScenarioId);
+  requireTeacherRole(user.userRole);
+
+  const learningScenario = await dbGetLearningScenarioByIdOptionalShareData({
+    learningScenarioId,
+    user,
+  });
+  if (!learningScenario) throw new NotFoundError('Learning scenario not found');
+
+  verifyReadAccess({ item: learningScenario, user });
+
+  let budgetUsedBySharedChat = 0;
+  if (learningScenario.startedAt && learningScenario.expiredAt) {
+    budgetUsedBySharedChat = await dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
+      learningScenarioId: learningScenario.id,
+      userId: user.id,
+      expiredAt: learningScenario.expiredAt,
+      startedAt: learningScenario.startedAt,
+    });
+  }
+
+  return {
+    expiredAt: learningScenario.expiredAt,
+    manuallyStoppedAt: learningScenario.manuallyStoppedAt,
+    tokenPointsLimit: learningScenario.tokenPointsLimit,
+    budgetUsedBySharedChat,
+  };
+}
+
+/**
  * Schema for updating character details that are allowed to be changed by the user.
  */
 const updateLearningScenarioSchema = learningScenarioUpdateSchema.omit({

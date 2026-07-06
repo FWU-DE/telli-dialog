@@ -698,6 +698,49 @@ export const getSharedCharacter = async ({
 };
 
 /**
+ * Returns lightweight share data for polling updates (no files, signed URLs, etc).
+ * Used by teacher views to poll for external changes to share state.
+ * @throws NotFoundError if character does not exist
+ */
+export const getActiveCharacterShareData = async ({
+  characterId,
+  user,
+}: {
+  characterId: string;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}): Promise<{
+  expiredAt: Date | null;
+  manuallyStoppedAt: Date | null;
+  tokenPointsLimit: number | null;
+  budgetUsedBySharedChat: number;
+}> => {
+  checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
+
+  const character = await dbGetCharacterByIdOptionalShareData({ characterId, user });
+  if (!character) throw new NotFoundError('Character not found');
+
+  verifyReadAccess({ item: character, user });
+
+  let budgetUsedBySharedChat = 0;
+  if (character.startedAt && character.expiredAt) {
+    budgetUsedBySharedChat = await dbGetSharedCharacterChatUsageInCentByCharacterId({
+      characterId: character.id,
+      userId: user.id,
+      expiredAt: character.expiredAt,
+      startedAt: character.startedAt,
+    });
+  }
+
+  return {
+    expiredAt: character.expiredAt,
+    manuallyStoppedAt: character.manuallyStoppedAt,
+    tokenPointsLimit: character.tokenPointsLimit,
+    budgetUsedBySharedChat,
+  };
+};
+
+/**
  * Returns all characters a user is allowed to see. That means:
  * - user is owner of character
  * - character is shared with users school
