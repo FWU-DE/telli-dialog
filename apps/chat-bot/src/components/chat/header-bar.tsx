@@ -74,9 +74,11 @@ export function ChatHeaderBar({
               />
             </div>
           </div>
-          <div className="flex flex-1 w-full min-w-0 pb-2 sm:hidden">
-            <span className="w-full truncate text-center font-normal text-xl">{title}</span>
-          </div>
+          {title !== undefined && (
+            <div className="flex flex-1 w-full min-w-0 pb-2 sm:hidden">
+              <span className="w-full truncate text-center font-normal text-xl">{title}</span>
+            </div>
+          )}
         </div>
       ),
     },

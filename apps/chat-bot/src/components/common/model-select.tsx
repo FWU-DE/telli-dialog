@@ -70,7 +70,7 @@ export default function ModelSelect({
             aria-label={`Select ${modelType} Model Dropdown`}
             data-testid={`${modelType}-model-dropdown`}
           >
-            <span className="line-clamp-2 text-primary text-base font-medium text-left">
+            <span className="min-w-0 flex-1 line-clamp-2 text-primary text-base font-medium text-left">
               {currentSelectedModel?.displayName ?? noModelsLabel}
             </span>
             {currentSelectedModel &&
