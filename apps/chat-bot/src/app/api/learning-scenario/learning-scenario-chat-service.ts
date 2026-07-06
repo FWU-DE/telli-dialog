@@ -37,6 +37,7 @@ import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat'
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { RetrievedChunk } from '../rag/types';
+import { resolveAgentNameForTracing } from '../utils/agent-name';
 
 /**
  * Server Action to send a learning scenario message and stream the response.
@@ -192,11 +193,15 @@ export async function sendLearningScenarioMessage({
   const assistantMessageId = crypto.randomUUID();
 
   if (agenticChatEnabled) {
+    const agentName = resolveAgentNameForTracing({ learningScenarioId: learningScenario.id });
+
     runAgentLoop({
       modelId: definedModel.id,
+      modelName: definedModel.name,
       apiKeyId,
       messages: convertToAiCoreMessages(systemPrompt, messagesWithImages),
       toolRegistry,
+      agentName,
       onTextChunk: (delta) => {
         update(delta);
       },

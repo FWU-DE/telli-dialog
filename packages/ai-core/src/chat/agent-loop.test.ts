@@ -10,7 +10,20 @@ vi.mock('./index', () => ({
     mockGenerateAgenticStreamWithBilling(...args),
 }));
 
+// Mock Sentry to verify spans are created
+const mockStartSpan = vi.fn((options, callback) => callback({ setAttribute: vi.fn() }));
+
+vi.mock('@sentry/core', () => ({
+  startSpan: (options: unknown, callback: unknown) => mockStartSpan(options, callback),
+}));
+
 describe('agent-loop', () => {
+  const usage: TokenUsage = {
+    promptTokens: 10,
+    completionTokens: 20,
+    totalTokens: 30,
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -20,12 +33,6 @@ describe('agent-loop', () => {
     const onTextChunk = vi.fn();
     const onComplete = vi.fn();
     const onError = vi.fn();
-
-    const usage: TokenUsage = {
-      promptTokens: 10,
-      completionTokens: 20,
-      totalTokens: 30,
-    };
 
     // Iteration 1: produces text "Hello world." then a tool call
     // Iteration 2: produces text "More info." with no tool calls
@@ -62,9 +69,11 @@ describe('agent-loop', () => {
 
     runAgentLoop({
       modelId: 'test-model',
+      modelName: 'Test Model',
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
+      agentName: 'Test Agent',
       onTextChunk,
       onComplete,
       onError,
@@ -95,12 +104,6 @@ describe('agent-loop', () => {
     const onComplete = vi.fn();
     const onError = vi.fn();
 
-    const usage: TokenUsage = {
-      promptTokens: 10,
-      completionTokens: 20,
-      totalTokens: 30,
-    };
-
     // Single iteration with no tool calls
     mockGenerateAgenticStreamWithBilling.mockImplementation(async function* () {
       yield { type: 'text', delta: 'Single response.' } satisfies StreamEvent;
@@ -109,8 +112,10 @@ describe('agent-loop', () => {
 
     runAgentLoop({
       modelId: 'test-model',
+      modelName: 'Test Model',
       apiKeyId: 'test-key',
       messages,
+      agentName: 'Test Agent',
       onTextChunk,
       onComplete,
       onError,
@@ -137,12 +142,6 @@ describe('agent-loop', () => {
     const onTextChunk = vi.fn();
     const onComplete = vi.fn();
     const onError = vi.fn();
-
-    const usage: TokenUsage = {
-      promptTokens: 10,
-      completionTokens: 20,
-      totalTokens: 30,
-    };
 
     // Iteration 1: tool call only, no text
     // Iteration 2: produces text
@@ -174,9 +173,11 @@ describe('agent-loop', () => {
 
     runAgentLoop({
       modelId: 'test-model',
+      modelName: 'Test Model',
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
+      agentName: 'Test Agent',
       onTextChunk,
       onComplete,
       onError,
@@ -203,12 +204,6 @@ describe('agent-loop', () => {
     const onTextChunk = vi.fn();
     const onComplete = vi.fn();
     const onError = vi.fn();
-
-    const usage: TokenUsage = {
-      promptTokens: 10,
-      completionTokens: 20,
-      totalTokens: 30,
-    };
 
     // Iteration 1: produces text ending with \n\n, then a tool call
     // Iteration 2: produces text
@@ -241,9 +236,11 @@ describe('agent-loop', () => {
 
     runAgentLoop({
       modelId: 'test-model',
+      modelName: 'Test Model',
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
+      agentName: 'Test Agent',
       onTextChunk,
       onComplete,
       onError,
@@ -271,12 +268,6 @@ describe('agent-loop', () => {
     const onTextChunk = vi.fn();
     const onComplete = vi.fn();
     const onError = vi.fn();
-
-    const usage: TokenUsage = {
-      promptTokens: 10,
-      completionTokens: 20,
-      totalTokens: 30,
-    };
 
     // Three iterations, each producing text and a tool call (except the last)
     let callCount = 0;
@@ -311,9 +302,11 @@ describe('agent-loop', () => {
 
     runAgentLoop({
       modelId: 'test-model',
+      modelName: 'Test Model',
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
+      agentName: 'Test Agent',
       onTextChunk,
       onComplete,
       onError,
@@ -333,5 +326,146 @@ describe('agent-loop', () => {
         fullText: 'First.\n\nSecond.\n\nThird.',
       }),
     );
+  });
+
+  describe('Sentry instrumentation', () => {
+    it('creates Sentry span for agent invocation', async () => {
+      const messages: Message[] = [{ role: 'user', content: 'Test query' }];
+      const onTextChunk = vi.fn();
+      const onComplete = vi.fn();
+      const onError = vi.fn();
+
+      mockGenerateAgenticStreamWithBilling.mockImplementation(async function* () {
+        yield { type: 'text', delta: 'Response' } satisfies StreamEvent;
+        yield { type: 'finish', usage } satisfies StreamEvent;
+      });
+
+      runAgentLoop({
+        modelId: 'test-model',
+        modelName: 'Test Model',
+        apiKeyId: 'test-key',
+        messages,
+        agentName: 'Test Agent',
+        onTextChunk,
+        onComplete,
+        onError,
+      });
+
+      await expect.poll(() => onComplete).toHaveBeenCalled();
+
+      expect(onError).not.toHaveBeenCalled();
+      expect(mockStartSpan).toHaveBeenCalledWith(
+        expect.objectContaining({ op: 'gen_ai.invoke_agent' }),
+        expect.any(Function),
+      );
+    });
+
+    it('creates Sentry spans for tool executions', async () => {
+      const messages: Message[] = [{ role: 'user', content: 'Test query' }];
+      const onTextChunk = vi.fn();
+      const onComplete = vi.fn();
+      const onError = vi.fn();
+
+      mockGenerateAgenticStreamWithBilling.mockImplementation(async function* () {
+        yield {
+          type: 'tool_call',
+          call: { id: 'call_1', name: 'test_tool', arguments: '{}' },
+        } satisfies StreamEvent;
+        yield { type: 'finish', usage } satisfies StreamEvent;
+      });
+
+      const toolRegistry = {
+        test_tool: {
+          definition: { name: 'test_tool', description: 'Test', parameters: {} },
+          handler: async () => 'result',
+        },
+      };
+
+      runAgentLoop({
+        modelId: 'test-model',
+        modelName: 'Test Model',
+        apiKeyId: 'test-key',
+        messages,
+        toolRegistry,
+        agentName: 'Test Agent',
+        onTextChunk,
+        onComplete,
+        onError,
+      });
+
+      await expect.poll(() => onComplete).toHaveBeenCalled();
+
+      expect(onError).not.toHaveBeenCalled();
+      expect(mockStartSpan).toHaveBeenCalledWith(
+        expect.objectContaining({ op: 'gen_ai.execute_tool' }),
+        expect.any(Function),
+      );
+    });
+
+    it('creates correct number of Sentry spans for multiple tool calls', async () => {
+      const messages: Message[] = [{ role: 'user', content: 'Test query' }];
+      const onTextChunk = vi.fn();
+      const onComplete = vi.fn();
+      const onError = vi.fn();
+
+      let callCount = 0;
+      mockGenerateAgenticStreamWithBilling.mockImplementation(async function* () {
+        callCount++;
+        if (callCount === 1) {
+          yield {
+            type: 'tool_call',
+            call: { id: 'call_1', name: 'tool1', arguments: '{}' },
+          } satisfies StreamEvent;
+          yield {
+            type: 'tool_call',
+            call: { id: 'call_2', name: 'tool2', arguments: '{}' },
+          } satisfies StreamEvent;
+          yield { type: 'finish', usage } satisfies StreamEvent;
+        } else {
+          yield { type: 'text', delta: 'Done' } satisfies StreamEvent;
+          yield { type: 'finish', usage } satisfies StreamEvent;
+        }
+      });
+
+      const toolRegistry = {
+        tool1: {
+          definition: { name: 'tool1', description: '', parameters: {} },
+          handler: async () => 'r1',
+        },
+        tool2: {
+          definition: { name: 'tool2', description: '', parameters: {} },
+          handler: async () => 'r2',
+        },
+      };
+
+      runAgentLoop({
+        modelId: 'test-model',
+        modelName: 'Test Model',
+        apiKeyId: 'test-key',
+        messages,
+        toolRegistry,
+        agentName: 'Test Agent',
+        onTextChunk,
+        onComplete,
+        onError,
+      });
+
+      await expect.poll(() => onComplete).toHaveBeenCalled();
+
+      expect(onError).not.toHaveBeenCalled();
+
+      // Verify: 1 agent span + 2 tool spans = 3 total
+      expect(mockStartSpan).toHaveBeenCalledTimes(3);
+
+      const agentSpanCalls = mockStartSpan.mock.calls.filter(
+        (call) => call[0]?.op === 'gen_ai.invoke_agent',
+      );
+      const toolSpanCalls = mockStartSpan.mock.calls.filter(
+        (call) => call[0]?.op === 'gen_ai.execute_tool',
+      );
+
+      expect(agentSpanCalls).toHaveLength(1);
+      expect(toolSpanCalls).toHaveLength(2);
+    });
   });
 });
