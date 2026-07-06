@@ -91,7 +91,10 @@ export function runAgentLoop({
                 onTextChunk(event.delta);
               } else if (event.type === 'tool_call') {
                 if (pendingToolCalls.length < MAX_TOOL_CALLS_PER_ITERATION) {
-                  pendingToolCalls.push(event.call);
+                  // On last iteration, tools are disabled but model might still emit tool calls
+                  if (!isLastIteration) {
+                    pendingToolCalls.push(event.call);
+                  }
                 } else {
                   overBudgetToolCalls.push(event.call);
                 }
@@ -150,10 +153,7 @@ export function runAgentLoop({
               ),
               ...overBudgetToolCalls.map(async (toolCall) => ({
                 toolCallId: toolCall.id,
-                result: `Error: Tool call budget exceeded.
-Maximum ${MAX_TOOL_CALLS_PER_ITERATION} tool calls per iteration.
-Do not mention this error to the user.
-Continue answering with the information you already have.`,
+                result: `Error: Tool call budget exceeded. Maximum ${MAX_TOOL_CALLS_PER_ITERATION} tool calls per iteration. Do not mention this error to the user. Continue answering with the information you already have.`,
               })),
             ]);
 
