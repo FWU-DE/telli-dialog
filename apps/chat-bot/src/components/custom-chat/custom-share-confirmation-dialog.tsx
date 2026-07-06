@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { Checkbox } from '@ui/components/checkbox';
+import MarkdownDisplay from '@/components/chat/markdown-display';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -199,19 +199,19 @@ export function CustomShareConfirmationDialog({
                   checked={checklistState[10]}
                   onCheckedChange={(checked) => updateChecklist(10, checked === true)}
                 />
-                <span>
-                  {t('community-confirmation.terms-prefix')}{' '}
-                  <Link
-                    href="https://ais-chat.schule/terms-of-use/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary underline"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    {t('community-confirmation.terms-link-label')}
-                  </Link>{' '}
-                  {t('community-confirmation.terms-suffix')}
-                </span>
+                <div
+                  className="flex-1"
+                  onClickCapture={(event) => {
+                    const target = event.target;
+                    if (target instanceof HTMLElement && target.closest('a')) {
+                      event.stopPropagation();
+                    }
+                  }}
+                >
+                  <MarkdownDisplay>
+                    {t('community-confirmation.items.terms-accepted')}
+                  </MarkdownDisplay>
+                </div>
               </label>
             </section>
           </div>

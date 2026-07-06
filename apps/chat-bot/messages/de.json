@@ -86,11 +86,8 @@
         "ethics-no-discrimination": "Die Vorlage ist in ihrer Konzeption nicht diskriminierend.",
         "content-no-extremism-violence-sexualized": "Die Vorlage enthält keine extremistischen, gewaltverherrlichenden oder sexualisierten Inhalte.",
         "content-no-false-outdated": "Die Vorlage enthält keine falschen oder veralteten Inhalte (z.B. telli statt AIS.chat).",
-        "terms-accepted": "Ich habe die Nutzungsbedingungen gelesen und akzeptiere sie."
-      },
-      "terms-prefix": "Ich habe die",
-      "terms-link-label": "Nutzungsbedingungen",
-      "terms-suffix": "gelesen und akzeptiere sie."
+        "terms-accepted": "Ich habe die [Nutzungsbedingungen](https://ais-chat.schule/terms-of-use/) gelesen und akzeptiere sie."
+      }
     }
   },
   "usage-disclaimer": {
