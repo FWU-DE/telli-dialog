@@ -21,10 +21,13 @@ import {
   deleteCharacterAction,
   deleteFileMappingAndEntityAction,
   downloadFileFromCharacterAction,
+  getCharacterShareDataAction,
   linkFileToCharacterAction,
   shareCharacterAction,
   unshareCharacterAction,
   updateCharacterAccessLevelAction,
+  extendCharacterShareExpirationAction,
+  updateCharacterShareTokenPointsLimitAction,
   updateCharacterAction,
   uploadAvatarPictureForCharacterAction,
 } from './actions';
@@ -409,8 +412,29 @@ export function CharacterEdit({
             });
             return result;
           }}
+          onAddTime={async (data) => {
+            const result = await extendCharacterShareExpirationAction({
+              characterId: character.id,
+              additionalTimeInMinutes: data.additionalTimeInMinutes,
+            });
+            if (result.success) {
+              return { success: true, expiredAt: result.value.expiredAt };
+            }
+            return { success: false };
+          }}
+          onAdjustTokenLimit={async (data) => {
+            const result = await updateCharacterShareTokenPointsLimitAction({
+              characterId: character.id,
+              tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
+            });
+            if (result.success) {
+              return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
+            }
+            return { success: false };
+          }}
           shareUILink={`/characters/editor/${character.id}/share`}
           sharingDisabled={!name || name.trim().length === 0}
+          onPollShareData={() => getCharacterShareDataAction({ characterId: character.id })}
         />
 
         <div className="flex flex-col gap-3">

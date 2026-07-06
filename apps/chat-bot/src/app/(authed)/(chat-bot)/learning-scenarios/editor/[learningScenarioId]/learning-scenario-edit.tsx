@@ -29,9 +29,12 @@ import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { useRouter } from 'next/navigation';
 import {
+  extendLearningScenarioShareExpirationAction,
+  getLearningScenarioShareDataAction,
   removeFileFromLearningScenarioAction,
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
+  updateLearningScenarioShareTokenPointsLimitAction,
   updateLearningScenarioAccessLevelAction,
   updateLearningScenarioAction,
   uploadAvatarPictureForLearningScenarioAction,
@@ -430,8 +433,33 @@ export function LearningScenarioEdit({
               learningScenarioId: learningScenario.id,
             })
           }
+          onAddTime={async (data) =>
+            await extendLearningScenarioShareExpirationAction({
+              learningScenarioId: learningScenario.id,
+              additionalTimeInMinutes: data.additionalTimeInMinutes,
+            }).then((result) => {
+              if (result.success) {
+                return { success: true, expiredAt: result.value.expiredAt };
+              }
+              return { success: false };
+            })
+          }
+          onAdjustTokenLimit={async (data) =>
+            await updateLearningScenarioShareTokenPointsLimitAction({
+              learningScenarioId: learningScenario.id,
+              tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
+            }).then((result) => {
+              if (result.success) {
+                return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
+              }
+              return { success: false };
+            })
+          }
           shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
           sharingDisabled={!name || name.trim().length === 0}
+          onPollShareData={() =>
+            getLearningScenarioShareDataAction({ learningScenarioId: learningScenario.id })
+          }
         />
 
         <div className="flex flex-col gap-3">

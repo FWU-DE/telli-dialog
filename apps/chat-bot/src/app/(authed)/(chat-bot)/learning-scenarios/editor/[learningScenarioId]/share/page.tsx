@@ -42,6 +42,9 @@ export default async function Page(
       relativeShareUrl={shareUrl}
       totalTimeInSeconds={learningScenario.maxUsageTimeLimit * 60}
       customChatVariant="learning-scenario"
+      expiredAt={learningScenario.expiredAt}
+      manuallyStoppedAt={learningScenario.manuallyStoppedAt}
+      entityId={learningScenario.id}
     />
   );
 }

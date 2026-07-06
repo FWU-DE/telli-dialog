@@ -24,8 +24,11 @@ import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners';
 import {
+  extendLearningScenarioShareExpirationAction,
+  getLearningScenarioShareDataAction,
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
+  updateLearningScenarioShareTokenPointsLimitAction,
 } from '../editor/[learningScenarioId]/actions';
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
@@ -94,6 +97,36 @@ export function LearningScenarioView({
     return result;
   };
 
+  const handleAddTimeToLearningScenario = async ({
+    additionalTimeInMinutes,
+  }: {
+    additionalTimeInMinutes: number;
+  }) => {
+    const result = await extendLearningScenarioShareExpirationAction({
+      learningScenarioId: learningScenario.id,
+      additionalTimeInMinutes,
+    });
+    if (result.success) {
+      return { success: true, expiredAt: result.value.expiredAt };
+    }
+    return { success: false };
+  };
+
+  const handleAdjustTokenLimitForLearningScenario = async ({
+    tokenPointsPercentageLimit,
+  }: {
+    tokenPointsPercentageLimit: number;
+  }) => {
+    const result = await updateLearningScenarioShareTokenPointsLimitAction({
+      learningScenarioId: learningScenario.id,
+      tokenPointsPercentageLimit,
+    });
+    if (result.success) {
+      return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
+    }
+    return { success: false };
+  };
+
   async function handleDownloadFile(fileId: string) {
     return downloadFileFromLearningScenarioAction({
       learningScenarioId: learningScenario.id,
@@ -125,8 +158,13 @@ export function LearningScenarioView({
         budgetUsedBySharedChat={budgetUsedBySharedChat}
         onShare={handleShareLearningScenario}
         onUnshare={handleUnshareLearningScenario}
+        onAddTime={handleAddTimeToLearningScenario}
+        onAdjustTokenLimit={handleAdjustTokenLimitForLearningScenario}
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
         sharingDisabled={!learningScenario.name || learningScenario.name.trim().length === 0}
+        onPollShareData={() =>
+          getLearningScenarioShareDataAction({ learningScenarioId: learningScenario.id })
+        }
       />
 
       <div className="flex flex-col gap-3">

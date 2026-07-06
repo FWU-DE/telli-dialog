@@ -544,3 +544,87 @@ export async function dbGetSharedCharacterConversations({
   const activeShare = latestActiveCharacterShare(user);
   return db.select().from(activeShare).where(eq(activeShare.characterId, characterId));
 }
+
+/**
+ * Extends the expiration timestamp of the latest unstopped character share for the given user.
+ * Returns undefined if no unstopped share exists.
+ */
+export async function dbExtendSharedCharacterConversationExpiration({
+  characterId,
+  user,
+  additionalTimeInMinutes,
+}: {
+  characterId: string;
+  user: Pick<UserModel, 'id'>;
+  additionalTimeInMinutes: number;
+}) {
+  const [latestUnstoppedShare] = await db
+    .select()
+    .from(sharedCharacterConversation)
+    .where(
+      and(
+        eq(sharedCharacterConversation.characterId, characterId),
+        eq(sharedCharacterConversation.userId, user.id),
+        isNull(sharedCharacterConversation.manuallyStoppedAt),
+        sql`${sharedCharacterConversation.expiredAt} >= now()`,
+      ),
+    )
+    .orderBy(desc(sharedCharacterConversation.startedAt))
+    .limit(1);
+
+  if (!latestUnstoppedShare) {
+    return undefined;
+  }
+
+  const now = new Date();
+  const baseDate = latestUnstoppedShare.expiredAt > now ? latestUnstoppedShare.expiredAt : now;
+  const newExpiredAt = new Date(baseDate.getTime() + additionalTimeInMinutes * 60 * 1000);
+
+  const [updatedShare] = await db
+    .update(sharedCharacterConversation)
+    .set({ expiredAt: newExpiredAt })
+    .where(eq(sharedCharacterConversation.id, latestUnstoppedShare.id))
+    .returning();
+
+  return updatedShare;
+}
+
+/**
+ * Updates the token points limit of the latest unstopped character share for the given user.
+ * Returns null if no unstopped share exists.
+ */
+export async function dbUpdateCharacterShareTokenPointsLimit({
+  characterId,
+  user,
+  tokenPointsLimit,
+}: {
+  characterId: string;
+  user: Pick<UserModel, 'id'>;
+  tokenPointsLimit: number;
+}) {
+  const [latestUnstoppedShare] = await db
+    .select()
+    .from(sharedCharacterConversation)
+    .where(
+      and(
+        eq(sharedCharacterConversation.characterId, characterId),
+        eq(sharedCharacterConversation.userId, user.id),
+        isNull(sharedCharacterConversation.manuallyStoppedAt),
+        sql`${sharedCharacterConversation.expiredAt} >= now()`,
+      ),
+    )
+    .orderBy(desc(sharedCharacterConversation.startedAt))
+    .limit(1);
+
+  if (!latestUnstoppedShare) {
+    return null;
+  }
+
+  const [updatedShare] = await db
+    .update(sharedCharacterConversation)
+    .set({ tokenPointsLimit })
+    .where(eq(sharedCharacterConversation.id, latestUnstoppedShare.id))
+    .returning();
+
+  return updatedShare;
+}

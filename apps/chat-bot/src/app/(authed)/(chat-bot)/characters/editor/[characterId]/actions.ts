@@ -7,9 +7,12 @@ import {
   deleteCharacter,
   deleteFileMappingAndEntity,
   downloadFileFromCharacter,
+  extendCharacterShareExpiration,
+  getActiveCharacterShareData,
   linkFileToCharacter,
   shareCharacter,
   unshareCharacter,
+  updateCharacterShareTokenPointsLimit,
   updateCharacter,
   updateCharacterAccessLevel,
   UpdateCharacterActionModel,
@@ -87,6 +90,56 @@ export async function unshareCharacterAction({ characterId }: { characterId: str
   )({
     characterId,
     user: user,
+  });
+}
+
+export async function extendCharacterShareExpirationAction({
+  characterId,
+  additionalTimeInMinutes,
+}: {
+  characterId: string;
+  additionalTimeInMinutes: number;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'extendCharacterShareExpirationAction',
+    extendCharacterShareExpiration,
+  )({
+    characterId,
+    additionalTimeInMinutes,
+    user,
+  });
+}
+
+export async function updateCharacterShareTokenPointsLimitAction({
+  characterId,
+  tokenPointsPercentageLimit,
+}: {
+  characterId: string;
+  tokenPointsPercentageLimit: number;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'updateCharacterShareTokenPointsLimitAction',
+    updateCharacterShareTokenPointsLimit,
+  )({
+    characterId,
+    tokenPointsPercentageLimit,
+    user,
+  });
+}
+
+export async function getCharacterShareDataAction({ characterId }: { characterId: string }) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'getCharacterShareDataAction',
+    getActiveCharacterShareData,
+  )({
+    characterId,
+    user,
   });
 }
 

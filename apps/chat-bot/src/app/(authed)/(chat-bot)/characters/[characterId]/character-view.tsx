@@ -23,8 +23,11 @@ import { useToast } from '@/components/common/toast';
 import { createNewCharacterAction } from '../actions';
 import {
   downloadFileFromCharacterAction,
+  extendCharacterShareExpirationAction,
+  getCharacterShareDataAction,
   shareCharacterAction,
   unshareCharacterAction,
+  updateCharacterShareTokenPointsLimitAction,
 } from '../editor/[characterId]/actions';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners';
@@ -118,7 +121,28 @@ export function CharacterView({
           });
           return result;
         }}
+        onAddTime={async (data) => {
+          const result = await extendCharacterShareExpirationAction({
+            characterId: character.id,
+            additionalTimeInMinutes: data.additionalTimeInMinutes,
+          });
+          if (result.success) {
+            return { success: true, expiredAt: result.value.expiredAt };
+          }
+          return { success: false };
+        }}
+        onAdjustTokenLimit={async (data) => {
+          const result = await updateCharacterShareTokenPointsLimitAction({
+            characterId: character.id,
+            tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
+          });
+          if (result.success) {
+            return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
+          }
+          return { success: false };
+        }}
         shareUILink={`/characters/editor/${character.id}/share`}
+        onPollShareData={() => getCharacterShareDataAction({ characterId: character.id })}
       />
 
       <div className="flex flex-col gap-3">

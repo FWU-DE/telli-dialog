@@ -1,7 +1,9 @@
 import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import {
+  dbExtendSharedCharacterConversationExpiration,
   dbDeleteCharacterByIdAndUser,
+  dbUpdateCharacterShareTokenPointsLimit,
   dbGetAllAccessibleCharacters,
   dbGetAllCharactersByUser,
   dbGetCharacterById,
@@ -34,7 +36,7 @@ import {
   fileTable,
   sharedCharacterConversation,
 } from '@shared/db/schema';
-import { checkParameterUUID, ForbiddenError } from '@shared/error';
+import { checkParameterUUID, ForbiddenError, InvalidArgumentError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
 import {
   deleteAvatarPicture,
@@ -417,10 +419,10 @@ export const shareCharacter = async ({
 
   // validate input parameters
   if (tokenPointsPercentageLimit < 0 || tokenPointsPercentageLimit > 100) {
-    throw new Error('token points percentage limit must be between 0 and 100');
+    throw new InvalidArgumentError('token points percentage limit must be between 0 and 100');
   }
   if (usageTimeLimitMinutes <= 0 || usageTimeLimitMinutes > 30 * 24 * 60) {
-    throw new Error('usage time limit must be between 1 and 43200 minutes');
+    throw new InvalidArgumentError('usage time limit must be between 1 and 43200 minutes');
   }
 
   const activeShares = await dbGetSharedCharacterConversations({ characterId, user });
@@ -485,6 +487,95 @@ export const unshareCharacter = async ({
   }
 
   return updatedCharacter;
+};
+
+/**
+ * Extends the expiration of an active character share.
+ * @throws InvalidArgumentError if no active sharing exists for the character.
+ */
+export const extendCharacterShareExpiration = async ({
+  characterId,
+  additionalTimeInMinutes,
+  user,
+}: {
+  characterId: string;
+  additionalTimeInMinutes: number;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}) => {
+  checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
+
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyReadAccess({ item: character, user });
+
+  if (additionalTimeInMinutes <= 0 || additionalTimeInMinutes > 30 * 24 * 60) {
+    throw new InvalidArgumentError('additional time must be between 1 and 43200 minutes');
+  }
+
+  const updatedShare = await dbExtendSharedCharacterConversationExpiration({
+    characterId,
+    user,
+    additionalTimeInMinutes,
+  });
+
+  if (!updatedShare) {
+    throw new InvalidArgumentError('No active sharing found for this character');
+  }
+
+  return updatedShare;
+};
+
+/**
+ * Increases the token points limit of an active character share.
+ * @throws InvalidArgumentError if no sharing exists for the character.
+ * @throws InvalidArgumentError if the new limit is not higher than the current limit.
+ */
+export const updateCharacterShareTokenPointsLimit = async ({
+  characterId,
+  tokenPointsPercentageLimit,
+  user,
+}: {
+  characterId: string;
+  tokenPointsPercentageLimit: number;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}) => {
+  checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
+
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyReadAccess({ item: character, user });
+
+  if (tokenPointsPercentageLimit <= 0 || tokenPointsPercentageLimit > 100) {
+    throw new InvalidArgumentError('token points percentage limit must be between 1 and 100');
+  }
+
+  const sharedConversations = await dbGetSharedCharacterConversations({
+    characterId,
+    user,
+  });
+  const currentShare = sharedConversations[0];
+
+  if (!currentShare) {
+    throw new InvalidArgumentError('No sharing found for this character');
+  }
+
+  if (tokenPointsPercentageLimit <= currentShare.tokenPointsLimit) {
+    throw new InvalidArgumentError(
+      'token points percentage limit must be higher than current limit',
+    );
+  }
+
+  const updatedShare = await dbUpdateCharacterShareTokenPointsLimit({
+    characterId,
+    user,
+    tokenPointsLimit: tokenPointsPercentageLimit,
+  });
+
+  if (!updatedShare) {
+    throw new InvalidArgumentError('No sharing found for this character');
+  }
+
+  return updatedShare;
 };
 
 /**
@@ -604,6 +695,49 @@ export const getSharedCharacter = async ({
   if (!character || !character.inviteCode) throw new NotFoundError('Character not found');
 
   return character;
+};
+
+/**
+ * Returns lightweight share data for polling updates (no files, signed URLs, etc).
+ * Used by teacher views to poll for external changes to share state.
+ * @throws NotFoundError if character does not exist
+ */
+export const getActiveCharacterShareData = async ({
+  characterId,
+  user,
+}: {
+  characterId: string;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}): Promise<{
+  expiredAt: Date | null;
+  manuallyStoppedAt: Date | null;
+  tokenPointsLimit: number | null;
+  budgetUsedBySharedChat: number;
+}> => {
+  checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
+
+  const character = await dbGetCharacterByIdOptionalShareData({ characterId, user });
+  if (!character) throw new NotFoundError('Character not found');
+
+  verifyReadAccess({ item: character, user });
+
+  let budgetUsedBySharedChat = 0;
+  if (character.startedAt && character.expiredAt) {
+    budgetUsedBySharedChat = await dbGetSharedCharacterChatUsageInCentByCharacterId({
+      characterId: character.id,
+      userId: user.id,
+      expiredAt: character.expiredAt,
+      startedAt: character.startedAt,
+    });
+  }
+
+  return {
+    expiredAt: character.expiredAt,
+    manuallyStoppedAt: character.manuallyStoppedAt,
+    tokenPointsLimit: character.tokenPointsLimit,
+    budgetUsedBySharedChat,
+  };
 };
 
 /**

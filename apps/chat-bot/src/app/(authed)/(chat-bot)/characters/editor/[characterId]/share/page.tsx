@@ -38,6 +38,9 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
       relativeShareUrl={shareUrl}
       totalTimeInSeconds={character.maxUsageTimeLimit * 60}
       customChatVariant="character"
+      expiredAt={character.expiredAt}
+      manuallyStoppedAt={character.manuallyStoppedAt}
+      entityId={character.id}
     />
   );
 }

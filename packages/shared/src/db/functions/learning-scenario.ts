@@ -423,6 +423,90 @@ export function dbGetSharedLearningScenarioConversations({
 }
 
 /**
+ * Extends the expiration timestamp of the latest unstopped learning scenario share for the given user.
+ * Returns undefined if no unstopped share exists.
+ */
+export async function dbExtendSharedLearningScenarioExpiration({
+  learningScenarioId,
+  user,
+  additionalTimeInMinutes,
+}: {
+  learningScenarioId: string;
+  user: Pick<UserModel, 'id'>;
+  additionalTimeInMinutes: number;
+}) {
+  const [latestUnstoppedShare] = await db
+    .select()
+    .from(sharedLearningScenarioTable)
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioTable.userId, user.id),
+        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
+        sql`${sharedLearningScenarioTable.expiredAt} >= now()`,
+      ),
+    )
+    .orderBy(desc(sharedLearningScenarioTable.startedAt))
+    .limit(1);
+
+  if (!latestUnstoppedShare) {
+    return undefined;
+  }
+
+  const now = new Date();
+  const baseDate = latestUnstoppedShare.expiredAt > now ? latestUnstoppedShare.expiredAt : now;
+  const newExpiredAt = new Date(baseDate.getTime() + additionalTimeInMinutes * 60 * 1000);
+
+  const [updatedShare] = await db
+    .update(sharedLearningScenarioTable)
+    .set({ expiredAt: newExpiredAt })
+    .where(eq(sharedLearningScenarioTable.id, latestUnstoppedShare.id))
+    .returning();
+
+  return updatedShare;
+}
+
+/**
+ * Updates the token points limit of the latest unstopped learning scenario share for the given user.
+ * Returns null if no unstopped share exists.
+ */
+export async function dbUpdateLearningScenarioShareTokenPointsLimit({
+  learningScenarioId,
+  user,
+  tokenPointsLimit,
+}: {
+  learningScenarioId: string;
+  user: Pick<UserModel, 'id'>;
+  tokenPointsLimit: number;
+}) {
+  const [latestUnstoppedShare] = await db
+    .select()
+    .from(sharedLearningScenarioTable)
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioTable.userId, user.id),
+        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
+        sql`${sharedLearningScenarioTable.expiredAt} >= now()`,
+      ),
+    )
+    .orderBy(desc(sharedLearningScenarioTable.startedAt))
+    .limit(1);
+
+  if (!latestUnstoppedShare) {
+    return null;
+  }
+
+  const [updatedShare] = await db
+    .update(sharedLearningScenarioTable)
+    .set({ tokenPointsLimit })
+    .where(eq(sharedLearningScenarioTable.id, latestUnstoppedShare.id))
+    .returning();
+
+  return updatedShare;
+}
+
+/**
  * Create a new shared instance for a learning scenario.
  * Always inserts a new row; the caller is responsible for stopping any existing active share first.
  */
