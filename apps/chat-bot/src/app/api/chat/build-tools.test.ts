@@ -369,6 +369,103 @@ describe('buildTools', () => {
     ]);
   });
 
+  it('handles multiple URLs and returns multiple results', async () => {
+    mocks.isWebSearchEnabledMock.mockResolvedValue(true);
+    mocks.webScraperMock
+      .mockResolvedValueOnce({
+        name: 'Erste Seite',
+        link: 'https://example.com/page1',
+        content: 'Inhalt der ersten Seite.',
+      })
+      .mockResolvedValueOnce({
+        name: 'Zweite Seite',
+        link: 'https://example.com/page2',
+        content: 'Inhalt der zweiten Seite.',
+      });
+
+    const { buildTools } = await import('./build-tools');
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conversation-1',
+      relatedFileEntities: [],
+    });
+
+    const result = await toolRegistry.web_scraper!.handler({
+      urls: ['https://example.com/page1', 'https://example.com/page2'],
+    });
+
+    expect(JSON.parse(result)).toEqual([
+      {
+        title: 'Erste Seite',
+        url: 'https://example.com/page1',
+        content: 'Inhalt der ersten Seite.',
+        error: null,
+      },
+      {
+        title: 'Zweite Seite',
+        url: 'https://example.com/page2',
+        content: 'Inhalt der zweiten Seite.',
+        error: null,
+      },
+    ]);
+  });
+
+  it('handles mixed success and failure with per-URL error results', async () => {
+    mocks.isWebSearchEnabledMock.mockResolvedValue(true);
+    mocks.webScraperMock
+      .mockResolvedValueOnce({
+        name: 'Erfolgreiche Seite',
+        link: 'https://example.com/success',
+        content: 'Erfolgreicher Inhalt.',
+      })
+      .mockResolvedValueOnce({
+        link: 'https://example.com/failure',
+        error: true,
+      });
+
+    const { buildTools } = await import('./build-tools');
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conversation-1',
+      relatedFileEntities: [],
+    });
+
+    const result = await toolRegistry.web_scraper!.handler({
+      urls: ['https://example.com/success', 'https://example.com/failure'],
+    });
+
+    expect(JSON.parse(result)).toEqual([
+      {
+        title: 'Erfolgreiche Seite',
+        url: 'https://example.com/success',
+        content: 'Erfolgreicher Inhalt.',
+        error: null,
+      },
+      {
+        title: null,
+        url: 'https://example.com/failure',
+        content: null,
+        error: 'Failed to fetch the page.',
+      },
+    ]);
+  });
+
+  it('returns error when more than max URLs provided', async () => {
+    mocks.isWebSearchEnabledMock.mockResolvedValue(true);
+    const { buildTools } = await import('./build-tools');
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conversation-1',
+      relatedFileEntities: [],
+    });
+
+    const result = await toolRegistry.web_scraper!.handler({
+      urls: Array(6).fill('https://example.com'),
+    });
+
+    expect(result).toBe('Error: Maximum 5 URLs allowed per call.');
+  });
+
   it('adds a web search tool and returns search results as JSON', async () => {
     mocks.isWebSearchEnabledMock.mockResolvedValue(true);
     mocks.searchWebMock.mockResolvedValue([
