@@ -11,10 +11,11 @@ import { FloatingText } from '../chat/floating-text';
 import { Messages } from '../chat/messages';
 import StreamingFinishedMarker from '../chat/streaming-finished-marker';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
-import { useCheckStatusCode } from '@/hooks/use-response-status';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import { logError } from '@shared/logging';
 import type { UseChatReturn } from '@/hooks/use-chat-hooks';
+import { SharedChatExpiredError, TokenPointsExceededError } from '@ais-chat/ai-core/errors';
+import { getErrorMessageByType } from '@/error/get-error-message-by-type';
 
 type CalculateTimeLeftInput = Parameters<typeof calculateTimeLeft>[0];
 type Translator = ReturnType<typeof useTranslations>;
@@ -24,8 +25,6 @@ type EntityMeta = CalculateTimeLeftInput & {
   name: string;
   description: string;
 };
-
-type ErrorState = ReturnType<typeof useCheckStatusCode>;
 
 export type SharedChatViewProps = {
   /**
@@ -45,11 +44,6 @@ export type SharedChatViewProps = {
    * `errorState.handleError` into the chat hook's `onError` option.
    */
   chat: UseChatReturn;
-  /**
-   * Error/expiry state from `useCheckStatusCode`, owned by the caller so that
-   * `handleError` can be passed to the chat hook.
-   */
-  errorState: ErrorState;
   /**
    * Controls how the "dialog has started" state is derived:
    * - `explicit`: managed via local `useState`, toggled from the initial content
@@ -94,7 +88,6 @@ export default function GenericSharedChat({
   inviteCode,
   avatarPictureUrl,
   chat,
-  errorState,
   dialogStartMode,
   exerciseDescription,
   exerciseTitle,
@@ -103,7 +96,7 @@ export default function GenericSharedChat({
 }: SharedChatViewProps) {
   const timeLeft = calculateTimeLeft(entity);
   const chatActive = timeLeft > 0;
-
+  const tCommon = useTranslations('common');
   const [explicitDialogStarted, setExplicitDialogStarted] = useState(false);
 
   const {
@@ -117,8 +110,8 @@ export default function GenericSharedChat({
     stop,
     status,
     clearClientPersistedMessages,
+    error,
   } = chat;
-  const { error, isChatExpired, resetError } = errorState;
 
   const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, entity.id, inviteCode]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -131,7 +124,6 @@ export default function GenericSharedChat({
 
     try {
       reactivateAutoScrolling();
-      resetError();
       await handleSubmit(e, {});
     } catch (error) {
       logError('Error in customHandleSubmit', error);
@@ -141,11 +133,9 @@ export default function GenericSharedChat({
   function handleOpenNewChat() {
     clearClientPersistedMessages();
     setMessages([]);
-    resetError();
   }
 
   function handleReload() {
-    resetError();
     void reload();
   }
 
@@ -160,7 +150,7 @@ export default function GenericSharedChat({
 
   return (
     <>
-      {(!chatActive || isChatExpired) && (
+      {(!chatActive || TokenPointsExceededError.is(error) || SharedChatExpiredError.is(error)) && (
         <ExpiredChatModal
           conversationMessages={uiMessages}
           title={entity.name}
@@ -215,7 +205,12 @@ export default function GenericSharedChat({
                 containerClassName="flex flex-col gap-4"
               />
             )}
-            {error && <ErrorChatPlaceholder error={error} handleReload={handleReload} />}
+            {error && (
+              <ErrorChatPlaceholder
+                errorMessage={tCommon(getErrorMessageByType(error))}
+                handleReload={handleReload}
+              />
+            )}
           </div>
           <div className="w-full max-w-5xl shrink-0 mx-auto px-4 pb-4">
             {showChatInputBox && (

@@ -26,7 +26,7 @@
     "send-message-placeholder": "Wie kann ich Dir helfen?",
     "information-disclaimer": "AIS.chat kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",
     "character-limit-reached": "Zeichenlimit erreicht",
-    "chat-expired": "Der Chat ist abgelaufen.",
+    "chat-expired-error": "Der Chat ist abgelaufen.",
     "new-chat": "Neuer Chat",
     "stop": "Stop",
     "copy": "Kopieren",
