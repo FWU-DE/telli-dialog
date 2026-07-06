@@ -17,7 +17,7 @@ export const VECTOR_SEARCH_LIMIT = 10; // Number of chunks to retrieve. One chun
 export const RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT = 100_000; // Maximum number of characters returned when retrieving a whole attached file
 
 // Web search
-export const WEBSEARCH_RESULTS_LIMIT = 5; // Number of websearch results to include in the RAG context
+export const WEBSEARCH_RESULTS_LIMIT = 10; // Number of websearch results to include in the RAG context
 export const WEBSEARCH_RESULT_LENGTH_LIMIT = 2500; // Maximum characters to include from each websearch result
 
 // Attachments

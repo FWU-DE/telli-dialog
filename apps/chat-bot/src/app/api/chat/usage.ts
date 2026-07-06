@@ -91,12 +91,10 @@ export async function sharedCharacterChatHasReachedTokenPointsLimit({
 }
 
 export function sharedChatHasExpired({
-  startedAt,
-  maxUsageTimeLimit,
+  expiredAt,
   manuallyStoppedAt,
 }: {
-  startedAt: Date;
-  maxUsageTimeLimit: number;
+  expiredAt: Date;
   manuallyStoppedAt?: Date | null;
 }) {
   // Manually stopped by the user
@@ -104,7 +102,7 @@ export function sharedChatHasExpired({
     return true;
   }
 
-  const timeLeft = calculateTimeLeft({ startedAt, maxUsageTimeLimit: maxUsageTimeLimit });
+  const timeLeft = calculateTimeLeft({ expiredAt, manuallyStoppedAt });
   if (timeLeft < 1) {
     // the shared chat is no viable anymore so the limit is reached
     return true;

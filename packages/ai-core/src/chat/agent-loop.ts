@@ -1,7 +1,7 @@
 import type { Message as AiCoreMessage, TokenUsage, ToolCall, ToolRegistry } from './types';
 
-const MAX_AGENTIC_ITERATIONS = 3;
-const MAX_TOOL_CALLS_PER_ITERATION = 2;
+export const MAX_AGENTIC_ITERATIONS = 3;
+export const MAX_TOOL_CALLS_PER_ITERATION = 2;
 
 function logError(message: string, error: unknown) {
   console.error(message, error);
@@ -44,6 +44,12 @@ export function runAgentLoop({
       for (let iteration = 0; iteration < MAX_AGENTIC_ITERATIONS; iteration++) {
         const pendingToolCalls: ToolCall[] = [];
         let iterationText = '';
+
+        // Add separator before starting a new iteration if the previous iteration produced text
+        if (iteration > 0 && fullText && !fullText.endsWith('\n\n')) {
+          fullText += '\n\n';
+          onTextChunk('\n\n');
+        }
 
         const isLastIteration = iteration === MAX_AGENTIC_ITERATIONS - 1;
         const stream = generateAgenticStreamWithBilling(

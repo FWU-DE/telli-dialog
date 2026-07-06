@@ -410,7 +410,7 @@ export function LearningScenarioEdit({
         )}
         {learningScenario.suspended && <CustomChatSuspensionError info={t('suspension-error')} />}
         <CustomChatShareWithLearners
-          startedAt={learningScenario.startedAt}
+          expiredAt={learningScenario.expiredAt}
           manuallyStoppedAt={learningScenario.manuallyStoppedAt}
           maxUsageTimeLimit={learningScenario.maxUsageTimeLimit}
           tokenPointsLimit={learningScenario.tokenPointsLimit}

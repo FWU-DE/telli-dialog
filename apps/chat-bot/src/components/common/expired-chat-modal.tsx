@@ -5,9 +5,9 @@ import StopWatchDoneIcon from '@/components/icons/stopwatch-done';
 import DownloadSharedConversationButton from '@/app/(unauth)/ua/download-shared-conversation-button';
 import { type ChatMessage as Message } from '@/types/chat';
 import { useTranslations } from 'next-intl';
+import { Button } from '@ui/components/button';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -19,14 +19,17 @@ type ExpiredChatModalProps = {
   conversationMessages: Message[];
   title: string;
   inviteCode: string;
+  handleRetry: () => void;
 };
 
 export default function ExpiredChatModal({
   conversationMessages,
   title,
   inviteCode,
+  handleRetry,
 }: ExpiredChatModalProps) {
   const t = useTranslations('learning-scenarios.shared');
+  const tCommon = useTranslations('common');
   const hasUserMessages = conversationMessages.some((message) => message.role === 'user');
 
   return (
@@ -42,8 +45,8 @@ export default function ExpiredChatModal({
         </AlertDialogHeader>
         <AlertDialogFooter className="items-center sm:justify-center">
           {/* If the shared chat has expired, the messages are gone, so there is no way atm to download the conversation. */}
-          {hasUserMessages && (
-            <AlertDialogAction asChild>
+          <div className="flex flex-col items-center gap-4">
+            {hasUserMessages && (
               <DownloadSharedConversationButton
                 primaryButton
                 characterName={title}
@@ -51,8 +54,9 @@ export default function ExpiredChatModal({
                 disabled={false}
                 inviteCode={inviteCode}
               />
-            </AlertDialogAction>
-          )}
+            )}
+            <Button onClick={handleRetry}>{tCommon('retry-button')}</Button>
+          </div>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

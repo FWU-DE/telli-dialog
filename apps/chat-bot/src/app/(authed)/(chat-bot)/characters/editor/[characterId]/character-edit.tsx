@@ -386,7 +386,7 @@ export function CharacterEdit({
         )}
         {character.suspended && <CustomChatSuspensionError info={t('suspension-error')} />}
         <CustomChatShareWithLearners
-          startedAt={character.startedAt}
+          expiredAt={character.expiredAt}
           manuallyStoppedAt={character.manuallyStoppedAt}
           maxUsageTimeLimit={character.maxUsageTimeLimit}
           tokenPointsLimit={character.tokenPointsLimit}

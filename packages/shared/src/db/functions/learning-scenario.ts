@@ -33,7 +33,7 @@ import { UserModel } from '@shared/auth/user-model';
  *
  * A share is expired if either:
  * - `manually_stopped_at IS NOT NULL` (explicitly stopped), or
- * - `started_at + maxUsageTimeLimit < now` (time limit elapsed; `manually_stopped_at` may still be NULL for these)
+ * - `expired_at < now` (time limit elapsed; `manually_stopped_at` may still be NULL for these)
  *
  * When multiple non-expired rows exist, `DISTINCT ON (learning_scenario_id) ORDER BY started_at DESC`
  * ensures only the most-recent row is returned, preventing duplicate entity rows in JOINs.
@@ -48,7 +48,7 @@ function latestActiveLearningScenarioShare(user: Pick<UserModel, 'id'>) {
       and(
         eq(sharedLearningScenarioTable.userId, user.id),
         isNull(sharedLearningScenarioTable.manuallyStoppedAt),
-        sql`${sharedLearningScenarioTable.startedAt} + ${sharedLearningScenarioTable.maxUsageTimeLimit} * interval '1 minute' >= now()`,
+        sql`${sharedLearningScenarioTable.expiredAt} >= now()`,
       ),
     )
     .orderBy(
@@ -99,6 +99,7 @@ function baseLearningScenarioWithShareQuery(
       inviteCode: activeShare.inviteCode,
       maxUsageTimeLimit: activeShare.maxUsageTimeLimit,
       startedAt: activeShare.startedAt,
+      expiredAt: activeShare.expiredAt,
       manuallyStoppedAt: activeShare.manuallyStoppedAt,
       startedBy: activeShare.userId,
       ownerSchoolIds: userTable.schoolIds,
@@ -320,6 +321,7 @@ export async function dbGetLearningScenarioByIdAndInviteCode({
       inviteCode: sharedLearningScenarioTable.inviteCode,
       maxUsageTimeLimit: sharedLearningScenarioTable.maxUsageTimeLimit,
       startedAt: sharedLearningScenarioTable.startedAt,
+      expiredAt: sharedLearningScenarioTable.expiredAt,
       manuallyStoppedAt: sharedLearningScenarioTable.manuallyStoppedAt,
       startedBy: sharedLearningScenarioTable.userId,
       ownerSchoolIds: userTable.schoolIds,
@@ -439,6 +441,7 @@ export async function dbCreateLearningScenarioShare({
   inviteCode: string;
   startedAt: Date;
 }) {
+  const expiredAt = new Date(startedAt.getTime() + maxUsageTimeLimit * 60 * 1000);
   const [newShare] = await db
     .insert(sharedLearningScenarioTable)
     .values({
@@ -448,6 +451,7 @@ export async function dbCreateLearningScenarioShare({
       tokenPointsLimit,
       inviteCode,
       startedAt,
+      expiredAt,
     })
     .returning();
   return newShare;

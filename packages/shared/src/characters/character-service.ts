@@ -429,6 +429,7 @@ export const shareCharacter = async ({
   const maxUsageTimeLimit = usageTimeLimitMinutes;
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
+  const expiredAt = new Date(startedAt.getTime() + maxUsageTimeLimit * 60 * 1000);
   const [newSharedChat] = await db
     .insert(sharedCharacterConversation)
     .values({
@@ -438,6 +439,7 @@ export const shareCharacter = async ({
       maxUsageTimeLimit,
       inviteCode,
       startedAt,
+      expiredAt,
     })
     .returning();
 

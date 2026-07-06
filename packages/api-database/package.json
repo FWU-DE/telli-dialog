@@ -17,6 +17,9 @@
     "db:seed": "dotenv -e ../../apps/api/.env.local -- tsx src/seed.ts",
     "db:seed:from-stage": "dotenv -e ../../apps/api/.env.local -- tsx src/seed-from-stage.ts",
     "lint": "eslint . --max-warnings 0",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
     "types": "tsc --noEmit"
   },
   "dependencies": {
@@ -33,10 +36,12 @@
     "@ais-chat/typescript-config": "workspace:*",
     "@types/node": "24.13.2",
     "@types/pg": "8.20.0",
+    "@vitest/coverage-v8": "4.1.8",
     "dotenv-cli": "11.0.0",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
     "tsx": "4.22.4",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "4.1.8"
   }
 }

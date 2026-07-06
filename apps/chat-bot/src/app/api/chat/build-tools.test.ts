@@ -172,7 +172,7 @@ describe('buildTools', () => {
     expect(parsed.truncated).toBe(true);
     expect(parsed.maxCharacters).toBe(RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT);
     expect(parsed.characterCount).toBeGreaterThan(RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT);
-    expect(parsed.error).toContain('Zeichenlimits');
+    expect(parsed.error).toContain('truncated');
     expect(parsed.content).not.toBeNull();
   });
 

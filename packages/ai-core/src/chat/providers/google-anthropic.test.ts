@@ -722,7 +722,14 @@ describe('constructGoogleAnthropicAgenticStreamFn', () => {
           },
           {
             role: 'user',
-            content: [{ type: 'tool_result', tool_use_id: 'toolu_123', content: '72°F and sunny' }],
+            content: [
+              {
+                type: 'tool_result',
+                tool_use_id: 'toolu_123',
+                content: '72°F and sunny',
+                is_error: false,
+              },
+            ],
           },
         ],
       }),
@@ -736,9 +743,13 @@ describe('constructGoogleAnthropicAgenticStreamFn', () => {
 
     streamMock.mockReturnValue({
       [Symbol.asyncIterator]: async function* () {
-        // empty stream
+        yield { type: 'message_stop' };
       },
-      finalMessage: finalMessageMock,
+      finalMessage: vi.fn().mockResolvedValue({
+        content: [],
+        usage: { input_tokens: 10, output_tokens: 5 },
+        stop_reason: 'end_turn',
+      }),
     });
 
     const generateAgenticStream = constructGoogleAnthropicAgenticStreamFn(model);
@@ -778,8 +789,78 @@ describe('constructGoogleAnthropicAgenticStreamFn', () => {
           {
             role: 'user',
             content: [
-              { type: 'tool_result', tool_use_id: 'toolu_1', content: '72°F sunny' },
-              { type: 'tool_result', tool_use_id: 'toolu_2', content: '65°F rainy' },
+              {
+                type: 'tool_result',
+                tool_use_id: 'toolu_1',
+                content: '72°F sunny',
+                is_error: false,
+              },
+              {
+                type: 'tool_result',
+                tool_use_id: 'toolu_2',
+                content: '65°F rainy',
+                is_error: false,
+              },
+            ],
+          },
+        ]),
+      }),
+    );
+  });
+
+  it('should set is_error to true for tool results with errors', async () => {
+    const model = createGoogleAnthropicModel();
+
+    streamMock.mockReturnValue({
+      [Symbol.asyncIterator]: async function* () {
+        yield { type: 'message_stop' };
+      },
+      finalMessage: vi.fn().mockResolvedValue({
+        content: [],
+        usage: { input_tokens: 10, output_tokens: 5 },
+        stop_reason: 'end_turn',
+      }),
+    });
+
+    const generateAgenticStream = constructGoogleAnthropicAgenticStreamFn(model);
+    const messages: Message[] = [
+      { role: 'user', content: 'What is the weather in InvalidCity?' },
+      {
+        role: 'assistant',
+        content: 'Let me check',
+        toolCalls: [{ id: 'toolu_123', name: 'get_weather', arguments: '{"city":"InvalidCity"}' }],
+      },
+      { role: 'tool', content: 'Error: City not found', toolCallId: 'toolu_123' },
+    ];
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for await (const _event of generateAgenticStream({
+      messages,
+      model: 'anthropic/claude',
+      tools: [
+        {
+          name: 'get_weather',
+          description: 'Get weather',
+          parameters: { properties: { city: { type: 'string' } }, required: ['city'] },
+        },
+      ],
+    })) {
+      // consume stream
+    }
+
+    // Verify tool result with error has is_error: true (detected from "Error:" prefix)
+    expect(streamMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: expect.arrayContaining([
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'tool_result',
+                tool_use_id: 'toolu_123',
+                content: 'Error: City not found',
+                is_error: true,
+              },
             ],
           },
         ]),
@@ -851,5 +932,99 @@ describe('constructGoogleAnthropicAgenticStreamFn', () => {
         // consume stream
       }
     }).rejects.toThrow(AiGenerationError);
+  });
+
+  it('should not duplicate text when both streaming deltas and finalMessage contain text', async () => {
+    const model = createGoogleAnthropicModel();
+
+    finalMessageMock.mockResolvedValue({
+      content: [
+        { type: 'text', text: 'Hello world' }, // This is the FULL text (already streamed as deltas)
+      ],
+      usage: { input_tokens: 10, output_tokens: 20 },
+      stop_reason: 'end_turn',
+    });
+
+    streamMock.mockReturnValue({
+      [Symbol.asyncIterator]: async function* () {
+        // Text is streamed as deltas
+        yield { type: 'content_block_delta', delta: { type: 'text_delta', text: 'Hello' } };
+        yield { type: 'content_block_delta', delta: { type: 'text_delta', text: ' world' } };
+        // Then message_stop with finalMessage containing the same text
+        yield { type: 'message_stop' };
+      },
+      finalMessage: finalMessageMock,
+    });
+
+    const generateAgenticStream = constructGoogleAnthropicAgenticStreamFn(model);
+    const events = [];
+
+    for await (const event of generateAgenticStream({
+      messages: [{ role: 'user', content: 'test' }],
+      model: 'anthropic/claude',
+    })) {
+      events.push(event);
+    }
+
+    // Should only have the streamed deltas + finish, NOT duplicate text from finalMessage
+    expect(events).toEqual([
+      { type: 'text', delta: 'Hello' },
+      { type: 'text', delta: ' world' },
+      {
+        type: 'finish',
+        usage: {
+          promptTokens: 10,
+          completionTokens: 20,
+          totalTokens: 30,
+        },
+      },
+    ]);
+
+    // Verify the text would concatenate to "Hello world" once, not twice
+    const textDeltas = events.filter((e) => e.type === 'text').map((e) => e.delta);
+    expect(textDeltas.join('')).toBe('Hello world');
+  });
+
+  it('should yield text from finalMessage when no deltas were streamed (very short response)', async () => {
+    const model = createGoogleAnthropicModel();
+
+    finalMessageMock.mockResolvedValue({
+      content: [
+        { type: 'text', text: 'OK' }, // Very short response that was not streamed as deltas
+      ],
+      usage: { input_tokens: 10, output_tokens: 2 },
+      stop_reason: 'end_turn',
+    });
+
+    streamMock.mockReturnValue({
+      [Symbol.asyncIterator]: async function* () {
+        // No content_block_delta events, just message_stop
+        yield { type: 'message_stop' };
+      },
+      finalMessage: finalMessageMock,
+    });
+
+    const generateAgenticStream = constructGoogleAnthropicAgenticStreamFn(model);
+    const events = [];
+
+    for await (const event of generateAgenticStream({
+      messages: [{ role: 'user', content: 'test' }],
+      model: 'anthropic/claude',
+    })) {
+      events.push(event);
+    }
+
+    // Should have the text from finalMessage since no deltas were streamed
+    expect(events).toEqual([
+      { type: 'text', delta: 'OK' },
+      {
+        type: 'finish',
+        usage: {
+          promptTokens: 10,
+          completionTokens: 2,
+          totalTokens: 12,
+        },
+      },
+    ]);
   });
 });
