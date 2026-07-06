@@ -6,6 +6,7 @@ import {
   downloadFileFromCharacter,
   extendCharacterShareExpiration,
   fetchFileMappings,
+  getActiveCharacterShareData,
   getCharacterByAccessLevel,
   getCharacterForChatSession,
   getCharacterForEditView,
@@ -1213,6 +1214,96 @@ describe('character-service', () => {
         startedAt,
       });
       expect(result.budgetUsedBySharedChat).toBe(321);
+    });
+  });
+
+  describe('getActiveCharacterShareData', () => {
+    it('returns lightweight share data with 0 usage when share timing is missing', async () => {
+      const characterId = generateUUID();
+      const user = mockUser('teacher');
+      const character = {
+        id: characterId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        expiredAt: null,
+        manuallyStoppedAt: null,
+        tokenPointsLimit: 25,
+      } as unknown as CharacterSelectModel;
+
+      (
+        dbGetCharacterByIdOptionalShareData as MockedFunction<
+          typeof dbGetCharacterByIdOptionalShareData
+        >
+      ).mockResolvedValue(character as never);
+
+      const result = await getActiveCharacterShareData({ characterId, user });
+
+      expect(result).toEqual({
+        expiredAt: null,
+        manuallyStoppedAt: null,
+        tokenPointsLimit: 25,
+        budgetUsedBySharedChat: 0,
+      });
+      expect(dbGetSharedCharacterChatUsageInCentByCharacterId).not.toHaveBeenCalled();
+    });
+
+    it('loads usage when startedAt and expiredAt are available', async () => {
+      const characterId = generateUUID();
+      const user = mockUser('teacher');
+      const startedAt = new Date('2026-06-01T10:00:00.000Z');
+      const expiredAt = new Date('2026-06-01T11:00:00.000Z');
+      const character = {
+        id: characterId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        startedAt,
+        expiredAt,
+        manuallyStoppedAt: null,
+        tokenPointsLimit: 50,
+      } as unknown as CharacterSelectModel;
+
+      (
+        dbGetCharacterByIdOptionalShareData as MockedFunction<
+          typeof dbGetCharacterByIdOptionalShareData
+        >
+      ).mockResolvedValue(character as never);
+      (
+        dbGetSharedCharacterChatUsageInCentByCharacterId as MockedFunction<
+          typeof dbGetSharedCharacterChatUsageInCentByCharacterId
+        >
+      ).mockResolvedValue(777);
+
+      const result = await getActiveCharacterShareData({ characterId, user });
+
+      expect(dbGetSharedCharacterChatUsageInCentByCharacterId).toHaveBeenCalledWith({
+        characterId,
+        userId: user.id,
+        startedAt,
+        expiredAt,
+      });
+      expect(result).toEqual({
+        expiredAt,
+        manuallyStoppedAt: null,
+        tokenPointsLimit: 50,
+        budgetUsedBySharedChat: 777,
+      });
+    });
+
+    it('throws NotFoundError when character does not exist', async () => {
+      const characterId = generateUUID();
+      const user = mockUser('teacher');
+
+      (
+        dbGetCharacterByIdOptionalShareData as MockedFunction<
+          typeof dbGetCharacterByIdOptionalShareData
+        >
+      ).mockResolvedValue(undefined as never);
+
+      await expect(getActiveCharacterShareData({ characterId, user })).rejects.toThrow(
+        NotFoundError,
+      );
     });
   });
 

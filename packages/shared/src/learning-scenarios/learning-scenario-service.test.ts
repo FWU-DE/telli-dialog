@@ -4,6 +4,7 @@ import {
   deleteLearningScenario,
   downloadFileFromLearningScenario,
   extendLearningScenarioShareExpiration,
+  getActiveLearningScenarioShareData,
   getFilesForLearningScenario,
   getLearningScenariosByAccessLevel,
   getLearningScenariosByOverviewFilter,
@@ -691,6 +692,96 @@ describe('learning-scenario-service', () => {
         startedAt,
       });
       expect(result.budgetUsedBySharedChat).toBe(654);
+    });
+  });
+
+  describe('getActiveLearningScenarioShareData', () => {
+    it('returns lightweight share data with 0 usage when share timing is missing', async () => {
+      const learningScenarioId = generateUUID();
+      const user = mockUser('teacher');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        expiredAt: null,
+        manuallyStoppedAt: null,
+        tokenPointsLimit: 10,
+      } as unknown as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdOptionalShareData
+        >
+      ).mockResolvedValue(learningScenario as never);
+
+      const result = await getActiveLearningScenarioShareData({ learningScenarioId, user });
+
+      expect(result).toEqual({
+        expiredAt: null,
+        manuallyStoppedAt: null,
+        tokenPointsLimit: 10,
+        budgetUsedBySharedChat: 0,
+      });
+      expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).not.toHaveBeenCalled();
+    });
+
+    it('loads usage when startedAt and expiredAt are available', async () => {
+      const learningScenarioId = generateUUID();
+      const user = mockUser('teacher');
+      const startedAt = new Date('2026-06-01T10:00:00.000Z');
+      const expiredAt = new Date('2026-06-01T11:00:00.000Z');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        startedAt,
+        expiredAt,
+        manuallyStoppedAt: null,
+        tokenPointsLimit: 75,
+      } as unknown as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdOptionalShareData
+        >
+      ).mockResolvedValue(learningScenario as never);
+      (
+        dbGetLearningScenarioChatUsageInCentByLearningScenarioId as MockedFunction<
+          typeof dbGetLearningScenarioChatUsageInCentByLearningScenarioId
+        >
+      ).mockResolvedValue(432);
+
+      const result = await getActiveLearningScenarioShareData({ learningScenarioId, user });
+
+      expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).toHaveBeenCalledWith({
+        learningScenarioId,
+        userId: user.id,
+        startedAt,
+        expiredAt,
+      });
+      expect(result).toEqual({
+        expiredAt,
+        manuallyStoppedAt: null,
+        tokenPointsLimit: 75,
+        budgetUsedBySharedChat: 432,
+      });
+    });
+
+    it('throws NotFoundError when learning scenario does not exist', async () => {
+      const learningScenarioId = generateUUID();
+      const user = mockUser('teacher');
+
+      (
+        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdOptionalShareData
+        >
+      ).mockResolvedValue(undefined as never);
+
+      await expect(
+        getActiveLearningScenarioShareData({ learningScenarioId, user }),
+      ).rejects.toThrow(NotFoundError);
     });
   });
 
