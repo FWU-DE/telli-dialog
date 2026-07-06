@@ -26,8 +26,8 @@ import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { getConversationPath } from '@/utils/chat/path';
 import { Messages, type PendingFileModel } from './messages';
 import { WebSource } from '@shared/db/types';
-import { useCheckStatusCode } from '@/hooks/use-response-status';
 import { FloatingText } from './floating-text';
+import { getErrorMessageByType } from '@/error/get-error-message-by-type';
 
 type ChatProps = {
   id: string;
@@ -57,7 +57,8 @@ export default function Chat({
   logoElement,
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
-  const tLearningScenarioShared = useTranslations('learning-scenarios.shared');
+  const tCommon = useTranslations('common');
+  const tLearningScenarioShared = useTranslations('learning-scenarios.shared'); // Todo
 
   const { selectedModel, setDownloadConversationEnabled } = useLlmModels();
   const conversationPath = getConversationPath({
@@ -101,6 +102,7 @@ export default function Chat({
     reload,
     stop,
     status,
+    error,
   } = useMainChat({
     conversationId: id,
     initialMessages: initialMessages,
@@ -138,13 +140,10 @@ export default function Chat({
       logWarning('Assert: onFinish was called with zero assistant messages.');
       refetchConversations();
     },
-    onError: (error) => {
-      handleError(error);
+    onError: () => {
       refetchConversations();
     },
   });
-
-  const { error, handleError, resetError } = useCheckStatusCode();
 
   const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, status]);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -187,7 +186,6 @@ export default function Chat({
 
     try {
       reactivateAutoScrolling();
-      resetError();
 
       // Trigger refetch of the fileMapping from the DB
       setCountOfFilesInChat((prev) => prev + 1);
@@ -230,7 +228,6 @@ export default function Chat({
   }
 
   function handleReload() {
-    resetError();
     void reload();
   }
 
@@ -348,7 +345,12 @@ export default function Chat({
               webSourceMapping={webSourceMapping}
             />
           )}
-          {error && <ErrorChatPlaceholder error={error} handleReload={handleReload} />}
+          {error && (
+            <ErrorChatPlaceholder
+              errorMessage={tCommon(getErrorMessageByType(error))}
+              handleReload={handleReload}
+            />
+          )}
         </div>
         <div className="w-full pb-4 px-4 mx-auto">
           <div className="relative flex flex-col">
