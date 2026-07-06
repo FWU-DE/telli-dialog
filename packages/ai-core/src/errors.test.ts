@@ -7,6 +7,7 @@ import {
   ProviderConfigurationError,
   TokenPointsExceededError,
   SharedChatExpiredError,
+  isKnownAiGenerationError,
 } from './errors';
 
 describe('AiGenerationError', () => {
@@ -126,5 +127,25 @@ describe('SharedChatExpiredError', () => {
     expect(SharedChatExpiredError.is(error)).toBe(true);
     expect(SharedChatExpiredError.is(new AiGenerationError('Test'))).toBe(false);
     expect(SharedChatExpiredError.is(new Error('Test'))).toBe(false);
+  });
+});
+
+describe('isKnownAiGenerationError', () => {
+  it('should return true for known AI generation errors', () => {
+    expect(isKnownAiGenerationError(new AiGenerationError('Test'))).toBe(true);
+    expect(isKnownAiGenerationError(new ResponsibleAIError('Test'))).toBe(true);
+    expect(isKnownAiGenerationError(new RateLimitExceededError('Test'))).toBe(true);
+    expect(isKnownAiGenerationError(new InvalidModelError('Test'))).toBe(true);
+    expect(isKnownAiGenerationError(new ProviderConfigurationError('Test'))).toBe(true);
+    expect(isKnownAiGenerationError(new TokenPointsExceededError('Test'))).toBe(true);
+    expect(isKnownAiGenerationError(new SharedChatExpiredError('Test'))).toBe(true);
+  });
+
+  it('should return false for unknown values', () => {
+    expect(isKnownAiGenerationError(new Error('Test'))).toBe(false);
+    expect(isKnownAiGenerationError('not an error')).toBe(false);
+    expect(isKnownAiGenerationError(null)).toBe(false);
+    expect(isKnownAiGenerationError(undefined)).toBe(false);
+    expect(isKnownAiGenerationError({ name: 'SomeOtherError' })).toBe(false);
   });
 });
