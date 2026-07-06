@@ -57,13 +57,12 @@ export function ChatHeaderBar({
       id: 'chat-header-main-content',
       headerNode: (
         <div className="flex flex-col w-full">
-          <div className="flex w-full gap-4 justify-center items-center">
+          <div className="flex w-full min-w-0 sm:gap-6 justify-center sm:justify-between items-center">
             <NewChatButton />
             <SelectLlmModel isStudent={userAndContext.userRole === 'student'} />
-            <div className="grow"></div>
             {title !== undefined && (
-              <div className="hidden sm:flex sm:w-1/3 lg:w-1/2">
-                <span className="font-normal text-xl truncate">{title}</span>
+              <div className="hidden min-w-0 sm:flex">
+                <span className="block w-full truncate font-normal text-xl">{title}</span>
               </div>
             )}
             <div className="hidden sm:flex">
@@ -75,8 +74,8 @@ export function ChatHeaderBar({
               />
             </div>
           </div>
-          <div className="flex flex-1 w-full sm:hidden">
-            <span className="font-normal text-xl">{title}</span>
+          <div className="flex flex-1 w-full min-w-0 pb-2 sm:hidden">
+            <span className="w-full truncate text-center font-normal text-xl">{title}</span>
           </div>
         </div>
       ),

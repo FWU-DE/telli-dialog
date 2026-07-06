@@ -167,14 +167,15 @@ export function FloatingText({
       ref={containerRef}
       aria-labelledby="floating-text-title"
       className={cn(
-        'pointer-events-auto flex flex-col z-200 bg-secondary rounded-xl border select-none',
+        'pointer-events-auto flex flex-col z-10 bg-secondary rounded-xl border select-none',
         // using string interpolations is extremely flaky, so we're using a static class name
         isAtLeast.lg ? 'absolute' : 'sticky',
+        !isAtLeast.lg && 'mx-4',
         dragging ? 'cursor-grabbing' : 'cursor-grab',
       )}
       style={{
         left: isAtLeast.lg ? position.x : undefined,
-        top: isAtLeast.lg ? position.y : 0,
+        top: isAtLeast.lg ? position.y : minMargin,
         maxWidth: isAtLeast.lg ? maxWidth : '100%',
         maxHeight: isAtLeast.lg ? maxHeight : '40%',
       }}
