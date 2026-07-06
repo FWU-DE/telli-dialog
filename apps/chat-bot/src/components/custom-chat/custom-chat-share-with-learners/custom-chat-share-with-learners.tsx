@@ -25,16 +25,18 @@ import {
 } from './custom-chat-share-with-learners-limit-params';
 import { TimeLimitSelect } from './custom-chat-time-limit-select';
 import { TokenPointsLeftRing } from './custom-chat-token-points-left-ring';
-import { CustomChatAdjustTokenLimitButton } from './custom-chat-adjust-token-limit-button';
-import { CustomChatExtendShareExpirationButton } from './custom-chat-extend-share-expiration-button';
+import { CustomChatAdjustTokenLimitDialog } from './custom-chat-adjust-token-limit-dialog';
+import { CustomChatExtendShareExpirationDialog } from './custom-chat-extend-share-expiration-dialog';
 import { useShareDataPolling, SharePollingData } from '@/hooks/use-share-data-polling';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { CustomChatStopShareButton } from './custom-chat-stop-share-button';
 
 const shareFormSchema = z.object({
-  tokenPointsPercentageLimit: z.coerce.number(),
-  usageTimeLimit: z.coerce.number(),
+  tokenPointsPercentageLimit: z.number(),
+  usageTimeLimit: z.number(),
 });
+
+type ShareFormValues = z.infer<typeof shareFormSchema>;
 
 interface CustomChatShareWithLearnersProps {
   expiredAt: Date | null;
@@ -44,7 +46,7 @@ interface CustomChatShareWithLearnersProps {
   usedBudget: number;
   budgetUsedBySharedChat: number;
   maxBudget: number;
-  onShare: (data: z.infer<typeof shareFormSchema>) => Promise<{ success: boolean }>;
+  onShare: (data: ShareFormValues) => Promise<{ success: boolean }>;
   onUnshare: () => Promise<{ success: boolean }>;
   onAddTime: (data: { additionalTimeInMinutes: number }) => Promise<{
     success: boolean;
@@ -135,7 +137,7 @@ export function CustomChatShareWithLearners({
       ? maxUsageTimeLimit
       : 45;
 
-  const { getValues: getValuesShare, setValue: setShareValue } = useForm({
+  const { getValues: getValuesShare, setValue: setShareValue } = useForm<ShareFormValues>({
     resolver: zodResolver(shareFormSchema),
     defaultValues: {
       tokenPointsPercentageLimit: preselectedTokenPointsPercentageLimit,
@@ -179,8 +181,8 @@ export function CustomChatShareWithLearners({
                         <div className="pr-6">
                           <TokenPointsLimitSelect
                             ariaLabel={t('max-token-points')}
-                            defaultValue={String(currentTokenPointsPercentageLimit)}
-                            value={String(currentTokenPointsPercentageLimit)}
+                            defaultValue={currentTokenPointsPercentageLimit}
+                            value={currentTokenPointsPercentageLimit}
                             disabled
                             pointsPercentageValues={[currentTokenPointsPercentageLimit]}
                             maxAvailablePercentage={maxAvailablePercentage}
@@ -198,7 +200,12 @@ export function CustomChatShareWithLearners({
                         />
                       </div>
                       <div className="mt-4 flex justify-center">
-                        <CustomChatAdjustTokenLimitButton
+                        <CustomChatAdjustTokenLimitDialog
+                          trigger={
+                            <Button type="button" data-testid="adjust-token-limit-button">
+                              {t('button-adjust-token-limit')}
+                            </Button>
+                          }
                           sharedChatActive={sharedChatActive}
                           currentTokenPointsPercentageLimit={currentTokenPointsPercentageLimit}
                           maxAvailablePercentage={maxAvailablePercentage}
@@ -217,7 +224,7 @@ export function CustomChatShareWithLearners({
                         <div className="pr-6">
                           <TimeLimitSelect
                             ariaLabel={t('max-usage-time')}
-                            defaultValue={String(getValuesShare('usageTimeLimit'))}
+                            defaultValue={getValuesShare('usageTimeLimit')}
                             disabled
                             usageTimeValuesInMinutes={[preselectedUsageTimeLimit]}
                           />
@@ -233,8 +240,12 @@ export function CustomChatShareWithLearners({
                         />
                       </div>
                       <div className="mt-4 flex justify-center">
-                        <CustomChatExtendShareExpirationButton
-                          sharedChatActive={sharedChatActive}
+                        <CustomChatExtendShareExpirationDialog
+                          trigger={
+                            <Button type="button" data-testid="add-additional-time-button">
+                              {t('button-additional-time')}
+                            </Button>
+                          }
                           preselectedUsageTimeLimit={preselectedUsageTimeLimit}
                           onAddTime={onAddTime}
                           onAddTimeSuccess={(newExpiredAt) => {
@@ -270,7 +281,7 @@ export function CustomChatShareWithLearners({
               <TokenPointsLimitSelect
                 label={t('token-points')}
                 ariaLabel={t('token-points')}
-                defaultValue={String(getValuesShare('tokenPointsPercentageLimit'))}
+                defaultValue={getValuesShare('tokenPointsPercentageLimit')}
                 onValueChange={(value) => setShareValue('tokenPointsPercentageLimit', value)}
                 disabled={sharedChatActive || maxAvailablePercentage <= 0}
                 pointsPercentageValues={tokenPointsPercentageValues}
@@ -279,7 +290,7 @@ export function CustomChatShareWithLearners({
               <TimeLimitSelect
                 label={t('max-usage-time')}
                 ariaLabel={t('max-usage-time')}
-                defaultValue={String(getValuesShare('usageTimeLimit'))}
+                defaultValue={getValuesShare('usageTimeLimit')}
                 onChange={(value) => setShareValue('usageTimeLimit', value)}
                 disabled={sharedChatActive}
                 usageTimeValuesInMinutes={usageTimeValuesInMinutes}

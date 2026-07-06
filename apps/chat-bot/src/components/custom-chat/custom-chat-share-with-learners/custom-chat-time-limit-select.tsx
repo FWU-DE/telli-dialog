@@ -12,7 +12,7 @@ import { useTranslations } from 'next-intl';
 type TimeLimitSelectProps = {
   label?: string;
   ariaLabel?: string;
-  defaultValue: string;
+  defaultValue: number;
   onChange?: (value: number) => void;
   disabled?: boolean;
   usageTimeValuesInMinutes: number[];
@@ -35,7 +35,7 @@ export function TimeLimitSelect({
       <Field>
         {label && <FieldLabel>{label}</FieldLabel>}
         <Select
-          defaultValue={defaultValue}
+          defaultValue={String(defaultValue)}
           onValueChange={(value) => onChange?.(Number(value))}
           disabled={disabled}
         >

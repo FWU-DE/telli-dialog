@@ -491,7 +491,7 @@ export const unshareCharacter = async ({
 
 /**
  * Extends the expiration of an active character share.
- * @throws NotFoundError if no active sharing exists for the character.
+ * @throws InvalidArgumentError if no active sharing exists for the character.
  */
 export const extendCharacterShareExpiration = async ({
   characterId,
@@ -519,7 +519,7 @@ export const extendCharacterShareExpiration = async ({
   });
 
   if (!updatedShare) {
-    throw new NotFoundError('No active sharing found for this character');
+    throw new InvalidArgumentError('No active sharing found for this character');
   }
 
   return updatedShare;
@@ -527,7 +527,7 @@ export const extendCharacterShareExpiration = async ({
 
 /**
  * Increases the token points limit of an active character share.
- * @throws NotFoundError if no sharing exists for the character.
+ * @throws InvalidArgumentError if no sharing exists for the character.
  * @throws InvalidArgumentError if the new limit is not higher than the current limit.
  */
 export const updateCharacterShareTokenPointsLimit = async ({
@@ -556,7 +556,7 @@ export const updateCharacterShareTokenPointsLimit = async ({
   const currentShare = sharedConversations[0];
 
   if (!currentShare) {
-    throw new NotFoundError('No sharing found for this character');
+    throw new InvalidArgumentError('No sharing found for this character');
   }
 
   if (tokenPointsPercentageLimit <= currentShare.tokenPointsLimit) {
@@ -572,7 +572,7 @@ export const updateCharacterShareTokenPointsLimit = async ({
   });
 
   if (!updatedShare) {
-    throw new NotFoundError('No sharing found for this character');
+    throw new InvalidArgumentError('No sharing found for this character');
   }
 
   return updatedShare;

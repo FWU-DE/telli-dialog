@@ -468,7 +468,7 @@ export async function dbExtendSharedLearningScenarioExpiration({
 
 /**
  * Updates the token points limit of the latest unstopped learning scenario share for the given user.
- * Returns undefined if no unstopped share exists.
+ * Returns null if no unstopped share exists.
  */
 export async function dbUpdateLearningScenarioShareTokenPointsLimit({
   learningScenarioId,
@@ -494,7 +494,7 @@ export async function dbUpdateLearningScenarioShareTokenPointsLimit({
     .limit(1);
 
   if (!latestUnstoppedShare) {
-    return undefined;
+    return null;
   }
 
   const [updatedShare] = await db

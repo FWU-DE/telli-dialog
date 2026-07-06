@@ -476,7 +476,7 @@ export async function unshareLearningScenario({
 
 /**
  * Extends the expiration of an active learning scenario share.
- * @throws NotFoundError if no active sharing exists for the learning scenario.
+ * @throws InvalidArgumentError if no active sharing exists for the learning scenario.
  */
 export async function extendLearningScenarioShareExpiration({
   learningScenarioId,
@@ -504,7 +504,7 @@ export async function extendLearningScenarioShareExpiration({
   });
 
   if (!updatedShare) {
-    throw new NotFoundError('No active sharing found for this learning scenario');
+    throw new InvalidArgumentError('No active sharing found for this learning scenario');
   }
 
   return updatedShare;
@@ -512,7 +512,7 @@ export async function extendLearningScenarioShareExpiration({
 
 /**
  * Increases the token points limit of an active learning scenario share.
- * @throws NotFoundError if no sharing exists for the learning scenario.
+ * @throws InvalidArgumentError if no sharing exists for the learning scenario.
  * @throws InvalidArgumentError if the new limit is not higher than the current limit.
  */
 export async function updateLearningScenarioShareTokenPointsLimit({
@@ -541,7 +541,7 @@ export async function updateLearningScenarioShareTokenPointsLimit({
   const currentShare = sharedConversations[0];
 
   if (!currentShare) {
-    throw new NotFoundError('No sharing found for this learning scenario');
+    throw new InvalidArgumentError('No sharing found for this learning scenario');
   }
 
   if (tokenPointsPercentageLimit <= currentShare.tokenPointsLimit) {
@@ -557,7 +557,7 @@ export async function updateLearningScenarioShareTokenPointsLimit({
   });
 
   if (!updatedShare) {
-    throw new NotFoundError('No sharing found for this learning scenario');
+    throw new InvalidArgumentError('No sharing found for this learning scenario');
   }
 
   return updatedShare;

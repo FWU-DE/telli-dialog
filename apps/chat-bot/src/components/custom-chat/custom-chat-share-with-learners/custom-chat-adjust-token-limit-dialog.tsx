@@ -20,7 +20,8 @@ import {
   tokenPointsPercentageValues,
 } from './custom-chat-share-with-learners-limit-params';
 
-type CustomChatAdjustTokenLimitButtonProps = {
+type CustomChatAdjustTokenLimitDialogProps = {
+  trigger: React.ReactElement;
   sharedChatActive: boolean;
   currentTokenPointsPercentageLimit: number;
   maxAvailablePercentage: number;
@@ -31,13 +32,14 @@ type CustomChatAdjustTokenLimitButtonProps = {
   onAdjustTokenLimitSuccess: (newTokenPointsLimit: number) => void;
 };
 
-export function CustomChatAdjustTokenLimitButton({
+export function CustomChatAdjustTokenLimitDialog({
+  trigger,
   sharedChatActive,
   currentTokenPointsPercentageLimit,
   maxAvailablePercentage,
   onAdjustTokenLimit,
   onAdjustTokenLimitSuccess,
-}: CustomChatAdjustTokenLimitButtonProps) {
+}: CustomChatAdjustTokenLimitDialogProps) {
   const toast = useToast();
 
   const t = useTranslations('custom-chat.share-with-learners');
@@ -66,15 +68,12 @@ export function CustomChatAdjustTokenLimitButton({
         toast.success(tToast('adjust-token-limit-toast-success'));
         setOpen(false);
         onAdjustTokenLimitSuccess(result.tokenPointsLimit);
-        // early return runs through finally and avoids the error toast
-        return;
       }
     } catch {
-      // Errors are handled by the generic failure toast below.
+      toast.error(tToast('adjust-token-limit-toast-error'));
     } finally {
       setIsSubmitting(false);
     }
-    toast.error(tToast('adjust-token-limit-toast-error'));
   }
 
   function handleOpenChange(nextOpen: boolean) {
@@ -84,17 +83,19 @@ export function CustomChatAdjustTokenLimitButton({
     }
   }
 
+  const triggerWithState = React.cloneElement(
+    trigger as React.ReactElement<{ disabled?: boolean }>,
+    {
+      disabled:
+        Boolean((trigger.props as { disabled?: boolean }).disabled) ||
+        !sharedChatActive ||
+        !hasHigherOption,
+    },
+  );
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button
-          type="button"
-          disabled={!sharedChatActive || !hasHigherOption}
-          data-testid="adjust-token-limit-button"
-        >
-          {t('button-adjust-token-limit')}
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{triggerWithState}</DialogTrigger>
       <DialogContent>
         <DialogHeader className="space-y-2">
           <DialogTitle>{t('adjust-token-limit-modal-title')}</DialogTitle>
@@ -104,8 +105,8 @@ export function CustomChatAdjustTokenLimitButton({
           <TokenPointsLimitSelect
             label={t('token-points')}
             ariaLabel={t('adjust-token-limit-modal-aria')}
-            defaultValue={String(nextHigherOption)}
-            value={String(tokenPointsPercentageLimit)}
+            defaultValue={nextHigherOption}
+            value={tokenPointsPercentageLimit}
             onValueChange={setTokenPointsPercentageLimit}
             disabled={isSubmitting}
             pointsPercentageValues={tokenPointsPercentageValues}

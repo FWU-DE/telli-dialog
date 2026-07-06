@@ -17,8 +17,8 @@ import {
 import { TimeLimitSelect } from './custom-chat-time-limit-select';
 import { usageTimeValuesInMinutes } from './custom-chat-share-with-learners-limit-params';
 
-type CustomChatExtendShareExpirationButtonProps = {
-  sharedChatActive: boolean;
+type CustomChatExtendShareExpirationDialogProps = {
+  trigger: React.ReactElement;
   preselectedUsageTimeLimit: number;
   onAddTime: (data: { additionalTimeInMinutes: number }) => Promise<{
     success: boolean;
@@ -27,12 +27,12 @@ type CustomChatExtendShareExpirationButtonProps = {
   onAddTimeSuccess: (newExpiredAt: Date) => void;
 };
 
-export function CustomChatExtendShareExpirationButton({
-  sharedChatActive,
+export function CustomChatExtendShareExpirationDialog({
+  trigger,
   preselectedUsageTimeLimit,
   onAddTime,
   onAddTimeSuccess,
-}: CustomChatExtendShareExpirationButtonProps) {
+}: CustomChatExtendShareExpirationDialogProps) {
   const toast = useToast();
 
   const t = useTranslations('custom-chat.share-with-learners');
@@ -52,16 +52,12 @@ export function CustomChatExtendShareExpirationButton({
         toast.success(tToast('add-time-toast-success'));
         setOpen(false);
         onAddTimeSuccess(result.expiredAt);
-        // early return runs through finally and avoids the error toast
-        return;
       }
     } catch {
-      // Errors are handled by the generic failure toast below.
+      toast.error(tToast('add-time-toast-error'));
     } finally {
       setIsSubmitting(false);
     }
-
-    toast.error(tToast('add-time-toast-error'));
   }
 
   function handleOpenChange(nextOpen: boolean) {
@@ -74,11 +70,7 @@ export function CustomChatExtendShareExpirationButton({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button type="button" disabled={!sharedChatActive} data-testid="add-additional-time-button">
-          {t('button-additional-time')}
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader className="space-y-2">
           <DialogTitle>{t('additional-time-modal-title')}</DialogTitle>
@@ -88,7 +80,7 @@ export function CustomChatExtendShareExpirationButton({
           <TimeLimitSelect
             key={selectVersion}
             ariaLabel={t('additional-time-modal-aria')}
-            defaultValue={String(preselectedUsageTimeLimit)}
+            defaultValue={preselectedUsageTimeLimit}
             onChange={setAdditionalTimeInMinutes}
             disabled={isSubmitting}
             usageTimeValuesInMinutes={usageTimeValuesInMinutes}

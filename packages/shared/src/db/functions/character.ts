@@ -591,7 +591,7 @@ export async function dbExtendSharedCharacterConversationExpiration({
 
 /**
  * Updates the token points limit of the latest unstopped character share for the given user.
- * Returns undefined if no unstopped share exists.
+ * Returns null if no unstopped share exists.
  */
 export async function dbUpdateCharacterShareTokenPointsLimit({
   characterId,
@@ -617,7 +617,7 @@ export async function dbUpdateCharacterShareTokenPointsLimit({
     .limit(1);
 
   if (!latestUnstoppedShare) {
-    return undefined;
+    return null;
   }
 
   const [updatedShare] = await db
