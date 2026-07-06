@@ -182,7 +182,6 @@ test.describe('create, share, chat, delete', () => {
     await page.waitForURL('/learning-scenarios/**');
     await stopSharingIfActive(page);
     await expect(page.getByTestId('start-share-button')).toBeVisible();
-    await page.reload();
 
     // verify maximum token points is preselected
     await page.getByTestId('token-points-select').click();

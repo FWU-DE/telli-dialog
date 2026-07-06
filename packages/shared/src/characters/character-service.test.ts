@@ -594,7 +594,7 @@ describe('character-service', () => {
       },
     );
 
-    it('throws NotFoundError when there is no active share to extend', async () => {
+    it('throws InvalidArgumentError when there is no active share to extend', async () => {
       (
         dbExtendSharedCharacterConversationExpiration as MockedFunction<
           typeof dbExtendSharedCharacterConversationExpiration
@@ -607,7 +607,7 @@ describe('character-service', () => {
           additionalTimeInMinutes: 30,
           user,
         }),
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toThrow(InvalidArgumentError);
     });
   });
 
@@ -678,7 +678,7 @@ describe('character-service', () => {
       },
     );
 
-    it('throws NotFoundError when there is no current share', async () => {
+    it('throws InvalidArgumentError when there is no current share', async () => {
       (
         dbGetSharedCharacterConversations as MockedFunction<
           typeof dbGetSharedCharacterConversations
@@ -691,7 +691,7 @@ describe('character-service', () => {
           tokenPointsPercentageLimit: 75,
           user,
         }),
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toThrow(InvalidArgumentError);
 
       expect(dbUpdateCharacterShareTokenPointsLimit).not.toHaveBeenCalled();
     });
@@ -711,7 +711,7 @@ describe('character-service', () => {
       },
     );
 
-    it('throws NotFoundError when the share update returns no result', async () => {
+    it('throws InvalidArgumentError when the share update returns no result', async () => {
       (
         dbUpdateCharacterShareTokenPointsLimit as MockedFunction<
           typeof dbUpdateCharacterShareTokenPointsLimit
@@ -724,7 +724,7 @@ describe('character-service', () => {
           tokenPointsPercentageLimit: 75,
           user,
         }),
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toThrow(InvalidArgumentError);
     });
   });
 

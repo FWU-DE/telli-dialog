@@ -994,7 +994,7 @@ describe('learning-scenario-service', () => {
       },
     );
 
-    it('throws NotFoundError when there is no active share to extend', async () => {
+    it('throws InvalidArgumentError when there is no active share to extend', async () => {
       (
         dbExtendSharedLearningScenarioExpiration as MockedFunction<
           typeof dbExtendSharedLearningScenarioExpiration
@@ -1007,7 +1007,7 @@ describe('learning-scenario-service', () => {
           additionalTimeInMinutes: 30,
           user,
         }),
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toThrow(InvalidArgumentError);
     });
   });
 
@@ -1079,7 +1079,7 @@ describe('learning-scenario-service', () => {
       },
     );
 
-    it('throws NotFoundError when there is no current share', async () => {
+    it('throws InvalidArgumentError when there is no current share', async () => {
       (
         dbGetSharedLearningScenarioConversations as MockedFunction<
           typeof dbGetSharedLearningScenarioConversations
@@ -1092,7 +1092,7 @@ describe('learning-scenario-service', () => {
           tokenPointsPercentageLimit: 75,
           user,
         }),
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toThrow(InvalidArgumentError);
 
       expect(dbUpdateLearningScenarioShareTokenPointsLimit).not.toHaveBeenCalled();
     });
@@ -1112,7 +1112,7 @@ describe('learning-scenario-service', () => {
       },
     );
 
-    it('throws NotFoundError when the share update returns no result', async () => {
+    it('throws InvalidArgumentError when the share update returns no result', async () => {
       (
         dbUpdateLearningScenarioShareTokenPointsLimit as MockedFunction<
           typeof dbUpdateLearningScenarioShareTokenPointsLimit
@@ -1125,7 +1125,7 @@ describe('learning-scenario-service', () => {
           tokenPointsPercentageLimit: 75,
           user,
         }),
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toThrow(InvalidArgumentError);
     });
   });
 

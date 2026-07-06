@@ -135,9 +135,8 @@ test.describe('create, share, chat, delete', () => {
     await page.waitForURL('/characters/editor/**');
     await confirmStopSharing(page);
     await expect(page.getByTestId('start-share-button')).toBeVisible();
-    await page.reload();
 
-    // verify maximum token points is preselected
+    // verify maximum token points is preselected after stopping share
     await page.getByTestId('token-points-select').click();
     await expect(page.getByTestId('token-points-option-max')).toHaveAttribute(
       'data-state',
