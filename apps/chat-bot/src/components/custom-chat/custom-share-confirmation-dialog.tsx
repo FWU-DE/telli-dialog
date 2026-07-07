@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Checkbox } from '@ui/components/checkbox';
 import MarkdownDisplay from '@/components/chat/markdown-display';
 import {
@@ -15,6 +15,52 @@ import {
   AlertDialogTitle,
 } from '@ui/components/alert-dialog';
 
+const CHECKLIST_SECTIONS = [
+  {
+    titleKey: 'community-confirmation.sections.copyright',
+    items: [
+      { key: 'community-confirmation.items.copyright-material-reviewed' },
+      { key: 'community-confirmation.items.copyright-no-protected-upload' },
+      { key: 'community-confirmation.items.copyright-image-reviewed' },
+      { key: 'community-confirmation.items.copyright-sources-provided' },
+    ],
+  },
+  {
+    titleKey: 'community-confirmation.sections.personal-data',
+    items: [
+      { key: 'community-confirmation.items.personal-no-data' },
+      { key: 'community-confirmation.items.personal-no-invitation' },
+    ],
+  },
+  {
+    titleKey: 'community-confirmation.sections.ethics',
+    items: [
+      { key: 'community-confirmation.items.ethics-no-real-person' },
+      { key: 'community-confirmation.items.ethics-no-discrimination' },
+    ],
+  },
+  {
+    titleKey: 'community-confirmation.sections.content',
+    items: [
+      { key: 'community-confirmation.items.content-no-extremism-violence-sexualized' },
+      { key: 'community-confirmation.items.content-no-false-outdated' },
+    ],
+  },
+  {
+    titleKey: 'community-confirmation.sections.terms',
+    items: [{ key: 'community-confirmation.items.terms-accepted', useMarkdown: true }],
+  },
+] as const;
+
+type ChecklistItemKey = (typeof CHECKLIST_SECTIONS)[number]['items'][number]['key'];
+type ChecklistState = Record<ChecklistItemKey, boolean>;
+
+function createInitialChecklistState(): ChecklistState {
+  return Object.fromEntries(
+    CHECKLIST_SECTIONS.flatMap((section) => section.items.map((item) => [item.key, false])),
+  ) as ChecklistState;
+}
+
 type CustomShareConfirmationDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -27,40 +73,18 @@ export function CustomShareConfirmationDialog({
   onAccept,
 }: CustomShareConfirmationDialogProps) {
   const t = useTranslations('sharing');
-  const checklistItemKeys = useMemo(
-    () =>
-      [
-        'community-confirmation.items.copyright-material-reviewed',
-        'community-confirmation.items.copyright-no-protected-upload',
-        'community-confirmation.items.copyright-image-reviewed',
-        'community-confirmation.items.copyright-sources-provided',
-        'community-confirmation.items.personal-no-data',
-        'community-confirmation.items.personal-no-invitation',
-        'community-confirmation.items.ethics-no-real-person',
-        'community-confirmation.items.ethics-no-discrimination',
-        'community-confirmation.items.content-no-extremism-violence-sexualized',
-        'community-confirmation.items.content-no-false-outdated',
-        'community-confirmation.items.terms-accepted',
-      ] as const,
-    [],
-  );
+  const [checklistState, setChecklistState] = useState<ChecklistState>(createInitialChecklistState);
 
-  const [checklistState, setChecklistState] = useState<boolean[]>(() =>
-    Array(checklistItemKeys.length).fill(false),
+  const allChecklistItemsChecked = CHECKLIST_SECTIONS.every((section) =>
+    section.items.every((item) => checklistState[item.key]),
   );
-
-  const allChecklistItemsChecked = checklistState.every(Boolean);
 
   function resetChecklist() {
-    setChecklistState(Array(checklistItemKeys.length).fill(false));
+    setChecklistState(createInitialChecklistState());
   }
 
-  function updateChecklist(index: number, checked: boolean) {
-    setChecklistState((prev) => {
-      const next = [...prev];
-      next[index] = checked;
-      return next;
-    });
+  function updateChecklist(itemKey: ChecklistItemKey, checked: boolean) {
+    setChecklistState((prev) => ({ ...prev, [itemKey]: checked }));
   }
 
   return (
@@ -79,7 +103,7 @@ export function CustomShareConfirmationDialog({
       }}
     >
       <AlertDialogContent
-        className="grid max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-3xl grid-rows-[auto_minmax(0,1fr)_auto] gap-4 overflow-hidden p-4 pt-4 sm:max-h-[calc(100dvh-2rem)] sm:w-full sm:gap-6 sm:p-8 sm:pt-6"
+        className="grid max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-3xl sm:max-w-3xl! grid-rows-[auto_minmax(0,1fr)_auto] gap-4 overflow-hidden p-4 pt-4 sm:max-h-[calc(100dvh-2rem)] sm:w-full sm:gap-6 sm:p-8 sm:pt-6"
         onEscapeKeyDown={(event) => {
           if (!allChecklistItemsChecked) {
             event.preventDefault();
@@ -90,130 +114,47 @@ export function CustomShareConfirmationDialog({
           <AlertDialogTitle>{t('community-confirmation.title')}</AlertDialogTitle>
         </AlertDialogHeader>
 
-        <div className="min-h-0 overflow-y-auto pr-1 sm:pr-2">
+        <div className="min-h-0 overflow-y-auto pr-1 sm:overflow-y-visible sm:pr-2">
           <div className="space-y-6">
             <AlertDialogDescription>
               {t('community-confirmation.description')}
             </AlertDialogDescription>
-            <section className="space-y-3">
-              <h3 className="font-semibold">{t('community-confirmation.sections.copyright')}</h3>
-              <div className="space-y-2 sm:space-y-3">
-                {checklistItemKeys.slice(0, 4).map((itemKey, index) => (
-                  <label
-                    key={itemKey}
-                    htmlFor={`community-checklist-${index}`}
-                    className="flex items-start gap-3"
-                  >
-                    <Checkbox
-                      id={`community-checklist-${index}`}
-                      className="mt-1"
-                      checked={checklistState[index]}
-                      onCheckedChange={(checked) => updateChecklist(index, checked === true)}
-                    />
-                    <span>{t(itemKey)}</span>
-                  </label>
-                ))}
-              </div>
-            </section>
+            {CHECKLIST_SECTIONS.map((section) => (
+              <section key={section.titleKey} className="space-y-3">
+                <div className="font-semibold">{t(section.titleKey)}</div>
+                <div className="space-y-2 sm:space-y-3">
+                  {section.items.map((item) => {
+                    const checkboxId = item.key.replaceAll('.', '-');
 
-            <section className="space-y-3">
-              <h3 className="font-semibold">
-                {t('community-confirmation.sections.personal-data')}
-              </h3>
-              <div className="space-y-2 sm:space-y-3">
-                {checklistItemKeys.slice(4, 6).map((itemKey, localIndex) => {
-                  const index = localIndex + 4;
-                  return (
-                    <label
-                      key={itemKey}
-                      htmlFor={`community-checklist-${index}`}
-                      className="flex items-start gap-3"
-                    >
-                      <Checkbox
-                        id={`community-checklist-${index}`}
-                        className="mt-1"
-                        checked={checklistState[index]}
-                        onCheckedChange={(checked) => updateChecklist(index, checked === true)}
-                      />
-                      <span>{t(itemKey)}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="space-y-3">
-              <h3 className="font-semibold">{t('community-confirmation.sections.ethics')}</h3>
-              <div className="space-y-2 sm:space-y-3">
-                {checklistItemKeys.slice(6, 8).map((itemKey, localIndex) => {
-                  const index = localIndex + 6;
-                  return (
-                    <label
-                      key={itemKey}
-                      htmlFor={`community-checklist-${index}`}
-                      className="flex items-start gap-3"
-                    >
-                      <Checkbox
-                        id={`community-checklist-${index}`}
-                        className="mt-1"
-                        checked={checklistState[index]}
-                        onCheckedChange={(checked) => updateChecklist(index, checked === true)}
-                      />
-                      <span>{t(itemKey)}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="space-y-3">
-              <h3 className="font-semibold">{t('community-confirmation.sections.content')}</h3>
-              <div className="space-y-2 sm:space-y-3">
-                {checklistItemKeys.slice(8, 10).map((itemKey, localIndex) => {
-                  const index = localIndex + 8;
-                  return (
-                    <label
-                      key={itemKey}
-                      htmlFor={`community-checklist-${index}`}
-                      className="flex items-start gap-3"
-                    >
-                      <Checkbox
-                        id={`community-checklist-${index}`}
-                        className="mt-1"
-                        checked={checklistState[index]}
-                        onCheckedChange={(checked) => updateChecklist(index, checked === true)}
-                      />
-                      <span>{t(itemKey)}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="space-y-3">
-              <h3 className="font-semibold">{t('community-confirmation.sections.terms')}</h3>
-              <label htmlFor="community-checklist-10" className="flex items-start gap-3">
-                <Checkbox
-                  id="community-checklist-10"
-                  className="mt-1"
-                  checked={checklistState[10]}
-                  onCheckedChange={(checked) => updateChecklist(10, checked === true)}
-                />
-                <div
-                  className="flex-1"
-                  onClickCapture={(event) => {
-                    const target = event.target;
-                    if (target instanceof HTMLElement && target.closest('a')) {
-                      event.stopPropagation();
-                    }
-                  }}
-                >
-                  <MarkdownDisplay>
-                    {t('community-confirmation.items.terms-accepted')}
-                  </MarkdownDisplay>
+                    return (
+                      <label key={item.key} htmlFor={checkboxId} className="flex items-start gap-3">
+                        <Checkbox
+                          id={checkboxId}
+                          className="mt-1"
+                          checked={checklistState[item.key]}
+                          onCheckedChange={(checked) => updateChecklist(item.key, checked === true)}
+                        />
+                        {'useMarkdown' in item && item.useMarkdown ? (
+                          <div
+                            className="flex-1"
+                            onClickCapture={(event) => {
+                              const target = event.target;
+                              if (target instanceof HTMLElement && target.closest('a')) {
+                                event.stopPropagation();
+                              }
+                            }}
+                          >
+                            <MarkdownDisplay>{t(item.key)}</MarkdownDisplay>
+                          </div>
+                        ) : (
+                          <span>{t(item.key)}</span>
+                        )}
+                      </label>
+                    );
+                  })}
                 </div>
-              </label>
-            </section>
+              </section>
+            ))}
           </div>
         </div>
 

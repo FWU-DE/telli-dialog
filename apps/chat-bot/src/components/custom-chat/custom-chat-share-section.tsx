@@ -90,7 +90,7 @@ export default function CustomShareSection<T extends FieldValues>({
                   id={communityField.name + '-checkbox'}
                   aria-label={t('community')}
                   data-testid="community-sharing-checkbox"
-                  checked={Boolean(communityField.value)}
+                  checked={communityField.value}
                   disabled={suspended}
                   onCheckedChange={(checked) => {
                     const nextChecked = checked === true;
