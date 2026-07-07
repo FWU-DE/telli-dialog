@@ -361,12 +361,9 @@ describe('sendChatMessage', () => {
       expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
       expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
       expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
-        expect.objectContaining({ errorUrls: [] }),
-      );
-      expect(result.webSearchResults).toEqual(webSearchResults);
-      expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          webSearchResults,
+          errorUrls: [],
+          webSearchResults: [],
           activeToolDefinitions: [buildToolsOutput.toolRegistry.web_search.definition],
         }),
       );

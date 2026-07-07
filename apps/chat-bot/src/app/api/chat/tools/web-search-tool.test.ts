@@ -45,7 +45,6 @@ describe('buildWebSearchTool', () => {
     const result = await buildWebSearchTool({
       user,
       conversationId: 'conversation-1',
-      webSearchResults: [],
     });
 
     expect(result).toBeNull();
@@ -63,11 +62,9 @@ describe('buildWebSearchTool', () => {
 
     const { buildWebSearchTool } = await import('./web-search-tool');
 
-    const webSearchResults: any[] = [];
     const tool = await buildWebSearchTool({
       user,
       conversationId: 'conversation-1',
-      webSearchResults,
     });
 
     expect(tool).not.toBeNull();
@@ -99,7 +96,6 @@ describe('buildWebSearchTool', () => {
       ],
       error: null,
     });
-    expect(webSearchResults).toHaveLength(1);
   });
 
   it('calls onWebSearchResults callback when provided', async () => {
@@ -118,7 +114,6 @@ describe('buildWebSearchTool', () => {
     const tool = await buildWebSearchTool({
       user,
       conversationId: 'conversation-1',
-      webSearchResults: [],
       onWebSearchResults,
     });
 
