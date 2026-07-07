@@ -42,7 +42,7 @@ test.describe('share character with grace window', () => {
       // Navigate back to editor to verify share is active
       await page.goto(`/characters/editor/${characterId}`);
 
-      await expect(page.getByTestId('extend-share-button')).toBeVisible();
+      await expect(page.getByTestId('add-additional-time-button')).toBeVisible();
       await expect(page.getByTestId('stop-share-button')).toBeVisible();
     });
 
