@@ -12,7 +12,7 @@ const aiErrorNameToMessageKeyMap = {
 } as const satisfies Partial<Record<KnownAiGenerationError['name'], ErrorMessageTranslationKey>>;
 
 function isMappedAiErrorName(name: string): name is keyof typeof aiErrorNameToMessageKeyMap {
-  return name in aiErrorNameToMessageKeyMap;
+  return Object.hasOwn(aiErrorNameToMessageKeyMap, name);
 }
 
 function hasErrorName(error: unknown, name: string): error is { name: string } {
