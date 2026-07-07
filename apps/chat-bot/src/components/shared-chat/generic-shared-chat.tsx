@@ -11,16 +11,19 @@ import { FloatingText } from '../chat/floating-text';
 import { Messages } from '../chat/messages';
 import StreamingFinishedMarker from '../chat/streaming-finished-marker';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
-import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
+import {
+  calculateShareSessionState,
+  ShareSessionState,
+} from '@shared/sharing/calculate-share-session-state';
 import { logError } from '@shared/logging';
 import type { UseChatReturn } from '@/hooks/use-chat-hooks';
 import { SharedChatExpiredError, TokenPointsExceededError } from '@ais-chat/ai-core/errors';
 import { getErrorMessageByType } from '@/error/get-error-message-by-type';
 
-type CalculateTimeLeftInput = Parameters<typeof calculateTimeLeft>[0];
+type ShareSessionInput = Parameters<typeof calculateShareSessionState>[0];
 type Translator = ReturnType<typeof useTranslations>;
 
-type EntityMeta = CalculateTimeLeftInput & {
+type EntityMeta = ShareSessionInput & {
   id: string;
   name: string;
   description: string;
@@ -94,8 +97,10 @@ export default function GenericSharedChat({
   enableFloatingText = false,
   assistantIcon,
 }: SharedChatViewProps) {
-  const timeLeft = calculateTimeLeft(entity);
   const tCommon = useTranslations('common');
+  const { shareSessionState } = calculateShareSessionState(entity);
+  const chatActive = shareSessionState === ShareSessionState.RUNNING;
+
   const [explicitDialogStarted, setExplicitDialogStarted] = useState(false);
 
   const {
@@ -116,7 +121,7 @@ export default function GenericSharedChat({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const chatUsable =
-    timeLeft > 0 && !TokenPointsExceededError.is(error) && !SharedChatExpiredError.is(error);
+    chatActive && !TokenPointsExceededError.is(error) && !SharedChatExpiredError.is(error);
 
   const dialogStarted =
     dialogStartMode === 'explicit' ? explicitDialogStarted : messages.length > 0;

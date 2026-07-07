@@ -293,18 +293,18 @@ export function CharacterEdit({
   };
 
   const handleDeleteFile = async (fileId: string) => {
-    return await deleteFileMappingAndEntityAction({
+    return deleteFileMappingAndEntityAction({
       characterId: character.id,
       fileId,
     });
   };
 
   const handleDownloadFile = async (fileId: string) => {
-    return await downloadFileFromCharacterAction({ characterId: character.id, fileId });
+    return downloadFileFromCharacterAction({ characterId: character.id, fileId });
   };
 
   const handleLinksChange = async (links: string[]) => {
-    return await updateCharacterAction({ id: character.id, attachedLinks: links });
+    return updateCharacterAction({ id: character.id, attachedLinks: links });
   };
 
   async function handleUploadPicture(croppedImageBlob: Blob) {
@@ -398,20 +398,18 @@ export function CharacterEdit({
           usedBudget={usedBudget}
           budgetUsedBySharedChat={budgetUsedBySharedChat}
           maxBudget={maxBudget}
-          onShare={async (data) => {
-            const result = await shareCharacterAction({
+          onShare={(data) =>
+            shareCharacterAction({
               id: character.id,
               tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
               usageTimeLimit: data.usageTimeLimit,
-            });
-            return result;
-          }}
-          onUnshare={async () => {
-            const result = await unshareCharacterAction({
+            })
+          }
+          onUnshare={() =>
+            unshareCharacterAction({
               characterId: character.id,
-            });
-            return result;
-          }}
+            })
+          }
           onAddTime={async (data) => {
             const result = await extendCharacterShareExpirationAction({
               characterId: character.id,
@@ -432,9 +430,13 @@ export function CharacterEdit({
             }
             return { success: false };
           }}
+          onPollShareData={() =>
+            getCharacterShareDataAction({
+              characterId: character.id,
+            })
+          }
           shareUILink={`/characters/editor/${character.id}/share`}
           sharingDisabled={!name || name.trim().length === 0}
-          onPollShareData={() => getCharacterShareDataAction({ characterId: character.id })}
         />
 
         <div className="flex flex-col gap-3">

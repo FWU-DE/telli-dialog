@@ -1,9 +1,9 @@
 import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import {
-  dbExtendSharedCharacterConversationExpiration,
+  dbCreateCharacterShare,
   dbDeleteCharacterByIdAndUser,
-  dbUpdateCharacterShareTokenPointsLimit,
+  dbExtendSharedCharacterConversationExpiration,
   dbGetAllAccessibleCharacters,
   dbGetAllCharactersByUser,
   dbGetCharacterById,
@@ -14,7 +14,9 @@ import {
   dbGetCharactersByAssociatedSchools,
   dbGetCharactersByUser,
   dbGetGlobalCharacters,
-  dbGetSharedCharacterConversations,
+  dbGetLatestManageableCharacterShare,
+  dbStopCharacterShare,
+  dbUpdateCharacterShareTokenPointsLimit,
 } from '@shared/db/functions/character';
 import { dbGetFileForCharacter, dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -34,7 +36,6 @@ import {
   CharacterWithShareDataModel,
   FileModel,
   fileTable,
-  sharedCharacterConversation,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, InvalidArgumentError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
@@ -59,7 +60,7 @@ import {
   getPreservedUpdatedAtForExemptedKeys,
 } from '@shared/utils/preserve-updated-at';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import {
@@ -392,6 +393,74 @@ export const deleteCharacter = async ({
   return deletedCharacter;
 };
 
+export const getActiveCharacterShareData = async ({
+  characterId,
+  user,
+}: {
+  characterId: string;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}): Promise<{
+  expiredAt: Date | null;
+  manuallyStoppedAt: Date | null;
+  tokenPointsLimit: number | null;
+  budgetUsedBySharedChat: number;
+}> => {
+  checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
+
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyReadAccess({ item: character, user });
+
+  const share = await dbGetLatestManageableCharacterShare({ characterId, user });
+
+  if (!share) {
+    return {
+      expiredAt: null,
+      manuallyStoppedAt: null,
+      tokenPointsLimit: null,
+      budgetUsedBySharedChat: 0,
+    };
+  }
+
+  const budgetUsedBySharedChat = await dbGetSharedCharacterChatUsageInCentByCharacterId({
+    characterId,
+    userId: user.id,
+    expiredAt: share.expiredAt,
+    startedAt: share.startedAt,
+  });
+
+  return {
+    expiredAt: share.expiredAt,
+    manuallyStoppedAt: share.manuallyStoppedAt,
+    tokenPointsLimit: share.tokenPointsLimit,
+    budgetUsedBySharedChat,
+  };
+};
+
+/**
+ * Checks if any recent shares exist for a character that would prevent a new share.
+ * A recent share is one that is either:
+ * 1. Running (not yet expired and not manually stopped)
+ * 2. Expired but within the 2-hour grace window (still extendable)
+ *
+ * @throws Error if a share exists that prevents creating a new one
+ */
+const checkRecentCharacterShares = async ({
+  characterId,
+  user,
+}: {
+  characterId: string;
+  user: Pick<UserModel, 'id'>;
+}): Promise<void> => {
+  const share = await dbGetLatestManageableCharacterShare({ characterId, user });
+
+  if (share) {
+    throw new InvalidArgumentError(
+      'A share session already exists or has recently expired. Please extend the existing session instead of starting a new one.',
+    );
+  }
+};
+
 /**
  * A teacher can share a character with students.
  * The teacher can share his own characters or characters that are released for the school or global.
@@ -425,26 +494,22 @@ export const shareCharacter = async ({
     throw new InvalidArgumentError('usage time limit must be between 1 and 43200 minutes');
   }
 
-  const activeShares = await dbGetSharedCharacterConversations({ characterId, user });
-  if (activeShares.length > 0) throw new Error('There can only be one active share at a time');
+  // Check for existing active or recently-expired shares within the grace window
+  await checkRecentCharacterShares({
+    characterId,
+    user,
+  });
 
-  const tokenPointsLimit = tokenPointsPercentageLimit;
-  const maxUsageTimeLimit = usageTimeLimitMinutes;
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
-  const expiredAt = new Date(startedAt.getTime() + maxUsageTimeLimit * 60 * 1000);
-  const [newSharedChat] = await db
-    .insert(sharedCharacterConversation)
-    .values({
-      userId: user.id,
-      characterId,
-      tokenPointsLimit,
-      maxUsageTimeLimit,
-      inviteCode,
-      startedAt,
-      expiredAt,
-    })
-    .returning();
+  const newSharedChat = await dbCreateCharacterShare({
+    user,
+    characterId,
+    tokenPointsLimit: tokenPointsPercentageLimit,
+    maxUsageTimeLimit: usageTimeLimitMinutes,
+    inviteCode,
+    startedAt,
+  });
 
   if (newSharedChat === undefined) {
     throw new Error('Could not share character chat');
@@ -467,20 +532,16 @@ export const unshareCharacter = async ({
   // Authorization check: user must be a teacher and owner of the sharing itself
   requireTeacherRole(user.userRole);
 
-  const sharedConversations = await dbGetSharedCharacterConversations({
+  const share = await dbGetLatestManageableCharacterShare({
     characterId,
     user,
   });
-  if (sharedConversations.length === 0)
+  if (!share) {
     throw new NotFoundError('No active sharing found for this character');
+  }
 
   // unshare character instance by setting manuallyStoppedAt
-  const sharedConversationIds = sharedConversations.map((s) => s.id);
-  const [updatedCharacter] = await db
-    .update(sharedCharacterConversation)
-    .set({ manuallyStoppedAt: new Date() })
-    .where(inArray(sharedCharacterConversation.id, sharedConversationIds))
-    .returning();
+  const updatedCharacter = await dbStopCharacterShare({ shareId: share.id });
 
   if (!updatedCharacter) {
     throw new Error('Could not stop sharing of character');
@@ -549,11 +610,7 @@ export const updateCharacterShareTokenPointsLimit = async ({
     throw new InvalidArgumentError('token points percentage limit must be between 1 and 100');
   }
 
-  const sharedConversations = await dbGetSharedCharacterConversations({
-    characterId,
-    user,
-  });
-  const currentShare = sharedConversations[0];
+  const currentShare = await dbGetLatestManageableCharacterShare({ characterId, user });
 
   if (!currentShare) {
     throw new InvalidArgumentError('No sharing found for this character');
@@ -695,49 +752,6 @@ export const getSharedCharacter = async ({
   if (!character || !character.inviteCode) throw new NotFoundError('Character not found');
 
   return character;
-};
-
-/**
- * Returns lightweight share data for polling updates (no files, signed URLs, etc).
- * Used by teacher views to poll for external changes to share state.
- * @throws NotFoundError if character does not exist
- */
-export const getActiveCharacterShareData = async ({
-  characterId,
-  user,
-}: {
-  characterId: string;
-  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
-}): Promise<{
-  expiredAt: Date | null;
-  manuallyStoppedAt: Date | null;
-  tokenPointsLimit: number | null;
-  budgetUsedBySharedChat: number;
-}> => {
-  checkParameterUUID(characterId);
-  requireTeacherRole(user.userRole);
-
-  const character = await dbGetCharacterByIdOptionalShareData({ characterId, user });
-  if (!character) throw new NotFoundError('Character not found');
-
-  verifyReadAccess({ item: character, user });
-
-  let budgetUsedBySharedChat = 0;
-  if (character.startedAt && character.expiredAt) {
-    budgetUsedBySharedChat = await dbGetSharedCharacterChatUsageInCentByCharacterId({
-      characterId: character.id,
-      userId: user.id,
-      expiredAt: character.expiredAt,
-      startedAt: character.startedAt,
-    });
-  }
-
-  return {
-    expiredAt: character.expiredAt,
-    manuallyStoppedAt: character.manuallyStoppedAt,
-    tokenPointsLimit: character.tokenPointsLimit,
-    budgetUsedBySharedChat,
-  };
 };
 
 /**

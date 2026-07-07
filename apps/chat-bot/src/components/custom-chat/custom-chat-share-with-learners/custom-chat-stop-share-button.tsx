@@ -19,11 +19,13 @@ import {
 type CustomChatStopShareButtonProps = {
   onUnshare: () => Promise<{ success: boolean }>;
   onStopShareSuccess: () => void;
+  className?: string;
 };
 
 export function CustomChatStopShareButton({
   onUnshare,
   onStopShareSuccess,
+  className,
 }: CustomChatStopShareButtonProps) {
   const toast = useToast();
   const t = useTranslations('custom-chat.share-with-learners');
@@ -61,6 +63,7 @@ export function CustomChatStopShareButton({
           variant="destructive"
           aria-label={t('button-stop')}
           data-testid="stop-share-button"
+          className={className}
         >
           <TrashSimpleIcon className="size-5" /> {t('button-close-session')}
         </Button>

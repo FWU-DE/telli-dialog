@@ -4,11 +4,14 @@ import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetLearningScenarioChatUsageInCentByLearningScenarioId,
 } from '@shared/db/functions/token-points';
-import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import {
   getMaxBudgetInCentByUser,
   getUsedBudgetInCentByUser,
 } from '@shared/users/user-budget-service';
+import {
+  calculateShareSessionState,
+  ShareSessionState,
+} from '@shared/sharing/calculate-share-session-state';
 
 /**
  * Calculates the shared chat limit in cents
@@ -96,8 +99,10 @@ export function sharedChatHasExpired({
     return true;
   }
 
-  const timeLeft = calculateTimeLeft({ expiredAt, manuallyStoppedAt });
-  if (timeLeft < 1) {
+  if (
+    calculateShareSessionState({ expiredAt, manuallyStoppedAt }).shareSessionState !==
+    ShareSessionState.RUNNING
+  ) {
     // the shared chat is no viable anymore so the limit is reached
     return true;
   }

@@ -21,6 +21,8 @@ import {
   uploadAvatarPictureForCharacter,
 } from './character-service';
 import {
+  dbCreateCharacterShare,
+  dbExtendSharedCharacterConversationExpiration,
   dbGetAllAccessibleCharacters,
   dbGetAllCharactersByUser,
   dbGetCharacterById,
@@ -29,9 +31,9 @@ import {
   dbGetCharactersByAssociatedSchools,
   dbGetCommunityCharacters,
   dbGetCharactersByUser,
-  dbExtendSharedCharacterConversationExpiration,
   dbGetGlobalCharacters,
-  dbGetSharedCharacterConversations,
+  dbGetLatestManageableCharacterShare,
+  dbStopCharacterShare,
   dbUpdateCharacterShareTokenPointsLimit,
 } from '../db/functions/character';
 import { dbGetRelatedCharacterFiles } from '../db/functions/files';
@@ -50,7 +52,6 @@ import {
 } from '../templates/template-service';
 
 vi.mock('../db/functions/character', () => ({
-  dbGetSharedCharacterConversations: vi.fn(),
   dbGetAllAccessibleCharacters: vi.fn(),
   dbGetAllCharactersByUser: vi.fn(),
   dbGetCharacterById: vi.fn(),
@@ -61,8 +62,11 @@ vi.mock('../db/functions/character', () => ({
   dbGetCharactersByAssociatedSchools: vi.fn(),
   dbGetCommunityCharacters: vi.fn(),
   dbGetCharactersByUser: vi.fn(),
-  dbExtendSharedCharacterConversationExpiration: vi.fn(),
   dbGetGlobalCharacters: vi.fn(),
+  dbGetLatestManageableCharacterShare: vi.fn(),
+  dbCreateCharacterShare: vi.fn(),
+  dbStopCharacterShare: vi.fn(),
+  dbExtendSharedCharacterConversationExpiration: vi.fn(),
   dbUpdateCharacterShareTokenPointsLimit: vi.fn(),
 }));
 vi.mock('../db/functions/files', () => ({
@@ -95,7 +99,12 @@ const { mockDbReturning, mockDbSet, mockDbUpdate } = vi.hoisted(() => {
   const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
   const mockDbSet = vi.fn(() => ({ where: mockDbWhere }));
   const mockDbUpdate = vi.fn(() => ({ set: mockDbSet }));
-  return { mockDbReturning, mockDbSet, mockDbUpdate };
+
+  return {
+    mockDbReturning,
+    mockDbSet,
+    mockDbUpdate,
+  };
 });
 vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 
@@ -480,10 +489,10 @@ describe('character-service', () => {
 
     it('should throw NotFoundError when there is no active sharing to unshare - unshareCharacter', async () => {
       (
-        dbGetSharedCharacterConversations as MockedFunction<
-          typeof dbGetSharedCharacterConversations
+        dbGetLatestManageableCharacterShare as MockedFunction<
+          typeof dbGetLatestManageableCharacterShare
         >
-      ).mockResolvedValue([] as never);
+      ).mockResolvedValue(null as never);
 
       await expect(
         unshareCharacter({
@@ -519,10 +528,10 @@ describe('character-service', () => {
         mockCharacter as never,
       );
       (
-        dbGetSharedCharacterConversations as MockedFunction<
-          typeof dbGetSharedCharacterConversations
+        dbGetLatestManageableCharacterShare as MockedFunction<
+          typeof dbGetLatestManageableCharacterShare
         >
-      ).mockResolvedValue([existingShare] as never);
+      ).mockResolvedValue(existingShare as never);
     });
 
     it('throws when there is already an active share', async () => {
@@ -533,7 +542,72 @@ describe('character-service', () => {
           tokenPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
         }),
-      ).rejects.toThrow('There can only be one active share at a time');
+      ).rejects.toThrow(InvalidArgumentError);
+    });
+  });
+
+  describe('shareCharacter / unshareCharacter - success', () => {
+    const userId = generateUUID();
+    const characterId = generateUUID();
+    const user = { ...mockUser('teacher'), id: userId };
+    const mockCharacter: Partial<CharacterSelectModel> = {
+      id: characterId,
+      userId,
+      accessLevel: 'private',
+      hasLinkAccess: false,
+    };
+
+    beforeEach(() => {
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        mockCharacter as never,
+      );
+    });
+
+    it('creates a new share via dbCreateCharacterShare when no manageable share exists', async () => {
+      const newShare = { id: generateUUID(), characterId, userId };
+      (
+        dbGetLatestManageableCharacterShare as MockedFunction<
+          typeof dbGetLatestManageableCharacterShare
+        >
+      ).mockResolvedValue(null as never);
+      (dbCreateCharacterShare as MockedFunction<typeof dbCreateCharacterShare>).mockResolvedValue(
+        newShare as never,
+      );
+
+      const result = await shareCharacter({
+        characterId,
+        user,
+        tokenPointsPercentageLimit: 10,
+        usageTimeLimitMinutes: 60,
+      });
+
+      expect(dbCreateCharacterShare).toHaveBeenCalledWith(
+        expect.objectContaining({
+          user,
+          characterId,
+          tokenPointsLimit: 10,
+          maxUsageTimeLimit: 60,
+        }),
+      );
+      expect(result).toBe(newShare);
+    });
+
+    it('stops the latest manageable share via dbStopCharacterShare', async () => {
+      const share = { id: generateUUID(), characterId, userId };
+      const stoppedShare = { ...share, manuallyStoppedAt: new Date() };
+      (
+        dbGetLatestManageableCharacterShare as MockedFunction<
+          typeof dbGetLatestManageableCharacterShare
+        >
+      ).mockResolvedValue(share as never);
+      (dbStopCharacterShare as MockedFunction<typeof dbStopCharacterShare>).mockResolvedValue(
+        stoppedShare as never,
+      );
+
+      const result = await unshareCharacter({ characterId, user });
+
+      expect(dbStopCharacterShare).toHaveBeenCalledWith({ shareId: share.id });
+      expect(result).toBe(stoppedShare);
     });
   });
 
@@ -600,7 +674,7 @@ describe('character-service', () => {
         dbExtendSharedCharacterConversationExpiration as MockedFunction<
           typeof dbExtendSharedCharacterConversationExpiration
         >
-      ).mockResolvedValue(undefined as never);
+      ).mockResolvedValue(null as never);
 
       await expect(
         extendCharacterShareExpiration({
@@ -638,10 +712,10 @@ describe('character-service', () => {
         mockCharacter as never,
       );
       (
-        dbGetSharedCharacterConversations as MockedFunction<
-          typeof dbGetSharedCharacterConversations
+        dbGetLatestManageableCharacterShare as MockedFunction<
+          typeof dbGetLatestManageableCharacterShare
         >
-      ).mockResolvedValue([currentShare] as never);
+      ).mockResolvedValue(currentShare as never);
       (
         dbUpdateCharacterShareTokenPointsLimit as MockedFunction<
           typeof dbUpdateCharacterShareTokenPointsLimit
@@ -681,10 +755,10 @@ describe('character-service', () => {
 
     it('throws InvalidArgumentError when there is no current share', async () => {
       (
-        dbGetSharedCharacterConversations as MockedFunction<
-          typeof dbGetSharedCharacterConversations
+        dbGetLatestManageableCharacterShare as MockedFunction<
+          typeof dbGetLatestManageableCharacterShare
         >
-      ).mockResolvedValue([] as never);
+      ).mockResolvedValue(null as never);
 
       await expect(
         updateCharacterShareTokenPointsLimit({
@@ -717,7 +791,7 @@ describe('character-service', () => {
         dbUpdateCharacterShareTokenPointsLimit as MockedFunction<
           typeof dbUpdateCharacterShareTokenPointsLimit
         >
-      ).mockResolvedValue(undefined as never);
+      ).mockResolvedValue(null as never);
 
       await expect(
         updateCharacterShareTokenPointsLimit({
@@ -1218,7 +1292,7 @@ describe('character-service', () => {
   });
 
   describe('getActiveCharacterShareData', () => {
-    it('returns lightweight share data with 0 usage when share timing is missing', async () => {
+    it('returns empty share data when no active or grace-window share exists', async () => {
       const characterId = generateUUID();
       const user = mockUser('teacher');
       const character = {
@@ -1226,23 +1300,23 @@ describe('character-service', () => {
         userId: user.id,
         accessLevel: 'private',
         hasLinkAccess: false,
-        expiredAt: null,
-        manuallyStoppedAt: null,
-        tokenPointsLimit: 25,
       } as unknown as CharacterSelectModel;
 
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        character as never,
+      );
       (
-        dbGetCharacterByIdOptionalShareData as MockedFunction<
-          typeof dbGetCharacterByIdOptionalShareData
+        dbGetLatestManageableCharacterShare as MockedFunction<
+          typeof dbGetLatestManageableCharacterShare
         >
-      ).mockResolvedValue(character as never);
+      ).mockResolvedValue(null as never);
 
       const result = await getActiveCharacterShareData({ characterId, user });
 
       expect(result).toEqual({
         expiredAt: null,
         manuallyStoppedAt: null,
-        tokenPointsLimit: 25,
+        tokenPointsLimit: null,
         budgetUsedBySharedChat: 0,
       });
       expect(dbGetSharedCharacterChatUsageInCentByCharacterId).not.toHaveBeenCalled();
@@ -1258,17 +1332,25 @@ describe('character-service', () => {
         userId: user.id,
         accessLevel: 'private',
         hasLinkAccess: false,
+      } as unknown as CharacterSelectModel;
+      const share = {
+        id: generateUUID(),
+        characterId,
+        userId: user.id,
         startedAt,
         expiredAt,
         manuallyStoppedAt: null,
         tokenPointsLimit: 50,
-      } as unknown as CharacterSelectModel;
+      };
 
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        character as never,
+      );
       (
-        dbGetCharacterByIdOptionalShareData as MockedFunction<
-          typeof dbGetCharacterByIdOptionalShareData
+        dbGetLatestManageableCharacterShare as MockedFunction<
+          typeof dbGetLatestManageableCharacterShare
         >
-      ).mockResolvedValue(character as never);
+      ).mockResolvedValue(share as never);
       (
         dbGetSharedCharacterChatUsageInCentByCharacterId as MockedFunction<
           typeof dbGetSharedCharacterChatUsageInCentByCharacterId
@@ -1295,11 +1377,9 @@ describe('character-service', () => {
       const characterId = generateUUID();
       const user = mockUser('teacher');
 
-      (
-        dbGetCharacterByIdOptionalShareData as MockedFunction<
-          typeof dbGetCharacterByIdOptionalShareData
-        >
-      ).mockResolvedValue(undefined as never);
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        undefined as never,
+      );
 
       await expect(getActiveCharacterShareData({ characterId, user })).rejects.toThrow(
         NotFoundError,

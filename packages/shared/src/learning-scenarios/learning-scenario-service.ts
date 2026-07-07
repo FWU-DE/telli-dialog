@@ -8,17 +8,18 @@ import {
   dbCreateLearningScenarioShare,
   dbDeleteLearningScenarioByIdAndUser,
   dbExtendSharedLearningScenarioExpiration,
-  dbUpdateLearningScenarioShareTokenPointsLimit,
   dbGetAllAccessibleLearningScenarios,
   dbGetCommunityLearningScenarios,
   dbGetAllLearningScenariosByUser,
   dbGetGlobalLearningScenarios,
+  dbGetLatestManageableLearningScenarioShare,
   dbGetLearningScenarioById,
   dbGetLearningScenarioByIdOptionalShareData,
   dbGetLearningScenarioByIdWithShareData,
   dbGetLearningScenariosByAssociatedSchools,
   dbGetLearningScenariosByUser,
-  dbGetSharedLearningScenarioConversations,
+  dbStopLearningScenarioShare,
+  dbUpdateLearningScenarioShareTokenPointsLimit,
 } from '@shared/db/functions/learning-scenario';
 import {
   AccessLevel,
@@ -31,7 +32,6 @@ import {
   learningScenarioTable,
   learningScenarioUpdateSchema,
   LearningScenarioWithShareDataModel,
-  sharedLearningScenarioTable,
 } from '@shared/db/schema';
 import {
   checkParameterUUID,
@@ -47,7 +47,7 @@ import {
 import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { OverviewFilter } from '@shared/overview-filter';
 import z from 'zod';
 import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-admin-service';
@@ -223,52 +223,6 @@ export async function getSharedLearningScenario({
 }
 
 /**
- * Returns lightweight share data for polling updates (no files, signed URLs, etc).
- * Used by teacher views to poll for external changes to share state.
- * @throws NotFoundError if learning scenario does not exist
- */
-export async function getActiveLearningScenarioShareData({
-  learningScenarioId,
-  user,
-}: {
-  learningScenarioId: string;
-  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
-}): Promise<{
-  expiredAt: Date | null;
-  manuallyStoppedAt: Date | null;
-  tokenPointsLimit: number | null;
-  budgetUsedBySharedChat: number;
-}> {
-  checkParameterUUID(learningScenarioId);
-  requireTeacherRole(user.userRole);
-
-  const learningScenario = await dbGetLearningScenarioByIdOptionalShareData({
-    learningScenarioId,
-    user,
-  });
-  if (!learningScenario) throw new NotFoundError('Learning scenario not found');
-
-  verifyReadAccess({ item: learningScenario, user });
-
-  let budgetUsedBySharedChat = 0;
-  if (learningScenario.startedAt && learningScenario.expiredAt) {
-    budgetUsedBySharedChat = await dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
-      learningScenarioId: learningScenario.id,
-      userId: user.id,
-      expiredAt: learningScenario.expiredAt,
-      startedAt: learningScenario.startedAt,
-    });
-  }
-
-  return {
-    expiredAt: learningScenario.expiredAt,
-    manuallyStoppedAt: learningScenario.manuallyStoppedAt,
-    tokenPointsLimit: learningScenario.tokenPointsLimit,
-    budgetUsedBySharedChat,
-  };
-}
-
-/**
  * Schema for updating character details that are allowed to be changed by the user.
  */
 const updateLearningScenarioSchema = learningScenarioUpdateSchema.omit({
@@ -386,6 +340,77 @@ export const learningScenarioShareValuesSchema = z.object({
 });
 export type LearningScenarioShareValues = z.infer<typeof learningScenarioShareValuesSchema>;
 
+export async function getActiveLearningScenarioShareData({
+  learningScenarioId,
+  user,
+}: {
+  learningScenarioId: string;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}): Promise<{
+  expiredAt: Date | null;
+  manuallyStoppedAt: Date | null;
+  tokenPointsLimit: number | null;
+  budgetUsedBySharedChat: number;
+}> {
+  checkParameterUUID(learningScenarioId);
+  requireTeacherRole(user.userRole);
+
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user);
+  verifyReadAccess({ item: learningScenario, user });
+
+  const share = await dbGetLatestManageableLearningScenarioShare({ learningScenarioId, user });
+
+  if (!share) {
+    return {
+      expiredAt: null,
+      manuallyStoppedAt: null,
+      tokenPointsLimit: null,
+      budgetUsedBySharedChat: 0,
+    };
+  }
+
+  const budgetUsedBySharedChat = await dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
+    learningScenarioId,
+    userId: user.id,
+    expiredAt: share.expiredAt,
+    startedAt: share.startedAt,
+  });
+
+  return {
+    expiredAt: share.expiredAt,
+    manuallyStoppedAt: share.manuallyStoppedAt,
+    tokenPointsLimit: share.tokenPointsLimit,
+    budgetUsedBySharedChat,
+  };
+}
+
+/**
+ * Checks if any recent shares exist for a learning scenario that would prevent a new share.
+ * A recent share is one that is either:
+ * 1. Running (not yet expired and not manually stopped)
+ * 2. Expired but within the 2-hour grace window (still extendable)
+ *
+ * @throws Error if a share exists that prevents creating a new one
+ */
+async function checkRecentLearningScenarioShares({
+  learningScenarioId,
+  user,
+}: {
+  learningScenarioId: string;
+  user: Pick<UserModel, 'id'>;
+}): Promise<void> {
+  const share = await dbGetLatestManageableLearningScenarioShare({
+    learningScenarioId,
+    user,
+  });
+
+  if (share) {
+    throw new InvalidArgumentError(
+      'A share session already exists or has recently expired. Please extend the existing session instead of starting a new one.',
+    );
+  }
+}
+
 /**
  * Starts sharing of a learning scenario.
  * @throws NotFoundError if the learning scenario does not exist.
@@ -412,11 +437,11 @@ export async function shareLearningScenario({
 
   const parsedValues = learningScenarioShareValuesSchema.parse(data);
 
-  const activeShares = await dbGetSharedLearningScenarioConversations({
+  // Check for existing active or recently-expired shares within the grace window
+  await checkRecentLearningScenarioShares({
     learningScenarioId,
     user,
   });
-  if (activeShares.length > 0) throw new Error('There can only be one active share at a time');
 
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
@@ -453,19 +478,15 @@ export async function unshareLearningScenario({
   // Authorization check: user must be a teacher and owner of the sharing itself
   requireTeacherRole(user.userRole);
 
-  const sharedConversations = await dbGetSharedLearningScenarioConversations({
+  const share = await dbGetLatestManageableLearningScenarioShare({
     learningScenarioId,
     user,
   });
-  if (sharedConversations.length === 0)
+  if (!share) {
     throw new NotFoundError('No active sharing found for this learning scenario');
+  }
 
-  const sharedConversationIds = sharedConversations.map((s) => s.id);
-  const [updatedShare] = await db
-    .update(sharedLearningScenarioTable)
-    .set({ manuallyStoppedAt: new Date() })
-    .where(inArray(sharedLearningScenarioTable.id, sharedConversationIds))
-    .returning();
+  const updatedShare = await dbStopLearningScenarioShare({ shareId: share.id });
 
   if (!updatedShare) {
     throw new Error('Could not unshare learning scenario');
@@ -534,11 +555,10 @@ export async function updateLearningScenarioShareTokenPointsLimit({
     throw new InvalidArgumentError('token points percentage limit must be between 1 and 100');
   }
 
-  const sharedConversations = await dbGetSharedLearningScenarioConversations({
+  const currentShare = await dbGetLatestManageableLearningScenarioShare({
     learningScenarioId,
     user,
   });
-  const currentShare = sharedConversations[0];
 
   if (!currentShare) {
     throw new InvalidArgumentError('No sharing found for this learning scenario');

@@ -3,6 +3,8 @@ import {
   addDays,
   convertUnixTimestampToLocaleDate,
   formatDateToDayMonthYear,
+  formatDuration,
+  formatDurationAsClock,
   formatDateToGermanTimestamp,
   getWeekNumber,
 } from './date';
@@ -34,6 +36,34 @@ describe('formatDateToGermanTimestamp', () => {
     const date = new Date('2022-01-05T08:05:00'); // 5th January 2022, 08:05
     const result = formatDateToGermanTimestamp(date);
     expect(result).toBe('05.01.2022, 08:05');
+  });
+});
+
+describe('formatDuration', () => {
+  it('should format durations below one hour as minutes and seconds', () => {
+    expect(formatDuration(125)).toBe('02 : 05');
+  });
+
+  it('should format durations above one hour as hours, minutes and seconds', () => {
+    expect(formatDuration(3723)).toBe('1h 2m 3s');
+  });
+
+  it('should format durations above one day with days, hours and minutes', () => {
+    expect(formatDuration(93784)).toBe('1d 2h 3m');
+  });
+});
+
+describe('formatDurationAsClock', () => {
+  it('should format durations below one hour as hh:mm:ss', () => {
+    expect(formatDurationAsClock(125)).toBe('00:02:05');
+  });
+
+  it('should format durations above one hour as hh:mm:ss', () => {
+    expect(formatDurationAsClock(3723)).toBe('01:02:03');
+  });
+
+  it('should keep accumulating hours beyond 24 hours', () => {
+    expect(formatDurationAsClock(93784)).toBe('26:03:04');
   });
 });
 
