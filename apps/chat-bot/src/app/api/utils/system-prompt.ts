@@ -61,12 +61,13 @@ function constructAgenticBudgetGuidelines(): string {
   return `## Agentic loop budget
 - After every user message, you start a fresh agentic loop with a budget of up to ${MAX_AGENTIC_ITERATIONS} iterations, each allowing up to ${MAX_TOOL_CALLS_PER_ITERATION} tool calls. The budget resets on every new user message and does not carry over between messages.
 - Plan tool use across iterations within the current user message. Do not try to solve everything in a single iteration.
-- On the final iteration of the loop tool calls are disabled, so you must produce the final answer based on the information you already have.`;
+- On the final iteration of the loop tool calls are disabled, so you must produce the final answer based on the information you already have.
+- Your thinking process or internal notes do not belong in the visible output. Only produce user-facing content.`;
 }
 
 export const FORMAT_GUIDELINES = `
 ## Formatierung
-- Antworten werden als Markdown gerendert (GitHub-Flavored Markdown, Codeblöcke, Mathematik in LaTeX/KaTeX). Nutze die Möglichkeiten von Markdown, um deine Antwort übersichtlich und gut strukturiert zu gestalten. 
+- Antworten werden als Markdown gerendert (GitHub-Flavored Markdown, Codeblöcke, Mathematik in LaTeX/KaTeX). Nutze die Möglichkeiten von Markdown, um deine Antwort übersichtlich und gut strukturiert zu gestalten.
 - Nutze immer die passende Formatierung für technische Elemente, z.B. Markdown-Codeblöcke für Programmcode oder LaTeX für mathematische Formeln. Verwende in LaTeX-Formeln für natürlichsprachigen Text immer \\text{}. Benutze außerhalb von \\text{} nur Standard-LaTeX-Befehle.
 - Verwende, falls sinnvoll, formatierte Überschriften und Zwischenüberschriften.
 - Hebe wichtige Begriffe oder Kernaussagen **fett** hervor.
