@@ -121,7 +121,7 @@ export default function GenericSharedChat({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const chatUsable =
-    timeLeft > 0 && !TokenPointsExceededError.is(error) && !SharedChatExpiredError.is(error);
+    chatActive && !TokenPointsExceededError.is(error) && !SharedChatExpiredError.is(error);
 
   const dialogStarted =
     dialogStartMode === 'explicit' ? explicitDialogStarted : messages.length > 0;
