@@ -1,7 +1,6 @@
-import type { ToolDefinition, ToolRegistry } from '@ais-chat/ai-core';
+import type { ToolRegistry } from '@ais-chat/ai-core';
 import type { UserAndContext } from '@/auth/types';
-import type { WebSearchResult } from '@shared/db/schema';
-import type { FileModelAndContent } from '@shared/db/schema';
+import type { FileModelAndContent, WebSearchResult } from '@shared/db/schema';
 import { buildWebSearchTool } from './tools/web-search-tool';
 import { buildWebScraperTool } from './tools/web-scraper-tool';
 import { buildRetrieveEntireFileTool } from './tools/retrieve-entire-file-tool';
@@ -21,7 +20,6 @@ type BuildToolsParams = {
 
 type BuildToolsResult = {
   toolRegistry: ToolRegistry;
-  tools: ToolDefinition[];
   webSearchResults: WebSearchResult[];
 };
 
@@ -37,7 +35,6 @@ export async function buildTools({
   onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
   const toolRegistry: ToolRegistry = {};
-  const tools: ToolDefinition[] = [];
   const webSearchResults: WebSearchResult[] = [];
 
   const webSearchTool = await buildWebSearchTool({
@@ -52,7 +49,6 @@ export async function buildTools({
 
   if (webSearchTool) {
     toolRegistry[webSearchTool.definition.name] = webSearchTool;
-    tools.push(webSearchTool.definition);
   }
 
   const webScraperTool = buildWebScraperTool({
@@ -64,7 +60,6 @@ export async function buildTools({
 
   if (webScraperTool) {
     toolRegistry[webScraperTool.definition.name] = webScraperTool;
-    tools.push(webScraperTool.definition);
   }
 
   const retrieveEntireFileTool = buildRetrieveEntireFileTool({
@@ -73,7 +68,6 @@ export async function buildTools({
 
   if (retrieveEntireFileTool) {
     toolRegistry[retrieveEntireFileTool.definition.name] = retrieveEntireFileTool;
-    tools.push(retrieveEntireFileTool.definition);
   }
 
   const retrieveTextChunksTool = buildRetrieveTextChunksTool({
@@ -85,8 +79,7 @@ export async function buildTools({
 
   if (retrieveTextChunksTool) {
     toolRegistry[retrieveTextChunksTool.definition.name] = retrieveTextChunksTool;
-    tools.push(retrieveTextChunksTool.definition);
   }
 
-  return { toolRegistry, tools, webSearchResults };
+  return { toolRegistry, webSearchResults };
 }
