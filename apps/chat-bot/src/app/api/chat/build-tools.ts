@@ -20,7 +20,6 @@ type BuildToolsParams = {
 
 type BuildToolsResult = {
   toolRegistry: ToolRegistry;
-  webSearchResults: WebSearchResult[];
 };
 
 export async function buildTools({
@@ -35,7 +34,6 @@ export async function buildTools({
   onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
   const toolRegistry: ToolRegistry = {};
-  const webSearchResults: WebSearchResult[] = [];
 
   const webSearchTool = await buildWebSearchTool({
     user,
@@ -43,7 +41,6 @@ export async function buildTools({
     learningScenarioId,
     assistantId,
     conversationId,
-    webSearchResults,
     onWebSearchResults,
   });
 
@@ -81,5 +78,5 @@ export async function buildTools({
     toolRegistry[retrieveTextChunksTool.definition.name] = retrieveTextChunksTool;
   }
 
-  return { toolRegistry, webSearchResults };
+  return { toolRegistry };
 }

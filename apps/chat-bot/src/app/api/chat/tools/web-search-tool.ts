@@ -17,7 +17,6 @@ type BuildWebSearchToolParams = Pick<
   BuildToolsContext,
   'user' | 'characterId' | 'learningScenarioId' | 'assistantId' | 'conversationId'
 > & {
-  webSearchResults: WebSearchResult[];
   onWebSearchResults?: (results: WebSearchResult[]) => void;
 };
 
@@ -27,7 +26,6 @@ export async function buildWebSearchTool({
   learningScenarioId,
   assistantId,
   conversationId,
-  webSearchResults,
   onWebSearchResults,
 }: BuildWebSearchToolParams): Promise<ToolRegistration | null> {
   const webSearchEnabled = await isWebSearchEnabled({
@@ -76,7 +74,6 @@ export async function buildWebSearchTool({
       error: null,
     };
 
-    webSearchResults.push(...results);
     onWebSearchResults?.(results);
 
     if (results.length === 0) {
