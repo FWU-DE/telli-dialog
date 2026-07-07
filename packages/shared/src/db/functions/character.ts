@@ -535,7 +535,7 @@ export async function dbLiftSuspensionOnCharacter({ characterId }: { characterId
 
 /**
  * Returns the latest manageable share for a character owned/started by the given user,
- * or `undefined` when none exists.
+ * or `null` when none exists.
  *
  * A share is "manageable" when it has not been manually stopped and its expiration is
  * still within the grace window (`SHARE_EXTENSION_WINDOW_MS`) — i.e. it is either still
@@ -564,7 +564,7 @@ export async function dbGetLatestManageableCharacterShare({
     .orderBy(desc(sharedCharacterConversation.startedAt))
     .limit(1);
 
-  return share;
+  return share ?? null;
 }
 
 /**
@@ -606,7 +606,7 @@ export async function dbCreateCharacterShare({
 
 /**
  * Marks a character share as manually stopped.
- * Returns `undefined` if the share does not exist.
+ * Returns `null` if the share does not exist.
  */
 export async function dbStopCharacterShare({ shareId }: { shareId: string }) {
   const [updatedShare] = await db
@@ -615,7 +615,7 @@ export async function dbStopCharacterShare({ shareId }: { shareId: string }) {
     .where(eq(sharedCharacterConversation.id, shareId))
     .returning();
 
-  return updatedShare;
+  return updatedShare ?? null;
 }
 
 /**

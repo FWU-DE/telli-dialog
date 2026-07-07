@@ -718,7 +718,7 @@ describe('learning-scenario-service', () => {
         dbGetLatestManageableLearningScenarioShare as MockedFunction<
           typeof dbGetLatestManageableLearningScenarioShare
         >
-      ).mockResolvedValue(undefined as never);
+      ).mockResolvedValue(null as never);
 
       const result = await getActiveLearningScenarioShareData({ learningScenarioId, user });
 
@@ -912,7 +912,7 @@ describe('learning-scenario-service', () => {
         dbGetLatestManageableLearningScenarioShare as MockedFunction<
           typeof dbGetLatestManageableLearningScenarioShare
         >
-      ).mockResolvedValue(undefined as never);
+      ).mockResolvedValue(null as never);
       (
         dbGetFileForLearningScenario as MockedFunction<typeof dbGetFileForLearningScenario>
       ).mockResolvedValue({} as never);
@@ -1027,7 +1027,7 @@ describe('learning-scenario-service', () => {
         dbGetLatestManageableLearningScenarioShare as MockedFunction<
           typeof dbGetLatestManageableLearningScenarioShare
         >
-      ).mockResolvedValue(undefined as never);
+      ).mockResolvedValue(null as never);
     });
 
     it('throws NotFoundError when the teacher has no active share to stop', async () => {
@@ -1186,7 +1186,7 @@ describe('learning-scenario-service', () => {
         dbGetLatestManageableLearningScenarioShare as MockedFunction<
           typeof dbGetLatestManageableLearningScenarioShare
         >
-      ).mockResolvedValue(undefined as never);
+      ).mockResolvedValue(null as never);
 
       await expect(
         updateLearningScenarioShareTokenPointsLimit({
@@ -1269,7 +1269,7 @@ describe('learning-scenario-service', () => {
         dbGetLatestManageableLearningScenarioShare as MockedFunction<
           typeof dbGetLatestManageableLearningScenarioShare
         >
-      ).mockResolvedValue(undefined as never);
+      ).mockResolvedValue(null as never);
     });
 
     it('throws an error when there is already an active share', async () => {
@@ -1313,7 +1313,7 @@ describe('learning-scenario-service', () => {
         dbGetLatestManageableLearningScenarioShare as MockedFunction<
           typeof dbGetLatestManageableLearningScenarioShare
         >
-      ).mockResolvedValue(undefined as never);
+      ).mockResolvedValue(null as never);
       (
         dbCreateLearningScenarioShare as MockedFunction<typeof dbCreateLearningScenarioShare>
       ).mockResolvedValue(newShare as never);

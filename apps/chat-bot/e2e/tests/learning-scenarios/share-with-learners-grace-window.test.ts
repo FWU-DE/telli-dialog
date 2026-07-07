@@ -65,22 +65,21 @@ test.describe('share learning scenario with 2-hour grace window', () => {
       // Check if share is active by looking for stop button
       const stopButton = page.getByTestId('stop-share-button');
 
-      if (await stopButton.isVisible()) {
-        // Click stop share
-        await stopButton.click();
+      await expect(stopButton).toBeVisible();
+      // Click stop share
+      await stopButton.click();
 
-        // Confirm the action in the stop share dialog
-        await expect(page.getByTestId('stop-share-dialog')).toBeVisible();
-        await page.getByTestId('stop-share-confirm-button').click();
-        await expect(page.getByTestId('stop-share-dialog')).not.toBeVisible();
+      // Confirm the action in the stop share dialog
+      await expect(page.getByTestId('stop-share-dialog')).toBeVisible();
+      await page.getByTestId('stop-share-confirm-button').click();
+      await expect(page.getByTestId('stop-share-dialog')).not.toBeVisible();
 
-        // Wait for page refresh
-        await page.waitForLoadState('networkidle');
+      // Wait for page refresh
+      await page.waitForLoadState('networkidle');
 
-        // Verify start button is now visible (share is stopped)
-        const startShareButton = page.getByTestId('start-share-button');
-        await expect(startShareButton).toBeVisible();
-      }
+      // Verify start button is now visible (share is stopped)
+      const startShareButton = page.getByTestId('start-share-button');
+      await expect(startShareButton).toBeVisible();
     });
   });
 });

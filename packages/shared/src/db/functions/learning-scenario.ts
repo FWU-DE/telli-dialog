@@ -408,7 +408,7 @@ export async function dbDeleteLearningScenarioByIdAndUser({
 
 /**
  * Returns the latest manageable share for a learning scenario owned/started by the given user,
- * or `undefined` when none exists.
+ * or `null` when none exists.
  *
  * A share is "manageable" when it has not been manually stopped and its expiration is
  * still within the grace window (`SHARE_EXTENSION_WINDOW_MS`) — i.e. it is either still
@@ -437,12 +437,12 @@ export async function dbGetLatestManageableLearningScenarioShare({
     .orderBy(desc(sharedLearningScenarioTable.startedAt))
     .limit(1);
 
-  return share;
+  return share ?? null;
 }
 
 /**
  * Marks a learning scenario share as manually stopped.
- * Returns `undefined` if the share does not exist.
+ * Returns `null` if the share does not exist.
  */
 export async function dbStopLearningScenarioShare({ shareId }: { shareId: string }) {
   const [updatedShare] = await db
@@ -451,7 +451,7 @@ export async function dbStopLearningScenarioShare({ shareId }: { shareId: string
     .where(eq(sharedLearningScenarioTable.id, shareId))
     .returning();
 
-  return updatedShare;
+  return updatedShare ?? null;
 }
 
 /**

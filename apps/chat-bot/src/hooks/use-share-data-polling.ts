@@ -39,8 +39,6 @@ export function useShareDataPolling({
       }
     };
 
-    void poll();
-
     const interval = setInterval(() => void poll(), intervalMs);
     return () => clearInterval(interval);
   }, [isActive, intervalMs]);

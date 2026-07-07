@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDurationAsClock } from '@shared/utils/date';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import {
@@ -44,7 +45,7 @@ export function CustomChatGraceWindowNote({
   return (
     <p className="text-sm text-gray-600 text-center">
       {t('session-will-be-closed', {
-        time: new Date(gracePeriodTimeLeftInSeconds * 1000).toISOString().slice(11, 19),
+        time: formatDurationAsClock(gracePeriodTimeLeftInSeconds),
       })}
     </p>
   );

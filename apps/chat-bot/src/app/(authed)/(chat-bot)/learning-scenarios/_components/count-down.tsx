@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDuration } from '@shared/utils/date';
 import { cn } from '@/utils/tailwind';
 import StopWatchIcon from '@/components/icons/stopwatch';
 import React from 'react';
@@ -49,7 +50,7 @@ export default function CountDownTimer({
     <div
       data-testid="countdown-timer"
       role="timer"
-      aria-label={t('countdown-timer-label')}
+      aria-label={`${t('countdown-timer-label')}: ${formatDuration(timeRemaining)}`}
       className={cn(
         'flex gap-2 items-center min-w-36 px-4 py-2 rounded-xl justify-center',
         className,
@@ -57,24 +58,9 @@ export default function CountDownTimer({
       )}
     >
       <StopWatchIcon className={stopWatchClassName} />
-      <span aria-hidden="true">{formatTime(timeRemaining)}</span>
+      <span aria-hidden="true">{formatDuration(timeRemaining)}</span>
     </div>
   );
-}
-
-function formatTime(totalSeconds: number) {
-  const days = Math.floor(totalSeconds / (24 * 3600));
-  const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  if (days > 0) {
-    return `${days}d ${hours}h ${minutes}m`;
-  } else if (hours > 0) {
-    return `${hours}h ${minutes}m ${seconds}s`;
-  } else {
-    return `${String(minutes).padStart(2, '0')} : ${String(seconds).padStart(2, '0')}`;
-  }
 }
 
 function getColorByLeftAndTotalTime({

@@ -83,14 +83,14 @@ export function LearningScenarioView({
   const handleShareLearningScenario = async (
     data: Parameters<typeof shareLearningScenarioAction>[0]['data'],
   ) => {
-    return await shareLearningScenarioAction({
+    return shareLearningScenarioAction({
       learningScenarioId: learningScenario.id,
       data,
     });
   };
 
   const handleUnshareLearningScenario = async () => {
-    return await unshareLearningScenarioAction({
+    return unshareLearningScenarioAction({
       learningScenarioId: learningScenario.id,
     });
   };
@@ -158,8 +158,8 @@ export function LearningScenarioView({
         onUnshare={handleUnshareLearningScenario}
         onAddTime={handleAddTimeToLearningScenario}
         onAdjustTokenLimit={handleAdjustTokenLimitForLearningScenario}
-        onPollShareData={async () =>
-          await getLearningScenarioShareDataAction({
+        onPollShareData={() =>
+          getLearningScenarioShareDataAction({
             learningScenarioId: learningScenario.id,
           })
         }

@@ -293,18 +293,18 @@ export function CharacterEdit({
   };
 
   const handleDeleteFile = async (fileId: string) => {
-    return await deleteFileMappingAndEntityAction({
+    return deleteFileMappingAndEntityAction({
       characterId: character.id,
       fileId,
     });
   };
 
   const handleDownloadFile = async (fileId: string) => {
-    return await downloadFileFromCharacterAction({ characterId: character.id, fileId });
+    return downloadFileFromCharacterAction({ characterId: character.id, fileId });
   };
 
   const handleLinksChange = async (links: string[]) => {
-    return await updateCharacterAction({ id: character.id, attachedLinks: links });
+    return updateCharacterAction({ id: character.id, attachedLinks: links });
   };
 
   async function handleUploadPicture(croppedImageBlob: Blob) {
@@ -398,18 +398,18 @@ export function CharacterEdit({
           usedBudget={usedBudget}
           budgetUsedBySharedChat={budgetUsedBySharedChat}
           maxBudget={maxBudget}
-          onShare={async (data) => {
-            return await shareCharacterAction({
+          onShare={(data) =>
+            shareCharacterAction({
               id: character.id,
               tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
               usageTimeLimit: data.usageTimeLimit,
-            });
-          }}
-          onUnshare={async () => {
-            return await unshareCharacterAction({
+            })
+          }
+          onUnshare={() =>
+            unshareCharacterAction({
               characterId: character.id,
-            });
-          }}
+            })
+          }
           onAddTime={async (data) => {
             const result = await extendCharacterShareExpirationAction({
               characterId: character.id,
@@ -430,8 +430,8 @@ export function CharacterEdit({
             }
             return { success: false };
           }}
-          onPollShareData={async () =>
-            await getCharacterShareDataAction({
+          onPollShareData={() =>
+            getCharacterShareDataAction({
               characterId: character.id,
             })
           }

@@ -107,18 +107,18 @@ export function CharacterView({
         usedBudget={usedBudget}
         budgetUsedBySharedChat={budgetUsedBySharedChat}
         maxBudget={maxBudget}
-        onShare={async (data) => {
-          return await shareCharacterAction({
+        onShare={(data) =>
+          shareCharacterAction({
             id: character.id,
             tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
             usageTimeLimit: data.usageTimeLimit,
-          });
-        }}
-        onUnshare={async () => {
-          return await unshareCharacterAction({
+          })
+        }
+        onUnshare={() =>
+          unshareCharacterAction({
             characterId: character.id,
-          });
-        }}
+          })
+        }
         onAddTime={async (data) => {
           const result = await extendCharacterShareExpirationAction({
             characterId: character.id,
@@ -139,8 +139,8 @@ export function CharacterView({
           }
           return { success: false };
         }}
-        onPollShareData={async () =>
-          await getCharacterShareDataAction({
+        onPollShareData={() =>
+          getCharacterShareDataAction({
             characterId: character.id,
           })
         }

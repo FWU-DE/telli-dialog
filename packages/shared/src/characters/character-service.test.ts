@@ -492,7 +492,7 @@ describe('character-service', () => {
         dbGetLatestManageableCharacterShare as MockedFunction<
           typeof dbGetLatestManageableCharacterShare
         >
-      ).mockResolvedValue(undefined as never);
+      ).mockResolvedValue(null as never);
 
       await expect(
         unshareCharacter({
@@ -569,7 +569,7 @@ describe('character-service', () => {
         dbGetLatestManageableCharacterShare as MockedFunction<
           typeof dbGetLatestManageableCharacterShare
         >
-      ).mockResolvedValue(undefined as never);
+      ).mockResolvedValue(null as never);
       (dbCreateCharacterShare as MockedFunction<typeof dbCreateCharacterShare>).mockResolvedValue(
         newShare as never,
       );
@@ -758,7 +758,7 @@ describe('character-service', () => {
         dbGetLatestManageableCharacterShare as MockedFunction<
           typeof dbGetLatestManageableCharacterShare
         >
-      ).mockResolvedValue(undefined as never);
+      ).mockResolvedValue(null as never);
 
       await expect(
         updateCharacterShareTokenPointsLimit({
@@ -1309,7 +1309,7 @@ describe('character-service', () => {
         dbGetLatestManageableCharacterShare as MockedFunction<
           typeof dbGetLatestManageableCharacterShare
         >
-      ).mockResolvedValue(undefined as never);
+      ).mockResolvedValue(null as never);
 
       const result = await getActiveCharacterShareData({ characterId, user });
 

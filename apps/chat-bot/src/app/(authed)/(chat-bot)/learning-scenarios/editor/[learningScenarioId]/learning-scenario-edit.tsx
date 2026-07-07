@@ -302,14 +302,14 @@ export function LearningScenarioEdit({
   };
 
   const handleDeleteFile = async (fileId: string) => {
-    return await removeFileFromLearningScenarioAction({
+    return removeFileFromLearningScenarioAction({
       learningScenarioId: learningScenario.id,
       fileId,
     });
   };
 
   const handleDownloadFile = async (fileId: string) => {
-    return await downloadFileFromLearningScenarioAction({
+    return downloadFileFromLearningScenarioAction({
       learningScenarioId: learningScenario.id,
       fileId,
     });
@@ -422,19 +422,19 @@ export function LearningScenarioEdit({
           usedBudget={usedBudget}
           maxBudget={maxBudget}
           budgetUsedBySharedChat={budgetUsedBySharedChat}
-          onShare={async (data) => {
-            return await shareLearningScenarioAction({
+          onShare={(data) =>
+            shareLearningScenarioAction({
               learningScenarioId: learningScenario.id,
               data: data as Parameters<typeof shareLearningScenarioAction>[0]['data'],
-            });
-          }}
-          onUnshare={async () => {
-            return await unshareLearningScenarioAction({
+            })
+          }
+          onUnshare={() =>
+            unshareLearningScenarioAction({
               learningScenarioId: learningScenario.id,
-            });
-          }}
-          onAddTime={async (data) =>
-            await extendLearningScenarioShareExpirationAction({
+            })
+          }
+          onAddTime={(data) =>
+            extendLearningScenarioShareExpirationAction({
               learningScenarioId: learningScenario.id,
               additionalTimeInMinutes: data.additionalTimeInMinutes,
             }).then((result) => {
@@ -444,8 +444,8 @@ export function LearningScenarioEdit({
               return { success: false };
             })
           }
-          onAdjustTokenLimit={async (data) =>
-            await updateLearningScenarioShareTokenPointsLimitAction({
+          onAdjustTokenLimit={(data) =>
+            updateLearningScenarioShareTokenPointsLimitAction({
               learningScenarioId: learningScenario.id,
               tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
             }).then((result) => {
@@ -455,8 +455,8 @@ export function LearningScenarioEdit({
               return { success: false };
             })
           }
-          onPollShareData={async () =>
-            await getLearningScenarioShareDataAction({
+          onPollShareData={() =>
+            getLearningScenarioShareDataAction({
               learningScenarioId: learningScenario.id,
             })
           }
