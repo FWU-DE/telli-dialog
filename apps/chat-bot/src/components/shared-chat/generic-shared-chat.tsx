@@ -1,12 +1,11 @@
 'use client';
 
-import { ReactNode, RefObject, SyntheticEvent, useRef, useState } from 'react';
+import { ReactNode, RefObject, SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
-import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from '../chat/floating-text';
 import { Messages } from '../chat/messages';
 import StreamingFinishedMarker from '../chat/streaming-finished-marker';
@@ -19,6 +18,7 @@ import { logError } from '@shared/logging';
 import type { UseChatReturn } from '@/hooks/use-chat-hooks';
 import { SharedChatExpiredError, TokenPointsExceededError } from '@ais-chat/ai-core/errors';
 import { getErrorMessageByType } from '@/error/get-error-message-by-type';
+import { ErrorChatPlaceholder } from '../chat/error-chat-placeholder';
 
 type ShareSessionInput = Parameters<typeof calculateShareSessionState>[0];
 type Translator = ReturnType<typeof useTranslations>;
@@ -124,7 +124,7 @@ export default function GenericSharedChat({
     chatActive && !TokenPointsExceededError.is(error) && !SharedChatExpiredError.is(error);
 
   const dialogStarted =
-    dialogStartMode === 'explicit' ? explicitDialogStarted : messages.length > 0;
+    messages.length > 0 || (dialogStartMode === 'explicit' && explicitDialogStarted);
 
   async function customHandleSubmit(e: SyntheticEvent) {
     e.preventDefault();
@@ -146,6 +146,10 @@ export default function GenericSharedChat({
     void reload();
   }
 
+  function handleRetry() {
+    window.location.reload();
+  }
+
   const isLoading = status === 'submitted';
   const hasExerciseDescription =
     enableFloatingText && exerciseDescription !== undefined && exerciseDescription.trim() !== '';
@@ -155,6 +159,26 @@ export default function GenericSharedChat({
       : messages.length === 0;
   const showChatInputBox = dialogStartMode === 'explicit' ? dialogStarted : true;
 
+  useEffect(() => {
+    if (!chatUsable || messages.length === 0) {
+      return;
+    }
+
+    const lastMessage = messages.at(-1);
+
+    if (!lastMessage) {
+      return;
+    }
+
+    if (lastMessage.role !== 'user') {
+      return;
+    }
+
+    reactivateAutoScrolling();
+    void reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
       {!chatUsable && (
@@ -162,6 +186,7 @@ export default function GenericSharedChat({
           conversationMessages={uiMessages}
           title={entity.name}
           inviteCode={inviteCode}
+          handleRetry={handleRetry}
         />
       )}
       <div className="flex h-dvh min-h-0 flex-col overflow-hidden">

@@ -4,7 +4,7 @@ import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
 import { getTextModelById, getTextModelByName } from '../models';
 import type { Message, TokenUsage, GenerationOptions, StreamEvent } from './types';
-export { runAgentLoop } from './agent-loop';
+export { runAgentLoop, MAX_AGENTIC_ITERATIONS, MAX_TOOL_CALLS_PER_ITERATION } from './agent-loop';
 export { countTokens } from './utils';
 
 // Re-export types for external consumers

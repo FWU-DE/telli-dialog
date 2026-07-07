@@ -1,7 +1,8 @@
+import * as Sentry from '@sentry/core';
 import type { Message as AiCoreMessage, TokenUsage, ToolCall, ToolRegistry } from './types';
 
-const MAX_AGENTIC_ITERATIONS = 3;
-const MAX_TOOL_CALLS_PER_ITERATION = 2;
+export const MAX_AGENTIC_ITERATIONS = 3;
+export const MAX_TOOL_CALLS_PER_ITERATION = 2;
 
 function logError(message: string, error: unknown) {
   console.error(message, error);
@@ -9,9 +10,11 @@ function logError(message: string, error: unknown) {
 
 type RunAgentLoopParams = {
   modelId: string;
+  modelName: string;
   apiKeyId: string;
   messages: AiCoreMessage[];
   toolRegistry?: ToolRegistry;
+  agentName: string;
   onTextChunk: (delta: string) => void;
   onComplete: (result: {
     fullText: string;
@@ -24,9 +27,11 @@ type RunAgentLoopParams = {
 
 export function runAgentLoop({
   modelId,
+  modelName,
   apiKeyId,
   messages,
   toolRegistry,
+  agentName,
   onTextChunk,
   onComplete,
   onError,
@@ -41,75 +46,127 @@ export function runAgentLoop({
     const tools = toolRegistry ? Object.values(toolRegistry).map((entry) => entry.definition) : [];
 
     try {
-      for (let iteration = 0; iteration < MAX_AGENTIC_ITERATIONS; iteration++) {
-        const pendingToolCalls: ToolCall[] = [];
-        let iterationText = '';
-
-        const isLastIteration = iteration === MAX_AGENTIC_ITERATIONS - 1;
-        const stream = generateAgenticStreamWithBilling(
-          modelId,
-          loopMessages,
-          apiKeyId,
-          async ({ usage, priceInCents }) => {
-            totalUsage = {
-              promptTokens: totalUsage.promptTokens + usage.promptTokens,
-              completionTokens: totalUsage.completionTokens + usage.completionTokens,
-              totalTokens: totalUsage.totalTokens + usage.totalTokens,
-            };
-            totalPriceInCents += priceInCents;
+      await Sentry.startSpan(
+        {
+          op: 'gen_ai.invoke_agent',
+          name: `invoke_agent ${agentName}`,
+          attributes: {
+            'gen_ai.operation.name': 'invoke_agent',
+            'gen_ai.operation.type': 'agent',
+            'gen_ai.request.model': modelName,
+            'gen_ai.agent.name': agentName,
           },
-          tools.length > 0 && !isLastIteration ? { tools, toolChoice: 'auto' } : undefined,
-        );
+        },
+        async (agentSpan) => {
+          for (let iteration = 0; iteration < MAX_AGENTIC_ITERATIONS; iteration++) {
+            const pendingToolCalls: ToolCall[] = [];
+            const overBudgetToolCalls: ToolCall[] = [];
+            let iterationText = '';
 
-        for await (const event of stream) {
-          if (event.type === 'text') {
-            iterationText += event.delta;
-            onTextChunk(event.delta);
-          } else if (
-            event.type === 'tool_call' &&
-            pendingToolCalls.length < MAX_TOOL_CALLS_PER_ITERATION
-          ) {
-            pendingToolCalls.push(event.call);
-          }
-        }
-
-        fullText += iterationText;
-
-        if (pendingToolCalls.length === 0) {
-          break;
-        }
-
-        loopMessages.push({
-          role: 'assistant',
-          content: iterationText,
-          toolCalls: pendingToolCalls,
-        });
-
-        const toolResults = await Promise.all(
-          pendingToolCalls.map(async (toolCall) => {
-            const registryEntry = toolRegistry?.[toolCall.name];
-            let result: string;
-
-            if (registryEntry) {
-              try {
-                const args = JSON.parse(toolCall.arguments) as Record<string, unknown>;
-                result = await registryEntry.handler(args);
-              } catch (error) {
-                logError(`Error executing tool ${toolCall.name}:`, error);
-                result = `Error: ${error instanceof Error ? error.message : 'Tool execution failed'}`;
-              }
-            } else {
-              result = `Error: Unknown tool "${toolCall.name}"`;
+            // Add separator before starting a new iteration if the previous iteration produced text
+            if (iteration > 0 && fullText && !fullText.endsWith('\n\n')) {
+              fullText += '\n\n';
+              onTextChunk('\n\n');
             }
 
-            return { toolCallId: toolCall.id, result };
-          }),
-        );
+            const isLastIteration = iteration === MAX_AGENTIC_ITERATIONS - 1;
+            const stream = generateAgenticStreamWithBilling(
+              modelId,
+              loopMessages,
+              apiKeyId,
+              async ({ usage, priceInCents }) => {
+                totalUsage = {
+                  promptTokens: totalUsage.promptTokens + usage.promptTokens,
+                  completionTokens: totalUsage.completionTokens + usage.completionTokens,
+                  totalTokens: totalUsage.totalTokens + usage.totalTokens,
+                };
+                totalPriceInCents += priceInCents;
+              },
+              tools.length > 0 && !isLastIteration ? { tools, toolChoice: 'auto' } : undefined,
+            );
 
-        for (const { toolCallId, result } of toolResults) {
-          loopMessages.push({ role: 'tool', content: result, toolCallId });
-        }
-      }
+            for await (const event of stream) {
+              if (event.type === 'text') {
+                iterationText += event.delta;
+                onTextChunk(event.delta);
+              } else if (event.type === 'tool_call') {
+                if (pendingToolCalls.length < MAX_TOOL_CALLS_PER_ITERATION) {
+                  // On last iteration, tools are disabled but model might still emit tool calls
+                  if (!isLastIteration) {
+                    pendingToolCalls.push(event.call);
+                  }
+                } else {
+                  overBudgetToolCalls.push(event.call);
+                }
+              }
+            }
+
+            fullText += iterationText;
+
+            if (pendingToolCalls.length === 0 && overBudgetToolCalls.length === 0) {
+              break;
+            }
+
+            loopMessages.push({
+              role: 'assistant',
+              content: iterationText,
+              toolCalls: [...pendingToolCalls, ...overBudgetToolCalls],
+            });
+
+            const toolResults = await Promise.all([
+              ...pendingToolCalls.map((toolCall) =>
+                Sentry.startSpan(
+                  {
+                    op: 'gen_ai.execute_tool',
+                    name: `execute_tool ${toolCall.name}`,
+                    attributes: {
+                      'gen_ai.operation.name': 'execute_tool',
+                      'gen_ai.operation.type': 'tool',
+                      'gen_ai.tool.name': toolCall.name,
+                    },
+                  },
+                  async (toolSpan) => {
+                    const registryEntry = toolRegistry?.[toolCall.name];
+                    let result: string;
+
+                    if (registryEntry) {
+                      try {
+                        const args = JSON.parse(toolCall.arguments) as Record<string, unknown>;
+                        result = await registryEntry.handler(args);
+                      } catch (error) {
+                        // TODO: see tech debt (refactoring of tool calls for error handling). The catch clause is usually never executed, because tool handlers return errors as plain string or in the 'error' key of a stringified json
+                        const message =
+                          error instanceof Error ? error.message : 'Tool execution failed';
+                        toolSpan.setStatus({ code: 2, message });
+                        logError(`Error executing tool ${toolCall.name}:`, error);
+                        result = `Error: ${message}`;
+                      }
+                    } else {
+                      const message = `Unknown tool "${toolCall.name}"`;
+                      toolSpan.setStatus({ code: 2, message });
+                      result = `Error: ${message}`;
+                    }
+
+                    return { toolCallId: toolCall.id, result };
+                  },
+                ),
+              ),
+              ...overBudgetToolCalls.map(async (toolCall) => ({
+                toolCallId: toolCall.id,
+                result: `Error: Tool call budget exceeded. Maximum ${MAX_TOOL_CALLS_PER_ITERATION} tool calls per iteration. Do not mention this error to the user. Continue answering with the information you already have.`,
+              })),
+            ]);
+
+            for (const { toolCallId, result } of toolResults) {
+              loopMessages.push({ role: 'tool', content: result, toolCallId });
+            }
+          }
+
+          agentSpan.setAttribute('gen_ai.usage.input_tokens', totalUsage.promptTokens);
+          agentSpan.setAttribute('gen_ai.usage.output_tokens', totalUsage.completionTokens);
+          agentSpan.setAttribute('gen_ai.usage.total_tokens', totalUsage.totalTokens);
+        },
+      );
 
       onComplete({
         fullText,

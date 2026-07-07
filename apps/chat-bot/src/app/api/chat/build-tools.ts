@@ -52,6 +52,8 @@ type RetrieveEntireFileToolResponse = {
   error: string | null;
 };
 
+const MAX_WEB_SCRAPER_URLS = 5;
+
 function formatRetrievedChunksForTool(chunks: Awaited<ReturnType<typeof retrieveChunksByQuery>>) {
   const formattedChunks: SemanticFileSearchChunkResult[] = chunks.map((chunk) => ({
     fileName: chunk.fileName ?? null,
@@ -65,7 +67,7 @@ function formatRetrievedChunksForTool(chunks: Awaited<ReturnType<typeof retrieve
   };
 
   if (chunks.length === 0) {
-    response.error = 'Keine passenden Textstellen gefunden.';
+    response.error = 'No matching chunks found.';
   }
 
   return JSON.stringify(response);
@@ -95,9 +97,9 @@ function formatEntireFileForTool(file: FileModelAndContent) {
   };
 
   if (!content) {
-    response.error = 'Keine verwertbaren Inhalte gefunden.';
+    response.error = 'No usable content found.';
   } else if (truncated) {
-    response.error = 'Dateiinhalt wurde wegen des Zeichenlimits gekürzt.';
+    response.error = 'File content was truncated to fit the character limit.';
   }
 
   return JSON.stringify(response);
@@ -115,12 +117,12 @@ function formatWebScrapedContentForTool(result: WebSource) {
   };
 
   if (result.error) {
-    response.error = 'Fehler beim Abrufen der Seite.';
+    response.error = 'Failed to fetch the page.';
     return JSON.stringify(response);
   }
 
   if (!content) {
-    response.error = 'Keine verwertbaren Inhalte gefunden.';
+    response.error = 'No usable content found.';
     return JSON.stringify(response);
   }
 
@@ -216,7 +218,7 @@ export async function buildTools({
     const webSearchToolDefinition: ToolDefinition = {
       name: 'web_search',
       description:
-        'Search the web for current information. Call this tool immediately and without asking for permission whenever the user asks about recent events, news, current data (weather, prices, scores), or any facts that may have changed after your knowledge cutoff. Call this tool at most ONCE per user message. After receiving the results, synthesize them into a direct answer — do not call the tool again with a different query.',
+        'Search the web for current information. Call this tool immediately and without asking for permission whenever the user asks about recent events, news, current data (weather, prices, scores), or any facts that may have changed after your knowledge cutoff. After receiving the results, synthesize them into a direct answer — do not call the tool again with a different query.',
       parameters: {
         type: 'object',
         properties: {
@@ -264,39 +266,70 @@ export async function buildTools({
     const webScraperToolDefinition: ToolDefinition = {
       name: 'web_scraper',
       description:
-        'Fetch and extract the main text from one specific URL. Use this tool when the user gives you a single webpage URL or when you can derive a concrete URL yourself, for example to scrape a documentation page or another known target. Use web_search instead when you need to discover relevant pages or compare multiple sources.' +
+        `Fetch and extract the main text from one or more URLs (max ${MAX_WEB_SCRAPER_URLS}). Use this tool when the user gives you webpage URLs or when you can derive concrete URLs yourself, for example to scrape documentation pages or other known targets. Use web_search instead when you need to discover relevant pages or compare multiple sources.` +
         (attachedSourceUrls.length > 0
           ? `\n\nThe following URLs were pinned for this conversation and are likely relevant — consider scraping them when appropriate:\n${attachedSourceUrls.map((link) => `- ${link}`).join('\n')}`
           : ''),
       parameters: {
         type: 'object',
         properties: {
-          url: {
-            type: 'string',
+          urls: {
+            type: 'array',
             description:
-              'The exact URL of the page to scrape. It must be a single http or https URL. Only domain hosts are allowed (no localhost, .local, or IP addresses).',
+              'Array of URLs to scrape. Each must be a valid http or https URL. Only domain hosts are allowed (no localhost, .local, or IP addresses).',
+            items: {
+              type: 'string',
+            },
+            minItems: 1,
+            maxItems: MAX_WEB_SCRAPER_URLS,
           },
         },
-        required: ['url'],
+        required: ['urls'],
         additionalProperties: false,
       },
     };
 
     addTool(webScraperToolDefinition, async (args) => {
-      const url = typeof args.url === 'string' ? args.url.trim() : '';
+      const urls = Array.isArray(args.urls) ? args.urls : [];
 
-      if (url.length === 0) {
-        return 'Error: Missing URL.';
+      if (urls.length === 0) {
+        return 'Error: Missing URLs.';
       }
 
-      const validationResult = validateWebScraperUrl(url);
-
-      if (validationResult.error) {
-        return validationResult.error;
+      if (urls.length > MAX_WEB_SCRAPER_URLS) {
+        return `Error: Maximum ${MAX_WEB_SCRAPER_URLS} URLs allowed per call.`;
       }
 
-      const result = await webScraper(validationResult.url);
-      return formatWebScrapedContentForTool(result);
+      const results = await Promise.all(
+        urls.map(async (url) => {
+          const urlString = typeof url === 'string' ? url.trim() : '';
+
+          if (urlString.length === 0) {
+            return JSON.stringify({
+              title: null,
+              url: null,
+              content: null,
+              error: 'Empty URL.',
+            });
+          }
+
+          const validationResult = validateWebScraperUrl(urlString);
+
+          if (validationResult.error) {
+            return JSON.stringify({
+              title: null,
+              url: urlString,
+              content: null,
+              error: validationResult.error,
+            });
+          }
+
+          const result = await webScraper(validationResult.url);
+          return formatWebScrapedContentForTool(result);
+        }),
+      );
+
+      return JSON.stringify(results.map((r) => JSON.parse(r)));
     });
   }
 
@@ -329,7 +362,7 @@ export async function buildTools({
             truncated: false,
             characterCount: 0,
             maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
-            error: 'Fehlender Dateiname.',
+            error: 'Missing file name.',
           };
 
           return JSON.stringify(response);
@@ -344,7 +377,7 @@ export async function buildTools({
             truncated: false,
             characterCount: 0,
             maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
-            error: 'Datei nicht gefunden.',
+            error: 'File not found.',
           };
 
           return JSON.stringify(response);

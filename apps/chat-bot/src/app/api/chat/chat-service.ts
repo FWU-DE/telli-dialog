@@ -54,6 +54,7 @@ import { getCharacterForChatSession } from '@shared/characters/character-service
 import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
 import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { deepEqual } from '@/utils/object';
+import { resolveAgentNameForTracing } from '../utils/agent-name';
 
 // Exports for testing
 export { handleRegenerationProcessing, prepareMessageForProcessing };
@@ -573,12 +574,16 @@ export async function sendChatMessage({
   }
 
   if (agenticChatEnabled) {
+    const agentName = resolveAgentNameForTracing({ characterId, learningScenarioId, assistantId });
+
     // Start the agent loop in the background
     runAgentLoop({
       modelId: definedModel.id,
+      modelName: definedModel.name,
       apiKeyId,
       messages: aiCoreMessages,
       toolRegistry,
+      agentName,
       onTextChunk: (delta: string) => {
         update(delta);
       },
