@@ -89,10 +89,10 @@ export function ChatBox({
 
   const maybeFileAttachment =
     hasFiles && children.role === 'user' ? (
-      <div className="flex flex-col gap-4 pb-0 pt-0 self-end mb-4">
+      <div className="flex flex-col gap-4 pb-0 pt-0 self-end mb-4 w-[70%] max-w-full overflow-hidden">
         {/* Display images */}
         {imageFiles.length > 0 && (
-          <div className="flex flex-row gap-2 overflow-auto">
+          <div className="flex w-full flex-wrap gap-2 overflow-hidden">
             {imageFiles.map((file) => (
               <DisplayUploadedImage
                 file={file}
@@ -105,7 +105,7 @@ export function ChatBox({
         )}
         {/* Display non-image files */}
         {nonImageFiles.length > 0 && (
-          <div className="flex flex-row gap-2 overflow-auto">
+          <div className="flex w-full flex-wrap gap-2 overflow-hidden">
             {nonImageFiles.map((file) => (
               <DisplayUploadedFile fileName={file.name} status="processed" key={file.id} />
             ))}
