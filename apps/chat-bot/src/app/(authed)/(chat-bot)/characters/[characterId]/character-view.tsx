@@ -23,8 +23,11 @@ import { useToast } from '@/components/common/toast';
 import { createNewCharacterAction } from '../actions';
 import {
   downloadFileFromCharacterAction,
+  extendCharacterShareExpirationAction,
+  getCharacterShareDataAction,
   shareCharacterAction,
   unshareCharacterAction,
+  updateCharacterShareTokenPointsLimitAction,
 } from '../editor/[characterId]/actions';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners';
@@ -40,6 +43,7 @@ export function CharacterView({
   avatarPictureUrl,
   usedBudget,
   maxBudget,
+  budgetUsedBySharedChat,
 }: {
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
@@ -47,6 +51,7 @@ export function CharacterView({
   avatarPictureUrl?: string;
   usedBudget: number;
   maxBudget: number;
+  budgetUsedBySharedChat: number;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -100,21 +105,45 @@ export function CharacterView({
         maxUsageTimeLimit={character.maxUsageTimeLimit}
         tokenPointsLimit={character.tokenPointsLimit}
         usedBudget={usedBudget}
+        budgetUsedBySharedChat={budgetUsedBySharedChat}
         maxBudget={maxBudget}
-        onShare={async (data) => {
-          const result = await shareCharacterAction({
+        onShare={(data) =>
+          shareCharacterAction({
             id: character.id,
             tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
             usageTimeLimit: data.usageTimeLimit,
-          });
-          return result;
-        }}
-        onUnshare={async () => {
-          const result = await unshareCharacterAction({
+          })
+        }
+        onUnshare={() =>
+          unshareCharacterAction({
             characterId: character.id,
+          })
+        }
+        onAddTime={async (data) => {
+          const result = await extendCharacterShareExpirationAction({
+            characterId: character.id,
+            additionalTimeInMinutes: data.additionalTimeInMinutes,
           });
-          return result;
+          if (result.success) {
+            return { success: true, expiredAt: result.value.expiredAt };
+          }
+          return { success: false };
         }}
+        onAdjustTokenLimit={async (data) => {
+          const result = await updateCharacterShareTokenPointsLimitAction({
+            characterId: character.id,
+            tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
+          });
+          if (result.success) {
+            return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
+          }
+          return { success: false };
+        }}
+        onPollShareData={() =>
+          getCharacterShareDataAction({
+            characterId: character.id,
+          })
+        }
         shareUILink={`/characters/editor/${character.id}/share`}
       />
 

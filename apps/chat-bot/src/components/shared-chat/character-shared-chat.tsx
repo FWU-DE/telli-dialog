@@ -7,7 +7,6 @@ import useBreakpoints from '../hooks/use-breakpoints';
 import { AssistantIcon } from '../chat/assistant-icon';
 import GenericSharedChat from './generic-shared-chat';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
-import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 /**
  * This component is used if a character is shared via invite code.
@@ -23,13 +22,11 @@ export default function CharacterSharedChat({
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
     : [];
 
-  const errorState = useCheckStatusCode();
   const chat = useCharacterChat({
     characterId: id,
     inviteCode,
     initialMessages,
     modelId: modelId ?? undefined,
-    onError: errorState.handleError,
   });
 
   const { isBelow } = useBreakpoints();
@@ -46,7 +43,6 @@ export default function CharacterSharedChat({
       inviteCode={inviteCode}
       avatarPictureUrl={avatarPictureUrl}
       chat={chat}
-      errorState={errorState}
       dialogStartMode="derived"
       assistantIcon={assistantIcon}
     />

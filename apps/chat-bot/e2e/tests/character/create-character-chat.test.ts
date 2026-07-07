@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { AUTH_FILES, MOCK_LLM_COMMANDS } from '../../utils/const';
 import { regenerateMessage, sendMessage } from '../../utils/chat';
 import {
@@ -11,6 +11,14 @@ import { waitForAutosave, waitForToast, waitForToastDisappear } from '../../util
 import { nanoid } from 'nanoid';
 
 test.use({ storageState: AUTH_FILES.teacher });
+
+async function confirmStopSharing(page: Page) {
+  await page.getByTestId('stop-share-button').click();
+  const stopShareDialog = page.getByTestId('stop-share-dialog');
+  await expect(stopShareDialog).toBeVisible();
+  await page.getByTestId('stop-share-confirm-button').click();
+  await expect(stopShareDialog).not.toBeVisible();
+}
 
 test.describe('create, share, chat, delete', () => {
   const characterName = 'John Cena ' + nanoid(8);
@@ -125,11 +133,10 @@ test.describe('create, share, chat, delete', () => {
     // stop share
     await page.goto(editorUrl);
     await page.waitForURL('/characters/editor/**');
-    await page.getByTestId('stop-share-button').click();
+    await confirmStopSharing(page);
     await expect(page.getByTestId('start-share-button')).toBeVisible();
-    await page.reload();
 
-    // verify maximum token points is preselected
+    // verify maximum token points is preselected after stopping share
     await page.getByTestId('token-points-select').click();
     await expect(page.getByTestId('token-points-option-max')).toHaveAttribute(
       'data-state',

@@ -3,6 +3,8 @@ import {
   createNewLearningScenarioFromTemplate,
   deleteLearningScenario,
   downloadFileFromLearningScenario,
+  extendLearningScenarioShareExpiration,
+  getActiveLearningScenarioShareData,
   getFilesForLearningScenario,
   getLearningScenariosByAccessLevel,
   getLearningScenariosByOverviewFilter,
@@ -16,6 +18,7 @@ import {
   unshareLearningScenario,
   updateLearningScenario,
   updateLearningScenarioAccessLevel,
+  updateLearningScenarioShareTokenPointsLimit,
   uploadAvatarPictureForLearningScenario,
 } from './learning-scenario-service';
 import {
@@ -23,13 +26,16 @@ import {
   dbGetAllLearningScenariosByUser,
   dbGetCommunityLearningScenarios,
   dbCreateLearningScenarioShare,
+  dbExtendSharedLearningScenarioExpiration,
   dbGetGlobalLearningScenarios,
+  dbGetLatestManageableLearningScenarioShare,
   dbGetLearningScenarioById,
   dbGetLearningScenarioByIdOptionalShareData,
   dbGetLearningScenarioByIdWithShareData,
   dbGetLearningScenariosByAssociatedSchools,
   dbGetLearningScenariosByUser,
-  dbGetSharedLearningScenarioConversations,
+  dbStopLearningScenarioShare,
+  dbUpdateLearningScenarioShareTokenPointsLimit,
 } from '../db/functions/learning-scenario';
 import { dbGetFileForLearningScenario, dbGetFilesForLearningScenario } from '../db/functions/files';
 import { getAvatarPictureUrl } from '../files/fileService';
@@ -41,19 +47,23 @@ import { FederalStateModel } from '@shared/federal-states/types';
 import { getReadOnlySignedUrl, uploadFileToS3 } from '../s3';
 import { duplicateLearningScenario } from './learning-scenario-admin-service';
 import { getMaxBudgetInCentByUser, getUsedBudgetInCentByUser } from '../users/user-budget-service';
+import { dbGetLearningScenarioChatUsageInCentByLearningScenarioId } from '@shared/db/functions/token-points';
 
 vi.mock('../db/functions/learning-scenario', () => ({
   dbGetAllAccessibleLearningScenarios: vi.fn(),
   dbGetAllLearningScenariosByUser: vi.fn(),
   dbGetCommunityLearningScenarios: vi.fn(),
   dbCreateLearningScenarioShare: vi.fn(),
+  dbExtendSharedLearningScenarioExpiration: vi.fn(),
   dbGetGlobalLearningScenarios: vi.fn(),
+  dbGetLatestManageableLearningScenarioShare: vi.fn(),
   dbGetLearningScenarioById: vi.fn(),
   dbGetLearningScenarioByIdOptionalShareData: vi.fn(),
   dbGetLearningScenarioByIdWithShareData: vi.fn(),
   dbGetLearningScenariosByAssociatedSchools: vi.fn(),
   dbGetLearningScenariosByUser: vi.fn(),
-  dbGetSharedLearningScenarioConversations: vi.fn(),
+  dbStopLearningScenarioShare: vi.fn(),
+  dbUpdateLearningScenarioShareTokenPointsLimit: vi.fn(),
 }));
 vi.mock('./learning-scenario-admin-service', () => ({
   duplicateLearningScenario: vi.fn(),
@@ -74,15 +84,23 @@ vi.mock('../s3', () => ({
 }));
 const { mockDbReturning, mockDbSet, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
-  const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
-  const mockDbSet = vi.fn(() => ({ where: mockDbWhere }));
+  const mockDbUpdateWhere = vi.fn(() => ({ returning: mockDbReturning }));
+  const mockDbSet = vi.fn(() => ({ where: mockDbUpdateWhere }));
   const mockDbUpdate = vi.fn(() => ({ set: mockDbSet }));
-  return { mockDbReturning, mockDbSet, mockDbUpdate };
+
+  return {
+    mockDbReturning,
+    mockDbSet,
+    mockDbUpdate,
+  };
 });
 vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 vi.mock('../users/user-budget-service', () => ({
   getMaxBudgetInCentByUser: vi.fn(),
   getUsedBudgetInCentByUser: vi.fn(),
+}));
+vi.mock('@shared/db/functions/token-points', () => ({
+  dbGetLearningScenarioChatUsageInCentByLearningScenarioId: vi.fn(),
 }));
 
 const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
@@ -301,10 +319,8 @@ describe('learning-scenario-service', () => {
         >
       ).mockResolvedValue(mockLearningScenario as never);
       (
-        dbGetSharedLearningScenarioConversations as MockedFunction<
-          typeof dbGetSharedLearningScenarioConversations
-        >
-      ).mockResolvedValue([] as never);
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(mockLearningScenario as never);
     });
 
     describe('accessLevel=private and user not owner', () => {
@@ -598,6 +614,188 @@ describe('learning-scenario-service', () => {
     });
   });
 
+  describe('getLearningScenarioForEditView shared chat usage budget', () => {
+    it('returns 0 when startedAt or expiredAt is missing', async () => {
+      const learningScenarioId = generateUUID();
+      const user = mockUser('teacher');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+      } as unknown as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdOptionalShareData
+        >
+      ).mockResolvedValue(learningScenario as never);
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+      (
+        dbGetFilesForLearningScenario as MockedFunction<typeof dbGetFilesForLearningScenario>
+      ).mockResolvedValue([] as never);
+      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
+        undefined,
+      );
+
+      const result = await getLearningScenarioForEditView({
+        learningScenarioId,
+        user,
+        federalState: mockFederalState(),
+      });
+
+      expect(result.budgetUsedBySharedChat).toBe(0);
+      expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).not.toHaveBeenCalled();
+    });
+
+    it('loads shared chat usage when startedAt and expiredAt are present', async () => {
+      const learningScenarioId = generateUUID();
+      const user = mockUser('teacher');
+      const startedAt = new Date('2026-06-01T10:00:00.000Z');
+      const expiredAt = new Date('2026-06-01T11:00:00.000Z');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+        startedAt,
+        expiredAt,
+      } as unknown as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdOptionalShareData
+        >
+      ).mockResolvedValue(learningScenario as never);
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+      (
+        dbGetFilesForLearningScenario as MockedFunction<typeof dbGetFilesForLearningScenario>
+      ).mockResolvedValue([] as never);
+      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
+        undefined,
+      );
+      (
+        dbGetLearningScenarioChatUsageInCentByLearningScenarioId as MockedFunction<
+          typeof dbGetLearningScenarioChatUsageInCentByLearningScenarioId
+        >
+      ).mockResolvedValue(654);
+
+      const result = await getLearningScenarioForEditView({
+        learningScenarioId,
+        user,
+        federalState: mockFederalState(),
+      });
+
+      expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).toHaveBeenCalledWith({
+        learningScenarioId,
+        userId: user.id,
+        expiredAt,
+        startedAt,
+      });
+      expect(result.budgetUsedBySharedChat).toBe(654);
+    });
+  });
+
+  describe('getActiveLearningScenarioShareData', () => {
+    it('returns empty share data when no active or grace-window share exists', async () => {
+      const learningScenarioId = generateUUID();
+      const user = mockUser('teacher');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+      } as unknown as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+      (
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
+        >
+      ).mockResolvedValue(null as never);
+
+      const result = await getActiveLearningScenarioShareData({ learningScenarioId, user });
+
+      expect(result).toEqual({
+        expiredAt: null,
+        manuallyStoppedAt: null,
+        tokenPointsLimit: null,
+        budgetUsedBySharedChat: 0,
+      });
+      expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).not.toHaveBeenCalled();
+    });
+
+    it('loads usage when startedAt and expiredAt are available', async () => {
+      const learningScenarioId = generateUUID();
+      const user = mockUser('teacher');
+      const startedAt = new Date('2026-06-01T10:00:00.000Z');
+      const expiredAt = new Date('2026-06-01T11:00:00.000Z');
+      const learningScenario = {
+        id: learningScenarioId,
+        userId: user.id,
+        accessLevel: 'private',
+        hasLinkAccess: false,
+      } as unknown as LearningScenarioSelectModel;
+      const share = {
+        id: generateUUID(),
+        learningScenarioId,
+        userId: user.id,
+        startedAt,
+        expiredAt,
+        manuallyStoppedAt: null,
+        tokenPointsLimit: 75,
+      };
+
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(learningScenario as never);
+      (
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
+        >
+      ).mockResolvedValue(share as never);
+      (
+        dbGetLearningScenarioChatUsageInCentByLearningScenarioId as MockedFunction<
+          typeof dbGetLearningScenarioChatUsageInCentByLearningScenarioId
+        >
+      ).mockResolvedValue(432);
+
+      const result = await getActiveLearningScenarioShareData({ learningScenarioId, user });
+
+      expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).toHaveBeenCalledWith({
+        learningScenarioId,
+        userId: user.id,
+        startedAt,
+        expiredAt,
+      });
+      expect(result).toEqual({
+        expiredAt,
+        manuallyStoppedAt: null,
+        tokenPointsLimit: 75,
+        budgetUsedBySharedChat: 432,
+      });
+    });
+
+    it('throws NotFoundError when learning scenario does not exist', async () => {
+      const learningScenarioId = generateUUID();
+      const user = mockUser('teacher');
+
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(undefined as never);
+
+      await expect(
+        getActiveLearningScenarioShareData({ learningScenarioId, user }),
+      ).rejects.toThrow(NotFoundError);
+    });
+  });
+
   describe('getLearningScenarioForChatSession', () => {
     const learningScenarioId = generateUUID();
 
@@ -711,10 +909,10 @@ describe('learning-scenario-service', () => {
         dbCreateLearningScenarioShare as MockedFunction<typeof dbCreateLearningScenarioShare>
       ).mockResolvedValue(mockLearningScenario as never);
       (
-        dbGetSharedLearningScenarioConversations as MockedFunction<
-          typeof dbGetSharedLearningScenarioConversations
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
         >
-      ).mockResolvedValue([] as never);
+      ).mockResolvedValue(null as never);
       (
         dbGetFileForLearningScenario as MockedFunction<typeof dbGetFileForLearningScenario>
       ).mockResolvedValue({} as never);
@@ -826,16 +1024,210 @@ describe('learning-scenario-service', () => {
     const user = mockUser('teacher');
     beforeEach(() => {
       (
-        dbGetSharedLearningScenarioConversations as MockedFunction<
-          typeof dbGetSharedLearningScenarioConversations
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
         >
-      ).mockResolvedValue([] as never);
+      ).mockResolvedValue(null as never);
     });
 
     it('throws NotFoundError when the teacher has no active share to stop', async () => {
       await expect(unshareLearningScenario({ learningScenarioId, user })).rejects.toThrow(
         NotFoundError,
       );
+    });
+  });
+
+  describe('extendLearningScenarioShareExpiration', () => {
+    const userId = generateUUID();
+    const learningScenarioId = generateUUID();
+    const user = { ...mockUser('teacher'), id: userId };
+    const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
+      id: learningScenarioId,
+      userId,
+      accessLevel: 'private',
+      hasLinkAccess: false,
+      name: 'Test Scenario',
+    };
+    const updatedShare = {
+      id: generateUUID(),
+      learningScenarioId,
+      userId,
+      expiredAt: new Date('2026-07-01T12:30:00.000Z'),
+    };
+
+    beforeEach(() => {
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(mockLearningScenario as never);
+      (
+        dbExtendSharedLearningScenarioExpiration as MockedFunction<
+          typeof dbExtendSharedLearningScenarioExpiration
+        >
+      ).mockResolvedValue(updatedShare as never);
+    });
+
+    it('returns the updated share when the expiration is extended', async () => {
+      const result = await extendLearningScenarioShareExpiration({
+        learningScenarioId,
+        additionalTimeInMinutes: 30,
+        user,
+      });
+
+      expect(dbExtendSharedLearningScenarioExpiration).toHaveBeenCalledWith({
+        learningScenarioId,
+        user,
+        additionalTimeInMinutes: 30,
+      });
+      expect(result).toBe(updatedShare);
+    });
+
+    it.each([0, 43201])(
+      'throws InvalidArgumentError for an out-of-range additional time value (%s)',
+      async (additionalTimeInMinutes) => {
+        await expect(
+          extendLearningScenarioShareExpiration({
+            learningScenarioId,
+            additionalTimeInMinutes,
+            user,
+          }),
+        ).rejects.toThrow(InvalidArgumentError);
+
+        expect(dbExtendSharedLearningScenarioExpiration).not.toHaveBeenCalled();
+      },
+    );
+
+    it('throws InvalidArgumentError when there is no active share to extend', async () => {
+      (
+        dbExtendSharedLearningScenarioExpiration as MockedFunction<
+          typeof dbExtendSharedLearningScenarioExpiration
+        >
+      ).mockResolvedValue(null as never);
+
+      await expect(
+        extendLearningScenarioShareExpiration({
+          learningScenarioId,
+          additionalTimeInMinutes: 30,
+          user,
+        }),
+      ).rejects.toThrow(InvalidArgumentError);
+    });
+  });
+
+  describe('updateLearningScenarioShareTokenPointsLimit', () => {
+    const userId = generateUUID();
+    const learningScenarioId = generateUUID();
+    const user = { ...mockUser('teacher'), id: userId };
+    const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
+      id: learningScenarioId,
+      userId,
+      accessLevel: 'private',
+      hasLinkAccess: false,
+      name: 'Test Scenario',
+    };
+    const currentShare = {
+      id: generateUUID(),
+      learningScenarioId,
+      userId,
+      tokenPointsLimit: 50,
+    };
+    const updatedShare = {
+      ...currentShare,
+      tokenPointsLimit: 75,
+    };
+
+    beforeEach(() => {
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(mockLearningScenario as never);
+      (
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
+        >
+      ).mockResolvedValue(currentShare as never);
+      (
+        dbUpdateLearningScenarioShareTokenPointsLimit as MockedFunction<
+          typeof dbUpdateLearningScenarioShareTokenPointsLimit
+        >
+      ).mockResolvedValue(updatedShare as never);
+    });
+
+    it('returns the updated share when the token points limit increases', async () => {
+      const result = await updateLearningScenarioShareTokenPointsLimit({
+        learningScenarioId,
+        tokenPointsPercentageLimit: 75,
+        user,
+      });
+
+      expect(dbUpdateLearningScenarioShareTokenPointsLimit).toHaveBeenCalledWith({
+        learningScenarioId,
+        user,
+        tokenPointsLimit: 75,
+      });
+      expect(result).toBe(updatedShare);
+    });
+
+    it.each([0, 101])(
+      'throws InvalidArgumentError for an out-of-range token limit (%s)',
+      async (tokenPointsPercentageLimit) => {
+        await expect(
+          updateLearningScenarioShareTokenPointsLimit({
+            learningScenarioId,
+            tokenPointsPercentageLimit,
+            user,
+          }),
+        ).rejects.toThrow(InvalidArgumentError);
+
+        expect(dbUpdateLearningScenarioShareTokenPointsLimit).not.toHaveBeenCalled();
+      },
+    );
+
+    it('throws InvalidArgumentError when there is no current share', async () => {
+      (
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
+        >
+      ).mockResolvedValue(null as never);
+
+      await expect(
+        updateLearningScenarioShareTokenPointsLimit({
+          learningScenarioId,
+          tokenPointsPercentageLimit: 75,
+          user,
+        }),
+      ).rejects.toThrow(InvalidArgumentError);
+
+      expect(dbUpdateLearningScenarioShareTokenPointsLimit).not.toHaveBeenCalled();
+    });
+
+    it.each([50, 49])(
+      'throws InvalidArgumentError when the new token limit is not higher than the current limit (%s)',
+      async (tokenPointsPercentageLimit) => {
+        await expect(
+          updateLearningScenarioShareTokenPointsLimit({
+            learningScenarioId,
+            tokenPointsPercentageLimit,
+            user,
+          }),
+        ).rejects.toThrow(InvalidArgumentError);
+
+        expect(dbUpdateLearningScenarioShareTokenPointsLimit).not.toHaveBeenCalled();
+      },
+    );
+
+    it('throws InvalidArgumentError when the share update returns no result', async () => {
+      (
+        dbUpdateLearningScenarioShareTokenPointsLimit as MockedFunction<
+          typeof dbUpdateLearningScenarioShareTokenPointsLimit
+        >
+      ).mockResolvedValue(null as never);
+
+      await expect(
+        updateLearningScenarioShareTokenPointsLimit({
+          learningScenarioId,
+          tokenPointsPercentageLimit: 75,
+          user,
+        }),
+      ).rejects.toThrow(InvalidArgumentError);
     });
   });
 
@@ -874,18 +1266,18 @@ describe('learning-scenario-service', () => {
         dbCreateLearningScenarioShare as MockedFunction<typeof dbCreateLearningScenarioShare>
       ).mockResolvedValue(newShare as never);
       (
-        dbGetSharedLearningScenarioConversations as MockedFunction<
-          typeof dbGetSharedLearningScenarioConversations
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
         >
-      ).mockResolvedValue([] as never);
+      ).mockResolvedValue(null as never);
     });
 
     it('throws an error when there is already an active share', async () => {
       (
-        dbGetSharedLearningScenarioConversations as MockedFunction<
-          typeof dbGetSharedLearningScenarioConversations
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
         >
-      ).mockResolvedValue([newShare] as never);
+      ).mockResolvedValue(newShare as never);
 
       await expect(
         shareLearningScenario({
@@ -893,7 +1285,72 @@ describe('learning-scenario-service', () => {
           data: { tokenPointsPercentageLimit: 50, usageTimeLimit: 60 },
           user,
         }),
-      ).rejects.toThrow('There can only be one active share at a time');
+      ).rejects.toThrow(InvalidArgumentError);
+    });
+  });
+
+  describe('shareLearningScenario / unshareLearningScenario - success', () => {
+    const userId = generateUUID();
+    const learningScenarioId = generateUUID();
+    const user = { ...mockUser('teacher'), id: userId };
+    const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
+      id: learningScenarioId,
+      userId,
+      accessLevel: 'private',
+      hasLinkAccess: false,
+      name: 'Test Scenario',
+    };
+
+    beforeEach(() => {
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(mockLearningScenario as never);
+    });
+
+    it('creates a new share via dbCreateLearningScenarioShare when no manageable share exists', async () => {
+      const newShare = { id: generateUUID(), learningScenarioId, userId };
+      (
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
+        >
+      ).mockResolvedValue(null as never);
+      (
+        dbCreateLearningScenarioShare as MockedFunction<typeof dbCreateLearningScenarioShare>
+      ).mockResolvedValue(newShare as never);
+
+      const result = await shareLearningScenario({
+        learningScenarioId,
+        data: { tokenPointsPercentageLimit: 50, usageTimeLimit: 60 },
+        user,
+      });
+
+      expect(dbCreateLearningScenarioShare).toHaveBeenCalledWith(
+        expect.objectContaining({
+          user,
+          learningScenarioId,
+          tokenPointsLimit: 50,
+          maxUsageTimeLimit: 60,
+        }),
+      );
+      expect(result).toBe(newShare);
+    });
+
+    it('stops the latest manageable share via dbStopLearningScenarioShare', async () => {
+      const share = { id: generateUUID(), learningScenarioId, userId };
+      const stoppedShare = { ...share, manuallyStoppedAt: new Date() };
+      (
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
+        >
+      ).mockResolvedValue(share as never);
+      (
+        dbStopLearningScenarioShare as MockedFunction<typeof dbStopLearningScenarioShare>
+      ).mockResolvedValue(stoppedShare as never);
+
+      const result = await unshareLearningScenario({ learningScenarioId, user });
+
+      expect(dbStopLearningScenarioShare).toHaveBeenCalledWith({ shareId: share.id });
+      expect(result).toBe(stoppedShare);
     });
   });
 

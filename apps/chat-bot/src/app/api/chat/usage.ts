@@ -2,13 +2,16 @@ import { CharacterWithShareDataModel, LearningScenarioWithShareDataModel } from 
 import { type UserAndContext } from '@/auth/types';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
-  dbGetSharedChatUsageInCentBySharedChatId,
+  dbGetLearningScenarioChatUsageInCentByLearningScenarioId,
 } from '@shared/db/functions/token-points';
-import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import {
   getMaxBudgetInCentByUser,
   getUsedBudgetInCentByUser,
 } from '@shared/users/user-budget-service';
+import {
+  calculateShareSessionState,
+  ShareSessionState,
+} from '@shared/sharing/calculate-share-session-state';
 
 /**
  * Calculates the shared chat limit in cents
@@ -38,13 +41,10 @@ export async function sharedLearningScenarioChatHasReachedTokenPointsLimit({
     return true;
   }
 
-  if (sharedChatHasExpired(learningScenario)) {
-    return true;
-  }
-
-  const sharedChatUsageInCent = await dbGetSharedChatUsageInCentBySharedChatId({
-    sharedChatId: learningScenario.id,
-    maxUsageTimeLimit: learningScenario.maxUsageTimeLimit,
+  const sharedChatUsageInCent = await dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
+    learningScenarioId: learningScenario.id,
+    userId: user.id,
+    expiredAt: learningScenario.expiredAt,
     startedAt: learningScenario.startedAt,
   });
 
@@ -70,13 +70,10 @@ export async function sharedCharacterChatHasReachedTokenPointsLimit({
     return true;
   }
 
-  if (sharedChatHasExpired(character)) {
-    return true;
-  }
-
   const characterUsageInCent = await dbGetSharedCharacterChatUsageInCentByCharacterId({
     characterId: character.id,
-    maxUsageTimeLimit: character.maxUsageTimeLimit,
+    userId: user.id,
+    expiredAt: character.expiredAt,
     startedAt: character.startedAt,
   });
 
@@ -102,8 +99,10 @@ export function sharedChatHasExpired({
     return true;
   }
 
-  const timeLeft = calculateTimeLeft({ expiredAt, manuallyStoppedAt });
-  if (timeLeft < 1) {
+  if (
+    calculateShareSessionState({ expiredAt, manuallyStoppedAt }).shareSessionState !==
+    ShareSessionState.RUNNING
+  ) {
     // the shared chat is no viable anymore so the limit is reached
     return true;
   }

@@ -4,9 +4,12 @@ import { AccessLevel, LearningScenarioSelectModel } from '@shared/db/schema';
 import { ShareWithLearnersLimitParams } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners-limit-params';
 import { runServerAction } from '@shared/actions/run-server-action';
 import {
+  extendLearningScenarioShareExpiration,
+  getActiveLearningScenarioShareData,
   removeFileFromLearningScenario,
   shareLearningScenario,
   unshareLearningScenario,
+  updateLearningScenarioShareTokenPointsLimit,
   updateLearningScenario,
   updateLearningScenarioAccessLevel,
   uploadAvatarPictureForLearningScenario,
@@ -80,6 +83,60 @@ export async function unshareLearningScenarioAction({
   return runServerAction(
     'unshareLearningScenarioAction',
     unshareLearningScenario,
+  )({
+    learningScenarioId,
+    user,
+  });
+}
+
+export async function extendLearningScenarioShareExpirationAction({
+  learningScenarioId,
+  additionalTimeInMinutes,
+}: {
+  learningScenarioId: string;
+  additionalTimeInMinutes: number;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'extendLearningScenarioShareExpirationAction',
+    extendLearningScenarioShareExpiration,
+  )({
+    learningScenarioId,
+    additionalTimeInMinutes,
+    user,
+  });
+}
+
+export async function updateLearningScenarioShareTokenPointsLimitAction({
+  learningScenarioId,
+  tokenPointsPercentageLimit,
+}: {
+  learningScenarioId: string;
+  tokenPointsPercentageLimit: number;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'updateLearningScenarioShareTokenPointsLimitAction',
+    updateLearningScenarioShareTokenPointsLimit,
+  )({
+    learningScenarioId,
+    tokenPointsPercentageLimit,
+    user,
+  });
+}
+
+export async function getLearningScenarioShareDataAction({
+  learningScenarioId,
+}: {
+  learningScenarioId: string;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'getLearningScenarioShareDataAction',
+    getActiveLearningScenarioShareData,
   )({
     learningScenarioId,
     user,

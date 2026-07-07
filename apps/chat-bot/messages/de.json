@@ -26,7 +26,7 @@
     "send-message-placeholder": "Wie kann ich Dir helfen?",
     "information-disclaimer": "AIS.chat kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",
     "character-limit-reached": "Zeichenlimit erreicht",
-    "chat-expired": "Der Chat ist abgelaufen.",
+    "chat-expired-error": "Der Chat ist abgelaufen.",
     "new-chat": "Neuer Chat",
     "stop": "Stop",
     "copy": "Kopieren",
@@ -61,7 +61,8 @@
     "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit AIS.chat-Zugang. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "copy-link": "Link kopieren",
     "link-copied": "Link in die Zwischenablage kopiert",
-    "link-copied-error": "Link konnte nicht kopiert werden"
+    "link-copied-error": "Link konnte nicht kopiert werden",
+    "expired-modal-description": "Der Dialog ist abgelaufen"
   },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei AIS.chat!",
@@ -197,11 +198,9 @@
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
-      "button-start": "Dialogpartner teilen",
       "delete-chat-modal-title": "Aktuellen Chat löschen?",
       "delete-chat-modal-description": "Es wird ein neuer Chat begonnen. Der aktuelle Chat wird unwiderruflich gelöscht.",
-      "delete-chat-modal-confirm-button": "Löschen",
-      "expired-modal-description": "Der Dialog ist abgelaufen"
+      "delete-chat-modal-confirm-button": "Löschen"
     },
     "copy-modal": {
       "title": "Dialogpartner kopieren",
@@ -354,20 +353,17 @@
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
-      "button-start": "Szenario starten",
       "invalid-code-toast": "Der Code der eingegeben wurde, ist entweder abgelaufen oder ungültig.",
       "join-code": "Mit Code beitreten",
       "enter-chat": "Zum Dialog",
       "delete-chat-modal-title": "Aktuellen Chat löschen?",
       "delete-chat-modal-description": "Es wird ein neuer Chat begonnen. Der aktuelle Chat wird unwiderruflich gelöscht.",
-      "delete-chat-modal-confirm-button": "Löschen",
-      "expired-modal-description": "Der Dialog ist abgelaufen"
+      "delete-chat-modal-confirm-button": "Löschen"
     },
     "share-with-learners": {
       "title": "Mit Lernenden teilen",
       "description": "<b>Wie viel des monatlichen Tokenvolumens</b> soll durch diesen Chat maximal verbraucht und <b>wie lange</b> darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
-      "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",
       "share": "Teilen"
     },
@@ -484,14 +480,35 @@
       "title": "Mit Lernenden teilen",
       "description": "<b>Wie viel des monatlichen Tokenvolumens</b> soll durch diesen Chat maximal verbraucht und <b>wie lange</b> darf er aktiv benutzt werden?",
       "token-points": "Tokenvolumen",
-      "max-usage": "Maximale Nutzungszeit",
-      "button-start": "Jetzt bereitstellen",
+      "max-token-points": "Maximales Tokenvolumen",
+      "max-usage-time": "Maximale Nutzungszeit",
+      "token-points-left": "Verbleibendes Tokenvolumen für diesen Dialog",
+      "token-points-spent": "Aufgebraucht",
+      "usage-time-left": "Verbleibende Nutzungszeit",
+      "warning-token-points": "Bitte das Maximum des erlaubten Tokenvolumens neu setzen, damit die Lernenden ihre Chats fortsetzen können.",
+      "warning-usage-time": "Bitte Zeit hinzufügen, damit die Lernenden ihre Chats fortsetzen können.",
+      "warning-token-points-and-usage-time": "Bitte das Maximum des erlaubten Tokenvolumens neu setzen sowie Zeit hinzufügen, damit die Lernenden ihre Chats fortsetzen können.",
+      "session-will-be-closed": "Sitzung wird automatisch beendet in {time}",
+      "button-start": "Teilen",
       "button-stop": "Stoppen",
+      "button-close-session": "Sitzung beenden",
+      "stop-share-modal-title": "Sitzung beenden?",
+      "stop-share-modal-description": "Soll die Sitzung beendet werden? Die Lernenden können ihre Chats dann nicht fortsetzen und nicht wieder aufrufen.\n\nEin Download des Chats als Word-Datei ist jedem Lernenden möglich, solange die Sitzung noch nicht beendet ist.",
+      "button-to-share-page": "Zur Teilenseite",
       "share": "Teilen",
       "maximum": "Maximum",
       "minutes-count": "{count, plural, =1 {# Minute} other {# Minuten}}",
       "days-count": "{count, plural, =1 {# Tag} other {# Tage}}",
-      "additional-time": "Zeit hinzufügen"
+      "button-additional-time": "Zeit hinzufügen",
+      "button-adjust-token-limit": "Maximum anpassen",
+      "additional-time-modal-title": "Nutzungszeit hinzufügen",
+      "additional-time-modal-description": "Bitte auswählen, wie viel zusätzliche Nutzungszeit für diesen Chat hinzugefügt werden soll.",
+      "additional-time-modal-aria": "Zusätzliche Nutzungszeit auswählen",
+      "adjust-token-limit-modal-title": "Maximalen Verbrauch anpassen",
+      "adjust-token-limit-modal-description": "Bitte auswählen, wie viel des monatlichen Tokenvolumens für diesen Chat maximal verbraucht werden darf.",
+      "adjust-token-limit-modal-aria": "Neues maximales Tokenvolumen auswählen",
+      "button-add": "Hinzufügen",
+      "button-save": "Speichern"
     },
     "share-page": {
       "go-to": "Gehe auf",
@@ -514,7 +531,11 @@
       "share-toast-error": "Das Teilen konnte nicht aktiviert werden.",
       "share-toast-success": "Erfolgreich zum Teilen freigegeben!",
       "stop-share-toast-success": "Das Teilen wurde erfolgreich beendet.",
-      "stop-share-toast-error": "Das Teilen konnte nicht beendet werden."
+      "stop-share-toast-error": "Das Teilen konnte nicht beendet werden.",
+      "add-time-toast-success": "Die zusätzliche Nutzungszeit wurde erfolgreich hinzugefügt.",
+      "add-time-toast-error": "Die zusätzliche Nutzungszeit konnte nicht hinzugefügt werden.",
+      "adjust-token-limit-toast-success": "Das maximale Tokenvolumen wurde erfolgreich angepasst.",
+      "adjust-token-limit-toast-error": "Das maximale Tokenvolumen konnte nicht angepasst werden."
     },
     "files-and-links": {
       "heading": "Hintergrundwissen",

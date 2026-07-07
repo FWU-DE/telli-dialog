@@ -21,12 +21,18 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   const { characterId } = await props.params;
   const { user, federalState } = await requireAuth();
 
-  const { character, relatedFiles, maybeSignedPictureUrl, maxBudget, usedBudget } =
-    await getCharacterForEditView({
-      characterId,
-      user,
-      federalState,
-    }).catch(handleErrorInServerComponent);
+  const {
+    character,
+    relatedFiles,
+    maybeSignedPictureUrl,
+    maxBudget,
+    usedBudget,
+    budgetUsedBySharedChat,
+  } = await getCharacterForEditView({
+    characterId,
+    user,
+    federalState,
+  }).catch(handleErrorInServerComponent);
 
   const readOnly = user.id !== character.userId;
 
@@ -53,6 +59,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
         avatarPictureUrl={maybeSignedPictureUrl}
         usedBudget={usedBudget ?? 0}
         maxBudget={maxBudget ?? 500}
+        budgetUsedBySharedChat={budgetUsedBySharedChat}
       />
     </DefaultPageLayout>
   );

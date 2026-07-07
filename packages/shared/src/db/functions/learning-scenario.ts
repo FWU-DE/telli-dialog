@@ -4,6 +4,7 @@ import {
   desc,
   eq,
   getTableColumns,
+  gte,
   inArray,
   isNull,
   or,
@@ -11,6 +12,7 @@ import {
 } from 'drizzle-orm';
 import { NotFoundError } from '@shared/error';
 import { db } from '..';
+import { SHARE_EXTENSION_WINDOW_MS } from '@shared/sharing/const';
 import {
   fileTable,
   LearningScenarioFileMapping,
@@ -19,7 +21,6 @@ import {
   learningScenarioTable,
   learningScenarioTemplateMappingTable,
   LearningScenarioWithShareDataModel,
-  SharedLearningScenarioSelectModel,
   sharedLearningScenarioTable,
   sharedLearningScenarioUsageTracking,
   SharedLearningScenarioUsageTrackingInsertModel,
@@ -406,20 +407,119 @@ export async function dbDeleteLearningScenarioByIdAndUser({
 }
 
 /**
- * Returns all active (non-stopped, non-expired) shared learning scenarios for a given learning scenario and user.
+ * Returns the latest manageable share for a learning scenario owned/started by the given user,
+ * or `null` when none exists.
+ *
+ * A share is "manageable" when it has not been manually stopped and its expiration is
+ * still within the grace window (`SHARE_EXTENSION_WINDOW_MS`) — i.e. it is either still
+ * running or expired recently enough that it can still be extended or adjusted.
  */
-export function dbGetSharedLearningScenarioConversations({
+export async function dbGetLatestManageableLearningScenarioShare({
   learningScenarioId,
   user,
 }: {
   learningScenarioId: string;
   user: Pick<UserModel, 'id'>;
-}): Promise<SharedLearningScenarioSelectModel[]> {
-  const activeShare = latestActiveLearningScenarioShare(user);
-  return db
+}) {
+  const graceWindowStart = new Date(Date.now() - SHARE_EXTENSION_WINDOW_MS);
+
+  const [share] = await db
     .select()
-    .from(activeShare)
-    .where(eq(activeShare.learningScenarioId, learningScenarioId));
+    .from(sharedLearningScenarioTable)
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioTable.userId, user.id),
+        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
+        gte(sharedLearningScenarioTable.expiredAt, graceWindowStart),
+      ),
+    )
+    .orderBy(desc(sharedLearningScenarioTable.startedAt))
+    .limit(1);
+
+  return share ?? null;
+}
+
+/**
+ * Marks a learning scenario share as manually stopped.
+ * Returns `null` if the share does not exist.
+ */
+export async function dbStopLearningScenarioShare({ shareId }: { shareId: string }) {
+  const [updatedShare] = await db
+    .update(sharedLearningScenarioTable)
+    .set({ manuallyStoppedAt: new Date() })
+    .where(eq(sharedLearningScenarioTable.id, shareId))
+    .returning();
+
+  return updatedShare ?? null;
+}
+
+/**
+ * Extends the expiration timestamp of the latest manageable learning scenario share for the given user.
+ * Respects the grace window, so a share that expired recently can still be extended.
+ * Returns `null` if no manageable share exists.
+ */
+export async function dbExtendSharedLearningScenarioExpiration({
+  learningScenarioId,
+  user,
+  additionalTimeInMinutes,
+}: {
+  learningScenarioId: string;
+  user: Pick<UserModel, 'id'>;
+  additionalTimeInMinutes: number;
+}) {
+  const latestManageableShare = await dbGetLatestManageableLearningScenarioShare({
+    learningScenarioId,
+    user,
+  });
+
+  if (!latestManageableShare) {
+    return null;
+  }
+
+  const now = new Date();
+  const baseDate = latestManageableShare.expiredAt > now ? latestManageableShare.expiredAt : now;
+  const newExpiredAt = new Date(baseDate.getTime() + additionalTimeInMinutes * 60 * 1000);
+
+  const [updatedShare] = await db
+    .update(sharedLearningScenarioTable)
+    .set({ expiredAt: newExpiredAt })
+    .where(eq(sharedLearningScenarioTable.id, latestManageableShare.id))
+    .returning();
+
+  return updatedShare;
+}
+
+/**
+ * Updates the token points limit of the latest manageable learning scenario share for the given user.
+ * Respects the grace window, so a share that expired recently can still be adjusted.
+ * Returns `null` if no manageable share exists.
+ */
+export async function dbUpdateLearningScenarioShareTokenPointsLimit({
+  learningScenarioId,
+  user,
+  tokenPointsLimit,
+}: {
+  learningScenarioId: string;
+  user: Pick<UserModel, 'id'>;
+  tokenPointsLimit: number;
+}) {
+  const latestManageableShare = await dbGetLatestManageableLearningScenarioShare({
+    learningScenarioId,
+    user,
+  });
+
+  if (!latestManageableShare) {
+    return null;
+  }
+
+  const [updatedShare] = await db
+    .update(sharedLearningScenarioTable)
+    .set({ tokenPointsLimit })
+    .where(eq(sharedLearningScenarioTable.id, latestManageableShare.id))
+    .returning();
+
+  return updatedShare;
 }
 
 /**

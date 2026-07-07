@@ -58,25 +58,25 @@ export async function dbGetChatsUsageInCentByUserId({ userId }: { userId: string
   return Number(costs[0]?.totalCosts || 0);
 }
 
-export async function dbGetSharedChatUsageInCentBySharedChatId({
-  sharedChatId,
+export async function dbGetLearningScenarioChatUsageInCentByLearningScenarioId({
+  learningScenarioId,
+  userId,
   startedAt,
-  maxUsageTimeLimit,
+  expiredAt,
 }: {
-  sharedChatId: string;
+  learningScenarioId: string;
+  userId: string;
   startedAt: Date;
-  maxUsageTimeLimit: number;
+  expiredAt: Date;
 }) {
-  const startDate = startedAt;
-  const endDate = new Date(startedAt.getTime() + maxUsageTimeLimit * 60_000);
-
   const costs = await db
     .select({ totalCosts: sum(sharedLearningScenarioUsageTracking.costsInCent) })
     .from(sharedLearningScenarioUsageTracking)
     .where(
       and(
-        eq(sharedLearningScenarioUsageTracking.learningScenarioId, sharedChatId),
-        between(sharedLearningScenarioUsageTracking.createdAt, startDate, endDate),
+        eq(sharedLearningScenarioUsageTracking.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioUsageTracking.userId, userId),
+        between(sharedLearningScenarioUsageTracking.createdAt, startedAt, expiredAt),
       ),
     );
 
@@ -85,23 +85,23 @@ export async function dbGetSharedChatUsageInCentBySharedChatId({
 
 export async function dbGetSharedCharacterChatUsageInCentByCharacterId({
   characterId,
+  userId,
   startedAt,
-  maxUsageTimeLimit,
+  expiredAt,
 }: {
   characterId: string;
+  userId: string;
   startedAt: Date;
-  maxUsageTimeLimit: number;
+  expiredAt: Date;
 }) {
-  const startDate = startedAt;
-  const endDate = new Date(startedAt.getTime() + maxUsageTimeLimit * 60_000);
-
   const costs = await db
     .select({ totalCosts: sum(sharedCharacterChatUsageTrackingTable.costsInCent) })
     .from(sharedCharacterChatUsageTrackingTable)
     .where(
       and(
         eq(sharedCharacterChatUsageTrackingTable.characterId, characterId),
-        between(sharedCharacterChatUsageTrackingTable.createdAt, startDate, endDate),
+        eq(sharedCharacterChatUsageTrackingTable.userId, userId),
+        between(sharedCharacterChatUsageTrackingTable.createdAt, startedAt, expiredAt),
       ),
     );
 

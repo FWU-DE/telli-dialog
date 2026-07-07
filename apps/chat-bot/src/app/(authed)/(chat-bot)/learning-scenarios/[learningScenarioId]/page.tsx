@@ -19,12 +19,18 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
   const { learningScenarioId } = await props.params;
   const { user, federalState } = await requireAuth();
 
-  const { learningScenario, relatedFiles, avatarPictureUrl, maxBudget, usedBudget } =
-    await getLearningScenarioForEditView({
-      learningScenarioId,
-      user,
-      federalState,
-    }).catch(handleErrorInServerComponent);
+  const {
+    learningScenario,
+    relatedFiles,
+    avatarPictureUrl,
+    maxBudget,
+    usedBudget,
+    budgetUsedBySharedChat,
+  } = await getLearningScenarioForEditView({
+    learningScenarioId,
+    user,
+    federalState,
+  }).catch(handleErrorInServerComponent);
 
   const initialLinks = learningScenario.attachedLinks.map((url) => ({ link: url }));
 
@@ -37,6 +43,7 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
         initialLinks={initialLinks}
         usedBudget={usedBudget ?? 0}
         maxBudget={maxBudget ?? 500}
+        budgetUsedBySharedChat={budgetUsedBySharedChat}
       />
     </DefaultPageLayout>
   );

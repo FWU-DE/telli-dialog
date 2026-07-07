@@ -29,9 +29,12 @@ import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { useRouter } from 'next/navigation';
 import {
+  extendLearningScenarioShareExpirationAction,
+  getLearningScenarioShareDataAction,
   removeFileFromLearningScenarioAction,
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
+  updateLearningScenarioShareTokenPointsLimitAction,
   updateLearningScenarioAccessLevelAction,
   updateLearningScenarioAction,
   uploadAvatarPictureForLearningScenarioAction,
@@ -135,6 +138,7 @@ export function LearningScenarioEdit({
   avatarPictureUrl,
   usedBudget,
   maxBudget,
+  budgetUsedBySharedChat,
 }: {
   learningScenario: LearningScenarioOptionalShareDataModel;
   relatedFiles: FileModel[];
@@ -142,6 +146,7 @@ export function LearningScenarioEdit({
   avatarPictureUrl?: string;
   usedBudget: number;
   maxBudget: number;
+  budgetUsedBySharedChat: number;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -297,14 +302,14 @@ export function LearningScenarioEdit({
   };
 
   const handleDeleteFile = async (fileId: string) => {
-    return await removeFileFromLearningScenarioAction({
+    return removeFileFromLearningScenarioAction({
       learningScenarioId: learningScenario.id,
       fileId,
     });
   };
 
   const handleDownloadFile = async (fileId: string) => {
-    return await downloadFileFromLearningScenarioAction({
+    return downloadFileFromLearningScenarioAction({
       learningScenarioId: learningScenario.id,
       fileId,
     });
@@ -416,14 +421,42 @@ export function LearningScenarioEdit({
           tokenPointsLimit={learningScenario.tokenPointsLimit}
           usedBudget={usedBudget}
           maxBudget={maxBudget}
-          onShare={async (data) =>
-            await shareLearningScenarioAction({
+          budgetUsedBySharedChat={budgetUsedBySharedChat}
+          onShare={(data) =>
+            shareLearningScenarioAction({
               learningScenarioId: learningScenario.id,
               data: data as Parameters<typeof shareLearningScenarioAction>[0]['data'],
             })
           }
-          onUnshare={async () =>
-            await unshareLearningScenarioAction({
+          onUnshare={() =>
+            unshareLearningScenarioAction({
+              learningScenarioId: learningScenario.id,
+            })
+          }
+          onAddTime={(data) =>
+            extendLearningScenarioShareExpirationAction({
+              learningScenarioId: learningScenario.id,
+              additionalTimeInMinutes: data.additionalTimeInMinutes,
+            }).then((result) => {
+              if (result.success) {
+                return { success: true, expiredAt: result.value.expiredAt };
+              }
+              return { success: false };
+            })
+          }
+          onAdjustTokenLimit={(data) =>
+            updateLearningScenarioShareTokenPointsLimitAction({
+              learningScenarioId: learningScenario.id,
+              tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
+            }).then((result) => {
+              if (result.success) {
+                return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
+              }
+              return { success: false };
+            })
+          }
+          onPollShareData={() =>
+            getLearningScenarioShareDataAction({
               learningScenarioId: learningScenario.id,
             })
           }

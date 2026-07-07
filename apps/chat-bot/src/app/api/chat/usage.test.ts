@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@shared/db/functions/token-points', () => ({
-  dbGetSharedChatUsageInCentBySharedChatId: vi.fn(),
+  dbGetLearningScenarioChatUsageInCentByLearningScenarioId: vi.fn(),
   dbGetSharedCharacterChatUsageInCentByCharacterId: vi.fn(),
 }));
 
@@ -12,7 +12,10 @@ vi.mock('@shared/users/user-budget-service', () => ({
 
 import { sharedChatHasExpired } from './usage';
 import { getMaxBudgetInCentByUser } from '@shared/users/user-budget-service';
-import { dbGetSharedChatUsageInCentBySharedChatId } from '@shared/db/functions/token-points';
+import {
+  dbGetLearningScenarioChatUsageInCentByLearningScenarioId,
+  dbGetSharedCharacterChatUsageInCentByCharacterId,
+} from '@shared/db/functions/token-points';
 
 describe('sharedChatHasExpired', () => {
   const now = new Date('2024-06-01T10:00:00.000Z');
@@ -78,6 +81,51 @@ describe('coverage for uncovered branches', () => {
     vi.clearAllMocks();
   });
 
+  it('sharedLearningScenarioChatHasReachedTokenPointsLimit returns true for undefined user', async () => {
+    const { sharedLearningScenarioChatHasReachedTokenPointsLimit } = await import('./usage');
+
+    const result = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
+      user: undefined,
+      learningScenario: {
+        id: 'scenario-1',
+        startedAt: new Date(),
+        expiredAt: new Date(new Date().getTime() + 60 * 60_000),
+        maxUsageTimeLimit: 60,
+        tokenPointsLimit: 10,
+      } as any,
+    });
+
+    expect(result).toBe(true);
+    expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).not.toHaveBeenCalled();
+  });
+
+  it('sharedLearningScenarioChatHasReachedTokenPointsLimit evaluates usage when chat has expired', async () => {
+    const { sharedLearningScenarioChatHasReachedTokenPointsLimit } = await import('./usage');
+
+    const mockUser = {
+      id: 'user-1',
+      userRole: 'teacher' as const,
+      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
+    };
+
+    vi.mocked(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).mockResolvedValue(50);
+    vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
+
+    const result = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
+      user: mockUser as any,
+      learningScenario: {
+        id: 'scenario-1',
+        startedAt: new Date('2024-06-01T08:00:00.000Z'),
+        expiredAt: new Date('2024-06-01T09:00:00.000Z'),
+        maxUsageTimeLimit: 60,
+        tokenPointsLimit: 10,
+      } as any,
+    });
+
+    expect(result).toBe(false);
+    expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).toHaveBeenCalled();
+  });
+
   it('sharedLearningScenarioChatHasReachedTokenPointsLimit handles teacher with usage below limit', async () => {
     const { sharedLearningScenarioChatHasReachedTokenPointsLimit } = await import('./usage');
 
@@ -95,7 +143,7 @@ describe('coverage for uncovered branches', () => {
       tokenPointsLimit: 10,
     };
 
-    vi.mocked(dbGetSharedChatUsageInCentBySharedChatId).mockResolvedValue(50); // below 100 (10% of 1000)
+    vi.mocked(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).mockResolvedValue(50); // below 100 (10% of 1000)
     vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
 
     const result = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
@@ -104,6 +152,101 @@ describe('coverage for uncovered branches', () => {
     });
 
     expect(result).toBe(false);
+    expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).toHaveBeenCalledWith({
+      learningScenarioId: 'scenario-1',
+      userId: mockUser.id,
+      expiredAt: mockScenario.expiredAt,
+      startedAt: mockScenario.startedAt,
+    });
+  });
+
+  it('sharedLearningScenarioChatHasReachedTokenPointsLimit handles teacher above limit', async () => {
+    const { sharedLearningScenarioChatHasReachedTokenPointsLimit } = await import('./usage');
+
+    const mockUser = {
+      id: 'user-1',
+      userRole: 'teacher' as const,
+      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
+    };
+
+    const mockScenario = {
+      id: 'scenario-1',
+      startedAt: new Date(),
+      expiredAt: new Date(new Date().getTime() + 60 * 60_000),
+      maxUsageTimeLimit: 60,
+      tokenPointsLimit: 10,
+    };
+
+    vi.mocked(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).mockResolvedValue(150); // above 100
+    vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
+
+    const result = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
+      user: mockUser as any,
+      learningScenario: mockScenario as any,
+    });
+
+    expect(result).toBe(true);
+  });
+
+  it('sharedCharacterChatHasReachedTokenPointsLimit handles teacher below limit and forwards timestamps', async () => {
+    const { sharedCharacterChatHasReachedTokenPointsLimit } = await import('./usage');
+
+    const mockUser = {
+      id: 'user-1',
+      userRole: 'teacher' as const,
+      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
+    };
+
+    const mockCharacter = {
+      id: 'character-1',
+      startedAt: new Date(),
+      expiredAt: new Date(new Date().getTime() + 60 * 60_000),
+      maxUsageTimeLimit: 60,
+      tokenPointsLimit: 10,
+    };
+
+    vi.mocked(dbGetSharedCharacterChatUsageInCentByCharacterId).mockResolvedValue(50);
+    vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
+
+    const result = await sharedCharacterChatHasReachedTokenPointsLimit({
+      user: mockUser as any,
+      character: mockCharacter as any,
+    });
+
+    expect(result).toBe(false);
+    expect(dbGetSharedCharacterChatUsageInCentByCharacterId).toHaveBeenCalledWith({
+      characterId: 'character-1',
+      userId: mockUser.id,
+      expiredAt: mockCharacter.expiredAt,
+      startedAt: mockCharacter.startedAt,
+    });
+  });
+
+  it('sharedCharacterChatHasReachedTokenPointsLimit evaluates usage when expired', async () => {
+    const { sharedCharacterChatHasReachedTokenPointsLimit } = await import('./usage');
+
+    const mockUser = {
+      id: 'user-1',
+      userRole: 'teacher' as const,
+      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
+    };
+
+    vi.mocked(dbGetSharedCharacterChatUsageInCentByCharacterId).mockResolvedValue(50);
+    vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
+
+    const result = await sharedCharacterChatHasReachedTokenPointsLimit({
+      user: mockUser as any,
+      character: {
+        id: 'character-1',
+        startedAt: new Date('2024-06-01T08:00:00.000Z'),
+        expiredAt: new Date('2024-06-01T09:00:00.000Z'),
+        maxUsageTimeLimit: 60,
+        tokenPointsLimit: 10,
+      } as any,
+    });
+
+    expect(result).toBe(false);
+    expect(dbGetSharedCharacterChatUsageInCentByCharacterId).toHaveBeenCalled();
   });
 
   it('userHasReachedTokenPointsLimit handles exceeding budget', async () => {
@@ -124,5 +267,35 @@ describe('coverage for uncovered branches', () => {
     });
 
     expect(result).toBe(true);
+  });
+
+  it('userHasReachedTokenPointsLimit returns false for undefined user', async () => {
+    const { userHasReachedTokenPointsLimit } = await import('./usage');
+
+    const result = await userHasReachedTokenPointsLimit({
+      user: undefined,
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it('userHasReachedTokenPointsLimit returns false when max budget is null', async () => {
+    const { userHasReachedTokenPointsLimit } = await import('./usage');
+    const { getUsedBudgetInCentByUser } = await import('@shared/users/user-budget-service');
+
+    const mockUser = {
+      id: 'user-1',
+      userRole: 'teacher' as const,
+      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
+    };
+
+    vi.mocked(getUsedBudgetInCentByUser).mockResolvedValue(250);
+    vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(null);
+
+    const result = await userHasReachedTokenPointsLimit({
+      user: mockUser as any,
+    });
+
+    expect(result).toBe(false);
   });
 });

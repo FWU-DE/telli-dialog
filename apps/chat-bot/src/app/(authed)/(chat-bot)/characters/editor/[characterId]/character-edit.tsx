@@ -21,10 +21,13 @@ import {
   deleteCharacterAction,
   deleteFileMappingAndEntityAction,
   downloadFileFromCharacterAction,
+  getCharacterShareDataAction,
   linkFileToCharacterAction,
   shareCharacterAction,
   unshareCharacterAction,
   updateCharacterAccessLevelAction,
+  extendCharacterShareExpirationAction,
+  updateCharacterShareTokenPointsLimitAction,
   updateCharacterAction,
   uploadAvatarPictureForCharacterAction,
 } from './actions';
@@ -131,6 +134,7 @@ export function CharacterEdit({
   avatarPictureUrl,
   usedBudget,
   maxBudget,
+  budgetUsedBySharedChat,
 }: {
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
@@ -138,6 +142,7 @@ export function CharacterEdit({
   avatarPictureUrl?: string;
   usedBudget: number;
   maxBudget: number;
+  budgetUsedBySharedChat: number;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -288,18 +293,18 @@ export function CharacterEdit({
   };
 
   const handleDeleteFile = async (fileId: string) => {
-    return await deleteFileMappingAndEntityAction({
+    return deleteFileMappingAndEntityAction({
       characterId: character.id,
       fileId,
     });
   };
 
   const handleDownloadFile = async (fileId: string) => {
-    return await downloadFileFromCharacterAction({ characterId: character.id, fileId });
+    return downloadFileFromCharacterAction({ characterId: character.id, fileId });
   };
 
   const handleLinksChange = async (links: string[]) => {
-    return await updateCharacterAction({ id: character.id, attachedLinks: links });
+    return updateCharacterAction({ id: character.id, attachedLinks: links });
   };
 
   async function handleUploadPicture(croppedImageBlob: Blob) {
@@ -391,21 +396,45 @@ export function CharacterEdit({
           maxUsageTimeLimit={character.maxUsageTimeLimit}
           tokenPointsLimit={character.tokenPointsLimit}
           usedBudget={usedBudget}
+          budgetUsedBySharedChat={budgetUsedBySharedChat}
           maxBudget={maxBudget}
-          onShare={async (data) => {
-            const result = await shareCharacterAction({
+          onShare={(data) =>
+            shareCharacterAction({
               id: character.id,
               tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
               usageTimeLimit: data.usageTimeLimit,
-            });
-            return result;
-          }}
-          onUnshare={async () => {
-            const result = await unshareCharacterAction({
+            })
+          }
+          onUnshare={() =>
+            unshareCharacterAction({
               characterId: character.id,
+            })
+          }
+          onAddTime={async (data) => {
+            const result = await extendCharacterShareExpirationAction({
+              characterId: character.id,
+              additionalTimeInMinutes: data.additionalTimeInMinutes,
             });
-            return result;
+            if (result.success) {
+              return { success: true, expiredAt: result.value.expiredAt };
+            }
+            return { success: false };
           }}
+          onAdjustTokenLimit={async (data) => {
+            const result = await updateCharacterShareTokenPointsLimitAction({
+              characterId: character.id,
+              tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
+            });
+            if (result.success) {
+              return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
+            }
+            return { success: false };
+          }}
+          onPollShareData={() =>
+            getCharacterShareDataAction({
+              characterId: character.id,
+            })
+          }
           shareUILink={`/characters/editor/${character.id}/share`}
           sharingDisabled={!name || name.trim().length === 0}
         />

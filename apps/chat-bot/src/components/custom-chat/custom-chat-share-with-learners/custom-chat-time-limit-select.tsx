@@ -10,14 +10,18 @@ import { Field, FieldLabel } from '@ui/components/field';
 import { useTranslations } from 'next-intl';
 
 type TimeLimitSelectProps = {
-  defaultValue: string;
-  onChange: (value: number) => void;
+  label?: string;
+  ariaLabel?: string;
+  defaultValue: number;
+  onChange?: (value: number) => void;
   disabled?: boolean;
   usageTimeValuesInMinutes: number[];
   isAdditionalTime?: boolean;
 };
 
 export function TimeLimitSelect({
+  label,
+  ariaLabel,
   defaultValue,
   onChange,
   disabled,
@@ -29,16 +33,13 @@ export function TimeLimitSelect({
   return (
     <div className="whitespace-nowrap flex-1">
       <Field>
-        <FieldLabel>{isAdditionalTime ? t('additional-time') : t('max-usage')}</FieldLabel>
+        {label && <FieldLabel>{label}</FieldLabel>}
         <Select
-          defaultValue={defaultValue}
-          onValueChange={(value) => onChange(Number(value))}
+          defaultValue={String(defaultValue)}
+          onValueChange={(value) => onChange?.(Number(value))}
           disabled={disabled}
         >
-          <SelectTrigger
-            aria-label={isAdditionalTime ? t('additional-time') : t('max-usage')}
-            data-testid="usage-time-select"
-          >
+          <SelectTrigger aria-label={ariaLabel} data-testid="usage-time-select">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

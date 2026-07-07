@@ -24,8 +24,11 @@ import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners';
 import {
+  extendLearningScenarioShareExpirationAction,
+  getLearningScenarioShareDataAction,
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
+  updateLearningScenarioShareTokenPointsLimitAction,
 } from '../editor/[learningScenarioId]/actions';
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
@@ -40,6 +43,7 @@ export function LearningScenarioView({
   initialLinks,
   usedBudget,
   maxBudget,
+  budgetUsedBySharedChat,
 }: {
   learningScenario: LearningScenarioOptionalShareDataModel;
   fileMappings: FileModel[];
@@ -47,6 +51,7 @@ export function LearningScenarioView({
   initialLinks: WebSource[];
   usedBudget: number;
   maxBudget: number;
+  budgetUsedBySharedChat: number;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -78,18 +83,46 @@ export function LearningScenarioView({
   const handleShareLearningScenario = async (
     data: Parameters<typeof shareLearningScenarioAction>[0]['data'],
   ) => {
-    const result = await shareLearningScenarioAction({
+    return shareLearningScenarioAction({
       learningScenarioId: learningScenario.id,
       data,
     });
-    return result;
   };
 
   const handleUnshareLearningScenario = async () => {
-    const result = await unshareLearningScenarioAction({
+    return unshareLearningScenarioAction({
       learningScenarioId: learningScenario.id,
     });
-    return result;
+  };
+
+  const handleAddTimeToLearningScenario = async ({
+    additionalTimeInMinutes,
+  }: {
+    additionalTimeInMinutes: number;
+  }) => {
+    const result = await extendLearningScenarioShareExpirationAction({
+      learningScenarioId: learningScenario.id,
+      additionalTimeInMinutes,
+    });
+    if (result.success) {
+      return { success: true, expiredAt: result.value.expiredAt };
+    }
+    return { success: false };
+  };
+
+  const handleAdjustTokenLimitForLearningScenario = async ({
+    tokenPointsPercentageLimit,
+  }: {
+    tokenPointsPercentageLimit: number;
+  }) => {
+    const result = await updateLearningScenarioShareTokenPointsLimitAction({
+      learningScenarioId: learningScenario.id,
+      tokenPointsPercentageLimit,
+    });
+    if (result.success) {
+      return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
+    }
+    return { success: false };
   };
 
   async function handleDownloadFile(fileId: string) {
@@ -120,8 +153,16 @@ export function LearningScenarioView({
         tokenPointsLimit={learningScenario.tokenPointsLimit}
         usedBudget={usedBudget}
         maxBudget={maxBudget}
+        budgetUsedBySharedChat={budgetUsedBySharedChat}
         onShare={handleShareLearningScenario}
         onUnshare={handleUnshareLearningScenario}
+        onAddTime={handleAddTimeToLearningScenario}
+        onAdjustTokenLimit={handleAdjustTokenLimitForLearningScenario}
+        onPollShareData={() =>
+          getLearningScenarioShareDataAction({
+            learningScenarioId: learningScenario.id,
+          })
+        }
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
         sharingDisabled={!learningScenario.name || learningScenario.name.trim().length === 0}
       />

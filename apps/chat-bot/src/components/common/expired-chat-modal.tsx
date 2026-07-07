@@ -28,7 +28,7 @@ export default function ExpiredChatModal({
   inviteCode,
   handleRetry,
 }: ExpiredChatModalProps) {
-  const t = useTranslations('learning-scenarios.shared');
+  const t = useTranslations('sharing');
   const tCommon = useTranslations('common');
   const hasUserMessages = conversationMessages.some((message) => message.role === 'user');
 

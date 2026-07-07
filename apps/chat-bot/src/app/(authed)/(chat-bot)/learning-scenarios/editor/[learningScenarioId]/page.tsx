@@ -23,12 +23,18 @@ export default async function Page(
   const { learningScenarioId } = await props.params;
   const { user, federalState } = await requireAuth();
 
-  const { learningScenario, relatedFiles, avatarPictureUrl, maxBudget, usedBudget } =
-    await getLearningScenarioForEditView({
-      learningScenarioId: learningScenarioId,
-      user,
-      federalState,
-    }).catch(handleErrorInServerComponent);
+  const {
+    learningScenario,
+    relatedFiles,
+    avatarPictureUrl,
+    maxBudget,
+    usedBudget,
+    budgetUsedBySharedChat,
+  } = await getLearningScenarioForEditView({
+    learningScenarioId: learningScenarioId,
+    user,
+    federalState,
+  }).catch(handleErrorInServerComponent);
 
   const readOnly = user.id !== learningScenario.userId;
 
@@ -55,6 +61,7 @@ export default async function Page(
         avatarPictureUrl={avatarPictureUrl}
         usedBudget={usedBudget ?? 0}
         maxBudget={maxBudget ?? 500}
+        budgetUsedBySharedChat={budgetUsedBySharedChat}
       />
     </DefaultPageLayout>
   );
