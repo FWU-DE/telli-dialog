@@ -58,7 +58,7 @@ export default function Chat({
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
   const tCommon = useTranslations('common');
-  const tLearningScenarioShared = useTranslations('learning-scenarios.shared'); // Todo
+  const tLearningScenarioShared = useTranslations('learning-scenarios.shared');
 
   const { selectedModel, setDownloadConversationEnabled } = useLlmModels();
   const conversationPath = getConversationPath({

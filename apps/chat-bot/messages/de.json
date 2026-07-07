@@ -61,7 +61,8 @@
     "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit AIS.chat-Zugang. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "copy-link": "Link kopieren",
     "link-copied": "Link in die Zwischenablage kopiert",
-    "link-copied-error": "Link konnte nicht kopiert werden"
+    "link-copied-error": "Link konnte nicht kopiert werden",
+    "expired-modal-description": "Der Dialog ist abgelaufen"
   },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei AIS.chat!",
@@ -199,8 +200,7 @@
       "share": "Teilen",
       "delete-chat-modal-title": "Aktuellen Chat löschen?",
       "delete-chat-modal-description": "Es wird ein neuer Chat begonnen. Der aktuelle Chat wird unwiderruflich gelöscht.",
-      "delete-chat-modal-confirm-button": "Löschen",
-      "expired-modal-description": "Der Dialog ist abgelaufen"
+      "delete-chat-modal-confirm-button": "Löschen"
     },
     "copy-modal": {
       "title": "Dialogpartner kopieren",
@@ -358,8 +358,7 @@
       "enter-chat": "Zum Dialog",
       "delete-chat-modal-title": "Aktuellen Chat löschen?",
       "delete-chat-modal-description": "Es wird ein neuer Chat begonnen. Der aktuelle Chat wird unwiderruflich gelöscht.",
-      "delete-chat-modal-confirm-button": "Löschen",
-      "expired-modal-description": "Der Dialog ist abgelaufen"
+      "delete-chat-modal-confirm-button": "Löschen"
     },
     "share-with-learners": {
       "title": "Mit Lernenden teilen",

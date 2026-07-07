@@ -115,7 +115,7 @@ export default function GenericSharedChat({
   const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, entity.id, inviteCode]);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const chatActive =
+  const chatUsable =
     timeLeft > 0 && !TokenPointsExceededError.is(error) && !SharedChatExpiredError.is(error);
 
   const dialogStarted =
@@ -152,7 +152,7 @@ export default function GenericSharedChat({
 
   return (
     <>
-      {!chatActive && (
+      {!chatUsable && (
         <ExpiredChatModal
           conversationMessages={uiMessages}
           title={entity.name}
@@ -161,7 +161,7 @@ export default function GenericSharedChat({
       )}
       <div className="flex h-dvh min-h-0 flex-col overflow-hidden">
         <SharedChatHeader
-          chatActive={chatActive}
+          chatActive={chatUsable}
           hasMessages={messages.length > 0}
           t={headerT}
           handleOpenNewChat={handleOpenNewChat}
