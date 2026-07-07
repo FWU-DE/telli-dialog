@@ -6,7 +6,7 @@ export function ErrorChatPlaceholder({
   errorMessage,
   handleReload,
 }: {
-  errorMessage?: string;
+  errorMessage: string;
   handleReload: () => void;
 }) {
   const t = useTranslations('common');
