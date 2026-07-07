@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { getSharedLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
-import { calculateShareSessionState } from '@shared/sharing/calculate-time-left';
+import { calculateShareSessionState } from '@shared/sharing/calculate-share-session-state';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';

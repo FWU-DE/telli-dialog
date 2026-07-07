@@ -8,7 +8,10 @@ import {
   getMaxBudgetInCentByUser,
   getUsedBudgetInCentByUser,
 } from '@shared/users/user-budget-service';
-import { calculateShareSessionState, ShareSessionState } from '@shared/sharing/calculate-time-left';
+import {
+  calculateShareSessionState,
+  ShareSessionState,
+} from '@shared/sharing/calculate-share-session-state';
 
 /**
  * Calculates the shared chat limit in cents

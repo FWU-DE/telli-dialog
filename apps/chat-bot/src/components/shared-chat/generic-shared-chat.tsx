@@ -12,7 +12,10 @@ import { Messages } from '../chat/messages';
 import StreamingFinishedMarker from '../chat/streaming-finished-marker';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
-import { calculateShareSessionState, ShareSessionState } from '@shared/sharing/calculate-time-left';
+import {
+  calculateShareSessionState,
+  ShareSessionState,
+} from '@shared/sharing/calculate-share-session-state';
 import { logError } from '@shared/logging';
 import type { UseChatReturn } from '@/hooks/use-chat-hooks';
 

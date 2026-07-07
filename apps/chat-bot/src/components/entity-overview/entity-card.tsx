@@ -10,7 +10,7 @@ import { ChatTextIcon, ImageSquareIcon } from '@phosphor-icons/react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/tooltip';
 import { Button } from '@ui/components/button';
 import CountDownTimer from '@/app/(authed)/(chat-bot)/learning-scenarios/_components/count-down';
-import { calculateShareSessionState } from '@shared/sharing/calculate-time-left';
+import { calculateShareSessionState } from '@shared/sharing/calculate-share-session-state';
 
 type ShareInfo = {
   expiredAt: Date | null;

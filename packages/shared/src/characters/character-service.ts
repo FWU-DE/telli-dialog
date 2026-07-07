@@ -1,7 +1,9 @@
 import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import {
+  dbCreateCharacterShare,
   dbDeleteCharacterByIdAndUser,
+  dbExtendSharedCharacterConversationExpiration,
   dbGetAllAccessibleCharacters,
   dbGetAllCharactersByUser,
   dbGetCharacterById,
@@ -12,6 +14,9 @@ import {
   dbGetCharactersByAssociatedSchools,
   dbGetCharactersByUser,
   dbGetGlobalCharacters,
+  dbGetLatestManageableCharacterShare,
+  dbStopCharacterShare,
+  dbUpdateCharacterShareTokenPointsLimit,
 } from '@shared/db/functions/character';
 import { dbGetFileForCharacter, dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -31,7 +36,6 @@ import {
   CharacterWithShareDataModel,
   FileModel,
   fileTable,
-  sharedCharacterConversation,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, InvalidArgumentError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
@@ -44,7 +48,6 @@ import { buildCharacterPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { SHARE_EXTENSION_WINDOW_MS } from '@shared/sharing/const';
 import {
   copyCharacter,
   copyEntityPictureIfExists,
@@ -57,7 +60,7 @@ import {
   getPreservedUpdatedAtForExemptedKeys,
 } from '@shared/utils/preserve-updated-at';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, desc, eq, gte, isNull } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import {
@@ -390,32 +393,6 @@ export const deleteCharacter = async ({
   return deletedCharacter;
 };
 
-async function getLatestManageableCharacterShare({
-  characterId,
-  user,
-}: {
-  characterId: string;
-  user: Pick<UserModel, 'id'>;
-}) {
-  const graceWindowStart = new Date(Date.now() - SHARE_EXTENSION_WINDOW_MS);
-
-  const [share] = await db
-    .select()
-    .from(sharedCharacterConversation)
-    .where(
-      and(
-        eq(sharedCharacterConversation.characterId, characterId),
-        eq(sharedCharacterConversation.userId, user.id),
-        isNull(sharedCharacterConversation.manuallyStoppedAt),
-        gte(sharedCharacterConversation.expiredAt, graceWindowStart),
-      ),
-    )
-    .orderBy(desc(sharedCharacterConversation.startedAt))
-    .limit(1);
-
-  return share;
-}
-
 export const getActiveCharacterShareData = async ({
   characterId,
   user,
@@ -434,7 +411,7 @@ export const getActiveCharacterShareData = async ({
   const { character } = await getCharacterInfo(characterId, user.id);
   verifyReadAccess({ item: character, user });
 
-  const share = await getLatestManageableCharacterShare({ characterId, user });
+  const share = await dbGetLatestManageableCharacterShare({ characterId, user });
 
   if (!share) {
     return {
@@ -475,7 +452,7 @@ const checkRecentCharacterShares = async ({
   characterId: string;
   user: Pick<UserModel, 'id'>;
 }): Promise<void> => {
-  const share = await getLatestManageableCharacterShare({ characterId, user });
+  const share = await dbGetLatestManageableCharacterShare({ characterId, user });
 
   if (share) {
     throw new InvalidArgumentError(
@@ -523,23 +500,16 @@ export const shareCharacter = async ({
     user,
   });
 
-  const tokenPointsLimit = tokenPointsPercentageLimit;
-  const maxUsageTimeLimit = usageTimeLimitMinutes;
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
-  const expiredAt = new Date(startedAt.getTime() + maxUsageTimeLimit * 60 * 1000);
-  const [newSharedChat] = await db
-    .insert(sharedCharacterConversation)
-    .values({
-      userId: user.id,
-      characterId,
-      tokenPointsLimit,
-      maxUsageTimeLimit,
-      inviteCode,
-      startedAt,
-      expiredAt,
-    })
-    .returning();
+  const newSharedChat = await dbCreateCharacterShare({
+    user,
+    characterId,
+    tokenPointsLimit: tokenPointsPercentageLimit,
+    maxUsageTimeLimit: usageTimeLimitMinutes,
+    inviteCode,
+    startedAt,
+  });
 
   if (newSharedChat === undefined) {
     throw new Error('Could not share character chat');
@@ -562,7 +532,7 @@ export const unshareCharacter = async ({
   // Authorization check: user must be a teacher and owner of the sharing itself
   requireTeacherRole(user.userRole);
 
-  const share = await getLatestManageableCharacterShare({
+  const share = await dbGetLatestManageableCharacterShare({
     characterId,
     user,
   });
@@ -571,11 +541,7 @@ export const unshareCharacter = async ({
   }
 
   // unshare character instance by setting manuallyStoppedAt
-  const [updatedCharacter] = await db
-    .update(sharedCharacterConversation)
-    .set({ manuallyStoppedAt: new Date() })
-    .where(eq(sharedCharacterConversation.id, share.id))
-    .returning();
+  const updatedCharacter = await dbStopCharacterShare({ shareId: share.id });
 
   if (!updatedCharacter) {
     throw new Error('Could not stop sharing of character');
@@ -586,7 +552,7 @@ export const unshareCharacter = async ({
 
 /**
  * Extends the expiration of an active character share.
- * @throws NotFoundError if no active sharing exists for the character.
+ * @throws InvalidArgumentError if no active sharing exists for the character.
  */
 export const extendCharacterShareExpiration = async ({
   characterId,
@@ -607,24 +573,14 @@ export const extendCharacterShareExpiration = async ({
     throw new InvalidArgumentError('additional time must be between 1 and 43200 minutes');
   }
 
-  const share = await getLatestManageableCharacterShare({ characterId, user });
-
-  if (!share) {
-    throw new NotFoundError('No active sharing found for this character');
-  }
-
-  const now = new Date();
-  const baseDate = share.expiredAt > now ? share.expiredAt : now;
-  const newExpiredAt = new Date(baseDate.getTime() + additionalTimeInMinutes * 60 * 1000);
-
-  const [updatedShare] = await db
-    .update(sharedCharacterConversation)
-    .set({ expiredAt: newExpiredAt })
-    .where(eq(sharedCharacterConversation.id, share.id))
-    .returning();
+  const updatedShare = await dbExtendSharedCharacterConversationExpiration({
+    characterId,
+    user,
+    additionalTimeInMinutes,
+  });
 
   if (!updatedShare) {
-    throw new NotFoundError('No active sharing found for this character');
+    throw new InvalidArgumentError('No active sharing found for this character');
   }
 
   return updatedShare;
@@ -632,7 +588,7 @@ export const extendCharacterShareExpiration = async ({
 
 /**
  * Increases the token points limit of an active character share.
- * @throws NotFoundError if no sharing exists for the character.
+ * @throws InvalidArgumentError if no sharing exists for the character.
  * @throws InvalidArgumentError if the new limit is not higher than the current limit.
  */
 export const updateCharacterShareTokenPointsLimit = async ({
@@ -654,10 +610,10 @@ export const updateCharacterShareTokenPointsLimit = async ({
     throw new InvalidArgumentError('token points percentage limit must be between 1 and 100');
   }
 
-  const currentShare = await getLatestManageableCharacterShare({ characterId, user });
+  const currentShare = await dbGetLatestManageableCharacterShare({ characterId, user });
 
   if (!currentShare) {
-    throw new NotFoundError('No sharing found for this character');
+    throw new InvalidArgumentError('No sharing found for this character');
   }
 
   if (tokenPointsPercentageLimit <= currentShare.tokenPointsLimit) {
@@ -666,14 +622,14 @@ export const updateCharacterShareTokenPointsLimit = async ({
     );
   }
 
-  const [updatedShare] = await db
-    .update(sharedCharacterConversation)
-    .set({ tokenPointsLimit: tokenPointsPercentageLimit })
-    .where(eq(sharedCharacterConversation.id, currentShare.id))
-    .returning();
+  const updatedShare = await dbUpdateCharacterShareTokenPointsLimit({
+    characterId,
+    user,
+    tokenPointsLimit: tokenPointsPercentageLimit,
+  });
 
   if (!updatedShare) {
-    throw new NotFoundError('No sharing found for this character');
+    throw new InvalidArgumentError('No sharing found for this character');
   }
 
   return updatedShare;

@@ -11,10 +11,10 @@
  *
  * Value: 2 hours
  */
-export const SHARE_EXTENSION_WINDOW_HOURS = 2;
+const SHARE_EXTENSION_WINDOW_HOURS = 2;
 
 /**
- * Same as SHARE_EXTENSION_WINDOW_MS, but in hours for readability.
+ * Same as SHARE_EXTENSION_WINDOW_HOURS, but in milliseconds for readability.
  * Value: 2 hours = 7,200,000 milliseconds
  */
 export const SHARE_EXTENSION_WINDOW_MS = SHARE_EXTENSION_WINDOW_HOURS * 60 * 60 * 1000;

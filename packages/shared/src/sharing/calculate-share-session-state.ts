@@ -19,7 +19,7 @@ export enum ShareSessionState {
  * after expiration during which the session can still be extended.
  *
  * @returns Object containing:
- *   - state: The current state of the share session
+ *   - shareSessionState: The current state of the share session
  *   - timeLeftInSeconds: Time remaining in seconds (can be negative for expired sessions)
  *   - isExtendable: Whether the session can still be extended
  */
@@ -53,10 +53,9 @@ export function calculateShareSessionState({
   }
 
   const expiredAtDate = new Date(expiredAt);
-  const nowUtc = new Date().toISOString();
-  const nowUtcDate = new Date(nowUtc);
+  const nowMs = Date.now();
 
-  const timeLeftInMs = expiredAtDate.getTime() - nowUtcDate.getTime();
+  const timeLeftInMs = expiredAtDate.getTime() - nowMs;
   const timeLeftInSeconds = Math.floor(timeLeftInMs / 1000);
 
   // Session is still running (not yet expired)
@@ -101,12 +100,11 @@ export function calculateGracePeriodTimeLeftInSeconds(expiredAt: Date | null): n
   }
 
   const expiredAtDate = new Date(expiredAt);
-  const nowUtc = new Date().toISOString();
-  const nowUtcDate = new Date(nowUtc);
+  const nowMs = Date.now();
 
   // Grace period ends at: expiredAt + 2 hours
   const gracePeriodEndMs = expiredAtDate.getTime() + SHARE_EXTENSION_WINDOW_MS;
-  const timeUntilGracePeriodEndMs = gracePeriodEndMs - nowUtcDate.getTime();
+  const timeUntilGracePeriodEndMs = gracePeriodEndMs - nowMs;
 
   // Return 0 if grace period has ended
   return Math.max(0, Math.floor(timeUntilGracePeriodEndMs / 1000));

@@ -10,7 +10,7 @@ import Footer from '@/components/navigation/footer';
 import CountDownTimer from '@/app/(authed)/(chat-bot)/learning-scenarios/_components/count-down';
 import CustomChatHeader from './custom-chat-header';
 import { useShareDataPolling } from '@/hooks/use-share-data-polling';
-import { calculateShareSessionState } from '@shared/sharing/calculate-time-left';
+import { calculateShareSessionState } from '@shared/sharing/calculate-share-session-state';
 import type { ServerActionResult } from '@shared/actions/server-action-result';
 import type { SharePollingData } from '@/hooks/use-share-data-polling';
 import { getCharacterShareDataAction } from '@/app/(authed)/(chat-bot)/characters/editor/[characterId]/actions';

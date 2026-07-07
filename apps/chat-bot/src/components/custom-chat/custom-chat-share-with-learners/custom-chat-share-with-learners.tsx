@@ -6,7 +6,10 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { calculateShareSessionState, ShareSessionState } from '@shared/sharing/calculate-time-left';
+import {
+  calculateShareSessionState,
+  ShareSessionState,
+} from '@shared/sharing/calculate-share-session-state';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { Card, CardContent } from '@ui/components/card';
 import { Button } from '@ui/components/button';

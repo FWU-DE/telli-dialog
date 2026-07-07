@@ -3,7 +3,7 @@ import {
   calculateGracePeriodTimeLeftInSeconds,
   calculateShareSessionState,
   ShareSessionState,
-} from './calculate-time-left';
+} from './calculate-share-session-state';
 import { SHARE_EXTENSION_WINDOW_MS } from './const';
 
 describe('calculateShareSessionState', () => {

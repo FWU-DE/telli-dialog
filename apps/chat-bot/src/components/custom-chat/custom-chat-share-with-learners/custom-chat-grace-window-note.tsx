@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import {
   calculateGracePeriodTimeLeftInSeconds,
   ShareSessionState,
-} from '@shared/sharing/calculate-time-left';
+} from '@shared/sharing/calculate-share-session-state';
 
 interface CustomChatGraceWindowNoteProps {
   expiredAt: Date | null;
