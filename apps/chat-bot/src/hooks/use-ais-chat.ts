@@ -16,6 +16,7 @@ import {
   loadSharedChatMessages,
   saveSharedChatMessages,
 } from '@/utils/shared-chat-storage';
+import { logError } from '@shared/logging';
 
 // Re-export for consumers
 export type { ChatMessage, ChatStatus };
@@ -233,6 +234,7 @@ export function useAisChat({
         setError(error);
         setStatus('error');
         onError?.(error);
+        logError('Error in submitMessage', error);
 
         // Remove the assistant placeholder on error
         setMessages((prev) => {
