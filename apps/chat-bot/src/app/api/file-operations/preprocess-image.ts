@@ -1,4 +1,4 @@
-import { SUPPORTED_DOCUMENTS_TYPE, TRUNCATE_IMAGE_HEIGHT } from '@/const';
+import { TRUNCATE_IMAGE_HEIGHT } from '@/const';
 import { FileMetadata, FileModel } from '@shared/db/schema';
 import { getFileFromS3, getReadOnlySignedUrl } from '@shared/s3';
 import { isImageFile } from '@/utils/files/generic';
@@ -58,13 +58,15 @@ export async function createImageAttachmentsForConversation(
 
 export async function preprocessImage(
   fileContent: Buffer,
-  type: SUPPORTED_DOCUMENTS_TYPE,
-): Promise<{ buffer: Buffer; metadata: FileMetadata }> {
+  type: string,
+): Promise<{ buffer: Buffer; metadata: FileMetadata; type: string }> {
   // Convert SVG to PNG if needed
   let processedBuffer = fileContent;
+  let processedType = type;
   if (type === 'svg') {
     try {
       processedBuffer = await sharp(fileContent).png().toBuffer();
+      processedType = 'png';
     } catch {
       throw new Error('Failed to convert SVG to PNG');
     }
@@ -90,6 +92,7 @@ export async function preprocessImage(
     return {
       buffer: finalBuffer,
       metadata: { width, height },
+      type: processedType,
     };
   }
 
@@ -97,6 +100,7 @@ export async function preprocessImage(
   return {
     buffer: processedBuffer,
     metadata: { width, height },
+    type: processedType,
   };
 }
 
