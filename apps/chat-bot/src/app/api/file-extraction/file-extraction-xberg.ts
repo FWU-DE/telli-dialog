@@ -22,7 +22,7 @@ export async function fileExtractionXberg({
     formData.append('files', new Blob([buffer as BlobPart]), filename);
     formData.append('output_format', 'markdown');
 
-    const response = await fetch(`${env.xbergUrl}/extract`, {
+    const response = await fetch(new URL('/extract', env.xbergUrl), {
       method: 'POST',
       body: formData,
       signal: AbortSignal.timeout(timeout),
