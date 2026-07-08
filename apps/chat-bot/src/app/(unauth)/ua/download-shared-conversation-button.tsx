@@ -73,7 +73,8 @@ export default function DownloadSharedConversationButton({
   const tCommon = useTranslations('common');
 
   React.useEffect(() => {
-    // Component is mounted twice and unmounted in dev environment
+    // In dev with React StrictMode, effects may run setup/cleanup twice.
+    // Keep this ref accurate so async callbacks don't call setState after unmount.
     isMountedRef.current = true;
 
     return () => {

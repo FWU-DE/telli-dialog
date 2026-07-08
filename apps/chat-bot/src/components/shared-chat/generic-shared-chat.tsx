@@ -119,7 +119,7 @@ export default function GenericSharedChat({
 
   const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, entity.id, inviteCode]);
   const containerRef = useRef<HTMLDivElement>(null);
-  const alreadyMounted = useRef(false);
+  const alreadyMounted = useRef(false); // Guard against the mount effect running twice (e.g. React StrictMode dev behavior)
 
   const chatUsable =
     chatActive && !TokenPointsExceededError.is(error) && !SharedChatExpiredError.is(error);
