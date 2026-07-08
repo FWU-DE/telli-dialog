@@ -35,7 +35,8 @@ function createAzureClient(model: AiModel): {
 }
 
 /**
- * Streaming function using the OpenAI Responses API.
+ * Alternative streaming function using the OpenAI Responses API
+ * The Responses API provides a more flexible interface with built-in tool support
  */
 export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
   const { client, deployment } = createAzureClient(model);
@@ -47,7 +48,6 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
         input: toOpenAIResponsesInput(messages),
         stream: true,
         max_output_tokens: maxTokens,
-        temperature,
         ...model.additionalParameters,
       },
       {
