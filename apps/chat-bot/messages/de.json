@@ -56,7 +56,7 @@
     "school": "Schulintern",
     "school-tooltip": "Wird schulintern sicht- und kopierbar. \nZu beachten: Eine Lehrkraft kann mehreren Schulen zugehörig sein. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "community": "Community",
-    "community-tooltip": "Wird als Community-Vorlage sicht- und kopierbar. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
+    "community-tooltip": "Wird als deutschlandweite Community-Vorlage für alle AIS.chat-User sicht- und kopierbar.",
     "link": "Via Link",
     "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit AIS.chat-Zugang. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "copy-link": "Link kopieren",

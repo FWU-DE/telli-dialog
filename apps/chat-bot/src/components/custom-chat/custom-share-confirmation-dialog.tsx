@@ -103,7 +103,8 @@ export function CustomShareConfirmationDialog({
       }}
     >
       <AlertDialogContent
-        className="grid max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-3xl sm:max-w-3xl! grid-rows-[auto_minmax(0,1fr)_auto] gap-4 overflow-hidden p-4 pt-4 sm:max-h-[calc(100dvh-2rem)] sm:w-full sm:gap-6 sm:p-8 sm:pt-6"
+        variant="scrollable"
+        size="lg"
         onEscapeKeyDown={(event) => {
           if (!allChecklistItemsChecked) {
             event.preventDefault();

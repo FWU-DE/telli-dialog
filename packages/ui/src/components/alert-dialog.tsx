@@ -1,11 +1,33 @@
 'use client';
 
 import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { AlertDialog as AlertDialogPrimitive } from 'radix-ui';
 
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import { usePortalContainer } from './portal-container';
+
+const alertDialogContentVariants = cva(
+  'bg-background fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] rounded-2xl shadow-lg group/alert-dialog-content gap-4 p-4 sm:gap-8 sm:p-8 sm:pt-6 duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
+  {
+    variants: {
+      size: {
+        default: 'sm:max-w-lg',
+        sm: 'sm:max-w-xs',
+        lg: 'max-w-[min(48rem,calc(100%-2rem))]',
+      },
+      variant: {
+        default: null,
+        scrollable: 'max-h-[calc(100dvh-1rem)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden',
+      },
+    },
+    defaultVariants: {
+      size: 'default',
+      variant: 'default',
+    },
+  },
+);
 
 function AlertDialog({ ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
   return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />;
@@ -43,22 +65,18 @@ function AlertDialogOverlay({
 function AlertDialogContent({
   className,
   size = 'default',
+  variant = 'default',
   ...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
-  size?: 'default' | 'sm';
-}) {
+}: React.ComponentProps<typeof AlertDialogPrimitive.Content> &
+  VariantProps<typeof alertDialogContentVariants>) {
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
         data-size={size}
-        className={cn(
-          'bg-background grid gap-8 p-8 pt-6 rounded-2xl shadow-lg',
-          'fixed top-[50%] left-[50%] z-50 w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%]',
-          'group/alert-dialog-content duration-200 data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-lg',
-          className,
-        )}
+        data-variant={variant}
+        className={cn(alertDialogContentVariants({ size, variant }), className)}
         {...props}
       />
     </AlertDialogPortal>
