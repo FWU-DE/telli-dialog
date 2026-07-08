@@ -4,11 +4,15 @@ import CheckboxWithInfo from '@ui/components/common/checkbox-with-info';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { LinkIcon } from '@phosphor-icons/react';
-import { Control, FieldValues, Path, useWatch } from 'react-hook-form';
+import { Control, FieldValues, Path, useController, useWatch } from 'react-hook-form';
 import { useFederalState } from '../providers/federal-state-provider';
 import { CustomChatHeading2 } from './custom-chat-heading2';
 import { Card, CardRow } from '@ui/components/card';
 import { Button } from '@ui/components/button';
+import { Checkbox } from '@ui/components/checkbox';
+import { FieldLabel } from '@ui/components/field';
+import { useState } from 'react';
+import { CustomShareConfirmationDialog } from './custom-share-confirmation-dialog';
 
 type CustomShareSectionProps<T extends FieldValues> = {
   control: Control<T>;
@@ -31,6 +35,11 @@ export default function CustomShareSection<T extends FieldValues>({
 }: CustomShareSectionProps<T>) {
   const t = useTranslations('sharing');
   const toast = useToast();
+  const [isCommunityConfirmOpen, setIsCommunityConfirmOpen] = useState(false);
+  const { field: communityField } = useController({
+    name: communitySharingName,
+    control,
+  });
   const isLinkSharingEnabled = Boolean(
     useWatch({
       control,
@@ -75,17 +84,37 @@ export default function CustomShareSection<T extends FieldValues>({
             />
           )}
           {communitySharingName && (
-            <CheckboxWithInfo
-              name={communitySharingName}
-              control={control}
-              label={t('community')}
-              tooltip={t('community-tooltip')}
-              testId="community-sharing-checkbox"
-              disabled={suspended}
-              onCheckedChange={(checked) => {
-                onShareChange?.({ name: communitySharingName, checked });
-              }}
-            />
+            <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id={communityField.name + '-checkbox'}
+                  aria-label={t('community')}
+                  data-testid="community-sharing-checkbox"
+                  checked={communityField.value}
+                  disabled={suspended}
+                  onCheckedChange={(checked) => {
+                    const nextChecked = checked === true;
+                    if (!nextChecked) {
+                      communityField.onChange(false);
+                      onShareChange?.({ name: communitySharingName, checked: false });
+                      return;
+                    }
+
+                    if (Boolean(communityField.value)) {
+                      return;
+                    }
+                    setIsCommunityConfirmOpen(true);
+                  }}
+                />
+                <FieldLabel
+                  htmlFor={communityField.name + '-checkbox'}
+                  size="normal"
+                  tooltip={t('community-tooltip')}
+                >
+                  {t('community')}
+                </FieldLabel>
+              </div>
+            </div>
           )}
           <CheckboxWithInfo
             name={linkSharingName}
@@ -110,6 +139,17 @@ export default function CustomShareSection<T extends FieldValues>({
           </Button>
         </CardRow>
       </Card>
+
+      {communitySharingName && (
+        <CustomShareConfirmationDialog
+          open={isCommunityConfirmOpen}
+          onOpenChange={setIsCommunityConfirmOpen}
+          onAccept={() => {
+            communityField.onChange(true);
+            onShareChange?.({ name: communitySharingName, checked: true });
+          }}
+        />
+      )}
     </div>
   );
 }
