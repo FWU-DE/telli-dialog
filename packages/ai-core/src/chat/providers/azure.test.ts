@@ -55,12 +55,12 @@ function createAzureModel(additionalParameters: Record<string, unknown> = {}): A
   } as AiModel;
 }
 
-describe('Azure chat providers', () => {
+describe('Azure Responses chat providers', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('passes temperature and model additional parameters to Responses stream and maps usage', async () => {
+  it('streams Azure Responses output and maps usage without forwarding temperature', async () => {
     responsesCreateMock.mockResolvedValue({
       [Symbol.asyncIterator]: async function* () {
         yield { type: 'response.output_text.delta', delta: 'Hello' };
@@ -97,6 +97,7 @@ describe('Azure chat providers', () => {
     }
 
     expect(chunks).toEqual(['Hello', ' world']);
+    expect(responsesCreateMock).toHaveBeenCalledTimes(1);
     expect(responsesCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         model: 'chat-deploy',
@@ -108,6 +109,9 @@ describe('Azure chat providers', () => {
         path: '/openai/responses',
       },
     );
+
+    const requestPayload = responsesCreateMock.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(requestPayload).not.toHaveProperty('temperature');
     expect(onComplete).toHaveBeenCalledWith({
       promptTokens: 10,
       completionTokens: 20,
@@ -115,7 +119,7 @@ describe('Azure chat providers', () => {
     });
   });
 
-  it('passes model additional parameters to Responses generation', async () => {
+  it('generates Azure Responses text and usage without forwarding temperature', async () => {
     responsesCreateMock.mockResolvedValue({
       output: [
         {
@@ -155,6 +159,8 @@ describe('Azure chat providers', () => {
         path: '/openai/responses',
       },
     );
+    const requestPayload = responsesCreateMock.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(requestPayload).not.toHaveProperty('temperature');
     expect(result).toEqual({
       text: 'Test response',
       usage: {
