@@ -40,7 +40,7 @@ export async function webScraperCrawl4AI(url: string): Promise<WebSource> {
 
   try {
     const timeout = 30_000; // 30 seconds timeout for crawl4ai
-    const response = await fetch(`${env.crawl4AIUrl}/crawl`, {
+    const response = await fetch(new URL('/crawl', env.crawl4AIUrl), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
