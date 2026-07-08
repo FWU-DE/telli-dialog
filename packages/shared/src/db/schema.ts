@@ -1395,7 +1395,6 @@ export type FileUpdateModel = z.infer<typeof fileUpdateSchema>;
 // Keep existing extended types
 export type FileModel = typeof fileTable.$inferSelect;
 export type FileModelAndUrl = FileModel & { signedUrl: string };
-export type FileModelAndContent = FileModel & { content?: string };
 
 /**
  * Schema for table conversation_message_file_mapping

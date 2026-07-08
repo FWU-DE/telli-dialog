@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FileModelAndContent } from '@shared/db/schema';
+import type { FileModel } from '@shared/db/schema';
 import { RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT } from '@/configuration-text-inputs/const';
 
 const mocks = vi.hoisted(() => ({
@@ -21,7 +21,7 @@ const relatedFileEntities = [
     name: 'Leitfaden.txt',
     size: 8_000,
   },
-] as FileModelAndContent[];
+] as FileModel[];
 
 const fileContentsById = new Map<string, string>([
   ['file-1', 'Erster Abschnitt. Zweiter Abschnitt. Dritter Abschnitt.'],
@@ -30,9 +30,6 @@ const fileContentsById = new Map<string, string>([
 
 beforeEach(() => {
   vi.clearAllMocks();
-  for (const file of relatedFileEntities) {
-    file.content = undefined;
-  }
   mocks.dbGetExtractedFileContentMock.mockImplementation(async (fileId: string) => {
     return fileContentsById.get(fileId) ?? '';
   });
@@ -87,7 +84,7 @@ describe('buildRetrieveEntireFileTool', () => {
     const veryLongFile = {
       id: 'file-3',
       name: 'Grossdatei.txt',
-    } as FileModelAndContent;
+    } as FileModel;
     fileContentsById.set('file-3', 'a'.repeat(100_001));
 
     const tool = buildRetrieveEntireFileTool({

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserAndContext } from '@/auth/types';
-import type { FileModelAndContent } from '@shared/db/schema';
+import type { FileModel } from '@shared/db/schema';
 
 const mocks = vi.hoisted(() => ({
   buildWebSearchToolMock: vi.fn(),
@@ -39,7 +39,7 @@ const relatedFileEntities = [
     name: 'test.pdf',
     size: 1000,
   },
-] as FileModelAndContent[];
+] as FileModel[];
 
 beforeEach(() => {
   vi.clearAllMocks();
