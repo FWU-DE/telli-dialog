@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FileModelAndContent } from '@shared/db/schema';
+import type { FileModel } from '@shared/db/schema';
 import type { UserAndContext } from '@/auth/types';
 import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 
@@ -47,7 +47,7 @@ const relatedFileEntities = [
     name: 'Leitfaden.txt',
     size: 8_000,
   },
-] as FileModelAndContent[];
+] as FileModel[];
 
 beforeEach(() => {
   vi.clearAllMocks();

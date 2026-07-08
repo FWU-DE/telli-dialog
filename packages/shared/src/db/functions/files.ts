@@ -13,7 +13,6 @@ import {
   FileInsertModel,
   FileMetadata,
   FileModel,
-  FileModelAndContent,
   fileTable,
   LearningScenarioFileMapping,
   learningScenarioTable,
@@ -265,7 +264,7 @@ function convertToMap(
   return resultMap;
 }
 
-export async function dbGetFilesInIds(fileIds: string[]): Promise<FileModelAndContent[]> {
+export async function dbGetFilesInIds(fileIds: string[]): Promise<FileModel[]> {
   const maybeFiles = await db.select().from(fileTable).where(inArray(fileTable.id, fileIds));
   return [...maybeFiles];
 }

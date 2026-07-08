@@ -1,6 +1,6 @@
 import { RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT } from '@/configuration-text-inputs/const';
 import { dbGetExtractedFileContent } from '@shared/db/functions/files';
-import type { FileModelAndContent } from '@shared/db/schema';
+import type { FileModel } from '@shared/db/schema';
 import type { BuildToolsContext, ToolDefinition, ToolRegistration } from './types';
 
 type RetrieveEntireFileToolResponse = {
@@ -13,15 +13,11 @@ type RetrieveEntireFileToolResponse = {
 };
 
 function truncateToCharacterLimit(text: string, maxCharacters: number) {
-  if (text.length <= maxCharacters) {
-    return text;
-  }
-
   return text.slice(0, maxCharacters);
 }
 
-function formatEntireFileForTool(file: FileModelAndContent) {
-  const content = file.content?.trim() ?? '';
+async function formatEntireFileForTool(file: FileModel) {
+  const content = await dbGetExtractedFileContent(file.id);
   const characterCount = content.length;
   const truncatedContent = truncateToCharacterLimit(content, RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT);
   const truncated = truncatedContent.length !== content.length;
@@ -102,10 +98,6 @@ export function buildRetrieveEntireFileTool({
       };
 
       return JSON.stringify(response);
-    }
-
-    if (matchedFile.content === undefined) {
-      matchedFile.content = await dbGetExtractedFileContent(matchedFile.id);
     }
 
     return formatEntireFileForTool(matchedFile);
