@@ -35,19 +35,19 @@ function createAzureClient(model: AiModel): {
 }
 
 /**
- * Alternative streaming function using the OpenAI Responses API
- * The Responses API provides a more flexible interface with built-in tool support
+ * Streaming function using the OpenAI Responses API.
  */
 export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function* getAzureTextStream({ messages, maxTokens }, onComplete) {
+  return async function* getAzureTextStream({ messages, maxTokens, temperature }, onComplete) {
     const response = await client.responses.create(
       {
         model: deployment,
         input: toOpenAIResponsesInput(messages),
         stream: true,
         max_output_tokens: maxTokens,
+        temperature,
         ...model.additionalParameters,
       },
       {
@@ -114,13 +114,15 @@ export function constructAzureResponsesAgenticStreamFn(model: AiModel): AgenticS
 export function constructAzureResponsesGenerationFn(model: AiModel): TextGenerationFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function getAzureTextGeneration({ messages, maxTokens }) {
+  return async function getAzureTextGeneration({ messages, maxTokens, temperature }) {
     const response = await client.responses.create(
       {
         model: deployment,
         input: toOpenAIResponsesInput(messages),
         stream: false,
         max_output_tokens: maxTokens,
+        temperature,
+        ...model.additionalParameters,
       },
       {
         path: `/openai/responses`,
