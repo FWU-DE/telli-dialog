@@ -73,7 +73,11 @@ export default function DownloadSharedConversationButton({
   const tCommon = useTranslations('common');
 
   React.useEffect(() => {
+    // Component is mounted twice and unmounted in dev environment
+    isMountedRef.current = true;
+
     return () => {
+      // Component can be unmounted before the download is completed
       isMountedRef.current = false;
     };
   }, []);
