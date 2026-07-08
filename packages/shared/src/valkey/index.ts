@@ -15,6 +15,10 @@ function getClusterDriverOptions(valkeyUrl: string): RedisOptions {
     ],
     clusterOptions: {
       redisOptions: {
+        username: url.username ? decodeURIComponent(url.username) : undefined,
+        password: url.password ? decodeURIComponent(url.password) : undefined,
+        // rediss:// enables TLS for the connection to each cluster node
+        tls: url.protocol === 'rediss:' ? {} : undefined,
         commandTimeout: COMMAND_TIMEOUT_MS,
       },
     },
