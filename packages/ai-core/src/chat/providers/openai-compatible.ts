@@ -43,7 +43,7 @@ export async function* streamOpenAICompatibleAgenticResponse({
       input: toOpenAIResponsesInput(messages),
       stream: true,
       max_output_tokens: maxTokens,
-      temperature,
+      ...(temperature !== undefined ? { temperature } : {}),
       tools: toOpenAITools(tools),
       tool_choice: toolChoice,
       ...additionalParameters,
