@@ -15,7 +15,7 @@ const getWindowWidth = () => {
 };
 
 export default function useBreakpoints() {
-  const [width, setWidth] = useState(getWindowWidth());
+  const [width, setWidth] = useState(0);
 
   useEffect(() => {
     const handleResize = () => {
