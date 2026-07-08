@@ -409,7 +409,6 @@ export async function sendChatMessage({
       },
     });
 
-    webSearchResults = builtTools.webSearchResults;
     toolRegistry = builtTools.toolRegistry;
     activeToolDefinitions = Object.values(toolRegistry).map((entry) => entry.definition);
   } else {
