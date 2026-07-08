@@ -119,6 +119,7 @@ export default function GenericSharedChat({
 
   const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, entity.id, inviteCode]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const alreadyMounted = useRef(false);
 
   const chatUsable =
     chatActive && !TokenPointsExceededError.is(error) && !SharedChatExpiredError.is(error);
@@ -160,17 +161,14 @@ export default function GenericSharedChat({
   const showChatInputBox = dialogStartMode === 'explicit' ? dialogStarted : true;
 
   useEffect(() => {
-    if (!chatUsable || messages.length === 0) {
+    if (alreadyMounted.current) {
       return;
     }
+    alreadyMounted.current = true;
 
     const lastMessage = messages.at(-1);
 
-    if (!lastMessage) {
-      return;
-    }
-
-    if (lastMessage.role !== 'user') {
+    if (!chatUsable || lastMessage === undefined || lastMessage.role !== 'user') {
       return;
     }
 
