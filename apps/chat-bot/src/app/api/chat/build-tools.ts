@@ -1,161 +1,10 @@
-import { type ToolDefinition, type ToolRegistry } from '@ais-chat/ai-core';
-import { UserAndContext } from '@/auth/types';
-import { isWebSearchEnabled, searchWeb } from './websearch';
-import { dbGetExtractedFileContent } from '@shared/db/functions/files';
-import type { WebSearchResult } from '@shared/db/schema';
-import type { FileModelAndContent } from '@shared/db/schema';
-import type { WebSource } from '@shared/db/types';
-import {
-  RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
-  VECTOR_SEARCH_LIMIT,
-} from '@/configuration-text-inputs/const';
-import { ingestWebContent } from '../rag/ingestWebContent';
-import { retrieveChunksByQuery } from '../rag/rag-service';
-import { webScraper } from '../web-scraper/web-scraper';
-import { isIP } from 'node:net';
-
-type WebScraperToolResult = {
-  title: string | null;
-  url: string | null;
-  content: string | null;
-  error: string | null;
-};
-
-type WebSearchToolResult = {
-  title: string | null;
-  url: string | null;
-  content: string | null;
-};
-
-type WebSearchToolResponse = {
-  results: WebSearchToolResult[];
-  error: string | null;
-};
-
-type SemanticFileSearchChunkResult = {
-  fileName: string | null;
-  orderIndex: number | null;
-  content: string | null;
-};
-
-type SemanticFileSearchToolResponse = {
-  chunks: SemanticFileSearchChunkResult[];
-  error: string | null;
-};
-
-type RetrieveEntireFileToolResponse = {
-  fileName: string | null;
-  content: string | null;
-  truncated: boolean;
-  characterCount: number;
-  maxCharacters: number;
-  error: string | null;
-};
-
-const MAX_WEB_SCRAPER_URLS = 5;
-
-function formatRetrievedChunksForTool(chunks: Awaited<ReturnType<typeof retrieveChunksByQuery>>) {
-  const formattedChunks: SemanticFileSearchChunkResult[] = chunks.map((chunk) => ({
-    fileName: chunk.fileName ?? null,
-    orderIndex: chunk.orderIndex ?? null,
-    content: chunk.content ?? null,
-  }));
-
-  const response: SemanticFileSearchToolResponse = {
-    chunks: formattedChunks,
-    error: null,
-  };
-
-  if (chunks.length === 0) {
-    response.error = 'No matching chunks found.';
-  }
-
-  return JSON.stringify(response);
-}
-
-function truncateToCharacterLimit(text: string, maxCharacters: number) {
-  if (text.length <= maxCharacters) {
-    return text;
-  }
-
-  return text.slice(0, maxCharacters);
-}
-
-function formatEntireFileForTool(file: FileModelAndContent) {
-  const content = file.content?.trim() ?? '';
-  const characterCount = content.length;
-  const truncatedContent = truncateToCharacterLimit(content, RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT);
-  const truncated = truncatedContent.length !== content.length;
-
-  const response: RetrieveEntireFileToolResponse = {
-    fileName: file.name ?? null,
-    content: content.length > 0 ? truncatedContent : null,
-    truncated,
-    characterCount,
-    maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
-    error: null,
-  };
-
-  if (!content) {
-    response.error = 'No usable content found.';
-  } else if (truncated) {
-    response.error = 'File content was truncated to fit the character limit.';
-  }
-
-  return JSON.stringify(response);
-}
-
-function formatWebScrapedContentForTool(result: WebSource) {
-  const title = result.name?.trim() || null;
-  const content = result.content?.trim() || null;
-
-  const response: WebScraperToolResult = {
-    title,
-    url: result.link ?? null,
-    content: null,
-    error: null,
-  };
-
-  if (result.error) {
-    response.error = 'Failed to fetch the page.';
-    return JSON.stringify(response);
-  }
-
-  if (!content) {
-    response.error = 'No usable content found.';
-    return JSON.stringify(response);
-  }
-
-  response.content = content;
-  return JSON.stringify(response);
-}
-
-function validateWebScraperUrl(inputUrl: string): { url: string; error?: string } {
-  let parsedUrl: URL;
-
-  try {
-    parsedUrl = new URL(inputUrl);
-  } catch {
-    return { url: '', error: 'Error: Invalid URL.' };
-  }
-
-  if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-    return { url: '', error: 'Error: Only http and https URLs are allowed.' };
-  }
-
-  const hostname = parsedUrl.hostname.toLowerCase();
-
-  if (
-    hostname === 'localhost' ||
-    hostname.endsWith('.localhost') ||
-    hostname.endsWith('.local') ||
-    isIP(hostname) !== 0
-  ) {
-    return { url: '', error: 'Error: Only domain hosts are allowed.' };
-  }
-
-  return { url: parsedUrl.toString() };
-}
+import type { ToolRegistry } from '@ais-chat/ai-core';
+import type { UserAndContext } from '@/auth/types';
+import type { FileModelAndContent, WebSearchResult } from '@shared/db/schema';
+import { buildWebSearchTool } from './tools/web-search-tool';
+import { buildWebScraperTool } from './tools/web-scraper-tool';
+import { buildRetrieveEntireFileTool } from './tools/retrieve-entire-file-tool';
+import { buildRetrieveTextChunksTool } from './tools/retrieve-text-chunks-tool';
 
 type BuildToolsParams = {
   user: UserAndContext;
@@ -171,9 +20,6 @@ type BuildToolsParams = {
 
 type BuildToolsResult = {
   toolRegistry: ToolRegistry;
-  tools: ToolDefinition[];
-  toolHandlers: Record<string, (args: Record<string, unknown>) => Promise<string>>;
-  webSearchResults: WebSearchResult[];
 };
 
 export async function buildTools({
@@ -188,263 +34,49 @@ export async function buildTools({
   onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
   const toolRegistry: ToolRegistry = {};
-  const tools: ToolDefinition[] = [];
-  const toolHandlers: Record<string, (args: Record<string, unknown>) => Promise<string>> = {};
-  const webSearchResults: WebSearchResult[] = [];
-  const attachedFileDescriptions = relatedFileEntities.map(
-    (file) => `${file.name} (${file.size} bytes)`,
-  );
-  const attachedSourceUrls = sourceUrls.length > 0 ? sourceUrls : attachedLinks;
 
-  function addTool(
-    definition: ToolDefinition,
-    handler: (args: Record<string, unknown>) => Promise<string>,
-  ) {
-    toolRegistry[definition.name] = {
-      definition,
-      handler,
-    };
-    tools.push(definition);
-    toolHandlers[definition.name] = handler;
-  }
-  const webSearchEnabled = await isWebSearchEnabled({
+  const webSearchTool = await buildWebSearchTool({
     user,
     characterId,
     learningScenarioId,
     assistantId,
+    conversationId,
+    onWebSearchResults,
   });
 
-  if (webSearchEnabled) {
-    const webSearchToolDefinition: ToolDefinition = {
-      name: 'web_search',
-      description:
-        'Search the web for current information. Call this tool immediately and without asking for permission whenever the user asks about recent events, news, current data (weather, prices, scores), or any facts that may have changed after your knowledge cutoff. After receiving the results, synthesize them into a direct answer — do not call the tool again with a different query.',
-      parameters: {
-        type: 'object',
-        properties: {
-          query: {
-            type: 'string',
-            description:
-              'A concise search query (max 10 words) that captures the key information need. Write it in the same language as the user.',
-          },
-        },
-        required: ['query'],
-        additionalProperties: false,
-      },
-    };
-
-    addTool(webSearchToolDefinition, async (args) => {
-      const query = typeof args.query === 'string' ? args.query : '';
-      const results = await searchWeb({
-        query,
-        conversationId,
-        userId: user.id,
-      });
-
-      const response: WebSearchToolResponse = {
-        results: results.map((result) => ({
-          title: result.name?.trim() ?? null,
-          url: result.url ?? null,
-          content: result.content?.trim() ?? null,
-        })),
-        error: null,
-      };
-
-      webSearchResults.push(...results);
-      onWebSearchResults?.(results);
-
-      if (results.length === 0) {
-        response.error = 'No results found.';
-        return JSON.stringify(response);
-      }
-
-      return JSON.stringify(response);
-    });
+  if (webSearchTool) {
+    toolRegistry[webSearchTool.definition.name] = webSearchTool;
   }
 
-  if (!characterId && !learningScenarioId) {
-    const webScraperToolDefinition: ToolDefinition = {
-      name: 'web_scraper',
-      description:
-        `Fetch and extract the main text from one or more URLs (max ${MAX_WEB_SCRAPER_URLS}). Use this tool when the user gives you webpage URLs or when you can derive concrete URLs yourself, for example to scrape documentation pages or other known targets. Use web_search instead when you need to discover relevant pages or compare multiple sources.` +
-        (attachedSourceUrls.length > 0
-          ? `\n\nThe following URLs were pinned for this conversation and are likely relevant — consider scraping them when appropriate:\n${attachedSourceUrls.map((link) => `- ${link}`).join('\n')}`
-          : ''),
-      parameters: {
-        type: 'object',
-        properties: {
-          urls: {
-            type: 'array',
-            description:
-              'Array of URLs to scrape. Each must be a valid http or https URL. Only domain hosts are allowed (no localhost, .local, or IP addresses).',
-            items: {
-              type: 'string',
-            },
-            minItems: 1,
-            maxItems: MAX_WEB_SCRAPER_URLS,
-          },
-        },
-        required: ['urls'],
-        additionalProperties: false,
-      },
-    };
+  const webScraperTool = buildWebScraperTool({
+    characterId,
+    learningScenarioId,
+    sourceUrls,
+    attachedLinks,
+  });
 
-    addTool(webScraperToolDefinition, async (args) => {
-      const urls = Array.isArray(args.urls) ? args.urls : [];
-
-      if (urls.length === 0) {
-        return 'Error: Missing URLs.';
-      }
-
-      if (urls.length > MAX_WEB_SCRAPER_URLS) {
-        return `Error: Maximum ${MAX_WEB_SCRAPER_URLS} URLs allowed per call.`;
-      }
-
-      const results = await Promise.all(
-        urls.map(async (url) => {
-          const urlString = typeof url === 'string' ? url.trim() : '';
-
-          if (urlString.length === 0) {
-            return JSON.stringify({
-              title: null,
-              url: null,
-              content: null,
-              error: 'Empty URL.',
-            });
-          }
-
-          const validationResult = validateWebScraperUrl(urlString);
-
-          if (validationResult.error) {
-            return JSON.stringify({
-              title: null,
-              url: urlString,
-              content: null,
-              error: validationResult.error,
-            });
-          }
-
-          const result = await webScraper(validationResult.url);
-          return formatWebScrapedContentForTool(result);
-        }),
-      );
-
-      return JSON.stringify(results.map((r) => JSON.parse(r)));
-    });
+  if (webScraperTool) {
+    toolRegistry[webScraperTool.definition.name] = webScraperTool;
   }
 
-  if (relatedFileEntities.length > 0) {
-    const retrieveEntireFileToolDefinition: ToolDefinition = {
-      name: 'retrieve_entire_file',
-      description: `Retrieve the full content of one attached file by name. Available files right now: ${attachedFileDescriptions.join(', ') || 'none'}. Use this tool when you need the full text of a specific attached file instead of only relevant excerpts. The returned content is capped at ${RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT} characters.`,
-      parameters: {
-        type: 'object',
-        properties: {
-          fileName: {
-            type: 'string',
-            description: 'The exact name of the attached file to retrieve.',
-          },
-        },
-        required: ['fileName'],
-        additionalProperties: false,
-      },
-    };
+  const retrieveEntireFileTool = buildRetrieveEntireFileTool({
+    relatedFileEntities,
+  });
 
-    toolRegistry.retrieve_entire_file = {
-      definition: retrieveEntireFileToolDefinition,
-      handler: async (args) => {
-        const fileName = typeof args.fileName === 'string' ? args.fileName.trim() : '';
-
-        if (fileName.length === 0) {
-          const response: RetrieveEntireFileToolResponse = {
-            fileName: null,
-            content: null,
-            truncated: false,
-            characterCount: 0,
-            maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
-            error: 'Missing file name.',
-          };
-
-          return JSON.stringify(response);
-        }
-
-        const matchedFile = relatedFileEntities.find((file) => file.name === fileName);
-
-        if (matchedFile === undefined) {
-          const response: RetrieveEntireFileToolResponse = {
-            fileName,
-            content: null,
-            truncated: false,
-            characterCount: 0,
-            maxCharacters: RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT,
-            error: 'File not found.',
-          };
-
-          return JSON.stringify(response);
-        }
-
-        if (matchedFile.content === undefined) {
-          matchedFile.content = await dbGetExtractedFileContent(matchedFile.id);
-        }
-
-        return formatEntireFileForTool(matchedFile);
-      },
-    };
+  if (retrieveEntireFileTool) {
+    toolRegistry[retrieveEntireFileTool.definition.name] = retrieveEntireFileTool;
   }
 
-  if (relatedFileEntities.length > 0 || attachedSourceUrls.length > 0) {
-    const retrieveTextChunksToolDefinition: ToolDefinition = {
-      name: 'retrieve_text_chunks',
-      description: `Retrieve relevant text chunks from the attached sources. Available files right now: ${attachedFileDescriptions.join(', ') || 'none'}. Available linked pages right now: ${attachedSourceUrls.join(', ') || 'none'}. Use this tool when you need exact passages from the files or linked pages or want to inspect a specific topic inside the available sources. You can request up to ${VECTOR_SEARCH_LIMIT} chunks per call. Call it with a short, specific search string in the same language as the user.`,
-      parameters: {
-        type: 'object',
-        properties: {
-          search: {
-            type: 'string',
-            description:
-              'A concise search string that captures the exact topic or passage you want to retrieve.',
-          },
-          limit: {
-            type: 'integer',
-            minimum: 1,
-            maximum: VECTOR_SEARCH_LIMIT,
-            description:
-              'Optional number of chunks to return. Values outside the allowed range are clamped.',
-          },
-        },
-        required: ['search', 'limit'],
-        additionalProperties: false,
-      },
-    };
+  const retrieveTextChunksTool = buildRetrieveTextChunksTool({
+    user,
+    relatedFileEntities,
+    sourceUrls,
+    attachedLinks,
+  });
 
-    addTool(retrieveTextChunksToolDefinition, async (args) => {
-      let processedSourceUrls = attachedSourceUrls;
-
-      if (attachedSourceUrls.length > 0) {
-        const { processedUrls } = await ingestWebContent({
-          urls: attachedSourceUrls,
-          federalStateId: user.federalState.id,
-        });
-
-        processedSourceUrls = processedUrls;
-      }
-      const search = typeof args.search === 'string' ? args.search : '';
-      const requestedLimit =
-        typeof args.limit === 'number' && Number.isFinite(args.limit)
-          ? Math.trunc(args.limit)
-          : VECTOR_SEARCH_LIMIT;
-      const limit = Math.min(Math.max(requestedLimit, 1), VECTOR_SEARCH_LIMIT);
-      const chunks = await retrieveChunksByQuery({
-        searchQuery: search,
-        federalStateId: user.federalState.id,
-        relatedFileEntities,
-        sourceUrls: processedSourceUrls,
-        limit,
-      });
-
-      return formatRetrievedChunksForTool(chunks);
-    });
+  if (retrieveTextChunksTool) {
+    toolRegistry[retrieveTextChunksTool.definition.name] = retrieveTextChunksTool;
   }
 
-  return { toolRegistry, tools, toolHandlers, webSearchResults };
+  return { toolRegistry };
 }
