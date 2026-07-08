@@ -86,18 +86,18 @@ export default function DisplayUploadedFile({
   // TODO: this shoulld only be a button if the fileId is present and otherwise just a div
 
   return (
-    <div className="flex items-center justify-left gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px]">
+    <div className="flex w-fit max-w-40 min-w-0 shrink-0 items-center justify-start gap-2 py-4 pl-4 pr-6 text-sm relative group">
       <div className="absolute inset-0 opacity-5" style={{ backgroundColor }} />
       {onDeattachFile !== undefined && (
         <button onClick={onDeattachFile} className="absolute right-0 top-0 hover:bg-neutral-200">
           <DeattachFileIcon />
         </button>
       )}
-      <div className="relative flex items-center gap-2 h-[24px]">
-        {status === 'processed' && <FileIcon className="w-8 h-8" />}
-        {status === 'uploading' && <Spinner className="w-5 h-5" />}
-        {status === 'failed' && <CrossIcon className="w-5 h-5" />}
-        <div className="flex flex-col">
+      <div className="relative flex items-center gap-2 h-[24px] min-w-0">
+        {status === 'processed' && <FileIcon className="h-8 w-8 shrink-0" />}
+        {status === 'uploading' && <Spinner className="h-5 w-5 shrink-0" />}
+        {status === 'failed' && <CrossIcon className="h-5 w-5 shrink-0" />}
+        <div className="flex min-w-0 flex-col">
           <ParagraphWithConditionalTitle content={fileName} />
           <span className="text-left text-gray-100 font-normal text-[10px]">{`.${getFileExtension(fileName)}`}</span>
         </div>
