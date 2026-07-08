@@ -41,7 +41,7 @@ function createAzureClient(model: AiModel): {
 export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function* getAzureTextStream({ messages, maxTokens, temperature }, onComplete) {
+  return async function* getAzureTextStream({ messages, maxTokens }, onComplete) {
     const response = await client.responses.create(
       {
         model: deployment,
@@ -84,19 +84,12 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
 export function constructAzureResponsesAgenticStreamFn(model: AiModel): AgenticStreamFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function* getAzureTextStream({
-    messages,
-    maxTokens,
-    temperature,
-    tools,
-    toolChoice,
-  }) {
+  return async function* getAzureTextStream({ messages, maxTokens, tools, toolChoice }) {
     yield* streamOpenAICompatibleAgenticResponse({
       client,
       messages,
       modelName: deployment,
       maxTokens,
-      temperature,
       tools,
       toolChoice,
       providerName: 'Azure OpenAI',
@@ -114,14 +107,13 @@ export function constructAzureResponsesAgenticStreamFn(model: AiModel): AgenticS
 export function constructAzureResponsesGenerationFn(model: AiModel): TextGenerationFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function getAzureTextGeneration({ messages, maxTokens, temperature }) {
+  return async function getAzureTextGeneration({ messages, maxTokens }) {
     const response = await client.responses.create(
       {
         model: deployment,
         input: toOpenAIResponsesInput(messages),
         stream: false,
         max_output_tokens: maxTokens,
-        temperature,
         ...model.additionalParameters,
       },
       {

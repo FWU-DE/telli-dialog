@@ -90,7 +90,6 @@ describe('Azure chat providers', () => {
         messages: [{ role: 'user', content: 'Hello there' }],
         model: model.name,
         maxTokens: 128,
-        temperature: 0.4,
       },
       onComplete,
     )) {
@@ -103,7 +102,6 @@ describe('Azure chat providers', () => {
         model: 'chat-deploy',
         stream: true,
         max_output_tokens: 128,
-        temperature: 0.4,
         reasoning: { effort: 'low' },
       }),
       {
@@ -117,7 +115,7 @@ describe('Azure chat providers', () => {
     });
   });
 
-  it('passes temperature and model additional parameters to Responses generation', async () => {
+  it('passes model additional parameters to Responses generation', async () => {
     responsesCreateMock.mockResolvedValue({
       output: [
         {
@@ -144,7 +142,6 @@ describe('Azure chat providers', () => {
       messages: [{ role: 'user', content: 'Generate something' }],
       model: model.name,
       maxTokens: 256,
-      temperature: 0.2,
     });
 
     expect(responsesCreateMock).toHaveBeenCalledWith(
@@ -152,7 +149,6 @@ describe('Azure chat providers', () => {
         model: 'chat-deploy',
         stream: false,
         max_output_tokens: 256,
-        temperature: 0.2,
         metadata: { source: 'unit-test' },
       }),
       {
