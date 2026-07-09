@@ -14,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@ui/components/alert-dialog';
+import { ArrowClockwiseIcon } from '@phosphor-icons/react';
 
 type ExpiredChatModalProps = {
   conversationMessages: Message[];
@@ -55,7 +56,10 @@ export default function ExpiredChatModal({
                 inviteCode={inviteCode}
               />
             )}
-            <Button onClick={handleRetry}>{tCommon('retry-button')}</Button>
+            <Button onClick={handleRetry}>
+              <ArrowClockwiseIcon className="size-5" />
+              {tCommon('retry-button')}
+            </Button>
           </div>
         </AlertDialogFooter>
       </AlertDialogContent>
