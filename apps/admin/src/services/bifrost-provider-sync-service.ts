@@ -1,6 +1,7 @@
 import { dbGetAllModelsByOrganizationId, LlmModel } from '@ais-chat/api-database';
 import { DEFAULT_IONOS_BASE_URL, DEFAULT_OPENAI_BASE_URL } from '@ais-chat/api-database/llm-model';
 import { env } from '@/consts/env';
+import { BifrostProviderSyncError } from '@/types/bifrost-provider-sync-error';
 import { logError, logInfo, logWarning } from '@shared/logging';
 
 type BifrostProvider = 'azure' | 'openai' | 'vertex' | 'ionos';
@@ -66,15 +67,6 @@ type BifrostProviderResponse = Omit<BifrostProviderConfig, 'provider' | 'keys'> 
 };
 
 type ProviderSettings = LlmModel['setting'];
-
-export const BIFROST_SYNC_ERROR_MESSAGE = 'Fehler beim Aktualisieren der Bifrost-Konfiguration';
-
-export class BifrostProviderSyncError extends Error {
-  constructor(message = BIFROST_SYNC_ERROR_MESSAGE) {
-    super(message);
-    this.name = 'BifrostProviderSyncError';
-  }
-}
 
 export async function syncBifrostProvidersForOrganization(organizationId: string): Promise<void> {
   const bifrostAdminUrl = env.bifrostAdminUrl;

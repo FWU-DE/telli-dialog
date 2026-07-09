@@ -13,9 +13,8 @@ import { LargeLanguageModel } from '@/types/large-language-model';
 import { createLLMAction, updateLLMAction } from './actions';
 import { ROUTES } from '@/consts/routes';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
+import { isBifrostProviderSyncError } from '@/types/bifrost-provider-sync-error';
 import { logError } from '@shared/logging';
-
-const BIFROST_SYNC_ERROR_MESSAGE = 'Fehler beim Aktualisieren der Bifrost-Konfiguration';
 
 // Helper function to validate JSON
 const jsonStringSchema = z.string().refine((str) => {
@@ -107,7 +106,7 @@ export function LargeLanguageModelDetailView({
       }
     } catch (error) {
       logError('Error saving model', error);
-      if (error instanceof Error && error.message === BIFROST_SYNC_ERROR_MESSAGE) {
+      if (isBifrostProviderSyncError(error)) {
         toast.error('Fehler beim Aktualisieren des Sprachmodells in Bifrost');
         return;
       }
