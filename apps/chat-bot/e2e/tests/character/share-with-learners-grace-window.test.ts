@@ -4,65 +4,65 @@ import { configureCharacter, createCharacter } from '../../utils/character';
 import { waitForAutosave } from '../../utils/utils';
 import { nanoid } from 'nanoid';
 
-const characterName = 'Grace Window Character Test - ' + nanoid(8);
-
 test.describe('share character with grace window', () => {
+  test.use({ storageState: AUTH_FILES.teacher });
+
   let characterId: string;
 
-  test.beforeAll(async ({ browser }) => {
-    // Create character as teacher
-    const page = await browser.newPage({ storageState: AUTH_FILES.teacher });
+  test.beforeEach(async ({ page }) => {
     await createCharacter(page);
-    await configureCharacter(page, { name: characterName });
+    await configureCharacter(page, { name: 'Grace Window Character Test - ' + nanoid(8) });
     await waitForAutosave(page);
 
-    // Extract character ID from URL
     const url = page.url();
     const match = url.match(/characters\/editor\/([^/?]+)/);
     characterId = match ? match[1]! : '';
-
-    await page.close();
   });
 
-  test.describe('teacher perspective', () => {
-    test.use({ storageState: AUTH_FILES.teacher });
+  test('can extend a share session that has not yet expired', async ({ page }) => {
+    await page.goto(`/characters/editor/${characterId}`);
+    await page.waitForURL(`**/characters/editor/${characterId}**`);
 
-    test('can extend a share session that has not yet expired', async ({ page }) => {
-      await page.goto(`/characters/editor/${characterId}`);
-      await page.waitForURL(`**/characters/editor/${characterId}**`);
+    // Select usage time before starting share
+    await page.getByTestId('usage-time-select').click();
+    await page.getByTestId('usage-time-option-30').click();
 
-      // Select usage time before starting share
-      await page.getByTestId('usage-time-select').click();
-      await page.getByTestId('usage-time-option-30').click();
+    await page.getByTestId('start-share-button').click();
 
-      await page.getByTestId('start-share-button').click();
+    await page.waitForURL('**/characters/editor/**/share');
 
-      await page.waitForURL('**/characters/editor/**/share');
+    // Navigate back to editor to verify share is active
+    await page.goto(`/characters/editor/${characterId}`);
 
-      // Navigate back to editor to verify share is active
-      await page.goto(`/characters/editor/${characterId}`);
+    await expect(page.getByTestId('add-additional-time-button')).toBeVisible();
+    await expect(page.getByTestId('stop-share-button')).toBeVisible();
+  });
 
-      await expect(page.getByTestId('add-additional-time-button')).toBeVisible();
-      await expect(page.getByTestId('stop-share-button')).toBeVisible();
-    });
+  test('can manually stop a share session', async ({ page }) => {
+    await page.goto(`/characters/editor/${characterId}`);
+    await page.waitForURL(`**/characters/editor/${characterId}**`);
 
-    test('can manually stop a share session', async ({ page }) => {
-      await page.goto(`/characters/editor/${characterId}`);
-      await page.waitForURL(`**/characters/editor/${characterId}**`);
+    // Start sharing with 30 minutes
+    await page.getByTestId('usage-time-select').click();
+    await page.getByTestId('usage-time-option-30').click();
+    await page.getByTestId('start-share-button').click();
 
-      const stopShareButton = page.getByTestId('stop-share-button');
+    await page.waitForURL('**/characters/editor/**/share');
 
-      if (await stopShareButton.isVisible()) {
-        await stopShareButton.click();
+    // Navigate back to editor
+    await page.goto(`/characters/editor/${characterId}`);
+    await page.waitForURL(`**/characters/editor/${characterId}**`);
 
-        const stopShareDialog = page.getByTestId('stop-share-dialog');
-        await expect(stopShareDialog).toBeVisible();
+    const stopShareButton = page.getByTestId('stop-share-button');
+    await expect(stopShareButton).toBeVisible();
+    await stopShareButton.click();
 
-        await page.getByTestId('stop-share-confirm-button').click();
-        await expect(stopShareDialog).not.toBeVisible();
+    const stopShareDialog = page.getByTestId('stop-share-dialog');
+    await expect(stopShareDialog).toBeVisible();
 
-        await expect(page.getByTestId('start-share-button')).toBeVisible();
-      }
-    });
+    await page.getByTestId('stop-share-confirm-button').click();
+    await expect(stopShareDialog).not.toBeVisible();
+
+    await expect(page.getByTestId('start-share-button')).toBeVisible();
   });
 });
