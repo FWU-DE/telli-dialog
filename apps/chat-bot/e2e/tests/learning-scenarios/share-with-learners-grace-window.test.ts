@@ -16,7 +16,8 @@ test.describe('share learning scenario with 2-hour grace window', () => {
 
     const url = page.url();
     const match = url.match(/learning-scenarios\/editor\/([^/?]+)/);
-    learningScenarioId = match ? match[1]! : '';
+    expect(match, `Expected learning scenario editor URL, got: ${url}`).not.toBeNull();
+    learningScenarioId = match![1]!;
   });
 
   test('can extend a share session that has not yet expired', async ({ page }) => {
