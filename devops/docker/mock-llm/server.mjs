@@ -84,7 +84,7 @@ function extractUrls(text) {
 }
 
 function extractFileNameFromSystemPrompt(systemPrompt) {
-  const match = systemPrompt.match(/Available files right now: ([^\n.]+?\.txt) \(/i);
+  const match = systemPrompt.match(/Available files right now:\s*([^\n]+?)\s+\(\d+ bytes\)/i);
   return match?.[1] ?? 'Große Text Datei.txt';
 }
 
