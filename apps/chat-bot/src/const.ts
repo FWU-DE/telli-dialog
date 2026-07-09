@@ -10,6 +10,8 @@ export const SUPPORTED_DOCUMENTS_EXTENSIONS = [
   'ods',
   'odt',
   'tex',
+  'html',
+  'htm',
 ];
 
 export const SUPPORTED_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'svg'];
