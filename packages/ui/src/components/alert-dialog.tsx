@@ -9,7 +9,7 @@ import { Button } from './button';
 import { usePortalContainer } from './portal-container';
 
 const alertDialogContentVariants = cva(
-  'bg-background fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] rounded-2xl shadow-lg group/alert-dialog-content gap-4 p-4 sm:gap-8 sm:p-8 sm:pt-6 duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
+  'bg-background fixed top-[50%] left-[50%] z-50 w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] rounded-2xl shadow-lg group/alert-dialog-content duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
   {
     variants: {
       size: {
@@ -18,8 +18,8 @@ const alertDialogContentVariants = cva(
         lg: 'max-w-[min(48rem,calc(100%-2rem))]',
       },
       variant: {
-        default: null,
-        scrollable: 'max-h-[calc(100dvh-1rem)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden',
+        default: 'grid gap-4 p-4 sm:gap-8 sm:p-8 sm:pt-6',
+        scrollable: 'flex flex-col overflow-hidden max-h-[calc(100dvh-1rem)] p-4 sm:p-8 sm:py-6',
       },
     },
     defaultVariants: {
@@ -28,6 +28,9 @@ const alertDialogContentVariants = cva(
     },
   },
 );
+
+const alertDialogScrollAreaClassName =
+  'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1 sm:gap-8 sm:pr-2';
 
 function AlertDialog({ ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
   return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />;
@@ -66,6 +69,7 @@ function AlertDialogContent({
   className,
   size = 'default',
   variant = 'default',
+  children,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> &
   VariantProps<typeof alertDialogContentVariants>) {
@@ -78,7 +82,15 @@ function AlertDialogContent({
         data-variant={variant}
         className={cn(alertDialogContentVariants({ size, variant }), className)}
         {...props}
-      />
+      >
+        {variant === 'scrollable' ? (
+          <div data-slot="alert-dialog-scroll-area" className={alertDialogScrollAreaClassName}>
+            {children}
+          </div>
+        ) : (
+          children
+        )}
+      </AlertDialogPrimitive.Content>
     </AlertDialogPortal>
   );
 }
