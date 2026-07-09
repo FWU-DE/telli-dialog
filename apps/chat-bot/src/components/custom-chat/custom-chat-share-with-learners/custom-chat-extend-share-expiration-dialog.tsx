@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from '@ui/components/dialog';
 import { TimeLimitSelect } from './custom-chat-time-limit-select';
-import { usageTimeValuesInMinutes } from './custom-chat-share-with-learners-limit-params';
+import { extendTimeValuesInMinutes } from './custom-chat-share-with-learners-limit-params';
 
 type CustomChatExtendShareExpirationDialogProps = {
   trigger: React.ReactElement;
@@ -83,7 +83,7 @@ export function CustomChatExtendShareExpirationDialog({
             defaultValue={preselectedUsageTimeLimit}
             onChange={setAdditionalTimeInMinutes}
             disabled={isSubmitting}
-            usageTimeValuesInMinutes={usageTimeValuesInMinutes}
+            usageTimeValuesInMinutes={extendTimeValuesInMinutes}
             isAdditionalTime
           />
         </div>
