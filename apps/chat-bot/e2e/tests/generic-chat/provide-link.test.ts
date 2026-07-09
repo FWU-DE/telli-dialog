@@ -8,15 +8,14 @@ test('teacher can provide link and it is displayed in the chat', async ({ page }
   await page.goto('/');
   await sendMessage(
     page,
-    `${MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT}
+    `${MOCK_LLM_COMMANDS.CALL_WEB_SCRAPER}
     Wann hatte der Barock seinen Anfang?
     https://www.planet-wissen.de/geschichte/neuzeit/barock/index.html`,
   );
 
   await expect(page.getByTestId('citation').first()).toContainText('planet-wissen.de');
   await expect(page.getByLabel('assistant message 1')).toBeVisible();
-  // The provided URL is scraped, and its content is injected into the system prompt;
-  // the mock LLM echoes the system prompt back, so the response contains the scraped page text.
+  // The mock LLM calls the scraper tool, so the response contains the scraped page text.
   await expect(page.getByLabel('assistant message 1')).toContainText(/17.\sJahrhundert/);
 });
 

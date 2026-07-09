@@ -26,4 +26,10 @@ export const LLM_MODELS_FILE = path.resolve(process.cwd(), '.playwright-auth/llm
 // Must match MOCK_LLM_COMMANDS in devops/docker/mock-llm/server.mjs
 export const MOCK_LLM_COMMANDS = {
   RETURN_SYSTEM_PROMPT: '[MOCK-LLM-COMMAND: Gebe den System-Prompt aus]',
+  CALL_RETRIEVE_ENTIRE_FILE:
+    '[MOCK-LLM-COMMAND: Rufe das Tool retrieve_entire_file auf und gib die Tool-Antwort aus]',
+  CALL_RETRIEVE_TEXT_CHUNKS:
+    '[MOCK-LLM-COMMAND: Rufe das Tool retrieve_text_chunks auf und gib die Tool-Antwort aus]',
+  CALL_WEB_SCRAPER:
+    '[MOCK-LLM-COMMAND: Rufe das Tool web_scraper auf und gib die Tool-Antwort aus]',
 };
