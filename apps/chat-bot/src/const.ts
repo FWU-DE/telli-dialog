@@ -4,7 +4,6 @@ export const SUPPORTED_DOCUMENTS_EXTENSIONS = [
   'md',
   'txt',
   'pptx',
-  'odp',
   'csv',
   'xlsx',
   'ods',
