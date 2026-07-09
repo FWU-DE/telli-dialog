@@ -34,6 +34,7 @@ import { useShareDataPolling, SharePollingData } from '@/hooks/use-share-data-po
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { CustomChatStopShareButton } from './custom-chat-stop-share-button';
 import { CustomChatGraceWindowNote } from './custom-chat-grace-window-note';
+import { CustomChatShareWarning } from './custom-chat-share-warning';
 
 const shareFormSchema = z.object({
   tokenPointsPercentageLimit: z.number(),
@@ -135,6 +136,10 @@ export function CustomChatShareWithLearners({
 
   const currentBudgetUsedBySharedChat =
     polledData?.budgetUsedBySharedChat ?? budgetUsedBySharedChat;
+  const isTokenLimitExceeded =
+    currentTokenPointsLimit !== null && currentBudgetUsedBySharedChat >= currentTokenPointsLimit;
+  const isShareWarningVisible =
+    shareSessionState === ShareSessionState.EXPIRED_RECENTLY || isTokenLimitExceeded;
 
   const preselectedUsageTimeLimit =
     maxUsageTimeLimit !== null && usageTimeValuesInMinutes.includes(maxUsageTimeLimit)
@@ -174,6 +179,11 @@ export function CustomChatShareWithLearners({
           <p className="mb-4">
             <RichText>{(tags) => t.rich('description', tags)}</RichText>
           </p>
+          {isShareWarningVisible && (
+            <div className="mb-6 w-full">
+              <CustomChatShareWarning info={t('share-not-possible')} />
+            </div>
+          )}
           {isExtendable ? (
             <>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch w-full">
@@ -239,7 +249,7 @@ export function CustomChatShareWithLearners({
                         <CountDownTimer
                           leftTimeInSeconds={sharedChatTimeLeft}
                           totalTimeInSeconds={(maxUsageTimeLimit ?? 0) * 60}
-                          className="!bg-transparent"
+                          className="bg-transparent!"
                           stopWatchClassName="w-4 h-4"
                         />
                       </div>

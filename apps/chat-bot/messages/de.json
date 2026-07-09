@@ -218,16 +218,6 @@
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
     "duplicate-name-format-string": "Duplikat von {sourceName}",
-    "shared": {
-      "title": "Dialogpartner im Unterricht einsetzen",
-      "description": "Wie viel des monatlichen Tokenvolumens darf durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
-      "max-usage": "Maximale Nutzungszeit",
-      "time": "Zeit",
-      "share": "Teilen",
-      "delete-chat-modal-title": "Aktuellen Chat löschen?",
-      "delete-chat-modal-description": "Es wird ein neuer Chat begonnen. Der aktuelle Chat wird unwiderruflich gelöscht.",
-      "delete-chat-modal-confirm-button": "Löschen"
-    },
     "copy-modal": {
       "title": "Dialogpartner kopieren",
       "content": "Dieser Dialogpartner ist schreibgeschützt. Soll eine Kopie im eigenen Bereich erstellt werden? Danach kann dieser frei bearbeitet und angepasst werden.",
@@ -508,6 +498,7 @@
       "token-points": "Tokenvolumen",
       "max-token-points": "Maximales Tokenvolumen",
       "max-usage-time": "Maximale Nutzungszeit",
+      "share-not-possible": "Teilen nicht mehr möglich. Bitte die Einstellungen prüfen",
       "token-points-left": "Verbleibendes Tokenvolumen für diesen Dialog",
       "token-points-spent": "Aufgebraucht",
       "usage-time-left": "Verbleibende Nutzungszeit",
@@ -518,6 +509,7 @@
       "button-start": "Teilen",
       "button-stop": "Stoppen",
       "button-close-session": "Sitzung beenden",
+      "button-to-share-settings": "Zu den Einstellungen",
       "stop-share-modal-title": "Sitzung beenden?",
       "stop-share-modal-description": "Der Chat kann dann nicht mehr verlängert und wiederaufgenommen werden. Die Lernenden können ihre Chats nicht mehr fortsetzen.\n\nDie Lernenden können sich ihren Chat jedoch noch als Word-Datei herunterladen, sofern ihr Browser-Tab nicht geschlossen wurde.",
       "button-to-share-page": "Teilen",
