@@ -16,7 +16,8 @@ test.describe('share character with grace window', () => {
 
     const url = page.url();
     const match = url.match(/characters\/editor\/([^/?]+)/);
-    characterId = match ? match[1]! : '';
+    expect(match, `Expected character editor URL, got: ${url}`).not.toBeNull();
+    characterId = match![1]!;
   });
 
   test('can extend a share session that has not yet expired', async ({ page }) => {
