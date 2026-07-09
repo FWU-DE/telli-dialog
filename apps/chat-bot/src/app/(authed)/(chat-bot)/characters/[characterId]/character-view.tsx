@@ -16,7 +16,7 @@ import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading
 import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-update';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
-import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
 import { Card, CardContent } from '@ui/components/card';
 import { FieldGroup } from '@ui/components/field';
 import { useToast } from '@/components/common/toast';
@@ -30,11 +30,11 @@ import {
   updateCharacterShareTokenPointsLimitAction,
 } from '../editor/[characterId]/actions';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
-import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners';
+import { CustomChatShareWithLearners } from '@/components/custom-chat/share-with-learners/custom-chat-share-with-learners';
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
-import { FilterDisplaySection } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-display-section';
-import { extractFilterValues } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
+import { FilterDisplaySection } from '@/components/custom-chat/filter/custom-chat-filter-display-section';
+import { extractFilterValues } from '@/components/custom-chat/filter/custom-chat-filter-utils';
 
 export function CharacterView({
   character,

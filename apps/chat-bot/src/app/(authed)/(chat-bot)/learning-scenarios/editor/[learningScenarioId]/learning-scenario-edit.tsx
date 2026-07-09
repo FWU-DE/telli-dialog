@@ -52,13 +52,13 @@ import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-imag
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
-import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
 import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
 import { WebSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
-import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners';
+import { CustomChatShareWithLearners } from '@/components/custom-chat/share-with-learners/custom-chat-share-with-learners';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
@@ -70,11 +70,11 @@ import {
   getShareFormValues,
 } from '@/components/custom-chat/access-level-sharing';
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
-import FilterSelectSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
+import FilterSelectSection from '@/components/custom-chat/filter/custom-chat-filter-select-section';
 import {
   extractFilterValues,
   toFilterGroup,
-} from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
+} from '@/components/custom-chat/filter/custom-chat-filter-utils';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
