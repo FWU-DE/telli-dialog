@@ -25,10 +25,10 @@ export default function DisplayUploadedFile({
   file,
   onDeattachFile,
 }: DisplayUploadedFileProps) {
-  const file_extension = getFileExtension(fileName);
+  const fileExtension = getFileExtension(fileName);
   const isImage = isImageFile(fileName);
 
-  const { Icon: FileIcon, fillColor: backgroundColor } = getFileIconByFileExtension(file_extension);
+  const { Icon: FileIcon, fillColor: backgroundColor } = getFileIconByFileExtension(fileExtension);
 
   const { data: imageUrl, isLoading } = useQuery({
     queryKey: file
@@ -94,7 +94,9 @@ export default function DisplayUploadedFile({
         </button>
       )}
       <div className="relative flex items-center gap-2 h-[24px] min-w-0">
-        {status === 'processed' && <FileIcon className="h-8 w-8 shrink-0" />}
+        {status === 'processed' && (
+          <FileIcon className="h-8 w-8 shrink-0" weight="fill" color={backgroundColor} />
+        )}
         {status === 'uploading' && <Spinner className="h-5 w-5 shrink-0" />}
         {status === 'failed' && <CrossIcon className="h-5 w-5 shrink-0" />}
         <div className="flex min-w-0 flex-col">
