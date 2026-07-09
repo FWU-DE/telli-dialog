@@ -24,19 +24,21 @@ const gpt4oMiniBaseUrl = process.env.LLM_GPT4OMINI_BASE_URL ?? 'PLACEHOLDER_BASE
 const gpt5nanoApiKey = process.env.LLM_GPT5NANO_API_KEY ?? 'API_KEY_PLACEHOLDER';
 const gpt5nanoBaseUrl = process.env.LLM_GPT5NANO_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const mockLlmApiKey = process.env.LLM_MOCK_API_KEY ?? 'API_KEY_PLACEHOLDER';
-const mockLlmBaseUrl = process.env.LLM_MOCK_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
+const mockLlmBaseUrl =
+  process.env.LLM_MOCK_BASE_URL ??
+  'http://localhost:6556/openai/deployments/mock-echo?api-version=2025-04-01-preview';
 
-// Mock LLM: OpenAI-compatible echo server used as the default model in e2e tests.
-// Echoes the last user message back as a streaming response — no real API calls, fully deterministic.
+// Mock LLM: Azure/OpenAI Responses-compatible server used as the default model in e2e tests.
+// Echoes prompts or drives deterministic tool calls — no real API calls.
 // See devops/docker/mock-llm/ for the server implementation.
 const mockLlm: LlmInsertModel = {
   organizationId: ORGANIZATION_ID,
-  provider: 'openai',
+  provider: 'azure',
   name: 'mock-echo',
   displayName: 'Mock LLM',
   description: 'Mock LLM for e2e testing — echoes back the received prompt',
   setting: {
-    provider: 'openai',
+    provider: 'azure',
     apiKey: mockLlmApiKey,
     baseUrl: mockLlmBaseUrl,
   },
