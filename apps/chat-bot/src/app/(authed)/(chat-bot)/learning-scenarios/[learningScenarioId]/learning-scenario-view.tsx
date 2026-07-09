@@ -9,7 +9,7 @@ import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
-import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
 import type { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import type { WebSource } from '@shared/db/types';
 import { useRouter } from 'next/navigation';
@@ -22,7 +22,7 @@ import {
 import { Card, CardContent } from '@ui/components/card';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
-import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners';
+import { CustomChatShareWithLearners } from '@/components/custom-chat/share-with-learners/custom-chat-share-with-learners';
 import {
   extendLearningScenarioShareExpirationAction,
   getLearningScenarioShareDataAction,
@@ -33,8 +33,8 @@ import {
 import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
-import { FilterDisplaySection } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-display-section';
-import { extractFilterValues } from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
+import { FilterDisplaySection } from '@/components/custom-chat/filter/custom-chat-filter-display-section';
+import { extractFilterValues } from '@/components/custom-chat/filter/custom-chat-filter-utils';
 
 export function LearningScenarioView({
   learningScenario,

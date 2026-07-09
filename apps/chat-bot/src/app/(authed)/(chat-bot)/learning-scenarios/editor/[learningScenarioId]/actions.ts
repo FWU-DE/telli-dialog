@@ -1,7 +1,7 @@
 'use server';
 
 import { AccessLevel, LearningScenarioSelectModel } from '@shared/db/schema';
-import { ShareWithLearnersLimitParams } from '@/components/custom-chat/custom-chat-share-with-learners/custom-chat-share-with-learners-limit-params';
+import { ShareWithLearnersLimitParams } from '@/components/custom-chat/share-with-learners/custom-chat-share-with-learners-limit-params';
 import { runServerAction } from '@shared/actions/run-server-action';
 import {
   extendLearningScenarioShareExpiration,

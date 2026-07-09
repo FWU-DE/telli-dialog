@@ -7,7 +7,7 @@ import {
   getActiveFilterPills,
   type ActiveFilterPill,
   type FilterValues,
-} from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
+} from '@/components/custom-chat/filter/custom-chat-filter-utils';
 import {
   type EntityType,
   usePersistedOverviewFilter,

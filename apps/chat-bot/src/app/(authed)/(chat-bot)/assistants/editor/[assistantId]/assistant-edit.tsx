@@ -48,7 +48,7 @@ import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-imag
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
-import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
 import { WebSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';
@@ -61,11 +61,11 @@ import {
   getAccessLevelFromShareForm,
   getShareFormValues,
 } from '@/components/custom-chat/access-level-sharing';
-import FilterSelectSection from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-select-section';
+import FilterSelectSection from '@/components/custom-chat/filter/custom-chat-filter-select-section';
 import {
   extractFilterValues,
   toFilterGroup,
-} from '@/components/custom-chat/custom-chat-filter/custom-chat-filter-utils';
+} from '@/components/custom-chat/filter/custom-chat-filter-utils';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
