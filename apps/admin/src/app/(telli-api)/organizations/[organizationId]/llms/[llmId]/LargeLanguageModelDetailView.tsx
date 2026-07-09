@@ -15,6 +15,8 @@ import { ROUTES } from '@/consts/routes';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
 import { logError } from '@shared/logging';
 
+const BIFROST_SYNC_ERROR_MESSAGE = 'Fehler beim Aktualisieren der Bifrost-Konfiguration';
+
 // Helper function to validate JSON
 const jsonStringSchema = z.string().refine((str) => {
   if (!str.trim()) return true; // Empty string is valid
@@ -105,6 +107,11 @@ export function LargeLanguageModelDetailView({
       }
     } catch (error) {
       logError('Error saving model', error);
+      if (error instanceof Error && error.message === BIFROST_SYNC_ERROR_MESSAGE) {
+        toast.error('Fehler beim Aktualisieren des Sprachmodells in Bifrost');
+        return;
+      }
+
       toast.error(
         isCreate
           ? 'Fehler beim Erstellen des Sprachmodells'

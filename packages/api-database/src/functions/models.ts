@@ -5,8 +5,10 @@ import {
   dbGetOrganizationAndProjectsByOrganizationId,
   LlmInsertModel,
   LlmModel,
+  apiKeyTable,
   llmModelApiKeyMappingTable,
   llmModelTable,
+  projectTable,
 } from '..';
 
 export async function dbGetAllModels() {
@@ -64,6 +66,23 @@ export async function dbGetAllModelsByOrganizationId(organizationId: string) {
     .from(llmModelTable)
     .where(eq(llmModelTable.organizationId, organizationId))
     .orderBy(llmModelTable.name, llmModelTable.createdAt);
+}
+
+export async function dbGetMappedModelsByOrganizationId(organizationId: string) {
+  const rows = await db
+    .select({ model: llmModelTable })
+    .from(llmModelTable)
+    .innerJoin(
+      llmModelApiKeyMappingTable,
+      eq(llmModelApiKeyMappingTable.llmModelId, llmModelTable.id),
+    )
+    .innerJoin(apiKeyTable, eq(llmModelApiKeyMappingTable.apiKeyId, apiKeyTable.id))
+    .innerJoin(projectTable, eq(apiKeyTable.projectId, projectTable.id))
+    .where(
+      and(eq(projectTable.organizationId, organizationId), eq(llmModelTable.isDeleted, false)),
+    );
+
+  return [...new Map(rows.map(({ model }) => [model.id, model])).values()];
 }
 
 /**

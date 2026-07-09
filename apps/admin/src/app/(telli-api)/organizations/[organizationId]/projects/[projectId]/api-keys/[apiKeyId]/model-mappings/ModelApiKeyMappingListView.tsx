@@ -29,6 +29,8 @@ import {
 import { LargeLanguageModel } from '@/types/large-language-model';
 import { ModelApiKeyMapping } from '@/types/model-mappings';
 
+const BIFROST_SYNC_ERROR_MESSAGE = 'Fehler beim Aktualisieren der Bifrost-Konfiguration';
+
 export type ModelApiKeyMappingListViewProps = {
   organizationId: string;
   projectId: string;
@@ -99,6 +101,11 @@ export function ModelApiKeyMappingListView({
       await loadData();
     } catch (error) {
       logError('Error saving assignments', error);
+      if (error instanceof Error && error.message === BIFROST_SYNC_ERROR_MESSAGE) {
+        toast.error('Fehler beim Aktualisieren der Bifrost-Zuordnung');
+        return;
+      }
+
       toast.error('Fehler beim Speichern der Zuordnungen');
     } finally {
       setIsSaving(false);
