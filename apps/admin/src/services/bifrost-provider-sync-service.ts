@@ -67,6 +67,7 @@ type BifrostProviderResponse = Omit<BifrostProviderConfig, 'provider' | 'keys'> 
 };
 
 type ProviderSettings = LlmModel['setting'];
+const GENERATED_KEY_PREFIX = 'ais-chat';
 
 export async function syncBifrostProvidersForOrganization(organizationId: string): Promise<void> {
   const bifrostAdminUrl = env.bifrostAdminUrl;
@@ -77,7 +78,9 @@ export async function syncBifrostProvidersForOrganization(organizationId: string
     return;
   }
 
-  const models = await dbGetAllModelsByOrganizationId(organizationId);
+  const models = (await dbGetAllModelsByOrganizationId(organizationId)).filter(
+    (model) => !model.isDeleted,
+  );
   const providerConfigs = buildBifrostProviderConfigs(models);
 
   try {
@@ -174,13 +177,15 @@ function buildAzureProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] 
       throw new BifrostProviderSyncError();
     }
 
+    const modelNames = getModelNames(groupedModels);
+
     return {
       provider: 'azure',
       keys: [
         {
           name: buildKeyName('azure', azureUrl.endpoint, setting.apiKey),
           value: setting.apiKey,
-          models: getModelNames(groupedModels),
+          models: modelNames,
           weight: 1,
           aliases: Object.fromEntries(
             groupedModels.flatMap((model) => {
@@ -211,6 +216,8 @@ function buildOpenAiProviderConfigs(models: LlmModel[]): BifrostProviderConfig[]
       throw new BifrostProviderSyncError();
     }
 
+    const modelNames = getModelNames(groupedModels);
+
     return {
       provider: 'openai',
       network_config:
@@ -219,7 +226,7 @@ function buildOpenAiProviderConfigs(models: LlmModel[]): BifrostProviderConfig[]
         {
           name: buildKeyName('openai', setting.baseUrl, setting.apiKey),
           value: setting.apiKey,
-          models: getModelNames(groupedModels),
+          models: modelNames,
           weight: 1,
           enabled: true,
         },
@@ -240,6 +247,8 @@ function buildIonosProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] 
 
     const baseUrl = setting.baseUrl.replace(/\/v1\/?$/, '');
 
+    const modelNames = getModelNames(groupedModels);
+
     return {
       provider: 'ionos',
       network_config: { base_url: baseUrl || DEFAULT_IONOS_BASE_URL.replace(/\/v1\/?$/, '') },
@@ -257,7 +266,7 @@ function buildIonosProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] 
         {
           name: buildKeyName('ionos', setting.baseUrl, setting.apiKey),
           value: setting.apiKey,
-          models: getModelNames(groupedModels),
+          models: modelNames,
           weight: 1,
           enabled: true,
         },
@@ -276,6 +285,8 @@ function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderConfig[]
       throw new BifrostProviderSyncError();
     }
 
+    const modelNames = getModelNames(groupedModels);
+
     return {
       provider: 'vertex',
       keys: [
@@ -286,7 +297,7 @@ function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderConfig[]
             setting.projectId,
           ),
           value: '',
-          models: getModelNames(groupedModels),
+          models: modelNames,
           weight: 1,
           vertex_key_config: {
             project_id: setting.projectId,
@@ -333,9 +344,10 @@ function buildKeyName(
   uniqueValue: string,
 ): string {
   const readablePart = toReadableKeyNamePart(readableValue);
+  // The suffix keeps multiple credentials for the same endpoint distinct without exposing the raw secret.
   const hashPart = hashString(`${provider}:${readableValue}:${uniqueValue}`).slice(0, 8);
 
-  return `${provider}-${readablePart}-${hashPart}`;
+  return `${GENERATED_KEY_PREFIX}-${provider}-${readablePart}-${hashPart}`;
 }
 
 function toReadableKeyNamePart(value: string): string {
@@ -359,17 +371,21 @@ function hashString(value: string): string {
 }
 
 function parseAzureBaseUrl(baseUrl: string): { endpoint: string; deployment: string } | undefined {
-  const [urlWithoutQuery] = baseUrl.split('?');
-  if (!urlWithoutQuery) return undefined;
+  let url: URL;
+  try {
+    url = new URL(baseUrl);
+  } catch {
+    return undefined;
+  }
 
-  const urlParts = urlWithoutQuery.split('/');
+  const urlParts = url.pathname.split('/').filter(Boolean);
   const deploymentIndex = urlParts.findIndex((part) => part === 'deployments');
   const deployment = urlParts[deploymentIndex + 1];
 
   if (deploymentIndex === -1 || !deployment) return undefined;
 
   return {
-    endpoint: urlParts.slice(0, deploymentIndex - 1).join('/'),
+    endpoint: `${url.protocol}//${url.host}`,
     deployment,
   };
 }
@@ -379,10 +395,24 @@ async function syncBifrostProvider(
   providerConfig: BifrostProviderConfig,
 ): Promise<void> {
   await ensureBifrostProvider(bifrostAdminUrl, providerConfig);
+  const existingKeysBeforeSync = await listBifrostProviderKeys(
+    bifrostAdminUrl,
+    providerConfig.provider,
+  );
   await Promise.all(
     providerConfig.keys.map((key) =>
-      syncBifrostProviderKey(bifrostAdminUrl, providerConfig.provider, key),
+      syncBifrostProviderKey(bifrostAdminUrl, providerConfig.provider, key, existingKeysBeforeSync),
     ),
+  );
+  const existingKeysAfterSync = await listBifrostProviderKeys(
+    bifrostAdminUrl,
+    providerConfig.provider,
+  );
+  await disableStaleGeneratedBifrostKeys(
+    bifrostAdminUrl,
+    providerConfig.provider,
+    providerConfig.keys,
+    existingKeysAfterSync,
   );
 }
 
@@ -428,13 +458,9 @@ async function syncBifrostProviderKey(
   bifrostAdminUrl: string,
   provider: BifrostProvider,
   key: BifrostKey,
+  existingKeys: BifrostKey[],
 ): Promise<void> {
-  const keysResponse = await assertBifrostResponse(
-    bifrostFetch(bifrostAdminUrl, `/api/providers/${provider}/keys`, { method: 'GET' }),
-    provider,
-  );
-  const keys = (await keysResponse.json()) as { keys?: BifrostKey[] };
-  const existingKey = keys.keys?.find((existingKey) => existingKey.name === key.name);
+  const existingKey = existingKeys.find((existingKey) => existingKey.name === key.name);
 
   if (existingKey?.id) {
     await assertBifrostResponse(
@@ -454,6 +480,47 @@ async function syncBifrostProviderKey(
     }),
     provider,
   );
+}
+
+async function disableStaleGeneratedBifrostKeys(
+  bifrostAdminUrl: string,
+  provider: BifrostProvider,
+  desiredKeys: BifrostKey[],
+  existingKeys: BifrostKey[],
+): Promise<void> {
+  const desiredKeyNames = new Set(desiredKeys.map((key) => key.name));
+  const generatedKeyPrefix = `${GENERATED_KEY_PREFIX}-${provider}-`;
+  const staleGeneratedKeys = existingKeys.filter(
+    (key) =>
+      key.id &&
+      key.name.startsWith(generatedKeyPrefix) &&
+      !desiredKeyNames.has(key.name) &&
+      key.enabled !== false,
+  );
+
+  await Promise.all(
+    staleGeneratedKeys.map((key) =>
+      assertBifrostResponse(
+        bifrostFetch(bifrostAdminUrl, `/api/providers/${provider}/keys/${key.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ ...key, enabled: false, models: [] }),
+        }),
+        provider,
+      ),
+    ),
+  );
+}
+
+async function listBifrostProviderKeys(
+  bifrostAdminUrl: string,
+  provider: BifrostProvider,
+): Promise<BifrostKey[]> {
+  const keysResponse = await assertBifrostResponse(
+    bifrostFetch(bifrostAdminUrl, `/api/providers/${provider}/keys`, { method: 'GET' }),
+    provider,
+  );
+  const keys = (await keysResponse.json()) as { keys?: BifrostKey[] };
+  return keys.keys ?? [];
 }
 
 function getAddProviderPayload(providerConfig: BifrostProviderConfig) {
