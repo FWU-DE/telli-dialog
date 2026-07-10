@@ -103,7 +103,8 @@ export function CustomShareConfirmationDialog({
       }}
     >
       <AlertDialogContent
-        className="grid max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-3xl sm:max-w-3xl! grid-rows-[auto_minmax(0,1fr)_auto] gap-4 overflow-hidden p-4 pt-4 sm:max-h-[calc(100dvh-2rem)] sm:w-full sm:gap-6 sm:p-8 sm:pt-6"
+        variant="scrollable"
+        size="lg"
         onEscapeKeyDown={(event) => {
           if (!allChecklistItemsChecked) {
             event.preventDefault();
@@ -114,48 +115,44 @@ export function CustomShareConfirmationDialog({
           <AlertDialogTitle>{t('community-confirmation.title')}</AlertDialogTitle>
         </AlertDialogHeader>
 
-        <div className="min-h-0 overflow-y-auto pr-1 sm:overflow-y-visible sm:pr-2">
-          <div className="space-y-6">
-            <AlertDialogDescription>
-              {t('community-confirmation.description')}
-            </AlertDialogDescription>
-            {CHECKLIST_SECTIONS.map((section) => (
-              <section key={section.titleKey} className="space-y-3">
-                <div className="font-semibold">{t(section.titleKey)}</div>
-                <div className="space-y-2 sm:space-y-3">
-                  {section.items.map((item) => {
-                    const checkboxId = item.key.replaceAll('.', '-');
+        <div className="space-y-6">
+          <AlertDialogDescription>{t('community-confirmation.description')}</AlertDialogDescription>
+          {CHECKLIST_SECTIONS.map((section) => (
+            <section key={section.titleKey} className="space-y-3">
+              <div className="font-semibold">{t(section.titleKey)}</div>
+              <div className="space-y-2 sm:space-y-3">
+                {section.items.map((item) => {
+                  const checkboxId = item.key.replaceAll('.', '-');
 
-                    return (
-                      <label key={item.key} htmlFor={checkboxId} className="flex items-start gap-3">
-                        <Checkbox
-                          id={checkboxId}
-                          className="mt-1"
-                          checked={checklistState[item.key]}
-                          onCheckedChange={(checked) => updateChecklist(item.key, checked === true)}
-                        />
-                        {'useMarkdown' in item && item.useMarkdown ? (
-                          <div
-                            className="flex-1"
-                            onClickCapture={(event) => {
-                              const target = event.target;
-                              if (target instanceof HTMLElement && target.closest('a')) {
-                                event.stopPropagation();
-                              }
-                            }}
-                          >
-                            <MarkdownDisplay>{t(item.key)}</MarkdownDisplay>
-                          </div>
-                        ) : (
-                          <span>{t(item.key)}</span>
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
-              </section>
-            ))}
-          </div>
+                  return (
+                    <label key={item.key} htmlFor={checkboxId} className="flex items-start gap-3">
+                      <Checkbox
+                        id={checkboxId}
+                        className="mt-1"
+                        checked={checklistState[item.key]}
+                        onCheckedChange={(checked) => updateChecklist(item.key, checked === true)}
+                      />
+                      {'useMarkdown' in item && item.useMarkdown ? (
+                        <div
+                          className="flex-1"
+                          onClickCapture={(event) => {
+                            const target = event.target;
+                            if (target instanceof HTMLElement && target.closest('a')) {
+                              event.stopPropagation();
+                            }
+                          }}
+                        >
+                          <MarkdownDisplay>{t(item.key)}</MarkdownDisplay>
+                        </div>
+                      ) : (
+                        <span>{t(item.key)}</span>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
         </div>
 
         <AlertDialogFooter className="mt-4 sm:pt-0">
