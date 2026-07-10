@@ -31,6 +31,10 @@ const persistedSharedFileSchema = z.object({
 });
 
 const persistedSharedFileMappingSchema = z.record(z.string(), z.array(persistedSharedFileSchema));
+const persistedSharedFileMappingPayloadSchema = z.object({
+  sessionId: z.string().min(1),
+  mapping: persistedSharedFileMappingSchema,
+});
 
 export type PersistedSharedFile = z.infer<typeof persistedSharedFileSchema>;
 
@@ -125,6 +129,7 @@ export function clearSharedChatMessages(inviteCode: string): void {
 
 export function loadSharedChatFileMapping(
   inviteCode: string,
+  sharedSessionId?: string,
 ): Map<string, PersistedSharedFile[]> | null {
   const storage = getSessionStorage();
   if (storage === null) return null;
@@ -147,17 +152,48 @@ export function loadSharedChatFileMapping(
     return null;
   }
 
-  const result = persistedSharedFileMappingSchema.safeParse(parsed);
-  if (!result.success) {
+  const payloadResult = persistedSharedFileMappingPayloadSchema.safeParse(parsed);
+
+  if (payloadResult.success) {
+    if (
+      sharedSessionId !== undefined &&
+      payloadResult.data.sessionId.trim() !== sharedSessionId.trim()
+    ) {
+      try {
+        storage.removeItem(sharedChatFileMappingStorageKey(inviteCode));
+      } catch (error) {
+        logError('Failed to clear stale shared chat file mapping from sessionStorage', error);
+      }
+      return null;
+    }
+
+    return new Map(Object.entries(payloadResult.data.mapping));
+  }
+
+  const legacyResult = persistedSharedFileMappingSchema.safeParse(parsed);
+  if (!legacyResult.success) {
     return null;
   }
 
-  return new Map(Object.entries(result.data));
+  // Legacy mapping does not contain a session id and can cross session
+  // boundaries. Drop it when session-aware loading is requested.
+  if (sharedSessionId !== undefined) {
+    try {
+      storage.removeItem(sharedChatFileMappingStorageKey(inviteCode));
+    } catch (error) {
+      logError('Failed to clear legacy shared chat file mapping from sessionStorage', error);
+    }
+
+    return null;
+  }
+
+  return new Map(Object.entries(legacyResult.data));
 }
 
 export function saveSharedChatFileMapping(
   inviteCode: string,
   mapping: Map<string, PersistedSharedFile[]>,
+  sharedSessionId?: string,
 ): void {
   const storage = getSessionStorage();
   if (storage === null) return;
@@ -165,6 +201,16 @@ export function saveSharedChatFileMapping(
   try {
     const serializable = Object.fromEntries(mapping);
     const parsed = persistedSharedFileMappingSchema.parse(serializable);
+
+    if (sharedSessionId !== undefined && sharedSessionId.trim() !== '') {
+      const payload = persistedSharedFileMappingPayloadSchema.parse({
+        sessionId: sharedSessionId,
+        mapping: parsed,
+      });
+      storage.setItem(sharedChatFileMappingStorageKey(inviteCode), JSON.stringify(payload));
+      return;
+    }
+
     storage.setItem(sharedChatFileMappingStorageKey(inviteCode), JSON.stringify(parsed));
   } catch (error) {
     logError('Failed to save shared chat file mapping to sessionStorage', error);

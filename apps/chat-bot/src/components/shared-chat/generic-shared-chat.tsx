@@ -115,17 +115,17 @@ export default function GenericSharedChat({
   const chatActive = shareSessionState === ShareSessionState.RUNNING;
 
   const [explicitDialogStarted, setExplicitDialogStarted] = useState(false);
+  const [sharedSessionId] = useState(() => getOrCreateSharedChatSessionId(inviteCode));
   const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
   const [pendingFileMapping, setPendingFileMapping] = useState<Map<string, PendingFileModel[]>>(
     () => {
-      const restored = loadSharedChatFileMapping(inviteCode);
+      const restored = loadSharedChatFileMapping(inviteCode, sharedSessionId);
       if (restored === null) {
         return new Map();
       }
       return new Map(restored);
     },
   );
-  const [sharedSessionId] = useState(() => getOrCreateSharedChatSessionId(inviteCode));
 
   const {
     messages,
@@ -158,7 +158,13 @@ export default function GenericSharedChat({
       reactivateAutoScrolling();
 
       const currentFiles = Array.from(files);
-      const fileIds = currentFiles.map(([, file]) => file.fileId).filter(Boolean) as string[];
+      const previousFileIds = Array.from(pendingFileMapping.values())
+        .flatMap((pendingFiles) => pendingFiles.map((pendingFile) => pendingFile.id))
+        .filter((id): id is string => id.trim() !== '');
+      const currentFileIds = currentFiles
+        .map(([, file]) => file.fileId)
+        .filter((id): id is string => id !== undefined && id.trim() !== '');
+      const fileIds = [...new Set([...previousFileIds, ...currentFileIds])];
       const userMessageId = crypto.randomUUID();
 
       const pendingFiles: PendingFileModel[] = currentFiles.map(([, file]) => ({
@@ -212,8 +218,8 @@ export default function GenericSharedChat({
   }
 
   useEffect(() => {
-    saveSharedChatFileMapping(inviteCode, pendingFileMapping);
-  }, [inviteCode, pendingFileMapping]);
+    saveSharedChatFileMapping(inviteCode, pendingFileMapping, sharedSessionId);
+  }, [inviteCode, pendingFileMapping, sharedSessionId]);
 
   function handleReload() {
     void reload();
