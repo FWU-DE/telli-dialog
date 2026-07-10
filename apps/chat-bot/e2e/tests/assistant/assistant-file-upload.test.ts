@@ -35,7 +35,7 @@ test('should upload file and chat with assistant template (Schulorganisationsass
   // Send message about file contents
   await sendMessage(
     page,
-    `${MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT} Wie heißt die Hauptperson die in dieser Datei genannt wird?`,
+    `${MOCK_LLM_COMMANDS.CALL_RETRIEVE_ENTIRE_FILE} Wie heißt die Hauptperson die in dieser Datei genannt wird?`,
   );
 
   // Verify the response contains expected content
@@ -43,7 +43,6 @@ test('should upload file and chat with assistant template (Schulorganisationsass
   const allAssistantMessages = page.locator('[aria-label^="assistant message"]');
   const lastAssistantMessage = allAssistantMessages.last();
   await expect(lastAssistantMessage).toBeVisible({ timeout: 10000 });
-  // 'Napoleon Bonaparte' is written in the uploaded file, which is added to the system prompt;
-  // the mock LLM echoes the system prompt back.
+  // 'Napoleon Bonaparte' is written in the uploaded file, which the mock LLM retrieves via tool call.
   await expect(lastAssistantMessage).toContainText(/Napol[eé]on Bonaparte/i, { timeout: 10000 });
 });
