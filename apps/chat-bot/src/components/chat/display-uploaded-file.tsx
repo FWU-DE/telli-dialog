@@ -2,21 +2,23 @@ import React from 'react';
 import Image from 'next/image';
 import { FileStatus } from './upload-file-button';
 
-import ParagraphWithConditionalTitle from './paragraph-with-conditional-title';
 import { getFileIconByFileExtension } from '../icons/file-upload-icons/file-icons-dict';
 import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
 import CrossIcon from '../icons/cross';
-import { getFileExtension, isImageFile } from '@/utils/files/generic';
+import { getFileNameAndFileExtension, isImageFile } from '@/utils/files/generic';
 import { getReadOnlySignedUrlAction } from '@/app/api/file-operations/actions';
 import { useQuery } from '@tanstack/react-query';
 import { LocalFileState } from './send-message-form';
+import { cn } from '@/utils/tailwind';
 
 type DisplayUploadedFileProps = {
   fileName: string;
   status: FileStatus;
   file?: LocalFileState;
   onDeattachFile?: () => void;
+  height?: 'default' | 'large';
+  width?: 'default' | 'small';
 };
 
 export default function DisplayUploadedFile({
@@ -24,8 +26,10 @@ export default function DisplayUploadedFile({
   status,
   file,
   onDeattachFile,
+  height = 'default',
+  width = 'default',
 }: DisplayUploadedFileProps) {
-  const fileExtension = getFileExtension(fileName);
+  const [fileStem, fileExtension] = getFileNameAndFileExtension(fileName);
   const isImage = isImageFile(fileName);
 
   const { Icon: FileIcon, fillColor: backgroundColor } = getFileIconByFileExtension(fileExtension);
@@ -62,7 +66,7 @@ export default function DisplayUploadedFile({
             <DeattachFileIcon />
           </button>
         )}
-        <div className="relative flex items-center gap-2 h-[56px] w-[56px] overflow-hidden rounded-enterprise-sm">
+        <div className="relative flex items-center gap-2 h-14 w-14 overflow-hidden rounded-enterprise-sm">
           {status === 'processed' && !isLoading && !!imageUrl ? (
             <Image
               src={imageUrl}
@@ -74,7 +78,7 @@ export default function DisplayUploadedFile({
               unoptimized // Since we're using signed URLs from S3
             />
           ) : status === 'uploading' || isLoading ? (
-            <Spinner className="w-[56px] h-5" />
+            <Spinner className="w-14 h-5" />
           ) : (
             <CrossIcon className="w-5 h-5" />
           )}
@@ -83,25 +87,34 @@ export default function DisplayUploadedFile({
     );
   }
 
-  // TODO: this shoulld only be a button if the fileId is present and otherwise just a div
-
   return (
-    <div className="flex w-fit max-w-40 min-w-0 shrink-0 items-center justify-start gap-2 py-4 pl-4 pr-6 text-sm relative group">
-      <div className="absolute inset-0 opacity-5" style={{ backgroundColor }} />
+    <div
+      className={cn(
+        'flex w-fit min-w-0 max-w-full shrink-0 items-center justify-start gap-2 pl-4 pr-6 text-sm relative group',
+        height === 'large' ? 'py-0 h-14' : 'py-2',
+      )}
+    >
+      <div className="absolute inset-0 opacity-5 rounded-lg" style={{ backgroundColor }} />
       {onDeattachFile !== undefined && (
         <button onClick={onDeattachFile} className="absolute right-0 top-0 hover:bg-neutral-200">
           <DeattachFileIcon />
         </button>
       )}
-      <div className="relative flex items-center gap-2 h-[24px] min-w-0">
+      <div
+        className={cn(
+          'relative flex items-center gap-2 min-w-0',
+          height === 'large' ? 'h-14' : 'h-6',
+        )}
+      >
         {status === 'processed' && (
-          <FileIcon className="h-8 w-8 shrink-0" weight="fill" color={backgroundColor} />
+          <FileIcon className="h-5 w-5 shrink-0" color={backgroundColor} />
         )}
         {status === 'uploading' && <Spinner className="h-5 w-5 shrink-0" />}
         {status === 'failed' && <CrossIcon className="h-5 w-5 shrink-0" />}
-        <div className="flex min-w-0 flex-col">
-          <ParagraphWithConditionalTitle content={fileName} />
-          <span className="text-left text-gray-100 font-normal text-[10px]">{`.${getFileExtension(fileName)}`}</span>
+        <div className={cn('flex min-w-0 flex-col', width === 'small' ? 'max-w-24' : 'max-w-80')}>
+          <p className="truncate overflow-hidden text-sm" title={fileName}>
+            {fileStem}
+          </p>
         </div>
       </div>
     </div>

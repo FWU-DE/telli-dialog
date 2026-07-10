@@ -55,13 +55,3 @@ export function getFileNameAndFileExtension(fileName: string): [string, string] 
   const fileStem = parts.slice(0, -1).join('.');
   return [fileStem, extension];
 }
-
-export function hexToRGBA(hex: string, opacity = 1) {
-  const sanitizedHex = hex.replace('#', '');
-
-  const r = parseInt(sanitizedHex.substring(0, 2), 16);
-  const g = parseInt(sanitizedHex.substring(2, 4), 16);
-  const b = parseInt(sanitizedHex.substring(4, 6), 16);
-
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-}

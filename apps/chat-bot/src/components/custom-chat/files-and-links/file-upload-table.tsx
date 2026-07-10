@@ -8,7 +8,7 @@ import Spinner from '../../icons/spinner';
 import CrossIcon from '../../icons/cross';
 import { LocalFileState } from '../../chat/send-message-form';
 import { getFileIconByFileExtension } from '../../icons/file-upload-icons/file-icons-dict';
-import { formatBytes, getFileNameAndFileExtension, hexToRGBA } from '@/utils/files/generic';
+import { formatBytes, getFileNameAndFileExtension } from '@/utils/files/generic';
 import { FileStatus } from '../../chat/upload-file-button';
 import { useToast } from '../../common/toast';
 import { useTranslations } from 'next-intl';
@@ -83,17 +83,16 @@ export default function FilesTable({
             >
               <div className="flex gap-2 items-center flex-1 min-w-0">
                 {status === 'processed' && (
-                  <Icon
-                    className="w-9 h-9 p-1.5 shrink-0"
-                    style={{ background: hexToRGBA(fillColor, 0.05) }}
-                  />
+                  <Icon className="w-9 h-9 p-1.5 shrink-0" color={fillColor} />
                 )}
                 {status === 'uploading' && <Spinner className="w-9 h-9 p-1.5 shrink-0" />}
                 {status === 'failed' && (
                   <CrossIcon className="w-9 h-9 p-1.5 text-destructive shrink-0" />
                 )}
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-medium truncate">{fileStem}</span>
+                  <span className="text-sm font-medium truncate" title={fileName}>
+                    {fileStem}
+                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
