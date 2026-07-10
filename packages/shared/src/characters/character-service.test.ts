@@ -669,6 +669,23 @@ describe('character-service', () => {
       },
     );
 
+    it('throws InvalidArgumentError when the total usage time would exceed 130 days', async () => {
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue({
+        ...mockCharacter,
+        maxUsageTimeLimit: 187000,
+      } as never);
+
+      await expect(
+        extendCharacterShareExpiration({
+          characterId,
+          additionalTimeInMinutes: 300,
+          user,
+        }),
+      ).rejects.toThrow('total usage time limit must not exceed 130 days');
+
+      expect(dbExtendSharedCharacterConversationExpiration).not.toHaveBeenCalled();
+    });
+
     it('throws InvalidArgumentError when there is no active share to extend', async () => {
       (
         dbExtendSharedCharacterConversationExpiration as MockedFunction<
@@ -701,6 +718,7 @@ describe('character-service', () => {
       characterId,
       userId,
       tokenPointsLimit: 50,
+      maxUsageTimeLimit: 187000,
     };
     const updatedShare = {
       ...currentShare,

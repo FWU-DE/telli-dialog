@@ -525,7 +525,6 @@
       "adjust-token-limit-modal-title": "Tokenvolumen anpassen",
       "adjust-token-limit-modal-description": "Wie viel des monatlichen Tokenvolumens darf für diesen Chat maximal verbraucht werden?",
       "adjust-token-limit-modal-aria": "Neues maximales Tokenvolumen auswählen",
-      "button-add": "Verlängern",
       "button-save": "Speichern"
     },
     "share-page": {

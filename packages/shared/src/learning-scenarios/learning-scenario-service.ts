@@ -61,6 +61,7 @@ import {
 } from '@shared/auth/authorization-service';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
+import { MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES } from '@shared/sharing/const';
 import {
   getChangedKeys,
   getPreservedUpdatedAtForExemptedKeys,
@@ -516,6 +517,21 @@ export async function extendLearningScenarioShareExpiration({
 
   if (additionalTimeInMinutes <= 0 || additionalTimeInMinutes > 30 * 24 * 60) {
     throw new InvalidArgumentError('additional time must be between 1 and 43200 minutes');
+  }
+
+  const currentShare = await dbGetLatestManageableLearningScenarioShare({
+    learningScenarioId,
+    user,
+  });
+  if (!currentShare) {
+    throw new InvalidArgumentError('No active sharing found for this learning scenario');
+  }
+
+  if (
+    currentShare.maxUsageTimeLimit + additionalTimeInMinutes >
+    MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES
+  ) {
+    throw new InvalidArgumentError('total usage time limit must not exceed 130 days');
   }
 
   const updatedShare = await dbExtendSharedLearningScenarioExpiration({

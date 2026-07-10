@@ -203,7 +203,7 @@ export function CustomChatShareWithLearners({
                           />
                         </div>
                       </div>
-                      <div className="mt-3 flex-1 space-y-2">
+                      <div className="mt-4 flex-1 space-y-2">
                         <p className="text-sm">{t('token-points-left')}</p>
                         <TokenPointsLeftRing
                           tokenLimit={(maxBudget * currentTokenPointsPercentageLimit) / 100}
@@ -244,7 +244,7 @@ export function CustomChatShareWithLearners({
                           />
                         </div>
                       </div>
-                      <div className="mt-3 flex-1 space-y-2">
+                      <div className="mt-4 flex-1 space-y-2">
                         <p className="text-sm">{t('usage-time-left')}</p>
                         <CountDownTimer
                           leftTimeInSeconds={sharedChatTimeLeft}
@@ -261,6 +261,7 @@ export function CustomChatShareWithLearners({
                             </Button>
                           }
                           preselectedUsageTimeLimit={preselectedUsageTimeLimit}
+                          currentUsageTimeLimit={sharedChatTimeLeft}
                           onAddTime={onAddTime}
                           onAddTimeSuccess={(newExpiredAt) => {
                             setExpiredAtOverride(newExpiredAt);

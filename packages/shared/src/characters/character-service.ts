@@ -48,6 +48,7 @@ import { buildCharacterPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
+import { MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES } from '@shared/sharing/const';
 import {
   copyCharacter,
   copyEntityPictureIfExists,
@@ -571,6 +572,18 @@ export const extendCharacterShareExpiration = async ({
 
   if (additionalTimeInMinutes <= 0 || additionalTimeInMinutes > 30 * 24 * 60) {
     throw new InvalidArgumentError('additional time must be between 1 and 43200 minutes');
+  }
+
+  const currentShare = await dbGetLatestManageableCharacterShare({ characterId, user });
+  if (!currentShare) {
+    throw new InvalidArgumentError('No active sharing found for this character');
+  }
+
+  if (
+    currentShare.maxUsageTimeLimit + additionalTimeInMinutes >
+    MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES
+  ) {
+    throw new InvalidArgumentError('total usage time limit must not exceed 130 days');
   }
 
   const updatedShare = await dbExtendSharedCharacterConversationExpiration({
