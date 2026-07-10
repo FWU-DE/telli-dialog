@@ -15,6 +15,7 @@ const getWindowWidth = () => {
 };
 
 export default function useBreakpoints() {
+  // width is initialized with 0 instead of the current window width of the client to prevent hydration errors on the client
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
