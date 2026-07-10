@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { AUTH_FILES, MOCK_LLM_COMMANDS } from '../../utils/const';
 import { regenerateMessage, sendMessage } from '../../utils/chat';
 import {
@@ -7,18 +7,10 @@ import {
   deleteCharacter,
   deleteCharacterFromDetailPage,
 } from '../../utils/character';
-import { waitForAutosave, waitForToast, waitForToastDisappear } from '../../utils/utils';
+import { stopShare, waitForAutosave, waitForToast, waitForToastDisappear } from '../../utils/utils';
 import { nanoid } from 'nanoid';
 
 test.use({ storageState: AUTH_FILES.teacher });
-
-async function confirmStopSharing(page: Page) {
-  await page.getByTestId('stop-share-button').click();
-  const stopShareDialog = page.getByTestId('stop-share-dialog');
-  await expect(stopShareDialog).toBeVisible();
-  await page.getByTestId('stop-share-confirm-button').click();
-  await expect(stopShareDialog).not.toBeVisible();
-}
 
 test.describe('create, share, chat, delete', () => {
   const characterName = 'John Cena ' + nanoid(8);
@@ -133,7 +125,7 @@ test.describe('create, share, chat, delete', () => {
     // stop share
     await page.goto(editorUrl);
     await page.waitForURL('/characters/editor/**');
-    await confirmStopSharing(page);
+    await stopShare(page);
     await expect(page.getByTestId('start-share-button')).toBeVisible();
 
     // verify maximum token points is preselected after stopping share
