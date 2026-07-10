@@ -54,6 +54,8 @@ type BifrostProviderConfig = {
   keys: BifrostKey[];
 };
 
+type BifrostProviderConfigFields = Omit<BifrostProviderConfig, 'provider' | 'keys'>;
+
 type BifrostProviderResponse = Omit<BifrostProviderConfig, 'provider' | 'keys'> & {
   name?: BifrostProvider;
   concurrency_and_buffer_size?: {
@@ -67,7 +69,6 @@ type BifrostProviderResponse = Omit<BifrostProviderConfig, 'provider' | 'keys'> 
 };
 
 type ProviderSettings = LlmModel['setting'];
-const GENERATED_KEY_PREFIX = 'ais-chat';
 
 export async function syncBifrostProvidersForOrganization(organizationId: string): Promise<void> {
   const bifrostAdminUrl = env.bifrostAdminUrl;
@@ -78,6 +79,7 @@ export async function syncBifrostProvidersForOrganization(organizationId: string
     return;
   }
 
+  // Deleted models stay in the API DB for history/admin visibility, but should not be routable.
   const models = (await dbGetAllModelsByOrganizationId(organizationId)).filter(
     (model) => !model.isDeleted,
   );
@@ -161,154 +163,195 @@ function mergeBifrostProviderConfigs(
 }
 
 function buildAzureProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] {
-  return groupModelsBySettings(models, (setting) => {
-    if (setting.provider !== 'azure') return undefined;
-    const azureUrl = parseAzureBaseUrl(setting.baseUrl);
-    if (!azureUrl) return undefined;
-    return `${setting.apiKey}:${azureUrl.endpoint}`;
-  }).map((groupedModels) => {
-    const setting = groupedModels[0]?.setting;
-    if (!setting || setting.provider !== 'azure') {
-      throw new BifrostProviderSyncError();
-    }
+  return buildSingleKeyProviderConfigs({
+    provider: 'azure',
+    models,
+    getGroupKey: (setting) => {
+      if (setting.provider !== 'azure') return undefined;
+      const azureUrl = parseAzureBaseUrl(setting.baseUrl);
+      if (!azureUrl) return undefined;
+      return `${setting.apiKey}:${azureUrl.endpoint}`;
+    },
+    buildKey: (setting, groupedModels) => {
+      if (setting.provider !== 'azure') throw new BifrostProviderSyncError();
+      const azureUrl = parseAzureBaseUrl(setting.baseUrl);
+      if (!azureUrl) throw new BifrostProviderSyncError();
 
-    const azureUrl = parseAzureBaseUrl(setting.baseUrl);
-    if (!azureUrl) {
-      throw new BifrostProviderSyncError();
-    }
-
-    const modelNames = getModelNames(groupedModels);
-
-    return {
-      provider: 'azure',
-      keys: [
-        {
-          name: buildKeyName('azure', azureUrl.endpoint, setting.apiKey),
-          value: setting.apiKey,
-          models: modelNames,
-          weight: 1,
-          aliases: Object.fromEntries(
-            groupedModels.flatMap((model) => {
-              const parsedUrl =
-                model.setting.provider === 'azure'
-                  ? parseAzureBaseUrl(model.setting.baseUrl)
-                  : undefined;
-              return parsedUrl ? [[model.name, parsedUrl.deployment]] : [];
-            }),
-          ),
-          azure_key_config: {
-            endpoint: azureUrl.endpoint,
-          },
-          enabled: true,
+      return buildBifrostKey({
+        provider: 'azure',
+        readableValue: azureUrl.endpoint,
+        uniqueValue: setting.apiKey,
+        value: setting.apiKey,
+        groupedModels,
+        extra: {
+          aliases: buildAzureAliases(groupedModels),
+          azure_key_config: { endpoint: azureUrl.endpoint },
         },
-      ],
-    };
+      });
+    },
   });
 }
 
 function buildOpenAiProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] {
-  return groupModelsBySettings(models, (setting) => {
-    if (setting.provider !== 'openai') return undefined;
-    return `${setting.apiKey}:${setting.baseUrl}`;
-  }).map((groupedModels) => {
-    const setting = groupedModels[0]?.setting;
-    if (!setting || setting.provider !== 'openai') {
-      throw new BifrostProviderSyncError();
-    }
-
-    const modelNames = getModelNames(groupedModels);
-
-    return {
-      provider: 'openai',
-      network_config:
-        setting.baseUrl !== DEFAULT_OPENAI_BASE_URL ? { base_url: setting.baseUrl } : undefined,
-      keys: [
-        {
-          name: buildKeyName('openai', setting.baseUrl, setting.apiKey),
-          value: setting.apiKey,
-          models: modelNames,
-          weight: 1,
-          enabled: true,
-        },
-      ],
-    };
+  return buildSingleKeyProviderConfigs({
+    provider: 'openai',
+    models,
+    getGroupKey: (setting) => {
+      if (setting.provider !== 'openai') return undefined;
+      return `${setting.apiKey}:${setting.baseUrl}`;
+    },
+    buildConfig: (setting) => {
+      if (setting.provider !== 'openai') throw new BifrostProviderSyncError();
+      return setting.baseUrl !== DEFAULT_OPENAI_BASE_URL
+        ? { network_config: { base_url: setting.baseUrl } }
+        : {};
+    },
+    buildKey: (setting, groupedModels) => {
+      if (setting.provider !== 'openai') throw new BifrostProviderSyncError();
+      return buildBifrostKey({
+        provider: 'openai',
+        readableValue: setting.baseUrl,
+        uniqueValue: setting.apiKey,
+        value: setting.apiKey,
+        groupedModels,
+      });
+    },
   });
 }
 
 function buildIonosProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] {
-  return groupModelsBySettings(models, (setting) => {
-    if (setting.provider !== 'ionos') return undefined;
-    return `${setting.apiKey}:${setting.baseUrl}`;
-  }).map((groupedModels) => {
-    const setting = groupedModels[0]?.setting;
-    if (!setting || setting.provider !== 'ionos') {
-      throw new BifrostProviderSyncError();
-    }
-
-    const baseUrl = setting.baseUrl.replace(/\/v1\/?$/, '');
-
-    const modelNames = getModelNames(groupedModels);
-
-    return {
-      provider: 'ionos',
-      network_config: { base_url: baseUrl || DEFAULT_IONOS_BASE_URL.replace(/\/v1\/?$/, '') },
-      custom_provider_config: {
-        base_provider_type: 'openai',
-        allowed_requests: {
-          list_models: true,
-          chat_completion: true,
-          chat_completion_stream: true,
-          embedding: true,
-          image_generation: true,
+  return buildSingleKeyProviderConfigs({
+    provider: 'ionos',
+    models,
+    getGroupKey: (setting) => {
+      if (setting.provider !== 'ionos') return undefined;
+      return `${setting.apiKey}:${setting.baseUrl}`;
+    },
+    buildConfig: (setting) => {
+      if (setting.provider !== 'ionos') throw new BifrostProviderSyncError();
+      return {
+        network_config: {
+          base_url: getOrigin(setting.baseUrl) ?? getOrigin(DEFAULT_IONOS_BASE_URL),
         },
-      },
-      keys: [
-        {
-          name: buildKeyName('ionos', setting.baseUrl, setting.apiKey),
-          value: setting.apiKey,
-          models: modelNames,
-          weight: 1,
-          enabled: true,
+        custom_provider_config: {
+          base_provider_type: 'openai',
+          allowed_requests: {
+            list_models: true,
+            chat_completion: true,
+            chat_completion_stream: true,
+            embedding: true,
+            image_generation: true,
+          },
         },
-      ],
-    };
+      };
+    },
+    buildKey: (setting, groupedModels) => {
+      if (setting.provider !== 'ionos') throw new BifrostProviderSyncError();
+      return buildBifrostKey({
+        provider: 'ionos',
+        readableValue: setting.baseUrl,
+        uniqueValue: setting.apiKey,
+        value: setting.apiKey,
+        groupedModels,
+      });
+    },
   });
 }
 
 function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] {
-  return groupModelsBySettings(models, (setting) => {
-    if (setting.provider !== 'google') return undefined;
-    return `${setting.projectId}:${setting.location}`;
-  }).map((groupedModels) => {
-    const setting = groupedModels[0]?.setting;
-    if (!setting || setting.provider !== 'google') {
-      throw new BifrostProviderSyncError();
-    }
-
-    const modelNames = getModelNames(groupedModels);
-
-    return {
-      provider: 'vertex',
-      keys: [
-        {
-          name: buildKeyName(
-            'vertex',
-            `${setting.projectId}-${setting.location}`,
-            setting.projectId,
-          ),
-          value: '',
-          models: modelNames,
-          weight: 1,
+  return buildSingleKeyProviderConfigs({
+    provider: 'vertex',
+    models,
+    getGroupKey: (setting) => {
+      if (setting.provider !== 'google') return undefined;
+      return `${setting.projectId}:${setting.location}`;
+    },
+    buildKey: (setting, groupedModels) => {
+      if (setting.provider !== 'google') throw new BifrostProviderSyncError();
+      return buildBifrostKey({
+        provider: 'vertex',
+        readableValue: `${setting.projectId}-${setting.location}`,
+        uniqueValue: setting.projectId,
+        value: '',
+        groupedModels,
+        extra: {
           vertex_key_config: {
             project_id: setting.projectId,
             region: setting.location,
             auth_credentials: '',
           },
-          enabled: true,
         },
-      ],
+      });
+    },
+  });
+}
+
+function buildSingleKeyProviderConfigs({
+  provider,
+  models,
+  getGroupKey,
+  buildKey,
+  buildConfig,
+}: {
+  provider: BifrostProvider;
+  models: LlmModel[];
+  getGroupKey: (setting: ProviderSettings) => string | undefined;
+  buildKey: (setting: ProviderSettings, groupedModels: LlmModel[]) => BifrostKey;
+  buildConfig?: (
+    setting: ProviderSettings,
+    groupedModels: LlmModel[],
+  ) => BifrostProviderConfigFields;
+}): BifrostProviderConfig[] {
+  return groupModelsBySettings(models, getGroupKey).map((groupedModels) => {
+    const setting = getFirstModelSetting(groupedModels);
+
+    return {
+      provider,
+      ...buildConfig?.(setting, groupedModels),
+      keys: [buildKey(setting, groupedModels)],
     };
   });
+}
+
+function buildBifrostKey({
+  provider,
+  readableValue,
+  uniqueValue,
+  value,
+  groupedModels,
+  extra,
+}: {
+  provider: BifrostProvider;
+  readableValue: string;
+  uniqueValue: string;
+  value: BifrostSecret;
+  groupedModels: LlmModel[];
+  extra?: Partial<BifrostKey>;
+}): BifrostKey {
+  return {
+    name: buildKeyName(provider, readableValue, uniqueValue),
+    value,
+    models: getModelNames(groupedModels),
+    weight: 1,
+    enabled: true,
+    ...extra,
+  };
+}
+
+function buildAzureAliases(groupedModels: LlmModel[]): Record<string, string> {
+  return Object.fromEntries(
+    groupedModels.flatMap((model) => {
+      const parsedUrl =
+        model.setting.provider === 'azure' ? parseAzureBaseUrl(model.setting.baseUrl) : undefined;
+      return parsedUrl ? [[model.name, parsedUrl.deployment]] : [];
+    }),
+  );
+}
+
+function getFirstModelSetting(groupedModels: LlmModel[]): ProviderSettings {
+  const setting = groupedModels[0]?.setting;
+  if (!setting) throw new BifrostProviderSyncError();
+  return setting;
 }
 
 function groupModelsBySettings(
@@ -347,19 +390,60 @@ function buildKeyName(
   // The suffix keeps multiple credentials for the same endpoint distinct without exposing the raw secret.
   const hashPart = hashString(`${provider}:${readableValue}:${uniqueValue}`).slice(0, 8);
 
-  return `${GENERATED_KEY_PREFIX}-${provider}-${readablePart}-${hashPart}`;
+  return `${provider}-${readablePart}-${hashPart}`;
 }
 
 function toReadableKeyNamePart(value: string): string {
-  const normalizedValue = value
-    .replace(/^https?:\/\//, '')
-    .replace(/\/v1\/?$/, '')
-    .replace(/\/openai\/deployments\/.*$/, '')
-    .replace(/[^a-zA-Z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .toLowerCase();
+  const normalizedValue = toKebabCase(getReadableKeyNameValue(value));
 
   return normalizedValue.slice(0, 48) || 'default';
+}
+
+function getReadableKeyNameValue(value: string): string {
+  try {
+    const url = new URL(value);
+    return url.hostname;
+  } catch {
+    return value;
+  }
+}
+
+function toKebabCase(value: string): string {
+  const parts: string[] = [];
+  let currentPart = '';
+
+  for (const character of value.toLowerCase()) {
+    if (isAsciiLetterOrDigit(character)) {
+      currentPart += character;
+      continue;
+    }
+
+    if (currentPart) {
+      parts.push(currentPart);
+      currentPart = '';
+    }
+  }
+
+  if (currentPart) {
+    parts.push(currentPart);
+  }
+
+  return parts.join('-');
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  const charCode = character.charCodeAt(0);
+  const isDigit = charCode >= 48 && charCode <= 57;
+  const isLowercaseLetter = charCode >= 97 && charCode <= 122;
+  return isDigit || isLowercaseLetter;
+}
+
+function getOrigin(value: string): string | undefined {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return undefined;
+  }
 }
 
 function hashString(value: string): string {
@@ -385,7 +469,7 @@ function parseAzureBaseUrl(baseUrl: string): { endpoint: string; deployment: str
   if (deploymentIndex === -1 || !deployment) return undefined;
 
   return {
-    endpoint: `${url.protocol}//${url.host}`,
+    endpoint: url.origin,
     deployment,
   };
 }
@@ -395,6 +479,8 @@ async function syncBifrostProvider(
   providerConfig: BifrostProviderConfig,
 ): Promise<void> {
   await ensureBifrostProvider(bifrostAdminUrl, providerConfig);
+  // Bifrost updates keys by ID, so we list keys once and match by our deterministic name.
+  // Without this, every sync would create duplicate keys for the same provider settings.
   const existingKeysBeforeSync = await listBifrostProviderKeys(
     bifrostAdminUrl,
     providerConfig.provider,
@@ -403,16 +489,6 @@ async function syncBifrostProvider(
     providerConfig.keys.map((key) =>
       syncBifrostProviderKey(bifrostAdminUrl, providerConfig.provider, key, existingKeysBeforeSync),
     ),
-  );
-  const existingKeysAfterSync = await listBifrostProviderKeys(
-    bifrostAdminUrl,
-    providerConfig.provider,
-  );
-  await disableStaleGeneratedBifrostKeys(
-    bifrostAdminUrl,
-    providerConfig.provider,
-    providerConfig.keys,
-    existingKeysAfterSync,
   );
 }
 
@@ -479,35 +555,6 @@ async function syncBifrostProviderKey(
       body: JSON.stringify(key),
     }),
     provider,
-  );
-}
-
-async function disableStaleGeneratedBifrostKeys(
-  bifrostAdminUrl: string,
-  provider: BifrostProvider,
-  desiredKeys: BifrostKey[],
-  existingKeys: BifrostKey[],
-): Promise<void> {
-  const desiredKeyNames = new Set(desiredKeys.map((key) => key.name));
-  const generatedKeyPrefix = `${GENERATED_KEY_PREFIX}-${provider}-`;
-  const staleGeneratedKeys = existingKeys.filter(
-    (key) =>
-      key.id &&
-      key.name.startsWith(generatedKeyPrefix) &&
-      !desiredKeyNames.has(key.name) &&
-      key.enabled !== false,
-  );
-
-  await Promise.all(
-    staleGeneratedKeys.map((key) =>
-      assertBifrostResponse(
-        bifrostFetch(bifrostAdminUrl, `/api/providers/${provider}/keys/${key.id}`, {
-          method: 'PUT',
-          body: JSON.stringify({ ...key, enabled: false, models: [] }),
-        }),
-        provider,
-      ),
-    ),
   );
 }
 
