@@ -29,6 +29,7 @@ export type SendMessageFn = (params: {
   messages: ChatMessage[];
   modelId: string;
   fileIds?: string[];
+  sharedSessionId?: string;
 }) => Promise<SendMessageResult>;
 
 export type UseChatOptions = {
@@ -53,7 +54,10 @@ export type UseChatReturn = {
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSubmit: (e: React.FormEvent, options?: { fileIds?: string[] }) => Promise<void>;
+  handleSubmit: (
+    e: React.FormEvent,
+    options?: { fileIds?: string[]; userMessageId?: string; sharedSessionId?: string },
+  ) => Promise<void>;
   isLoading: boolean;
   status: ChatStatus;
   error: Error | null;
@@ -120,7 +124,12 @@ export function useAisChat({
   );
 
   const submitMessage = useCallback(
-    async (userMessage: ChatMessage, fileIds?: string[], existingMessages?: ChatMessage[]) => {
+    async (
+      userMessage: ChatMessage,
+      fileIds?: string[],
+      existingMessages?: ChatMessage[],
+      sharedSessionId?: string,
+    ) => {
       if (!modelId) {
         const err = new Error('No model selected');
         setError(err);
@@ -144,6 +153,7 @@ export function useAisChat({
           messages: newMessages,
           modelId,
           fileIds,
+          sharedSessionId,
         });
 
         if (result.error) {
@@ -252,13 +262,16 @@ export function useAisChat({
   );
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent, options?: { fileIds?: string[] }) => {
+    async (
+      e: React.FormEvent,
+      options?: { fileIds?: string[]; userMessageId?: string; sharedSessionId?: string },
+    ) => {
       e.preventDefault();
 
       if (!input.trim() || isLoading) return;
 
       const userMessage: ChatMessage = {
-        id: crypto.randomUUID(),
+        id: options?.userMessageId ?? crypto.randomUUID(),
         role: 'user',
         content: input.trim(),
       };
@@ -267,7 +280,7 @@ export function useAisChat({
       onMessageCreated?.(userMessage.id);
 
       setInput('');
-      await submitMessage(userMessage, options?.fileIds);
+      await submitMessage(userMessage, options?.fileIds, undefined, options?.sharedSessionId);
     },
     [input, isLoading, submitMessage, onMessageCreated],
   );

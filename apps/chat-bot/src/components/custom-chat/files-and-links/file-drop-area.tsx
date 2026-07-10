@@ -2,7 +2,6 @@ import React, { useState, useRef, useCallback } from 'react';
 import { FileUploadIcon } from '../../icons/file-upload-icons/file-upload-tray-icon';
 import { useTranslations } from 'next-intl';
 import { handleSingleFile, UploadFileButtonProps } from '../../chat/upload-file-button';
-import { useSession } from 'next-auth/react';
 import { useToast } from '../../common/toast';
 import { RichText } from '../../common/rich-text';
 import { SUPPORTED_DOCUMENTS_EXTENSIONS } from '@/const';
@@ -21,7 +20,6 @@ export function FileDrop({
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
-  const session = useSession();
 
   const t = useTranslations('file-interaction');
 
@@ -56,7 +54,6 @@ export function FileDrop({
           handleSingleFile({
             file: f,
             toast,
-            session,
             setFiles,
             onFileUploaded,
             translations: t,
@@ -70,7 +67,7 @@ export function FileDrop({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [toast, session, setFiles, onFileUploaded, t, showUploadConfirmation],
+    [toast, setFiles, onFileUploaded, t, showUploadConfirmation],
   );
 
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>): void => {

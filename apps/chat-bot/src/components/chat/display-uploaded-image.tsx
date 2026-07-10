@@ -19,6 +19,7 @@ type DisplayUploadedImageProps = {
   status: FileStatus;
   onDeattachFile?: () => void;
   showBanner?: boolean;
+  getSignedUrl?: (fileId: string) => Promise<string>;
 };
 
 export default function DisplayUploadedImage({
@@ -26,6 +27,7 @@ export default function DisplayUploadedImage({
   status,
   onDeattachFile,
   showBanner = true,
+  getSignedUrl,
 }: DisplayUploadedImageProps) {
   const t = useTranslations();
 
@@ -39,6 +41,10 @@ export default function DisplayUploadedImage({
   } = useQuery({
     queryKey: ['signed-url', file.id, file.name, file.type],
     queryFn: async () => {
+      if (getSignedUrl !== undefined) {
+        return getSignedUrl(file.id);
+      }
+
       const signedUrl = await getReadOnlySignedUrlAction({
         key: `message_attachments/${file.id}`,
       });

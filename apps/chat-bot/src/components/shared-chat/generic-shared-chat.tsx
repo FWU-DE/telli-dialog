@@ -19,6 +19,15 @@ import type { UseChatReturn } from '@/hooks/use-chat-hooks';
 import { SharedChatExpiredError, TokenPointsExceededError } from '@ais-chat/ai-core/errors';
 import { getErrorMessageByType } from '@/error/get-error-message-by-type';
 import { ErrorChatPlaceholder } from '../chat/error-chat-placeholder';
+import { LocalFileState } from '../chat/send-message-form';
+import { getFileExtension, isImageFile } from '@/utils/files/generic';
+import { PendingFileModel } from '../chat/messages';
+import {
+  clearSharedChatFileMapping,
+  getOrCreateSharedChatSessionId,
+  loadSharedChatFileMapping,
+  saveSharedChatFileMapping,
+} from '@/utils/shared-chat-storage';
 
 type ShareSessionInput = Parameters<typeof calculateShareSessionState>[0];
 type Translator = ReturnType<typeof useTranslations>;
@@ -76,6 +85,8 @@ export type SharedChatViewProps = {
    * `Messages` list.
    */
   assistantIcon?: ReactNode;
+  uploadFileFn?: (file: File, sharedSessionId: string) => Promise<{ fileId: string }>;
+  getSignedUrlFn?: (fileId: string, sharedSessionId: string) => Promise<string>;
 };
 
 /**
@@ -96,12 +107,25 @@ export default function GenericSharedChat({
   exerciseTitle,
   enableFloatingText = false,
   assistantIcon,
+  uploadFileFn,
+  getSignedUrlFn,
 }: SharedChatViewProps) {
   const tCommon = useTranslations('common');
   const { shareSessionState } = calculateShareSessionState(entity);
   const chatActive = shareSessionState === ShareSessionState.RUNNING;
 
   const [explicitDialogStarted, setExplicitDialogStarted] = useState(false);
+  const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
+  const [pendingFileMapping, setPendingFileMapping] = useState<Map<string, PendingFileModel[]>>(
+    () => {
+      const restored = loadSharedChatFileMapping(inviteCode);
+      if (restored === null) {
+        return new Map();
+      }
+      return new Map(restored);
+    },
+  );
+  const [sharedSessionId] = useState(() => getOrCreateSharedChatSessionId(inviteCode));
 
   const {
     messages,
@@ -132,16 +156,64 @@ export default function GenericSharedChat({
 
     try {
       reactivateAutoScrolling();
-      await handleSubmit(e, {});
+
+      const currentFiles = Array.from(files);
+      const fileIds = currentFiles.map(([, file]) => file.fileId).filter(Boolean) as string[];
+      const userMessageId = crypto.randomUUID();
+
+      const pendingFiles: PendingFileModel[] = currentFiles.map(([, file]) => ({
+        id: file.fileId ?? '',
+        name: file.file.name,
+        type: getFileExtension(file.file.name),
+        createdAt: new Date(),
+        size: file.file.size,
+        metadata: null,
+        userId: null,
+        localUrl: isImageFile(file.file.name) ? URL.createObjectURL(file.file) : undefined,
+      }));
+
+      if (pendingFiles.length > 0) {
+        setPendingFileMapping((prev) => {
+          const next = new Map(prev);
+          next.set(userMessageId, pendingFiles);
+          return next;
+        });
+      }
+
+      setFiles(new Map());
+
+      await handleSubmit(e, { fileIds, userMessageId, sharedSessionId });
     } catch (error) {
       logError('Error in customHandleSubmit', error);
     }
   }
 
+  function handleDeattachFile(localFileId: string) {
+    setFiles((prev) => {
+      const next = new Map(prev);
+      next.delete(localFileId);
+      return next;
+    });
+  }
+
   function handleOpenNewChat() {
+    for (const pendingFiles of pendingFileMapping.values()) {
+      for (const pendingFile of pendingFiles) {
+        if (pendingFile.localUrl) {
+          URL.revokeObjectURL(pendingFile.localUrl);
+        }
+      }
+    }
+
+    setPendingFileMapping(new Map());
+    clearSharedChatFileMapping(inviteCode);
     clearClientPersistedMessages();
     setMessages([]);
   }
+
+  useEffect(() => {
+    saveSharedChatFileMapping(inviteCode, pendingFileMapping);
+  }, [inviteCode, pendingFileMapping]);
 
   function handleReload() {
     void reload();
@@ -233,6 +305,12 @@ export default function GenericSharedChat({
                 reload={reload}
                 assistantIcon={assistantIcon}
                 containerClassName="flex flex-col gap-4"
+                pendingFileMapping={pendingFileMapping}
+                getSignedUrlFn={
+                  getSignedUrlFn === undefined
+                    ? undefined
+                    : (fileId) => getSignedUrlFn(fileId, sharedSessionId)
+                }
               />
             )}
             {/* If there is a TokenPointsExceededError or SharedChatExpiredError we show a dialog instead */}
@@ -247,11 +325,25 @@ export default function GenericSharedChat({
             {showChatInputBox && (
               <div className="flex flex-col">
                 <ChatInputBox
+                  files={files}
+                  setFiles={setFiles}
                   customHandleSubmit={customHandleSubmit}
                   handleStopGeneration={stop}
                   input={input}
                   isLoading={isLoading}
                   handleInputChange={handleInputChange}
+                  enableFileUpload
+                  fileUploadFn={
+                    uploadFileFn === undefined
+                      ? undefined
+                      : (file) => uploadFileFn(file, sharedSessionId)
+                  }
+                  getSignedUrlFn={
+                    getSignedUrlFn === undefined
+                      ? undefined
+                      : (fileId) => getSignedUrlFn(fileId, sharedSessionId)
+                  }
+                  handleDeattachFile={handleDeattachFile}
                 />
               </div>
             )}

@@ -66,12 +66,14 @@ export function useCharacterChat(options: {
   const { characterId, inviteCode, ...rest } = options;
 
   const sendMessage: SendMessageFn = useCallback(
-    async ({ messages, modelId }) => {
+    async ({ messages, modelId, fileIds, sharedSessionId }) => {
       return sendCharacterMessageAction({
         characterId,
         inviteCode,
         messages,
         modelId,
+        fileIds,
+        sharedSessionId,
       });
     },
     [characterId, inviteCode],
@@ -98,12 +100,14 @@ export function useLearningScenarioChat(options: {
   const { learningScenarioId, inviteCode, ...rest } = options;
 
   const sendMessage: SendMessageFn = useCallback(
-    async ({ messages, modelId }) => {
+    async ({ messages, modelId, fileIds, sharedSessionId }) => {
       return sendLearningScenarioMessageAction({
         learningScenarioId,
         inviteCode,
         messages,
         modelId,
+        fileIds,
+        sharedSessionId,
       });
     },
     [learningScenarioId, inviteCode],

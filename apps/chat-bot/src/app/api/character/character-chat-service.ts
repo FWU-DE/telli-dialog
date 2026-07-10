@@ -38,6 +38,8 @@ import { createImageAttachmentsForConversation } from '../file-operations/prepro
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { RetrievedChunk } from '../rag/types';
 import { resolveAgentNameForTracing } from '../utils/agent-name';
+import { extractUrls } from '../utils/extract-urls';
+import { combineSharedRelatedFiles } from '../shared-chat/shared-chat-file-service';
 
 /**
  * Sends a character chat message and streams the response.
@@ -47,11 +49,15 @@ export async function sendCharacterMessage({
   inviteCode,
   messages,
   modelId,
+  fileIds,
+  sharedSessionId,
 }: {
   characterId: string;
   inviteCode: string;
   messages: ChatMessage[];
   modelId: string;
+  fileIds?: string[];
+  sharedSessionId?: string;
 }): Promise<SendMessageResult> {
   // Get character
   const character = await dbGetCharacterByIdAndInviteCode({ id: characterId, inviteCode });
@@ -114,8 +120,19 @@ export async function sendCharacterMessage({
   }
 
   // Get related files and web sources
-  const relatedFileEntities = await dbGetRelatedCharacterFiles(character.id);
-  const urls = character.attachedLinks.filter((l) => l !== '');
+  const relatedFileEntities = await combineSharedRelatedFiles({
+    relatedFileEntities: await dbGetRelatedCharacterFiles(character.id),
+    messages,
+    fileIds,
+    inviteCode,
+    characterId,
+    sharedSessionId,
+  });
+  const urls = extractUrls({
+    character,
+    messages,
+    includeUserMessageUrlsForSharedChats: true,
+  });
   const { processedUrls } = await ingestWebContent({
     urls,
     federalStateId: teacherUserAndContext.federalState.id,

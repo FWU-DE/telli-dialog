@@ -20,8 +20,30 @@ const persistedChatMessageSchema = chatMessageSchema
 
 const persistedChatMessagesSchema = z.array(persistedChatMessageSchema);
 
+const persistedSharedFileSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: z.string(),
+  size: z.number(),
+  createdAt: z.coerce.date(),
+  metadata: z.nullable(z.record(z.string(), z.unknown())),
+  userId: z.string().nullable(),
+});
+
+const persistedSharedFileMappingSchema = z.record(z.string(), z.array(persistedSharedFileSchema));
+
+export type PersistedSharedFile = z.infer<typeof persistedSharedFileSchema>;
+
 export function sharedChatStorageKey(inviteCode: string): string {
   return `shared-chat-messages:${STORAGE_KEY_VERSION}:${inviteCode}`;
+}
+
+export function sharedChatFileMappingStorageKey(inviteCode: string): string {
+  return `shared-chat-files:${STORAGE_KEY_VERSION}:${inviteCode}`;
+}
+
+export function sharedChatSessionIdStorageKey(inviteCode: string): string {
+  return `shared-chat-session:${STORAGE_KEY_VERSION}:${inviteCode}`;
 }
 
 function getSessionStorage(): Storage | null {
@@ -98,5 +120,87 @@ export function clearSharedChatMessages(inviteCode: string): void {
     storage.removeItem(sharedChatStorageKey(inviteCode));
   } catch (error) {
     logError('Failed to clear shared chat messages from sessionStorage', error);
+  }
+}
+
+export function loadSharedChatFileMapping(
+  inviteCode: string,
+): Map<string, PersistedSharedFile[]> | null {
+  const storage = getSessionStorage();
+  if (storage === null) return null;
+
+  let raw: string | null;
+  try {
+    raw = storage.getItem(sharedChatFileMappingStorageKey(inviteCode));
+  } catch (error) {
+    logError('Failed to read shared chat file mapping from sessionStorage', error);
+    return null;
+  }
+
+  if (raw === null) return null;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    logError('Failed to parse shared chat file mapping from sessionStorage', error);
+    return null;
+  }
+
+  const result = persistedSharedFileMappingSchema.safeParse(parsed);
+  if (!result.success) {
+    return null;
+  }
+
+  return new Map(Object.entries(result.data));
+}
+
+export function saveSharedChatFileMapping(
+  inviteCode: string,
+  mapping: Map<string, PersistedSharedFile[]>,
+): void {
+  const storage = getSessionStorage();
+  if (storage === null) return;
+
+  try {
+    const serializable = Object.fromEntries(mapping);
+    const parsed = persistedSharedFileMappingSchema.parse(serializable);
+    storage.setItem(sharedChatFileMappingStorageKey(inviteCode), JSON.stringify(parsed));
+  } catch (error) {
+    logError('Failed to save shared chat file mapping to sessionStorage', error);
+  }
+}
+
+export function clearSharedChatFileMapping(inviteCode: string): void {
+  const storage = getSessionStorage();
+  if (storage === null) return;
+
+  try {
+    storage.removeItem(sharedChatFileMappingStorageKey(inviteCode));
+  } catch (error) {
+    logError('Failed to clear shared chat file mapping from sessionStorage', error);
+  }
+}
+
+export function getOrCreateSharedChatSessionId(inviteCode: string): string {
+  const storage = getSessionStorage();
+  if (storage === null) {
+    return crypto.randomUUID();
+  }
+
+  const key = sharedChatSessionIdStorageKey(inviteCode);
+
+  try {
+    const existing = storage.getItem(key);
+    if (existing !== null && existing.trim() !== '') {
+      return existing;
+    }
+
+    const created = crypto.randomUUID();
+    storage.setItem(key, created);
+    return created;
+  } catch (error) {
+    logError('Failed to get or create shared chat session id', error);
+    return crypto.randomUUID();
   }
 }

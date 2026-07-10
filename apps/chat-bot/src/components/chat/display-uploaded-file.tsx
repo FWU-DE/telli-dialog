@@ -17,6 +17,7 @@ type DisplayUploadedFileProps = {
   status: FileStatus;
   file?: LocalFileState;
   onDeattachFile?: () => void;
+  getSignedUrl?: (fileId: string) => Promise<string>;
 };
 
 export default function DisplayUploadedFile({
@@ -24,6 +25,7 @@ export default function DisplayUploadedFile({
   status,
   file,
   onDeattachFile,
+  getSignedUrl,
 }: DisplayUploadedFileProps) {
   const file_extension = getFileExtension(fileName);
   const isImage = isImageFile(fileName);
@@ -38,12 +40,17 @@ export default function DisplayUploadedFile({
       if (!file) {
         throw new Error('File is undefined');
       }
+
+      if (getSignedUrl !== undefined && file.fileId !== undefined) {
+        return getSignedUrl(file.fileId);
+      }
+
       const signedUrl = await getReadOnlySignedUrlAction({
         key: `message_attachments/${file.fileId}`,
       });
       return signedUrl;
     },
-    enabled: status === 'processed', // Only fetch when status is processed
+    enabled: status === 'processed' && file?.fileId !== undefined, // Only fetch when status is processed and a fileId exists
     staleTime: 5 * 60 * 1000, // 5 minutes - signed URLs are typically valid for longer
     gcTime: 10 * 60 * 1000, // 10 minutes garbage collection time
   });
@@ -62,7 +69,7 @@ export default function DisplayUploadedFile({
             <DeattachFileIcon />
           </button>
         )}
-        <div className="relative flex items-center gap-2 h-[56px] w-[56px] overflow-hidden rounded-enterprise-sm">
+        <div className="relative flex h-14 w-14 items-center gap-2 overflow-hidden rounded-enterprise-sm">
           {status === 'processed' && !isLoading && !!imageUrl ? (
             <Image
               src={imageUrl}
@@ -74,7 +81,7 @@ export default function DisplayUploadedFile({
               unoptimized // Since we're using signed URLs from S3
             />
           ) : status === 'uploading' || isLoading ? (
-            <Spinner className="w-[56px] h-5" />
+            <Spinner className="h-5 w-14" />
           ) : (
             <CrossIcon className="w-5 h-5" />
           )}
@@ -86,20 +93,22 @@ export default function DisplayUploadedFile({
   // TODO: this shoulld only be a button if the fileId is present and otherwise just a div
 
   return (
-    <div className="flex w-fit max-w-40 min-w-0 shrink-0 items-center justify-start gap-2 py-4 pl-4 pr-6 text-sm relative group">
+    <div className="group relative flex w-fit max-w-40 min-w-0 shrink-0 items-center justify-start gap-2 py-4 pl-4 pr-6 text-sm">
       <div className="absolute inset-0 opacity-5" style={{ backgroundColor }} />
       {onDeattachFile !== undefined && (
         <button onClick={onDeattachFile} className="absolute right-0 top-0 hover:bg-neutral-200">
           <DeattachFileIcon />
         </button>
       )}
-      <div className="relative flex items-center gap-2 h-[24px] min-w-0">
+      <div className="relative flex h-6 min-w-0 items-center gap-2">
         {status === 'processed' && <FileIcon className="h-8 w-8 shrink-0" />}
         {status === 'uploading' && <Spinner className="h-5 w-5 shrink-0" />}
         {status === 'failed' && <CrossIcon className="h-5 w-5 shrink-0" />}
         <div className="flex min-w-0 flex-col">
           <ParagraphWithConditionalTitle content={fileName} />
-          <span className="text-left text-gray-100 font-normal text-[10px]">{`.${getFileExtension(fileName)}`}</span>
+          <span className="text-left text-[10px] font-normal text-gray-100">
+            {`.${getFileExtension(fileName)}`}
+          </span>
         </div>
       </div>
     </div>

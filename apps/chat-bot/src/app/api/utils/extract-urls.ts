@@ -33,18 +33,22 @@ export function extractUrls({
   character,
   learningScenario,
   messages,
+  includeUserMessageUrlsForSharedChats = false,
 }: {
   assistant?: AssistantSelectModel;
   character?: CharacterSelectModel;
   learningScenario?: LearningScenarioSelectModel;
   messages: ChatMessage[];
+  includeUserMessageUrlsForSharedChats?: boolean;
 }): string[] {
   const attachedLinks = sanitizeLinks(
     assistant?.attachedLinks ?? character?.attachedLinks ?? learningScenario?.attachedLinks,
   );
 
-  // For characters or learning scenarios, just return their attached links
-  if (character || learningScenario) {
+  // Shared character and learning-scenario chats can opt into also using URLs
+  // from visitor messages. Authenticated character/scenario chats keep the
+  // previous attached-links-only behavior unless explicitly enabled.
+  if ((character || learningScenario) && !includeUserMessageUrlsForSharedChats) {
     return attachedLinks;
   }
 

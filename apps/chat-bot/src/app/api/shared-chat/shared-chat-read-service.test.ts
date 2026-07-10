@@ -1,0 +1,126 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mocks = vi.hoisted(() => ({
+  resolveSharedUploadContextMock: vi.fn(),
+  dbGetFilesInIdsMock: vi.fn(),
+  getReadOnlySignedUrlMock: vi.fn(),
+}));
+
+vi.mock('./shared-chat-upload-service', () => ({
+  resolveSharedUploadContext: mocks.resolveSharedUploadContextMock,
+  assertSharedChatFileOwnershipBySession: vi.fn(
+    ({
+      metadata,
+      sharedSessionId,
+    }: {
+      metadata: { sharedChatSessionId?: string };
+      sharedSessionId: string;
+    }) => {
+      if (metadata.sharedChatSessionId !== sharedSessionId) {
+        throw new Error('Not authorized to access this file');
+      }
+    },
+  ),
+}));
+
+vi.mock('@shared/db/functions/files', () => ({
+  dbGetFilesInIds: mocks.dbGetFilesInIdsMock,
+}));
+
+vi.mock('@shared/s3', () => ({
+  getReadOnlySignedUrl: mocks.getReadOnlySignedUrlMock,
+}));
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mocks.resolveSharedUploadContextMock.mockResolvedValue({
+    inviteCode: 'invite',
+    entityType: 'character',
+    entityId: 'character-1',
+    startedBy: 'teacher-1',
+    federalStateId: 'federal-state-1',
+  });
+  mocks.getReadOnlySignedUrlMock.mockResolvedValue('https://signed.example/file');
+});
+
+describe('getSharedChatReadOnlySignedUrl', () => {
+  it('returns signed url for anonymous shared file after invite validation', async () => {
+    mocks.dbGetFilesInIdsMock.mockResolvedValue([
+      {
+        id: 'file-1',
+        metadata: {
+          sharedChatInviteCode: 'invite',
+          sharedChatEntityType: 'character',
+          sharedChatEntityId: 'character-1',
+          sharedChatSessionId: 'session-1',
+        },
+        userId: null,
+      },
+    ]);
+
+    const { getSharedChatReadOnlySignedUrl } = await import('./shared-chat-read-service');
+
+    const signedUrl = await getSharedChatReadOnlySignedUrl({
+      inviteCode: 'invite',
+      characterId: 'character-1',
+      fileId: 'file-1',
+      sharedSessionId: 'session-1',
+    });
+
+    expect(signedUrl).toBe('https://signed.example/file');
+    expect(mocks.resolveSharedUploadContextMock).toHaveBeenCalledWith({
+      inviteCode: 'invite',
+      characterId: 'character-1',
+      learningScenarioId: undefined,
+    });
+    expect(mocks.getReadOnlySignedUrlMock).toHaveBeenCalledWith({
+      key: 'message_attachments/file-1',
+    });
+  });
+
+  it('throws when file belongs to an authenticated user', async () => {
+    mocks.dbGetFilesInIdsMock.mockResolvedValue([
+      {
+        id: 'file-1',
+        userId: 'user-1',
+      },
+    ]);
+
+    const { getSharedChatReadOnlySignedUrl } = await import('./shared-chat-read-service');
+
+    await expect(
+      getSharedChatReadOnlySignedUrl({
+        inviteCode: 'invite',
+        learningScenarioId: 'learning-scenario-1',
+        fileId: 'file-1',
+        sharedSessionId: 'session-1',
+      }),
+    ).rejects.toThrow('Not authorized to access this file');
+  });
+
+  it('throws when shared session id does not match file metadata', async () => {
+    mocks.dbGetFilesInIdsMock.mockResolvedValue([
+      {
+        id: 'file-1',
+        metadata: {
+          sharedChatInviteCode: 'invite',
+          sharedChatEntityType: 'character',
+          sharedChatEntityId: 'character-1',
+          sharedChatSessionId: 'other-session',
+        },
+        userId: null,
+      },
+    ]);
+
+    const { getSharedChatReadOnlySignedUrl } = await import('./shared-chat-read-service');
+
+    await expect(
+      getSharedChatReadOnlySignedUrl({
+        inviteCode: 'invite',
+        characterId: 'character-1',
+        fileId: 'file-1',
+        sharedSessionId: 'session-1',
+      }),
+    ).rejects.toThrow('Not authorized to access this file');
+  });
+});

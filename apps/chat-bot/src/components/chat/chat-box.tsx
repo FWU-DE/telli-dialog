@@ -37,6 +37,7 @@ export function ChatBox({
   conversationId,
   characterName,
   status,
+  getSignedUrlFn,
 }: {
   assistantIcon?: ReactNode;
   children: UIMessage;
@@ -50,6 +51,7 @@ export function ChatBox({
   conversationId?: string;
   characterName?: string;
   status: ChatStatus;
+  getSignedUrlFn?: (fileId: string) => Promise<string>;
 }) {
   const tCommon = useTranslations('common');
   const { isAtLeast } = useBreakpoints();
@@ -99,6 +101,7 @@ export function ChatBox({
                 status="processed"
                 key={file.id}
                 showBanner={false}
+                getSignedUrl={getSignedUrlFn}
               />
             ))}
           </div>
