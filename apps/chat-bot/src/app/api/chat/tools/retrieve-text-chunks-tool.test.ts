@@ -96,17 +96,16 @@ describe('buildRetrieveTextChunksTool', () => {
     expect(tool!.definition.description).toContain('Arbeitsblatt.pdf (120000 bytes)');
     expect(tool!.definition.description).toContain('Leitfaden.txt (8000 bytes)');
     expect(tool!.definition.parameters).toMatchObject({
-      required: ['search', 'limit'],
+      required: ['search'],
       properties: {
-        limit: {
-          maximum: VECTOR_SEARCH_LIMIT,
+        search: {
+          type: 'string',
         },
       },
     });
 
     const result = await tool!.handler({
       search: 'relevante Passage',
-      limit: VECTOR_SEARCH_LIMIT + 5,
     });
 
     expect(mocks.retrieveChunksByQueryMock).toHaveBeenCalledWith(
@@ -229,7 +228,6 @@ describe('buildRetrieveTextChunksTool', () => {
 
     const result = await tool!.handler({
       search: 'not found',
-      limit: 5,
     });
 
     const parsed = JSON.parse(result);
