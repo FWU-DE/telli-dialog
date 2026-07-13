@@ -23,7 +23,7 @@
     "db:seed:from-stage": "pnpm --filter @ais-chat/api-database db:seed:from-stage && pnpm --filter @ais-chat/shared db:seed:from-stage",
     "jira:description": "pnpm --filter ais-chat-api exec tsx ../../scripts/jira-description.ts"
   },
-  "packageManager": "pnpm@11.2.2",
+  "packageManager": "pnpm@11.11.0",
   "devDependencies": {
     "@ais-chat/typescript-config": "workspace:*",
     "prettier": "3.9.4",
