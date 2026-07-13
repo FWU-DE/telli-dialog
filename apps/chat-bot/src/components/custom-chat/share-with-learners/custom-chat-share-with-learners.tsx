@@ -106,6 +106,7 @@ export function CustomChatShareWithLearners({
           manuallyStoppedAt: null,
           tokenPointsLimit: null,
           budgetUsedBySharedChat: 0,
+          tokenLimitExceeded: false,
         },
       })),
     isActive: sharedChatActiveInitial && !!onPollShareData,
@@ -136,12 +137,9 @@ export function CustomChatShareWithLearners({
 
   const currentBudgetUsedBySharedChat =
     polledData?.budgetUsedBySharedChat ?? budgetUsedBySharedChat;
-  const currentTokenLimitInCent =
-    currentTokenPointsLimit !== null ? (maxBudget * currentTokenPointsLimit) / 100 : null;
-  const isTokenLimitExceeded =
-    currentTokenLimitInCent !== null && currentBudgetUsedBySharedChat >= currentTokenLimitInCent;
+  const currentTokenLimitExceeded = polledData?.tokenLimitExceeded ?? null;
   const isShareWarningVisible =
-    shareSessionState === ShareSessionState.EXPIRED_RECENTLY || isTokenLimitExceeded;
+    shareSessionState === ShareSessionState.EXPIRED_RECENTLY || currentTokenLimitExceeded;
 
   const preselectedUsageTimeLimit =
     maxUsageTimeLimit !== null && usageTimeValuesInMinutes.includes(maxUsageTimeLimit)
@@ -251,7 +249,7 @@ export function CustomChatShareWithLearners({
                         <CountDownTimer
                           leftTimeInSeconds={sharedChatTimeLeft}
                           totalTimeInSeconds={(maxUsageTimeLimit ?? 0) * 60}
-                          className="!bg-transparent"
+                          className="bg-transparent!"
                           stopWatchClassName="w-4 h-4"
                         />
                       </div>

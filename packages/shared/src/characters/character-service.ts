@@ -397,14 +397,17 @@ export const deleteCharacter = async ({
 export const getActiveCharacterShareData = async ({
   characterId,
   user,
+  federalState,
 }: {
   characterId: string;
   user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+  federalState: FederalStateModel;
 }): Promise<{
   expiredAt: Date | null;
   manuallyStoppedAt: Date | null;
   tokenPointsLimit: number | null;
   budgetUsedBySharedChat: number;
+  tokenLimitExceeded: boolean;
 }> => {
   checkParameterUUID(characterId);
   requireTeacherRole(user.userRole);
@@ -420,6 +423,7 @@ export const getActiveCharacterShareData = async ({
       manuallyStoppedAt: null,
       tokenPointsLimit: null,
       budgetUsedBySharedChat: 0,
+      tokenLimitExceeded: false,
     };
   }
 
@@ -430,11 +434,19 @@ export const getActiveCharacterShareData = async ({
     startedAt: share.startedAt,
   });
 
+  let tokenLimitExceeded = false;
+  if (share.expiredAt !== null && share.tokenPointsLimit !== null) {
+    const maxBudgetInCent = await getMaxBudgetInCentByUser({ user, federalState });
+    tokenLimitExceeded =
+      budgetUsedBySharedChat >= ((maxBudgetInCent ?? 0) * share.tokenPointsLimit) / 100;
+  }
+
   return {
     expiredAt: share.expiredAt,
     manuallyStoppedAt: share.manuallyStoppedAt,
     tokenPointsLimit: share.tokenPointsLimit,
     budgetUsedBySharedChat,
+    tokenLimitExceeded,
   };
 };
 

@@ -344,14 +344,17 @@ export type LearningScenarioShareValues = z.infer<typeof learningScenarioShareVa
 export async function getActiveLearningScenarioShareData({
   learningScenarioId,
   user,
+  federalState,
 }: {
   learningScenarioId: string;
   user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+  federalState: FederalStateModel;
 }): Promise<{
   expiredAt: Date | null;
   manuallyStoppedAt: Date | null;
   tokenPointsLimit: number | null;
   budgetUsedBySharedChat: number;
+  tokenLimitExceeded: boolean;
 }> {
   checkParameterUUID(learningScenarioId);
   requireTeacherRole(user.userRole);
@@ -367,6 +370,7 @@ export async function getActiveLearningScenarioShareData({
       manuallyStoppedAt: null,
       tokenPointsLimit: null,
       budgetUsedBySharedChat: 0,
+      tokenLimitExceeded: false,
     };
   }
 
@@ -377,11 +381,19 @@ export async function getActiveLearningScenarioShareData({
     startedAt: share.startedAt,
   });
 
+  let tokenLimitExceeded = false;
+  if (share.expiredAt !== null && share.tokenPointsLimit !== null) {
+    const maxBudgetInCent = await getMaxBudgetInCentByUser({ user, federalState });
+    tokenLimitExceeded =
+      budgetUsedBySharedChat >= ((maxBudgetInCent ?? 0) * share.tokenPointsLimit) / 100;
+  }
+
   return {
     expiredAt: share.expiredAt,
     manuallyStoppedAt: share.manuallyStoppedAt,
     tokenPointsLimit: share.tokenPointsLimit,
     budgetUsedBySharedChat,
+    tokenLimitExceeded,
   };
 }
 

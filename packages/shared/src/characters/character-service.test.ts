@@ -118,6 +118,15 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
   schoolIds: [generateUUID()],
 });
 
+const mockFederalState = (): FederalStateModel =>
+  ({
+    id: generateUUID(),
+    teacherPriceLimit: 500,
+    studentPriceLimit: 100,
+    createdAt: new Date(),
+    mandatoryCertificationTeacher: null,
+  }) as FederalStateModel;
+
 describe('character-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -1350,13 +1359,18 @@ describe('character-service', () => {
         >
       ).mockResolvedValue(null as never);
 
-      const result = await getActiveCharacterShareData({ characterId, user });
+      const result = await getActiveCharacterShareData({
+        characterId,
+        user,
+        federalState: mockFederalState(),
+      });
 
       expect(result).toEqual({
         expiredAt: null,
         manuallyStoppedAt: null,
         tokenPointsLimit: null,
         budgetUsedBySharedChat: 0,
+        tokenLimitExceeded: false,
       });
       expect(dbGetSharedCharacterChatUsageInCentByCharacterId).not.toHaveBeenCalled();
     });
@@ -1396,7 +1410,11 @@ describe('character-service', () => {
         >
       ).mockResolvedValue(777);
 
-      const result = await getActiveCharacterShareData({ characterId, user });
+      const result = await getActiveCharacterShareData({
+        characterId,
+        user,
+        federalState: mockFederalState(),
+      });
 
       expect(dbGetSharedCharacterChatUsageInCentByCharacterId).toHaveBeenCalledWith({
         characterId,
@@ -1409,6 +1427,7 @@ describe('character-service', () => {
         manuallyStoppedAt: null,
         tokenPointsLimit: 50,
         budgetUsedBySharedChat: 777,
+        tokenLimitExceeded: true,
       });
     });
 
@@ -1420,9 +1439,9 @@ describe('character-service', () => {
         undefined as never,
       );
 
-      await expect(getActiveCharacterShareData({ characterId, user })).rejects.toThrow(
-        NotFoundError,
-      );
+      await expect(
+        getActiveCharacterShareData({ characterId, user, federalState: mockFederalState() }),
+      ).rejects.toThrow(NotFoundError);
     });
   });
 

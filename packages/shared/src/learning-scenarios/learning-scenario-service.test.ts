@@ -720,13 +720,18 @@ describe('learning-scenario-service', () => {
         >
       ).mockResolvedValue(null as never);
 
-      const result = await getActiveLearningScenarioShareData({ learningScenarioId, user });
+      const result = await getActiveLearningScenarioShareData({
+        learningScenarioId,
+        user,
+        federalState: mockFederalState(),
+      });
 
       expect(result).toEqual({
         expiredAt: null,
         manuallyStoppedAt: null,
         tokenPointsLimit: null,
         budgetUsedBySharedChat: 0,
+        tokenLimitExceeded: false,
       });
       expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).not.toHaveBeenCalled();
     });
@@ -766,7 +771,11 @@ describe('learning-scenario-service', () => {
         >
       ).mockResolvedValue(432);
 
-      const result = await getActiveLearningScenarioShareData({ learningScenarioId, user });
+      const result = await getActiveLearningScenarioShareData({
+        learningScenarioId,
+        user,
+        federalState: mockFederalState(),
+      });
 
       expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).toHaveBeenCalledWith({
         learningScenarioId,
@@ -779,6 +788,7 @@ describe('learning-scenario-service', () => {
         manuallyStoppedAt: null,
         tokenPointsLimit: 75,
         budgetUsedBySharedChat: 432,
+        tokenLimitExceeded: true,
       });
     });
 
@@ -791,7 +801,11 @@ describe('learning-scenario-service', () => {
       ).mockResolvedValue(undefined as never);
 
       await expect(
-        getActiveLearningScenarioShareData({ learningScenarioId, user }),
+        getActiveLearningScenarioShareData({
+          learningScenarioId,
+          user,
+          federalState: mockFederalState(),
+        }),
       ).rejects.toThrow(NotFoundError);
     });
   });

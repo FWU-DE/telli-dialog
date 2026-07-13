@@ -89,6 +89,7 @@ export default function CustomChatSharePageContent({
           manuallyStoppedAt: result.value.manuallyStoppedAt,
           tokenPointsLimit: result.value.tokenPointsLimit,
           budgetUsedBySharedChat: result.value.budgetUsedBySharedChat,
+          tokenLimitExceeded: result.value.tokenLimitExceeded,
         },
       };
     }
@@ -103,18 +104,15 @@ export default function CustomChatSharePageContent({
 
   const currentExpiredAt = polledData?.expiredAt ?? expiredAt;
   const currentManuallyStoppedAt = polledData?.manuallyStoppedAt ?? manuallyStoppedAt;
-  const currentTokenPointsLimit = polledData?.tokenPointsLimit ?? null;
-  const currentBudgetUsedBySharedChat = polledData?.budgetUsedBySharedChat ?? 0;
+  const currentTokenLimitExceeded = polledData?.tokenLimitExceeded ?? null;
 
   const { shareSessionState, timeLeftInSeconds: currentLeftTimeInSeconds } =
     calculateShareSessionState({
       expiredAt: currentExpiredAt,
       manuallyStoppedAt: currentManuallyStoppedAt,
     });
-  const isTokenLimitExceeded =
-    currentTokenPointsLimit !== null && currentBudgetUsedBySharedChat >= currentTokenPointsLimit;
   const showShareWarning =
-    shareSessionState === ShareSessionState.EXPIRED_RECENTLY || isTokenLimitExceeded;
+    shareSessionState === ShareSessionState.EXPIRED_RECENTLY || currentTokenLimitExceeded;
 
   const content = showShareWarning ? (
     <div className="flex flex-col items-center gap-6">
