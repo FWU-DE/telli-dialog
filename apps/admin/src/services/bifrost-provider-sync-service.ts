@@ -101,10 +101,11 @@ export async function syncBifrostProvidersForOrganization(organizationId: string
 function buildBifrostProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] {
   const providerModels = new Map<BifrostProvider, LlmModel[]>();
   for (const model of models) {
-    const provider = toBifrostProvider(model.provider);
+    const provider = getBifrostProviderFromSettings(model.setting.provider);
     if (!provider) {
       logWarning('Skipping unsupported provider for Bifrost sync', {
         provider: model.provider,
+        settingProvider: model.setting.provider,
         modelId: model.id,
         modelName: model.name,
       });
@@ -369,7 +370,7 @@ function groupModelsBySettings(
   return [...groupedModels.values()];
 }
 
-function toBifrostProvider(provider: string): BifrostProvider | undefined {
+function getBifrostProviderFromSettings(provider: string): BifrostProvider | undefined {
   if (provider === 'azure') return 'azure';
   if (provider === 'openai') return 'openai';
   if (provider === 'ionos') return 'ionos';

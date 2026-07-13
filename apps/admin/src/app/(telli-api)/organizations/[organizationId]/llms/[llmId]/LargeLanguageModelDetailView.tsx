@@ -158,7 +158,7 @@ export function LargeLanguageModelDetailView({
           <FormField
             name="provider"
             label="Anbieter *"
-            description="Name des Modell-Anbieters (ionos, azure, openai, google)"
+            description="Name des Modell-Anbieters (ionos, azure, openai, google, bifrost)"
             control={control}
           />
 
