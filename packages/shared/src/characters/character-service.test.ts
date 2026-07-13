@@ -669,8 +669,7 @@ describe('character-service', () => {
       });
 
       expect(dbExtendSharedCharacterConversationExpiration).toHaveBeenCalledWith({
-        characterId,
-        user,
+        share: currentShare,
         additionalTimeInMinutes: 30,
       });
       expect(result).toBe(updatedShare);

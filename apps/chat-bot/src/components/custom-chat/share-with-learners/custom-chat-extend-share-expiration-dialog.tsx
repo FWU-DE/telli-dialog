@@ -21,7 +21,7 @@ import { MAX_EXTENDABLE_USAGE_TIME_IN_SECONDS } from '@shared/sharing/const';
 type CustomChatExtendShareExpirationDialogProps = {
   trigger: React.ReactElement<{ disabled?: boolean }>;
   preselectedUsageTimeLimit: number;
-  currentUsageTimeLimit: number;
+  currentUsageTimeRemaining: number;
   onAddTime: (data: { additionalTimeInMinutes: number }) => Promise<{
     success: boolean;
     expiredAt?: Date;
@@ -32,7 +32,7 @@ type CustomChatExtendShareExpirationDialogProps = {
 export function CustomChatExtendShareExpirationDialog({
   trigger,
   preselectedUsageTimeLimit,
-  currentUsageTimeLimit,
+  currentUsageTimeRemaining,
   onAddTime,
   onAddTimeSuccess,
 }: CustomChatExtendShareExpirationDialogProps) {
@@ -47,7 +47,7 @@ export function CustomChatExtendShareExpirationDialog({
   const [selectVersion, setSelectVersion] = React.useState(0);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const isExtendableTimeLimitExceeded =
-    currentUsageTimeLimit >= MAX_EXTENDABLE_USAGE_TIME_IN_SECONDS;
+    currentUsageTimeRemaining >= MAX_EXTENDABLE_USAGE_TIME_IN_SECONDS;
   const triggerWithState = React.cloneElement(trigger, {
     disabled: Boolean(trigger.props.disabled) || isExtendableTimeLimitExceeded,
   });

@@ -73,6 +73,7 @@ import {
   filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
 import { dbGetSharedCharacterChatUsageInCentByCharacterId } from '@shared/db/functions/token-points';
+import { sharedCharacterChatHasReachedTokenPointsLimit } from '@shared/users/usage';
 
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
@@ -434,12 +435,15 @@ export const getActiveCharacterShareData = async ({
     startedAt: share.startedAt,
   });
 
-  let tokenLimitExceeded = false;
-  if (share.expiredAt !== null && share.tokenPointsLimit !== null) {
-    const maxBudgetInCent = await getMaxBudgetInCentByUser({ user, federalState });
-    tokenLimitExceeded =
-      budgetUsedBySharedChat >= ((maxBudgetInCent ?? 0) * share.tokenPointsLimit) / 100;
-  }
+  const tokenLimitExceeded = await sharedCharacterChatHasReachedTokenPointsLimit({
+    user: { ...user, federalState },
+    character: {
+      ...character,
+      tokenPointsLimit: share.tokenPointsLimit,
+      expiredAt: share.expiredAt,
+      startedAt: share.startedAt,
+    },
+  });
 
   return {
     expiredAt: share.expiredAt,
@@ -604,8 +608,7 @@ export const extendCharacterShareExpiration = async ({
   }
 
   const updatedShare = await dbExtendSharedCharacterConversationExpiration({
-    characterId,
-    user,
+    share: currentShare,
     additionalTimeInMinutes,
   });
 

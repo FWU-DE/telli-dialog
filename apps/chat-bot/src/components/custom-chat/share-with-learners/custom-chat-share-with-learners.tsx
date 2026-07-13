@@ -249,7 +249,7 @@ export function CustomChatShareWithLearners({
                         <CountDownTimer
                           leftTimeInSeconds={sharedChatTimeLeft}
                           totalTimeInSeconds={(maxUsageTimeLimit ?? 0) * 60}
-                          className="bg-transparent!"
+                          className="!bg-transparent"
                           stopWatchClassName="w-4 h-4"
                         />
                       </div>
@@ -261,7 +261,7 @@ export function CustomChatShareWithLearners({
                             </Button>
                           }
                           preselectedUsageTimeLimit={preselectedUsageTimeLimit}
-                          currentUsageTimeLimit={sharedChatTimeLeft}
+                          currentUsageTimeRemaining={sharedChatTimeLeft}
                           onAddTime={onAddTime}
                           onAddTimeSuccess={(newExpiredAt) => {
                             setExpiredAtOverride(newExpiredAt);

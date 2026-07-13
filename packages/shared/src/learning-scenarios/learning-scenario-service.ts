@@ -70,6 +70,7 @@ import {
   getMaxBudgetInCentByUser,
   getUsedBudgetInCentByUser,
 } from '@shared/users/user-budget-service';
+import { sharedLearningScenarioChatHasReachedTokenPointsLimit } from '@shared/users/usage';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { dbGetLearningScenarioChatUsageInCentByLearningScenarioId } from '@shared/db/functions/token-points';
 
@@ -381,12 +382,15 @@ export async function getActiveLearningScenarioShareData({
     startedAt: share.startedAt,
   });
 
-  let tokenLimitExceeded = false;
-  if (share.expiredAt !== null && share.tokenPointsLimit !== null) {
-    const maxBudgetInCent = await getMaxBudgetInCentByUser({ user, federalState });
-    tokenLimitExceeded =
-      budgetUsedBySharedChat >= ((maxBudgetInCent ?? 0) * share.tokenPointsLimit) / 100;
-  }
+  const tokenLimitExceeded = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
+    user: { ...user, federalState },
+    learningScenario: {
+      ...learningScenario,
+      tokenPointsLimit: share.tokenPointsLimit,
+      expiredAt: share.expiredAt,
+      startedAt: share.startedAt,
+    },
+  });
 
   return {
     expiredAt: share.expiredAt,

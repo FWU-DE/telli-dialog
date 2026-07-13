@@ -619,36 +619,27 @@ export async function dbStopCharacterShare({ shareId }: { shareId: string }) {
 }
 
 /**
- * Extends the expiration timestamp of the latest manageable character share for the given user.
+ * Extends the expiration timestamp of an already loaded manageable character share.
  * Respects the grace window, so a share that expired recently can still be extended.
- * Returns `null` if no manageable share exists.
  */
 export async function dbExtendSharedCharacterConversationExpiration({
-  characterId,
-  user,
+  share,
   additionalTimeInMinutes,
 }: {
-  characterId: string;
-  user: Pick<UserModel, 'id'>;
+  share: { id: string; expiredAt: Date };
   additionalTimeInMinutes: number;
 }) {
-  const latestManageableShare = await dbGetLatestManageableCharacterShare({ characterId, user });
-
-  if (!latestManageableShare) {
-    return null;
-  }
-
   const now = new Date();
-  const baseDate = latestManageableShare.expiredAt > now ? latestManageableShare.expiredAt : now;
+  const baseDate = share.expiredAt > now ? share.expiredAt : now;
   const newExpiredAt = new Date(baseDate.getTime() + additionalTimeInMinutes * 60 * 1000);
 
   const [updatedShare] = await db
     .update(sharedCharacterConversation)
     .set({ expiredAt: newExpiredAt })
-    .where(eq(sharedCharacterConversation.id, latestManageableShare.id))
+    .where(eq(sharedCharacterConversation.id, share.id))
     .returning();
 
-  return updatedShare;
+  return updatedShare ?? null;
 }
 
 /**
