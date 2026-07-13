@@ -1,0 +1,43 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\title{Sample Document}
+\author{Document Extraction Test Suite}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+Document extraction services need to correctly parse \textbf{bold text},
+\textit{italic text}, and plain paragraphs across many file formats. This
+file was created directly as a \LaTeX{} source to exercise the
+\texttt{.tex} extraction pathway.
+
+\section{Key Points}
+
+\begin{itemize}
+  \item Supports headings and nested structure
+  \item Supports ordered and unordered lists
+  \item Supports tables with multiple columns
+  \item Supports emphasis and simple inline formatting
+\end{itemize}
+
+\section{Sample Table}
+
+\begin{tabular}{|l|l|l|}
+\hline
+Name & Category & Score \\
+\hline
+Alpha & Test & 91 \\
+Beta & Test & 78 \\
+Gamma & Sample & 85 \\
+\hline
+\end{tabular}
+
+\section{Conclusion}
+
+If this text is extracted correctly, the document extraction pipeline is
+working as expected for this file format.
+
+\end{document}
