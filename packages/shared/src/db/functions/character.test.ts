@@ -41,7 +41,10 @@ describe('db character sharing helpers', () => {
   });
 
   describe('dbExtendSharedCharacterConversationExpiration', () => {
-    it('returns null when there is no active unstopped share', async () => {
+    it('extends from now when the loaded share is already expired', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-01-01T10:00:00.000Z'));
+
       const currentShare = {
         id: 'share-1',
         expiredAt: new Date('2026-01-01T10:30:00.000Z'),
