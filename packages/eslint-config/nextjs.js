@@ -1,3 +1,4 @@
+import { fixupConfigRules } from '@eslint/compat';
 import next from 'eslint-config-next';
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 import nextTypescript from 'eslint-config-next/typescript';
@@ -19,11 +20,13 @@ const nextJsConfig = [
       'coverage/**',
       'playwright-report/**',
       'next-env.d.ts',
+      'eslint.config.mjs',
+      '*.config.mjs',
     ],
   },
-  ...next,
-  ...nextCoreWebVitals,
-  ...nextTypescript,
+  ...fixupConfigRules(next),
+  ...fixupConfigRules(nextCoreWebVitals),
+  ...fixupConfigRules(nextTypescript),
   ...turboConfig,
   {
     files: ['**/*.{js,mjs,cjs,jsx,ts,tsx}'],
