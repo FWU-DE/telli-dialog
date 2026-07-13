@@ -23,6 +23,8 @@ const gpt4oMiniApiKey = process.env.LLM_GPT4OMINI_API_KEY ?? 'API_KEY_PLACEHOLDE
 const gpt4oMiniBaseUrl = process.env.LLM_GPT4OMINI_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const gpt5nanoApiKey = process.env.LLM_GPT5NANO_API_KEY ?? 'API_KEY_PLACEHOLDER';
 const gpt5nanoBaseUrl = process.env.LLM_GPT5NANO_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
+const gpt5miniApiKey = process.env.LLM_GPT5MINI_API_KEY ?? 'API_KEY_PLACEHOLDER';
+const gpt5miniBaseUrl = process.env.LLM_GPT5MINI_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const mockLlmApiKey = process.env.LLM_MOCK_API_KEY ?? 'API_KEY_PLACEHOLDER';
 const mockLlmBaseUrl =
   process.env.LLM_MOCK_BASE_URL ??
@@ -174,6 +176,31 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     additionalParameters: {
       reasoning: {
         effort: 'minimal',
+        summary: null,
+      },
+    },
+    supportedImageFormats: ['jpg', 'jpeg', 'png', 'webp'],
+  },
+  {
+    id: 'f1c2d3e4-5b6a-7c8d-9e0f-1a2b3c4d5e6f',
+    organizationId: ORGANIZATION_ID,
+    provider: 'azure',
+    name: 'gpt-5-mini',
+    displayName: 'GPT-5 mini',
+    description: 'GPT-5 mini model for testing',
+    setting: {
+      provider: 'azure',
+      apiKey: gpt5miniApiKey,
+      baseUrl: gpt5miniBaseUrl,
+    },
+    priceMetadata: {
+      type: 'text',
+      promptTokenPrice: 211.2,
+      completionTokenPrice: 1672,
+    },
+    additionalParameters: {
+      reasoning: {
+        effort: 'low',
         summary: null,
       },
     },
