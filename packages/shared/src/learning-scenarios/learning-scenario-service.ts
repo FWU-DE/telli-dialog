@@ -527,8 +527,13 @@ export async function extendLearningScenarioShareExpiration({
     throw new InvalidArgumentError('No active sharing found for this learning scenario');
   }
 
+  const currentRemainingUsageTimeInMinutes = Math.max(
+    0,
+    Math.ceil((currentShare.expiredAt.getTime() - Date.now()) / 60_000),
+  );
+
   if (
-    currentShare.maxUsageTimeLimit + additionalTimeInMinutes >
+    currentRemainingUsageTimeInMinutes + additionalTimeInMinutes >
     MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES
   ) {
     throw new InvalidArgumentError('total usage time limit must not exceed 130 days');

@@ -1060,6 +1060,7 @@ describe('learning-scenario-service', () => {
       userId,
       tokenPointsLimit: 50,
       maxUsageTimeLimit: 60,
+      expiredAt: new Date(Date.now() + 60 * 60_000),
     };
 
     beforeEach(() => {
@@ -1115,7 +1116,7 @@ describe('learning-scenario-service', () => {
         >
       ).mockResolvedValue({
         ...currentShare,
-        maxUsageTimeLimit: 187000,
+        expiredAt: new Date(Date.now() + 187000 * 60_000),
       } as never);
       (
         dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>

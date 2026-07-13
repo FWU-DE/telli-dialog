@@ -633,6 +633,7 @@ describe('character-service', () => {
       userId,
       tokenPointsLimit: 50,
       maxUsageTimeLimit: 60,
+      expiredAt: new Date(Date.now() + 60 * 60_000),
     };
 
     beforeEach(() => {
@@ -688,7 +689,7 @@ describe('character-service', () => {
         >
       ).mockResolvedValue({
         ...currentShare,
-        maxUsageTimeLimit: 187000,
+        expiredAt: new Date(Date.now() + 187000 * 60_000),
       } as never);
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue({
         ...mockCharacter,
