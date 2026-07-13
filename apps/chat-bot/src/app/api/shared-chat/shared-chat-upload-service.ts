@@ -18,6 +18,7 @@ type SharedUploadContext = {
   entityId: string;
 };
 
+/** This object is stored in the metadata column of the files table  */
 export type SharedChatOwnershipMetadata = {
   sharedChatInviteCode: string;
   sharedChatEntityType: 'character' | 'learningScenario';
