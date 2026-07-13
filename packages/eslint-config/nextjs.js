@@ -22,7 +22,7 @@ const nextJsConfig = [
       'next-env.d.ts',
     ],
   },
-  // Keep legacy rule APIs from eslint-config-next compatible with ESLint v10.
+  // eslint-config-next still ships legacy rule APIs; fixupConfigRules adapts them for ESLint v10.
   ...fixupConfigRules(next),
   ...fixupConfigRules(nextCoreWebVitals),
   ...fixupConfigRules(nextTypescript),
