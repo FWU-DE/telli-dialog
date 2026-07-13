@@ -56,7 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} className={cn(barlow.className)} suppressHydrationWarning>
-      <body>
+      <body suppressHydrationWarning>
         <Script
           id="public-config"
           // runs as soon as the browser parses it (before client components hydrate)

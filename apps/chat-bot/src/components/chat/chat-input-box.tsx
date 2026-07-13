@@ -152,6 +152,8 @@ export function ChatInputBox({
                 file={file}
                 onDeattachFile={() => handleDeattachFile(localId)}
                 getSignedUrl={getSignedUrlFn}
+                height="large"
+                width="small"
               />
             ))}
           </div>
