@@ -168,16 +168,29 @@ export default function GenericSharedChat({
       const fileIds = [...new Set([...previousFileIds, ...currentFileIds])];
       const userMessageId = crypto.randomUUID();
 
-      const pendingFiles: PendingFileModel[] = currentFiles.map(([, file]) => ({
-        id: file.fileId ?? '',
-        name: file.file.name,
-        type: getFileExtension(file.file.name),
-        createdAt: new Date(),
-        size: file.file.size,
-        metadata: null,
-        userId: null,
-        localUrl: isImageFile(file.file.name) ? URL.createObjectURL(file.file) : undefined,
-      }));
+      const pendingFiles: PendingFileModel[] = currentFiles.reduce<PendingFileModel[]>(
+        (acc, [, file]) => {
+          const fileId = file.fileId;
+
+          if (fileId === undefined || fileId.trim() === '') {
+            return acc;
+          }
+
+          acc.push({
+            id: fileId,
+            name: file.file.name,
+            type: getFileExtension(file.file.name),
+            createdAt: new Date(),
+            size: file.file.size,
+            metadata: null,
+            userId: null,
+            localUrl: isImageFile(file.file.name) ? URL.createObjectURL(file.file) : undefined,
+          });
+
+          return acc;
+        },
+        [],
+      );
 
       if (pendingFiles.length > 0) {
         setPendingFileMapping((prev) => {
