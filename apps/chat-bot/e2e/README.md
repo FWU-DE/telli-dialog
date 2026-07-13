@@ -5,9 +5,9 @@ For e2e tests we use [playwright](https://playwright.dev/).
 
 ## Mock LLM
 
-Most e2e tests use a local mock OpenAI-compatible server (`devops/docker/mock-llm/`) as the default
-text model instead of calling real LLMs. The mock server echoes the last user message back as a
-character-by-character SSE stream for deterministic responses.
+Most e2e tests use a local mock Azure/OpenAI Responses-compatible server (`devops/docker/mock-llm/`)
+as the default text model instead of calling real LLMs. The mock server streams deterministic SSE
+responses and can be controlled with `MOCK_LLM_COMMANDS` to trigger tool calls.
 
 ### Starting the mock LLM locally
 
