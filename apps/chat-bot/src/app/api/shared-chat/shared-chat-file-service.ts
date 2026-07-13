@@ -61,10 +61,6 @@ export async function combineSharedRelatedFiles({
 
   const uploadedFiles = await dbGetFilesInIds(fileIds);
 
-  if (uploadedFiles.length !== fileIds.length) {
-    throw new ForbiddenError('Not authorized to use one or more files');
-  }
-
   for (const file of uploadedFiles) {
     if (file.userId !== null) {
       throw new ForbiddenError('Not authorized to use one or more files');

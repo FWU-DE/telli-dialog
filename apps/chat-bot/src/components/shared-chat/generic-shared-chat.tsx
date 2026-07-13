@@ -24,6 +24,7 @@ import { getFileExtension, isImageFile } from '@/utils/files/generic';
 import { PendingFileModel } from '../chat/messages';
 import {
   clearSharedChatFileMapping,
+  clearSharedChatSessionId,
   getOrCreateSharedChatSessionId,
   loadSharedChatFileMapping,
   saveSharedChatFileMapping,
@@ -213,6 +214,7 @@ export default function GenericSharedChat({
 
     setPendingFileMapping(new Map());
     clearSharedChatFileMapping(inviteCode);
+    clearSharedChatSessionId(inviteCode);
     clearClientPersistedMessages();
     setMessages([]);
   }

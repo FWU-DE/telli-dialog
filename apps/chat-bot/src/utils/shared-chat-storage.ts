@@ -250,3 +250,14 @@ export function getOrCreateSharedChatSessionId(inviteCode: string): string {
     return crypto.randomUUID();
   }
 }
+
+export function clearSharedChatSessionId(inviteCode: string): void {
+  const storage = getSessionStorage();
+  if (storage === null) return;
+
+  try {
+    storage.removeItem(sharedChatSessionIdStorageKey(inviteCode));
+  } catch (error) {
+    logError('Failed to clear shared chat session id from sessionStorage', error);
+  }
+}
