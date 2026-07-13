@@ -25,7 +25,7 @@
     "@ais-chat/typescript-config": "workspace:*",
     "@types/node": "24.13.3",
     "@vitest/coverage-v8": "4.1.10",
-    "eslint": "9.39.4",
+    "eslint": "10.7.0",
     "typescript": "6.0.3",
     "vitest": "4.1.10"
   }

@@ -1,3 +1,4 @@
+import { fixupConfigRules } from '@eslint/compat';
 import next from 'eslint-config-next';
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 import nextTypescript from 'eslint-config-next/typescript';
@@ -21,9 +22,10 @@ const nextJsConfig = [
       'next-env.d.ts',
     ],
   },
-  ...next,
-  ...nextCoreWebVitals,
-  ...nextTypescript,
+  // eslint-config-next still ships legacy rule APIs; fixupConfigRules adapts them for ESLint v10.
+  ...fixupConfigRules(next),
+  ...fixupConfigRules(nextCoreWebVitals),
+  ...fixupConfigRules(nextTypescript),
   ...turboConfig,
   {
     files: ['**/*.{js,mjs,cjs,jsx,ts,tsx}'],

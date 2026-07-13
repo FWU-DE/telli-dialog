@@ -9,17 +9,21 @@
     "./nextjs": "./nextjs.js"
   },
   "dependencies": {
-    "@eslint/js": "9.39.2",
-    "prettier": "3.9.4",
+    "@eslint/compat": "2.1.0",
+    "@eslint/js": "10.0.1",
     "eslint-config-next": "16.2.10",
+    "eslint-config-prettier": "10.1.8",
     "eslint-config-turbo": "2.10.4",
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-package-json": "1.5.0",
     "eslint-plugin-prettier": "5.5.6",
-    "eslint-config-prettier": "10.1.8",
+    "prettier": "3.9.4",
     "typescript-eslint": "8.63.0"
   },
   "peerDependencies": {
-    "eslint": ">=9"
+    "eslint": ">=10"
+  },
+  "devDependencies": {
+    "eslint": "10.7.0"
   }
 }
