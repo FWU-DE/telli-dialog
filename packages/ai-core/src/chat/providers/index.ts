@@ -4,6 +4,11 @@ import {
   constructAzureResponsesAgenticStreamFn,
 } from './azure';
 import {
+  constructBifrostAgenticStreamFn,
+  constructBifrostTextGenerationFn,
+  constructBifrostTextStreamFn,
+} from './bifrost';
+import {
   constructGoogleAgenticStreamFn,
   constructGoogleTextGenerationFn,
   constructGoogleTextStreamFn,
@@ -41,6 +46,9 @@ function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerati
   if (model.provider === 'openai') {
     return constructOpenAITextGenerationFn(model);
   }
+  if (model.provider === 'bifrost') {
+    return constructBifrostTextGenerationFn(model);
+  }
 
   return undefined;
 }
@@ -58,6 +66,9 @@ function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | u
   if (model.provider === 'openai') {
     return constructOpenAITextStreamFn(model);
   }
+  if (model.provider === 'bifrost') {
+    return constructBifrostTextStreamFn(model);
+  }
 
   return undefined;
 }
@@ -74,6 +85,9 @@ function getAgenticStreamFnByModel({ model }: { model: AiModel }): AgenticStream
   }
   if (model.provider === 'google') {
     return constructGoogleAgenticStreamFn(model);
+  }
+  if (model.provider === 'bifrost') {
+    return constructBifrostAgenticStreamFn(model);
   }
   return undefined; // HINT: Add support for other providers here
 }
