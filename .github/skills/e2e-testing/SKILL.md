@@ -88,9 +88,7 @@ import { authorizationHeader } from '../utils/api.js';
 test.describe('POST /v1/some-endpoint', () => {
   test('returns 401 without authentication', async ({ request }) => {
     const response = await request.post('/v1/some-endpoint', {
-      data: {
-        /* valid body */
-      },
+      data: {/* valid body */},
     });
     expect(response.status()).toBe(401);
   });
@@ -108,9 +106,7 @@ test.describe('POST /v1/some-endpoint', () => {
   test('returns expected response', async ({ request }) => {
     const response = await request.post('/v1/some-endpoint', {
       headers: authorizationHeader,
-      data: {
-        /* valid body */
-      },
+      data: {/* valid body */},
     });
     expect(response.status()).toBe(200);
     const body = await response.json();
