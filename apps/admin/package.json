@@ -49,10 +49,10 @@
     "@types/react-syntax-highlighter": "15.5.13",
     "babel-plugin-react-compiler": "1.0.0",
     "esbuild": "0.28.1",
-    "eslint": "9.39.4",
+    "eslint": "10.7.0",
     "postcss": "8.5.16",
     "prettier": "3.9.4",
-    "prettier-eslint": "16.4.2",
+    "prettier-eslint": "17.1.1",
     "tailwindcss": "4.3.2",
     "tailwindcss-animate": "1.0.7",
     "typescript": "6.0.3"

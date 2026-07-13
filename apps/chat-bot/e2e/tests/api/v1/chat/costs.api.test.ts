@@ -10,10 +10,6 @@ import {
   userTable,
 } from '@shared/db/schema';
 import {
-  sharedCharacterChatHasReachedTokenPointsLimit,
-  sharedLearningScenarioChatHasReachedTokenPointsLimit,
-} from '@/app/api/chat/usage';
-import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetLearningScenarioChatUsageInCentByLearningScenarioId,
 } from '@shared/db/functions/token-points';
@@ -28,6 +24,10 @@ import {
 } from '../../../../utils/mock';
 import { generateRandomString } from '../../../../utils/random';
 import { getUsedBudgetInCentByUser } from '@shared/users/user-budget-service';
+import {
+  sharedCharacterChatHasReachedTokenPointsLimit,
+  sharedLearningScenarioChatHasReachedTokenPointsLimit,
+} from '@shared/users/usage';
 
 test.describe('costs', () => {
   test('should calculate total price from all three usage tracking tables', async () => {
