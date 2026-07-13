@@ -48,9 +48,6 @@ export function CustomChatExtendShareExpirationDialog({
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const isExtendableTimeLimitExceeded =
     currentUsageTimeRemaining >= MAX_EXTENDABLE_USAGE_TIME_IN_SECONDS;
-  const triggerWithState = React.cloneElement(trigger, {
-    disabled: Boolean(trigger.props.disabled) || isExtendableTimeLimitExceeded,
-  });
 
   async function handleAddTime() {
     setIsSubmitting(true);
@@ -78,7 +75,12 @@ export function CustomChatExtendShareExpirationDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{triggerWithState}</DialogTrigger>
+      <DialogTrigger
+        asChild
+        disabled={Boolean(trigger.props.disabled) || isExtendableTimeLimitExceeded}
+      >
+        {trigger}
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader className="space-y-2">
           <DialogTitle>{t('additional-time-modal-title')}</DialogTitle>

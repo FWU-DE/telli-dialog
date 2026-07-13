@@ -137,12 +137,7 @@ export function CustomChatShareWithLearners({
 
   const currentBudgetUsedBySharedChat =
     polledData?.budgetUsedBySharedChat ?? budgetUsedBySharedChat;
-
-  const tokenLimitInCent =
-    maxBudget === null ? null : (maxBudget * currentTokenPointsPercentageLimit) / 100;
-  const currentTokenLimitExceeded =
-    polledData?.tokenLimitExceeded ??
-    (tokenLimitInCent !== null && currentBudgetUsedBySharedChat >= tokenLimitInCent);
+  const currentTokenLimitExceeded = polledData?.tokenLimitExceeded ?? false;
   const isShareWarningVisible =
     shareSessionState === ShareSessionState.EXPIRED_RECENTLY || currentTokenLimitExceeded;
 
