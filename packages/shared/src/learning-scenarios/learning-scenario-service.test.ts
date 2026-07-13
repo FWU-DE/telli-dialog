@@ -1054,11 +1054,23 @@ describe('learning-scenario-service', () => {
       userId,
       expiredAt: new Date('2026-07-01T12:30:00.000Z'),
     };
+    const currentShare = {
+      id: generateUUID(),
+      learningScenarioId,
+      userId,
+      tokenPointsLimit: 50,
+      maxUsageTimeLimit: 60,
+    };
 
     beforeEach(() => {
       (
         dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
       ).mockResolvedValue(mockLearningScenario as never);
+      (
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
+        >
+      ).mockResolvedValue(currentShare as never);
       (
         dbExtendSharedLearningScenarioExpiration as MockedFunction<
           typeof dbExtendSharedLearningScenarioExpiration
@@ -1097,6 +1109,14 @@ describe('learning-scenario-service', () => {
     );
 
     it('throws InvalidArgumentError when the total usage time would exceed 130 days', async () => {
+      (
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
+        >
+      ).mockResolvedValue({
+        ...currentShare,
+        maxUsageTimeLimit: 187000,
+      } as never);
       (
         dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
       ).mockResolvedValue({

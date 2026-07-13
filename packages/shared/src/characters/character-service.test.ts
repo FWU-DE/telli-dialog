@@ -627,11 +627,23 @@ describe('character-service', () => {
       userId,
       expiredAt: new Date('2026-07-01T12:30:00.000Z'),
     };
+    const currentShare = {
+      id: generateUUID(),
+      characterId,
+      userId,
+      tokenPointsLimit: 50,
+      maxUsageTimeLimit: 60,
+    };
 
     beforeEach(() => {
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
         mockCharacter as never,
       );
+      (
+        dbGetLatestManageableCharacterShare as MockedFunction<
+          typeof dbGetLatestManageableCharacterShare
+        >
+      ).mockResolvedValue(currentShare as never);
       (
         dbExtendSharedCharacterConversationExpiration as MockedFunction<
           typeof dbExtendSharedCharacterConversationExpiration
@@ -670,6 +682,14 @@ describe('character-service', () => {
     );
 
     it('throws InvalidArgumentError when the total usage time would exceed 130 days', async () => {
+      (
+        dbGetLatestManageableCharacterShare as MockedFunction<
+          typeof dbGetLatestManageableCharacterShare
+        >
+      ).mockResolvedValue({
+        ...currentShare,
+        maxUsageTimeLimit: 187000,
+      } as never);
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue({
         ...mockCharacter,
         maxUsageTimeLimit: 187000,
