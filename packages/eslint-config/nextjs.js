@@ -20,8 +20,6 @@ const nextJsConfig = [
       'coverage/**',
       'playwright-report/**',
       'next-env.d.ts',
-      'eslint.config.mjs',
-      '*.config.mjs',
     ],
   },
   ...fixupConfigRules(next),
