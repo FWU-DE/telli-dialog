@@ -21,12 +21,12 @@
   },
   "dependencies": {
     "@ais-chat/api-database": "workspace:*",
-    "@anthropic-ai/sdk": "0.104.1",
-    "@anthropic-ai/vertex-sdk": "0.17.1",
-    "@google/genai": "2.8.0",
-    "@sentry/core": "10.57.0",
+    "@anthropic-ai/sdk": "0.110.0",
+    "@anthropic-ai/vertex-sdk": "0.19.0",
+    "@google/genai": "2.10.0",
+    "@sentry/core": "10.64.0",
     "js-tiktoken": "1.0.21",
-    "openai": "6.42.0",
+    "openai": "6.45.0",
     "openaiv4": "npm:openai@4.104.0",
     "zod": "4.4.3"
   },
@@ -34,13 +34,13 @@
     "@ais-chat/eslint-config": "workspace:*",
     "@ais-chat/typescript-config": "workspace:*",
     "@t3-oss/env-core": "0.13.11",
-    "@types/node": "24.13.2",
-    "@vitest/coverage-v8": "4.1.8",
+    "@types/node": "24.13.3",
+    "@vitest/coverage-v8": "4.1.10",
     "eslint": "9.39.4",
-    "prettier": "3.8.4",
+    "prettier": "3.9.4",
     "prettier-eslint": "16.4.2",
-    "tsx": "4.22.4",
+    "tsx": "4.23.0",
     "typescript": "6.0.3",
-    "vitest": "4.1.8"
+    "vitest": "4.1.10"
   }
 }

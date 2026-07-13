@@ -4,8 +4,8 @@ packages:
 allowBuilds:
   '@google/genai': true
   '@parcel/watcher': true
-  '@sentry-internal/node-cpu-profiler': false
   '@sentry/cli': true
+  '@sentry/node-cpu-profiler': false
   '@swc/core': true
   esbuild: true
   protobufjs: false

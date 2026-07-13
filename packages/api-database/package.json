@@ -27,21 +27,21 @@
     "bcryptjs": "3.0.3",
     "drizzle-orm": "0.45.2",
     "drizzle-zod": "0.8.3",
-    "nanoid": "5.1.11",
-    "pg": "8.21.0",
+    "nanoid": "5.1.16",
+    "pg": "8.22.0",
     "zod": "4.4.3"
   },
   "devDependencies": {
     "@ais-chat/eslint-config": "workspace:*",
     "@ais-chat/typescript-config": "workspace:*",
-    "@types/node": "24.13.2",
+    "@types/node": "24.13.3",
     "@types/pg": "8.20.0",
-    "@vitest/coverage-v8": "4.1.8",
+    "@vitest/coverage-v8": "4.1.10",
     "dotenv-cli": "11.0.0",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
-    "tsx": "4.22.4",
+    "tsx": "4.23.0",
     "typescript": "6.0.3",
-    "vitest": "4.1.8"
+    "vitest": "4.1.10"
   }
 }
