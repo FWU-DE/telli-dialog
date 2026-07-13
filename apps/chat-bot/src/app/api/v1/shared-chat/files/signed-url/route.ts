@@ -1,35 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { InvalidArgumentError } from '@shared/error';
 import { handleErrorInRoute } from '@/error/handle-error-in-route';
 import { getSharedChatReadOnlySignedUrl } from '@/app/api/shared-chat/shared-chat-read-service';
+import { sharedChatSignedUrlRequestSchema } from '@/app/api/shared-chat/shared-chat-request-schemas';
 
 export async function POST(req: NextRequest) {
   try {
-    const {
-      inviteCode,
-      characterId,
-      learningScenarioId,
-      fileId,
-      sharedSessionId,
-    }: {
-      inviteCode?: string;
-      characterId?: string;
-      learningScenarioId?: string;
-      fileId?: string;
-      sharedSessionId?: string;
-    } = await req.json();
-
-    if (inviteCode === undefined || inviteCode.trim() === '') {
-      throw new InvalidArgumentError('inviteCode is required');
-    }
-
-    if (fileId === undefined || fileId.trim() === '') {
-      throw new InvalidArgumentError('fileId is required');
-    }
-
-    if (sharedSessionId === undefined || sharedSessionId.trim() === '') {
-      throw new InvalidArgumentError('sharedSessionId is required');
-    }
+    const { inviteCode, characterId, learningScenarioId, fileId, sharedSessionId } =
+      sharedChatSignedUrlRequestSchema.parse(await req.json());
 
     const signedUrl = await getSharedChatReadOnlySignedUrl({
       inviteCode,

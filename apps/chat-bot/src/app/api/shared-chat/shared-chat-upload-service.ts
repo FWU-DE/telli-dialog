@@ -131,7 +131,8 @@ export async function resolveSharedUploadContext({
 
 /**
  * Uploads a file for a shared (invite-based) chat.
- * Files are stored with `userId: null` and are later authorized through invite/session logic.
+ * Files are stored with `userId: null` and a metadata object
+ * that contains invite code and session information.
  */
 export async function uploadSharedChatFile({
   file,
