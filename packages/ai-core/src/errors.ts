@@ -133,11 +133,9 @@ export const aiGenerationErrorTypes = [
 ] as const satisfies ReadonlyArray<AiGenerationErrorType>;
 
 export type KnownAiGenerationError = {
-  [K in keyof typeof aiGenerationErrorTypes]: (typeof aiGenerationErrorTypes)[K] extends AiGenerationErrorType<
-    infer T
-  >
-    ? T
-    : never;
+  [
+    K in keyof typeof aiGenerationErrorTypes
+  ]: (typeof aiGenerationErrorTypes)[K] extends AiGenerationErrorType<infer T> ? T : never;
 }[number];
 
 export function isKnownAiGenerationError(error: unknown): error is KnownAiGenerationError {
