@@ -120,7 +120,7 @@
     "playwright-core": "1.61.1",
     "postcss": "8.5.16",
     "prettier": "3.9.4",
-    "prettier-eslint": "16.4.2",
+    "prettier-eslint": "17.1.1",
     "tailwindcss": "4.3.2",
     "tailwindcss-animate": "1.0.7",
     "tsx": "4.23.0",
