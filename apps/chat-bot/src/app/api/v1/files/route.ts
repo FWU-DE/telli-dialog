@@ -1,14 +1,7 @@
 import { getUser } from '@/auth/utils';
-import { getFileExtension, isImageFile } from '@/utils/files/generic';
-import { cnanoid } from '@ais-chat/shared/random/randomService';
 import { NextRequest, NextResponse } from 'next/server';
-import { fileExtractionXberg } from '../../file-extraction/file-extraction-xberg';
-import { preprocessImage } from '../../file-operations/preprocess-image';
-import { chunkAndEmbed } from '../../rag/rag-service';
-import { logDebug } from '@shared/logging';
-import { dbInsertFileWithChunks } from '@shared/db/functions/files';
-import { uploadMessageAttachment } from '@shared/files/fileService';
 import { handleErrorInRoute } from '@/error/handle-error-in-route';
+import { uploadFile } from '../../file-operations/file-upload-service';
 
 /**
  * Handles the POST request to upload a file.
@@ -39,8 +32,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const fileId = await handleFileUpload(file);
+
     return NextResponse.json({
-      body: JSON.stringify({ file_id: await handleFileUpload(file) }),
+      body: JSON.stringify({ file_id: fileId }),
       status: 200,
     });
   } catch (error) {
@@ -58,55 +53,11 @@ export async function POST(req: NextRequest) {
  */
 async function handleFileUpload(file: File) {
   const user = await getUser();
-  const fileId = `file_${cnanoid()}`;
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-  const fileExtension = getFileExtension(file.name);
 
-  if (isImageFile(fileExtension)) {
-    const {
-      buffer: imageBuffer,
-      metadata,
-      type: processedType,
-    } = await preprocessImage(buffer, fileExtension);
-    const processedName =
-      processedType === fileExtension
-        ? file.name
-        : `${file.name.replace(/\.[^.]+$/, '')}.${processedType}`;
-
-    await uploadMessageAttachment({ fileId, fileExtension: processedType, buffer: imageBuffer });
-    await dbInsertFileWithChunks(
-      {
-        id: fileId,
-        name: processedName,
-        size: imageBuffer.length,
-        type: processedType,
-        metadata,
-        userId: user.id,
-      },
-      [],
-    );
-  } else {
-    const content = await fileExtractionXberg({ buffer, filename: file.name });
-
-    const [chunks] = await Promise.all([
-      chunkAndEmbed({ text: content, fileId, federalStateId: user.federalState.id }),
-      uploadMessageAttachment({ fileId, fileExtension, buffer }),
-    ]);
-
-    await dbInsertFileWithChunks(
-      {
-        id: fileId,
-        name: file.name,
-        size: file.size,
-        type: fileExtension,
-        metadata: {},
-        userId: user.id,
-      },
-      chunks,
-    );
-  }
-
-  logDebug(`File ${file.name} with type ${fileExtension} stored in db.`);
-  return fileId;
+  return uploadFile({
+    federalStateId: user.federalState.id,
+    file,
+    fileMetadata: {},
+    userId: user.id,
+  });
 }
