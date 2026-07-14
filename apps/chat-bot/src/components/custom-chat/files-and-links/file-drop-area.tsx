@@ -67,7 +67,7 @@ export function FileDrop({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [toast, setFiles, onFileUploaded, t, showUploadConfirmation],
+    [],
   );
 
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>): void => {
