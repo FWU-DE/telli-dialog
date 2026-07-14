@@ -2,6 +2,7 @@ import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { ingestWebContent } from '../../rag/ingestWebContent';
 import { retrieveChunksByQuery } from '../../rag/rag-service';
 import type { BuildToolsContext, ToolDefinition, ToolRegistration } from './types';
+import { dbGetAllChunks } from '@shared/db/functions/files';
 
 type SemanticFileSearchChunkResult = {
   fileName: string | null;
@@ -82,16 +83,39 @@ export function buildRetrieveTextChunksTool({
 
       processedSourceUrls = processedUrls;
     }
+
     const search = typeof args.search === 'string' ? args.search : '';
-    const chunks = await retrieveChunksByQuery({
-      searchQuery: search,
-      federalStateId: user.federalState.id,
-      relatedFileEntities,
+
+    // Fetch at most VECTOR_SEARCH_LIMIT + 1 chunks to cheaply check whether
+    // the total fits within the limit without pulling the full dataset.
+    const fileIds = relatedFileEntities.map((f) => f.id);
+    const allChunks = await dbGetAllChunks({
+      fileIds,
       sourceUrls: processedSourceUrls,
-      limit: VECTOR_SEARCH_LIMIT,
+      limit: VECTOR_SEARCH_LIMIT + 1,
     });
 
-    return formatRetrievedChunksForTool(chunks);
+    if (allChunks.length <= VECTOR_SEARCH_LIMIT) {
+      const response: SemanticFileSearchToolResponse = {
+        chunks: allChunks.map((chunk) => ({
+          fileName: chunk.fileName,
+          orderIndex: chunk.orderIndex,
+          content: chunk.content,
+        })),
+        error: allChunks.length === 0 ? 'No matching chunks found.' : null,
+      };
+      return JSON.stringify(response);
+    }
+
+    return formatRetrievedChunksForTool(
+      await retrieveChunksByQuery({
+        searchQuery: search,
+        federalStateId: user.federalState.id,
+        relatedFileEntities,
+        sourceUrls: processedSourceUrls,
+        limit: VECTOR_SEARCH_LIMIT,
+      }),
+    );
   };
 
   return { definition, handler };
