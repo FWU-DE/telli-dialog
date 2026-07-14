@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({
-      body: JSON.stringify({ file_id: fileId }),
+      body: JSON.stringify({ fileId }),
       status: 200,
     });
   } catch (error) {

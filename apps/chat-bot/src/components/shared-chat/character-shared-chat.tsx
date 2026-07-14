@@ -58,10 +58,10 @@ export default function CharacterSharedChat({
     }
 
     const json = await response.json();
-    const parsed = z.object({ file_id: z.string() }).parse(JSON.parse(json?.body));
+    const parsed = z.object({ fileId: z.string() }).parse(JSON.parse(json?.body));
 
     return {
-      fileId: parsed.file_id,
+      fileId: parsed.fileId,
     };
   }
 
