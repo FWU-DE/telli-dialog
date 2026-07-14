@@ -18,3 +18,7 @@ const SHARE_EXTENSION_WINDOW_HOURS = 2;
  * Value: 2 hours = 7,200,000 milliseconds
  */
 export const SHARE_EXTENSION_WINDOW_MS = SHARE_EXTENSION_WINDOW_HOURS * 60 * 60 * 1000;
+
+export const MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES = 130 * 24 * 60;
+
+export const MAX_EXTENDABLE_USAGE_TIME_IN_SECONDS = 100 * 24 * 60 * 60; // 100 days

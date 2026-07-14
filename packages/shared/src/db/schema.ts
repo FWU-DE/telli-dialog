@@ -871,6 +871,7 @@ export const sharedLearningScenarioTable = pgTable(
       // The custom name can only be set with foreignKey() function
       name: 'shared_learning_scenario_learning_scenario_id_fk',
     }).onDelete('cascade'),
+    index().on(table.learningScenarioId, table.userId),
   ],
 );
 
@@ -1083,19 +1084,23 @@ export type ConversationUsageTrackingUpdateModel = z.infer<
 /**
  * Schema for table shared_character_conversation
  */
-export const sharedCharacterConversation = pgTable('shared_character_conversation', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  characterId: uuid('character_id').notNull(),
-  userId: uuid('user_id')
-    .references(() => userTable.id)
-    .notNull(),
-  tokenPointsLimit: integer('token_points_limit').notNull(),
-  maxUsageTimeLimit: integer('max_usage_time_limit').notNull(),
-  inviteCode: text('invite_code').unique().notNull(),
-  startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
-  expiredAt: timestamp('expired_at', { withTimezone: true }).notNull(),
-  manuallyStoppedAt: timestamp('manually_stopped_at', { withTimezone: true }),
-});
+export const sharedCharacterConversation = pgTable(
+  'shared_character_conversation',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    characterId: uuid('character_id').notNull(),
+    userId: uuid('user_id')
+      .references(() => userTable.id)
+      .notNull(),
+    tokenPointsLimit: integer('token_points_limit').notNull(),
+    maxUsageTimeLimit: integer('max_usage_time_limit').notNull(),
+    inviteCode: text('invite_code').unique().notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+    expiredAt: timestamp('expired_at', { withTimezone: true }).notNull(),
+    manuallyStoppedAt: timestamp('manually_stopped_at', { withTimezone: true }),
+  },
+  (table) => [index().on(table.characterId, table.userId)],
+);
 
 export const sharedCharacterConversationSelectSchema = createSelectSchema(
   sharedCharacterConversation,

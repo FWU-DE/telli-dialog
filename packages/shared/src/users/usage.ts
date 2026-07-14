@@ -1,9 +1,9 @@
 import { CharacterWithShareDataModel, LearningScenarioWithShareDataModel } from '@shared/db/schema';
-import { type UserAndContext } from '@/auth/types';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetLearningScenarioChatUsageInCentByLearningScenarioId,
 } from '@shared/db/functions/token-points';
+import { FederalStateModel } from '@shared/federal-states/types';
 import {
   getMaxBudgetInCentByUser,
   getUsedBudgetInCentByUser,
@@ -13,6 +13,22 @@ import {
   ShareSessionState,
 } from '@shared/sharing/calculate-share-session-state';
 
+type SharedChatUser = {
+  id: string;
+  userRole: 'student' | 'teacher';
+  federalState?: FederalStateModel | null;
+};
+
+type SharedChatSession = Pick<
+  CharacterWithShareDataModel,
+  'id' | 'tokenPointsLimit' | 'startedAt' | 'expiredAt'
+>;
+
+type SharedLearningScenarioSession = Pick<
+  LearningScenarioWithShareDataModel,
+  'id' | 'tokenPointsLimit' | 'startedAt' | 'expiredAt'
+>;
+
 /**
  * Calculates the shared chat limit in cents
  * @param user - The user and context
@@ -20,7 +36,7 @@ import {
  * @returns The calculated limit in cents
  */
 async function calculateSharedChatLimitInCent(
-  user: UserAndContext,
+  user: SharedChatUser,
   tokenPointsPercentageLimit: number,
 ): Promise<number> {
   const maxBudgetInCent = await getMaxBudgetInCentByUser({
@@ -34,8 +50,8 @@ export async function sharedLearningScenarioChatHasReachedTokenPointsLimit({
   user,
   learningScenario,
 }: {
-  user: UserAndContext | undefined;
-  learningScenario: LearningScenarioWithShareDataModel;
+  user: SharedChatUser | undefined;
+  learningScenario: SharedLearningScenarioSession;
 }) {
   if (user === undefined || user.federalState === undefined) {
     return true;
@@ -63,8 +79,8 @@ export async function sharedCharacterChatHasReachedTokenPointsLimit({
   user,
   character,
 }: {
-  user: UserAndContext | undefined;
-  character: CharacterWithShareDataModel;
+  user: SharedChatUser | undefined;
+  character: SharedChatSession;
 }) {
   if (user === undefined || user.federalState === undefined) {
     return true;
@@ -112,7 +128,7 @@ export function sharedChatHasExpired({
 export async function userHasReachedTokenPointsLimit({
   user,
 }: {
-  user: UserAndContext | undefined;
+  user: SharedChatUser | undefined;
 }) {
   if (user === undefined || user.federalState === undefined) {
     return false;

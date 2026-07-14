@@ -16,6 +16,50 @@ import {
   dbGetLearningScenarioChatUsageInCentByLearningScenarioId,
   dbGetSharedCharacterChatUsageInCentByCharacterId,
 } from '@shared/db/functions/token-points';
+import { type FederalStateModel } from '@shared/federal-states/types';
+
+type TestSharedChatUser = {
+  id: string;
+  userRole: 'student' | 'teacher';
+  federalState: FederalStateModel;
+};
+
+type TestSharedLearningScenario = {
+  id: string;
+  startedAt: Date;
+  expiredAt: Date;
+  maxUsageTimeLimit: number;
+  tokenPointsLimit: number;
+};
+
+type TestSharedCharacter = TestSharedLearningScenario;
+
+const mockFederalState = (): FederalStateModel =>
+  ({
+    id: 'state-1',
+    teacherPriceLimit: 1000,
+    studentPriceLimit: 200,
+    createdAt: new Date(),
+    mandatoryCertificationTeacher: null,
+    chatStorageTime: 120,
+    supportContacts: null,
+    trainingLink: null,
+    featureToggles: {
+      isStudentAccessEnabled: true,
+      isCharacterEnabled: true,
+      isSharedChatEnabled: true,
+      isCustomGptEnabled: true,
+      isShareTemplateWithSchoolEnabled: true,
+      isAgenticChatEnabled: true,
+      isImageGenerationEnabled: true,
+      isWebSearchEnabled: true,
+    },
+    designConfiguration: null,
+    appName: null,
+    pictureUrls: null,
+    apiKeyId: null,
+    hasApiKeyAssigned: false,
+  }) as unknown as FederalStateModel;
 
 describe('sharedChatHasExpired', () => {
   const now = new Date('2024-06-01T10:00:00.000Z');
@@ -92,7 +136,7 @@ describe('coverage for uncovered branches', () => {
         expiredAt: new Date(new Date().getTime() + 60 * 60_000),
         maxUsageTimeLimit: 60,
         tokenPointsLimit: 10,
-      } as any,
+      } as TestSharedLearningScenario,
     });
 
     expect(result).toBe(true);
@@ -105,21 +149,21 @@ describe('coverage for uncovered branches', () => {
     const mockUser = {
       id: 'user-1',
       userRole: 'teacher' as const,
-      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
-    };
+      federalState: mockFederalState(),
+    } satisfies TestSharedChatUser;
 
     vi.mocked(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).mockResolvedValue(50);
     vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
 
     const result = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
-      user: mockUser as any,
+      user: mockUser,
       learningScenario: {
         id: 'scenario-1',
         startedAt: new Date('2024-06-01T08:00:00.000Z'),
         expiredAt: new Date('2024-06-01T09:00:00.000Z'),
         maxUsageTimeLimit: 60,
         tokenPointsLimit: 10,
-      } as any,
+      } as TestSharedLearningScenario,
     });
 
     expect(result).toBe(false);
@@ -132,8 +176,8 @@ describe('coverage for uncovered branches', () => {
     const mockUser = {
       id: 'user-1',
       userRole: 'teacher' as const,
-      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
-    };
+      federalState: mockFederalState(),
+    } satisfies TestSharedChatUser;
 
     const mockScenario = {
       id: 'scenario-1',
@@ -141,14 +185,14 @@ describe('coverage for uncovered branches', () => {
       expiredAt: new Date(new Date().getTime() + 60 * 60_000),
       maxUsageTimeLimit: 60,
       tokenPointsLimit: 10,
-    };
+    } satisfies TestSharedLearningScenario;
 
     vi.mocked(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).mockResolvedValue(50); // below 100 (10% of 1000)
     vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
 
     const result = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
-      user: mockUser as any,
-      learningScenario: mockScenario as any,
+      user: mockUser,
+      learningScenario: mockScenario,
     });
 
     expect(result).toBe(false);
@@ -166,8 +210,8 @@ describe('coverage for uncovered branches', () => {
     const mockUser = {
       id: 'user-1',
       userRole: 'teacher' as const,
-      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
-    };
+      federalState: mockFederalState(),
+    } satisfies TestSharedChatUser;
 
     const mockScenario = {
       id: 'scenario-1',
@@ -175,14 +219,14 @@ describe('coverage for uncovered branches', () => {
       expiredAt: new Date(new Date().getTime() + 60 * 60_000),
       maxUsageTimeLimit: 60,
       tokenPointsLimit: 10,
-    };
+    } satisfies TestSharedLearningScenario;
 
     vi.mocked(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).mockResolvedValue(150); // above 100
     vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
 
     const result = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
-      user: mockUser as any,
-      learningScenario: mockScenario as any,
+      user: mockUser,
+      learningScenario: mockScenario,
     });
 
     expect(result).toBe(true);
@@ -194,8 +238,8 @@ describe('coverage for uncovered branches', () => {
     const mockUser = {
       id: 'user-1',
       userRole: 'teacher' as const,
-      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
-    };
+      federalState: mockFederalState(),
+    } satisfies TestSharedChatUser;
 
     const mockCharacter = {
       id: 'character-1',
@@ -203,14 +247,14 @@ describe('coverage for uncovered branches', () => {
       expiredAt: new Date(new Date().getTime() + 60 * 60_000),
       maxUsageTimeLimit: 60,
       tokenPointsLimit: 10,
-    };
+    } satisfies TestSharedCharacter;
 
     vi.mocked(dbGetSharedCharacterChatUsageInCentByCharacterId).mockResolvedValue(50);
     vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
 
     const result = await sharedCharacterChatHasReachedTokenPointsLimit({
-      user: mockUser as any,
-      character: mockCharacter as any,
+      user: mockUser,
+      character: mockCharacter,
     });
 
     expect(result).toBe(false);
@@ -228,21 +272,21 @@ describe('coverage for uncovered branches', () => {
     const mockUser = {
       id: 'user-1',
       userRole: 'teacher' as const,
-      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
-    };
+      federalState: mockFederalState(),
+    } satisfies TestSharedChatUser;
 
     vi.mocked(dbGetSharedCharacterChatUsageInCentByCharacterId).mockResolvedValue(50);
     vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
 
     const result = await sharedCharacterChatHasReachedTokenPointsLimit({
-      user: mockUser as any,
+      user: mockUser,
       character: {
         id: 'character-1',
         startedAt: new Date('2024-06-01T08:00:00.000Z'),
         expiredAt: new Date('2024-06-01T09:00:00.000Z'),
         maxUsageTimeLimit: 60,
         tokenPointsLimit: 10,
-      } as any,
+      } as TestSharedCharacter,
     });
 
     expect(result).toBe(false);
@@ -256,14 +300,14 @@ describe('coverage for uncovered branches', () => {
     const mockUser = {
       id: 'user-1',
       userRole: 'teacher' as const,
-      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
-    };
+      federalState: mockFederalState(),
+    } satisfies TestSharedChatUser;
 
     vi.mocked(getUsedBudgetInCentByUser).mockResolvedValue(1500); // exceeds 1000
     vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(1000);
 
     const result = await userHasReachedTokenPointsLimit({
-      user: mockUser as any,
+      user: mockUser,
     });
 
     expect(result).toBe(true);
@@ -286,14 +330,14 @@ describe('coverage for uncovered branches', () => {
     const mockUser = {
       id: 'user-1',
       userRole: 'teacher' as const,
-      federalState: { id: 'state-1', teacherPriceLimit: 1000 },
-    };
+      federalState: mockFederalState(),
+    } satisfies TestSharedChatUser;
 
     vi.mocked(getUsedBudgetInCentByUser).mockResolvedValue(250);
     vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(null);
 
     const result = await userHasReachedTokenPointsLimit({
-      user: mockUser as any,
+      user: mockUser,
     });
 
     expect(result).toBe(false);

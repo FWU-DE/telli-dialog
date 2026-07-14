@@ -9,11 +9,6 @@ import { NotFoundError } from '@shared/error';
 import { createTextStream } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
-import {
-  sharedChatHasExpired,
-  sharedLearningScenarioChatHasReachedTokenPointsLimit,
-  userHasReachedTokenPointsLimit,
-} from '../chat/usage';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
 import {
   dbGetLearningScenarioByIdAndInviteCode,
@@ -38,6 +33,11 @@ import { createImageAttachmentsForConversation } from '../file-operations/prepro
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { RetrievedChunk } from '../rag/types';
 import { resolveAgentNameForTracing } from '../utils/agent-name';
+import {
+  sharedChatHasExpired,
+  sharedLearningScenarioChatHasReachedTokenPointsLimit,
+  userHasReachedTokenPointsLimit,
+} from '@shared/users/usage';
 
 /**
  * Server Action to send a learning scenario message and stream the response.

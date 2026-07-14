@@ -48,6 +48,7 @@ import { buildCharacterPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
+import { MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES } from '@shared/sharing/const';
 import {
   copyCharacter,
   copyEntityPictureIfExists,
@@ -72,6 +73,7 @@ import {
   filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
 import { dbGetSharedCharacterChatUsageInCentByCharacterId } from '@shared/db/functions/token-points';
+import { sharedCharacterChatHasReachedTokenPointsLimit } from '@shared/users/usage';
 
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
@@ -396,14 +398,17 @@ export const deleteCharacter = async ({
 export const getActiveCharacterShareData = async ({
   characterId,
   user,
+  federalState,
 }: {
   characterId: string;
   user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+  federalState: FederalStateModel;
 }): Promise<{
   expiredAt: Date | null;
   manuallyStoppedAt: Date | null;
   tokenPointsLimit: number | null;
   budgetUsedBySharedChat: number;
+  tokenLimitExceeded: boolean;
 }> => {
   checkParameterUUID(characterId);
   requireTeacherRole(user.userRole);
@@ -419,6 +424,7 @@ export const getActiveCharacterShareData = async ({
       manuallyStoppedAt: null,
       tokenPointsLimit: null,
       budgetUsedBySharedChat: 0,
+      tokenLimitExceeded: false,
     };
   }
 
@@ -429,11 +435,22 @@ export const getActiveCharacterShareData = async ({
     startedAt: share.startedAt,
   });
 
+  const tokenLimitExceeded = await sharedCharacterChatHasReachedTokenPointsLimit({
+    user: { ...user, federalState },
+    character: {
+      ...character,
+      tokenPointsLimit: share.tokenPointsLimit,
+      expiredAt: share.expiredAt,
+      startedAt: share.startedAt,
+    },
+  });
+
   return {
     expiredAt: share.expiredAt,
     manuallyStoppedAt: share.manuallyStoppedAt,
     tokenPointsLimit: share.tokenPointsLimit,
     budgetUsedBySharedChat,
+    tokenLimitExceeded,
   };
 };
 
@@ -573,9 +590,25 @@ export const extendCharacterShareExpiration = async ({
     throw new InvalidArgumentError('additional time must be between 1 and 43200 minutes');
   }
 
+  const currentShare = await dbGetLatestManageableCharacterShare({ characterId, user });
+  if (!currentShare) {
+    throw new InvalidArgumentError('No active sharing found for this character');
+  }
+
+  const currentRemainingUsageTimeInMinutes = Math.max(
+    0,
+    Math.ceil((currentShare.expiredAt.getTime() - Date.now()) / 60_000),
+  );
+
+  if (
+    currentRemainingUsageTimeInMinutes + additionalTimeInMinutes >
+    MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES
+  ) {
+    throw new InvalidArgumentError('total usage time limit must not exceed 130 days');
+  }
+
   const updatedShare = await dbExtendSharedCharacterConversationExpiration({
-    characterId,
-    user,
+    share: currentShare,
     additionalTimeInMinutes,
   });
 

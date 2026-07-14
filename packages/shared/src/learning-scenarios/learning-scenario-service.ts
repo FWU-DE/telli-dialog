@@ -61,6 +61,7 @@ import {
 } from '@shared/auth/authorization-service';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
+import { MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES } from '@shared/sharing/const';
 import {
   getChangedKeys,
   getPreservedUpdatedAtForExemptedKeys,
@@ -69,6 +70,7 @@ import {
   getMaxBudgetInCentByUser,
   getUsedBudgetInCentByUser,
 } from '@shared/users/user-budget-service';
+import { sharedLearningScenarioChatHasReachedTokenPointsLimit } from '@shared/users/usage';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { dbGetLearningScenarioChatUsageInCentByLearningScenarioId } from '@shared/db/functions/token-points';
 
@@ -343,14 +345,17 @@ export type LearningScenarioShareValues = z.infer<typeof learningScenarioShareVa
 export async function getActiveLearningScenarioShareData({
   learningScenarioId,
   user,
+  federalState,
 }: {
   learningScenarioId: string;
   user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+  federalState: FederalStateModel;
 }): Promise<{
   expiredAt: Date | null;
   manuallyStoppedAt: Date | null;
   tokenPointsLimit: number | null;
   budgetUsedBySharedChat: number;
+  tokenLimitExceeded: boolean;
 }> {
   checkParameterUUID(learningScenarioId);
   requireTeacherRole(user.userRole);
@@ -366,6 +371,7 @@ export async function getActiveLearningScenarioShareData({
       manuallyStoppedAt: null,
       tokenPointsLimit: null,
       budgetUsedBySharedChat: 0,
+      tokenLimitExceeded: false,
     };
   }
 
@@ -376,11 +382,22 @@ export async function getActiveLearningScenarioShareData({
     startedAt: share.startedAt,
   });
 
+  const tokenLimitExceeded = await sharedLearningScenarioChatHasReachedTokenPointsLimit({
+    user: { ...user, federalState },
+    learningScenario: {
+      ...learningScenario,
+      tokenPointsLimit: share.tokenPointsLimit,
+      expiredAt: share.expiredAt,
+      startedAt: share.startedAt,
+    },
+  });
+
   return {
     expiredAt: share.expiredAt,
     manuallyStoppedAt: share.manuallyStoppedAt,
     tokenPointsLimit: share.tokenPointsLimit,
     budgetUsedBySharedChat,
+    tokenLimitExceeded,
   };
 }
 
@@ -516,6 +533,26 @@ export async function extendLearningScenarioShareExpiration({
 
   if (additionalTimeInMinutes <= 0 || additionalTimeInMinutes > 30 * 24 * 60) {
     throw new InvalidArgumentError('additional time must be between 1 and 43200 minutes');
+  }
+
+  const currentShare = await dbGetLatestManageableLearningScenarioShare({
+    learningScenarioId,
+    user,
+  });
+  if (!currentShare) {
+    throw new InvalidArgumentError('No active sharing found for this learning scenario');
+  }
+
+  const currentRemainingUsageTimeInMinutes = Math.max(
+    0,
+    Math.ceil((currentShare.expiredAt.getTime() - Date.now()) / 60_000),
+  );
+
+  if (
+    currentRemainingUsageTimeInMinutes + additionalTimeInMinutes >
+    MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES
+  ) {
+    throw new InvalidArgumentError('total usage time limit must not exceed 130 days');
   }
 
   const updatedShare = await dbExtendSharedLearningScenarioExpiration({

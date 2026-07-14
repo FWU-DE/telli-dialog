@@ -508,6 +508,7 @@
       "token-points": "Tokenvolumen",
       "max-token-points": "Maximales Tokenvolumen",
       "max-usage-time": "Maximale Nutzungszeit",
+      "share-not-possible": "Teilen nicht mehr möglich. Bitte die Einstellungen prüfen",
       "token-points-left": "Verbleibendes Tokenvolumen für diesen Dialog",
       "token-points-spent": "Aufgebraucht",
       "usage-time-left": "Verbleibende Nutzungszeit",
@@ -518,6 +519,7 @@
       "button-start": "Teilen",
       "button-stop": "Stoppen",
       "button-close-session": "Sitzung beenden",
+      "button-to-share-settings": "Zu den Einstellungen",
       "stop-share-modal-title": "Sitzung beenden?",
       "stop-share-modal-description": "Der Chat kann dann nicht mehr verlängert und wiederaufgenommen werden. Die Lernenden können ihre Chats nicht mehr fortsetzen.\n\nDie Lernenden können sich ihren Chat jedoch noch als Word-Datei herunterladen, sofern ihr Browser-Tab nicht geschlossen wurde.",
       "button-to-share-page": "Teilen",
@@ -533,7 +535,6 @@
       "adjust-token-limit-modal-title": "Tokenvolumen anpassen",
       "adjust-token-limit-modal-description": "Wie viel des monatlichen Tokenvolumens darf für diesen Chat maximal verbraucht werden?",
       "adjust-token-limit-modal-aria": "Neues maximales Tokenvolumen auswählen",
-      "button-add": "Verlängern",
       "button-save": "Speichern"
     },
     "share-page": {

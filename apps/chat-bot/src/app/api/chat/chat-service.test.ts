@@ -86,7 +86,7 @@ vi.mock('./websearch', () => ({
   runWebSearchPipeline: mocks.runWebSearchPipelineMock,
 }));
 
-vi.mock('./usage', () => ({
+vi.mock('@shared/users/usage', () => ({
   userHasReachedTokenPointsLimit: mocks.userHasReachedTokenPointsLimitMock,
 }));
 

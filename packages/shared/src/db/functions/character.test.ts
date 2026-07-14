@@ -41,17 +41,25 @@ describe('db character sharing helpers', () => {
   });
 
   describe('dbExtendSharedCharacterConversationExpiration', () => {
-    it('returns null when there is no active unstopped share', async () => {
-      mockSelectLatestShare([]);
+    it('extends from now when the loaded share is already expired', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-01-01T10:00:00.000Z'));
+
+      const currentShare = {
+        id: 'share-1',
+        expiredAt: new Date('2026-01-01T10:30:00.000Z'),
+      };
+      const update = mockUpdateReturning([]);
 
       const result = await dbExtendSharedCharacterConversationExpiration({
-        characterId: 'character-1',
-        user: { id: 'teacher-1' },
+        share: currentShare,
         additionalTimeInMinutes: 30,
       });
 
+      expect(update.set).toHaveBeenCalledWith({
+        expiredAt: new Date('2026-01-01T11:00:00.000Z'),
+      });
       expect(result).toBeNull();
-      expect(mocks.update).not.toHaveBeenCalled();
     });
 
     it('extends from current expiration when expiration is in the future', async () => {
@@ -62,12 +70,10 @@ describe('db character sharing helpers', () => {
         id: 'share-1',
         expiredAt: new Date('2026-01-01T10:30:00.000Z'),
       };
-      mockSelectLatestShare([latestShare]);
       const update = mockUpdateReturning([{ ...latestShare, expiredAt: new Date() }]);
 
       await dbExtendSharedCharacterConversationExpiration({
-        characterId: 'character-1',
-        user: { id: 'teacher-1' },
+        share: latestShare,
         additionalTimeInMinutes: 15,
       });
 
@@ -84,12 +90,10 @@ describe('db character sharing helpers', () => {
         id: 'share-1',
         expiredAt: new Date('2026-01-01T09:30:00.000Z'),
       };
-      mockSelectLatestShare([latestShare]);
       const update = mockUpdateReturning([{ ...latestShare, expiredAt: new Date() }]);
 
       await dbExtendSharedCharacterConversationExpiration({
-        characterId: 'character-1',
-        user: { id: 'teacher-1' },
+        share: latestShare,
         additionalTimeInMinutes: 20,
       });
 
