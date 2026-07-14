@@ -84,32 +84,25 @@ export function assertSharedChatFileOwnershipBySession(args: {
 
 export async function resolveSharedUploadContext({
   inviteCode,
-  characterId,
-  learningScenarioId,
+  entityType,
+  entityId,
 }: {
   inviteCode: string;
-  characterId?: string;
-  learningScenarioId?: string;
+  entityType: 'character' | 'learningScenario';
+  entityId: string;
 }): Promise<SharedUploadContext> {
-  if (
-    (characterId === undefined && learningScenarioId === undefined) ||
-    (characterId !== undefined && learningScenarioId !== undefined)
-  ) {
-    throw new InvalidArgumentError('Exactly one of characterId or learningScenarioId is required.');
-  }
-
   let sharedEntity:
     | Awaited<ReturnType<typeof dbGetCharacterByIdAndInviteCode>>
     | Awaited<ReturnType<typeof dbGetLearningScenarioByIdAndInviteCode>>;
 
-  if (characterId !== undefined) {
+  if (entityType === 'character') {
     sharedEntity = await dbGetCharacterByIdAndInviteCode({
-      id: characterId,
+      id: entityId,
       inviteCode,
     });
   } else {
     sharedEntity = await dbGetLearningScenarioByIdAndInviteCode({
-      learningScenarioId: learningScenarioId!,
+      learningScenarioId: entityId,
       inviteCode,
     });
   }
@@ -124,8 +117,8 @@ export async function resolveSharedUploadContext({
     startedBy: sharedEntity.startedBy,
     federalStateId: teacher.federalState.id,
     inviteCode,
-    entityType: characterId !== undefined ? 'character' : 'learningScenario',
-    entityId: characterId ?? learningScenarioId!,
+    entityType,
+    entityId,
   };
 }
 
@@ -137,14 +130,14 @@ export async function resolveSharedUploadContext({
 export async function uploadSharedChatFile({
   file,
   inviteCode,
-  characterId,
-  learningScenarioId,
+  entityType,
+  entityId,
   sharedSessionId,
 }: {
   file: File;
   inviteCode: string;
-  characterId?: string;
-  learningScenarioId?: string;
+  entityType: 'character' | 'learningScenario';
+  entityId: string;
   sharedSessionId: string;
 }): Promise<string> {
   if (sharedSessionId.trim() === '') {
@@ -153,8 +146,8 @@ export async function uploadSharedChatFile({
 
   const context = await resolveSharedUploadContext({
     inviteCode,
-    characterId,
-    learningScenarioId,
+    entityType,
+    entityId,
   });
 
   const fileId = `file_${cnanoid()}`;

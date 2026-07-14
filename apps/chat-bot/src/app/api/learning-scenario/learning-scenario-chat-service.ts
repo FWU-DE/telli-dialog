@@ -130,7 +130,8 @@ export async function sendLearningScenarioMessage({
     messages,
     fileIds,
     inviteCode,
-    learningScenarioId,
+    entityType: 'learningScenario',
+    entityId: learningScenarioId,
     sharedSessionId,
   });
   const urls = extractUrls({

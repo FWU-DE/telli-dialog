@@ -27,7 +27,8 @@ export default function LearningScenarioSharedChat({
     const formData = new FormData();
     formData.append('file', file);
     formData.append('inviteCode', inviteCode);
-    formData.append('learningScenarioId', id);
+    formData.append('entityType', 'learningScenario');
+    formData.append('entityId', id);
     formData.append('sharedSessionId', sharedSessionId);
 
     const response = await fetch('/api/v1/shared-chat/files', {
@@ -58,7 +59,8 @@ export default function LearningScenarioSharedChat({
       },
       body: JSON.stringify({
         inviteCode,
-        learningScenarioId: id,
+        entityType: 'learningScenario',
+        entityId: id,
         fileId,
         sharedSessionId,
       }),

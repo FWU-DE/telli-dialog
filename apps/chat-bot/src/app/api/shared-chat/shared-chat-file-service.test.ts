@@ -77,7 +77,8 @@ describe('combineSharedRelatedFiles', () => {
       messages,
       fileIds: undefined,
       inviteCode: 'invite-1',
-      characterId: 'character-1',
+      entityType: 'character',
+      entityId: 'character-1',
       sharedSessionId: 'session-1',
     });
 
@@ -94,7 +95,8 @@ describe('combineSharedRelatedFiles', () => {
       messages,
       fileIds: ['uploaded-file'],
       inviteCode: 'invite-1',
-      characterId: 'character-1',
+      entityType: 'character',
+      entityId: 'character-1',
       sharedSessionId: 'session-1',
     });
 
@@ -117,7 +119,8 @@ describe('combineSharedRelatedFiles', () => {
       messages: [{ id: 'assistant-1', role: 'assistant', content: 'Only assistant' }],
       fileIds: ['uploaded-file'],
       inviteCode: 'invite-1',
-      characterId: 'character-1',
+      entityType: 'character',
+      entityId: 'character-1',
       sharedSessionId: 'session-1',
     });
 
@@ -133,7 +136,8 @@ describe('combineSharedRelatedFiles', () => {
       messages,
       fileIds: ['related-file'],
       inviteCode: 'invite-1',
-      characterId: 'character-1',
+      entityType: 'character',
+      entityId: 'character-1',
       sharedSessionId: 'session-1',
     });
 
@@ -165,7 +169,8 @@ describe('combineSharedRelatedFiles', () => {
         messages,
         fileIds: ['uploaded-file'],
         inviteCode: 'invite-1',
-        characterId: 'character-1',
+        entityType: 'character',
+        entityId: 'character-1',
         sharedSessionId: 'session-1',
       }),
     ).rejects.toThrow('Not authorized to access this file');

@@ -125,7 +125,8 @@ export async function sendCharacterMessage({
     messages,
     fileIds,
     inviteCode,
-    characterId,
+    entityType: 'character',
+    entityId: characterId,
     sharedSessionId,
   });
   const urls = extractUrls({

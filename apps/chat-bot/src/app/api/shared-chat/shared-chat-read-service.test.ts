@@ -62,7 +62,8 @@ describe('getSharedChatReadOnlySignedUrl', () => {
 
     const signedUrl = await getSharedChatReadOnlySignedUrl({
       inviteCode: 'invite',
-      characterId: 'character-1',
+      entityType: 'character',
+      entityId: 'character-1',
       fileId: 'file-1',
       sharedSessionId: 'session-1',
     });
@@ -70,8 +71,8 @@ describe('getSharedChatReadOnlySignedUrl', () => {
     expect(signedUrl).toBe('https://signed.example/file');
     expect(mocks.resolveSharedUploadContextMock).toHaveBeenCalledWith({
       inviteCode: 'invite',
-      characterId: 'character-1',
-      learningScenarioId: undefined,
+      entityType: 'character',
+      entityId: 'character-1',
     });
     expect(mocks.getReadOnlySignedUrlMock).toHaveBeenCalledWith({
       key: 'message_attachments/file-1',
@@ -91,7 +92,8 @@ describe('getSharedChatReadOnlySignedUrl', () => {
     await expect(
       getSharedChatReadOnlySignedUrl({
         inviteCode: 'invite',
-        learningScenarioId: 'learning-scenario-1',
+        entityType: 'learningScenario',
+        entityId: 'learning-scenario-1',
         fileId: 'file-1',
         sharedSessionId: 'session-1',
       }),
@@ -117,7 +119,8 @@ describe('getSharedChatReadOnlySignedUrl', () => {
     await expect(
       getSharedChatReadOnlySignedUrl({
         inviteCode: 'invite',
-        characterId: 'character-1',
+        entityType: 'character',
+        entityId: 'character-1',
         fileId: 'file-1',
         sharedSessionId: 'session-1',
       }),

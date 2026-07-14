@@ -44,7 +44,8 @@ export default function CharacterSharedChat({
     const formData = new FormData();
     formData.append('file', file);
     formData.append('inviteCode', inviteCode);
-    formData.append('characterId', id);
+    formData.append('entityType', 'character');
+    formData.append('entityId', id);
     formData.append('sharedSessionId', sharedSessionId);
 
     const response = await fetch('/api/v1/shared-chat/files', {
@@ -75,7 +76,8 @@ export default function CharacterSharedChat({
       },
       body: JSON.stringify({
         inviteCode,
-        characterId: id,
+        entityType: 'character',
+        entityId: id,
         fileId,
         sharedSessionId,
       }),

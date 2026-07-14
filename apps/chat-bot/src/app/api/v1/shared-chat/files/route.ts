@@ -9,16 +9,16 @@ export async function POST(req: NextRequest) {
     const parseResult = sharedChatUploadFormSchema.parse({
       file: formData.get('file'),
       inviteCode: formData.get('inviteCode'),
-      characterId: formData.get('characterId'),
-      learningScenarioId: formData.get('learningScenarioId'),
+      entityType: formData.get('entityType'),
+      entityId: formData.get('entityId'),
       sharedSessionId: formData.get('sharedSessionId'),
     });
 
     const fileId = await uploadSharedChatFile({
       file: parseResult.file,
       inviteCode: parseResult.inviteCode,
-      characterId: parseResult.characterId,
-      learningScenarioId: parseResult.learningScenarioId,
+      entityType: parseResult.entityType,
+      entityId: parseResult.entityId,
       sharedSessionId: parseResult.sharedSessionId,
     });
 

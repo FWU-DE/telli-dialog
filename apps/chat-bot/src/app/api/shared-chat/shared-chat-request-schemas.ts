@@ -7,16 +7,11 @@ const requiredNonEmptyString = (message: string) =>
     })
     .transform((value) => value.trim());
 
-const optionalNonEmptyString = z.preprocess(
-  (value) => (typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined),
-  z.string().optional(),
-);
-
 export const sharedChatCommonRequestSchema = z.object({
   inviteCode: requiredNonEmptyString('inviteCode is required'),
   sharedSessionId: requiredNonEmptyString('sharedSessionId is required'),
-  characterId: optionalNonEmptyString,
-  learningScenarioId: optionalNonEmptyString,
+  entityType: z.union([z.literal('character'), z.literal('learningScenario')]),
+  entityId: requiredNonEmptyString('entityId is required'),
 });
 
 export const sharedChatUploadFormSchema = sharedChatCommonRequestSchema.extend({

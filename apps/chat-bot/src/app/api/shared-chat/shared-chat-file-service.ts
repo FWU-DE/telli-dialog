@@ -23,16 +23,16 @@ export async function combineSharedRelatedFiles({
   messages,
   fileIds,
   inviteCode,
-  characterId,
-  learningScenarioId,
+  entityType,
+  entityId,
   sharedSessionId,
 }: {
   relatedFileEntities: SharedMessageFileModel[];
   messages: ChatMessage[];
   fileIds?: string[];
   inviteCode: string;
-  characterId?: string;
-  learningScenarioId?: string;
+  entityType: 'character' | 'learningScenario';
+  entityId: string;
   sharedSessionId?: string;
 }): Promise<SharedMessageFileModel[]> {
   if (fileIds === undefined || fileIds.length === 0) {
@@ -50,8 +50,8 @@ export async function combineSharedRelatedFiles({
 
   const context = await resolveSharedUploadContext({
     inviteCode,
-    characterId,
-    learningScenarioId,
+    entityType,
+    entityId,
   });
 
   const uploadedFiles = await dbGetFilesInIds(fileIds);

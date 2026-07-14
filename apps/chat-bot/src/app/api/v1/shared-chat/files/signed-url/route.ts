@@ -5,13 +5,13 @@ import { sharedChatSignedUrlRequestSchema } from '@/app/api/shared-chat/shared-c
 
 export async function POST(req: NextRequest) {
   try {
-    const { inviteCode, characterId, learningScenarioId, fileId, sharedSessionId } =
+    const { inviteCode, entityType, entityId, fileId, sharedSessionId } =
       sharedChatSignedUrlRequestSchema.parse(await req.json());
 
     const signedUrl = await getSharedChatReadOnlySignedUrl({
       inviteCode,
-      characterId,
-      learningScenarioId,
+      entityType,
+      entityId,
       fileId,
       sharedSessionId,
     });

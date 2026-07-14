@@ -68,14 +68,16 @@ beforeEach(() => {
 });
 
 describe('resolveSharedUploadContext', () => {
-  it('throws when neither entity id is provided', async () => {
+  it('throws when entityId is empty', async () => {
     const { resolveSharedUploadContext } = await import('./shared-chat-upload-service');
 
     await expect(
       resolveSharedUploadContext({
         inviteCode: 'invite',
+        entityType: 'character',
+        entityId: '   ',
       }),
-    ).rejects.toThrow('Exactly one of characterId or learningScenarioId is required.');
+    ).rejects.toThrow('entityId is required.');
   });
 
   it('resolves context for character uploads', async () => {
@@ -87,7 +89,8 @@ describe('resolveSharedUploadContext', () => {
 
     const result = await resolveSharedUploadContext({
       inviteCode: 'invite',
-      characterId: 'character-1',
+      entityType: 'character',
+      entityId: 'character-1',
     });
 
     expect(mocks.dbGetCharacterByIdAndInviteCodeMock).toHaveBeenCalledWith({
@@ -119,7 +122,8 @@ describe('uploadSharedChatFile', () => {
     const fileId = await uploadSharedChatFile({
       file,
       inviteCode: 'invite',
-      characterId: 'character-1',
+      entityType: 'character',
+      entityId: 'character-1',
       sharedSessionId: 'session-1',
     });
 
@@ -160,7 +164,8 @@ describe('uploadSharedChatFile', () => {
     await uploadSharedChatFile({
       file,
       inviteCode: 'invite',
-      learningScenarioId: 'learning-scenario-1',
+      entityType: 'learningScenario',
+      entityId: 'learning-scenario-1',
       sharedSessionId: 'session-1',
     });
 

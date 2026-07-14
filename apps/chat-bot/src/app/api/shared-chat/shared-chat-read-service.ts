@@ -8,14 +8,14 @@ import {
 
 export async function getSharedChatReadOnlySignedUrl({
   inviteCode,
-  characterId,
-  learningScenarioId,
+  entityType,
+  entityId,
   fileId,
   sharedSessionId,
 }: {
   inviteCode: string;
-  characterId?: string;
-  learningScenarioId?: string;
+  entityType: 'character' | 'learningScenario';
+  entityId: string;
   fileId: string;
   sharedSessionId: string;
 }): Promise<string> {
@@ -26,8 +26,8 @@ export async function getSharedChatReadOnlySignedUrl({
   // Validate invite + target entity first.
   const context = await resolveSharedUploadContext({
     inviteCode,
-    characterId,
-    learningScenarioId,
+    entityType,
+    entityId,
   });
 
   const files = await dbGetFilesInIds([fileId]);
