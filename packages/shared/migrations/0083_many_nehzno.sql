@@ -1,0 +1,2 @@
+ALTER TABLE "character" ADD COLUMN "is_web_search_enabled" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "learning_scenario" ADD COLUMN "is_web_search_enabled" boolean DEFAULT false NOT NULL;

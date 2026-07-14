@@ -582,6 +582,13 @@
       "when": 1783933432002,
       "tag": "0082_fast_electro",
       "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "7",
+      "when": 1784067548717,
+      "tag": "0083_many_nehzno",
+      "breakpoints": true
     }
   ]
 }

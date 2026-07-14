@@ -13,6 +13,8 @@ import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { UserAndContext } from '@/auth/types';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { dbGetAssistantById } from '@shared/db/functions/assistants';
+import { dbGetCharacterById } from '@shared/db/functions/character';
+import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 
 export function isWebSearchAvailableForFederalState(
   federalState: UserAndContext['federalState'],
@@ -32,7 +34,12 @@ export async function isWebSearchEnabled({
   assistantId?: string;
 }): Promise<boolean> {
   if (!isWebSearchAvailableForFederalState(user.federalState)) return false;
-  if (characterId || learningScenarioId) return false;
+  if (characterId) {
+    return (await dbGetCharacterById({ characterId }))?.isWebSearchEnabled ?? false;
+  }
+  if (learningScenarioId) {
+    return (await dbGetLearningScenarioById({ learningScenarioId }))?.isWebSearchEnabled ?? false;
+  }
   if (!assistantId) return true;
   if (assistantId === HELP_MODE_ASSISTANT_ID) return false;
   return (await dbGetAssistantById({ assistantId }))?.isWebSearchEnabled ?? false;
