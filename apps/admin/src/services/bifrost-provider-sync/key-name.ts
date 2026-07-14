@@ -1,42 +1,38 @@
-import { BifrostProvider, BifrostSecret } from './types';
+import { BifrostProvider } from './types';
 
 /**
  * Builds deterministic, readable Bifrost key names.
  *
- * The readable part helps admins identify the upstream endpoint in Bifrost.
- * The hash suffix keeps multiple credentials for the same endpoint distinct without exposing the raw secret.
+ * The API DB stores upstream credentials, but not a dedicated Bifrost provider-key name.
+ * We therefore need a stable generated name so repeated syncs update the same Bifrost key.
+ *
+ * If the readable value is a URL, only its hostname is used in the visible part to avoid
+ * long names with deployment paths or query strings. The hash suffix keeps multiple
+ * credentials for the same endpoint distinct without exposing the raw secret.
  */
 export function buildKeyName(
   provider: BifrostProvider,
   readableValue: string,
-  uniqueValue: BifrostSecret,
+  uniqueValue: string,
 ): string {
   const readablePart = toReadableKeyNamePart(readableValue);
-  const hashPart = hashString(
-    `${provider}:${readableValue}:${getSecretHashValue(uniqueValue)}`,
-  ).slice(0, 8);
+  const hashPart = hashString(`${provider}:${readableValue}:${uniqueValue}`).slice(0, 8);
 
   return `${provider}-${readablePart}-${hashPart}`;
 }
 
-function getSecretHashValue(value: BifrostSecret): string {
-  return typeof value === 'string'
-    ? value
-    : `${value.from_env ? 'env' : 'value'}:${value.env_var ?? ''}:${value.value}`;
-}
-
 function toReadableKeyNamePart(value: string): string {
-  const normalizedValue = toKebabCase(getReadableKeyNameValue(value));
+  const normalizedValue = toKebabCase(getHostnameForUrl(value) ?? value);
 
   return normalizedValue.slice(0, 48) || 'default';
 }
 
-function getReadableKeyNameValue(value: string): string {
+function getHostnameForUrl(value: string): string | undefined {
   try {
     const url = new URL(value);
     return url.hostname;
   } catch {
-    return value;
+    return undefined;
   }
 }
 

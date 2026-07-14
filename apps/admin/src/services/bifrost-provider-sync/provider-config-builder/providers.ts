@@ -126,6 +126,8 @@ export function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderC
           vertex_key_config: {
             project_id: setting.projectId,
             region: setting.location,
+            // Empty credentials make Bifrost use Application Default Credentials.
+            // Mount GOOGLE_APPLICATION_CREDENTIALS into the Bifrost container/pod when needed.
             auth_credentials: '',
           },
         },

@@ -36,11 +36,11 @@ export async function createLargeLanguageModel(
     isDeleted: data.isDeleted,
   });
 
+  await syncBifrostProvidersForOrganization(organizationId);
+
   logInfo('LLM was created successfully', { organizationId, data });
 
   if (!model) throw new Error('Failed to create model');
-
-  await syncBifrostProvidersForOrganization(organizationId);
   return model;
 }
 

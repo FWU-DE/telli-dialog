@@ -48,7 +48,7 @@ export function buildBifrostKey({
 }: {
   provider: BifrostProvider;
   readableValue: string;
-  uniqueValue: BifrostSecret;
+  uniqueValue: string;
   value: BifrostSecret;
   groupedModels: LlmModel[];
   extra?: Partial<BifrostKey>;

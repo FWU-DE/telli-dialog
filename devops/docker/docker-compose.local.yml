@@ -120,7 +120,7 @@ services:
       - '6556:6556'
 
   bifrost:
-    image: maximhq/bifrost:latest
+    image: maximhq/bifrost:v1.6.3
     restart: unless-stopped
     environment:
       APP_HOST: 0.0.0.0

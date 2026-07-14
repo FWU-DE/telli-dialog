@@ -21,6 +21,7 @@ services:
       - '3001:3001' # ais-chat-admin
       - '3002:3002' # ais-chat-api
       - '8080:8080' # keycloak
+      - '8089:8089' # bifrost
     depends_on:
       fix-keycloak-volume-ownership:
         condition: service_completed_successfully
@@ -144,6 +145,19 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+  bifrost:
+    image: maximhq/bifrost:v1.6.3
+    restart: unless-stopped
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: '8089'
+    volumes:
+      - bifrost_data:/app/data
+    network_mode: service:keycloak
+    depends_on:
+      keycloak:
+        condition: service_started
 
   # AIS.chat API - OpenAI compatible API service
   ais-chat-api:
@@ -336,5 +350,6 @@ volumes:
   postgres_data:
   valkey_data:
   keycloak_data:
+  bifrost_data:
   rustfs_data:
   xberg_cache:

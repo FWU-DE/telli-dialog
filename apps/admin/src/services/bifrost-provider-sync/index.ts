@@ -10,7 +10,7 @@ import { buildBifrostProviderConfigs } from './provider-config-builder';
  *
  * This is called from the existing admin save flows so Bifrost stays aligned with the
  * model definitions that are copied into the app DB. Deleted models are intentionally
- * ignored: they remain in the DB for history/admin visibility but must not be routable.
+ * ignored: they remain in the DB for history/admin visibility but should not be synced to bifrost.
  */
 export async function syncBifrostProvidersForOrganization(organizationId: string): Promise<void> {
   const bifrostAdminUrl = env.bifrostAdminUrl;
@@ -26,14 +26,30 @@ export async function syncBifrostProvidersForOrganization(organizationId: string
   );
   const providerConfigs = buildBifrostProviderConfigs(models);
 
-  try {
-    await Promise.all(
-      providerConfigs.map((providerConfig) => syncBifrostProvider(bifrostAdminUrl, providerConfig)),
-    );
-  } catch (error) {
-    logError('Error syncing Bifrost providers', error, {
+  const syncResults = await Promise.allSettled(
+    providerConfigs.map(async (providerConfig) => {
+      await syncBifrostProvider(bifrostAdminUrl, providerConfig);
+      return providerConfig.provider;
+    }),
+  );
+  const failedProviders = syncResults.flatMap((result, index) => {
+    if (result.status === 'fulfilled') return [];
+    return [providerConfigs[index]?.provider ?? 'unknown'];
+  });
+
+  if (failedProviders.length > 0) {
+    for (const [index, result] of syncResults.entries()) {
+      if (result.status === 'rejected') {
+        logError('Error syncing Bifrost provider', result.reason, {
+          organizationId,
+          provider: providerConfigs[index]?.provider ?? 'unknown',
+        });
+      }
+    }
+
+    logError('Error syncing Bifrost providers', undefined, {
       organizationId,
-      providers: providerConfigs.map(({ provider }) => provider),
+      providers: failedProviders,
     });
     throw new BifrostProviderSyncError();
   }
