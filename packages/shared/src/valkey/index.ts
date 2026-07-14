@@ -14,6 +14,8 @@ function getClusterDriverOptions(valkeyUrl: string): RedisOptions {
       { host: url.hostname, port: Number(url.port) || 6379 },
     ],
     clusterOptions: {
+      // Disable the offline queue so commands fail fast instead of waiting indefinitely when the cluster is unreachable.
+      enableOfflineQueue: false,
       redisOptions: {
         username: url.username ? decodeURIComponent(url.username) : undefined,
         password: url.password ? decodeURIComponent(url.password) : undefined,
