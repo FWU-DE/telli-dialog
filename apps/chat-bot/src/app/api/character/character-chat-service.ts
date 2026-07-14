@@ -132,7 +132,6 @@ export async function sendCharacterMessage({
   const urls = extractUrls({
     character,
     messages,
-    includeUserMessageUrlsForSharedChats: true,
   });
   const { processedUrls } = await ingestWebContent({
     urls,

@@ -137,7 +137,6 @@ export async function sendLearningScenarioMessage({
   const urls = extractUrls({
     learningScenario,
     messages,
-    includeUserMessageUrlsForSharedChats: true,
   });
   const { processedUrls } = await ingestWebContent({
     urls,
