@@ -1,10 +1,8 @@
 import { dbGetFilesInIds } from '@shared/db/functions/files';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 import { getReadOnlySignedUrl } from '@shared/s3';
-import {
-  assertSharedChatFileOwnershipBySession,
-  resolveSharedUploadContext,
-} from './shared-chat-upload-service';
+import { resolveSharedChatEntityContext } from './shared-chat-upload-service';
+import { verify } from '.';
 
 export async function getSharedChatReadOnlySignedUrl({
   inviteCode,
@@ -24,7 +22,7 @@ export async function getSharedChatReadOnlySignedUrl({
   }
 
   // Validate invite + target entity first.
-  const context = await resolveSharedUploadContext({
+  const context = await resolveSharedChatEntityContext({
     inviteCode,
     entityType,
     entityId,
@@ -37,16 +35,8 @@ export async function getSharedChatReadOnlySignedUrl({
     throw new NotFoundError('File not found');
   }
 
-  // Shared upload path stores anonymous files with null userId.
-  if (file.userId !== null) {
-    throw new ForbiddenError('Not authorized to access this file');
-  }
-
-  assertSharedChatFileOwnershipBySession({
-    metadata: file.metadata,
-    context,
-    sharedSessionId,
-  });
+  verify.filesDoNotBelongToAnyUser([file]);
+  verify.sharedChatFileOwnershipBySession([file], context, sharedSessionId);
 
   return getReadOnlySignedUrl({ key: `message_attachments/${file.id}` });
 }

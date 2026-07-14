@@ -69,7 +69,8 @@ beforeEach(() => {
 
 describe('resolveSharedUploadContext', () => {
   it('throws when entityId is empty', async () => {
-    const { resolveSharedUploadContext } = await import('./shared-chat-upload-service');
+    const { resolveSharedChatEntityContext: resolveSharedUploadContext } =
+      await import('./shared-chat-upload-service');
 
     await expect(
       resolveSharedUploadContext({
@@ -85,7 +86,8 @@ describe('resolveSharedUploadContext', () => {
       startedBy: 'teacher-1',
     });
 
-    const { resolveSharedUploadContext } = await import('./shared-chat-upload-service');
+    const { resolveSharedChatEntityContext: resolveSharedUploadContext } =
+      await import('./shared-chat-upload-service');
 
     const result = await resolveSharedUploadContext({
       inviteCode: 'invite',

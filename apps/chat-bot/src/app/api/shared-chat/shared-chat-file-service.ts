@@ -1,13 +1,8 @@
 import { type ChatMessage } from '@/types/chat';
-import { type FileModel } from '@shared/db/schema';
 import { dbGetFilesInIds } from '@shared/db/functions/files';
-import { ForbiddenError } from '@shared/error';
-import {
-  assertSharedChatFileOwnershipBySession,
-  resolveSharedUploadContext,
-} from './shared-chat-upload-service';
-
-type SharedMessageFileModel = FileModel & { conversationMessageId?: string };
+import { resolveSharedChatEntityContext } from './shared-chat-upload-service';
+import { SharedMessageFileModel, SharedSessionId, verify } from '.';
+import { verifySharedSessionIdIsNotEmpty } from './shared-chat-verify';
 
 function getLastUserMessageId(messages: ChatMessage[]): string | undefined {
   return messages.findLast((message) => message.role === 'user')?.id;
@@ -33,40 +28,28 @@ export async function combineSharedRelatedFiles({
   inviteCode: string;
   entityType: 'character' | 'learningScenario';
   entityId: string;
-  sharedSessionId?: string;
+  sharedSessionId?: SharedSessionId;
 }): Promise<SharedMessageFileModel[]> {
   if (fileIds === undefined || fileIds.length === 0) {
     return relatedFileEntities;
   }
 
-  if (sharedSessionId === undefined || sharedSessionId.trim() === '') {
-    throw new ForbiddenError('Not authorized to use uploaded files');
-  }
+  verifySharedSessionIdIsNotEmpty(sharedSessionId);
 
   const lastUserMessageId = getLastUserMessageId(messages);
   if (lastUserMessageId === undefined) {
     return relatedFileEntities;
   }
 
-  const context = await resolveSharedUploadContext({
+  const context = await resolveSharedChatEntityContext({
     inviteCode,
     entityType,
     entityId,
   });
 
   const uploadedFiles = await dbGetFilesInIds(fileIds);
-
-  for (const file of uploadedFiles) {
-    if (file.userId !== null) {
-      throw new ForbiddenError('Not authorized to use one or more files');
-    }
-
-    assertSharedChatFileOwnershipBySession({
-      metadata: file.metadata,
-      context,
-      sharedSessionId,
-    });
-  }
+  verify.filesDoNotBelongToAnyUser(uploadedFiles);
+  verify.sharedChatFileOwnershipBySession(uploadedFiles, context, sharedSessionId);
 
   const uploadedFilesWithMessageId: SharedMessageFileModel[] = uploadedFiles.map((file) => ({
     ...file,
