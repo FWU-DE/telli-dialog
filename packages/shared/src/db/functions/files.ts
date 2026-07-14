@@ -1,4 +1,14 @@
-import { and, asc, eq, getTableColumns, inArray, isNotNull, isNull } from 'drizzle-orm';
+import {
+  type SQL,
+  and,
+  asc,
+  eq,
+  getTableColumns,
+  inArray,
+  isNotNull,
+  isNull,
+  or,
+} from 'drizzle-orm';
 import { db } from '..';
 import {
   AssistantFileMapping,
@@ -355,6 +365,48 @@ export async function dbChunksExistForSourceUrls(sourceUrls: string[]): Promise<
     .from(chunkTable)
     .where(inArray(chunkTable.sourceUrl, sourceUrls));
   return new Set(results.map((r) => r.sourceUrl).filter((url): url is string => url !== null));
+}
+
+/**
+ * Returns chunks for the given file IDs and/or source URLs,
+ * ordered by fileId, sourceUrl, orderIndex, id.
+ * Pass `limit` to cap the number of rows returned.
+ */
+export async function dbGetAllChunks({
+  fileIds,
+  sourceUrls,
+  limit,
+}: {
+  fileIds: string[];
+  sourceUrls: string[];
+  limit?: number;
+}) {
+  const conditions: SQL[] = [];
+  if (fileIds.length > 0) {
+    conditions.push(inArray(chunkTable.fileId, fileIds));
+  }
+  if (sourceUrls.length > 0) {
+    conditions.push(inArray(chunkTable.sourceUrl, sourceUrls));
+  }
+  if (conditions.length === 0) return [];
+  const query = db
+    .select({
+      fileId: chunkTable.fileId,
+      fileName: fileTable.name,
+      sourceUrl: chunkTable.sourceUrl,
+      orderIndex: chunkTable.orderIndex,
+      content: chunkTable.content,
+    })
+    .from(chunkTable)
+    .leftJoin(fileTable, eq(chunkTable.fileId, fileTable.id))
+    .where(or(...conditions))
+    .orderBy(
+      asc(chunkTable.fileId),
+      asc(chunkTable.sourceUrl),
+      asc(chunkTable.orderIndex),
+      asc(chunkTable.id),
+    );
+  return limit !== undefined ? query.limit(limit) : query;
 }
 
 export async function dbInsertFile(file: FileInsertModel) {

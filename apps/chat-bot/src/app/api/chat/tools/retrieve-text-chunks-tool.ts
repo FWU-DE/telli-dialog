@@ -2,6 +2,7 @@ import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { ingestWebContent } from '../../rag/ingestWebContent';
 import { retrieveChunksByQuery } from '../../rag/rag-service';
 import type { BuildToolsContext, ToolDefinition, ToolRegistration } from './types';
+import { dbGetAllChunks } from '@shared/db/functions/files';
 
 type SemanticFileSearchChunkResult = {
   fileName: string | null;
@@ -56,7 +57,7 @@ export function buildRetrieveTextChunksTool({
 
   const definition: ToolDefinition = {
     name: 'retrieve_text_chunks',
-    description: `Retrieve relevant text chunks from the attached sources. Available files right now: ${attachedFileDescriptions.join(', ') || 'none'}. Available linked pages right now: ${attachedSourceUrls.join(', ') || 'none'}. Use this tool when you need exact passages from the files or linked pages or want to inspect a specific topic inside the available sources. You can request up to ${VECTOR_SEARCH_LIMIT} chunks per call. Call it with a short, specific search string in the same language as the user.`,
+    description: `Retrieve relevant text chunks from the attached sources. Available files right now: ${attachedFileDescriptions.join(', ') || 'none'}. Available linked pages right now: ${attachedSourceUrls.join(', ') || 'none'}. Use this tool when you need exact passages from the files or linked pages or want to inspect a specific topic inside the available sources. Returns up to ${VECTOR_SEARCH_LIMIT} chunks per call. Call it with a short, specific search string in the same language as the user.`,
     parameters: {
       type: 'object',
       properties: {
@@ -65,15 +66,8 @@ export function buildRetrieveTextChunksTool({
           description:
             'A concise search string that captures the exact topic or passage you want to retrieve.',
         },
-        limit: {
-          type: 'integer',
-          minimum: 1,
-          maximum: VECTOR_SEARCH_LIMIT,
-          description:
-            'Optional number of chunks to return. Values outside the allowed range are clamped.',
-        },
       },
-      required: ['search', 'limit'],
+      required: ['search'],
       additionalProperties: false,
     },
   };
@@ -89,21 +83,39 @@ export function buildRetrieveTextChunksTool({
 
       processedSourceUrls = processedUrls;
     }
+
     const search = typeof args.search === 'string' ? args.search : '';
-    const requestedLimit =
-      typeof args.limit === 'number' && Number.isFinite(args.limit)
-        ? Math.trunc(args.limit)
-        : VECTOR_SEARCH_LIMIT;
-    const limit = Math.min(Math.max(requestedLimit, 1), VECTOR_SEARCH_LIMIT);
-    const chunks = await retrieveChunksByQuery({
-      searchQuery: search,
-      federalStateId: user.federalState.id,
-      relatedFileEntities,
+
+    // Fetch at most VECTOR_SEARCH_LIMIT + 1 chunks to cheaply check whether
+    // the total fits within the limit without pulling the full dataset.
+    const fileIds = relatedFileEntities.map((f) => f.id);
+    const allChunks = await dbGetAllChunks({
+      fileIds,
       sourceUrls: processedSourceUrls,
-      limit,
+      limit: VECTOR_SEARCH_LIMIT + 1,
     });
 
-    return formatRetrievedChunksForTool(chunks);
+    if (allChunks.length <= VECTOR_SEARCH_LIMIT) {
+      const response: SemanticFileSearchToolResponse = {
+        chunks: allChunks.map((chunk) => ({
+          fileName: chunk.fileName,
+          orderIndex: chunk.orderIndex,
+          content: chunk.content,
+        })),
+        error: allChunks.length === 0 ? 'No matching chunks found.' : null,
+      };
+      return JSON.stringify(response);
+    }
+
+    return formatRetrievedChunksForTool(
+      await retrieveChunksByQuery({
+        searchQuery: search,
+        federalStateId: user.federalState.id,
+        relatedFileEntities,
+        sourceUrls: processedSourceUrls,
+        limit: VECTOR_SEARCH_LIMIT,
+      }),
+    );
   };
 
   return { definition, handler };

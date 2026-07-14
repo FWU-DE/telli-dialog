@@ -11,14 +11,32 @@ export const SUPPORTED_DOCUMENTS_EXTENSIONS = [
   'tex',
   'html',
   'htm',
-];
+] as const;
 
-export const SUPPORTED_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'svg'];
+export const SUPPORTED_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'svg'] as const;
 
 export const SUPPORTED_FILE_EXTENSIONS = [
   ...SUPPORTED_DOCUMENTS_EXTENSIONS,
   ...SUPPORTED_IMAGE_EXTENSIONS,
-];
+] as const;
+
+export type SupportedDocumentExtension = (typeof SUPPORTED_DOCUMENTS_EXTENSIONS)[number];
+export type SupportedImageExtension = (typeof SUPPORTED_IMAGE_EXTENSIONS)[number];
+export type SupportedFileExtension = (typeof SUPPORTED_FILE_EXTENSIONS)[number];
+
+export function isSupportedDocumentExtension(
+  extension: string,
+): extension is SupportedDocumentExtension {
+  return SUPPORTED_DOCUMENTS_EXTENSIONS.includes(extension as SupportedDocumentExtension);
+}
+
+export function isSupportedImageExtension(extension: string): extension is SupportedImageExtension {
+  return SUPPORTED_IMAGE_EXTENSIONS.includes(extension as SupportedImageExtension);
+}
+
+export function isSupportedFileExtension(extension: string): extension is SupportedFileExtension {
+  return SUPPORTED_FILE_EXTENSIONS.includes(extension as SupportedFileExtension);
+}
 
 /**
  * The maximum size in pixels (width or height) of an avatar. Larger images will be scaled down.
