@@ -157,7 +157,7 @@ async function dbUpsertLlmModels({ models }: { models: KnotenpunktLlmModel[] }) 
       .insert(llmModelTable)
       .values(model)
       .onConflictDoUpdate({
-        target: [llmModelTable.name, llmModelTable.provider],
+        target: llmModelTable.id,
         set: {
           name: model.name,
           displayName: model.displayName,

@@ -5,7 +5,7 @@ export const defaultLlmProviderProps = z.object({
   name: z.string(),
 });
 
-export const llmModelProviderSchema = z.enum(['ionos', 'openai', 'azure', 'google']);
+export const llmModelProviderSchema = z.enum(['ionos', 'openai', 'azure', 'google', 'bifrost']);
 
 export const llmModelSettingsIonos = z.object({
   provider: z.literal(llmModelProviderSchema.enum.ionos),
