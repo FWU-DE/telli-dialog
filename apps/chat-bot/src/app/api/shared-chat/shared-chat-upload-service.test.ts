@@ -68,7 +68,9 @@ beforeEach(() => {
 });
 
 describe('resolveSharedUploadContext', () => {
-  it('throws when entityId is empty', async () => {
+  it('throws when shared entity cannot be found', async () => {
+    mocks.dbGetCharacterByIdAndInviteCodeMock.mockResolvedValue(undefined);
+
     const { resolveSharedChatEntityContext: resolveSharedUploadContext } =
       await import('./shared-chat-upload-service');
 
@@ -76,9 +78,9 @@ describe('resolveSharedUploadContext', () => {
       resolveSharedUploadContext({
         inviteCode: 'invite',
         entityType: 'character',
-        entityId: '   ',
+        entityId: 'character-missing',
       }),
-    ).rejects.toThrow('entityId is required.');
+    ).rejects.toThrow('Shared chat not found');
   });
 
   it('resolves context for character uploads', async () => {
@@ -105,6 +107,36 @@ describe('resolveSharedUploadContext', () => {
       inviteCode: 'invite',
       entityType: 'character',
       entityId: 'character-1',
+    });
+  });
+
+  it('resolves context for learning scenario uploads', async () => {
+    mocks.dbGetLearningScenarioByIdAndInviteCodeMock.mockResolvedValue({
+      startedBy: 'teacher-1',
+      expiredAt: new Date('2099-01-01'),
+      isDeleted: false,
+      suspended: false,
+    });
+
+    const { resolveSharedChatEntityContext: resolveSharedUploadContext } =
+      await import('./shared-chat-upload-service');
+
+    const result = await resolveSharedUploadContext({
+      inviteCode: 'invite',
+      entityType: 'learningScenario',
+      entityId: 'learning-scenario-1',
+    });
+
+    expect(mocks.dbGetLearningScenarioByIdAndInviteCodeMock).toHaveBeenCalledWith({
+      learningScenarioId: 'learning-scenario-1',
+      inviteCode: 'invite',
+    });
+    expect(result).toEqual({
+      startedBy: 'teacher-1',
+      federalStateId: 'federal-state-1',
+      inviteCode: 'invite',
+      entityType: 'learningScenario',
+      entityId: 'learning-scenario-1',
     });
   });
 });

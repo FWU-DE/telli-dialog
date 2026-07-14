@@ -1,26 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  resolveSharedUploadContextMock: vi.fn(),
+  resolveSharedChatEntityContextMock: vi.fn(),
   dbGetFilesInIdsMock: vi.fn(),
   getReadOnlySignedUrlMock: vi.fn(),
 }));
 
 vi.mock('./shared-chat-upload-service', () => ({
-  resolveSharedUploadContext: mocks.resolveSharedUploadContextMock,
-  assertSharedChatFileOwnershipBySession: vi.fn(
-    ({
-      metadata,
-      sharedSessionId,
-    }: {
-      metadata: { sharedChatSessionId?: string };
-      sharedSessionId: string;
-    }) => {
-      if (metadata.sharedChatSessionId !== sharedSessionId) {
-        throw new Error('Not authorized to access this file');
-      }
-    },
-  ),
+  resolveSharedChatEntityContext: mocks.resolveSharedChatEntityContextMock,
 }));
 
 vi.mock('@shared/db/functions/files', () => ({
@@ -33,7 +20,7 @@ vi.mock('@shared/s3', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.resolveSharedUploadContextMock.mockResolvedValue({
+  mocks.resolveSharedChatEntityContextMock.mockResolvedValue({
     inviteCode: 'invite',
     entityType: 'character',
     entityId: 'character-1',
@@ -44,6 +31,23 @@ beforeEach(() => {
 });
 
 describe('getSharedChatReadOnlySignedUrl', () => {
+  it('throws when shared session id is empty', async () => {
+    const { getSharedChatReadOnlySignedUrl } = await import('./shared-chat-read-service');
+
+    await expect(
+      getSharedChatReadOnlySignedUrl({
+        inviteCode: 'invite',
+        entityType: 'character',
+        entityId: 'character-1',
+        fileId: 'file-1',
+        sharedSessionId: '  ',
+      }),
+    ).rejects.toThrow('Not authorized to access this file');
+
+    expect(mocks.resolveSharedChatEntityContextMock).not.toHaveBeenCalled();
+    expect(mocks.dbGetFilesInIdsMock).not.toHaveBeenCalled();
+  });
+
   it('returns signed url for anonymous shared file after invite validation', async () => {
     mocks.dbGetFilesInIdsMock.mockResolvedValue([
       {
@@ -69,7 +73,7 @@ describe('getSharedChatReadOnlySignedUrl', () => {
     });
 
     expect(signedUrl).toBe('https://signed.example/file');
-    expect(mocks.resolveSharedUploadContextMock).toHaveBeenCalledWith({
+    expect(mocks.resolveSharedChatEntityContextMock).toHaveBeenCalledWith({
       inviteCode: 'invite',
       entityType: 'character',
       entityId: 'character-1',
@@ -97,7 +101,7 @@ describe('getSharedChatReadOnlySignedUrl', () => {
         fileId: 'file-1',
         sharedSessionId: 'session-1',
       }),
-    ).rejects.toThrow('Not authorized to access this file');
+    ).rejects.toThrow('Not authorized to use one or more files');
   });
 
   it('throws when shared session id does not match file metadata', async () => {

@@ -3,6 +3,7 @@ import type { ChatMessage } from '@/types/chat';
 
 const mocks = vi.hoisted(() => ({
   dbGetFilesInIdsMock: vi.fn(),
+  resolveSharedChatEntityContextMock: vi.fn(),
 }));
 
 vi.mock('@shared/db/functions/files', () => ({
@@ -10,26 +11,7 @@ vi.mock('@shared/db/functions/files', () => ({
 }));
 
 vi.mock('./shared-chat-upload-service', () => ({
-  resolveSharedUploadContext: vi.fn().mockResolvedValue({
-    inviteCode: 'invite-1',
-    entityType: 'character',
-    entityId: 'character-1',
-    startedBy: 'teacher-1',
-    federalStateId: 'federal-state-1',
-  }),
-  assertSharedChatFileOwnershipBySession: vi.fn(
-    ({
-      metadata,
-      sharedSessionId,
-    }: {
-      metadata: { sharedChatSessionId?: string };
-      sharedSessionId: string;
-    }) => {
-      if (metadata.sharedChatSessionId !== sharedSessionId) {
-        throw new Error('Not authorized to access this file');
-      }
-    },
-  ),
+  resolveSharedChatEntityContext: mocks.resolveSharedChatEntityContextMock,
 }));
 
 const relatedFile = {
@@ -66,6 +48,13 @@ const messages: ChatMessage[] = [
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.resolveSharedChatEntityContextMock.mockResolvedValue({
+    inviteCode: 'invite-1',
+    entityType: 'character',
+    entityId: 'character-1',
+    startedBy: 'teacher-1',
+    federalStateId: 'federal-state-1',
+  });
 });
 
 describe('combineSharedRelatedFiles', () => {
@@ -83,6 +72,24 @@ describe('combineSharedRelatedFiles', () => {
     });
 
     expect(result).toEqual([relatedFile]);
+    expect(mocks.dbGetFilesInIdsMock).not.toHaveBeenCalled();
+  });
+
+  it('throws when sharedSessionId is missing for uploaded files', async () => {
+    const { combineSharedRelatedFiles } = await import('./shared-chat-file-service');
+
+    await expect(
+      combineSharedRelatedFiles({
+        relatedFileEntities: [relatedFile],
+        messages,
+        fileIds: ['uploaded-file'],
+        inviteCode: 'invite-1',
+        entityType: 'character',
+        entityId: 'character-1',
+      }),
+    ).rejects.toThrow('Not authorized to use uploaded files');
+
+    expect(mocks.resolveSharedChatEntityContextMock).not.toHaveBeenCalled();
     expect(mocks.dbGetFilesInIdsMock).not.toHaveBeenCalled();
   });
 

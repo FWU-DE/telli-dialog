@@ -170,24 +170,7 @@ export function loadSharedChatFileMapping(
     return new Map(Object.entries(payloadResult.data.mapping));
   }
 
-  const legacyResult = persistedSharedFileMappingSchema.safeParse(parsed);
-  if (!legacyResult.success) {
-    return null;
-  }
-
-  // Legacy mapping does not contain a session id and can cross session
-  // boundaries. Drop it when session-aware loading is requested.
-  if (sharedSessionId !== undefined) {
-    try {
-      storage.removeItem(sharedChatFileMappingStorageKey(inviteCode));
-    } catch (error) {
-      logError('Failed to clear legacy shared chat file mapping from sessionStorage', error);
-    }
-
-    return null;
-  }
-
-  return new Map(Object.entries(legacyResult.data));
+  return null;
 }
 
 export function saveSharedChatFileMapping(
