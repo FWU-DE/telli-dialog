@@ -10,12 +10,7 @@ import {
 type SharedMessageFileModel = FileModel & { conversationMessageId?: string };
 
 function getLastUserMessageId(messages: ChatMessage[]): string | undefined {
-  for (let i = messages.length - 1; i >= 0; i -= 1) {
-    if (messages[i]?.role === 'user') {
-      return messages[i]?.id;
-    }
-  }
-  return undefined;
+  return messages.findLast((message) => message.role === 'user')?.id;
 }
 
 /**
