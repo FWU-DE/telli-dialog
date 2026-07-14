@@ -33,42 +33,38 @@ export function FileDrop({
     return files.some((f) => validateFileExtension(f.name));
   }
 
-  const handleFiles = useCallback(
-    async (selectedFiles: FileList | undefined | null) => {
-      if (selectedFiles === null || selectedFiles === undefined) return;
-      const files = Array.from(selectedFiles);
+  async function handleFiles(selectedFiles: FileList | undefined | null) {
+    if (selectedFiles === null || selectedFiles === undefined) return;
+    const files = Array.from(selectedFiles);
 
-      const totalFileCount = countOfFiles ? countOfFiles + files.length : files.length;
+    const totalFileCount = countOfFiles ? countOfFiles + files.length : files.length;
 
-      if (totalFileCount > NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT) {
-        toast.error(
-          t('toasts.file-limit-exceeded', {
-            max_files: NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT,
-          }),
-        );
-        return;
-      }
-
-      await Promise.all(
-        files.map((f) =>
-          handleSingleFile({
-            file: f,
-            toast,
-            setFiles,
-            onFileUploaded,
-            translations: t,
-            showUploadConfirmation,
-          }),
-        ),
+    if (totalFileCount > NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT) {
+      toast.error(
+        t('toasts.file-limit-exceeded', {
+          max_files: NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT,
+        }),
       );
+      return;
+    }
 
-      if (fileInputRef.current !== null) {
-        fileInputRef.current.value = '';
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
+    await Promise.all(
+      files.map((f) =>
+        handleSingleFile({
+          file: f,
+          toast,
+          setFiles,
+          onFileUploaded,
+          translations: t,
+          showUploadConfirmation,
+        }),
+      ),
+    );
+
+    if (fileInputRef.current !== null) {
+      fileInputRef.current.value = '';
+    }
+  }
 
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
@@ -93,25 +89,22 @@ export function FileDrop({
     [isDragging],
   );
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent<HTMLDivElement>): void => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(false);
+  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
 
-      const { files } = e.dataTransfer;
-      if (!validateFileExtensions(files)) {
-        toast.error(
-          t('toasts.invalid-file-format', {
-            supported_formats: SUPPORTED_DOCUMENTS_EXTENSIONS.join(', '),
-          }),
-        );
-        return;
-      }
-      handleFiles(files);
-    },
-    [handleFiles, t, toast],
-  );
+    const { files } = e.dataTransfer;
+    if (!validateFileExtensions(files)) {
+      toast.error(
+        t('toasts.invalid-file-format', {
+          supported_formats: SUPPORTED_DOCUMENTS_EXTENSIONS.join(', '),
+        }),
+      );
+      return;
+    }
+    void handleFiles(files);
+  }
 
   const handleButtonClick = (): void => {
     if (fileInputRef.current) {

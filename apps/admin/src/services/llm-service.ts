@@ -7,6 +7,7 @@ import {
 import { CreateLargeLanguageModel, UpdateLargeLanguageModel } from '../types/large-language-model';
 import { logInfo } from '@shared/logging';
 import { dbUpdateLlmModelsForAllFederalStates } from '@shared/db/functions/llm-model';
+import { syncBifrostProvidersForOrganization } from './bifrost-provider-sync-service';
 
 export async function getLargeLanguageModels(organizationId: string) {
   return dbGetAllModelsByOrganizationId(organizationId);
@@ -34,6 +35,8 @@ export async function createLargeLanguageModel(
     isNew: data.isNew,
     isDeleted: data.isDeleted,
   });
+
+  await syncBifrostProvidersForOrganization(organizationId);
 
   logInfo('LLM was created successfully', { organizationId, data });
 
@@ -63,9 +66,10 @@ export async function updateLargeLanguageModel(
     isDeleted: data.isDeleted,
   });
 
-  logInfo('LLM was updated successfully', { organizationId, modelId, data });
-
+  await syncBifrostProvidersForOrganization(organizationId);
   await dbUpdateLlmModelsForAllFederalStates();
+
+  logInfo('LLM was updated successfully', { organizationId, modelId, data });
 
   if (!model) throw new Error('Failed to update model');
   return model;
