@@ -7,7 +7,7 @@ import {
   verifySharedChatIsNotSuspended,
 } from './shared-chat-verify';
 
-// rexport types from ./shared-chat-types.ts
+// reexport types from ./shared-chat-types.ts
 export type {
   SharedSessionId,
   SharedChatCharacter,
@@ -16,6 +16,10 @@ export type {
   SharedChatFileMetadata,
 } from './shared-chat-types';
 
+// reexport guards from ./shared-chat-types.ts
+export { isSharedChatFileMetadata } from './shared-chat-types';
+
+// export verification helper
 export const verify = {
   sharedChatFileOwnershipBySession: verifySharedChatFileOwnershipBySession,
   filesDoNotBelongToAnyUser: verifyFilesDoNotBelongToAnyUser,
