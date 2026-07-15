@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  resolveSharedChatEntityContextMock: vi.fn(),
+  getSharedChatEntityMock: vi.fn(),
   dbGetFilesInIdsMock: vi.fn(),
   getReadOnlySignedUrlMock: vi.fn(),
 }));
 
-vi.mock('./shared-chat-upload-service', () => ({
-  resolveSharedChatEntityContext: mocks.resolveSharedChatEntityContextMock,
+vi.mock('./shared-chat-get-entity', () => ({
+  getSharedChatEntity: mocks.getSharedChatEntityMock,
 }));
 
 vi.mock('@shared/db/functions/files', () => ({
@@ -20,12 +20,13 @@ vi.mock('@shared/s3', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.resolveSharedChatEntityContextMock.mockResolvedValue({
-    inviteCode: 'invite',
-    entityType: 'character',
-    entityId: 'character-1',
+  mocks.getSharedChatEntityMock.mockResolvedValue({
+    id: 'character-1',
     startedBy: 'teacher-1',
-    federalStateId: 'federal-state-1',
+    expiredAt: new Date('2099-01-01'),
+    isDeleted: false,
+    suspended: false,
+    manuallyStoppedAt: null,
   });
   mocks.getReadOnlySignedUrlMock.mockResolvedValue('https://signed.example/file');
 });
@@ -44,7 +45,7 @@ describe('getSharedChatReadOnlySignedUrl', () => {
       }),
     ).rejects.toThrow('Not authorized to access this file');
 
-    expect(mocks.resolveSharedChatEntityContextMock).not.toHaveBeenCalled();
+    expect(mocks.getSharedChatEntityMock).not.toHaveBeenCalled();
     expect(mocks.dbGetFilesInIdsMock).not.toHaveBeenCalled();
   });
 
@@ -53,10 +54,10 @@ describe('getSharedChatReadOnlySignedUrl', () => {
       {
         id: 'file-1',
         metadata: {
-          sharedChatInviteCode: 'invite',
-          sharedChatEntityType: 'character',
-          sharedChatEntityId: 'character-1',
-          sharedChatSessionId: 'session-1',
+          inviteCode: 'invite',
+          entityType: 'character',
+          entityId: 'character-1',
+          sessionId: 'session-1',
         },
         userId: null,
       },
@@ -73,7 +74,7 @@ describe('getSharedChatReadOnlySignedUrl', () => {
     });
 
     expect(signedUrl).toBe('https://signed.example/file');
-    expect(mocks.resolveSharedChatEntityContextMock).toHaveBeenCalledWith({
+    expect(mocks.getSharedChatEntityMock).toHaveBeenCalledWith({
       inviteCode: 'invite',
       entityType: 'character',
       entityId: 'character-1',
@@ -109,10 +110,10 @@ describe('getSharedChatReadOnlySignedUrl', () => {
       {
         id: 'file-1',
         metadata: {
-          sharedChatInviteCode: 'invite',
-          sharedChatEntityType: 'character',
-          sharedChatEntityId: 'character-1',
-          sharedChatSessionId: 'other-session',
+          inviteCode: 'invite',
+          entityType: 'character',
+          entityId: 'character-1',
+          sessionId: 'other-session',
         },
         userId: null,
       },

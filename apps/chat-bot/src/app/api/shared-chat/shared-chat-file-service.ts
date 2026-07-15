@@ -1,12 +1,8 @@
 import { type ChatMessage } from '@/types/chat';
 import { dbGetFilesInIds } from '@shared/db/functions/files';
-import { resolveSharedChatEntityContext } from './shared-chat-upload-service';
-import { SharedMessageFileModel, SharedSessionId, verify } from '.';
+import { SharedSessionId, verify } from '.';
 import { verifySharedSessionIdIsNotEmpty } from './shared-chat-verify';
-
-function getLastUserMessageId(messages: ChatMessage[]): string | undefined {
-  return messages.findLast((message) => message.role === 'user')?.id;
-}
+import { FileModel } from '@shared/db/schema';
 
 /**
  * Combines entity-related files with files uploaded for the current shared chat turn.
@@ -15,57 +11,34 @@ function getLastUserMessageId(messages: ChatMessage[]): string | undefined {
  */
 export async function combineSharedRelatedFiles({
   relatedFileEntities,
-  messages,
   fileIds,
   inviteCode,
   entityType,
   entityId,
   sharedSessionId,
 }: {
-  relatedFileEntities: SharedMessageFileModel[];
-  messages: ChatMessage[];
+  relatedFileEntities: FileModel[];
   fileIds?: string[];
   inviteCode: string;
   entityType: 'character' | 'learningScenario';
   entityId: string;
   sharedSessionId?: SharedSessionId;
-}): Promise<SharedMessageFileModel[]> {
+}): Promise<FileModel[]> {
   if (fileIds === undefined || fileIds.length === 0) {
     return relatedFileEntities;
   }
 
   verifySharedSessionIdIsNotEmpty(sharedSessionId);
 
-  const lastUserMessageId = getLastUserMessageId(messages);
-  if (lastUserMessageId === undefined) {
-    return relatedFileEntities;
-  }
-
-  const context = await resolveSharedChatEntityContext({
+  const uploadedFiles = await dbGetFilesInIds(fileIds);
+  verify.filesDoNotBelongToAnyUser(uploadedFiles);
+  verify.sharedChatFileOwnershipBySession({
+    files: uploadedFiles,
     inviteCode,
     entityType,
     entityId,
+    sharedSessionId,
   });
 
-  const uploadedFiles = await dbGetFilesInIds(fileIds);
-  verify.filesDoNotBelongToAnyUser(uploadedFiles);
-  verify.sharedChatFileOwnershipBySession(uploadedFiles, context, sharedSessionId);
-
-  const uploadedFilesWithMessageId: SharedMessageFileModel[] = uploadedFiles.map((file) => ({
-    ...file,
-    conversationMessageId: lastUserMessageId,
-  }));
-
-  // Keep stable order and avoid duplicates if an uploaded file also exists in related files.
-  const byId = new Map<string, SharedMessageFileModel>();
-
-  for (const file of relatedFileEntities) {
-    byId.set(file.id, file);
-  }
-
-  for (const file of uploadedFilesWithMessageId) {
-    byId.set(file.id, file);
-  }
-
-  return [...byId.values()];
+  return [...relatedFileEntities, ...uploadedFiles];
 }

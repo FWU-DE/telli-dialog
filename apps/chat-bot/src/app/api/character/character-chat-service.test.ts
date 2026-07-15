@@ -227,7 +227,7 @@ describe('sendCharacterMessage', () => {
     await collectStream(result.stream);
 
     expect(mocks.ingestWebContentMock).toHaveBeenCalledWith({
-      urls: ['https://character.example/context', 'https://student.example/resource'],
+      urls: ['https://character.example/context'],
       federalStateId: teacherUserAndContext.federalState.id,
     });
   });
@@ -246,10 +246,10 @@ describe('sendCharacterMessage', () => {
 
     expect(mocks.combineSharedRelatedFilesMock).toHaveBeenCalledWith({
       relatedFileEntities: [],
-      messages,
       fileIds: ['file-1', 'file-2'],
       inviteCode: 'invite-code',
-      characterId: character.id,
+      entityType: 'character',
+      entityId: character.id,
       sharedSessionId: 'session-1',
     });
   });

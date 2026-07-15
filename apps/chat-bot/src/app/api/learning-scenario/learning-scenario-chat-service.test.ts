@@ -228,7 +228,7 @@ describe('sendLearningScenarioMessage', () => {
     await collectStream(result.stream);
 
     expect(mocks.ingestWebContentMock).toHaveBeenCalledWith({
-      urls: ['https://scenario.example/context', 'https://student.example/scenario'],
+      urls: ['https://scenario.example/context'],
       federalStateId: teacherUserAndContext.federalState.id,
     });
   });
@@ -250,7 +250,8 @@ describe('sendLearningScenarioMessage', () => {
       messages,
       fileIds: ['file-1', 'file-2'],
       inviteCode: 'invite-code',
-      learningScenarioId: learningScenario.id,
+      entityType: 'learningScenario',
+      entityId: learningScenario.id,
       sharedSessionId: 'session-1',
     });
   });

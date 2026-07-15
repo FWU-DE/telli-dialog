@@ -1,17 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ChatMessage } from '@/types/chat';
 
 const mocks = vi.hoisted(() => ({
   dbGetFilesInIdsMock: vi.fn(),
-  resolveSharedChatEntityContextMock: vi.fn(),
 }));
 
 vi.mock('@shared/db/functions/files', () => ({
   dbGetFilesInIds: mocks.dbGetFilesInIdsMock,
-}));
-
-vi.mock('./shared-chat-upload-service', () => ({
-  resolveSharedChatEntityContext: mocks.resolveSharedChatEntityContextMock,
 }));
 
 const relatedFile = {
@@ -31,30 +25,16 @@ const uploadedFile = {
   size: 11,
   createdAt: new Date('2026-01-02'),
   metadata: {
-    sharedChatInviteCode: 'invite-1',
-    sharedChatEntityType: 'character',
-    sharedChatEntityId: 'character-1',
-    sharedChatSessionId: 'session-1',
+    inviteCode: 'invite-1',
+    entityType: 'character',
+    entityId: 'character-1',
+    sessionId: 'session-1',
   },
   userId: null,
 };
 
-const messages: ChatMessage[] = [
-  { id: 'assistant-1', role: 'assistant', content: 'Hi' },
-  { id: 'user-1', role: 'user', content: 'Hello' },
-  { id: 'assistant-2', role: 'assistant', content: 'How can I help?' },
-  { id: 'user-2', role: 'user', content: 'Use this image' },
-];
-
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.resolveSharedChatEntityContextMock.mockResolvedValue({
-    inviteCode: 'invite-1',
-    entityType: 'character',
-    entityId: 'character-1',
-    startedBy: 'teacher-1',
-    federalStateId: 'federal-state-1',
-  });
 });
 
 describe('combineSharedRelatedFiles', () => {
@@ -63,7 +43,6 @@ describe('combineSharedRelatedFiles', () => {
 
     const result = await combineSharedRelatedFiles({
       relatedFileEntities: [relatedFile],
-      messages,
       fileIds: undefined,
       inviteCode: 'invite-1',
       entityType: 'character',
@@ -81,7 +60,6 @@ describe('combineSharedRelatedFiles', () => {
     await expect(
       combineSharedRelatedFiles({
         relatedFileEntities: [relatedFile],
-        messages,
         fileIds: ['uploaded-file'],
         inviteCode: 'invite-1',
         entityType: 'character',
@@ -89,7 +67,6 @@ describe('combineSharedRelatedFiles', () => {
       }),
     ).rejects.toThrow('Not authorized to use uploaded files');
 
-    expect(mocks.resolveSharedChatEntityContextMock).not.toHaveBeenCalled();
     expect(mocks.dbGetFilesInIdsMock).not.toHaveBeenCalled();
   });
 
@@ -99,7 +76,6 @@ describe('combineSharedRelatedFiles', () => {
 
     const result = await combineSharedRelatedFiles({
       relatedFileEntities: [relatedFile],
-      messages,
       fileIds: ['uploaded-file'],
       inviteCode: 'invite-1',
       entityType: 'character',
@@ -108,22 +84,15 @@ describe('combineSharedRelatedFiles', () => {
     });
 
     expect(mocks.dbGetFilesInIdsMock).toHaveBeenCalledWith(['uploaded-file']);
-    expect(result).toEqual([
-      relatedFile,
-      {
-        ...uploadedFile,
-        conversationMessageId: 'user-2',
-      },
-    ]);
+    expect(result).toEqual([relatedFile, uploadedFile]);
   });
 
-  it('returns related files when fileIds are provided but no user message exists', async () => {
+  it('returns related files combined with uploaded files when fileIds are provided', async () => {
     mocks.dbGetFilesInIdsMock.mockResolvedValue([uploadedFile]);
     const { combineSharedRelatedFiles } = await import('./shared-chat-file-service');
 
     const result = await combineSharedRelatedFiles({
       relatedFileEntities: [relatedFile],
-      messages: [{ id: 'assistant-1', role: 'assistant', content: 'Only assistant' }],
       fileIds: ['uploaded-file'],
       inviteCode: 'invite-1',
       entityType: 'character',
@@ -131,30 +100,7 @@ describe('combineSharedRelatedFiles', () => {
       sharedSessionId: 'session-1',
     });
 
-    expect(result).toEqual([relatedFile]);
-  });
-
-  it('deduplicates by file id and prefers uploaded mapping with message id', async () => {
-    mocks.dbGetFilesInIdsMock.mockResolvedValue([{ ...uploadedFile, id: relatedFile.id }]);
-    const { combineSharedRelatedFiles } = await import('./shared-chat-file-service');
-
-    const result = await combineSharedRelatedFiles({
-      relatedFileEntities: [relatedFile],
-      messages,
-      fileIds: ['related-file'],
-      inviteCode: 'invite-1',
-      entityType: 'character',
-      entityId: 'character-1',
-      sharedSessionId: 'session-1',
-    });
-
-    expect(result).toEqual([
-      {
-        ...uploadedFile,
-        id: relatedFile.id,
-        conversationMessageId: 'user-2',
-      },
-    ]);
+    expect(result).toEqual([relatedFile, uploadedFile]);
   });
 
   it('throws when uploaded file belongs to another shared session', async () => {
@@ -163,7 +109,7 @@ describe('combineSharedRelatedFiles', () => {
         ...uploadedFile,
         metadata: {
           ...uploadedFile.metadata,
-          sharedChatSessionId: 'session-other',
+          sessionId: 'session-other',
         },
       },
     ]);
@@ -173,7 +119,6 @@ describe('combineSharedRelatedFiles', () => {
     await expect(
       combineSharedRelatedFiles({
         relatedFileEntities: [relatedFile],
-        messages,
         fileIds: ['uploaded-file'],
         inviteCode: 'invite-1',
         entityType: 'character',

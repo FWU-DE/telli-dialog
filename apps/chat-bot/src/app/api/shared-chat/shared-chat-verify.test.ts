@@ -40,45 +40,44 @@ describe('verifySharedChatFileOwnershipBySession', () => {
     inviteCode: 'invite-1',
     entityType: 'character' as const,
     entityId: 'character-1',
+    sharedSessionId: 'session-1' as const,
   };
 
   it('accepts files with matching ownership metadata', () => {
     const files = [
       {
         metadata: {
-          sharedChatInviteCode: 'invite-1',
-          sharedChatEntityType: 'character',
-          sharedChatEntityId: 'character-1',
-          sharedChatSessionId: 'session-1',
+          inviteCode: 'invite-1',
+          entityType: 'character',
+          entityId: 'character-1',
+          sessionId: 'session-1',
         },
       },
     ];
 
-    expect(() => verifySharedChatFileOwnershipBySession(files, context, 'session-1')).not.toThrow();
+    expect(() => verifySharedChatFileOwnershipBySession({ files, ...context })).not.toThrow();
   });
 
   it('throws when metadata does not match context/session', () => {
     const files = [
       {
         metadata: {
-          sharedChatInviteCode: 'invite-1',
-          sharedChatEntityType: 'character',
-          sharedChatEntityId: 'character-1',
-          sharedChatSessionId: 'other-session',
+          inviteCode: 'invite-1',
+          entityType: 'character',
+          entityId: 'character-1',
+          sessionId: 'other-session',
         },
       },
     ];
 
-    expect(() => verifySharedChatFileOwnershipBySession(files, context, 'session-1')).toThrow(
+    expect(() => verifySharedChatFileOwnershipBySession({ files, ...context })).toThrow(
       'Not authorized to access this file',
     );
   });
 
-  it('throws when metadata is null', () => {
+  it('does not throw when metadata is null', () => {
     const files = [{ metadata: null }];
 
-    expect(() => verifySharedChatFileOwnershipBySession(files, context, 'session-1')).toThrow(
-      'Not authorized to access this file',
-    );
+    expect(() => verifySharedChatFileOwnershipBySession({ files, ...context })).not.toThrow();
   });
 });

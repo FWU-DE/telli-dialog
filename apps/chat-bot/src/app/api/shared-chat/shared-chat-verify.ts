@@ -1,39 +1,51 @@
 import { ForbiddenError } from '@shared/error';
-import { SharedEntityContext, SharedSessionId } from './shared-chat-types';
+import { SharedChatFileMetadata, SharedSessionId } from '.';
 import { FileMetadata } from '@shared/db/schema';
+import { isSharedChatFileMetadata } from './shared-chat-types';
 
 function isSharedChatFileOwnedBySession({
-  metadata,
-  context,
+  fileMetadata,
+  inviteCode,
+  entityType,
+  entityId,
   sharedSessionId,
 }: {
-  metadata: FileMetadata | null;
-  context: Pick<SharedEntityContext, 'inviteCode' | 'entityType' | 'entityId'>;
+  fileMetadata: SharedChatFileMetadata;
+  inviteCode: string;
+  entityType: 'character' | 'learningScenario';
+  entityId: string;
   sharedSessionId: SharedSessionId;
 }): boolean {
-  if (metadata === null) {
-    return false;
-  }
-
   return (
-    metadata.sharedChatInviteCode === context.inviteCode &&
-    metadata.sharedChatEntityType === context.entityType &&
-    metadata.sharedChatEntityId === context.entityId &&
-    metadata.sharedChatSessionId === sharedSessionId
+    fileMetadata.inviteCode === inviteCode &&
+    fileMetadata.entityType === entityType &&
+    fileMetadata.entityId === entityId &&
+    fileMetadata.sessionId === sharedSessionId
   );
 }
 
-export function verifySharedChatFileOwnershipBySession(
-  files: { metadata: FileMetadata | null }[],
-  context: Pick<SharedEntityContext, 'inviteCode' | 'entityType' | 'entityId'>,
-  sharedSessionId: SharedSessionId,
-): void {
+export function verifySharedChatFileOwnershipBySession({
+  files,
+  inviteCode,
+  entityType,
+  entityId,
+  sharedSessionId,
+}: {
+  files: { metadata: FileMetadata | null }[];
+  inviteCode: string;
+  entityType: 'character' | 'learningScenario';
+  entityId: string;
+  sharedSessionId: SharedSessionId;
+}): void {
   for (const fileMetadata of files.map((file) => file.metadata)) {
     if (
+      isSharedChatFileMetadata(fileMetadata) &&
       !isSharedChatFileOwnedBySession({
-        metadata: fileMetadata,
-        context: context,
-        sharedSessionId: sharedSessionId,
+        fileMetadata,
+        inviteCode,
+        entityType,
+        entityId,
+        sharedSessionId,
       })
     ) {
       throw new ForbiddenError('Not authorized to access this file');
@@ -74,12 +86,22 @@ export function verifySharedChatIsNotSuspended(sharedEntity: { suspended: boolea
   }
 }
 
-export function verifySharedChatCanBeAccessed(sharedEntity: {
+export function verifySharedChatIsNotManuallyStopped(sharedEntity: {
+  manuallyStoppedAt: Date | null;
+}): void {
+  if (sharedEntity.manuallyStoppedAt !== null) {
+    throw new ForbiddenError('Shared chat has been manually stopped');
+  }
+}
+
+export function verifySharedChatEntityIsAccessible(sharedEntity: {
   expiredAt: Date;
   isDeleted: boolean;
   suspended: boolean;
+  manuallyStoppedAt: Date | null;
 }): void {
   verifySharedChatIsNotExpired(sharedEntity);
   verifySharedChatIsNotDeleted(sharedEntity);
   verifySharedChatIsNotSuspended(sharedEntity);
+  verifySharedChatIsNotManuallyStopped(sharedEntity);
 }

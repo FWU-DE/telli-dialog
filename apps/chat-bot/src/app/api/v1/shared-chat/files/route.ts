@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { handleErrorInRoute } from '@/error/handle-error-in-route';
 import { uploadSharedChatFile } from '@/app/api/shared-chat/shared-chat-upload-service';
 import { sharedChatUploadFormSchema } from '@/app/api/shared-chat/shared-chat-request-schemas';
+import { requireValidInviteCode } from '@/auth/requireValidInviteCode';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,6 +14,8 @@ export async function POST(req: NextRequest) {
       entityId: formData.get('entityId'),
       sharedSessionId: formData.get('sharedSessionId'),
     });
+
+    await requireValidInviteCode(parseResult.inviteCode);
 
     const fileId = await uploadSharedChatFile({
       file: parseResult.file,

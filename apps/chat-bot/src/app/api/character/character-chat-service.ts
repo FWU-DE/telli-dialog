@@ -122,7 +122,6 @@ export async function sendCharacterMessage({
   // Get related files and web sources
   const relatedFileEntities = await combineSharedRelatedFiles({
     relatedFileEntities: await dbGetRelatedCharacterFiles(character.id),
-    messages,
     fileIds,
     inviteCode,
     entityType: 'character',

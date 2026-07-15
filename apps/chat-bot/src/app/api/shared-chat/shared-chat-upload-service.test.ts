@@ -48,12 +48,19 @@ vi.mock('@ais-chat/shared/random/randomService', () => ({
   cnanoid: mocks.cnanoidMock,
 }));
 
+const validEntity = {
+  id: 'character-1',
+  startedBy: 'teacher-1',
+  expiredAt: new Date('2099-01-01'),
+  isDeleted: false,
+  suspended: false,
+  manuallyStoppedAt: null,
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.getUserAndContextByUserIdMock.mockResolvedValue({
-    federalState: {
-      id: 'federal-state-1',
-    },
+    federalStateId: 'federal-state-1',
   });
   mocks.cnanoidMock.mockReturnValue('abc123');
   mocks.dbInsertFileWithChunksMock.mockResolvedValue(undefined);
@@ -67,85 +74,9 @@ beforeEach(() => {
   mocks.chunkAndEmbedMock.mockResolvedValue([]);
 });
 
-describe('resolveSharedUploadContext', () => {
-  it('throws when shared entity cannot be found', async () => {
-    mocks.dbGetCharacterByIdAndInviteCodeMock.mockResolvedValue(undefined);
-
-    const { resolveSharedChatEntityContext: resolveSharedUploadContext } =
-      await import('./shared-chat-upload-service');
-
-    await expect(
-      resolveSharedUploadContext({
-        inviteCode: 'invite',
-        entityType: 'character',
-        entityId: 'character-missing',
-      }),
-    ).rejects.toThrow('Shared chat not found');
-  });
-
-  it('resolves context for character uploads', async () => {
-    mocks.dbGetCharacterByIdAndInviteCodeMock.mockResolvedValue({
-      startedBy: 'teacher-1',
-    });
-
-    const { resolveSharedChatEntityContext: resolveSharedUploadContext } =
-      await import('./shared-chat-upload-service');
-
-    const result = await resolveSharedUploadContext({
-      inviteCode: 'invite',
-      entityType: 'character',
-      entityId: 'character-1',
-    });
-
-    expect(mocks.dbGetCharacterByIdAndInviteCodeMock).toHaveBeenCalledWith({
-      id: 'character-1',
-      inviteCode: 'invite',
-    });
-    expect(result).toEqual({
-      startedBy: 'teacher-1',
-      federalStateId: 'federal-state-1',
-      inviteCode: 'invite',
-      entityType: 'character',
-      entityId: 'character-1',
-    });
-  });
-
-  it('resolves context for learning scenario uploads', async () => {
-    mocks.dbGetLearningScenarioByIdAndInviteCodeMock.mockResolvedValue({
-      startedBy: 'teacher-1',
-      expiredAt: new Date('2099-01-01'),
-      isDeleted: false,
-      suspended: false,
-    });
-
-    const { resolveSharedChatEntityContext: resolveSharedUploadContext } =
-      await import('./shared-chat-upload-service');
-
-    const result = await resolveSharedUploadContext({
-      inviteCode: 'invite',
-      entityType: 'learningScenario',
-      entityId: 'learning-scenario-1',
-    });
-
-    expect(mocks.dbGetLearningScenarioByIdAndInviteCodeMock).toHaveBeenCalledWith({
-      learningScenarioId: 'learning-scenario-1',
-      inviteCode: 'invite',
-    });
-    expect(result).toEqual({
-      startedBy: 'teacher-1',
-      federalStateId: 'federal-state-1',
-      inviteCode: 'invite',
-      entityType: 'learningScenario',
-      entityId: 'learning-scenario-1',
-    });
-  });
-});
-
 describe('uploadSharedChatFile', () => {
   it('stores shared image uploads with userId=null', async () => {
-    mocks.dbGetCharacterByIdAndInviteCodeMock.mockResolvedValue({
-      startedBy: 'teacher-1',
-    });
+    mocks.dbGetCharacterByIdAndInviteCodeMock.mockResolvedValue(validEntity);
 
     const { uploadSharedChatFile } = await import('./shared-chat-upload-service');
 
@@ -174,10 +105,10 @@ describe('uploadSharedChatFile', () => {
         id: 'file_abc123',
         userId: null,
         metadata: expect.objectContaining({
-          sharedChatInviteCode: 'invite',
-          sharedChatEntityType: 'character',
-          sharedChatEntityId: 'character-1',
-          sharedChatSessionId: 'session-1',
+          inviteCode: 'invite',
+          entityType: 'character',
+          entityId: 'character-1',
+          sessionId: 'session-1',
         }),
       }),
       [],
@@ -186,7 +117,8 @@ describe('uploadSharedChatFile', () => {
 
   it('stores shared non-image uploads with chunks and userId=null', async () => {
     mocks.dbGetLearningScenarioByIdAndInviteCodeMock.mockResolvedValue({
-      startedBy: 'teacher-1',
+      ...validEntity,
+      id: 'learning-scenario-1',
     });
 
     const { uploadSharedChatFile } = await import('./shared-chat-upload-service');
@@ -215,10 +147,10 @@ describe('uploadSharedChatFile', () => {
         id: 'file_abc123',
         userId: null,
         metadata: expect.objectContaining({
-          sharedChatInviteCode: 'invite',
-          sharedChatEntityType: 'learningScenario',
-          sharedChatEntityId: 'learning-scenario-1',
-          sharedChatSessionId: 'session-1',
+          inviteCode: 'invite',
+          entityType: 'learningScenario',
+          entityId: 'learning-scenario-1',
+          sessionId: 'session-1',
         }),
       }),
       expect.any(Array),

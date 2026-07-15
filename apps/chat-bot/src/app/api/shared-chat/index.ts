@@ -1,6 +1,6 @@
 import {
   verifyFilesDoNotBelongToAnyUser,
-  verifySharedChatCanBeAccessed,
+  verifySharedChatEntityIsAccessible,
   verifySharedChatFileOwnershipBySession,
   verifySharedChatIsNotDeleted,
   verifySharedChatIsNotExpired,
@@ -10,9 +10,10 @@ import {
 // rexport types from ./shared-chat-types.ts
 export type {
   SharedSessionId,
-  SharedEntityContext,
+  SharedChatCharacter,
+  SharedChatLearningScenario,
+  SharedChatEntity,
   SharedChatFileMetadata,
-  SharedMessageFileModel,
 } from './shared-chat-types';
 
 export const verify = {
@@ -21,5 +22,5 @@ export const verify = {
   sharedChatIsNotExpired: verifySharedChatIsNotExpired,
   sharedChatIsNotDeleted: verifySharedChatIsNotDeleted,
   sharedChatIsNotSuspended: verifySharedChatIsNotSuspended,
-  sharedChatCanBeAccessed: verifySharedChatCanBeAccessed,
+  sharedChatEntityIsAccessible: verifySharedChatEntityIsAccessible,
 };
