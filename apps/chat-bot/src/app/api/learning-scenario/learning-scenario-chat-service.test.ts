@@ -45,7 +45,7 @@ vi.mock('@/utils/vidis/access', () => ({
   checkProductAccess: mocks.checkProductAccessMock,
 }));
 
-vi.mock('../chat/usage', () => ({
+vi.mock('@shared/users/usage', () => ({
   sharedChatHasExpired: mocks.sharedChatHasExpiredMock,
   sharedLearningScenarioChatHasReachedTokenPointsLimit:
     mocks.sharedLearningScenarioChatHasReachedTokenPointsLimitMock,
@@ -247,7 +247,6 @@ describe('sendLearningScenarioMessage', () => {
 
     expect(mocks.combineSharedRelatedFilesMock).toHaveBeenCalledWith({
       relatedFileEntities: [],
-      messages,
       fileIds: ['file-1', 'file-2'],
       inviteCode: 'invite-code',
       entityType: 'learningScenario',

@@ -45,7 +45,7 @@ vi.mock('@/utils/vidis/access', () => ({
   checkProductAccess: mocks.checkProductAccessMock,
 }));
 
-vi.mock('../chat/usage', () => ({
+vi.mock('@shared/users/usage', () => ({
   sharedCharacterChatHasReachedTokenPointsLimit:
     mocks.sharedCharacterChatHasReachedTokenPointsLimitMock,
   sharedChatHasExpired: mocks.sharedChatHasExpiredMock,
