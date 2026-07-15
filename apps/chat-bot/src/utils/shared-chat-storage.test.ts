@@ -9,8 +9,6 @@ import type { ChatMessage } from '@/types/chat';
 import {
   clearSharedChatFileMapping,
   clearSharedChatMessages,
-  clearSharedChatSessionId,
-  getOrCreateSharedChatSessionId,
   loadSharedChatFileMapping,
   loadSharedChatMessages,
   saveSharedChatFileMapping,

@@ -1,4 +1,3 @@
-import { type ChatMessage } from '@/types/chat';
 import { dbGetFilesInIds } from '@shared/db/functions/files';
 import { SharedSessionId, verify } from '.';
 import { verifySharedSessionIdIsNotEmpty } from './shared-chat-verify';
