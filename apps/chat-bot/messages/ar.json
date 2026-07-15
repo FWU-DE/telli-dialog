@@ -1,0 +1,49 @@
+{
+  "common": {
+    "delete": "حذف",
+    "cancel": "إلغاء",
+    "information-disclaimer": "قد يخطئ AIS.chat. فكّر بشكل نقدي وتحقّق من جميع المعلومات."
+  },
+  "characters": {
+    "shared": {
+      "delete-chat-modal-title": "هل تريد حذف المحادثة الحالية؟",
+      "delete-chat-modal-description": "سيتم بدء محادثة جديدة. سيتم حذف المحادثة الحالية نهائيًا ولا يمكن التراجع عن ذلك.",
+      "delete-chat-modal-confirm-button": "حذف"
+    }
+  },
+  "learning-scenarios": {
+    "shared": {
+      "excercise-title": "مهمتك",
+      "title": "استخدام سيناريو التعلّم",
+      "description": "كم من حجم الرموز الشهري يمكن لهذه المحادثة أن تستهلك كحد أقصى، وكم من الوقت يمكن أن تظل نشطة؟",
+      "max-usage": "المدة القصوى للاستخدام",
+      "time": "الوقت",
+      "share": "مشاركة",
+      "invalid-code-toast": "الرمز الذي تم إدخاله منتهي الصلاحية أو غير صالح.",
+      "join-code": "الانضمام باستخدام رمز",
+      "enter-chat": "الانتقال إلى الحوار",
+      "delete-chat-modal-title": "هل تريد حذف المحادثة الحالية؟",
+      "delete-chat-modal-description": "سيتم بدء محادثة جديدة. سيتم حذف المحادثة الحالية نهائيًا ولا يمكن التراجع عن ذلك.",
+      "delete-chat-modal-confirm-button": "حذف"
+    }
+  },
+  "custom-chat": {
+    "share-page": {
+      "go-to": "انتقل إلى",
+      "enter-code": "أدخل الرمز.",
+      "open-chat": "فتح محادثة",
+      "use-qr": "أو استخدم رمز QR",
+      "copy-link": "نسخ رابط البدء",
+      "learning-scenario": {
+        "sub-header": "سيناريو التعلّم",
+        "back-button": "إلى سيناريو التعلّم",
+        "join": "بدء سيناريو التعلّم"
+      },
+      "character": {
+        "sub-header": "شريك الحوار",
+        "back-button": "إلى شريك الحوار",
+        "join": "الانضمام إلى الحوار"
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "common": {
+    "delete": "Cancella",
+    "cancel": "Annulla",
+    "information-disclaimer": "AIS.chat può commettere errori. Mantieni un atteggiamento critico e verifica tutte le informazioni."
+  },
+  "characters": {
+    "shared": {
+      "delete-chat-modal-title": "Cancellare la chat attuale?",
+      "delete-chat-modal-description": "Verrà avviata una nuova chat. La chat attuale verrà eliminata in modo definitivo.",
+      "delete-chat-modal-confirm-button": "Cancella"
+    }
+  },
+  "learning-scenarios": {
+    "shared": {
+      "excercise-title": "Il tuo compito",
+      "join-code": "Unisciti con un codice",
+      "enter-chat": "Vai al dialogo",
+      "delete-chat-modal-title": "Cancellare la chat attuale?",
+      "delete-chat-modal-description": "Verrà avviata una nuova chat. La chat attuale verrà eliminata in modo definitivo.",
+      "delete-chat-modal-confirm-button": "Cancella"
+    }
+  },
+  "custom-chat": {
+    "share-page": {
+      "go-to": "Vai su",
+      "enter-code": "Inserisci il codice.",
+      "open-chat": "Apri chat",
+      "use-qr": "Oppure usa il codice QR.",
+      "copy-link": "Copia link di avvio",
+      "learning-scenario": {
+        "sub-header": "Scenario di apprendimento",
+        "back-button": "Vai allo scenario di apprendimento",
+        "join": "Iniziare lo scenario di apprendimento"
+      },
+      "character": {
+        "sub-header": "Interlocutore",
+        "back-button": "Vai all’interlocutore",
+        "join": "Partecipare al dialogo"
+      }
+    }
+  }
+}

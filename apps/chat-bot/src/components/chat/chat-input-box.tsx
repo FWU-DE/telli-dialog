@@ -38,6 +38,7 @@ export function ChatInputBox({
   enableFileUpload = false,
   fileUploadFn,
   getSignedUrlFn,
+  showPlaceholder = true,
 }: {
   files?: Map<string, LocalFileState>;
   setFiles?: Dispatch<SetStateAction<Map<string, LocalFileState>>>;
@@ -50,6 +51,7 @@ export function ChatInputBox({
   enableFileUpload?: boolean;
   fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
   getSignedUrlFn?: (fileId: string) => Promise<string>;
+  showPlaceholder?: boolean;
 }) {
   const tCommon = useTranslations('common');
   const tFileInteraction = useTranslations('file-interaction');
@@ -162,7 +164,7 @@ export function ChatInputBox({
           <AutoResizeTextarea
             /* eslint-disable-next-line jsx-a11y/no-autofocus */
             autoFocus
-            placeholder={tCommon('send-message-placeholder')}
+            placeholder={showPlaceholder ? tCommon('send-message-placeholder') : ''}
             className="w-full text-base focus:outline-hidden max-h-40 sm:max-h-60 overflow-y-auto placeholder:text-muted-foreground p-2"
             onChange={handleInputChange}
             value={input}
