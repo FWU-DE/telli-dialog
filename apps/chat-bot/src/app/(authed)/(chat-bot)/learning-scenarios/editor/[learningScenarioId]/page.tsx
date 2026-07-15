@@ -1,4 +1,5 @@
 import { requireAuth } from '@/auth/requireAuth';
+import { isWebSearchAvailableForFederalState } from '@/app/api/chat/websearch';
 import { getLearningScenarioForEditView } from '@shared/learning-scenarios/learning-scenario-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebSource } from '@shared/db/types';
@@ -62,6 +63,7 @@ export default async function Page(
         usedBudget={usedBudget ?? 0}
         maxBudget={maxBudget ?? 500}
         budgetUsedBySharedChat={budgetUsedBySharedChat}
+        isWebSearchAvailable={isWebSearchAvailableForFederalState(federalState)}
       />
     </DefaultPageLayout>
   );

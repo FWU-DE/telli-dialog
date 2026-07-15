@@ -545,6 +545,7 @@ export const characterTable = pgTable(
     initialMessage: text('initial_message'),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
+    isWebSearchEnabled: boolean('is_web_search_enabled').notNull().default(false),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
       .defaultNow()
@@ -769,6 +770,7 @@ export const learningScenarioTable = pgTable(
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     originalLearningScenarioId: uuid('original_learning_scenario_id'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
+    isWebSearchEnabled: boolean('is_web_search_enabled').notNull().default(false),
   },
   (table) => [index().on(table.userId)],
 );

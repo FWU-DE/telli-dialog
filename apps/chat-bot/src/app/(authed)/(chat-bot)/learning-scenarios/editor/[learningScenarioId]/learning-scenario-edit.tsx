@@ -54,6 +54,7 @@ import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-b
 import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
 import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
+import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 import { WebSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
@@ -124,6 +125,7 @@ function createLearningScenarioFormValuesSchema(t: LearningScenarioTranslator) {
     isSchoolShared: z.boolean(),
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
+    isWebSearchEnabled: z.boolean(),
   });
 }
 
@@ -139,6 +141,7 @@ export function LearningScenarioEdit({
   usedBudget,
   maxBudget,
   budgetUsedBySharedChat,
+  isWebSearchAvailable,
 }: {
   learningScenario: LearningScenarioOptionalShareDataModel;
   relatedFiles: FileModel[];
@@ -147,6 +150,7 @@ export function LearningScenarioEdit({
   usedBudget: number;
   maxBudget: number;
   budgetUsedBySharedChat: number;
+  isWebSearchAvailable: boolean;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -179,6 +183,7 @@ export function LearningScenarioEdit({
     languages: filterValues.languages,
     ...getShareFormValues(learningScenario.accessLevel),
     hasLinkAccess: learningScenario.hasLinkAccess,
+    isWebSearchEnabled: learningScenario.isWebSearchEnabled,
   };
 
   const {
@@ -557,6 +562,16 @@ export function LearningScenarioEdit({
               onLinksChange={handleLinksChange}
               onDownloadFile={handleDownloadFile}
             />
+
+            {isWebSearchAvailable && (
+              <CustomChatWebSearch
+                name="isWebSearchEnabled"
+                control={control}
+                onCheckedChange={() => {
+                  void flushAutoSave();
+                }}
+              />
+            )}
 
             <CustomShareSection
               control={control}

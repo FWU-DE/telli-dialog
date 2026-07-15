@@ -58,6 +58,7 @@ import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { useForm, useWatch } from 'react-hook-form';
 import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
+import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { FormField } from '@ui/components/form/form-field';
 import { createNewCharacterAction } from '../../actions';
@@ -122,6 +123,7 @@ function createCharacterFormValuesSchema(t: CharacterTranslator) {
     isSchoolShared: z.boolean(),
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
+    isWebSearchEnabled: z.boolean(),
   });
 }
 
@@ -135,6 +137,7 @@ export function CharacterEdit({
   usedBudget,
   maxBudget,
   budgetUsedBySharedChat,
+  isWebSearchAvailable,
 }: {
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
@@ -143,6 +146,7 @@ export function CharacterEdit({
   usedBudget: number;
   maxBudget: number;
   budgetUsedBySharedChat: number;
+  isWebSearchAvailable: boolean;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -170,6 +174,7 @@ export function CharacterEdit({
     languages: filterValues.languages,
     ...getShareFormValues(character.accessLevel),
     hasLinkAccess: character.hasLinkAccess,
+    isWebSearchEnabled: character.isWebSearchEnabled,
   };
 
   const {
@@ -213,6 +218,7 @@ export function CharacterEdit({
             languages: data.languages,
           }),
           hasLinkAccess: data.hasLinkAccess,
+          isWebSearchEnabled: data.isWebSearchEnabled,
         });
 
         return updateResult.success;
@@ -531,6 +537,16 @@ export function CharacterEdit({
             onLinksChange={handleLinksChange}
             onDownloadFile={handleDownloadFile}
           />
+
+          {isWebSearchAvailable && (
+            <CustomChatWebSearch
+              name="isWebSearchEnabled"
+              control={control}
+              onCheckedChange={() => {
+                void flushAutoSave();
+              }}
+            />
+          )}
 
           <CustomShareSection
             control={control}

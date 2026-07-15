@@ -109,6 +109,7 @@ export const mockLearningScenario = (): LearningScenarioSelectModel => {
     isDeleted: false,
     suspended: false,
     hasLinkAccess: false,
+    isWebSearchEnabled: false,
     ownerSchoolIds: [generateUUID()],
   };
 };
@@ -173,6 +174,7 @@ export const mockCharacter = (): CharacterSelectModel => {
     isDeleted: false,
     suspended: false,
     hasLinkAccess: false,
+    isWebSearchEnabled: false,
     ownerSchoolIds: [generateUUID()],
   };
 };
