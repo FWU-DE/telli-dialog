@@ -24,6 +24,7 @@ function createBifrostClient(model: AiModel): { client: OpenAI; modelName: strin
   }
 
   const provider = getBifrostUpstreamProvider(model);
+  const modelName = provider === 'vertex' ? stripAnthropicPrefix(model.name) : model.name;
 
   return {
     client: instrumentOpenAiClient(
@@ -32,7 +33,7 @@ function createBifrostClient(model: AiModel): { client: OpenAI; modelName: strin
         baseURL: env.bifrostBaseUrl,
       }),
     ),
-    modelName: `${provider}/${model.name}`,
+    modelName: `${provider}/${modelName}`,
   };
 }
 
@@ -44,6 +45,10 @@ function getBifrostUpstreamProvider(model: AiModel): BifrostUpstreamProvider {
   if (settingProvider === 'google') return 'vertex';
 
   throw new ProviderConfigurationError('Unsupported Bifrost upstream provider');
+}
+
+function stripAnthropicPrefix(modelName: string): string {
+  return modelName.replace(/^anthropic\//, '');
 }
 
 export function constructBifrostTextStreamFn(model: AiModel): TextStreamFn {
