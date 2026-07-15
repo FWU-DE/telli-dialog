@@ -38,7 +38,7 @@ const persistedSharedFileMappingPayloadSchema = z.object({
 
 export type PersistedSharedFile = z.infer<typeof persistedSharedFileSchema>;
 
-export function sharedChatStorageKey(inviteCode: string): string {
+export function sharedChatMessagesStorageKey(inviteCode: string): string {
   return `shared-chat-messages:${STORAGE_KEY_VERSION}:${inviteCode}`;
 }
 
@@ -47,7 +47,7 @@ export function sharedChatFileMappingStorageKey(inviteCode: string): string {
 }
 
 export function sharedChatSessionIdStorageKey(inviteCode: string): string {
-  return `shared-chat-session:${STORAGE_KEY_VERSION}:${inviteCode}`;
+  return `shared-chat-session-id:${STORAGE_KEY_VERSION}:${inviteCode}`;
 }
 
 function getSessionStorage(): Storage | null {
@@ -69,30 +69,19 @@ export function loadSharedChatMessages(inviteCode: string): ChatMessage[] | null
   const storage = getSessionStorage();
   if (storage === null) return null;
 
-  let raw: string | null;
   try {
-    raw = storage.getItem(sharedChatStorageKey(inviteCode));
+    const raw = storage.getItem(sharedChatMessagesStorageKey(inviteCode));
+    const parsed = JSON.parse(raw ?? '');
+    const result = persistedChatMessagesSchema.safeParse(parsed);
+
+    if (result.success) {
+      return result.data as ChatMessage[];
+    }
+    return null;
   } catch (error) {
     logError('Failed to read shared chat messages from sessionStorage', error);
     return null;
   }
-
-  if (raw === null) return null;
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (error) {
-    logError('Failed to parse shared chat messages from sessionStorage', error);
-    return null;
-  }
-
-  const result = persistedChatMessagesSchema.safeParse(parsed);
-  if (!result.success) {
-    return null;
-  }
-
-  return result.data as ChatMessage[];
 }
 
 /**
@@ -107,7 +96,7 @@ export function saveSharedChatMessages(inviteCode: string, messages: ChatMessage
   try {
     // strips away any extra properties like attachments, webSearchResults, toolCalls, etc. that are not needed for persistence
     const parsedMessages = persistedChatMessagesSchema.parse(messages);
-    storage.setItem(sharedChatStorageKey(inviteCode), JSON.stringify(parsedMessages));
+    storage.setItem(sharedChatMessagesStorageKey(inviteCode), JSON.stringify(parsedMessages));
   } catch (error) {
     logError('Failed to save shared chat messages to sessionStorage', error);
   }
@@ -121,7 +110,7 @@ export function clearSharedChatMessages(inviteCode: string): void {
   if (storage === null) return;
 
   try {
-    storage.removeItem(sharedChatStorageKey(inviteCode));
+    storage.removeItem(sharedChatMessagesStorageKey(inviteCode));
   } catch (error) {
     logError('Failed to clear shared chat messages from sessionStorage', error);
   }
@@ -134,43 +123,22 @@ export function loadSharedChatFileMapping(
   const storage = getSessionStorage();
   if (storage === null) return null;
 
-  let raw: string | null;
   try {
-    raw = storage.getItem(sharedChatFileMappingStorageKey(inviteCode));
+    const raw = storage.getItem(sharedChatFileMappingStorageKey(inviteCode));
+    const parsed = JSON.parse(raw ?? '');
+    const payloadResult = persistedSharedFileMappingPayloadSchema.safeParse(parsed);
+
+    if (payloadResult.success) {
+      if (sharedSessionId !== undefined && payloadResult.data.sessionId === sharedSessionId) {
+        return new Map(Object.entries(payloadResult.data.mapping));
+      }
+    }
+
+    return null;
   } catch (error) {
     logError('Failed to read shared chat file mapping from sessionStorage', error);
     return null;
   }
-
-  if (raw === null) return null;
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (error) {
-    logError('Failed to parse shared chat file mapping from sessionStorage', error);
-    return null;
-  }
-
-  const payloadResult = persistedSharedFileMappingPayloadSchema.safeParse(parsed);
-
-  if (payloadResult.success) {
-    if (
-      sharedSessionId !== undefined &&
-      payloadResult.data.sessionId.trim() !== sharedSessionId.trim()
-    ) {
-      try {
-        storage.removeItem(sharedChatFileMappingStorageKey(inviteCode));
-      } catch (error) {
-        logError('Failed to clear stale shared chat file mapping from sessionStorage', error);
-      }
-      return null;
-    }
-
-    return new Map(Object.entries(payloadResult.data.mapping));
-  }
-
-  return null;
 }
 
 export function saveSharedChatFileMapping(
@@ -190,6 +158,7 @@ export function saveSharedChatFileMapping(
         sessionId: sharedSessionId,
         mapping: parsed,
       });
+      storage.setItem(sharedChatSessionIdStorageKey(inviteCode), sharedSessionId);
       storage.setItem(sharedChatFileMappingStorageKey(inviteCode), JSON.stringify(payload));
       return;
     }

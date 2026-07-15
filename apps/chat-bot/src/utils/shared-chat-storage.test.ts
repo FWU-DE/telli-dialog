@@ -7,10 +7,17 @@ vi.mock('@shared/logging', () => ({
 import { logError } from '@shared/logging';
 import type { ChatMessage } from '@/types/chat';
 import {
+  clearSharedChatFileMapping,
   clearSharedChatMessages,
+  clearSharedChatSessionId,
+  getOrCreateSharedChatSessionId,
+  loadSharedChatFileMapping,
   loadSharedChatMessages,
+  saveSharedChatFileMapping,
   saveSharedChatMessages,
-  sharedChatStorageKey,
+  sharedChatFileMappingStorageKey,
+  sharedChatSessionIdStorageKey,
+  sharedChatMessagesStorageKey,
 } from './shared-chat-storage';
 
 /**
@@ -52,11 +59,13 @@ function uninstallSessionStorage(): void {
 
 describe('sharedChatStorageKey', () => {
   it('returns a versioned, invite-code-scoped key', () => {
-    expect(sharedChatStorageKey(INVITE_CODE)).toBe(`shared-chat-messages:v1:${INVITE_CODE}`);
+    expect(sharedChatMessagesStorageKey(INVITE_CODE)).toBe(
+      `shared-chat-messages:v1:${INVITE_CODE}`,
+    );
   });
 
   it('produces different keys for different invite codes', () => {
-    expect(sharedChatStorageKey('a')).not.toBe(sharedChatStorageKey('b'));
+    expect(sharedChatMessagesStorageKey('a')).not.toBe(sharedChatMessagesStorageKey('b'));
   });
 });
 
@@ -91,7 +100,7 @@ describe('shared-chat sessionStorage round-trip', () => {
   it('writes to the invite-code-scoped key', () => {
     saveSharedChatMessages(INVITE_CODE, [{ id: 'm1', role: 'user', content: 'hi' }]);
 
-    expect(storage.getItem(sharedChatStorageKey(INVITE_CODE))).not.toBeNull();
+    expect(storage.getItem(sharedChatMessagesStorageKey(INVITE_CODE))).not.toBeNull();
   });
 
   it('isolates messages between invite codes', () => {
@@ -144,11 +153,99 @@ describe('shared-chat sessionStorage round-trip', () => {
     clearSharedChatMessages(INVITE_CODE);
 
     expect(loadSharedChatMessages(INVITE_CODE)).toBeNull();
-    expect(storage.getItem(sharedChatStorageKey(INVITE_CODE))).toBeNull();
+    expect(storage.getItem(sharedChatMessagesStorageKey(INVITE_CODE))).toBeNull();
   });
 
   it('clearSharedChatMessages is a no-op when nothing is stored', () => {
     expect(() => clearSharedChatMessages(INVITE_CODE)).not.toThrow();
+  });
+});
+
+describe('shared-chat file mapping persistence', () => {
+  let storage: MemoryStorage;
+
+  beforeEach(() => {
+    storage = new MemoryStorage();
+    installSessionStorage(storage);
+    vi.mocked(logError).mockClear();
+  });
+
+  afterEach(() => {
+    uninstallSessionStorage();
+  });
+
+  it('persists and restores file mapping when session id matches', () => {
+    const mapping = new Map([
+      [
+        'user-1',
+        [
+          {
+            id: 'file-1',
+            name: 'test.png',
+            type: 'png',
+            size: 123,
+            createdAt: new Date('2025-01-01T10:00:00.000Z'),
+            metadata: null,
+            userId: null,
+          },
+        ],
+      ],
+    ]);
+
+    saveSharedChatFileMapping(INVITE_CODE, mapping, 'session-1');
+
+    const restored = loadSharedChatFileMapping(INVITE_CODE, 'session-1');
+    expect(restored).not.toBeNull();
+    expect(restored?.get('user-1')?.[0]?.id).toBe('file-1');
+    expect(storage.getItem(sharedChatSessionIdStorageKey(INVITE_CODE))).toBe('session-1');
+  });
+
+  it('does not clear persisted mapping when session id mismatches', () => {
+    const mapping = new Map([
+      [
+        'user-1',
+        [
+          {
+            id: 'file-1',
+            name: 'test.txt',
+            type: 'txt',
+            size: 42,
+            createdAt: new Date('2025-01-01T10:00:00.000Z'),
+            metadata: null,
+            userId: null,
+          },
+        ],
+      ],
+    ]);
+
+    saveSharedChatFileMapping(INVITE_CODE, mapping, 'session-a');
+
+    expect(loadSharedChatFileMapping(INVITE_CODE, 'session-b')).toBeNull();
+    expect(storage.getItem(sharedChatFileMappingStorageKey(INVITE_CODE))).not.toBeNull();
+  });
+
+  it('clearSharedChatFileMapping removes persisted file mapping entry', () => {
+    const mapping = new Map([
+      [
+        'user-1',
+        [
+          {
+            id: 'file-1',
+            name: 'test.txt',
+            type: 'txt',
+            size: 42,
+            createdAt: new Date('2025-01-01T10:00:00.000Z'),
+            metadata: null,
+            userId: null,
+          },
+        ],
+      ],
+    ]);
+
+    saveSharedChatFileMapping(INVITE_CODE, mapping, 'session-1');
+    clearSharedChatFileMapping(INVITE_CODE);
+
+    expect(storage.getItem(sharedChatFileMappingStorageKey(INVITE_CODE))).toBeNull();
   });
 });
 
@@ -166,7 +263,7 @@ describe('loadSharedChatMessages — invalid data', () => {
   });
 
   it('returns null when stored value is not valid JSON', () => {
-    storage.setItem(sharedChatStorageKey(INVITE_CODE), 'not json {');
+    storage.setItem(sharedChatMessagesStorageKey(INVITE_CODE), 'not json {');
 
     expect(loadSharedChatMessages(INVITE_CODE)).toBeNull();
     expect(logError).toHaveBeenCalledTimes(1);
@@ -174,7 +271,7 @@ describe('loadSharedChatMessages — invalid data', () => {
 
   it('returns null when stored JSON does not match the ChatMessage schema', () => {
     storage.setItem(
-      sharedChatStorageKey(INVITE_CODE),
+      sharedChatMessagesStorageKey(INVITE_CODE),
       JSON.stringify([{ id: 'm1', role: 'bogus-role', content: 'x' }]),
     );
 
@@ -182,14 +279,14 @@ describe('loadSharedChatMessages — invalid data', () => {
   });
 
   it('returns null when stored JSON is not an array', () => {
-    storage.setItem(sharedChatStorageKey(INVITE_CODE), JSON.stringify({ id: 'm1' }));
+    storage.setItem(sharedChatMessagesStorageKey(INVITE_CODE), JSON.stringify({ id: 'm1' }));
 
     expect(loadSharedChatMessages(INVITE_CODE)).toBeNull();
   });
 
   it('returns null when a message is missing required fields', () => {
     storage.setItem(
-      sharedChatStorageKey(INVITE_CODE),
+      sharedChatMessagesStorageKey(INVITE_CODE),
       JSON.stringify([{ id: 'm1', role: 'user' }]), // missing content
     );
 
