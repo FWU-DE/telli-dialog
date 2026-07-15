@@ -6,6 +6,7 @@ export interface SharePollingData {
   manuallyStoppedAt: Date | null;
   tokenPointsLimit: number | null;
   budgetUsedBySharedChat: number;
+  tokenLimitExceeded: boolean;
 }
 
 export function useShareDataPolling({

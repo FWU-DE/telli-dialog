@@ -720,13 +720,18 @@ describe('learning-scenario-service', () => {
         >
       ).mockResolvedValue(null as never);
 
-      const result = await getActiveLearningScenarioShareData({ learningScenarioId, user });
+      const result = await getActiveLearningScenarioShareData({
+        learningScenarioId,
+        user,
+        federalState: mockFederalState(),
+      });
 
       expect(result).toEqual({
         expiredAt: null,
         manuallyStoppedAt: null,
         tokenPointsLimit: null,
         budgetUsedBySharedChat: 0,
+        tokenLimitExceeded: false,
       });
       expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).not.toHaveBeenCalled();
     });
@@ -766,7 +771,11 @@ describe('learning-scenario-service', () => {
         >
       ).mockResolvedValue(432);
 
-      const result = await getActiveLearningScenarioShareData({ learningScenarioId, user });
+      const result = await getActiveLearningScenarioShareData({
+        learningScenarioId,
+        user,
+        federalState: mockFederalState(),
+      });
 
       expect(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).toHaveBeenCalledWith({
         learningScenarioId,
@@ -779,6 +788,7 @@ describe('learning-scenario-service', () => {
         manuallyStoppedAt: null,
         tokenPointsLimit: 75,
         budgetUsedBySharedChat: 432,
+        tokenLimitExceeded: true,
       });
     });
 
@@ -791,7 +801,11 @@ describe('learning-scenario-service', () => {
       ).mockResolvedValue(undefined as never);
 
       await expect(
-        getActiveLearningScenarioShareData({ learningScenarioId, user }),
+        getActiveLearningScenarioShareData({
+          learningScenarioId,
+          user,
+          federalState: mockFederalState(),
+        }),
       ).rejects.toThrow(NotFoundError);
     });
   });
@@ -1054,11 +1068,24 @@ describe('learning-scenario-service', () => {
       userId,
       expiredAt: new Date('2026-07-01T12:30:00.000Z'),
     };
+    const currentShare = {
+      id: generateUUID(),
+      learningScenarioId,
+      userId,
+      tokenPointsLimit: 50,
+      maxUsageTimeLimit: 60,
+      expiredAt: new Date(Date.now() + 60 * 60_000),
+    };
 
     beforeEach(() => {
       (
         dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
       ).mockResolvedValue(mockLearningScenario as never);
+      (
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
+        >
+      ).mockResolvedValue(currentShare as never);
       (
         dbExtendSharedLearningScenarioExpiration as MockedFunction<
           typeof dbExtendSharedLearningScenarioExpiration
@@ -1096,6 +1123,33 @@ describe('learning-scenario-service', () => {
       },
     );
 
+    it('throws InvalidArgumentError when the total usage time would exceed 130 days', async () => {
+      (
+        dbGetLatestManageableLearningScenarioShare as MockedFunction<
+          typeof dbGetLatestManageableLearningScenarioShare
+        >
+      ).mockResolvedValue({
+        ...currentShare,
+        expiredAt: new Date(Date.now() + 187000 * 60_000),
+      } as never);
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue({
+        ...mockLearningScenario,
+        maxUsageTimeLimit: 187000,
+      } as never);
+
+      await expect(
+        extendLearningScenarioShareExpiration({
+          learningScenarioId,
+          additionalTimeInMinutes: 300,
+          user,
+        }),
+      ).rejects.toThrow('total usage time limit must not exceed 130 days');
+
+      expect(dbExtendSharedLearningScenarioExpiration).not.toHaveBeenCalled();
+    });
+
     it('throws InvalidArgumentError when there is no active share to extend', async () => {
       (
         dbExtendSharedLearningScenarioExpiration as MockedFunction<
@@ -1129,6 +1183,7 @@ describe('learning-scenario-service', () => {
       learningScenarioId,
       userId,
       tokenPointsLimit: 50,
+      maxUsageTimeLimit: 187000,
     };
     const updatedShare = {
       ...currentShare,

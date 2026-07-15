@@ -132,7 +132,7 @@ export async function updateCharacterShareTokenPointsLimitAction({
 }
 
 export async function getCharacterShareDataAction({ characterId }: { characterId: string }) {
-  const { user } = await requireAuth();
+  const { user, federalState } = await requireAuth();
 
   return runServerAction(
     'getCharacterShareDataAction',
@@ -140,6 +140,7 @@ export async function getCharacterShareDataAction({ characterId }: { characterId
   )({
     characterId,
     user,
+    federalState,
   });
 }
 

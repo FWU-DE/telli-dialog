@@ -21,7 +21,7 @@ import {
 } from './custom-chat-share-with-learners-limit-params';
 
 type CustomChatAdjustTokenLimitDialogProps = {
-  trigger: React.ReactElement;
+  trigger: React.ReactElement<{ disabled?: boolean }>;
   sharedChatActive: boolean;
   currentTokenPointsPercentageLimit: number;
   maxAvailablePercentage: number;
@@ -83,19 +83,14 @@ export function CustomChatAdjustTokenLimitDialog({
     }
   }
 
-  const triggerWithState = React.cloneElement(
-    trigger as React.ReactElement<{ disabled?: boolean }>,
-    {
-      disabled:
-        Boolean((trigger.props as { disabled?: boolean }).disabled) ||
-        !sharedChatActive ||
-        !hasHigherOption,
-    },
-  );
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{triggerWithState}</DialogTrigger>
+      <DialogTrigger
+        asChild
+        disabled={Boolean(trigger.props.disabled) || !sharedChatActive || !hasHigherOption}
+      >
+        {trigger}
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader className="space-y-2">
           <DialogTitle>{t('adjust-token-limit-modal-title')}</DialogTitle>

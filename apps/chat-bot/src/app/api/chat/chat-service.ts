@@ -7,7 +7,6 @@ import {
   runAgentLoop,
 } from '@ais-chat/ai-core';
 import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
-import { userHasReachedTokenPointsLimit } from './usage';
 import { getModelAndApiKeyWithResult, getAuxiliaryModel } from '../utils/utils';
 import {
   dbGetConversationAndMessages,
@@ -55,6 +54,7 @@ import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/le
 import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { deepEqual } from '@/utils/object';
 import { resolveAgentNameForTracing } from '../utils/agent-name';
+import { userHasReachedTokenPointsLimit } from '@shared/users/usage';
 
 // Exports for testing
 export { handleRegenerationProcessing, prepareMessageForProcessing };

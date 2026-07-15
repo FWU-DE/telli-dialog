@@ -34,6 +34,7 @@ import { useShareDataPolling, SharePollingData } from '@/hooks/use-share-data-po
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { CustomChatStopShareButton } from './custom-chat-stop-share-button';
 import { CustomChatGraceWindowNote } from './custom-chat-grace-window-note';
+import { CustomChatShareWarning } from './custom-chat-share-warning';
 
 const shareFormSchema = z.object({
   tokenPointsPercentageLimit: z.number(),
@@ -105,6 +106,7 @@ export function CustomChatShareWithLearners({
           manuallyStoppedAt: null,
           tokenPointsLimit: null,
           budgetUsedBySharedChat: 0,
+          tokenLimitExceeded: false,
         },
       })),
     isActive: sharedChatActiveInitial && !!onPollShareData,
@@ -135,6 +137,9 @@ export function CustomChatShareWithLearners({
 
   const currentBudgetUsedBySharedChat =
     polledData?.budgetUsedBySharedChat ?? budgetUsedBySharedChat;
+  const currentTokenLimitExceeded = polledData?.tokenLimitExceeded ?? false;
+  const isShareWarningVisible =
+    shareSessionState === ShareSessionState.EXPIRED_RECENTLY || currentTokenLimitExceeded;
 
   const preselectedUsageTimeLimit =
     maxUsageTimeLimit !== null && usageTimeValuesInMinutes.includes(maxUsageTimeLimit)
@@ -174,6 +179,11 @@ export function CustomChatShareWithLearners({
           <p className="mb-4">
             <RichText>{(tags) => t.rich('description', tags)}</RichText>
           </p>
+          {isShareWarningVisible && (
+            <div className="mb-6 w-full">
+              <CustomChatShareWarning info={t('share-not-possible')} />
+            </div>
+          )}
           {isExtendable ? (
             <>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch w-full">
@@ -193,7 +203,7 @@ export function CustomChatShareWithLearners({
                           />
                         </div>
                       </div>
-                      <div className="mt-3 flex-1 space-y-2">
+                      <div className="mt-4 flex-1 space-y-2">
                         <p className="text-sm">{t('token-points-left')}</p>
                         <TokenPointsLeftRing
                           tokenLimit={(maxBudget * currentTokenPointsPercentageLimit) / 100}
@@ -234,7 +244,7 @@ export function CustomChatShareWithLearners({
                           />
                         </div>
                       </div>
-                      <div className="mt-3 flex-1 space-y-2">
+                      <div className="mt-4 flex-1 space-y-2">
                         <p className="text-sm">{t('usage-time-left')}</p>
                         <CountDownTimer
                           leftTimeInSeconds={sharedChatTimeLeft}
@@ -251,6 +261,7 @@ export function CustomChatShareWithLearners({
                             </Button>
                           }
                           preselectedUsageTimeLimit={preselectedUsageTimeLimit}
+                          currentUsageTimeRemaining={sharedChatTimeLeft}
                           onAddTime={onAddTime}
                           onAddTimeSuccess={(newExpiredAt) => {
                             setExpiredAtOverride(newExpiredAt);

@@ -16,10 +16,12 @@ import {
 } from '@ui/components/dialog';
 import { TimeLimitSelect } from './custom-chat-time-limit-select';
 import { extendTimeValuesInMinutes } from './custom-chat-share-with-learners-limit-params';
+import { MAX_EXTENDABLE_USAGE_TIME_IN_SECONDS } from '@shared/sharing/const';
 
 type CustomChatExtendShareExpirationDialogProps = {
-  trigger: React.ReactElement;
+  trigger: React.ReactElement<{ disabled?: boolean }>;
   preselectedUsageTimeLimit: number;
+  currentUsageTimeRemaining: number;
   onAddTime: (data: { additionalTimeInMinutes: number }) => Promise<{
     success: boolean;
     expiredAt?: Date;
@@ -30,6 +32,7 @@ type CustomChatExtendShareExpirationDialogProps = {
 export function CustomChatExtendShareExpirationDialog({
   trigger,
   preselectedUsageTimeLimit,
+  currentUsageTimeRemaining,
   onAddTime,
   onAddTimeSuccess,
 }: CustomChatExtendShareExpirationDialogProps) {
@@ -43,6 +46,8 @@ export function CustomChatExtendShareExpirationDialog({
   const [additionalTimeInMinutes, setAdditionalTimeInMinutes] = React.useState(45);
   const [selectVersion, setSelectVersion] = React.useState(0);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const isExtendableTimeLimitExceeded =
+    currentUsageTimeRemaining >= MAX_EXTENDABLE_USAGE_TIME_IN_SECONDS;
 
   async function handleAddTime() {
     setIsSubmitting(true);
@@ -70,7 +75,12 @@ export function CustomChatExtendShareExpirationDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger
+        asChild
+        disabled={Boolean(trigger.props.disabled) || isExtendableTimeLimitExceeded}
+      >
+        {trigger}
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader className="space-y-2">
           <DialogTitle>{t('additional-time-modal-title')}</DialogTitle>
@@ -100,7 +110,7 @@ export function CustomChatExtendShareExpirationDialog({
               void handleAddTime();
             }}
           >
-            {t('button-add')}
+            {t('button-additional-time')}
           </Button>
         </DialogFooter>
       </DialogContent>

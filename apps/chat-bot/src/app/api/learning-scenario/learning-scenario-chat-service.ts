@@ -9,11 +9,6 @@ import { NotFoundError } from '@shared/error';
 import { createTextStream } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
-import {
-  sharedChatHasExpired,
-  sharedLearningScenarioChatHasReachedTokenPointsLimit,
-  userHasReachedTokenPointsLimit,
-} from '../chat/usage';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
 import {
   dbGetLearningScenarioByIdAndInviteCode,
@@ -40,6 +35,11 @@ import { RetrievedChunk } from '../rag/types';
 import { resolveAgentNameForTracing } from '../utils/agent-name';
 import { extractUrls } from '../utils/extract-urls';
 import { combineSharedRelatedFiles } from '../shared-chat/shared-chat-file-service';
+import {
+  sharedChatHasExpired,
+  sharedLearningScenarioChatHasReachedTokenPointsLimit,
+  userHasReachedTokenPointsLimit,
+} from '@shared/users/usage';
 
 /**
  * Server Action to send a learning scenario message and stream the response.
@@ -127,7 +127,6 @@ export async function sendLearningScenarioMessage({
   // Get related files and web sources
   const relatedFileEntities = await combineSharedRelatedFiles({
     relatedFileEntities: await dbGetRelatedLearningScenarioFiles(learningScenario.id),
-    messages,
     fileIds,
     inviteCode,
     entityType: 'learningScenario',

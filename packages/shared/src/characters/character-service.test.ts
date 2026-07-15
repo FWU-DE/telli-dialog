@@ -118,6 +118,15 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
   schoolIds: [generateUUID()],
 });
 
+const mockFederalState = (): FederalStateModel =>
+  ({
+    id: generateUUID(),
+    teacherPriceLimit: 500,
+    studentPriceLimit: 100,
+    createdAt: new Date(),
+    mandatoryCertificationTeacher: null,
+  }) as FederalStateModel;
+
 describe('character-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -627,11 +636,24 @@ describe('character-service', () => {
       userId,
       expiredAt: new Date('2026-07-01T12:30:00.000Z'),
     };
+    const currentShare = {
+      id: generateUUID(),
+      characterId,
+      userId,
+      tokenPointsLimit: 50,
+      maxUsageTimeLimit: 60,
+      expiredAt: new Date(Date.now() + 60 * 60_000),
+    };
 
     beforeEach(() => {
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
         mockCharacter as never,
       );
+      (
+        dbGetLatestManageableCharacterShare as MockedFunction<
+          typeof dbGetLatestManageableCharacterShare
+        >
+      ).mockResolvedValue(currentShare as never);
       (
         dbExtendSharedCharacterConversationExpiration as MockedFunction<
           typeof dbExtendSharedCharacterConversationExpiration
@@ -647,8 +669,7 @@ describe('character-service', () => {
       });
 
       expect(dbExtendSharedCharacterConversationExpiration).toHaveBeenCalledWith({
-        characterId,
-        user,
+        share: currentShare,
         additionalTimeInMinutes: 30,
       });
       expect(result).toBe(updatedShare);
@@ -668,6 +689,31 @@ describe('character-service', () => {
         expect(dbExtendSharedCharacterConversationExpiration).not.toHaveBeenCalled();
       },
     );
+
+    it('throws InvalidArgumentError when the total usage time would exceed 130 days', async () => {
+      (
+        dbGetLatestManageableCharacterShare as MockedFunction<
+          typeof dbGetLatestManageableCharacterShare
+        >
+      ).mockResolvedValue({
+        ...currentShare,
+        expiredAt: new Date(Date.now() + 187000 * 60_000),
+      } as never);
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue({
+        ...mockCharacter,
+        maxUsageTimeLimit: 187000,
+      } as never);
+
+      await expect(
+        extendCharacterShareExpiration({
+          characterId,
+          additionalTimeInMinutes: 300,
+          user,
+        }),
+      ).rejects.toThrow('total usage time limit must not exceed 130 days');
+
+      expect(dbExtendSharedCharacterConversationExpiration).not.toHaveBeenCalled();
+    });
 
     it('throws InvalidArgumentError when there is no active share to extend', async () => {
       (
@@ -701,6 +747,7 @@ describe('character-service', () => {
       characterId,
       userId,
       tokenPointsLimit: 50,
+      maxUsageTimeLimit: 187000,
     };
     const updatedShare = {
       ...currentShare,
@@ -1311,13 +1358,18 @@ describe('character-service', () => {
         >
       ).mockResolvedValue(null as never);
 
-      const result = await getActiveCharacterShareData({ characterId, user });
+      const result = await getActiveCharacterShareData({
+        characterId,
+        user,
+        federalState: mockFederalState(),
+      });
 
       expect(result).toEqual({
         expiredAt: null,
         manuallyStoppedAt: null,
         tokenPointsLimit: null,
         budgetUsedBySharedChat: 0,
+        tokenLimitExceeded: false,
       });
       expect(dbGetSharedCharacterChatUsageInCentByCharacterId).not.toHaveBeenCalled();
     });
@@ -1357,7 +1409,11 @@ describe('character-service', () => {
         >
       ).mockResolvedValue(777);
 
-      const result = await getActiveCharacterShareData({ characterId, user });
+      const result = await getActiveCharacterShareData({
+        characterId,
+        user,
+        federalState: mockFederalState(),
+      });
 
       expect(dbGetSharedCharacterChatUsageInCentByCharacterId).toHaveBeenCalledWith({
         characterId,
@@ -1370,6 +1426,7 @@ describe('character-service', () => {
         manuallyStoppedAt: null,
         tokenPointsLimit: 50,
         budgetUsedBySharedChat: 777,
+        tokenLimitExceeded: true,
       });
     });
 
@@ -1381,9 +1438,9 @@ describe('character-service', () => {
         undefined as never,
       );
 
-      await expect(getActiveCharacterShareData({ characterId, user })).rejects.toThrow(
-        NotFoundError,
-      );
+      await expect(
+        getActiveCharacterShareData({ characterId, user, federalState: mockFederalState() }),
+      ).rejects.toThrow(NotFoundError);
     });
   });
 

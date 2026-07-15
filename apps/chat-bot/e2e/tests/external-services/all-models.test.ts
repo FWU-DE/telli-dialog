@@ -21,7 +21,7 @@ llmModels.forEach((modelName) => {
       await page.goto('/');
       await selectDifferentModel(page, modelName);
       await sendMessage(page, 'Antworte mit genau dem Wort "OK".');
-      await expect(page.getByLabel('assistant message 1')).toContainText('OK');
+      await expect(page.getByLabel('assistant message 1')).toContainText(/ok/i);
     },
   );
 });

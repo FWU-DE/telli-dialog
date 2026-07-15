@@ -10,6 +10,7 @@ import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avat
 import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
+import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 import type { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import type { WebSource } from '@shared/db/types';
 import { useRouter } from 'next/navigation';
@@ -44,6 +45,7 @@ export function LearningScenarioView({
   usedBudget,
   maxBudget,
   budgetUsedBySharedChat,
+  isWebSearchAvailable,
 }: {
   learningScenario: LearningScenarioOptionalShareDataModel;
   fileMappings: FileModel[];
@@ -52,6 +54,7 @@ export function LearningScenarioView({
   usedBudget: number;
   maxBudget: number;
   budgetUsedBySharedChat: number;
+  isWebSearchAvailable: boolean;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -212,6 +215,10 @@ export function LearningScenarioView({
         initialLinks={initialLinks}
         onDownloadFile={handleDownloadFile}
       />
+      {learningScenario.isWebSearchEnabled && isWebSearchAvailable && (
+        <CustomChatWebSearch readonly />
+      )}
+
       {(learningScenario.hasLinkAccess || learningScenario.accessLevel === 'community') && (
         <CustomChatCreateSuspensionRequestButton
           entityRef={{ entityType: 'learningScenario', entityId: learningScenario.id }}

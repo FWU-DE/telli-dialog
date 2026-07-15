@@ -193,6 +193,29 @@ valkey-cli PING
 valkey-cli --stats
 ```
 
+#### Testing Valkey cluster mode locally
+
+To test cluster mode locally, use the override file `docker-compose.valkey-cluster.yml` alongside the base file:
+
+```sh
+docker compose \
+  -f devops/docker/docker-compose.local.yml \
+  -f devops/docker/docker-compose.valkey-cluster.yml \
+  up -d --build
+```
+
+This replaces the standalone Valkey node with a single-node cluster.
+A one-shot `valkey-cluster-init` container bootstraps the cluster automatically on first start.
+
+To reset cluster state, stop only the valkey container and remove its volume:
+
+```sh
+docker compose -f devops/docker/docker-compose.local.yml \
+               -f devops/docker/docker-compose.valkey-cluster.yml \
+               down valkey valkey-cluster-init
+docker volume rm ais-chat_valkey_cluster_data
+```
+
 ## Monitoring
 
 To set up the monitoring and tracing stack in local development, use the following docker compose file:

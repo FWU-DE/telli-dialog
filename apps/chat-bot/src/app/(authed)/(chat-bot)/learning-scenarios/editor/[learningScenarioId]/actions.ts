@@ -132,7 +132,7 @@ export async function getLearningScenarioShareDataAction({
 }: {
   learningScenarioId: string;
 }) {
-  const { user } = await requireAuth();
+  const { user, federalState } = await requireAuth();
 
   return runServerAction(
     'getLearningScenarioShareDataAction',
@@ -140,6 +140,7 @@ export async function getLearningScenarioShareDataAction({
   )({
     learningScenarioId,
     user,
+    federalState,
   });
 }
 

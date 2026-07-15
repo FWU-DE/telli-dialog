@@ -9,11 +9,6 @@ import { NotFoundError } from '@shared/error';
 import { createTextStream } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
-import {
-  sharedCharacterChatHasReachedTokenPointsLimit,
-  sharedChatHasExpired,
-  userHasReachedTokenPointsLimit,
-} from '../chat/usage';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
 import {
   dbGetCharacterByIdAndInviteCode,
@@ -40,6 +35,11 @@ import { RetrievedChunk } from '../rag/types';
 import { resolveAgentNameForTracing } from '../utils/agent-name';
 import { extractUrls } from '../utils/extract-urls';
 import { combineSharedRelatedFiles } from '../shared-chat/shared-chat-file-service';
+import {
+  sharedCharacterChatHasReachedTokenPointsLimit,
+  sharedChatHasExpired,
+  userHasReachedTokenPointsLimit,
+} from '@shared/users/usage';
 
 /**
  * Sends a character chat message and streams the response.

@@ -1,4 +1,5 @@
 import { getCharacterForEditView } from '@shared/characters/character-service';
+import { isWebSearchAvailableForFederalState } from '@/app/api/chat/websearch';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebSource } from '@shared/db/types';
@@ -53,6 +54,7 @@ export default async function Page(props: PageProps<'/characters/[characterId]'>
         usedBudget={usedBudget ?? 0}
         maxBudget={maxBudget ?? 500}
         budgetUsedBySharedChat={budgetUsedBySharedChat}
+        isWebSearchAvailable={isWebSearchAvailableForFederalState(federalState)}
       />
     </DefaultPageLayout>
   );
