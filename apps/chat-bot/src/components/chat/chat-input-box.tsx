@@ -10,6 +10,7 @@ import {
 import StopIcon from '../icons/stop';
 import ArrowRightIcon from '../icons/arrow-right';
 import UploadFileButton from './upload-file-button';
+import type { FileUploadResponse } from './upload-file-button';
 import { useToast } from '../common/toast';
 import {
   ChangeEvent,
@@ -35,6 +36,8 @@ export function ChatInputBox({
   customHandleSubmit,
   input,
   enableFileUpload = false,
+  fileUploadFn,
+  getSignedUrlFn,
 }: {
   files?: Map<string, LocalFileState>;
   setFiles?: Dispatch<SetStateAction<Map<string, LocalFileState>>>;
@@ -45,6 +48,8 @@ export function ChatInputBox({
   customHandleSubmit: (e: SyntheticEvent) => Promise<void>;
   input: string;
   enableFileUpload?: boolean;
+  fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
+  getSignedUrlFn?: (fileId: string) => Promise<string>;
 }) {
   const tCommon = useTranslations('common');
   const tFileInteraction = useTranslations('file-interaction');
@@ -146,6 +151,7 @@ export function ChatInputBox({
                 status={file.status}
                 file={file}
                 onDeattachFile={() => handleDeattachFile(localId)}
+                getSignedUrl={getSignedUrlFn}
                 height="large"
                 width="small"
               />
@@ -171,6 +177,7 @@ export function ChatInputBox({
                 setFiles={setFiles}
                 files={files}
                 setFileUploading={setFileUploading}
+                fileUploadFn={fileUploadFn}
               />
             </div>
           )}

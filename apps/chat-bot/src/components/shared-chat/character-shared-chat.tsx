@@ -7,6 +7,7 @@ import useBreakpoints from '../hooks/use-breakpoints';
 import { AssistantIcon } from '../chat/assistant-icon';
 import GenericSharedChat from './generic-shared-chat';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
+import { z } from 'zod';
 
 /**
  * This component is used if a character is shared via invite code.
@@ -36,6 +37,62 @@ export default function CharacterSharedChat({
     className: isBelow[reductionBreakpoint] ? 'mt-0 mx-0' : undefined,
   });
 
+  async function uploadSharedCharacterFile(
+    file: File,
+    sharedSessionId: string,
+  ): Promise<{ fileId: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('inviteCode', inviteCode);
+    formData.append('entityType', 'character');
+    formData.append('entityId', id);
+    formData.append('sharedSessionId', sharedSessionId);
+
+    const response = await fetch('/api/v1/shared-chat/files', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Could not upload file');
+    }
+
+    const json = await response.json();
+    const parsed = z.object({ fileId: z.string() }).parse(JSON.parse(json?.body));
+
+    return {
+      fileId: parsed.fileId,
+    };
+  }
+
+  async function getSignedUrlForSharedCharacterFile(
+    fileId: string,
+    sharedSessionId: string,
+  ): Promise<string> {
+    const response = await fetch('/api/v1/shared-chat/files/signed-url', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        inviteCode,
+        entityType: 'character',
+        entityId: id,
+        fileId,
+        sharedSessionId,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Could not read file');
+    }
+
+    const json = await response.json();
+    const parsed = z.object({ signedUrl: z.string() }).parse(json);
+
+    return parsed.signedUrl;
+  }
+
   return (
     <GenericSharedChat
       headerT={t}
@@ -45,6 +102,8 @@ export default function CharacterSharedChat({
       chat={chat}
       dialogStartMode="derived"
       assistantIcon={assistantIcon}
+      uploadFileFn={uploadSharedCharacterFile}
+      getSignedUrlFn={getSignedUrlForSharedCharacterFile}
     />
   );
 }

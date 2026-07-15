@@ -43,7 +43,6 @@ export function extractUrls({
     assistant?.attachedLinks ?? character?.attachedLinks ?? learningScenario?.attachedLinks,
   );
 
-  // For characters or learning scenarios, just return their attached links
   if (character || learningScenario) {
     return attachedLinks;
   }

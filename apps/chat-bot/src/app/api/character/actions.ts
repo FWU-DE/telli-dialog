@@ -13,11 +13,15 @@ export async function sendCharacterMessageAction({
   inviteCode,
   messages,
   modelId,
+  fileIds,
+  sharedSessionId,
 }: {
   characterId: string;
   inviteCode: string;
   messages: ChatMessage[];
   modelId: string;
+  fileIds?: string[];
+  sharedSessionId?: string;
 }): Promise<SendMessageResult> {
   try {
     await requireValidInviteCode(inviteCode);
@@ -31,6 +35,8 @@ export async function sendCharacterMessageAction({
       inviteCode,
       messages,
       modelId,
+      fileIds,
+      sharedSessionId,
     }),
   );
 }

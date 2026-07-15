@@ -33,6 +33,8 @@ import { createImageAttachmentsForConversation } from '../file-operations/prepro
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { RetrievedChunk } from '../rag/types';
 import { resolveAgentNameForTracing } from '../utils/agent-name';
+import { extractUrls } from '../utils/extract-urls';
+import { combineSharedRelatedFiles } from '../shared-chat/shared-chat-file-service';
 import {
   sharedChatHasExpired,
   sharedLearningScenarioChatHasReachedTokenPointsLimit,
@@ -47,11 +49,15 @@ export async function sendLearningScenarioMessage({
   inviteCode,
   messages,
   modelId,
+  fileIds,
+  sharedSessionId,
 }: {
   learningScenarioId: string;
   inviteCode: string;
   messages: ChatMessage[];
   modelId: string;
+  fileIds?: string[];
+  sharedSessionId?: string;
 }): Promise<SendMessageResult> {
   // Get learning scenario
   const learningScenario = await dbGetLearningScenarioByIdAndInviteCode({
@@ -119,8 +125,18 @@ export async function sendLearningScenarioMessage({
   }
 
   // Get related files and web sources
-  const relatedFileEntities = await dbGetRelatedLearningScenarioFiles(learningScenario.id);
-  const urls = learningScenario.attachedLinks.filter((l) => l !== '');
+  const relatedFileEntities = await combineSharedRelatedFiles({
+    relatedFileEntities: await dbGetRelatedLearningScenarioFiles(learningScenario.id),
+    fileIds,
+    inviteCode,
+    entityType: 'learningScenario',
+    entityId: learningScenarioId,
+    sharedSessionId,
+  });
+  const urls = extractUrls({
+    learningScenario,
+    messages,
+  });
   const { processedUrls } = await ingestWebContent({
     urls,
     federalStateId: teacherUserAndContext.federalState.id,

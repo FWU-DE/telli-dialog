@@ -17,6 +17,7 @@ type DisplayUploadedFileProps = {
   status: FileStatus;
   file?: LocalFileState;
   onDeattachFile?: () => void;
+  getSignedUrl?: (fileId: string) => Promise<string>;
   height?: 'default' | 'large';
   width?: 'default' | 'small';
 };
@@ -26,6 +27,7 @@ export default function DisplayUploadedFile({
   status,
   file,
   onDeattachFile,
+  getSignedUrl,
   height = 'default',
   width = 'default',
 }: DisplayUploadedFileProps) {
@@ -42,12 +44,17 @@ export default function DisplayUploadedFile({
       if (!file) {
         throw new Error('File is undefined');
       }
+
+      if (getSignedUrl !== undefined && file.fileId !== undefined) {
+        return getSignedUrl(file.fileId);
+      }
+
       const signedUrl = await getReadOnlySignedUrlAction({
         key: `message_attachments/${file.fileId}`,
       });
       return signedUrl;
     },
-    enabled: status === 'processed', // Only fetch when status is processed
+    enabled: status === 'processed' && file?.fileId !== undefined, // Only fetch when status is processed and a fileId exists
     staleTime: 5 * 60 * 1000, // 5 minutes - signed URLs are typically valid for longer
     gcTime: 10 * 60 * 1000, // 10 minutes garbage collection time
   });

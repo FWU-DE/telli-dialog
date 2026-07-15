@@ -29,10 +29,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'driz
 import { ToolCall } from '@ais-chat/ai-core/chat/types';
 
 // can be expanded to include other metadata of other file types
-export type FileMetadata = {
-  width?: number;
-  height?: number;
-};
+export type FileMetadata = Record<string, unknown>;
 
 export const userRoleSchema = z.enum(['student', 'teacher']);
 export const userRoleEnum = pgEnum('user_school_role', userRoleSchema.enum);
