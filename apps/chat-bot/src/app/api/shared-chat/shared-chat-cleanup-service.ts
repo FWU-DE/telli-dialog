@@ -19,7 +19,7 @@ type SharedFileCandidate = {
 /**
  * Cleans up files uploaded in shared chats whose linked shared entity expired more than one day ago.
  *
- * The function removes conversation mappings and database rows, then deletes corresponding S3 objects.
+ * The function removes files and chunks from database, then deletes corresponding S3 objects.
  */
 export async function cleanupExpiredSharedChatFiles(): Promise<number> {
   const maybeSharedFiles = await db
@@ -80,6 +80,8 @@ export async function cleanupExpiredSharedChatFiles(): Promise<number> {
     return 0;
   }
 
+  // chunks are deleted via delete cascade on files table
+  await db.delete(fileTable).where(inArray(fileTable.id, fileIdsToDelete));
   await deleteMessageAttachments(fileIdsToDelete);
 
   return fileIdsToDelete.length;
