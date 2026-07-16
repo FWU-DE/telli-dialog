@@ -152,7 +152,6 @@ export async function sendCharacterMessage({
     const builtTools = await buildTools({
       user: teacherUserAndContext,
       characterId: character.id,
-      conversationId: `shared-character:${character.id}`,
       relatedFileEntities,
       attachedLinks: character.attachedLinks,
       sourceUrls: processedUrls,
