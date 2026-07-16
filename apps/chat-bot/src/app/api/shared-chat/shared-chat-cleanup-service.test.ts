@@ -1,10 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const originalEnv = { ...process.env };
 
 const mocks = vi.hoisted(() => ({
   dbSelectMock: vi.fn(),
   dbDeleteMock: vi.fn(),
   addDaysMock: vi.fn(),
   isSharedChatFileMetadataMock: vi.fn(),
+  deleteMessageAttachmentsMock: vi.fn(),
 }));
 
 vi.mock('@shared/db', () => ({
@@ -22,6 +25,10 @@ vi.mock('.', () => ({
   isSharedChatFileMetadata: mocks.isSharedChatFileMetadataMock,
 }));
 
+vi.mock('@shared/files/fileService', () => ({
+  deleteMessageAttachments: mocks.deleteMessageAttachmentsMock,
+}));
+
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.addDaysMock.mockImplementation((date: Date, days: number) => {
@@ -32,6 +39,18 @@ beforeEach(() => {
   mocks.dbDeleteMock.mockReturnValue({
     where: vi.fn(() => Promise.resolve()),
   });
+  mocks.deleteMessageAttachmentsMock.mockResolvedValue(undefined);
+});
+
+beforeAll(() => {
+  process.env.OTC_ACCESS_KEY_ID = 'test-access-key-id';
+  process.env.OTC_SECRET_ACCESS_KEY = 'test-secret-access-key';
+  process.env.OTC_BUCKET_NAME = 'test-bucket-name';
+  process.env.OTC_S3_HOSTNAME = 's3.test.local';
+});
+
+afterAll(() => {
+  process.env = originalEnv;
 });
 
 describe('cleanupExpiredSharedChatFiles', () => {
