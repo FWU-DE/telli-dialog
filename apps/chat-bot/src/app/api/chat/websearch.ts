@@ -8,6 +8,8 @@ import {
 import type { WebSearchResult } from '@shared/db/schema';
 import { logError } from '@shared/logging';
 import { dbInsertConversationToolCallUsage } from '@shared/db/functions/token-usage';
+import { dbUpdateTokenUsageByCharacterChatId } from '@shared/db/functions/character';
+import { dbUpdateTokenUsageBySharedLearningScenarioId } from '@shared/db/functions/learning-scenario';
 import { dbGetToolCallCostByName } from '@shared/db/functions/tool-call';
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { UserAndContext } from '@/auth/types';
@@ -47,9 +49,13 @@ export async function isWebSearchEnabled({
 
 async function recordWebSearchUsage({
   conversationId,
+  characterId,
+  learningScenarioId,
   userId,
 }: {
-  conversationId: string;
+  conversationId?: string;
+  characterId?: string;
+  learningScenarioId?: string;
   userId: string;
 }) {
   let costsInCent = 0;
@@ -61,12 +67,34 @@ async function recordWebSearchUsage({
   }
 
   try {
-    await dbInsertConversationToolCallUsage({
-      toolCallName: 'web_search',
-      conversationId,
-      userId,
-      costsInCent,
-    });
+    if (conversationId) {
+      await dbInsertConversationToolCallUsage({
+        toolCallName: 'web_search',
+        conversationId,
+        userId,
+        costsInCent,
+      });
+    } else if (characterId) {
+      await dbUpdateTokenUsageByCharacterChatId({
+        toolCallName: 'web_search',
+        characterId,
+        userId,
+        costsInCent,
+        completionTokens: 0,
+        promptTokens: 0,
+        modelId: null,
+      });
+    } else if (learningScenarioId) {
+      await dbUpdateTokenUsageBySharedLearningScenarioId({
+        toolCallName: 'web_search',
+        learningScenarioId,
+        userId,
+        costsInCent,
+        completionTokens: 0,
+        promptTokens: 0,
+        modelId: null,
+      });
+    }
   } catch (error) {
     logError('Error recording web search usage billing.', error);
   }
@@ -167,15 +195,23 @@ Beispiele:
  * Search results can be used in the rag context of the system prompt.
  *
  * @param query The search query string.
+ * @param conversationId Optional conversation ID.
+ * @param characterId Optional character ID.
+ * @param learningScenarioId Optional learning scenario ID.
+ * @param userId The user ID.
  * @returns An array of text search results from the Linkup API.
  */
 export async function searchWeb({
   query,
   conversationId,
+  characterId,
+  learningScenarioId,
   userId,
 }: {
   query: string;
-  conversationId: string;
+  conversationId?: string;
+  characterId?: string;
+  learningScenarioId?: string;
   userId: string;
 }): Promise<WebSearchResult[]> {
   if (!env.linkupApiKey) {
@@ -196,6 +232,8 @@ export async function searchWeb({
 
     await recordWebSearchUsage({
       conversationId,
+      characterId,
+      learningScenarioId,
       userId,
     });
 
@@ -220,10 +258,11 @@ export async function searchWeb({
  * @param messages - The conversation message history used to determine search necessity.
  * @param user - The authenticated user and their context, including federal state feature toggles.
  * @param characterId - Optional character ID
+ * @param learningScenarioId - Optional learning scenario ID
  * @param assistantId - Optional assistant ID
  * @param modelId - The ID of the auxiliary model used for the search classification.
  * @param apiKeyId - The API key ID of the auxiliary model.
- * @param conversationId - The conversation ID.
+ * @param conversationId - Optional conversation ID.
  * @returns An array of web search results, or an empty array if search is disabled or not needed.
  */
 export async function runWebSearchPipeline({
@@ -243,7 +282,7 @@ export async function runWebSearchPipeline({
   assistantId?: string;
   modelId: string;
   apiKeyId: string;
-  conversationId: string;
+  conversationId?: string;
 }): Promise<WebSearchResult[]> {
   const enabled = await isWebSearchEnabled({
     user,
@@ -256,5 +295,11 @@ export async function runWebSearchPipeline({
   const decision = await isWebSearchNeeded({ messages, modelId, apiKeyId });
   if (!decision.needed) return [];
 
-  return searchWeb({ query: decision.query, conversationId, userId: user.id });
+  return searchWeb({
+    query: decision.query,
+    conversationId,
+    characterId,
+    learningScenarioId,
+    userId: user.id,
+  });
 }

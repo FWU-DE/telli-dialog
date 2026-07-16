@@ -11,7 +11,7 @@ type BuildToolsParams = {
   characterId?: string;
   learningScenarioId?: string;
   assistantId?: string;
-  conversationId: string;
+  conversationId?: string;
   relatedFileEntities: FileModel[];
   sourceUrls?: string[];
   attachedLinks?: string[];

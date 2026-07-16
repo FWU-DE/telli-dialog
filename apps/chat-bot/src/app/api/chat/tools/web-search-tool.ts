@@ -62,6 +62,8 @@ export async function buildWebSearchTool({
     const results = await searchWeb({
       query,
       conversationId,
+      characterId,
+      learningScenarioId,
       userId: user.id,
     });
 
