@@ -71,6 +71,7 @@ export function loadSharedChat(inviteCode: string): PersistedSharedChat | null {
 
   try {
     const raw = storage.getItem(sharedChatStorageKey(inviteCode));
+    if (raw === null) return null;
     const parsed = JSON.parse(raw ?? '');
     const result = persistedSharedChatSchema.safeParse(parsed);
 
