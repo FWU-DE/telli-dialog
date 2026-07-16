@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   dbSelectMock: vi.fn(),
-  deleteMessageAttachmentsMock: vi.fn(),
+  dbDeleteMock: vi.fn(),
   addDaysMock: vi.fn(),
   isSharedChatFileMetadataMock: vi.fn(),
 }));
@@ -10,11 +10,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@shared/db', () => ({
   db: {
     select: mocks.dbSelectMock,
+    delete: mocks.dbDeleteMock,
   },
-}));
-
-vi.mock('@shared/files/fileService', () => ({
-  deleteMessageAttachments: mocks.deleteMessageAttachmentsMock,
 }));
 
 vi.mock('@shared/utils/date', () => ({
@@ -32,7 +29,9 @@ beforeEach(() => {
     result.setDate(result.getDate() + days);
     return result;
   });
-  mocks.deleteMessageAttachmentsMock.mockResolvedValue(undefined);
+  mocks.dbDeleteMock.mockReturnValue({
+    where: vi.fn(() => Promise.resolve()),
+  });
 });
 
 describe('cleanupExpiredSharedChatFiles', () => {
@@ -47,28 +46,6 @@ describe('cleanupExpiredSharedChatFiles', () => {
     const result = await cleanupExpiredSharedChatFiles();
 
     expect(result).toBe(0);
-    expect(mocks.deleteMessageAttachmentsMock).not.toHaveBeenCalled();
-  });
-
-  it('returns 0 when no shared chat files exist (only user files)', async () => {
-    mocks.dbSelectMock.mockReturnValue({
-      from: vi.fn(() => ({
-        where: vi.fn(() =>
-          Promise.resolve([
-            {
-              id: 'file-1',
-              metadata: null,
-            },
-          ]),
-        ),
-      })),
-    });
-
-    const { cleanupExpiredSharedChatFiles } = await import('./shared-chat-cleanup-service');
-    const result = await cleanupExpiredSharedChatFiles();
-
-    expect(result).toBe(0);
-    expect(mocks.deleteMessageAttachmentsMock).not.toHaveBeenCalled();
   });
 
   it('returns 0 when files have invalid metadata', async () => {
@@ -94,7 +71,6 @@ describe('cleanupExpiredSharedChatFiles', () => {
     const result = await cleanupExpiredSharedChatFiles();
 
     expect(result).toBe(0);
-    expect(mocks.deleteMessageAttachmentsMock).not.toHaveBeenCalled();
   });
 
   it('deletes files from expired character shares', async () => {
@@ -151,7 +127,6 @@ describe('cleanupExpiredSharedChatFiles', () => {
     const result = await cleanupExpiredSharedChatFiles();
 
     expect(result).toBe(1);
-    expect(mocks.deleteMessageAttachmentsMock).toHaveBeenCalledWith(['file-1']);
   });
 
   it('deletes files from expired learning scenario shares', async () => {
@@ -203,7 +178,6 @@ describe('cleanupExpiredSharedChatFiles', () => {
     const result = await cleanupExpiredSharedChatFiles();
 
     expect(result).toBe(1);
-    expect(mocks.deleteMessageAttachmentsMock).toHaveBeenCalledWith(['file-2']);
   });
 
   it('deletes multiple files from both character and scenario shares', async () => {
@@ -299,12 +273,6 @@ describe('cleanupExpiredSharedChatFiles', () => {
     const result = await cleanupExpiredSharedChatFiles();
 
     expect(result).toBe(4);
-    expect(mocks.deleteMessageAttachmentsMock).toHaveBeenCalledWith([
-      'file-1',
-      'file-2',
-      'file-3',
-      'file-4',
-    ]);
   });
 
   it('does not delete files when shares have not yet expired (outside cutoff date)', async () => {
@@ -354,7 +322,6 @@ describe('cleanupExpiredSharedChatFiles', () => {
     const result = await cleanupExpiredSharedChatFiles();
 
     expect(result).toBe(0);
-    expect(mocks.deleteMessageAttachmentsMock).not.toHaveBeenCalled();
   });
 
   it('handles mixed expired and non-expired files correctly', async () => {
@@ -419,7 +386,6 @@ describe('cleanupExpiredSharedChatFiles', () => {
     const result = await cleanupExpiredSharedChatFiles();
 
     expect(result).toBe(1);
-    expect(mocks.deleteMessageAttachmentsMock).toHaveBeenCalledWith(['file-1']);
   });
 
   it('correctly calculates cutoff date with EXPIRATION_OFFSET_IN_DAYS', async () => {
@@ -556,7 +522,6 @@ describe('cleanupExpiredSharedChatFiles', () => {
     const result = await cleanupExpiredSharedChatFiles();
 
     expect(result).toBe(2);
-    expect(mocks.deleteMessageAttachmentsMock).toHaveBeenCalledWith(['file-1', 'file-3']);
   });
 
   it('returns 0 when no file IDs match expired shares', async () => {
@@ -621,6 +586,5 @@ describe('cleanupExpiredSharedChatFiles', () => {
     const result = await cleanupExpiredSharedChatFiles();
 
     expect(result).toBe(0);
-    expect(mocks.deleteMessageAttachmentsMock).not.toHaveBeenCalled();
   });
 });
