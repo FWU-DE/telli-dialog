@@ -94,6 +94,8 @@ async function recordWebSearchUsage({
         promptTokens: 0,
         modelId: null,
       });
+    } else {
+      logError('Missing billing context for web search usage tracking');
     }
   } catch (error) {
     logError('Error recording web search usage billing.', error);

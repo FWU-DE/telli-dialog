@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
+  dbGetAssistantByIdMock: vi.fn(),
+  dbGetCharacterByIdMock: vi.fn(),
+  dbGetLearningScenarioByIdMock: vi.fn(),
   dbInsertConversationToolCallUsageMock: vi.fn(),
   dbUpdateTokenUsageByCharacterChatIdMock: vi.fn(),
   dbUpdateTokenUsageBySharedLearningScenarioIdMock: vi.fn(),
@@ -15,6 +18,21 @@ vi.mock('./env', () => ({
   },
 }));
 
+vi.mock('@shared/db/functions/assistants', () => ({
+  dbGetAssistantById: mocks.dbGetAssistantByIdMock,
+}));
+
+vi.mock('@shared/db/functions/character', () => ({
+  dbGetCharacterById: mocks.dbGetCharacterByIdMock,
+  dbUpdateTokenUsageByCharacterChatId: mocks.dbUpdateTokenUsageByCharacterChatIdMock,
+}));
+
+vi.mock('@shared/db/functions/learning-scenario', () => ({
+  dbGetLearningScenarioById: mocks.dbGetLearningScenarioByIdMock,
+  dbUpdateTokenUsageBySharedLearningScenarioId:
+    mocks.dbUpdateTokenUsageBySharedLearningScenarioIdMock,
+}));
+
 vi.mock('linkup-sdk', () => ({
   LinkupClient: vi.fn(function LinkupClient(this: unknown) {
     return {
@@ -25,15 +43,6 @@ vi.mock('linkup-sdk', () => ({
 
 vi.mock('@shared/db/functions/token-usage', () => ({
   dbInsertConversationToolCallUsage: mocks.dbInsertConversationToolCallUsageMock,
-}));
-
-vi.mock('@shared/db/functions/character', () => ({
-  dbUpdateTokenUsageByCharacterChatId: mocks.dbUpdateTokenUsageByCharacterChatIdMock,
-}));
-
-vi.mock('@shared/db/functions/learning-scenario', () => ({
-  dbUpdateTokenUsageBySharedLearningScenarioId:
-    mocks.dbUpdateTokenUsageBySharedLearningScenarioIdMock,
 }));
 
 vi.mock('@shared/db/functions/tool-call', () => ({
