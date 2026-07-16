@@ -51,11 +51,11 @@ jobs:
           RABBITMQ_DEFAULT_PASS: password
           RABBITMQ_DEFAULT_USER: user
       xberg:
-        image: ghcr.io/xberg-io/kreuzberg:4.9.9-core
+        image: ghcr.io/xberg-io/xberg:1.0.0-rc.29-core
         ports:
           - 8000:8000
         env:
-          KREUZBERG_MAX_UPLOAD_SIZE_MB: '50'
+          XBERG_MAX_UPLOAD_SIZE_MB: '50'
         options: >-
           --health-cmd "curl -f http://localhost:8000/health"
           --health-interval 30s

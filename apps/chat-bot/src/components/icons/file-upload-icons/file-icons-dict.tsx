@@ -25,6 +25,7 @@ export const FILE_ICONS_DICT: Record<SupportedDocumentExtension, FileIconConfig>
   html: { Icon: FileHtmlIcon, fillColor: '#9532C0' },
   md: { Icon: FileMdIcon, fillColor: '#000000' },
   ods: { Icon: FileXlsIcon, fillColor: '#107C42' },
+  odp: { Icon: FilePptIcon, fillColor: '#C0391B' },
   odt: { Icon: FileDocIcon, fillColor: '#1A59C0' },
   pdf: { Icon: FilePdfIcon, fillColor: '#B30B00' },
   pptx: { Icon: FilePptIcon, fillColor: '#C0391B' },
