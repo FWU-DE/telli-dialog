@@ -49,8 +49,10 @@ describe('buildVertexProviderConfigs', () => {
     ] as never);
 
     expect(configs).toHaveLength(2);
+    expect(configs[0]?.keys[0]?.name).toBe('vertex-project-id-europe-west3-2014fc08');
     expect(configs[0]?.keys[0]?.vertex_key_config?.auth_credentials).toBe('');
     expect(configs[0]?.keys[0]?.models).toEqual(['claude-sonnet-4-6']);
+    expect(configs[1]?.keys[0]?.name).not.toBe('vertex-project-id-europe-west3-2014fc08');
     expect(configs[1]?.keys[0]?.vertex_key_config?.auth_credentials).toBe(
       JSON.stringify({
         client_email: 'test@example.com',

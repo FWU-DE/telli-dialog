@@ -38,6 +38,10 @@ function getVertexAuthCredentials(groupedModels: LlmModel[]): unknown {
   )?.setting.authCredentials;
 }
 
+function getVertexUniqueValue(projectId: string, authCredentials: string): string {
+  return authCredentials ? `${projectId}:${authCredentials}` : projectId;
+}
+
 export function buildAzureProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] {
   return buildSingleKeyProviderConfigs({
     provider: 'azure',
@@ -140,7 +144,8 @@ export function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderC
     models,
     getGroupKey: (setting) => {
       if (setting.provider !== 'google') return undefined;
-      return `${setting.projectId}:${setting.location}:${stringifyAuthCredentials(setting.authCredentials)}`;
+      const authCredentials = stringifyAuthCredentials(setting.authCredentials);
+      return `${setting.projectId}:${setting.location}:${authCredentials}`;
     },
     buildKey: (setting, groupedModels) => {
       if (setting.provider !== 'google') throw new BifrostProviderSyncError();
@@ -151,7 +156,10 @@ export function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderC
       return buildBifrostKey({
         provider: 'vertex',
         readableValue: `${setting.projectId}-${setting.location}`,
-        uniqueValue: `${setting.projectId}:${stringifyAuthCredentials(authCredentials)}`,
+        uniqueValue: getVertexUniqueValue(
+          setting.projectId,
+          stringifyAuthCredentials(authCredentials),
+        ),
         value: '',
         groupedModels,
         extra: {
