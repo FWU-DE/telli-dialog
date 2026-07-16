@@ -14,6 +14,18 @@ function stripAnthropicPrefix(modelName: string): string {
   return modelName.replace(/^anthropic\//, '');
 }
 
+function stringifyAuthCredentials(authCredentials: unknown): string {
+  if (typeof authCredentials === 'string') return authCredentials;
+  if (authCredentials === undefined) return '';
+  return JSON.stringify(authCredentials);
+}
+
+function getVertexAuthCredentials(groupedModels: LlmModel[]): unknown {
+  return groupedModels.find(
+    (model) => model.setting.provider === 'google' && model.setting.authCredentials !== undefined,
+  )?.setting.authCredentials;
+}
+
 export function buildAzureProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] {
   return buildSingleKeyProviderConfigs({
     provider: 'azure',
@@ -123,6 +135,7 @@ export function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderC
       const modelNames = [
         ...new Set(groupedModels.map((model) => stripAnthropicPrefix(model.name))),
       ].sort();
+      const authCredentials = getVertexAuthCredentials(groupedModels);
       return buildBifrostKey({
         provider: 'vertex',
         readableValue: `${setting.projectId}-${setting.location}`,
@@ -133,9 +146,7 @@ export function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderC
           vertex_key_config: {
             project_id: setting.projectId,
             region: setting.location,
-            // Empty credentials make Bifrost use Application Default Credentials.
-            // Mount GOOGLE_APPLICATION_CREDENTIALS into the Bifrost container/pod when needed.
-            auth_credentials: '',
+            auth_credentials: stringifyAuthCredentials(authCredentials),
           },
           models: modelNames,
         },
