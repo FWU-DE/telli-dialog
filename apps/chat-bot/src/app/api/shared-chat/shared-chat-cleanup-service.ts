@@ -1,12 +1,11 @@
-import { db } from '@shared/db';
 import {
-  fileTable,
-  sharedCharacterConversation,
-  sharedLearningScenarioTable,
-} from '@shared/db/schema';
+  dbDeleteFilesByIds,
+  dbGetExpiredCharacterShares,
+  dbGetExpiredLearningScenarioShares,
+  dbGetSharedChatFileCandidates,
+} from '@shared/db/functions/shared-chat-files';
 import { deleteMessageAttachments } from '@shared/files/fileService';
 import { addDays } from '@shared/utils/date';
-import { and, inArray, isNotNull, isNull, lt } from 'drizzle-orm';
 import { isSharedChatFileMetadata, SharedChatFileMetadata } from '.';
 
 const EXPIRATION_OFFSET_IN_DAYS = -1;
@@ -22,10 +21,7 @@ type SharedFileCandidate = {
  * The function removes files and chunks from database, then deletes corresponding S3 objects.
  */
 export async function cleanupExpiredSharedChatFiles(): Promise<number> {
-  const maybeSharedFiles = await db
-    .select({ id: fileTable.id, metadata: fileTable.metadata })
-    .from(fileTable)
-    .where(and(isNull(fileTable.userId), isNotNull(fileTable.metadata)));
+  const maybeSharedFiles = await dbGetSharedChatFileCandidates();
 
   const sharedFiles: SharedFileCandidate[] = maybeSharedFiles
     .map((file) => {
@@ -59,8 +55,8 @@ export async function cleanupExpiredSharedChatFiles(): Promise<number> {
   ];
 
   const [expiredCharacterShares, expiredLearningScenarioShares] = await Promise.all([
-    getExpiredCharacterShares(characterInviteCodes, cutoffDate),
-    getExpiredLearningScenarioShares(learningScenarioInviteCodes, cutoffDate),
+    dbGetExpiredCharacterShares(characterInviteCodes, cutoffDate),
+    dbGetExpiredLearningScenarioShares(learningScenarioInviteCodes, cutoffDate),
   ]);
 
   const expiredCharacterKeys = new Set(
@@ -80,8 +76,7 @@ export async function cleanupExpiredSharedChatFiles(): Promise<number> {
     return 0;
   }
 
-  // chunks are deleted via delete cascade on files table
-  await db.delete(fileTable).where(inArray(fileTable.id, fileIdsToDelete));
+  await dbDeleteFilesByIds(fileIdsToDelete);
   await deleteMessageAttachments(fileIdsToDelete);
 
   return fileIdsToDelete.length;
@@ -103,41 +98,4 @@ function getExpiredSharedChatFileIds(
       return expiredLearningScenarioKeys.has(key);
     })
     .map((file) => file.id);
-}
-
-async function getExpiredCharacterShares(characterInviteCodes: string[], cutoffDate: Date) {
-  if (characterInviteCodes.length === 0) return [];
-
-  return db
-    .select({
-      inviteCode: sharedCharacterConversation.inviteCode,
-      entityId: sharedCharacterConversation.characterId,
-    })
-    .from(sharedCharacterConversation)
-    .where(
-      and(
-        inArray(sharedCharacterConversation.inviteCode, characterInviteCodes),
-        lt(sharedCharacterConversation.expiredAt, cutoffDate),
-      ),
-    );
-}
-
-async function getExpiredLearningScenarioShares(
-  learningScenarioInviteCodes: string[],
-  cutoffDate: Date,
-) {
-  if (learningScenarioInviteCodes.length === 0) return [];
-
-  return db
-    .select({
-      inviteCode: sharedLearningScenarioTable.inviteCode,
-      entityId: sharedLearningScenarioTable.learningScenarioId,
-    })
-    .from(sharedLearningScenarioTable)
-    .where(
-      and(
-        inArray(sharedLearningScenarioTable.inviteCode, learningScenarioInviteCodes),
-        lt(sharedLearningScenarioTable.expiredAt, cutoffDate),
-      ),
-    );
 }
