@@ -6,7 +6,8 @@ import { SharedCharacterProxy } from './utils/shared-character-proxy';
 // There must be an existing character that can be shared.
 // When the load test is executed, you have to pass credentials
 // of the owner of this character in order to share it.
-const existingCharacterTemplateId = 'd573e344-8119-46ca-bf9e-371800cf2782';
+const existingCharacterId = __ENV.LOADTEST_CHARACTER_ID || 'd573e344-8119-46ca-bf9e-371800cf2782';
+const loadTestVus = Number(__ENV.LOADTEST_VUS || 50);
 
 export const options = {
   cloud: {
@@ -20,7 +21,7 @@ export const options = {
       startTime: '5s',
       gracefulStop: '5s',
       iterations: 200,
-      vus: 50,
+      vus: loadTestVus,
       options: {
         browser: {
           type: 'chromium',
@@ -31,6 +32,28 @@ export const options = {
 };
 
 const sharedCharacterProxy = new SharedCharacterProxy();
+
+type K6SummaryData = {
+  metrics?: {
+    streaming_response_time?: {
+      values?: {
+        min?: number;
+        max?: number;
+        avg?: number;
+      };
+    };
+    checks?: {
+      values?: {
+        fails?: number;
+      };
+    };
+  };
+};
+
+function formatSeconds(valueInMs?: number) {
+  if (typeof valueInMs !== 'number' || Number.isNaN(valueInMs)) return '-';
+  return (valueInMs / 1000).toFixed(2);
+}
 
 type TestSetupParams = {
   characterId: string;
@@ -44,7 +67,7 @@ export function setup(): TestSetupParams {
 
     // Share existing character
 
-    const character = sharedCharacterProxy.getCharacter(existingCharacterTemplateId);
+    const character = sharedCharacterProxy.getCharacter(existingCharacterId);
     const { inviteCode } = sharedCharacterProxy.shareCharacter({
       characterId: character.id,
       userId: character.userId,
@@ -52,7 +75,7 @@ export function setup(): TestSetupParams {
       usageTimeLimitMinutes: 60,
     });
 
-    return { characterId: existingCharacterTemplateId, inviteCode, userId: character.userId };
+    return { characterId: existingCharacterId, inviteCode, userId: character.userId };
   } catch (error) {
     console.error('Error in setup():', error);
     exec.test.abort('Setup failed');
@@ -85,4 +108,24 @@ export default async function main(sharedCharacterData: TestSetupParams) {
     await sharedCharacterPage.sendMessage('Wie lange hast du gelebt?');
     await sharedCharacterPage.sendMessage('Wo bist du aufgewachsen?');
   });
+}
+
+export function handleSummary(data: K6SummaryData) {
+  const streamingResponseTime = data?.metrics?.streaming_response_time?.values;
+  const checks = data?.metrics?.checks?.values;
+  const fails = checks?.fails ?? 0;
+
+  const report = [
+    '',
+    'Streaming response time',
+    '',
+    '| VUs | Min [s] | Max [s] | Avg [s] | Fehler |',
+    '| --- | --- | --- | --- | --- |',
+    `| ${loadTestVus} | ${formatSeconds(streamingResponseTime?.min)} | ${formatSeconds(streamingResponseTime?.max)} | ${formatSeconds(streamingResponseTime?.avg)} | ${fails > 0 ? `ja, ${fails}` : 'nein'} |`,
+    '',
+  ].join('\n');
+
+  return {
+    stdout: report,
+  };
 }
