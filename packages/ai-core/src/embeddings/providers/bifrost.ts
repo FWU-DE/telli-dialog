@@ -52,6 +52,7 @@ export function constructBifrostEmbeddingGenerationFn(model: AiModel): Embedding
     const response = await client.embeddings.create({
       model: modelName,
       input: texts,
+      encoding_format: 'float',
     });
 
     const embeddings = response.data.map((element) => element.embedding);

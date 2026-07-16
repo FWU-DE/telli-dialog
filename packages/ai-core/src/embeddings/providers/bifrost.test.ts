@@ -60,6 +60,7 @@ describe('constructBifrostEmbeddingGenerationFn', () => {
     expect(createMock).toHaveBeenCalledWith({
       model: 'openai/embedding-model',
       input: ['hello'],
+      encoding_format: 'float',
     });
     expect(result).toEqual({
       embeddings: [[0.1, 0.2, 0.3]],
