@@ -4,6 +4,7 @@ import { useLearningScenarioChat } from '@/hooks/use-chat-hooks';
 import { useTranslations } from 'next-intl';
 import { LearningScenarioWithShareDataModel } from '@shared/db/schema';
 import GenericSharedChat from './generic-shared-chat';
+import { loadSharedChat } from '@/utils/shared-chat-storage';
 import { z } from 'zod';
 
 export default function LearningScenarioSharedChat({
@@ -13,10 +14,17 @@ export default function LearningScenarioSharedChat({
   const t = useTranslations('learning-scenarios.shared');
   const { id, inviteCode, modelId } = sharedSchoolChat;
 
+  const initialMessages =
+    loadSharedChat(inviteCode)?.messages.map((message) => ({
+      id: message.id,
+      role: message.role,
+      content: message.content,
+    })) ?? [];
+
   const chat = useLearningScenarioChat({
     learningScenarioId: id,
     inviteCode,
-    initialMessages: [],
+    initialMessages,
     modelId: modelId ?? undefined,
   });
 

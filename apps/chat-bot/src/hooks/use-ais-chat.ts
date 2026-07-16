@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { decodeChatStreamEvent, readTextStream } from '@/utils/streaming';
 import type { WebSearchResult } from '@shared/db/schema';
 import {
@@ -11,11 +11,6 @@ import {
   type ChatStatus,
   type SendMessageResult,
 } from '@/types/chat';
-import {
-  clearSharedChatMessages,
-  loadSharedChatMessages,
-  saveSharedChatMessages,
-} from '@/utils/shared-chat-storage';
 import { logError } from '@shared/logging';
 
 // Re-export for consumers
@@ -39,12 +34,6 @@ export type UseChatOptions = {
   onError?: (error: Error) => void;
   onFinish?: (message: ChatMessage) => void;
   onMessageCreated?: (messageId: string) => void;
-  /**
-   * When set, the visitor's invite code used to scope client-side message
-   * persistence in sessionStorage. Enables messages to survive page reloads
-   * on shared-chat pages where the server does not persist visitor history.
-   */
-  persistenceInviteCode?: string;
 };
 
 export type UseChatReturn = {
@@ -63,7 +52,6 @@ export type UseChatReturn = {
   error: Error | null;
   reload: () => Promise<void>;
   stop: () => void;
-  clearClientPersistedMessages: () => void;
 };
 
 function lastUserMessage(messages: ChatMessage[]): ChatMessage | null {
@@ -86,33 +74,15 @@ export function useAisChat({
   onError,
   onFinish,
   onMessageCreated,
-  persistenceInviteCode,
 }: UseChatOptions): UseChatReturn {
-  // Lazy initializer: when persistence is enabled, prefer a valid stored
-  // history; fall back to the prop-driven initial messages otherwise. Lazy
-  // form ensures the storage read runs only on the first client render.
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    if (persistenceInviteCode !== undefined) {
-      const restored = loadSharedChatMessages(persistenceInviteCode);
-      if (restored !== null) return restored;
-    }
-    return initialMessages;
-  });
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<ChatStatus>('ready');
   const [error, setError] = useState<Error | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   // Seed from the actual initial state (which may have been restored from
-  // storage), so reload() works after a page refresh.
+  // storage by the caller), so reload() works after a page refresh.
   const lastUserMessageRef = useRef<ChatMessage | null>(lastUserMessage(messages));
-
-  // Mirror message changes into sessionStorage when persistence is enabled.
-  useEffect(() => {
-    if (persistenceInviteCode === undefined) return;
-    // Do not persist messages during streaming
-    if (status === 'streaming') return;
-    saveSharedChatMessages(persistenceInviteCode, messages);
-  }, [messages, persistenceInviteCode, status]);
 
   const isLoading = status === 'submitted' || status === 'streaming';
 
@@ -305,14 +275,6 @@ export function useAisChat({
     abortControllerRef.current?.abort();
   }, []);
 
-  /**
-   * Removes any persisted client-side messages for the configured invite code.
-   */
-  const clearClientPersistedMessages = useCallback(() => {
-    if (persistenceInviteCode === undefined) return;
-    clearSharedChatMessages(persistenceInviteCode);
-  }, [persistenceInviteCode]);
-
   return {
     messages,
     setMessages,
@@ -326,6 +288,5 @@ export function useAisChat({
     error,
     reload,
     stop,
-    clearClientPersistedMessages,
   };
 }
