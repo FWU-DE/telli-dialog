@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   generateTextWithBillingMock: vi.fn(),
 }));
 
-vi.mock('@/env', () => ({
+vi.mock('./env', () => ({
   env: {
     linkupApiKey: 'linkup-api-key',
   },

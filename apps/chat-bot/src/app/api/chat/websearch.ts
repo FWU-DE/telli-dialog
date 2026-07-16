@@ -1,6 +1,6 @@
 import { LinkupClient } from 'linkup-sdk';
 import { generateTextWithBilling, type Message } from '@ais-chat/ai-core';
-import { env } from '@/env';
+import { env } from './env';
 import {
   WEBSEARCH_RESULT_LENGTH_LIMIT,
   WEBSEARCH_RESULTS_LIMIT,
