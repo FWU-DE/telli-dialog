@@ -81,10 +81,14 @@ describe('combineSharedRelatedFiles', () => {
       entityType: 'character',
       entityId: 'character-1',
       sharedSessionId: 'session-1',
+      userMessageId: 'user-message-1',
     });
 
     expect(mocks.dbGetFilesInIdsMock).toHaveBeenCalledWith(['uploaded-file']);
-    expect(result).toEqual([relatedFile, uploadedFile]);
+    expect(result).toEqual([
+      relatedFile,
+      { ...uploadedFile, conversationMessageId: 'user-message-1' },
+    ]);
   });
 
   it('returns related files combined with uploaded files when fileIds are provided', async () => {
@@ -98,9 +102,13 @@ describe('combineSharedRelatedFiles', () => {
       entityType: 'character',
       entityId: 'character-1',
       sharedSessionId: 'session-1',
+      userMessageId: 'user-message-1',
     });
 
-    expect(result).toEqual([relatedFile, uploadedFile]);
+    expect(result).toEqual([
+      relatedFile,
+      { ...uploadedFile, conversationMessageId: 'user-message-1' },
+    ]);
   });
 
   it('throws when uploaded file belongs to another shared session', async () => {
