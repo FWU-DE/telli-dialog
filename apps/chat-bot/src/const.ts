@@ -1,19 +1,20 @@
 export const SUPPORTED_DOCUMENTS_EXTENSIONS = [
-  'docx',
-  'pdf',
-  'md',
-  'txt',
-  'pptx',
   'csv',
-  'xlsx',
+  'docx',
+  'htm',
+  'html',
+  'md',
+  'odp',
   'ods',
   'odt',
+  'pdf',
+  'pptx',
   'tex',
-  'html',
-  'htm',
+  'txt',
+  'xlsx',
 ] as const;
 
-export const SUPPORTED_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'svg'] as const;
+export const SUPPORTED_IMAGE_EXTENSIONS = ['jpeg', 'jpg', 'png', 'svg', 'webp'] as const;
 
 export const SUPPORTED_FILE_EXTENSIONS = [
   ...SUPPORTED_DOCUMENTS_EXTENSIONS,

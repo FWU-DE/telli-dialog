@@ -98,13 +98,13 @@ services:
       start_period: 40s
 
   xberg:
-    image: ghcr.io/xberg-io/kreuzberg:4.9.9-core
+    image: ghcr.io/xberg-io/xberg:1.0.0-rc.29-core
     environment:
-      KREUZBERG_MAX_UPLOAD_SIZE_MB: '50'
+      XBERG_MAX_UPLOAD_SIZE_MB: '50'
     ports:
       - '8000:8000'
     volumes:
-      - xberg_cache:/app/.kreuzberg
+      - xberg_cache:/app/.xberg
     restart: unless-stopped
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']

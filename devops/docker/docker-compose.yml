@@ -107,16 +107,16 @@ services:
       retries: 3
       start_period: 40s
 
-  # Kreuzberg text extraction service
+  # Xberg text extraction service
   xberg:
-    image: ghcr.io/xberg-io/kreuzberg:4.9.9-core
+    image: ghcr.io/xberg-io/xberg:1.0.0-rc.29-core
     restart: unless-stopped
     environment:
-      KREUZBERG_MAX_UPLOAD_SIZE_MB: '50'
+      XBERG_MAX_UPLOAD_SIZE_MB: '50'
     ports:
       - '8000:8000'
     volumes:
-      - xberg_cache:/app/.kreuzberg
+      - xberg_cache:/app/.xberg
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://127.0.0.1:8000/health']
       interval: 30s
@@ -228,7 +228,7 @@ services:
       CRAWL4AI_URL: http://crawl4ai:11235
       CRAWL4AI_API_TOKEN: ais-chat-crawl4ai-token
 
-      # Kreuzberg text extraction
+      # Xberg text extraction
       XBERG_URL: http://xberg:8000
 
       # S3 Object Storage for file uploads and image generation
