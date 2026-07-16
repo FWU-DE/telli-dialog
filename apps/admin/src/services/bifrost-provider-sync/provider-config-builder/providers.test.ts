@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildVertexProviderConfigs } from './providers';
 
 describe('buildVertexProviderConfigs', () => {
-  it('stringifies object authCredentials for Bifrost', () => {
+  it('groups vertex models by authCredentials', () => {
     const configs = buildVertexProviderConfigs([
       {
         id: 'model-0',
@@ -48,11 +48,15 @@ describe('buildVertexProviderConfigs', () => {
       },
     ] as never);
 
-    expect(configs[0]?.keys[0]?.vertex_key_config?.auth_credentials).toBe(
+    expect(configs).toHaveLength(2);
+    expect(configs[0]?.keys[0]?.vertex_key_config?.auth_credentials).toBe('');
+    expect(configs[0]?.keys[0]?.models).toEqual(['claude-sonnet-4-6']);
+    expect(configs[1]?.keys[0]?.vertex_key_config?.auth_credentials).toBe(
       JSON.stringify({
-        type: 'service_account',
         client_email: 'test@example.com',
+        type: 'service_account',
       }),
     );
+    expect(configs[1]?.keys[0]?.models).toEqual(['gpt-5']);
   });
 });

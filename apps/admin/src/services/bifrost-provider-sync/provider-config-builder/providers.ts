@@ -17,7 +17,19 @@ function stripAnthropicPrefix(modelName: string): string {
 function stringifyAuthCredentials(authCredentials: unknown): string {
   if (typeof authCredentials === 'string') return authCredentials;
   if (authCredentials === undefined) return '';
-  return JSON.stringify(authCredentials);
+  return stableStringify(authCredentials);
+}
+
+function stableStringify(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
+  if (value && typeof value === 'object') {
+    return `{${Object.entries(value)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, entryValue]) => `${JSON.stringify(key)}:${stableStringify(entryValue)}`)
+      .join(',')}}`;
+  }
+
+  return JSON.stringify(value);
 }
 
 function getVertexAuthCredentials(groupedModels: LlmModel[]): unknown {
@@ -128,7 +140,7 @@ export function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderC
     models,
     getGroupKey: (setting) => {
       if (setting.provider !== 'google') return undefined;
-      return `${setting.projectId}:${setting.location}`;
+      return `${setting.projectId}:${setting.location}:${stringifyAuthCredentials(setting.authCredentials)}`;
     },
     buildKey: (setting, groupedModels) => {
       if (setting.provider !== 'google') throw new BifrostProviderSyncError();
@@ -139,7 +151,7 @@ export function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderC
       return buildBifrostKey({
         provider: 'vertex',
         readableValue: `${setting.projectId}-${setting.location}`,
-        uniqueValue: setting.projectId,
+        uniqueValue: `${setting.projectId}:${stringifyAuthCredentials(authCredentials)}`,
         value: '',
         groupedModels,
         extra: {
