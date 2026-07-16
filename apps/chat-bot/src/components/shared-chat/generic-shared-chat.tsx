@@ -29,6 +29,7 @@ import {
   loadSharedChatFileMapping,
   saveSharedChatFileMapping,
 } from '@/utils/shared-chat-storage';
+import { cnanoid } from '@shared/random/randomService';
 
 type ShareSessionInput = Parameters<typeof calculateShareSessionState>[0];
 type Translator = ReturnType<typeof useTranslations>;
@@ -116,7 +117,9 @@ export default function GenericSharedChat({
   const chatActive = shareSessionState === ShareSessionState.RUNNING;
 
   const [explicitDialogStarted, setExplicitDialogStarted] = useState(false);
-  const [sharedSessionId] = useState(() => getOrCreateSharedChatSessionId(inviteCode));
+  const [sharedSessionId, setSharedSessionId] = useState(() =>
+    getOrCreateSharedChatSessionId(inviteCode),
+  );
   const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
   const [pendingFileMapping, setPendingFileMapping] = useState<Map<string, PendingFileModel[]>>(
     () => {
@@ -225,7 +228,11 @@ export default function GenericSharedChat({
       }
     }
 
+    const nextSharedSessionId = cnanoid();
+
+    setFiles(new Map());
     setPendingFileMapping(new Map());
+    setSharedSessionId(nextSharedSessionId);
     clearSharedChatFileMapping(inviteCode);
     clearSharedChatSessionId(inviteCode);
     clearClientPersistedMessages();
