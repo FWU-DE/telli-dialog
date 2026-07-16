@@ -33,28 +33,6 @@ export const options = {
 
 const sharedCharacterProxy = new SharedCharacterProxy();
 
-type K6SummaryData = {
-  metrics?: {
-    streaming_response_time?: {
-      values?: {
-        min?: number;
-        max?: number;
-        avg?: number;
-      };
-    };
-    checks?: {
-      values?: {
-        fails?: number;
-      };
-    };
-  };
-};
-
-function formatSeconds(valueInMs?: number) {
-  if (typeof valueInMs !== 'number' || Number.isNaN(valueInMs)) return '-';
-  return (valueInMs / 1000).toFixed(2);
-}
-
 type TestSetupParams = {
   characterId: string;
   inviteCode: string;
@@ -108,24 +86,4 @@ export default async function main(sharedCharacterData: TestSetupParams) {
     await sharedCharacterPage.sendMessage('Wie lange hast du gelebt?');
     await sharedCharacterPage.sendMessage('Wo bist du aufgewachsen?');
   });
-}
-
-export function handleSummary(data: K6SummaryData) {
-  const streamingResponseTime = data?.metrics?.streaming_response_time?.values;
-  const checks = data?.metrics?.checks?.values;
-  const fails = checks?.fails ?? 0;
-
-  const report = [
-    '',
-    'Streaming response time',
-    '',
-    '| VUs | Min [s] | Max [s] | Avg [s] | Fehler |',
-    '| --- | --- | --- | --- | --- |',
-    `| ${loadTestVus} | ${formatSeconds(streamingResponseTime?.min)} | ${formatSeconds(streamingResponseTime?.max)} | ${formatSeconds(streamingResponseTime?.avg)} | ${fails > 0 ? `ja, ${fails}` : 'nein'} |`,
-    '',
-  ].join('\n');
-
-  return {
-    stdout: report,
-  };
 }
