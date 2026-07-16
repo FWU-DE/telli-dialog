@@ -3,6 +3,8 @@ import { SharedSessionId, verify } from '.';
 import { verifySharedSessionIdIsNotEmpty } from './shared-chat-verify';
 import { FileModel } from '@shared/db/schema';
 
+type SharedRelatedFile = FileModel & { conversationMessageId?: string };
+
 /**
  * Combines entity-related files with files uploaded for the current shared chat turn.
  * Uploaded files are associated with the most recent user message so downstream
@@ -15,6 +17,7 @@ export async function combineSharedRelatedFiles({
   entityType,
   entityId,
   sharedSessionId,
+  userMessageId,
 }: {
   relatedFileEntities: FileModel[];
   fileIds?: string[];
@@ -22,7 +25,8 @@ export async function combineSharedRelatedFiles({
   entityType: 'character' | 'learningScenario';
   entityId: string;
   sharedSessionId?: SharedSessionId;
-}): Promise<FileModel[]> {
+  userMessageId?: string;
+}): Promise<SharedRelatedFile[]> {
   if (fileIds === undefined || fileIds.length === 0) {
     return relatedFileEntities;
   }
@@ -39,5 +43,10 @@ export async function combineSharedRelatedFiles({
     sharedSessionId,
   });
 
-  return [...relatedFileEntities, ...uploadedFiles];
+  const uploadedFilesWithMessageId: SharedRelatedFile[] = uploadedFiles.map((file) => ({
+    ...file,
+    conversationMessageId: userMessageId,
+  }));
+
+  return [...relatedFileEntities, ...uploadedFilesWithMessageId];
 }

@@ -23,6 +23,7 @@ import {
   convertToAiCoreMessages,
   determineImageAttachmentTypeForModel,
   enrichMessagesWithImageData,
+  getMostRecentUserMessage,
   limitChatHistory,
 } from '../chat/utils';
 import { retrieveChunks } from '../rag/rag-service';
@@ -132,6 +133,7 @@ export async function sendLearningScenarioMessage({
     entityType: 'learningScenario',
     entityId: learningScenarioId,
     sharedSessionId,
+    userMessageId: getMostRecentUserMessage(messages)?.id,
   });
   const urls = extractUrls({
     learningScenario,

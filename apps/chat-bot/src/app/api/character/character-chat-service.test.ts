@@ -20,6 +20,7 @@ const mocks = vi.hoisted(() => ({
   convertToAiCoreMessagesMock: vi.fn(),
   determineImageAttachmentTypeForModelMock: vi.fn(),
   enrichMessagesWithImageDataMock: vi.fn(),
+  getMostRecentUserMessageMock: vi.fn(),
   limitChatHistoryMock: vi.fn(),
   retrieveChunksMock: vi.fn(),
   logErrorMock: vi.fn(),
@@ -85,6 +86,7 @@ vi.mock('../chat/utils', () => ({
   convertToAiCoreMessages: mocks.convertToAiCoreMessagesMock,
   determineImageAttachmentTypeForModel: mocks.determineImageAttachmentTypeForModelMock,
   enrichMessagesWithImageData: mocks.enrichMessagesWithImageDataMock,
+  getMostRecentUserMessage: mocks.getMostRecentUserMessageMock,
   limitChatHistory: mocks.limitChatHistoryMock,
 }));
 
@@ -185,6 +187,9 @@ beforeEach(() => {
   mocks.limitChatHistoryMock.mockImplementation(
     (incomingMessages: ChatMessage[]) => incomingMessages,
   );
+  mocks.getMostRecentUserMessageMock.mockImplementation((incomingMessages: ChatMessage[]) =>
+    incomingMessages.filter((m) => m.role === 'user').at(-1),
+  );
   mocks.determineImageAttachmentTypeForModelMock.mockReturnValue('url');
   mocks.createImageAttachmentsForConversationMock.mockResolvedValue([]);
   mocks.enrichMessagesWithImageDataMock.mockImplementation(
@@ -251,6 +256,7 @@ describe('sendCharacterMessage', () => {
       entityType: 'character',
       entityId: character.id,
       sharedSessionId: 'session-1',
+      userMessageId: 'message-1',
     });
   });
 });
