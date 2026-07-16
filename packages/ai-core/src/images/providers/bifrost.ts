@@ -60,10 +60,16 @@ export function constructBifrostImageGenerationFn(model: AiModel): ImageGenerati
       throw new AiGenerationError('No image data received from Bifrost');
     }
 
+    const data = result.data
+      .map((item) => item.b64_json)
+      .filter((item): item is string => item !== undefined);
+
+    if (data.length === 0) {
+      throw new AiGenerationError('No image data received from Bifrost');
+    }
+
     return {
-      data: result.data
-        .map((item) => item.b64_json)
-        .filter((item): item is string => item !== undefined),
+      data,
       output_format: result.output_format,
       usage: result.usage
         ? {

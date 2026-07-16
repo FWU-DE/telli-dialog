@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { constructBifrostImageGenerationFn } from './bifrost';
 import type { AiModel } from '../types';
+import { AiGenerationError } from '../../errors';
 
 const { generateMock, openAiConstructorMock, instrumentOpenAiClientMock, MockOpenAI } = vi.hoisted(
   () => {
@@ -108,6 +109,37 @@ describe('constructBifrostImageGenerationFn', () => {
 
     expect(generateMock).toHaveBeenCalledWith(
       expect.objectContaining({ model: 'vertex/claude-3-5-sonnet-v2@20241022' }),
+    );
+  });
+
+  it('throws when Bifrost returns no image data after mapping', async () => {
+    generateMock.mockResolvedValue({
+      data: [{ b64_json: undefined }],
+      output_format: 'png',
+      usage: {
+        input_tokens: 4,
+        output_tokens: 5,
+        output_tokens_details: {
+          text_tokens: 2,
+          image_tokens: 3,
+        },
+      },
+    });
+
+    const model = {
+      id: 'model-bifrost-image',
+      name: 'image-model',
+      provider: 'bifrost',
+      setting: { provider: 'azure', apiKey: 'unused', baseUrl: 'unused' },
+    } as AiModel;
+
+    const generateImage = constructBifrostImageGenerationFn(model);
+
+    await expect(generateImage({ prompt: 'a cat', model: model.name })).rejects.toBeInstanceOf(
+      AiGenerationError,
+    );
+    await expect(generateImage({ prompt: 'a cat', model: model.name })).rejects.toThrow(
+      'No image data received from Bifrost',
     );
   });
 });
