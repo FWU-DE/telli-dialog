@@ -6,7 +6,8 @@ import { SharedCharacterProxy } from './utils/shared-character-proxy';
 // There must be an existing character that can be shared.
 // When the load test is executed, you have to pass credentials
 // of the owner of this character in order to share it.
-const existingCharacterTemplateId = 'd573e344-8119-46ca-bf9e-371800cf2782';
+const existingCharacterTemplateId =
+  __ENV.LOADTEST_CHARACTER_ID || 'd573e344-8119-46ca-bf9e-371800cf2782';
 
 export const options = {
   cloud: {
@@ -20,7 +21,7 @@ export const options = {
       startTime: '5s',
       gracefulStop: '5s',
       iterations: 200,
-      vus: 50,
+      vus: Number(__ENV.LOADTEST_VUS || 50),
       options: {
         browser: {
           type: 'chromium',

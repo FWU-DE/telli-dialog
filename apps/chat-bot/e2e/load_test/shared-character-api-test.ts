@@ -10,7 +10,8 @@ import { SharedCharacterProxy } from './utils/shared-character-proxy';
  * Before running this test, ensure that there is an existing character that can be shared.
  * The character will be shared during the setup phase and unshared during teardown.
  */
-const existingCharacterTemplateId = 'd573e344-8119-46ca-bf9e-371800cf2782';
+const existingCharacterTemplateId =
+  __ENV.LOADTEST_CHARACTER_ID || 'd573e344-8119-46ca-bf9e-371800cf2782';
 
 export const options = {
   cloud: {
@@ -34,7 +35,7 @@ export const options = {
       startTime: '5s',
       gracefulStop: '30s',
       iterations: 120,
-      vus: 10,
+      vus: Number(__ENV.LOADTEST_VUS || 10),
       maxDuration: '1m',
     },
   },
