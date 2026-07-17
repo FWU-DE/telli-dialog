@@ -1,8 +1,16 @@
+import { z } from 'zod';
 import { env } from '@/env';
 
-interface XbergResult {
-  content: string;
-}
+const xbergResultSchema = z.object({
+  content: z.string(),
+});
+
+// The xberg service historically returned a top-level array of results, and now
+// returns an object with a `results` key. Support both, normalizing to the new shape.
+const xbergResponseSchema = z.union([
+  z.array(xbergResultSchema).transform((results) => ({ results })),
+  z.object({ results: z.array(xbergResultSchema) }),
+]);
 
 /**
  * Extracts text from a file as Markdown using the xberg-io extraction service.
@@ -32,8 +40,10 @@ export async function fileExtractionXberg({
       throw new Error(`Xberg request failed with status ${response.status} for file: ${filename}`);
     }
 
-    const results = (await response.json()) as XbergResult[];
-    const markdown = results?.[0]?.content?.trim() ?? '';
+    const json = await response.json();
+    const { results } = xbergResponseSchema.parse(json);
+
+    const markdown = results[0]?.content?.trim() ?? '';
 
     if (!markdown) {
       throw new Error(`Xberg returned no content for file: ${filename}`);
