@@ -1,12 +1,11 @@
-import { LlmModel } from '@ais-chat/api-database';
-import { logWarning } from '@shared/logging';
+import { LlmModel } from '../../schema';
 import {
   buildAzureProviderConfigs,
   buildIonosProviderConfigs,
   buildOpenAiProviderConfigs,
   buildVertexProviderConfigs,
 } from './providers';
-import { BifrostProvider, BifrostProviderConfig } from '../types';
+import { BifrostProvider, BifrostProviderConfig, BifrostProviderSyncLogger } from '../types';
 
 /**
  * Converts API DB model rows into Bifrost provider/key configuration.
@@ -15,12 +14,15 @@ import { BifrostProvider, BifrostProviderConfig } from '../types';
  * from `model.setting.provider`. This lets admins switch runtime routing without rewriting the
  * provider-specific settings JSON.
  */
-export function buildBifrostProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] {
+export function buildBifrostProviderConfigs(
+  models: LlmModel[],
+  logger?: BifrostProviderSyncLogger,
+): BifrostProviderConfig[] {
   const providerModels = new Map<BifrostProvider, LlmModel[]>();
   for (const model of models) {
     const provider = getBifrostProviderFromSettings(model.setting.provider);
     if (!provider) {
-      logWarning('Skipping unsupported provider for Bifrost sync', {
+      logger?.warning?.('Skipping unsupported provider for Bifrost sync', {
         provider: model.provider,
         settingProvider: model.setting.provider,
         modelId: model.id,
@@ -36,6 +38,7 @@ export function buildBifrostProviderConfigs(models: LlmModel[]): BifrostProvider
     [...providerModels.entries()].flatMap(([provider, providerModels]) =>
       buildBifrostProviderConfig(provider, providerModels),
     ),
+    logger,
   );
 }
 
@@ -52,6 +55,7 @@ function buildBifrostProviderConfig(
 
 function mergeBifrostProviderConfigs(
   providerConfigs: BifrostProviderConfig[],
+  logger?: BifrostProviderSyncLogger,
 ): BifrostProviderConfig[] {
   const mergedProviderConfigs = new Map<BifrostProvider, BifrostProviderConfig>();
 
@@ -66,7 +70,7 @@ function mergeBifrostProviderConfigs(
       JSON.stringify(existingConfig.network_config) !==
       JSON.stringify(providerConfig.network_config)
     ) {
-      logWarning('Multiple network configs found while syncing Bifrost provider', {
+      logger?.warning?.('Multiple network configs found while syncing Bifrost provider', {
         provider: providerConfig.provider,
       });
     }

@@ -158,6 +158,8 @@ LLM_GPT5NANO_BASE_URL=...
 
 Without these, placeholder values are used and the models will not work until real keys are configured.
 
+The seeded models are routed through Bifrost. Start the local Docker services before seeding and keep `BIFROST_ADMIN_URL` configured so the seed can sync provider keys to Bifrost.
+
 ```sh
 pnpm db:seed
 ```

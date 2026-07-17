@@ -1,11 +1,10 @@
-import { env } from '@/consts/env';
-import { BifrostProviderSyncError } from '@/types/bifrost-provider-sync-error';
-import { logError } from '@shared/logging';
+import { BifrostProviderSyncError } from './error';
 import {
   BifrostKey,
   BifrostProvider,
   BifrostProviderConfig,
   BifrostProviderResponse,
+  BifrostProviderSyncLogger,
 } from './types';
 
 /**
@@ -14,41 +13,76 @@ import {
  * Bifrost updates keys by ID, while our desired state is keyed by deterministic names.
  * Therefore we list keys once and use that list to decide whether to create or update each key.
  */
-export async function syncBifrostProvider(
-  bifrostAdminUrl: string,
-  providerConfig: BifrostProviderConfig,
-): Promise<void> {
-  await ensureBifrostProvider(bifrostAdminUrl, providerConfig);
-  const existingKeysBeforeSync = await listBifrostProviderKeys(
+export async function syncBifrostProvider({
+  bifrostAdminUrl,
+  bifrostManagementApiKey,
+  providerConfig,
+  logger,
+}: {
+  bifrostAdminUrl: string;
+  bifrostManagementApiKey?: string;
+  providerConfig: BifrostProviderConfig;
+  logger?: BifrostProviderSyncLogger;
+}): Promise<void> {
+  await ensureBifrostProvider({
     bifrostAdminUrl,
-    providerConfig.provider,
-  );
+    bifrostManagementApiKey,
+    providerConfig,
+    logger,
+  });
+  const existingKeysBeforeSync = await listBifrostProviderKeys({
+    bifrostAdminUrl,
+    bifrostManagementApiKey,
+    provider: providerConfig.provider,
+    logger,
+  });
   await Promise.all(
     providerConfig.keys.map((key) =>
-      syncBifrostProviderKey(bifrostAdminUrl, providerConfig.provider, key, existingKeysBeforeSync),
+      syncBifrostProviderKey({
+        bifrostAdminUrl,
+        bifrostManagementApiKey,
+        provider: providerConfig.provider,
+        key,
+        existingKeys: existingKeysBeforeSync,
+        logger,
+      }),
     ),
   );
 }
 
-async function ensureBifrostProvider(
-  bifrostAdminUrl: string,
-  providerConfig: BifrostProviderConfig,
-): Promise<void> {
-  const providerResponse = await bifrostFetch(
+async function ensureBifrostProvider({
+  bifrostAdminUrl,
+  bifrostManagementApiKey,
+  providerConfig,
+  logger,
+}: {
+  bifrostAdminUrl: string;
+  bifrostManagementApiKey?: string;
+  providerConfig: BifrostProviderConfig;
+  logger?: BifrostProviderSyncLogger;
+}): Promise<void> {
+  const providerResponse = await bifrostFetch({
     bifrostAdminUrl,
-    `/api/providers/${providerConfig.provider}`,
-    {
+    bifrostManagementApiKey,
+    path: `/api/providers/${providerConfig.provider}`,
+    init: {
       method: 'GET',
     },
-  );
+  });
 
   if (providerResponse.status === 404) {
     await assertBifrostResponse(
-      bifrostFetch(bifrostAdminUrl, '/api/providers', {
-        method: 'POST',
-        body: JSON.stringify(getAddProviderPayload(providerConfig)),
+      bifrostFetch({
+        bifrostAdminUrl,
+        bifrostManagementApiKey,
+        path: '/api/providers',
+        init: {
+          method: 'POST',
+          body: JSON.stringify(getAddProviderPayload(providerConfig)),
+        },
       }),
       providerConfig.provider,
+      logger,
     );
     return;
   }
@@ -56,53 +90,94 @@ async function ensureBifrostProvider(
   const existingProviderResponse = await assertBifrostResponse(
     Promise.resolve(providerResponse),
     providerConfig.provider,
+    logger,
   );
   const existingProvider = (await existingProviderResponse.json()) as BifrostProviderResponse;
 
   await assertBifrostResponse(
-    bifrostFetch(bifrostAdminUrl, `/api/providers/${providerConfig.provider}`, {
-      method: 'PUT',
-      body: JSON.stringify(getUpdateProviderPayload(providerConfig, existingProvider)),
+    bifrostFetch({
+      bifrostAdminUrl,
+      bifrostManagementApiKey,
+      path: `/api/providers/${providerConfig.provider}`,
+      init: {
+        method: 'PUT',
+        body: JSON.stringify(getUpdateProviderPayload(providerConfig, existingProvider)),
+      },
     }),
     providerConfig.provider,
+    logger,
   );
 }
 
-async function syncBifrostProviderKey(
-  bifrostAdminUrl: string,
-  provider: BifrostProvider,
-  key: BifrostKey,
-  existingKeys: BifrostKey[],
-): Promise<void> {
+async function syncBifrostProviderKey({
+  bifrostAdminUrl,
+  bifrostManagementApiKey,
+  provider,
+  key,
+  existingKeys,
+  logger,
+}: {
+  bifrostAdminUrl: string;
+  bifrostManagementApiKey?: string;
+  provider: BifrostProvider;
+  key: BifrostKey;
+  existingKeys: BifrostKey[];
+  logger?: BifrostProviderSyncLogger;
+}): Promise<void> {
   const existingKey = existingKeys.find((existingKey) => existingKey.name === key.name);
 
   if (existingKey?.id) {
     await assertBifrostResponse(
-      bifrostFetch(bifrostAdminUrl, `/api/providers/${provider}/keys/${existingKey.id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ ...existingKey, ...key, id: existingKey.id }),
+      bifrostFetch({
+        bifrostAdminUrl,
+        bifrostManagementApiKey,
+        path: `/api/providers/${provider}/keys/${existingKey.id}`,
+        init: {
+          method: 'PUT',
+          body: JSON.stringify({ ...existingKey, ...key, id: existingKey.id }),
+        },
       }),
       provider,
+      logger,
     );
     return;
   }
 
   await assertBifrostResponse(
-    bifrostFetch(bifrostAdminUrl, `/api/providers/${provider}/keys`, {
-      method: 'POST',
-      body: JSON.stringify(key),
+    bifrostFetch({
+      bifrostAdminUrl,
+      bifrostManagementApiKey,
+      path: `/api/providers/${provider}/keys`,
+      init: {
+        method: 'POST',
+        body: JSON.stringify(key),
+      },
     }),
     provider,
+    logger,
   );
 }
 
-async function listBifrostProviderKeys(
-  bifrostAdminUrl: string,
-  provider: BifrostProvider,
-): Promise<BifrostKey[]> {
+async function listBifrostProviderKeys({
+  bifrostAdminUrl,
+  bifrostManagementApiKey,
+  provider,
+  logger,
+}: {
+  bifrostAdminUrl: string;
+  bifrostManagementApiKey?: string;
+  provider: BifrostProvider;
+  logger?: BifrostProviderSyncLogger;
+}): Promise<BifrostKey[]> {
   const keysResponse = await assertBifrostResponse(
-    bifrostFetch(bifrostAdminUrl, `/api/providers/${provider}/keys`, { method: 'GET' }),
+    bifrostFetch({
+      bifrostAdminUrl,
+      bifrostManagementApiKey,
+      path: `/api/providers/${provider}/keys`,
+      init: { method: 'GET' },
+    }),
     provider,
+    logger,
   );
   const keys = (await keysResponse.json()) as { keys?: BifrostKey[] };
   return keys.keys ?? [];
@@ -148,18 +223,22 @@ function getUpdateProviderPayload(
   };
 }
 
-async function bifrostFetch(
-  bifrostAdminUrl: string,
-  path: string,
-  init: RequestInit,
-): Promise<Response> {
+async function bifrostFetch({
+  bifrostAdminUrl,
+  bifrostManagementApiKey,
+  path,
+  init,
+}: {
+  bifrostAdminUrl: string;
+  bifrostManagementApiKey?: string;
+  path: string;
+  init: RequestInit;
+}): Promise<Response> {
   return fetch(new URL(path, bifrostAdminUrl), {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      ...(env.bifrostManagementApiKey
-        ? { Authorization: `Bearer ${env.bifrostManagementApiKey}` }
-        : {}),
+      ...(bifrostManagementApiKey ? { Authorization: `Bearer ${bifrostManagementApiKey}` } : {}),
       ...init.headers,
     },
   });
@@ -168,12 +247,13 @@ async function bifrostFetch(
 async function assertBifrostResponse(
   responsePromise: Promise<Response>,
   provider: BifrostProvider,
+  logger?: BifrostProviderSyncLogger,
 ): Promise<Response> {
   const response = await responsePromise;
   if (response.ok) return response;
 
   const responseText = await response.text();
-  logError('Bifrost provider sync request failed', undefined, {
+  logger?.error?.('Bifrost provider sync request failed', undefined, {
     provider,
     status: response.status,
     response: responseText,

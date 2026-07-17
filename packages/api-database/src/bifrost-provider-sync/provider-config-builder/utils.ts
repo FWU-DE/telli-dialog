@@ -1,5 +1,5 @@
-import { LlmModel } from '@ais-chat/api-database';
-import { BifrostProviderSyncError } from '@/types/bifrost-provider-sync-error';
+import { LlmModel } from '../../schema';
+import { BifrostProviderSyncError } from '../error';
 import { buildKeyName } from '../key-name';
 import {
   BifrostKey,

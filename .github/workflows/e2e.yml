@@ -123,6 +123,27 @@ jobs:
         run: |
           node devops/docker/mock-llm/server.mjs > /tmp/mock-llm.log 2>&1 &
 
+      - name: Start Bifrost container
+        run: |
+          docker run \
+            --name bifrost \
+            --add-host=host.docker.internal:host-gateway \
+            -p 8089:8089 \
+            -e APP_HOST=0.0.0.0 \
+            -e APP_PORT=8089 \
+            maximhq/bifrost:v1.6.3 > /tmp/bifrost.log 2>&1 &
+          timeout=60
+          elapsed=0
+          until wget -qO- http://localhost:8089/api/providers > /dev/null 2>&1; do
+            if [ $elapsed -ge $timeout ]; then
+              echo "Bifrost did not become ready within ${timeout}s"
+              exit 1
+            fi
+            echo "$(date) - waiting for Bifrost to be ready"
+            sleep 1
+            elapsed=$((elapsed + 1))
+          done
+
       - name: Install dependencies
         run: pnpm install
 
@@ -154,6 +175,7 @@ jobs:
           done
         env:
           PORT: 3002
+          BIFROST_BASE_URL: http://localhost:8089/openai/v1
 
       - name: Seed ais-chat-api database
         # db:seed will print the generated API KEY on the console
@@ -162,6 +184,7 @@ jobs:
           pnpm --filter @ais-chat/api-database db:seed | tee /tmp/out.txt
           grep -E '^DE_[A-Z0-9_]*_API_KEY=' /tmp/out.txt >> "$GITHUB_ENV"
         env:
+          BIFROST_ADMIN_URL: http://localhost:8089
           LLM_IONOS_API_KEY: ${{ secrets.LLM_IONOS_API_KEY }}
           LLM_IONOS_BASE_URL: ${{ secrets.LLM_IONOS_BASE_URL }}
           LLM_GPT4OMINI_API_KEY: ${{ secrets.LLM_GPT4OMINI_API_KEY }}
@@ -171,7 +194,7 @@ jobs:
           LLM_GPT5MINI_API_KEY: ${{ secrets.LLM_GPT5MINI_API_KEY }}
           LLM_GPT5MINI_BASE_URL: ${{ secrets.LLM_GPT5MINI_BASE_URL }}
           LLM_MOCK_API_KEY: mock-api-key
-          LLM_MOCK_BASE_URL: http://localhost:6556/openai/deployments/mock-echo?api-version=2025-04-01-preview
+          LLM_MOCK_BASE_URL: http://host.docker.internal:6556/openai/deployments/mock-echo?api-version=2025-04-01-preview
 
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @ais-chat/shared db:migrate && pnpm --filter @ais-chat/shared db:seed
@@ -197,6 +220,7 @@ jobs:
         env:
           NODE_ENV: test
           LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
+          BIFROST_BASE_URL: http://localhost:8089/openai/v1
 
       - name: Run E2E tests (app)
         run: pnpm --filter ais-chat-app e2e
@@ -250,6 +274,12 @@ jobs:
         run: |
           echo "=== mock-llm logs ==="
           cat /tmp/mock-llm.log || true
+
+      - name: Print Bifrost logs
+        if: always()
+        run: |
+          echo "=== Bifrost logs ==="
+          cat /tmp/bifrost.log || true
 
       - name: Print keycloak logs
         if: always()

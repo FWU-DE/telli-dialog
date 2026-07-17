@@ -11,6 +11,7 @@ import {
   projectTable,
 } from './schema';
 import { eq } from 'drizzle-orm';
+import { normalizeSeedModelsForBifrost, syncSeedModelsToBifrost } from './seed-bifrost';
 
 const ORGANIZATION_ID = 'cfeb82c6-396a-4c2d-954b-53e77acbbe7e';
 const PROJECT_ID = 'DE-TEST';
@@ -54,7 +55,7 @@ const mockLlm: LlmInsertModel = {
 // All prices are rough estimates, probably outdated and just for mocking purposes
 // Static ids are used to ensure that the models are not created again
 // the ids are taken from the staging/production database for interoperability to be able to connect to local AIS.chat api or staging
-const DEFAULT_MODELS: LlmInsertModel[] = [
+const DEFAULT_MODELS: LlmInsertModel[] = normalizeSeedModelsForBifrost([
   // Mock LLMs
   {
     ...mockLlm,
@@ -206,7 +207,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     },
     supportedImageFormats: ['jpg', 'jpeg', 'png', 'webp'],
   },
-];
+]);
 
 export async function seedDatabase() {
   console.log('Starting database seeding...');
@@ -279,8 +280,29 @@ export async function seedDatabase() {
     }
 
     // 5. Create/update API key to model mapping
+    const seededModels = [];
     for (const model of DEFAULT_MODELS) {
-      await db.insert(llmModelTable).values(model).onConflictDoNothing().returning();
+      const [seededModel] = await db
+        .insert(llmModelTable)
+        .values(model)
+        .onConflictDoUpdate({
+          target: llmModelTable.id,
+          set: {
+            provider: model.provider,
+            name: model.name,
+            displayName: model.displayName,
+            description: model.description,
+            setting: model.setting,
+            priceMetadata: model.priceMetadata,
+            supportedImageFormats: model.supportedImageFormats,
+            additionalParameters: model.additionalParameters,
+            isNew: model.isNew,
+            isDeleted: model.isDeleted,
+          },
+        })
+        .returning();
+
+      if (seededModel) seededModels.push(seededModel);
 
       await db
         .insert(llmModelApiKeyMappingTable)
@@ -290,6 +312,10 @@ export async function seedDatabase() {
         })
         .onConflictDoNothing();
     }
+
+    const modelsToSync =
+      seededModels.length > 0 ? seededModels : await db.select().from(llmModelTable);
+    await syncSeedModelsToBifrost(modelsToSync);
 
     // Print API key in a format parseable by CI (e.g. DE_TEST_API_KEY=sk_...)
     const apiKeyEnvVar = `${PROJECT_ID.replace('-', '_')}_API_KEY`;
