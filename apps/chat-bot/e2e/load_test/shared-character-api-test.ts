@@ -10,7 +10,8 @@ import { SharedCharacterProxy } from './utils/shared-character-proxy';
  * Before running this test, ensure that there is an existing character that can be shared.
  * The character will be shared during the setup phase and unshared during teardown.
  */
-const existingCharacterTemplateId = 'd573e344-8119-46ca-bf9e-371800cf2782';
+const existingCharacterId = __ENV.LOADTEST_CHARACTER_ID || 'd573e344-8119-46ca-bf9e-371800cf2782';
+const loadTestVus = Number(__ENV.LOADTEST_VUS || 10);
 
 export const options = {
   cloud: {
@@ -34,7 +35,7 @@ export const options = {
       startTime: '5s',
       gracefulStop: '30s',
       iterations: 120,
-      vus: 10,
+      vus: loadTestVus,
       maxDuration: '1m',
     },
   },
@@ -53,7 +54,7 @@ export function setup(): TestSetupParams {
     console.log('running setup()...');
 
     // Share existing character
-    const character = sharedCharacterProxy.getCharacter(existingCharacterTemplateId);
+    const character = sharedCharacterProxy.getCharacter(existingCharacterId);
     const { inviteCode } = sharedCharacterProxy.shareCharacter({
       characterId: character.id,
       userId: character.userId,
@@ -61,7 +62,7 @@ export function setup(): TestSetupParams {
       usageTimeLimitMinutes: 60,
     });
 
-    return { characterId: existingCharacterTemplateId, inviteCode, userId: character.userId };
+    return { characterId: existingCharacterId, inviteCode, userId: character.userId };
   } catch (error) {
     console.error('Error in setup():', error);
     exec.test.abort('Setup failed');

@@ -6,7 +6,8 @@ import { SharedCharacterProxy } from './utils/shared-character-proxy';
 // There must be an existing character that can be shared.
 // When the load test is executed, you have to pass credentials
 // of the owner of this character in order to share it.
-const existingCharacterTemplateId = 'd573e344-8119-46ca-bf9e-371800cf2782';
+const existingCharacterId = __ENV.LOADTEST_CHARACTER_ID || 'd573e344-8119-46ca-bf9e-371800cf2782';
+const loadTestVus = Number(__ENV.LOADTEST_VUS || 50);
 
 export const options = {
   cloud: {
@@ -20,7 +21,7 @@ export const options = {
       startTime: '5s',
       gracefulStop: '5s',
       iterations: 200,
-      vus: 50,
+      vus: loadTestVus,
       options: {
         browser: {
           type: 'chromium',
@@ -44,7 +45,7 @@ export function setup(): TestSetupParams {
 
     // Share existing character
 
-    const character = sharedCharacterProxy.getCharacter(existingCharacterTemplateId);
+    const character = sharedCharacterProxy.getCharacter(existingCharacterId);
     const { inviteCode } = sharedCharacterProxy.shareCharacter({
       characterId: character.id,
       userId: character.userId,
@@ -52,7 +53,7 @@ export function setup(): TestSetupParams {
       usageTimeLimitMinutes: 60,
     });
 
-    return { characterId: existingCharacterTemplateId, inviteCode, userId: character.userId };
+    return { characterId: existingCharacterId, inviteCode, userId: character.userId };
   } catch (error) {
     console.error('Error in setup():', error);
     exec.test.abort('Setup failed');
