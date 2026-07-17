@@ -1,9 +1,11 @@
 import { dbGetAllModelsByOrganizationId } from '@ais-chat/api-database';
+import {
+  buildBifrostProviderConfigs,
+  syncBifrostProvider,
+} from '@ais-chat/shared-core/bifrost-sync';
 import { env } from '@/consts/env';
 import { BifrostProviderSyncError } from '@/types/bifrost-provider-sync-error';
 import { logError, logInfo } from '@shared/logging';
-import { syncBifrostProvider } from './client';
-import { buildBifrostProviderConfigs } from './provider-config-builder';
 
 /**
  * Mirrors the admin API DB model/provider configuration into Bifrost.
@@ -28,10 +30,15 @@ export async function syncBifrostProvidersForOrganization(organizationId: string
 
   const syncResults = await Promise.allSettled(
     providerConfigs.map(async (providerConfig) => {
-      await syncBifrostProvider(bifrostAdminUrl, providerConfig);
+      await syncBifrostProvider({
+        bifrostAdminUrl,
+        bifrostManagementApiKey: env.bifrostManagementApiKey,
+        providerConfig,
+      });
       return providerConfig.provider;
     }),
   );
+
   const failedProviders = syncResults.flatMap((result, index) => {
     if (result.status === 'fulfilled') return [];
     return [providerConfigs[index]?.provider ?? 'unknown'];

@@ -13,6 +13,7 @@ import {
 } from './schema';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import { syncApiDatabaseModelsToBifrost } from './bifrost-sync';
 
 // Loads all required data from the staging database into the local database
 // including organizations, projects, api keys, llm models and mappings.
@@ -87,6 +88,9 @@ export async function seedDatabase() {
       .values(await getModelKeyMappings())
       .onConflictDoNothing()
       .returning();
+
+    const models = await localDb.select().from(llmModelTable);
+    await syncApiDatabaseModelsToBifrost(models);
 
     // 6. Summary
     console.log('Database seeding completed successfully!');

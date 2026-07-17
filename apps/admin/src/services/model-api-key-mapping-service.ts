@@ -4,7 +4,7 @@ import {
 } from '@ais-chat/api-database';
 import { logInfo } from '@shared/logging';
 import { dbUpdateLlmModelsForAllFederalStates } from '@shared/db/functions/llm-model';
-import { syncBifrostProvidersForOrganization } from './bifrost-provider-sync-service';
+import { syncBifrostProvidersForOrganization } from './bifrost-provider-sync';
 
 export async function getModelApiKeyMappings(
   organizationId: string,

@@ -7,7 +7,7 @@ import {
 import { CreateLargeLanguageModel, UpdateLargeLanguageModel } from '../types/large-language-model';
 import { logInfo } from '@shared/logging';
 import { dbUpdateLlmModelsForAllFederalStates } from '@shared/db/functions/llm-model';
-import { syncBifrostProvidersForOrganization } from './bifrost-provider-sync-service';
+import { syncBifrostProvidersForOrganization } from './bifrost-provider-sync';
 
 export async function getLargeLanguageModels(organizationId: string) {
   return dbGetAllModelsByOrganizationId(organizationId);

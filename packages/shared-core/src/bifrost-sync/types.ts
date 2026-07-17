@@ -33,10 +33,6 @@ export type BifrostProviderConfig = {
   };
   custom_provider_config?: {
     base_provider_type: 'openai';
-    // Bifrost custom provider request types:
-    // https://docs.getbifrost.ai/providers/custom-providers#allowed-request-types
-    // Bifrost's officially supported provider endpoint matrix:
-    // https://docs.getbifrost.ai/providers/supported-providers/overview
     allowed_requests: {
       list_models: boolean;
       chat_completion: boolean;
@@ -48,8 +44,6 @@ export type BifrostProviderConfig = {
   keys: BifrostKey[];
 };
 
-export type BifrostProviderConfigFields = Omit<BifrostProviderConfig, 'provider' | 'keys'>;
-
 export type BifrostProviderResponse = Omit<BifrostProviderConfig, 'provider' | 'keys'> & {
   name?: BifrostProvider;
   concurrency_and_buffer_size?: {
@@ -60,4 +54,20 @@ export type BifrostProviderResponse = Omit<BifrostProviderConfig, 'provider' | '
   send_back_raw_request?: boolean;
   send_back_raw_response?: boolean;
   store_raw_request_response?: boolean;
+};
+
+export type BifrostProviderModel = {
+  provider: string;
+  name: string;
+  setting: {
+    provider: string;
+    apiKey?: string;
+    baseUrl?: string;
+    projectId?: string;
+    location?: string;
+    authCredentials?: unknown;
+  };
+  additionalParameters?: Record<string, unknown>;
+  supportedImageFormats?: string[];
+  isDeleted?: boolean;
 };

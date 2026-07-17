@@ -5,7 +5,8 @@
   "type": "module",
   "private": true,
   "exports": {
-    "./*": "./src/*.ts"
+    "./*": "./src/*.ts",
+    "./bifrost-sync": "./src/bifrost-sync/index.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",

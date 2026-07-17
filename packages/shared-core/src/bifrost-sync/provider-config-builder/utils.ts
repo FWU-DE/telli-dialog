@@ -1,15 +1,13 @@
-import { LlmModel } from '@ais-chat/api-database';
-import { BifrostProviderSyncError } from '@/types/bifrost-provider-sync-error';
-import { buildKeyName } from '../key-name';
 import {
-  BifrostKey,
-  BifrostProvider,
+  BifrostProviderModel,
   BifrostProviderConfig,
-  BifrostProviderConfigFields,
+  BifrostProviderConfig as BifrostProviderConfigType,
   BifrostSecret,
+  BifrostKey,
 } from '../types';
+import { buildKeyName } from '../key-name';
 
-type ProviderSettings = LlmModel['setting'];
+type ProviderSettings = BifrostProviderModel['setting'];
 
 export function buildSingleKeyProviderConfigs({
   provider,
@@ -18,14 +16,14 @@ export function buildSingleKeyProviderConfigs({
   buildKey,
   buildConfig,
 }: {
-  provider: BifrostProvider;
-  models: LlmModel[];
+  provider: BifrostProviderConfigType['provider'];
+  models: BifrostProviderModel[];
   getGroupKey: (setting: ProviderSettings) => string | undefined;
-  buildKey: (setting: ProviderSettings, groupedModels: LlmModel[]) => BifrostKey;
+  buildKey: (setting: ProviderSettings, groupedModels: BifrostProviderModel[]) => BifrostKey;
   buildConfig?: (
     setting: ProviderSettings,
-    groupedModels: LlmModel[],
-  ) => BifrostProviderConfigFields;
+    groupedModels: BifrostProviderModel[],
+  ) => Omit<BifrostProviderConfig, 'provider' | 'keys'>;
 }): BifrostProviderConfig[] {
   return groupModelsBySettings(models, getGroupKey).map((groupedModels) => {
     const setting = getFirstModelSetting(groupedModels);
@@ -46,11 +44,11 @@ export function buildBifrostKey({
   groupedModels,
   extra,
 }: {
-  provider: BifrostProvider;
+  provider: BifrostProviderConfigType['provider'];
   readableValue: string;
   uniqueValue: string;
   value: BifrostSecret;
-  groupedModels: LlmModel[];
+  groupedModels: BifrostProviderModel[];
   extra?: Partial<BifrostKey>;
 }): BifrostKey {
   return {
@@ -63,11 +61,13 @@ export function buildBifrostKey({
   };
 }
 
-export function buildAzureAliases(groupedModels: LlmModel[]): Record<string, string> {
+export function buildAzureAliases(groupedModels: BifrostProviderModel[]): Record<string, string> {
   return Object.fromEntries(
     groupedModels.flatMap((model) => {
       const parsedUrl =
-        model.setting.provider === 'azure' ? parseAzureBaseUrl(model.setting.baseUrl) : undefined;
+        model.setting.provider === 'azure'
+          ? parseAzureBaseUrl(model.setting.baseUrl ?? '')
+          : undefined;
       return parsedUrl ? [[model.name, parsedUrl.deployment]] : [];
     }),
   );
@@ -103,17 +103,17 @@ export function parseAzureBaseUrl(
   };
 }
 
-function getFirstModelSetting(groupedModels: LlmModel[]): ProviderSettings {
+function getFirstModelSetting(groupedModels: BifrostProviderModel[]): ProviderSettings {
   const setting = groupedModels[0]?.setting;
-  if (!setting) throw new BifrostProviderSyncError();
+  if (!setting) throw new Error('Missing Bifrost model setting');
   return setting;
 }
 
 function groupModelsBySettings(
-  models: LlmModel[],
+  models: BifrostProviderModel[],
   getGroupKey: (setting: ProviderSettings) => string | undefined,
-): LlmModel[][] {
-  const groupedModels = new Map<string, LlmModel[]>();
+): BifrostProviderModel[][] {
+  const groupedModels = new Map<string, BifrostProviderModel[]>();
 
   for (const model of models) {
     const key = getGroupKey(model.setting);
@@ -124,6 +124,6 @@ function groupModelsBySettings(
   return [...groupedModels.values()];
 }
 
-function getModelNames(models: LlmModel[]): string[] {
+function getModelNames(models: BifrostProviderModel[]): string[] {
   return [...new Set(models.map(({ name }) => name))].sort();
 }

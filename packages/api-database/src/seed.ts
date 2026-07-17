@@ -1,4 +1,5 @@
 import { createApiKeyRecord, db } from './index';
+import { syncApiDatabaseModelsToBifrost } from './bifrost-sync';
 import {
   type ApiKeyInsertModel,
   apiKeyTable,
@@ -72,7 +73,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
   {
     id: 'b870b74d-7458-4dcf-99f6-ace83ef514f4',
     organizationId: ORGANIZATION_ID,
-    provider: 'ionos',
+    provider: 'bifrost',
     name: 'BAAI/bge-m3',
     displayName: 'Standard Embedding Model',
     setting: {
@@ -88,7 +89,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
   {
     id: '7dcb063f-5241-4846-b11f-a621ea1dd4a9',
     organizationId: ORGANIZATION_ID,
-    provider: 'ionos',
+    provider: 'bifrost',
     name: 'black-forest-labs/FLUX.1-schnell',
     displayName: 'FLUX.1',
     setting: {
@@ -104,7 +105,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
   {
     id: '9578ed80-b0c2-4968-b253-d897576e5512',
     organizationId: ORGANIZATION_ID,
-    provider: 'ionos',
+    provider: 'bifrost',
     name: 'meta-llama/Meta-Llama-3.1-8B-Instruct',
     displayName: 'Llama-3.1-8B',
     description: 'Efficient for lighter tasks',
@@ -122,7 +123,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
   {
     id: '038ac4d1-c8c9-49a1-a2f9-c269b07961aa',
     organizationId: ORGANIZATION_ID,
-    provider: 'ionos',
+    provider: 'bifrost',
     name: 'mistralai/Mistral-Nemo-Instruct-2407',
     displayName: 'Mistral Nemo Instruct',
     description: 'Multilingual, open source and efficient',
@@ -140,7 +141,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
   {
     id: '4f8a2c1e-93d7-4b6a-a5e0-d2f1c8b7e3a9',
     organizationId: ORGANIZATION_ID,
-    provider: 'azure',
+    provider: 'bifrost',
     name: 'gpt-4o-mini',
     displayName: 'GPT-4o-mini',
     description: 'GPT-4o Mini model for testing',
@@ -159,7 +160,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
   {
     id: 'e7b3d9f2-1a4c-4e8b-b6d5-f0c2a9e8d1b7',
     organizationId: ORGANIZATION_ID,
-    provider: 'azure',
+    provider: 'bifrost',
     name: 'gpt-5-nano',
     displayName: 'GPT-5 nano',
     description: 'GPT-5 nano model for testing',
@@ -184,7 +185,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
   {
     id: 'f1c2d3e4-5b6a-7c8d-9e0f-1a2b3c4d5e6f',
     organizationId: ORGANIZATION_ID,
-    provider: 'azure',
+    provider: 'bifrost',
     name: 'gpt-5-mini',
     displayName: 'GPT-5 mini',
     description: 'GPT-5 mini model for testing',
@@ -290,6 +291,9 @@ export async function seedDatabase() {
         })
         .onConflictDoNothing();
     }
+
+    const models = await db.select().from(llmModelTable);
+    await syncApiDatabaseModelsToBifrost(models);
 
     // Print API key in a format parseable by CI (e.g. DE_TEST_API_KEY=sk_...)
     const apiKeyEnvVar = `${PROJECT_ID.replace('-', '_')}_API_KEY`;

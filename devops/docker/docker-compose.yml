@@ -224,6 +224,11 @@ services:
       # AIS.chat API connection
       API_URL: http://localhost:3002
 
+      # Bifrost gateway connection
+      BIFROST_BASE_URL: http://localhost:8089/openai/v1
+      BIFROST_API_KEY: not-needed
+      BIFROST_ADMIN_URL: http://localhost:8089
+
       # Crawl4AI
       CRAWL4AI_URL: http://crawl4ai:11235
       CRAWL4AI_API_TOKEN: ais-chat-crawl4ai-token
@@ -289,6 +294,11 @@ services:
       API_DATABASE_URL: postgresql://admin:test1234@postgres:5432/api_db
       API_KEY: ais-chat-api_api-key
       API_URL: http://localhost:3002
+
+      # Bifrost gateway connection
+      BIFROST_BASE_URL: http://localhost:8089/openai/v1
+      BIFROST_API_KEY: not-needed
+      BIFROST_ADMIN_URL: http://localhost:8089
       # Note: DB_CACHE_TTL_SECONDS should NOT be set in admin app
 
       # Monitoring (optional, leave empty to disable)
@@ -316,6 +326,7 @@ services:
       LLM_GPT4OMINI_BASE_URL: PLACEHOLDER_BASE_URL
       LLM_GPT5NANO_API_KEY: API_KEY_PLACEHOLDER
       LLM_GPT5NANO_BASE_URL: PLACEHOLDER_BASE_URL
+      BIFROST_ADMIN_URL: http://localhost:8089
     command: >
       sh -c "
         echo '=== Starting AIS.chat Initialization ==='

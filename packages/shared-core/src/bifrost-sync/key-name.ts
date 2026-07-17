@@ -1,15 +1,5 @@
 import { BifrostProvider } from './types';
 
-/**
- * Builds deterministic, readable Bifrost key names.
- *
- * The API DB stores upstream credentials, but not a dedicated Bifrost provider-key name.
- * We therefore need a stable generated name so repeated syncs update the same Bifrost key.
- *
- * If the readable value is a URL, only its hostname is used in the visible part to avoid
- * long names with deployment paths or query strings. The hash suffix keeps multiple
- * credentials for the same endpoint distinct without exposing the raw secret.
- */
 export function buildKeyName(
   provider: BifrostProvider,
   readableValue: string,
@@ -23,7 +13,6 @@ export function buildKeyName(
 
 function toReadableKeyNamePart(value: string): string {
   const normalizedValue = toKebabCase(getHostnameForUrl(value) ?? value);
-
   return normalizedValue.slice(0, 48) || 'default';
 }
 
@@ -52,9 +41,7 @@ function toKebabCase(value: string): string {
     }
   }
 
-  if (currentPart) {
-    parts.push(currentPart);
-  }
+  if (currentPart) parts.push(currentPart);
 
   return parts.join('-');
 }
