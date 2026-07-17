@@ -10,6 +10,10 @@ import {
   parseAzureBaseUrl,
 } from './utils';
 
+function stripAnthropicPrefix(modelName: string): string {
+  return modelName.replace(/^anthropic\//, '');
+}
+
 export function buildAzureProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] {
   return buildSingleKeyProviderConfigs({
     provider: 'azure',
@@ -116,6 +120,9 @@ export function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderC
     },
     buildKey: (setting, groupedModels) => {
       if (setting.provider !== 'google') throw new BifrostProviderSyncError();
+      const modelNames = [
+        ...new Set(groupedModels.map((model) => stripAnthropicPrefix(model.name))),
+      ].sort();
       return buildBifrostKey({
         provider: 'vertex',
         readableValue: `${setting.projectId}-${setting.location}`,
@@ -130,6 +137,7 @@ export function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderC
             // Mount GOOGLE_APPLICATION_CREDENTIALS into the Bifrost container/pod when needed.
             auth_credentials: '',
           },
+          models: modelNames,
         },
       });
     },
