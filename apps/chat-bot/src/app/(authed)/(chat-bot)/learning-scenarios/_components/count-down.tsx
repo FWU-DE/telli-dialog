@@ -11,30 +11,53 @@ type CountDownTimerProps = {
   totalTimeInSeconds: number;
   className?: string;
   stopWatchClassName?: string;
+  onExpire?: () => void;
 };
 export default function CountDownTimer({
   leftTimeInSeconds,
   totalTimeInSeconds,
   className,
   stopWatchClassName,
+  onExpire,
 }: CountDownTimerProps) {
   const t = useTranslations('sharing');
   const [timeRemaining, setTimeRemaining] = React.useState(Math.max(leftTimeInSeconds, 0));
 
+  // keep the latest onExpire callback without re-triggering the effects below
+  const onExpireRef = React.useRef(onExpire);
+  React.useEffect(() => {
+    onExpireRef.current = onExpire;
+  }, [onExpire]);
+
+  // ensures onExpire fires at most once per countdown cycle (reset below when leftTimeInSeconds changes)
+  const hasNotifiedExpiryRef = React.useRef(false);
+  const notifyExpiry = React.useCallback(() => {
+    if (!hasNotifiedExpiryRef.current) {
+      hasNotifiedExpiryRef.current = true;
+      onExpireRef.current?.();
+    }
+  }, []);
+
   // synchronize internal state with changes to leftTimeInSeconds (i.e. extend usage time)
   React.useEffect(() => {
+    hasNotifiedExpiryRef.current = false;
     const resetTimer = window.setTimeout(() => {
-      setTimeRemaining(Math.max(leftTimeInSeconds, 0));
+      const nextTimeRemaining = Math.max(leftTimeInSeconds, 0);
+      setTimeRemaining(nextTimeRemaining);
+      if (nextTimeRemaining === 0) {
+        notifyExpiry();
+      }
     }, 0);
 
     return () => window.clearTimeout(resetTimer);
-  }, [leftTimeInSeconds]);
+  }, [leftTimeInSeconds, notifyExpiry]);
 
   // countdown timer
   React.useEffect(() => {
     const timer = setInterval(() => {
       setTimeRemaining((prevTime) => {
         if (prevTime <= 1) {
+          notifyExpiry();
           return 0;
         }
         return prevTime - 1;
@@ -42,7 +65,7 @@ export default function CountDownTimer({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [notifyExpiry]);
 
   const textClassName = getColorByLeftAndTotalTime({ leftTimeInSeconds, totalTimeInSeconds });
 

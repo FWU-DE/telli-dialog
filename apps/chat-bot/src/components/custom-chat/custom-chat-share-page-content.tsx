@@ -97,7 +97,7 @@ export default function CustomChatSharePageContent({
     return result;
   };
 
-  const polledData = useShareDataPolling({
+  const { data: polledData, refetch: refetchShareData } = useShareDataPolling({
     fetchShareData,
     isActive: sharedChatActiveInitial,
   });
@@ -129,6 +129,9 @@ export default function CustomChatSharePageContent({
         leftTimeInSeconds={currentLeftTimeInSeconds}
         totalTimeInSeconds={totalTimeInSeconds}
         stopWatchClassName="w-8 h-8"
+        onExpire={() => {
+          void refetchShareData();
+        }}
       />
       <main className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">
         <section className="flex flex-col justify-between gap-4 items-center">
