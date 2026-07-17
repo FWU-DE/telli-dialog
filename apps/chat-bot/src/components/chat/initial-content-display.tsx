@@ -8,12 +8,14 @@ export function InitialChatContentDisplay({
   description,
   excerciseDescription,
   setDialogStarted,
+  startDialogLabel,
 }: {
   title: string;
   imageSource?: string;
   description?: string;
   excerciseDescription?: string;
   setDialogStarted?: (dialogStarted: boolean) => void;
+  startDialogLabel?: string;
 }) {
   return (
     <div className="flex flex-col items-center justify-center h-full mx-auto p-4 gap-1">
@@ -29,7 +31,7 @@ export function InitialChatContentDisplay({
       )}
       {setDialogStarted !== undefined && (
         <Button onClick={() => setDialogStarted(true)} className="mt-3">
-          Dialog starten
+          {startDialogLabel ?? 'Dialog starten'}
         </Button>
       )}
     </div>

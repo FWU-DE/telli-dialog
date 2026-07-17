@@ -15,6 +15,8 @@ import {
   uploadAvatarPictureForLearningScenario,
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { requireAuth } from '@/auth/requireAuth';
+import { resolveSharingLocale } from '@/i18n/sharing-locale';
+import { logInfo } from '@shared/logging';
 
 export async function updateLearningScenarioAccessLevelAction({
   learningScenarioId,
@@ -63,7 +65,7 @@ export async function shareLearningScenarioAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(
+  const result = await runServerAction(
     'shareLearningScenarioAction',
     shareLearningScenario,
   )({
@@ -71,6 +73,20 @@ export async function shareLearningScenarioAction({
     user,
     data,
   });
+
+  if (result.success) {
+    const uiLink = `/learning-scenarios/editor/${learningScenarioId}/share`;
+    const locale = await resolveSharingLocale(uiLink);
+    // TODO: REMOVE LOGS
+    logInfo('Resolved sharing locale', {
+      source: 'share-learning-scenario-action',
+      uiLink,
+      locale,
+      entityId: learningScenarioId,
+    });
+  }
+
+  return result;
 }
 
 export async function unshareLearningScenarioAction({

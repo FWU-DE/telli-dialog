@@ -19,6 +19,8 @@ import {
   uploadAvatarPictureForCharacter,
 } from '@shared/characters/character-service';
 import { runServerAction } from '@shared/actions/run-server-action';
+import { resolveSharingLocale } from '@/i18n/sharing-locale';
+import { logInfo } from '@shared/logging';
 
 export async function updateCharacterAccessLevelAction({
   characterId,
@@ -70,7 +72,7 @@ export async function shareCharacterAction({
 }: { id: string } & ShareWithLearnersLimitParams) {
   const { user } = await requireAuth();
 
-  return runServerAction(
+  const result = await runServerAction(
     'shareCharacterAction',
     shareCharacter,
   )({
@@ -79,6 +81,20 @@ export async function shareCharacterAction({
     usageTimeLimitMinutes: usageTimeLimit,
     user,
   });
+
+  if (result.success) {
+    const uiLink = `/characters/editor/${id}/share`;
+    const locale = await resolveSharingLocale(uiLink);
+    // TODO: REMOVE LOGS
+    logInfo('Resolved sharing locale', {
+      source: 'share-character-action',
+      uiLink,
+      locale,
+      entityId: id,
+    });
+  }
+
+  return result;
 }
 
 export async function unshareCharacterAction({ characterId }: { characterId: string }) {
