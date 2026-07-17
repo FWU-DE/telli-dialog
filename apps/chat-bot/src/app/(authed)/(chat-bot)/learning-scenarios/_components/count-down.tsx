@@ -40,11 +40,13 @@ export default function CountDownTimer({
 
   // synchronize internal state with changes to leftTimeInSeconds (i.e. extend usage time)
   React.useEffect(() => {
-    hasNotifiedExpiryRef.current = false;
     const resetTimer = window.setTimeout(() => {
       const nextTimeRemaining = Math.max(leftTimeInSeconds, 0);
       setTimeRemaining(nextTimeRemaining);
-      if (nextTimeRemaining === 0) {
+      if (nextTimeRemaining > 0) {
+        // countdown was restarted/extended - allow onExpire to fire again next time it runs out
+        hasNotifiedExpiryRef.current = false;
+      } else {
         notifyExpiry();
       }
     }, 0);
