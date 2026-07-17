@@ -7,6 +7,7 @@ import useBreakpoints from '../hooks/use-breakpoints';
 import { AssistantIcon } from '../chat/assistant-icon';
 import GenericSharedChat from './generic-shared-chat';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
+import { loadSharedChat } from '@/utils/shared-chat-storage';
 import { z } from 'zod';
 
 /**
@@ -19,9 +20,15 @@ export default function CharacterSharedChat({
   const t = useTranslations('characters.shared');
   const { id, inviteCode, modelId } = character;
 
-  const initialMessages: ChatMessage[] = character.initialMessage
-    ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
-    : [];
+  const initialMessages: ChatMessage[] =
+    loadSharedChat(inviteCode)?.messages.map((message) => ({
+      id: message.id,
+      role: message.role,
+      content: message.content,
+    })) ??
+    (character.initialMessage
+      ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
+      : []);
 
   const chat = useCharacterChat({
     characterId: id,

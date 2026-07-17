@@ -23,11 +23,10 @@ import { LocalFileState } from '../chat/send-message-form';
 import { getFileExtension, isImageFile } from '@/utils/files/generic';
 import { PendingFileModel } from '../chat/messages';
 import {
-  clearSharedChatFileMapping,
-  clearSharedChatSessionId,
-  getOrCreateSharedChatSessionId,
-  loadSharedChatFileMapping,
-  saveSharedChatFileMapping,
+  clearSharedChat,
+  loadSharedChat,
+  newSharedChatSessionId,
+  saveSharedChat,
 } from '@/utils/shared-chat-storage';
 import { cnanoid } from '@shared/random/randomService';
 
@@ -117,17 +116,32 @@ export default function GenericSharedChat({
   const chatActive = shareSessionState === ShareSessionState.RUNNING;
 
   const [explicitDialogStarted, setExplicitDialogStarted] = useState(false);
-  const [sharedSessionId, setSharedSessionId] = useState(() =>
-    getOrCreateSharedChatSessionId(inviteCode),
+  const [sharedSessionId, setSharedSessionId] = useState(
+    () => loadSharedChat(inviteCode)?.sharedSessionId ?? newSharedChatSessionId(),
   );
   const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
   const [pendingFileMapping, setPendingFileMapping] = useState<Map<string, PendingFileModel[]>>(
     () => {
-      const restored = loadSharedChatFileMapping(inviteCode, sharedSessionId);
-      if (restored === null) {
-        return new Map();
+      const restored = loadSharedChat(inviteCode);
+      const mapping = new Map<string, PendingFileModel[]>();
+      if (restored === null) return mapping;
+
+      for (const message of restored.messages) {
+        if (message.files.length > 0) {
+          // Persisted files only keep id/name/type/size; fill in the remaining
+          // FileModel fields with placeholders since they aren't used for display.
+          mapping.set(
+            message.id,
+            message.files.map((file) => ({
+              ...file,
+              createdAt: new Date(),
+              metadata: null,
+              userId: null,
+            })),
+          );
+        }
       }
-      return new Map(restored);
+      return mapping;
     },
   );
 
@@ -141,7 +155,6 @@ export default function GenericSharedChat({
     reload,
     stop,
     status,
-    clearClientPersistedMessages,
     error,
   } = chat;
 
@@ -233,15 +246,24 @@ export default function GenericSharedChat({
     setFiles(new Map());
     setPendingFileMapping(new Map());
     setSharedSessionId(nextSharedSessionId);
-    clearSharedChatFileMapping(inviteCode);
-    clearSharedChatSessionId(inviteCode);
-    clearClientPersistedMessages();
+    clearSharedChat(inviteCode);
     setMessages([]);
   }
 
   useEffect(() => {
-    saveSharedChatFileMapping(inviteCode, pendingFileMapping, sharedSessionId);
-  }, [inviteCode, pendingFileMapping, sharedSessionId]);
+    // Do not persist messages during streaming (assistant content is incomplete).
+    if (status === 'streaming') return;
+
+    saveSharedChat(inviteCode, {
+      sharedSessionId,
+      messages: messages.map((message) => ({
+        id: message.id,
+        role: message.role,
+        content: message.content,
+        files: pendingFileMapping.get(message.id) ?? [],
+      })),
+    });
+  }, [inviteCode, sharedSessionId, messages, pendingFileMapping, status]);
 
   function handleReload() {
     void reload();
