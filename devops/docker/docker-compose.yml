@@ -152,6 +152,8 @@ services:
     environment:
       APP_HOST: 0.0.0.0
       APP_PORT: '8089'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     volumes:
       - bifrost_data:/app/data
       - ./bifrost/config.json:/app/data/config.json:ro
