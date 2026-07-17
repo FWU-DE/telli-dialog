@@ -1,6 +1,6 @@
 import { LlmModel } from '@ais-chat/api-database';
 import { DEFAULT_IONOS_BASE_URL, DEFAULT_OPENAI_BASE_URL } from '@ais-chat/api-database/llm-model';
-import { BifrostProviderSyncError } from '@/types/bifrost-provider-sync-error';
+import { BifrostProviderSyncError } from '../../../types/bifrost-provider-sync-error';
 import { BifrostProviderConfig } from '../types';
 import {
   buildAzureAliases,
@@ -33,9 +33,13 @@ function stableStringify(value: unknown): string {
 }
 
 function getVertexAuthCredentials(groupedModels: LlmModel[]): unknown {
-  return groupedModels.find(
-    (model) => model.setting.provider === 'google' && model.setting.authCredentials !== undefined,
-  )?.setting.authCredentials;
+  for (const model of groupedModels) {
+    if (model.setting.provider !== 'google') continue;
+    if (model.setting.authCredentials === undefined) continue;
+    return model.setting.authCredentials;
+  }
+
+  return undefined;
 }
 
 function getVertexUniqueValue(projectId: string, authCredentials: string): string {

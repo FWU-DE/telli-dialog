@@ -1,6 +1,6 @@
-import { env } from '@/consts/env';
-import { BifrostProviderSyncError } from '@/types/bifrost-provider-sync-error';
+import { env } from '../../consts/env';
 import { logError } from '@shared/logging';
+import { BifrostProviderSyncError } from '../../types/bifrost-provider-sync-error';
 import {
   BifrostKey,
   BifrostProvider,
