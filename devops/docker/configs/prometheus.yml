@@ -9,6 +9,13 @@ scrape_configs:
       - targets: ['localhost:9090']
         labels:
           prometheus: prom
+
+  - job_name: 'bifrost'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['host.docker.internal:8089']
+        labels:
+          service: bifrost
 storage:
   tsdb:
     out_of_order_time_window: '30m'

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://www.getbifrost.ai/schema",
+  "plugins": [
+    {
+      "name": "otel",
+      "enabled": true,
+      "config": {
+        "service_name": "bifrost",
+        "collector_url": "http://host.docker.internal:4318/v1/traces",
+        "trace_type": "genai_extension",
+        "protocol": "http",
+        "metrics_enabled": true,
+        "metrics_endpoint": "http://host.docker.internal:4318/v1/metrics",
+        "metrics_push_interval": 15
+      }
+    }
+  ]
+}
