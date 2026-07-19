@@ -6,7 +6,7 @@ import {
   runAgentLoop,
 } from '@ais-chat/ai-core';
 import { NotFoundError } from '@shared/error';
-import { createTextStream } from '@/utils/streaming';
+import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
@@ -148,6 +148,9 @@ export async function sendCharacterMessage({
       >
     | undefined;
 
+  const { stream, update, done, error: streamError } = createTextStream();
+  const assistantMessageId = crypto.randomUUID();
+
   if (agenticChatEnabled) {
     const builtTools = await buildTools({
       user: teacherUserAndContext,
@@ -155,6 +158,14 @@ export async function sendCharacterMessage({
       relatedFileEntities,
       attachedLinks: character.attachedLinks,
       sourceUrls: processedUrls,
+      onWebSearchResults: (results) => {
+        update(
+          encodeChatStreamEvent({
+            type: 'web_search_results',
+            webSearchResults: results,
+          }),
+        );
+      },
     });
 
     activeToolDefinitions = Object.values(builtTools.toolRegistry).map((entry) => entry.definition);
@@ -201,10 +212,6 @@ export async function sendCharacterMessage({
 
   // Convert to ai-core format
   const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImages);
-
-  // Create native stream
-  const { stream, update, done, error: streamError } = createTextStream();
-  const assistantMessageId = crypto.randomUUID();
 
   if (agenticChatEnabled) {
     const agentName = resolveAgentNameForTracing({ characterId: character.id });
