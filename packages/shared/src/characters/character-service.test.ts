@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import {
   createNewCharacter,
   deleteCharacter,
@@ -41,7 +41,8 @@ import { getReadOnlySignedUrl, uploadFileToS3 } from '../s3';
 import { getAvatarPictureUrl } from '../files/fileService';
 import { generateUUID } from '../utils/uuid';
 import { getMaxBudgetInCentByUser, getUsedBudgetInCentByUser } from '../users/user-budget-service';
-import { CharacterSelectModel } from '@shared/db/schema';
+import { CharacterSelectModel, CharacterWithShareDataModel } from '@shared/db/schema';
+import { SHARE_EXTENSION_WINDOW_MS } from '../sharing/const';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { dbGetSharedCharacterChatUsageInCentByCharacterId } from '@shared/db/functions/token-points';
@@ -1663,6 +1664,121 @@ describe('character-service', () => {
         picturePath: `characters/${characterId}/avatar_3a6eb0790f39`,
         signedUrl: 'https://signed-url',
       });
+    });
+  });
+
+  describe('getSharedCharacter', () => {
+    const NOW = new Date('2026-07-20T12:00:00.000Z');
+
+    function mockCharacterWithShareData(overrides: Record<string, unknown> = {}) {
+      return {
+        id: generateUUID(),
+        author: '',
+        userId: generateUUID(),
+        modelId: generateUUID(),
+        name: 'Test Character',
+        description: '',
+        instructions: '',
+        learningContext: '',
+        competence: '',
+        filterGroup: { school_types: [], grade_ranges: [], subjects: [] },
+        accessLevel: 'private' as const,
+        hasLinkAccess: false,
+        isWebSearchEnabled: false,
+        createdAt: NOW,
+        updatedAt: NOW,
+        attachedLinks: [],
+        suspended: false,
+        isDeleted: false,
+        ownerSchoolIds: [],
+        specifications: null,
+        restrictions: null,
+        pictureId: null,
+        initialMessage: null,
+        originalCharacterId: null,
+        tokenPointsLimit: 50,
+        maxUsageTimeLimit: 60,
+        inviteCode: 'TEST1234',
+        startedAt: NOW,
+        expiredAt: new Date(NOW.getTime() + 60 * 60 * 1000),
+        manuallyStoppedAt: null,
+        startedBy: generateUUID(),
+        ...overrides,
+      } as unknown as CharacterWithShareDataModel;
+    }
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(NOW);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('returns the character when the share is active', async () => {
+      const characterId = generateUUID();
+      const userId = generateUUID();
+      const character = mockCharacterWithShareData({
+        id: characterId,
+        userId,
+        expiredAt: new Date(NOW.getTime() + 60 * 60 * 1000),
+      });
+      (
+        dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
+      ).mockResolvedValue(character as never);
+
+      const result = await getSharedCharacter({ characterId, userId });
+
+      expect(result).toBe(character);
+    });
+
+    it('returns the character when the share has expired but is within the grace window', async () => {
+      const characterId = generateUUID();
+      const userId = generateUUID();
+      const character = mockCharacterWithShareData({
+        id: characterId,
+        userId,
+        expiredAt: new Date(NOW.getTime() - 60 * 60 * 1000), // expired 1 hour ago, within 2-hour grace window
+      });
+      (
+        dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
+      ).mockResolvedValue(character as never);
+
+      const result = await getSharedCharacter({ characterId, userId });
+
+      expect(result).toBe(character);
+    });
+
+    it('throws NotFoundError when the share has expired beyond the grace window', async () => {
+      const characterId = generateUUID();
+      const userId = generateUUID();
+      const character = mockCharacterWithShareData({
+        id: characterId,
+        userId,
+        expiredAt: new Date(NOW.getTime() - SHARE_EXTENSION_WINDOW_MS - 1000), // expired 2 hours and 1 second ago
+      });
+      (
+        dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
+      ).mockResolvedValue(character as never);
+
+      await expect(getSharedCharacter({ characterId, userId })).rejects.toThrow(NotFoundError);
+    });
+
+    it('throws NotFoundError when the share was manually stopped', async () => {
+      const characterId = generateUUID();
+      const userId = generateUUID();
+      const character = mockCharacterWithShareData({
+        id: characterId,
+        userId,
+        expiredAt: new Date(NOW.getTime() + 60 * 60 * 1000), // still active time-wise
+        manuallyStoppedAt: new Date(NOW.getTime() - 30 * 60 * 1000), // but manually stopped 30 min ago
+      });
+      (
+        dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
+      ).mockResolvedValue(character as never);
+
+      await expect(getSharedCharacter({ characterId, userId })).rejects.toThrow(NotFoundError);
     });
   });
 });

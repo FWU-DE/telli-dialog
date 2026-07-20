@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import {
   createNewLearningScenarioFromTemplate,
   deleteLearningScenario,
@@ -40,7 +40,8 @@ import {
 import { dbGetFileForLearningScenario, dbGetFilesForLearningScenario } from '../db/functions/files';
 import { getAvatarPictureUrl } from '../files/fileService';
 import { generateUUID } from '../utils/uuid';
-import { LearningScenarioSelectModel } from '@shared/db/schema';
+import { LearningScenarioSelectModel, LearningScenarioWithShareDataModel } from '@shared/db/schema';
+import { SHARE_EXTENSION_WINDOW_MS } from '../sharing/const';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { UserModel } from '@shared/auth/user-model';
 import { FederalStateModel } from '@shared/federal-states/types';
@@ -1624,6 +1625,136 @@ describe('learning-scenario-service', () => {
       });
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('getSharedLearningScenario', () => {
+    const NOW = new Date('2026-07-20T12:00:00.000Z');
+
+    function mockLearningScenarioWithShareData(overrides: Record<string, unknown> = {}) {
+      return {
+        id: generateUUID(),
+        author: '',
+        name: 'Test Learning Scenario',
+        description: '',
+        modelId: generateUUID(),
+        userId: generateUUID(),
+        filterGroup: { school_types: [], grade_ranges: [], subjects: [] },
+        studentExercise: '',
+        additionalInstructions: null,
+        restrictions: null,
+        attachedLinks: [],
+        pictureId: null,
+        createdAt: NOW,
+        updatedAt: NOW,
+        suspended: false,
+        isDeleted: false,
+        accessLevel: 'private' as const,
+        originalLearningScenarioId: null,
+        hasLinkAccess: false,
+        isWebSearchEnabled: false,
+        ownerSchoolIds: [],
+        tokenPointsLimit: 50,
+        maxUsageTimeLimit: 60,
+        inviteCode: 'TEST1234',
+        startedAt: NOW,
+        expiredAt: new Date(NOW.getTime() + 60 * 60 * 1000),
+        manuallyStoppedAt: null,
+        startedBy: generateUUID(),
+        ...overrides,
+      } as unknown as LearningScenarioWithShareDataModel;
+    }
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(NOW);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('returns the learning scenario when the share is active', async () => {
+      const learningScenarioId = generateUUID();
+      const userId = generateUUID();
+      const learningScenario = mockLearningScenarioWithShareData({
+        id: learningScenarioId,
+        userId,
+        expiredAt: new Date(NOW.getTime() + 60 * 60 * 1000),
+      });
+      (
+        dbGetLearningScenarioByIdWithShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdWithShareData
+        >
+      ).mockResolvedValue(learningScenario as never);
+
+      const result = await getSharedLearningScenario({
+        learningScenarioId,
+        user: { id: userId },
+      });
+
+      expect(result).toBe(learningScenario);
+    });
+
+    it('returns the learning scenario when the share has expired but is within the grace window', async () => {
+      const learningScenarioId = generateUUID();
+      const userId = generateUUID();
+      const learningScenario = mockLearningScenarioWithShareData({
+        id: learningScenarioId,
+        userId,
+        expiredAt: new Date(NOW.getTime() - 60 * 60 * 1000), // expired 1 hour ago, within 2-hour grace window
+      });
+      (
+        dbGetLearningScenarioByIdWithShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdWithShareData
+        >
+      ).mockResolvedValue(learningScenario as never);
+
+      const result = await getSharedLearningScenario({
+        learningScenarioId,
+        user: { id: userId },
+      });
+
+      expect(result).toBe(learningScenario);
+    });
+
+    it('throws NotFoundError when the share has expired beyond the grace window', async () => {
+      const learningScenarioId = generateUUID();
+      const userId = generateUUID();
+      const learningScenario = mockLearningScenarioWithShareData({
+        id: learningScenarioId,
+        userId,
+        expiredAt: new Date(NOW.getTime() - SHARE_EXTENSION_WINDOW_MS - 1000), // expired 2 hours and 1 second ago
+      });
+      (
+        dbGetLearningScenarioByIdWithShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdWithShareData
+        >
+      ).mockResolvedValue(learningScenario as never);
+
+      await expect(
+        getSharedLearningScenario({ learningScenarioId, user: { id: userId } }),
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    it('throws NotFoundError when the share was manually stopped', async () => {
+      const learningScenarioId = generateUUID();
+      const userId = generateUUID();
+      const learningScenario = mockLearningScenarioWithShareData({
+        id: learningScenarioId,
+        userId,
+        expiredAt: new Date(NOW.getTime() + 60 * 60 * 1000), // still active time-wise
+        manuallyStoppedAt: new Date(NOW.getTime() - 30 * 60 * 1000), // but manually stopped 30 min ago
+      });
+      (
+        dbGetLearningScenarioByIdWithShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdWithShareData
+        >
+      ).mockResolvedValue(learningScenario as never);
+
+      await expect(
+        getSharedLearningScenario({ learningScenarioId, user: { id: userId } }),
+      ).rejects.toThrow(NotFoundError);
     });
   });
 });

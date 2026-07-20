@@ -229,21 +229,14 @@ export async function getSharedLearningScenario({
     learningScenarioId,
     user,
   });
-  if (!learningScenario || !learningScenario.inviteCode) {
-    throw new NotFoundError('Learning scenario not found');
-  }
-
-  // Check if share data exists (all share fields should be present if inviteCode exists)
   if (!isLearningScenarioWithShareData(learningScenario)) {
     throw new NotFoundError('Learning scenario not found');
   }
 
-  // Check if share has been manually stopped
   if (learningScenario.manuallyStoppedAt !== null) {
     throw new NotFoundError('Learning scenario not found');
   }
 
-  // Check if share is within the grace window (active or recently expired)
   if (!isShareWithinGraceWindow(learningScenario.expiredAt, SHARE_EXTENSION_WINDOW_MS)) {
     throw new NotFoundError('Learning scenario not found');
   }

@@ -82,11 +82,8 @@ function latestLearningScenarioShare(
 
 /**
  * Returns a subquery that selects the single most-recent non-manually-stopped share per learning
- * scenario for a given user. Unlike `latestActiveLearningScenarioShare`, this includes shares that
- * have expired, as long as they are within the grace window for extension/adjustment.
- *
- * Used by `dbGetLearningScenarioByIdWithShareData` to return the invite code and share data
- * even for recently-expired shares, allowing the service layer to check grace window validity.
+ * scenario for a given user. This includes shares that have already expired, so the caller has
+ * to decide if it is still available (grace window) or already expired.
  */
 function latestNonStoppedLearningScenarioShare(
   user: Pick<UserModel, 'id'>,
@@ -318,7 +315,7 @@ export async function dbGetLearningScenarioByIdWithShareData({
 }): Promise<LearningScenarioOptionalShareDataModel | undefined> {
   const latestShare = latestNonStoppedLearningScenarioShare(user);
   const [row] = await baseLearningScenarioWithShareQuery(latestShare)
-    .leftJoin(latestShare, eq(latestShare.learningScenarioId, learningScenarioTable.id))
+    .innerJoin(latestShare, eq(latestShare.learningScenarioId, learningScenarioTable.id))
     .where(eq(learningScenarioTable.id, learningScenarioId));
   return row;
 }

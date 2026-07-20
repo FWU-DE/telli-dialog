@@ -799,12 +799,10 @@ export const getSharedCharacter = async ({
     throw new NotFoundError('Character not found');
   }
 
-  // Check if share has been manually stopped
   if (character.manuallyStoppedAt !== null) {
     throw new NotFoundError('Character not found');
   }
 
-  // Check if share is within the grace window (active or recently expired)
   if (!isShareWithinGraceWindow(character.expiredAt, SHARE_EXTENSION_WINDOW_MS)) {
     throw new NotFoundError('Character not found');
   }

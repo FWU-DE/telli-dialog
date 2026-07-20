@@ -79,11 +79,8 @@ function latestCharacterShare(
 
 /**
  * Returns a subquery that selects the single most-recent non-manually-stopped share per character
- * for a given user. Unlike `latestActiveCharacterShare`, this includes shares that have expired,
- * as long as they are within the grace window for extension/adjustment.
- *
- * Used by `dbGetCharacterByIdWithShareData` to return the invite code and share data
- * even for recently-expired shares, allowing the service layer to check grace window validity.
+ * for a given user. This includes shares that have already expired, so the caller has
+ * to decide if it is still available (grace window) or already expired.
  */
 function latestNonStoppedCharacterShare(
   user: Pick<UserModel, 'id'>,
@@ -183,7 +180,7 @@ export async function dbGetCharacterByIdWithShareData({
 }): Promise<CharacterOptionalShareDataModel | undefined> {
   const latestShare = latestNonStoppedCharacterShare(user);
   const [row] = await baseCharacterWithShareQuery(latestShare)
-    .leftJoin(latestShare, eq(latestShare.characterId, characterTable.id))
+    .innerJoin(latestShare, eq(latestShare.characterId, characterTable.id))
     .where(eq(characterTable.id, characterId));
   return row;
 }

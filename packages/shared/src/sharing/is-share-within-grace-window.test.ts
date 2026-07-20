@@ -27,17 +27,17 @@ describe('isShareWithinGraceWindow', () => {
   });
 
   it('should return false when share expired after grace window', () => {
-    // Grace window is 2 hours, expire 2 hours and 1 second ago
+    // Expires 1 second after grace window is 2 hours, expire 2 hours and 1 second ago
     const outsideGraceWindow = new Date(NOW.getTime() - SHARE_EXTENSION_WINDOW_MS - 1000);
     expect(isShareWithinGraceWindow(outsideGraceWindow, SHARE_EXTENSION_WINDOW_MS)).toBe(false);
   });
 
   it('should use default grace window when not specified', () => {
-    // 1 hour ago - should be within default 2 hour grace window
-    const oneHourAgo = new Date(NOW.getTime() - 60 * 60 * 1000);
+    // Inside default grace window (1 second before end of grace window)
+    const oneHourAgo = new Date(NOW.getTime() - SHARE_EXTENSION_WINDOW_MS + 1000);
     expect(isShareWithinGraceWindow(oneHourAgo)).toBe(true);
 
-    // Outside default grace window (2 hours and 1 second ago)
+    // Outside default grace window (1 second after end of grace window)
     const outsideDefault = new Date(NOW.getTime() - SHARE_EXTENSION_WINDOW_MS - 1000);
     expect(isShareWithinGraceWindow(outsideDefault)).toBe(false);
   });
