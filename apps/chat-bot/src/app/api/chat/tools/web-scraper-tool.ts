@@ -70,15 +70,9 @@ type BuildWebScraperToolParams = Pick<
 >;
 
 export function buildWebScraperTool({
-  characterId,
-  learningScenarioId,
   sourceUrls,
   attachedLinks,
 }: BuildWebScraperToolParams): ToolRegistration | null {
-  if (characterId || learningScenarioId) {
-    return null;
-  }
-
   const attachedSourceUrls = sourceUrls.length > 0 ? sourceUrls : attachedLinks;
 
   const definition: ToolDefinition = {

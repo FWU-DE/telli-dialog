@@ -149,7 +149,7 @@ export async function sendCharacterMessage({
     | undefined;
 
   if (agenticChatEnabled) {
-    const builtTools = await buildTools({
+    const tools = await buildTools({
       user: teacherUserAndContext,
       characterId: character.id,
       relatedFileEntities,
@@ -157,9 +157,9 @@ export async function sendCharacterMessage({
       sourceUrls: processedUrls,
     });
 
-    activeToolDefinitions = Object.values(builtTools.toolRegistry).map((entry) => entry.definition);
+    activeToolDefinitions = Object.values(tools.toolRegistry).map((entry) => entry.definition);
 
-    toolRegistry = builtTools.toolRegistry;
+    toolRegistry = tools.toolRegistry;
   } else {
     chunks = await retrieveChunks({
       messages,
