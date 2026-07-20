@@ -5,6 +5,7 @@ import {
   dbGetConversations,
   dbUpdateConversationTitle,
 } from '@shared/db/functions/chat';
+import { dbGetRelatedFiles } from '@shared/db/functions/files';
 import {
   dbDeleteConversationByIdAndUserId,
   dbDoesInviteCodeExist,
@@ -113,6 +114,7 @@ export async function getConversationAndMessagesForExport({
 }) {
   const conversation = await getConversation({ conversationId, userId });
   let messages = await getConversationMessages({ conversationId, userId });
+  const fileMapping = await dbGetRelatedFiles(conversationId);
 
   if (conversation.characterId) {
     const character = await dbGetCharacterById({ characterId: conversation.characterId });
@@ -129,6 +131,7 @@ export async function getConversationAndMessagesForExport({
   return {
     conversation,
     messages,
+    fileMapping,
   };
 }
 
@@ -147,14 +150,29 @@ export async function getConversationMessageForExport({
 }) {
   const conversation = await getConversation({ conversationId, userId });
   const message = await dbGetConversationMessageById({ conversationId, messageId, userId });
+  const fileMapping = await dbGetRelatedFiles(conversationId);
 
   if (!message) {
     throw new NotFoundError('Conversation message not found');
   }
 
+  const messages = await getConversationMessages({ conversationId, userId });
+  const messageIndex = messages.findIndex(
+    (conversationMessage) => conversationMessage.id === messageId,
+  );
+  const previousUserMessage =
+    message.role === 'assistant'
+      ? messages
+          .slice(0, messageIndex)
+          .toReversed()
+          .find((conversationMessage) => conversationMessage.role === 'user')
+      : undefined;
+
   return {
     conversation,
     message,
+    fileMapping,
+    imageMessageIds: [previousUserMessage?.id, message.id].filter((id) => id !== undefined),
   };
 }
 
