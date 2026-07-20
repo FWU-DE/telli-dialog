@@ -154,7 +154,7 @@ export async function sendLearningScenarioMessage({
     | undefined;
 
   if (agenticChatEnabled) {
-    const builtTools = await buildTools({
+    const tools = await buildTools({
       user: teacherUserAndContext,
       learningScenarioId: learningScenario.id,
       relatedFileEntities,
@@ -162,9 +162,9 @@ export async function sendLearningScenarioMessage({
       sourceUrls: processedUrls,
     });
 
-    activeToolDefinitions = Object.values(builtTools.toolRegistry).map((entry) => entry.definition);
+    activeToolDefinitions = Object.values(tools.toolRegistry).map((entry) => entry.definition);
 
-    toolRegistry = builtTools.toolRegistry;
+    toolRegistry = tools.toolRegistry;
   } else {
     chunks = await retrieveChunks({
       messages,

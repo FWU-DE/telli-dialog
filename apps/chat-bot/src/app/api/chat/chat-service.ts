@@ -390,7 +390,7 @@ export async function sendChatMessage({
       activeLearningScenario?.attachedLinks ??
       [];
 
-    const builtTools = await buildTools({
+    const tools = await buildTools({
       user,
       characterId,
       learningScenarioId,
@@ -409,7 +409,7 @@ export async function sendChatMessage({
       },
     });
 
-    toolRegistry = builtTools.toolRegistry;
+    toolRegistry = tools.toolRegistry;
     activeToolDefinitions = Object.values(toolRegistry).map((entry) => entry.definition);
   } else {
     // Fallback implementations of Websearch and Chunk Retrieval.
