@@ -37,6 +37,7 @@ import {
   CharacterWithShareDataModel,
   FileModel,
   fileTable,
+  isCharacterWithShareData,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, InvalidArgumentError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
@@ -773,14 +774,6 @@ export const getCharacterForEditView = async ({
     budgetUsedBySharedChat,
   };
 };
-
-/**
- * Type guard that validates CharacterWithShareDataModel using Zod schema
- */
-function isCharacterWithShareData(character: unknown): character is CharacterWithShareDataModel {
-  const result = characterWithShareDataModel.safeParse(character);
-  return result.success;
-}
 
 /**
  * Returns a character with invite code and other sharing related data for sharing page.
