@@ -14,6 +14,20 @@ Help coding agents ship safe changes quickly in the `ais-chat` monorepo (TypeScr
 - **[SECURITY.md](SECURITY.md)** — Security issue reporting
 - **[packages/ui/README.md](packages/ui/README.md)** — shadcn/ui component library usage
 
+## Documentation Guardrails
+
+### Non-authoritative architecture snapshots
+
+- The files under `docs/current_architecture/` are snapshot documentation and can be incomplete or outdated.
+- Do not use `docs/current_architecture/*` as factual context for implementation decisions, bug fixes, or code generation.
+- For implementation work, always derive architecture facts from code in `apps/*`, `packages/*`, migrations, and runtime configuration.
+
+### Manual update trigger only
+
+- Update `docs/current_architecture/*` only when the user explicitly asks to update architecture documentation.
+- Never update these files opportunistically during unrelated coding tasks.
+- When updating, verify statements against current code and schema before editing.
+
 ## Tech Stack
 
 TypeScript monorepo (Turborepo + pnpm) with:
