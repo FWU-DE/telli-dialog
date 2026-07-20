@@ -28,6 +28,7 @@ import {
 import {
   AccessLevel,
   accessLevelSchema,
+  characterWithShareDataModel,
   CharacterFileMapping,
   CharacterOptionalShareDataModel,
   CharacterSelectModel,
@@ -48,7 +49,10 @@ import { buildCharacterPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES } from '@shared/sharing/const';
+import {
+  MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES,
+  SHARE_EXTENSION_WINDOW_MS,
+} from '@shared/sharing/const';
 import {
   copyCharacter,
   copyEntityPictureIfExists,
@@ -770,19 +774,70 @@ export const getCharacterForEditView = async ({
 };
 
 /**
+ * Checks if a share is still within the grace window (i.e., either active or recently expired).
+ * A share is considered manageable within the grace window if its expiration time is
+ * not more than `graceWindowMs` milliseconds in the past.
+ *
+ * @param expiredAt The timestamp when the share expires/expired
+ * @param graceWindowMs The grace window duration in milliseconds (default: SHARE_EXTENSION_WINDOW_MS)
+ * @returns true if the share is within the grace window, false otherwise
+ */
+function isShareWithinGraceWindow(
+  expiredAt: Date,
+  graceWindowMs: number = SHARE_EXTENSION_WINDOW_MS,
+): boolean {
+  const graceWindowStart = new Date(Date.now() - graceWindowMs);
+  return expiredAt >= graceWindowStart;
+}
+
+/**
+ * Type guard that validates CharacterWithShareDataModel using Zod schema
+ */
+function isCharacterWithShareData(character: unknown): character is CharacterWithShareDataModel {
+  const result = characterWithShareDataModel.safeParse(character);
+  return result.success;
+}
+
+/**
  * Returns a character with invite code and other sharing related data for sharing page.
- * @throws NotFoundError if character does not exist or is not shared
+ * The share must either be active (not yet expired) or within the grace window period
+ * (expired recently enough to still be manageable/extendable).
+ *
+ * @param graceWindowMs Optional grace window duration in milliseconds.
+ *        Defaults to SHARE_EXTENSION_WINDOW_MS (2 hours).
+ *        Can be customized if the business rules for grace period change.
+ *
+ * @throws NotFoundError if:
+ *   - character does not exist
+ *   - share does not exist or invite code is missing
+ *   - share has been manually stopped
+ *   - share is expired beyond the grace window
  */
 export const getSharedCharacter = async ({
   characterId,
   userId,
+  graceWindowMs = SHARE_EXTENSION_WINDOW_MS,
 }: {
   characterId: string;
   userId: string;
+  graceWindowMs?: number;
 }): Promise<CharacterWithShareDataModel> => {
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, user: { id: userId } });
-  if (!character || !character.inviteCode) throw new NotFoundError('Character not found');
+
+  if (!isCharacterWithShareData(character)) {
+    throw new NotFoundError('Character not found');
+  }
+
+  // Check if share has been manually stopped
+  if (character.manuallyStoppedAt !== null) {
+    throw new NotFoundError('Character not found');
+  }
+
+  // Check if share is within the grace window (active or recently expired)
+  if (!isShareWithinGraceWindow(character.expiredAt, graceWindowMs)) {
+    throw new NotFoundError('Character not found');
+  }
 
   return character;
 };
