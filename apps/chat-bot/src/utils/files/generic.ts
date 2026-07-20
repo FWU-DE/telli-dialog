@@ -5,11 +5,11 @@ import {
 } from '@/const';
 
 export function getFileExtension(fileName: string) {
-  const lastPart = fileName.split('.').at(-1)?.toLowerCase();
-  if (lastPart === undefined || !isSupportedFileExtension(lastPart)) {
-    throw new Error('file type is not supported or missing');
+  const fileExtension = fileName.split('.').at(-1)?.toLowerCase();
+  if (!fileExtension || !isSupportedFileExtension(fileExtension)) {
+    throw new Error(`file type ${fileExtension} is not supported`);
   }
-  return lastPart;
+  return fileExtension;
 }
 
 export function isImageFile(fileName: string): boolean {

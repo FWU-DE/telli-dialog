@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 
 export interface SharePollingData {
@@ -17,7 +17,7 @@ export function useShareDataPolling({
   fetchShareData: () => Promise<ServerActionResult<SharePollingData>>;
   isActive: boolean;
   intervalMs?: number;
-}): SharePollingData | null {
+}): { data: SharePollingData | null; refetch: () => Promise<void> } {
   const [polledData, setPolledData] = useState<SharePollingData | null>(null);
 
   // we store that function in a ref to avoid re-running the effect when the function changes
@@ -28,21 +28,21 @@ export function useShareDataPolling({
     fetchRef.current = fetchShareData;
   }, [fetchShareData]);
 
+  const poll = useCallback(async () => {
+    const result = await fetchRef.current(); // latest version
+    if (result.success && result.value) {
+      setPolledData(result.value);
+    }
+  }, []);
+
   useEffect(() => {
     if (!isActive) {
       return;
     }
 
-    const poll = async () => {
-      const result = await fetchRef.current(); // latest version
-      if (result.success && result.value) {
-        setPolledData(result.value);
-      }
-    };
-
     const interval = setInterval(() => void poll(), intervalMs);
     return () => clearInterval(interval);
-  }, [isActive, intervalMs]);
+  }, [isActive, intervalMs, poll]);
 
-  return polledData;
+  return { data: polledData, refetch: poll };
 }
