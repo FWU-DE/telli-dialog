@@ -17,7 +17,7 @@ This folder contains architecture snapshots for documentation purposes.
 
 1. Re-read affected source files first (code, schema, migrations, API handlers).
 2. Update diagrams/text to reflect what exists now, not what is planned.
-3. Keep the ARC42 standard.
+3. Keep the arc42 standard.
 4. Keep assumptions explicit and short.
 5. Prefer splitting crowded diagrams into focused diagrams.
 6. If a relation is runtime-only (not a DB FK), label it clearly.

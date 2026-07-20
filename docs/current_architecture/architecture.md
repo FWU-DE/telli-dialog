@@ -145,7 +145,7 @@ graph LR
     end
 
     chatbot --> ui & shared & aicore
-    admin --> ui & shared
+    admin --> ui & shared & apidb
     shared --> aicore & sharedcore
     aicore --> apidb
 ```
@@ -490,7 +490,9 @@ erDiagram
         text invite_code UK
         int token_points_limit
         int max_usage_time_limit
-        timestamp expires_at
+        timestamp started_at
+        timestamp expired_at
+        timestamp manually_stopped_at
     }
     shared_learning_scenario {
         uuid id PK
@@ -499,7 +501,9 @@ erDiagram
         text invite_code UK
         int token_points_limit
         int max_usage_time_limit
-        timestamp expires_at
+        timestamp started_at
+        timestamp expired_at
+        timestamp manually_stopped_at
     }
     suspension_request {
         uuid id PK
