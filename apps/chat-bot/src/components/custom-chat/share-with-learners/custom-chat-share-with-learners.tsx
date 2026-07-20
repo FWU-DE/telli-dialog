@@ -3,7 +3,6 @@
 import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import {
@@ -63,7 +62,7 @@ interface CustomChatShareWithLearnersProps {
   }>;
   shareUILink: string;
   sharingDisabled?: boolean;
-  onPollShareData?: () => Promise<ServerActionResult<SharePollingData>>;
+  onPollShareData: () => Promise<ServerActionResult<SharePollingData>>;
 }
 
 export function CustomChatShareWithLearners({
@@ -88,31 +87,17 @@ export function CustomChatShareWithLearners({
   const t = useTranslations('custom-chat.share-with-learners');
   const tToast = useTranslations('custom-chat.toasts');
 
-  const [expiredAtOverride, setExpiredAtOverride] = useState<Date | null>(null);
-  const [tokenPointsLimitOverride, setTokenPointsLimitOverride] = useState<number | null>(null);
-
   const { isExtendable: sharedChatActiveInitial } = calculateShareSessionState({
     expiredAt,
     manuallyStoppedAt,
   });
 
-  const polledData = useShareDataPolling({
-    fetchShareData:
-      onPollShareData ??
-      (async () => ({
-        success: true as const,
-        value: {
-          expiredAt: null,
-          manuallyStoppedAt: null,
-          tokenPointsLimit: null,
-          budgetUsedBySharedChat: 0,
-          tokenLimitExceeded: false,
-        },
-      })),
-    isActive: sharedChatActiveInitial && !!onPollShareData,
+  const { data: polledData, refetch: refetchShareData } = useShareDataPolling({
+    fetchShareData: onPollShareData,
+    isActive: sharedChatActiveInitial,
   });
 
-  const currentExpiredAt = expiredAtOverride ?? polledData?.expiredAt ?? expiredAt;
+  const currentExpiredAt = polledData?.expiredAt ?? expiredAt;
   const currentManuallyStoppedAt = polledData?.manuallyStoppedAt ?? manuallyStoppedAt;
 
   const { shareSessionState, timeLeftInSeconds, isExtendable } = calculateShareSessionState({
@@ -125,8 +110,7 @@ export function CustomChatShareWithLearners({
 
   const maxAvailablePercentage = getMaxAvailablePercentage({ usedBudget, maxBudget });
 
-  const currentTokenPointsLimit =
-    tokenPointsLimitOverride ?? polledData?.tokenPointsLimit ?? tokenPointsLimit;
+  const currentTokenPointsLimit = polledData?.tokenPointsLimit ?? tokenPointsLimit;
   const preselectedTokenPointsPercentageLimit = resolveTokenPointsPercentageLimit({
     previousTokenPointsLimit: currentTokenPointsLimit,
     selectableFixedValues: tokenPointsPercentageValues.filter(
@@ -140,6 +124,7 @@ export function CustomChatShareWithLearners({
   const currentTokenLimitExceeded = polledData?.tokenLimitExceeded ?? false;
   const isShareWarningVisible =
     shareSessionState === ShareSessionState.EXPIRED_RECENTLY || currentTokenLimitExceeded;
+  const isShareButtonDisabled = sharingDisabled || isShareWarningVisible;
 
   const preselectedUsageTimeLimit =
     maxUsageTimeLimit !== null && usageTimeValuesInMinutes.includes(maxUsageTimeLimit)
@@ -224,8 +209,8 @@ export function CustomChatShareWithLearners({
                           currentTokenPointsPercentageLimit={currentTokenPointsPercentageLimit}
                           maxAvailablePercentage={maxAvailablePercentage}
                           onAdjustTokenLimit={onAdjustTokenLimit}
-                          onAdjustTokenLimitSuccess={(newTokenPointsLimit) => {
-                            setTokenPointsLimitOverride(newTokenPointsLimit);
+                          onAdjustTokenLimitSuccess={() => {
+                            void refetchShareData();
                           }}
                         />
                       </div>
@@ -251,6 +236,9 @@ export function CustomChatShareWithLearners({
                           totalTimeInSeconds={(maxUsageTimeLimit ?? 0) * 60}
                           className="!bg-transparent"
                           stopWatchClassName="w-4 h-4"
+                          onExpire={() => {
+                            void refetchShareData();
+                          }}
                         />
                       </div>
                       <div className="mt-4 flex justify-center">
@@ -263,8 +251,8 @@ export function CustomChatShareWithLearners({
                           preselectedUsageTimeLimit={preselectedUsageTimeLimit}
                           currentUsageTimeRemaining={sharedChatTimeLeft}
                           onAddTime={onAddTime}
-                          onAddTimeSuccess={(newExpiredAt) => {
-                            setExpiredAtOverride(newExpiredAt);
+                          onAddTimeSuccess={() => {
+                            void refetchShareData();
                           }}
                         />
                       </div>
@@ -327,7 +315,7 @@ export function CustomChatShareWithLearners({
               <Button
                 type="button"
                 onClick={handleStartSharing}
-                disabled={sharingDisabled || maxAvailablePercentage <= 0}
+                disabled={isShareButtonDisabled}
                 data-testid="start-share-button"
               >
                 <ShareFatIcon className="size-5" />
