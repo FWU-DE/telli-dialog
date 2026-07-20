@@ -28,7 +28,6 @@ import {
 import {
   AccessLevel,
   accessLevelSchema,
-  characterWithShareDataModel,
   CharacterFileMapping,
   CharacterOptionalShareDataModel,
   CharacterSelectModel,
