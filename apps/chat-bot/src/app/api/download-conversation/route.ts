@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     let fileName: string;
 
     if (messageId === undefined) {
-      const { conversation, messages } = await getConversationAndMessagesForExport({
+      const { conversation, messages, fileMapping } = await getConversationAndMessagesForExport({
         conversationId,
         userId: user.id,
       });
@@ -50,19 +50,23 @@ export async function GET(req: NextRequest) {
       document = await generateConversationDocxFile({
         conversation,
         messages,
+        fileMapping,
         gptName,
       });
 
       fileName = generateFileName({ conversation, gptName });
     } else {
-      const { conversation, message } = await getConversationMessageForExport({
-        conversationId,
-        messageId,
-        userId: user.id,
-      });
+      const { conversation, message, fileMapping, imageMessageIds } =
+        await getConversationMessageForExport({
+          conversationId,
+          messageId,
+          userId: user.id,
+        });
 
       document = await generateConversationMessageDocxFile({
         message,
+        fileMapping,
+        imageMessageIds,
         gptName,
       });
 
