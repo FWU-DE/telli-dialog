@@ -923,6 +923,17 @@ export type LearningScenarioOptionalShareDataModel = z.infer<
   typeof learningScenarioOptionalShareDataModel
 >;
 
+/**
+ *  Type guard for learning scenario with share data
+ *  This uses Zod validation for compile-time and runtime safety.
+ */
+export function isLearningScenarioWithShareData(
+  scenario: unknown,
+): scenario is LearningScenarioWithShareDataModel {
+  const result = learningScenarioWithShareDataModel.safeParse(scenario);
+  return result.success;
+}
+
 export const toolCallNameSchema = z.enum(['web_search']);
 export const toolCallNameEnum = pgEnum('tool_call_name', toolCallNameSchema.enum);
 export type ToolCallName = z.infer<typeof toolCallNameSchema>;

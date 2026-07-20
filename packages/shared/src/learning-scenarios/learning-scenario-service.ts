@@ -26,6 +26,7 @@ import {
   accessLevelSchema,
   FileModel,
   fileTable,
+  isLearningScenarioWithShareData,
   LearningScenarioFileMapping,
   LearningScenarioOptionalShareDataModel,
   LearningScenarioSelectModel,
@@ -61,7 +62,10 @@ import {
 } from '@shared/auth/authorization-service';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES } from '@shared/sharing/const';
+import {
+  MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES,
+  SHARE_EXTENSION_WINDOW_MS,
+} from '@shared/sharing/const';
 import {
   getChangedKeys,
   getPreservedUpdatedAtForExemptedKeys,
@@ -202,15 +206,45 @@ async function getLearningScenarioInfo(
 }
 
 /**
+ * Checks if a share is still within the grace window (i.e., either active or recently expired).
+ * A share is considered manageable within the grace window if its expiration time is
+ * not more than `graceWindowMs` milliseconds in the past.
+ *
+ * @param expiredAt The timestamp when the share expires/expired
+ * @param graceWindowMs The grace window duration in milliseconds (default: SHARE_EXTENSION_WINDOW_MS)
+ * @returns true if the share is within the grace window, false otherwise
+ */
+function isShareWithinGraceWindow(
+  expiredAt: Date,
+  graceWindowMs: number = SHARE_EXTENSION_WINDOW_MS,
+): boolean {
+  const graceWindowStart = new Date(Date.now() - graceWindowMs);
+  return expiredAt >= graceWindowStart;
+}
+
+/**
  * Returns a learning scenario with invite code and other sharing related data for sharing page.
- * @throws NotFoundError if learning scenario does not exist or is not shared
+ * The share must either be active (not yet expired) or within the grace window period
+ * (expired recently enough to still be manageable/extendable).
+ *
+ * @param graceWindowMs Optional grace window duration in milliseconds.
+ *        Defaults to SHARE_EXTENSION_WINDOW_MS (2 hours).
+ *        Can be customized if the business rules for grace period change.
+ *
+ * @throws NotFoundError if:
+ *   - learning scenario does not exist
+ *   - share does not exist
+ *   - share has been manually stopped
+ *   - share is expired beyond the grace window
  */
 export async function getSharedLearningScenario({
   learningScenarioId,
   user,
+  graceWindowMs = SHARE_EXTENSION_WINDOW_MS,
 }: {
   learningScenarioId: string;
   user: Pick<UserModel, 'id'>;
+  graceWindowMs?: number;
 }): Promise<LearningScenarioWithShareDataModel> {
   checkParameterUUID(learningScenarioId);
   const learningScenario = await dbGetLearningScenarioByIdWithShareData({
@@ -218,6 +252,21 @@ export async function getSharedLearningScenario({
     user,
   });
   if (!learningScenario || !learningScenario.inviteCode) {
+    throw new NotFoundError('Learning scenario not found');
+  }
+
+  // Check if share data exists (all share fields should be present if inviteCode exists)
+  if (!isLearningScenarioWithShareData(learningScenario)) {
+    throw new NotFoundError('Learning scenario not found');
+  }
+
+  // Check if share has been manually stopped
+  if (learningScenario.manuallyStoppedAt !== null) {
+    throw new NotFoundError('Learning scenario not found');
+  }
+
+  // Check if share is within the grace window (active or recently expired)
+  if (!isShareWithinGraceWindow(learningScenario.expiredAt, graceWindowMs)) {
     throw new NotFoundError('Learning scenario not found');
   }
 
