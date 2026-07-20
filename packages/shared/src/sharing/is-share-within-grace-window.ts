@@ -14,5 +14,5 @@ export function isShareWithinGraceWindow(
   graceWindowMs: number = SHARE_EXTENSION_WINDOW_MS,
 ): boolean {
   const graceWindowStart = new Date(Date.now() - graceWindowMs);
-  return expiredAt >= graceWindowStart;
+  return expiredAt > graceWindowStart;
 }

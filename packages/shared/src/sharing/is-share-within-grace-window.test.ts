@@ -20,10 +20,10 @@ describe('isShareWithinGraceWindow', () => {
     expect(isShareWithinGraceWindow(almostAtBoundary, SHARE_EXTENSION_WINDOW_MS)).toBe(true);
   });
 
-  it('should return true when share expired exactly at grace window start', () => {
+  it('should return false when share expired exactly at grace window start', () => {
     // Expire exactly at the grace window boundary
     const atBoundary = new Date(NOW.getTime() - SHARE_EXTENSION_WINDOW_MS);
-    expect(isShareWithinGraceWindow(atBoundary, SHARE_EXTENSION_WINDOW_MS)).toBe(true);
+    expect(isShareWithinGraceWindow(atBoundary, SHARE_EXTENSION_WINDOW_MS)).toBe(false);
   });
 
   it('should return false when share expired after grace window', () => {
