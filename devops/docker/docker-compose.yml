@@ -87,7 +87,7 @@ services:
 
   # Crawl4AI for web scraping capabilities
   crawl4ai:
-    image: unclecode/crawl4ai:0.9.1
+    image: unclecode/crawl4ai:0.9.2
     environment:
       CRAWL4AI_API_TOKEN: ais-chat-crawl4ai-token
     restart: unless-stopped
@@ -147,7 +147,7 @@ services:
       start_period: 30s
 
   bifrost:
-    image: maximhq/bifrost:v1.6.3
+    image: maximhq/bifrost:v1.6.4
     restart: unless-stopped
     environment:
       APP_HOST: 0.0.0.0
