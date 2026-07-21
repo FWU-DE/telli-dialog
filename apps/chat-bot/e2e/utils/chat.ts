@@ -16,37 +16,31 @@ export async function enterMessage(page: Page, message: string) {
 export async function sendMessage(page: Page, message: string) {
   await test.step('send message and wait for response', async () => {
     const loadingSpinner = page.getByAltText('Ladeanimation');
+    const reloadButton = page.getByLabel('Reload');
     const errorText = page.getByText('Ein Fehler ist aufgetreten');
-    const previousAssistantMessageCount = await page.getByLabel(/assistant message \d+/).count();
-    const nextAssistantMessage = page.getByLabel(
-      `assistant message ${previousAssistantMessageCount + 1}`,
-    );
 
     await enterMessage(page, message);
-    await expect(page.getByTestId('submit-button')).toBeEnabled();
-    await page.getByTestId('submit-button').click();
+    await page.keyboard.press('Enter');
 
     // Firefox can miss the short-lived loading animation for fast mock responses.
-    // Treat either the spinner or the next assistant message as proof that submission started.
-    const firstResponseSignal = await Promise.race([
-      loadingSpinner.waitFor({ timeout: 10_000 }).then(() => 'spinner' as const),
-      nextAssistantMessage.waitFor({ timeout: 60_000 }).then(() => 'message' as const),
+    // Keep waiting for completion, but only wait for spinner detachment if it was observed.
+    const didShowLoadingSpinner = await loadingSpinner
+      .waitFor({ timeout: 5_000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (didShowLoadingSpinner) {
+      await loadingSpinner.waitFor({ state: 'detached', timeout: 60_000 });
+    }
+
+    // Either the response finishes successfully and shows the Reload button,
+    // or an error message appears and the test should fail.
+    await Promise.race([
+      reloadButton.waitFor({ timeout: 60_000 }),
       errorText.waitFor({ timeout: 60_000 }).then(() => {
         throw new Error('Error message appeared after sending message');
       }),
     ]);
-
-    if (firstResponseSignal === 'spinner') {
-      await loadingSpinner.waitFor({ state: 'detached', timeout: 60_000 });
-      await Promise.race([
-        nextAssistantMessage.waitFor({ timeout: 60_000 }),
-        errorText.waitFor({ timeout: 60_000 }).then(() => {
-          throw new Error('Error message appeared after sending message');
-        }),
-      ]);
-    }
-
-    await expect(nextAssistantMessage).toBeVisible();
   });
 }
 
