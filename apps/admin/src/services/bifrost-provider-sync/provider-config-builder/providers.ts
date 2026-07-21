@@ -14,6 +14,38 @@ function stripAnthropicPrefix(modelName: string): string {
   return modelName.replace(/^anthropic\//, '');
 }
 
+function stringifyAuthCredentials(authCredentials: unknown): string {
+  if (typeof authCredentials === 'string') return authCredentials;
+  if (authCredentials === undefined) return '';
+  return stableStringify(authCredentials);
+}
+
+function stableStringify(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
+  if (value && typeof value === 'object') {
+    return `{${Object.entries(value)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, entryValue]) => `${JSON.stringify(key)}:${stableStringify(entryValue)}`)
+      .join(',')}}`;
+  }
+
+  return JSON.stringify(value);
+}
+
+function getVertexAuthCredentials(groupedModels: LlmModel[]): unknown {
+  for (const model of groupedModels) {
+    if (model.setting.provider !== 'google') continue;
+    if (model.setting.authCredentials === undefined) continue;
+    return model.setting.authCredentials;
+  }
+
+  return undefined;
+}
+
+function getVertexUniqueValue(projectId: string, authCredentials: string): string {
+  return authCredentials ? `${projectId}:${authCredentials}` : projectId;
+}
+
 export function buildAzureProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] {
   return buildSingleKeyProviderConfigs({
     provider: 'azure',
@@ -116,26 +148,29 @@ export function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderC
     models,
     getGroupKey: (setting) => {
       if (setting.provider !== 'google') return undefined;
-      return `${setting.projectId}:${setting.location}`;
+      const authCredentials = stringifyAuthCredentials(setting.authCredentials);
+      return `${setting.projectId}:${setting.location}:${authCredentials}`;
     },
     buildKey: (setting, groupedModels) => {
       if (setting.provider !== 'google') throw new BifrostProviderSyncError();
       const modelNames = [
         ...new Set(groupedModels.map((model) => stripAnthropicPrefix(model.name))),
       ].sort();
+      const authCredentials = getVertexAuthCredentials(groupedModels);
       return buildBifrostKey({
         provider: 'vertex',
         readableValue: `${setting.projectId}-${setting.location}`,
-        uniqueValue: setting.projectId,
+        uniqueValue: getVertexUniqueValue(
+          setting.projectId,
+          stringifyAuthCredentials(authCredentials),
+        ),
         value: '',
         groupedModels,
         extra: {
           vertex_key_config: {
             project_id: setting.projectId,
             region: setting.location,
-            // Empty credentials make Bifrost use Application Default Credentials.
-            // Mount GOOGLE_APPLICATION_CREDENTIALS into the Bifrost container/pod when needed.
-            auth_credentials: '',
+            auth_credentials: stringifyAuthCredentials(authCredentials),
           },
           models: modelNames,
         },

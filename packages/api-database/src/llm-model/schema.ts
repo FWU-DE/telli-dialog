@@ -29,6 +29,7 @@ export const llmModelSettingsGoogleSchema = z.object({
   provider: z.literal(llmModelProviderSchema.enum.google),
   projectId: z.string(),
   location: z.string(),
+  authCredentials: z.union([z.string(), z.record(z.string(), z.unknown())]).optional(),
 });
 
 export const llmModelSettingsSchema = llmModelSettingsIonos
