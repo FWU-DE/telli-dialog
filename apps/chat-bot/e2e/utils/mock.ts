@@ -110,6 +110,8 @@ export const mockLearningScenario = (): LearningScenarioSelectModel => {
     suspended: false,
     hasLinkAccess: false,
     isWebSearchEnabled: false,
+    webSearchScope: 'all-web',
+    webSearchIncludedDomains: [],
     ownerSchoolIds: [generateUUID()],
   };
 };
@@ -175,6 +177,8 @@ export const mockCharacter = (): CharacterSelectModel => {
     suspended: false,
     hasLinkAccess: false,
     isWebSearchEnabled: false,
+    webSearchScope: 'all-web',
+    webSearchIncludedDomains: [],
     ownerSchoolIds: [generateUUID()],
   };
 };

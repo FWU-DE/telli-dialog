@@ -12,6 +12,7 @@ import {
   categoriesSchema,
   federalStatesSchema,
   languagesSchema,
+  webSearchScopeSchema,
 } from '@shared/db/schema';
 import { WebSource } from '@shared/db/types';
 import { useTranslations } from 'next-intl';
@@ -124,6 +125,8 @@ function createCharacterFormValuesSchema(t: CharacterTranslator) {
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
     isWebSearchEnabled: z.boolean(),
+    webSearchScope: webSearchScopeSchema,
+    webSearchIncludedDomains: z.array(z.string()),
   });
 }
 
@@ -175,6 +178,8 @@ export function CharacterEdit({
     ...getShareFormValues(character.accessLevel),
     hasLinkAccess: character.hasLinkAccess,
     isWebSearchEnabled: character.isWebSearchEnabled,
+    webSearchScope: character.webSearchScope,
+    webSearchIncludedDomains: character.webSearchIncludedDomains,
   };
 
   const {
@@ -219,6 +224,8 @@ export function CharacterEdit({
           }),
           hasLinkAccess: data.hasLinkAccess,
           isWebSearchEnabled: data.isWebSearchEnabled,
+          webSearchScope: data.webSearchScope,
+          webSearchIncludedDomains: data.webSearchIncludedDomains,
         });
 
         return updateResult.success;
@@ -542,9 +549,12 @@ export function CharacterEdit({
             <CustomChatWebSearch
               name="isWebSearchEnabled"
               control={control}
-              onCheckedChange={() => {
+              onChange={() => {
                 void flushAutoSave();
               }}
+              showScopeOptions
+              scopeName="webSearchScope"
+              includedDomainsName="webSearchIncludedDomains"
             />
           )}
 
