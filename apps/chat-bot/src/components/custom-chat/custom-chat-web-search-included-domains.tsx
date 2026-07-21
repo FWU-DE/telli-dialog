@@ -72,8 +72,7 @@ export function CustomChatWebSearchIncludedDomains<TFieldValues extends FieldVal
 
         return (
           <div className="flex flex-col gap-4">
-            <h3 className="font-medium">{t('websites-heading')}</h3>
-            <div className="flex w-full flex-col gap-2 lg:flex-row">
+            <div className="mt-1 flex w-full flex-col gap-2 lg:flex-row">
               <Input
                 wrapperClassName="flex-1"
                 type="text"
@@ -96,7 +95,7 @@ export function CustomChatWebSearchIncludedDomains<TFieldValues extends FieldVal
                 className="self-center"
                 onClick={handleAddWebsite}
                 disabled={isLimitReached}
-                aria-label={t('websites-aria-add')}
+                aria-label={t('websites-add')}
               >
                 <PlusIcon className="size-4" />
                 {t('websites-add')}

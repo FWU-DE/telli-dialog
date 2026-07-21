@@ -8,7 +8,6 @@ import { Card, CardContent } from '@ui/components/card';
 import { Control, Controller, FieldPath, FieldValues } from 'react-hook-form';
 import { CheckCircleIcon } from '@phosphor-icons/react';
 import { RadioGroup, RadioGroupItem } from '@ui/components/radio-group';
-import { Separator } from '@ui/components/separator';
 import { FieldLabel } from '@ui/components/field';
 import type { WebSearchScope } from '@shared/db/schema';
 
@@ -68,7 +67,7 @@ export function CustomChatWebSearch<
               name={props.name}
               control={props.control}
               render={({ field, fieldState }) => (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-6">
                   <Switch
                     checked={field.value}
                     onCheckedChange={(checked) => {
@@ -81,7 +80,6 @@ export function CustomChatWebSearch<
                   />
                   {props.showScopeOptions === true && field.value === true ? (
                     <>
-                      <Separator />
                       <Controller
                         name={props.scopeName}
                         control={props.control}
@@ -114,7 +112,6 @@ export function CustomChatWebSearch<
                               </RadioGroup>
                               {scopeValue === 'included-domains' && (
                                 <>
-                                  <Separator />
                                   <CustomChatWebSearchIncludedDomains
                                     control={props.control}
                                     name={props.includedDomainsName}
