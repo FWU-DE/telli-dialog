@@ -27,6 +27,7 @@ import {
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
 import { ToolCall } from '@ais-chat/ai-core/chat/types';
+import { logError } from '@shared/logging';
 
 // can be expanded to include other metadata of other file types
 export type FileMetadata = Record<string, unknown>;
@@ -942,6 +943,20 @@ export type LearningScenarioWithShareDataModel = z.infer<typeof learningScenario
 export type LearningScenarioOptionalShareDataModel = z.infer<
   typeof learningScenarioOptionalShareDataModel
 >;
+
+/**
+ *  Type guard for learning scenario with share data
+ *  This uses Zod validation for compile-time and runtime safety.
+ */
+export function isLearningScenarioWithShareData(
+  scenario: unknown,
+): scenario is LearningScenarioWithShareDataModel {
+  const result = learningScenarioWithShareDataModel.safeParse(scenario);
+  if (!result.success) {
+    logError('isLearningScenarioWithShareData: validation failed', result.error);
+  }
+  return result.success;
+}
 
 export const toolCallNameSchema = z.enum(['web_search']);
 export const toolCallNameEnum = pgEnum('tool_call_name', toolCallNameSchema.enum);

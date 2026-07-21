@@ -48,7 +48,10 @@ import { buildCharacterPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES } from '@shared/sharing/const';
+import {
+  MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES,
+  SHARE_EXTENSION_WINDOW_MS,
+} from '@shared/sharing/const';
 import {
   copyCharacter,
   copyEntityPictureIfExists,
@@ -74,6 +77,7 @@ import {
 } from '@shared/auth/authorization-service';
 import { dbGetSharedCharacterChatUsageInCentByCharacterId } from '@shared/db/functions/token-points';
 import { sharedCharacterChatHasReachedTokenPointsLimit } from '@shared/users/usage';
+import { isShareWithinGraceWindow } from '@shared/sharing/is-share-within-grace-window';
 
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
@@ -771,7 +775,14 @@ export const getCharacterForEditView = async ({
 
 /**
  * Returns a character with invite code and other sharing related data for sharing page.
- * @throws NotFoundError if character does not exist or is not shared
+ * The share must either be active (not yet expired) or within the grace window period
+ * (expired recently enough to still be manageable/extendable).
+ *
+ * @throws NotFoundError if:
+ *   - character does not exist
+ *   - share does not exist
+ *   - share has been manually stopped
+ *   - share is expired beyond the grace window
  */
 export const getSharedCharacter = async ({
   characterId,
@@ -782,7 +793,14 @@ export const getSharedCharacter = async ({
 }): Promise<CharacterWithShareDataModel> => {
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, user: { id: userId } });
-  if (!character || !character.inviteCode) throw new NotFoundError('Character not found');
+
+  if (!character || character.manuallyStoppedAt !== null) {
+    throw new NotFoundError('Character not found');
+  }
+
+  if (!isShareWithinGraceWindow(character.expiredAt, SHARE_EXTENSION_WINDOW_MS)) {
+    throw new NotFoundError('Character not found');
+  }
 
   return character;
 };
