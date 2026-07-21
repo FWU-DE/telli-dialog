@@ -11,6 +11,9 @@ import { notFound } from 'next/navigation';
 import z from 'zod';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { NextIntlClientProvider } from 'next-intl';
+import { resolveSharingLocale } from '@/i18n/sharing-locale';
+import { loadTranslations } from '@/i18n/load-translations';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('learning-scenarios.page-titles');
@@ -46,16 +49,21 @@ export default async function Page(
 
   const federalState = await dbGetFederalStateByUserId({ userId: learningScenario.startedBy });
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
+  const shareUrl = `/ua/learning-scenarios/${learningScenario.id}/dialog?inviteCode=${searchParams.inviteCode}`;
+  const locale = await resolveSharingLocale(shareUrl);
+  const messages = await loadTranslations(locale);
 
   return (
-    <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-      <ThemeProvider designConfiguration={designConfiguration}>
-        <LearningScenarioSharedChat
-          {...learningScenario}
-          inviteCode={searchParams.inviteCode}
-          avatarPictureUrl={avatarPictureUrl}
-        />
-      </ThemeProvider>
-    </LlmModelsProvider>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
+        <ThemeProvider designConfiguration={designConfiguration}>
+          <LearningScenarioSharedChat
+            {...learningScenario}
+            inviteCode={searchParams.inviteCode}
+            avatarPictureUrl={avatarPictureUrl}
+          />
+        </ThemeProvider>
+      </LlmModelsProvider>
+    </NextIntlClientProvider>
   );
 }

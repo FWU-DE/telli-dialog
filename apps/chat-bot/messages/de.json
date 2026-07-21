@@ -379,9 +379,6 @@
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
-      "invalid-code-toast": "Der Code der eingegeben wurde, ist entweder abgelaufen oder ungültig.",
-      "join-code": "Mit Code beitreten",
-      "enter-chat": "Zum Dialog",
       "delete-chat-modal-title": "Aktuellen Chat löschen?",
       "delete-chat-modal-description": "Es wird ein neuer Chat begonnen. Der aktuelle Chat wird unwiderruflich gelöscht.",
       "delete-chat-modal-confirm-button": "Löschen"
@@ -458,6 +455,12 @@
     }
   },
   "custom-chat": {
+    "shared": {
+      "join-code": "Mit Code beitreten",
+      "enter-chat": "Zum Dialog",
+      "start-chat": "Dialog starten",
+      "invalid-code-toast": "Der Code der eingegeben wurde, ist entweder abgelaufen oder ungültig."
+    },
     "chat": "Chatten",
     "duplicate": "Duplizieren",
     "delete": "Löschen",
@@ -675,9 +678,9 @@
   "filter": {
     "filter-label": "Filter",
     "filter-attributes": "Filterattribute",
-    "filter-edit-tooltip": "Falls eine Freigabe aktiviert ist, besteht über die Filterattribute eine bessere Auffindbarkeit für andere Lehrkräfte. \n\nDie Filterattribute beeinflussen nicht die Chat-Antworten.",
-    "filter-detail-tooltip": "Über die Filterattribute besteht eine bessere Auffindbarkeit. \nDie Filterattribute beeinflussen nicht die Chat-Antworten.",
-    "language-tooltip": "Die Sprache, in der AIS.chat antwortet.",
+    "filter-edit-tooltip": "Falls eine Freigabe aktiviert ist, besteht über die Filterattribute eine bessere Auffindbarkeit für andere Lehrkräfte. \n\nDie Filterattribute beeinflussen mit Ausnahme der Sprache nicht die Chat-Antworten.",
+    "filter-detail-tooltip": "Über die Filterattribute besteht eine bessere Auffindbarkeit. \nDie Filterattribute beeinflussen mit Ausnahme der Sprache nicht die Chat-Antworten.",
+    "language-tooltip": "Die Sprache, in der AIS.chat antwortet. Legt auch die Sprache der Schüleroberfläche beim Teilen fest.",
     "school-filter": "Schulform",
     "grade-filter": "Klassenstufe",
     "subject-filter": "Fach",
@@ -733,6 +736,7 @@
   "languages": {
     "german": "Deutsch",
     "english": "Englisch",
+    "arabic": "Arabisch",
     "turkish": "Türkisch",
     "french": "Französisch",
     "italian": "Italienisch",

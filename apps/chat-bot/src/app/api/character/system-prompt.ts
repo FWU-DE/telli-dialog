@@ -34,3 +34,20 @@ ${character.description?.trim() ? `### Beschreibung\n${character.description}\n`
 Bitte antworte stets im Rahmen deiner Rolle als ${character.name}.
 ${ragContext}`;
 }
+
+// Create the system prompt for determining the language of the character assistant
+export function constructCharacterLanguageSystemPrompt({
+  character,
+}: {
+  character: CharacterSelectModel;
+}) {
+  return `
+
+## Kontext:
+### Thema des Chats 
+${character.name}
+
+${character.description?.trim() ? `### Zweck des Dialogs\n${character.description}\n` : ''}
+${character.instructions?.trim() ? `### Folgendes sollst du tun\n${character.instructions}\n` : ''}
+`;
+}

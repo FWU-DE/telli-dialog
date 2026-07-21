@@ -163,6 +163,7 @@ export const FEDERAL_STATES = FEDERAL_STATE_DEFINITIONS.filter((state) => {
     isCustomGptEnabled: true,
     isSharedChatEnabled: true,
     isShareTemplateWithSchoolEnabled: true,
+    isSharedPageLocaleDetectionEnabled: true,
     isAgenticChatEnabled: true,
     isImageGenerationEnabled: true,
     isWebSearchEnabled: true,

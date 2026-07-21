@@ -196,6 +196,7 @@ export const federalStateFeatureTogglesSchema = z.object({
   isSharedChatEnabled: z.boolean().default(true),
   isCustomGptEnabled: z.boolean().default(true),
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
+  isSharedPageLocaleDetectionEnabled: z.boolean().optional(),
   isAgenticChatEnabled: z.boolean().optional(),
   isImageGenerationEnabled: z.boolean().optional(),
   isWebSearchEnabled: z.boolean().optional(),
@@ -447,6 +448,7 @@ export type FederalState = z.infer<typeof federalStatesSchema>;
 export const languagesSchema = z.enum([
   'german',
   'english',
+  'arabic',
   'turkish',
   'french',
   'italian',

@@ -61,6 +61,8 @@ function transformToFederalStateEditForm(federalState: FederalStateModel): Feder
       ...federalState.featureToggles,
       isImageGenerationEnabled: federalState.featureToggles.isImageGenerationEnabled ?? false,
       isWebSearchEnabled: federalState.featureToggles.isWebSearchEnabled ?? false,
+      isSharedPageLocaleDetectionEnabled:
+        federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true,
       isAgenticChatEnabled: federalState.featureToggles.isAgenticChatEnabled ?? false,
     },
     supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
@@ -258,6 +260,12 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="featureToggles.isWebSearchEnabled"
             label="Websuche aktivieren"
             description="Erlaubt die Nutzung der Websuchfunktion."
+            control={control}
+          />
+          <FormFieldCheckbox
+            name="featureToggles.isSharedPageLocaleDetectionEnabled"
+            label="Spracherkennung für geteilte Seiten aktivieren"
+            description="Ermittelt und setzt automatisch die Sprache für geteilte Seiten."
             control={control}
           />
           <FormFieldCheckbox

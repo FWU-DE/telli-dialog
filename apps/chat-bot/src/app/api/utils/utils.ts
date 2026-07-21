@@ -8,6 +8,7 @@ import { LlmModelSelectModel } from '@shared/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
 import {
   DEFAULT_AUXILIARY_MODEL,
+  DEFAULT_STRONG_AUXILIARY_MODEL,
   FALLBACK_AUXILIARY_MODEL,
 } from '@shared/llm-models/default-llm-models';
 import { getDefaultModel, getFirstTextModel } from '@shared/llm-models/llm-model-service';
@@ -169,6 +170,34 @@ export async function getAuxiliaryModel(federalStateId: string): Promise<LlmMode
 }
 
 /**
+ * Get a strong auxiliary model for the federal state for more complex tasks like language determination.
+ * This model is more capable than the default auxiliary model but also more resource-intensive, so should be used wisely.
+ * @returns The strong auxiliary model for the federal state
+ */
+export async function getStrongAuxiliaryModel(
+  federalStateId: string,
+): Promise<LlmModelSelectModel> {
+  const llmModels = await dbGetLlmModelsByFederalStateId({
+    federalStateId,
+  });
+  const auxiliaryModel = getDefaultStrongAuxModel(llmModels);
+  if (auxiliaryModel !== undefined) {
+    return auxiliaryModel;
+  }
+
+  const fallbackAuxiliaryModel =
+    getDefaultAuxModel(llmModels) ?? getFallbackAuxModel(llmModels) ?? getFirstTextModel(llmModels);
+  if (fallbackAuxiliaryModel === undefined) {
+    const error = new Error('No auxiliary model found for federal state id ' + federalStateId);
+    logError(error.message, error);
+
+    throw error;
+  }
+
+  return fallbackAuxiliaryModel;
+}
+
+/**
  * Get the default model for the federal state
  * @returns The default model for the federal state
  */
@@ -180,6 +209,10 @@ export async function getDefaultModelByFederalStateId(
   });
 
   return getDefaultModel(llmModels);
+}
+
+function getDefaultStrongAuxModel(models: LlmModelSelectModel[]): LlmModelSelectModel | undefined {
+  return models.find((model) => model.name === DEFAULT_STRONG_AUXILIARY_MODEL);
 }
 
 function getDefaultAuxModel(models: LlmModelSelectModel[]): LlmModelSelectModel | undefined {

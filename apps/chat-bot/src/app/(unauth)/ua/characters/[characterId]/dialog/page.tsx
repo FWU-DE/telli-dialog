@@ -11,6 +11,9 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { NextIntlClientProvider } from 'next-intl';
+import { resolveSharingLocale } from '@/i18n/sharing-locale';
+import { loadTranslations } from '@/i18n/load-translations';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('characters.page-titles');
@@ -41,17 +44,22 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
   }
   const federalState = await dbGetFederalStateByUserId({ userId: character.startedBy });
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
+  const shareUrl = `/ua/characters/${character.id}/dialog?inviteCode=${searchParams.inviteCode}`;
+  const locale = await resolveSharingLocale(shareUrl);
+  const messages = await loadTranslations(locale);
 
   return (
-    <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-      <ThemeProvider designConfiguration={designConfiguration}>
-        <CharacterSharedChat
-          {...character}
-          initialMessage={character.initialMessage ?? ''}
-          inviteCode={searchParams.inviteCode}
-          avatarPictureUrl={avatarPictureUrl}
-        />
-      </ThemeProvider>
-    </LlmModelsProvider>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
+        <ThemeProvider designConfiguration={designConfiguration}>
+          <CharacterSharedChat
+            {...character}
+            initialMessage={character.initialMessage ?? ''}
+            inviteCode={searchParams.inviteCode}
+            avatarPictureUrl={avatarPictureUrl}
+          />
+        </ThemeProvider>
+      </LlmModelsProvider>
+    </NextIntlClientProvider>
   );
 }
