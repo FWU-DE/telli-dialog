@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   createNewLearningScenarioFromTemplate,
   deleteLearningScenario,
@@ -265,12 +265,8 @@ describe('learning-scenario-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Set default mock return values for budget functions
-    (getMaxBudgetInCentByUser as MockedFunction<typeof getMaxBudgetInCentByUser>).mockResolvedValue(
-      500,
-    );
-    (
-      getUsedBudgetInCentByUser as MockedFunction<typeof getUsedBudgetInCentByUser>
-    ).mockResolvedValue(0);
+    vi.mocked(getMaxBudgetInCentByUser).mockResolvedValue(500);
+    vi.mocked(getUsedBudgetInCentByUser).mockResolvedValue(0);
   });
 
   describe('NotFoundError scenarios', () => {
@@ -282,9 +278,7 @@ describe('learning-scenario-service', () => {
     )(
       'should throw NotFoundError when learning scenario does not exist - $functionName',
       async ({ testFunction }) => {
-        (
-          dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-        ).mockResolvedValue(null as never);
+        vi.mocked(dbGetLearningScenarioById).mockResolvedValue(null as never);
 
         await expect(testFunction()).rejects.toThrow(NotFoundError);
       },
@@ -306,22 +300,14 @@ describe('learning-scenario-service', () => {
         suspended: false,
         ownerSchoolIds: [],
       };
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(mockLearningScenario as never);
-      (
-        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
-          typeof dbGetLearningScenarioByIdOptionalShareData
-        >
-      ).mockResolvedValue(mockLearningScenario as never);
-      (
-        dbGetLearningScenarioByIdWithShareData as MockedFunction<
-          typeof dbGetLearningScenarioByIdWithShareData
-        >
-      ).mockResolvedValue(mockLearningScenario as never);
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(mockLearningScenario as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(mockLearningScenario as never);
+      vi.mocked(dbGetLearningScenarioByIdOptionalShareData).mockResolvedValue(
+        mockLearningScenario as never,
+      );
+      vi.mocked(dbGetLearningScenarioByIdWithShareData).mockResolvedValue(
+        mockLearningScenario as never,
+      );
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(mockLearningScenario as never);
     });
 
     describe('accessLevel=private and user not owner', () => {
@@ -357,9 +343,7 @@ describe('learning-scenario-service', () => {
 
     it('should throw when copying a suspended learning scenario template', async () => {
       const user = mockUser('teacher');
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue({
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue({
         ...mockLearningScenario,
         userId: user.id,
         suspended: true,
@@ -398,9 +382,7 @@ describe('learning-scenario-service', () => {
     };
 
     beforeEach(() => {
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(mockLearningScenario as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(mockLearningScenario as never);
     });
 
     it('should throw ForbiddenError when setting access level to global - updateLearningScenarioAccessLevel', async () => {
@@ -427,9 +409,7 @@ describe('learning-scenario-service', () => {
         updatedAt,
       } as Partial<LearningScenarioSelectModel>;
 
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(learningScenario as never);
       mockDbReturning.mockResolvedValue([
         { ...learningScenario, accessLevel: 'school' } as LearningScenarioSelectModel,
       ]);
@@ -450,9 +430,7 @@ describe('learning-scenario-service', () => {
         updatedAt,
       } as Partial<LearningScenarioSelectModel>;
 
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(learningScenario as never);
       mockDbReturning.mockResolvedValue([
         { ...learningScenario, hasLinkAccess: true } as LearningScenarioSelectModel,
       ]);
@@ -511,21 +489,13 @@ describe('learning-scenario-service', () => {
           hasLinkAccess: true,
         };
 
-        (
-          dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
-            typeof dbGetLearningScenarioByIdOptionalShareData
-          >
-        ).mockResolvedValue(mockLearningScenario as never);
-        // Also mock dbGetLearningScenarioById because getFilesForLearningScenario -> getLearningScenarioInfo uses it
-        (
-          dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-        ).mockResolvedValue(mockLearningScenario as never);
-        (
-          dbGetFilesForLearningScenario as MockedFunction<typeof dbGetFilesForLearningScenario>
-        ).mockResolvedValue([]);
-        (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
-          undefined,
+        vi.mocked(dbGetLearningScenarioByIdOptionalShareData).mockResolvedValue(
+          mockLearningScenario as never,
         );
+        // Also mock dbGetLearningScenarioById because getFilesForLearningScenario -> getLearningScenarioInfo uses it
+        vi.mocked(dbGetLearningScenarioById).mockResolvedValue(mockLearningScenario as never);
+        vi.mocked(dbGetFilesForLearningScenario).mockResolvedValue([]);
+        vi.mocked(getAvatarPictureUrl).mockResolvedValue(undefined);
 
         // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getLearningScenarioForEditView({
@@ -553,12 +523,8 @@ describe('learning-scenario-service', () => {
           hasLinkAccess: true,
         };
 
-        (
-          dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-        ).mockResolvedValue(mockLearningScenario as never);
-        (
-          dbGetFilesForLearningScenario as MockedFunction<typeof dbGetFilesForLearningScenario>
-        ).mockResolvedValue([]);
+        vi.mocked(dbGetLearningScenarioById).mockResolvedValue(mockLearningScenario as never);
+        vi.mocked(dbGetFilesForLearningScenario).mockResolvedValue([]);
 
         // Should not throw - access is allowed via link sharing
         await expect(
@@ -579,11 +545,9 @@ describe('learning-scenario-service', () => {
           hasLinkAccess: false,
         };
 
-        (
-          dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
-            typeof dbGetLearningScenarioByIdOptionalShareData
-          >
-        ).mockResolvedValue(mockLearningScenario as never);
+        vi.mocked(dbGetLearningScenarioByIdOptionalShareData).mockResolvedValue(
+          mockLearningScenario as never,
+        );
 
         await expect(
           getLearningScenarioForEditView({
@@ -601,9 +565,7 @@ describe('learning-scenario-service', () => {
           hasLinkAccess: false,
         };
 
-        (
-          dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-        ).mockResolvedValue(mockLearningScenario as never);
+        vi.mocked(dbGetLearningScenarioById).mockResolvedValue(mockLearningScenario as never);
 
         await expect(
           getFilesForLearningScenario({
@@ -626,20 +588,12 @@ describe('learning-scenario-service', () => {
         hasLinkAccess: false,
       } as unknown as LearningScenarioSelectModel;
 
-      (
-        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
-          typeof dbGetLearningScenarioByIdOptionalShareData
-        >
-      ).mockResolvedValue(learningScenario as never);
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(learningScenario as never);
-      (
-        dbGetFilesForLearningScenario as MockedFunction<typeof dbGetFilesForLearningScenario>
-      ).mockResolvedValue([] as never);
-      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
-        undefined,
+      vi.mocked(dbGetLearningScenarioByIdOptionalShareData).mockResolvedValue(
+        learningScenario as never,
       );
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetFilesForLearningScenario).mockResolvedValue([] as never);
+      vi.mocked(getAvatarPictureUrl).mockResolvedValue(undefined);
 
       const result = await getLearningScenarioForEditView({
         learningScenarioId,
@@ -665,25 +619,13 @@ describe('learning-scenario-service', () => {
         expiredAt,
       } as unknown as LearningScenarioSelectModel;
 
-      (
-        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
-          typeof dbGetLearningScenarioByIdOptionalShareData
-        >
-      ).mockResolvedValue(learningScenario as never);
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(learningScenario as never);
-      (
-        dbGetFilesForLearningScenario as MockedFunction<typeof dbGetFilesForLearningScenario>
-      ).mockResolvedValue([] as never);
-      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
-        undefined,
+      vi.mocked(dbGetLearningScenarioByIdOptionalShareData).mockResolvedValue(
+        learningScenario as never,
       );
-      (
-        dbGetLearningScenarioChatUsageInCentByLearningScenarioId as MockedFunction<
-          typeof dbGetLearningScenarioChatUsageInCentByLearningScenarioId
-        >
-      ).mockResolvedValue(654);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetFilesForLearningScenario).mockResolvedValue([] as never);
+      vi.mocked(getAvatarPictureUrl).mockResolvedValue(undefined);
+      vi.mocked(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).mockResolvedValue(654);
 
       const result = await getLearningScenarioForEditView({
         learningScenarioId,
@@ -712,14 +654,8 @@ describe('learning-scenario-service', () => {
         hasLinkAccess: false,
       } as unknown as LearningScenarioSelectModel;
 
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(learningScenario as never);
-      (
-        dbGetLatestManageableLearningScenarioShare as MockedFunction<
-          typeof dbGetLatestManageableLearningScenarioShare
-        >
-      ).mockResolvedValue(null as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetLatestManageableLearningScenarioShare).mockResolvedValue(null as never);
 
       const result = await getActiveLearningScenarioShareData({
         learningScenarioId,
@@ -758,19 +694,9 @@ describe('learning-scenario-service', () => {
         tokenPointsLimit: 75,
       };
 
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(learningScenario as never);
-      (
-        dbGetLatestManageableLearningScenarioShare as MockedFunction<
-          typeof dbGetLatestManageableLearningScenarioShare
-        >
-      ).mockResolvedValue(share as never);
-      (
-        dbGetLearningScenarioChatUsageInCentByLearningScenarioId as MockedFunction<
-          typeof dbGetLearningScenarioChatUsageInCentByLearningScenarioId
-        >
-      ).mockResolvedValue(432);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetLatestManageableLearningScenarioShare).mockResolvedValue(share as never);
+      vi.mocked(dbGetLearningScenarioChatUsageInCentByLearningScenarioId).mockResolvedValue(432);
 
       const result = await getActiveLearningScenarioShareData({
         learningScenarioId,
@@ -797,9 +723,7 @@ describe('learning-scenario-service', () => {
       const learningScenarioId = generateUUID();
       const user = mockUser('teacher');
 
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(undefined as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(undefined as never);
 
       await expect(
         getActiveLearningScenarioShareData({
@@ -823,9 +747,7 @@ describe('learning-scenario-service', () => {
         hasLinkAccess: false,
       } as unknown as LearningScenarioSelectModel;
 
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(learningScenario as never);
 
       const result = await getLearningScenarioForChatSession({
         learningScenarioId,
@@ -837,9 +759,7 @@ describe('learning-scenario-service', () => {
 
     it('throws NotFoundError when learning scenario does not exist', async () => {
       const user = mockUser('teacher');
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(null as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(null as never);
 
       await expect(
         getLearningScenarioForChatSession({
@@ -858,9 +778,7 @@ describe('learning-scenario-service', () => {
         hasLinkAccess: false,
       } as unknown as LearningScenarioSelectModel;
 
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(learningScenario as never);
 
       await expect(
         getLearningScenarioForChatSession({
@@ -879,9 +797,7 @@ describe('learning-scenario-service', () => {
         hasLinkAccess: true,
       } as unknown as LearningScenarioSelectModel;
 
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(learningScenario as never);
 
       await expect(
         getLearningScenarioForChatSession({
@@ -907,31 +823,17 @@ describe('learning-scenario-service', () => {
         modelId: generateUUID(),
         userId,
       };
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(mockLearningScenario as never);
-      (
-        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
-          typeof dbGetLearningScenarioByIdOptionalShareData
-        >
-      ).mockResolvedValue(mockLearningScenario as never);
-      (
-        dbGetLearningScenarioByIdWithShareData as MockedFunction<
-          typeof dbGetLearningScenarioByIdWithShareData
-        >
-      ).mockResolvedValue(mockLearningScenario as never);
-      (
-        dbCreateLearningScenarioShare as MockedFunction<typeof dbCreateLearningScenarioShare>
-      ).mockResolvedValue(mockLearningScenario as never);
-      (
-        dbGetLatestManageableLearningScenarioShare as MockedFunction<
-          typeof dbGetLatestManageableLearningScenarioShare
-        >
-      ).mockResolvedValue(null as never);
-      (
-        dbGetFileForLearningScenario as MockedFunction<typeof dbGetFileForLearningScenario>
-      ).mockResolvedValue({} as never);
-      (getReadOnlySignedUrl as MockedFunction<typeof getReadOnlySignedUrl>).mockResolvedValue('');
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(mockLearningScenario as never);
+      vi.mocked(dbGetLearningScenarioByIdOptionalShareData).mockResolvedValue(
+        mockLearningScenario as never,
+      );
+      vi.mocked(dbGetLearningScenarioByIdWithShareData).mockResolvedValue(
+        mockLearningScenario as never,
+      );
+      vi.mocked(dbCreateLearningScenarioShare).mockResolvedValue(mockLearningScenario as never);
+      vi.mocked(dbGetLatestManageableLearningScenarioShare).mockResolvedValue(null as never);
+      vi.mocked(dbGetFileForLearningScenario).mockResolvedValue({} as never);
+      vi.mocked(getReadOnlySignedUrl).mockResolvedValue('');
     });
 
     describe('user is owner', () => {
@@ -1000,12 +902,8 @@ describe('learning-scenario-service', () => {
         accessLevel: 'private',
         pictureId: null,
       };
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(mockLearningScenario as never);
-      (uploadFileToS3 as MockedFunction<typeof uploadFileToS3>).mockResolvedValue(
-        undefined as never,
-      );
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(mockLearningScenario as never);
+      vi.mocked(uploadFileToS3).mockResolvedValue(undefined as never);
       mockDbReturning.mockResolvedValue([
         {
           id: learningScenarioId,
@@ -1013,9 +911,7 @@ describe('learning-scenario-service', () => {
           pictureId: `shared-chats/${learningScenarioId}/avatar_abc123`,
         },
       ]);
-      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
-        'https://signed-url',
-      );
+      vi.mocked(getAvatarPictureUrl).mockResolvedValue('https://signed-url');
     });
 
     it('should upload avatar, update db and return picturePath and signedUrl', async () => {
@@ -1038,11 +934,7 @@ describe('learning-scenario-service', () => {
     const learningScenarioId = generateUUID();
     const user = mockUser('teacher');
     beforeEach(() => {
-      (
-        dbGetLatestManageableLearningScenarioShare as MockedFunction<
-          typeof dbGetLatestManageableLearningScenarioShare
-        >
-      ).mockResolvedValue(null as never);
+      vi.mocked(dbGetLatestManageableLearningScenarioShare).mockResolvedValue(null as never);
     });
 
     it('throws NotFoundError when the teacher has no active share to stop', async () => {
@@ -1079,19 +971,11 @@ describe('learning-scenario-service', () => {
     };
 
     beforeEach(() => {
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(mockLearningScenario as never);
-      (
-        dbGetLatestManageableLearningScenarioShare as MockedFunction<
-          typeof dbGetLatestManageableLearningScenarioShare
-        >
-      ).mockResolvedValue(currentShare as never);
-      (
-        dbExtendSharedLearningScenarioExpiration as MockedFunction<
-          typeof dbExtendSharedLearningScenarioExpiration
-        >
-      ).mockResolvedValue(updatedShare as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(mockLearningScenario as never);
+      vi.mocked(dbGetLatestManageableLearningScenarioShare).mockResolvedValue(
+        currentShare as never,
+      );
+      vi.mocked(dbExtendSharedLearningScenarioExpiration).mockResolvedValue(updatedShare as never);
     });
 
     it('returns the updated share when the expiration is extended', async () => {
@@ -1125,17 +1009,11 @@ describe('learning-scenario-service', () => {
     );
 
     it('throws InvalidArgumentError when the total usage time would exceed 130 days', async () => {
-      (
-        dbGetLatestManageableLearningScenarioShare as MockedFunction<
-          typeof dbGetLatestManageableLearningScenarioShare
-        >
-      ).mockResolvedValue({
+      vi.mocked(dbGetLatestManageableLearningScenarioShare).mockResolvedValue({
         ...currentShare,
         expiredAt: new Date(Date.now() + 187000 * 60_000),
       } as never);
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue({
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue({
         ...mockLearningScenario,
         maxUsageTimeLimit: 187000,
       } as never);
@@ -1152,11 +1030,7 @@ describe('learning-scenario-service', () => {
     });
 
     it('throws InvalidArgumentError when there is no active share to extend', async () => {
-      (
-        dbExtendSharedLearningScenarioExpiration as MockedFunction<
-          typeof dbExtendSharedLearningScenarioExpiration
-        >
-      ).mockResolvedValue(null as never);
+      vi.mocked(dbExtendSharedLearningScenarioExpiration).mockResolvedValue(null as never);
 
       await expect(
         extendLearningScenarioShareExpiration({
@@ -1192,19 +1066,13 @@ describe('learning-scenario-service', () => {
     };
 
     beforeEach(() => {
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(mockLearningScenario as never);
-      (
-        dbGetLatestManageableLearningScenarioShare as MockedFunction<
-          typeof dbGetLatestManageableLearningScenarioShare
-        >
-      ).mockResolvedValue(currentShare as never);
-      (
-        dbUpdateLearningScenarioShareTokenPointsLimit as MockedFunction<
-          typeof dbUpdateLearningScenarioShareTokenPointsLimit
-        >
-      ).mockResolvedValue(updatedShare as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(mockLearningScenario as never);
+      vi.mocked(dbGetLatestManageableLearningScenarioShare).mockResolvedValue(
+        currentShare as never,
+      );
+      vi.mocked(dbUpdateLearningScenarioShareTokenPointsLimit).mockResolvedValue(
+        updatedShare as never,
+      );
     });
 
     it('returns the updated share when the token points limit increases', async () => {
@@ -1238,11 +1106,7 @@ describe('learning-scenario-service', () => {
     );
 
     it('throws InvalidArgumentError when there is no current share', async () => {
-      (
-        dbGetLatestManageableLearningScenarioShare as MockedFunction<
-          typeof dbGetLatestManageableLearningScenarioShare
-        >
-      ).mockResolvedValue(null as never);
+      vi.mocked(dbGetLatestManageableLearningScenarioShare).mockResolvedValue(null as never);
 
       await expect(
         updateLearningScenarioShareTokenPointsLimit({
@@ -1271,11 +1135,7 @@ describe('learning-scenario-service', () => {
     );
 
     it('throws InvalidArgumentError when the share update returns no result', async () => {
-      (
-        dbUpdateLearningScenarioShareTokenPointsLimit as MockedFunction<
-          typeof dbUpdateLearningScenarioShareTokenPointsLimit
-        >
-      ).mockResolvedValue(null as never);
+      vi.mocked(dbUpdateLearningScenarioShareTokenPointsLimit).mockResolvedValue(null as never);
 
       await expect(
         updateLearningScenarioShareTokenPointsLimit({
@@ -1310,30 +1170,16 @@ describe('learning-scenario-service', () => {
     };
 
     beforeEach(() => {
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(mockLearningScenario as never);
-      (
-        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
-          typeof dbGetLearningScenarioByIdOptionalShareData
-        >
-      ).mockResolvedValue(mockLearningScenario as never);
-      (
-        dbCreateLearningScenarioShare as MockedFunction<typeof dbCreateLearningScenarioShare>
-      ).mockResolvedValue(newShare as never);
-      (
-        dbGetLatestManageableLearningScenarioShare as MockedFunction<
-          typeof dbGetLatestManageableLearningScenarioShare
-        >
-      ).mockResolvedValue(null as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(mockLearningScenario as never);
+      vi.mocked(dbGetLearningScenarioByIdOptionalShareData).mockResolvedValue(
+        mockLearningScenario as never,
+      );
+      vi.mocked(dbCreateLearningScenarioShare).mockResolvedValue(newShare as never);
+      vi.mocked(dbGetLatestManageableLearningScenarioShare).mockResolvedValue(null as never);
     });
 
     it('throws an error when there is already an active share', async () => {
-      (
-        dbGetLatestManageableLearningScenarioShare as MockedFunction<
-          typeof dbGetLatestManageableLearningScenarioShare
-        >
-      ).mockResolvedValue(newShare as never);
+      vi.mocked(dbGetLatestManageableLearningScenarioShare).mockResolvedValue(newShare as never);
 
       await expect(
         shareLearningScenario({
@@ -1358,21 +1204,13 @@ describe('learning-scenario-service', () => {
     };
 
     beforeEach(() => {
-      (
-        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
-      ).mockResolvedValue(mockLearningScenario as never);
+      vi.mocked(dbGetLearningScenarioById).mockResolvedValue(mockLearningScenario as never);
     });
 
     it('creates a new share via dbCreateLearningScenarioShare when no manageable share exists', async () => {
       const newShare = { id: generateUUID(), learningScenarioId, userId };
-      (
-        dbGetLatestManageableLearningScenarioShare as MockedFunction<
-          typeof dbGetLatestManageableLearningScenarioShare
-        >
-      ).mockResolvedValue(null as never);
-      (
-        dbCreateLearningScenarioShare as MockedFunction<typeof dbCreateLearningScenarioShare>
-      ).mockResolvedValue(newShare as never);
+      vi.mocked(dbGetLatestManageableLearningScenarioShare).mockResolvedValue(null as never);
+      vi.mocked(dbCreateLearningScenarioShare).mockResolvedValue(newShare as never);
 
       const result = await shareLearningScenario({
         learningScenarioId,
@@ -1394,14 +1232,8 @@ describe('learning-scenario-service', () => {
     it('stops the latest manageable share via dbStopLearningScenarioShare', async () => {
       const share = { id: generateUUID(), learningScenarioId, userId };
       const stoppedShare = { ...share, manuallyStoppedAt: new Date() };
-      (
-        dbGetLatestManageableLearningScenarioShare as MockedFunction<
-          typeof dbGetLatestManageableLearningScenarioShare
-        >
-      ).mockResolvedValue(share as never);
-      (
-        dbStopLearningScenarioShare as MockedFunction<typeof dbStopLearningScenarioShare>
-      ).mockResolvedValue(stoppedShare as never);
+      vi.mocked(dbGetLatestManageableLearningScenarioShare).mockResolvedValue(share as never);
+      vi.mocked(dbStopLearningScenarioShare).mockResolvedValue(stoppedShare as never);
 
       const result = await unshareLearningScenario({ learningScenarioId, user });
 
@@ -1436,12 +1268,11 @@ describe('learning-scenario-service', () => {
         pictureId: 'shared-chats/b/picture.png',
       } as LearningScenarioSelectModel;
 
-      (
-        dbGetLearningScenariosByUser as MockedFunction<typeof dbGetLearningScenariosByUser>
-      ).mockResolvedValue([namedScenario, unnamedScenario] as never);
-      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
-        'https://signed-url',
-      );
+      vi.mocked(dbGetLearningScenariosByUser).mockResolvedValue([
+        namedScenario,
+        unnamedScenario,
+      ] as never);
+      vi.mocked(getAvatarPictureUrl).mockResolvedValue('https://signed-url');
 
       const result = await getLearningScenariosForUser({ user });
 
@@ -1474,7 +1305,7 @@ describe('learning-scenario-service', () => {
     ])(
       'routes accessLevel=$accessLevel to the correct db function',
       async ({ accessLevel, expectedMock }) => {
-        (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(scenarios as never);
+        vi.mocked(expectedMock).mockResolvedValue(scenarios as never);
 
         const result = await getLearningScenariosByAccessLevel({ accessLevel, user });
 
@@ -1493,11 +1324,7 @@ describe('learning-scenario-service', () => {
     });
 
     it('routes filter=all to dbGetAllAccessibleLearningScenarios', async () => {
-      (
-        dbGetAllAccessibleLearningScenarios as MockedFunction<
-          typeof dbGetAllAccessibleLearningScenarios
-        >
-      ).mockResolvedValue(scenarios as never);
+      vi.mocked(dbGetAllAccessibleLearningScenarios).mockResolvedValue(scenarios as never);
 
       const result = await getLearningScenariosByOverviewFilter({ filter: 'all', user });
 
@@ -1521,9 +1348,10 @@ describe('learning-scenario-service', () => {
         suspended: true,
       } as LearningScenarioSelectModel;
 
-      (
-        dbGetGlobalLearningScenarios as MockedFunction<typeof dbGetGlobalLearningScenarios>
-      ).mockResolvedValue([visibleScenario, suspendedScenario] as never);
+      vi.mocked(dbGetGlobalLearningScenarios).mockResolvedValue([
+        visibleScenario,
+        suspendedScenario,
+      ] as never);
 
       const result = await getLearningScenariosByOverviewFilter({ filter: 'official', user });
 
@@ -1541,9 +1369,7 @@ describe('learning-scenario-service', () => {
         ownerSchoolIds: user.schoolIds,
       } as LearningScenarioSelectModel;
 
-      (
-        dbGetAllLearningScenariosByUser as MockedFunction<typeof dbGetAllLearningScenariosByUser>
-      ).mockResolvedValue([ownSuspendedScenario] as never);
+      vi.mocked(dbGetAllLearningScenariosByUser).mockResolvedValue([ownSuspendedScenario] as never);
 
       const result = await getLearningScenariosByOverviewFilter({ filter: 'mine', user });
 
@@ -1554,7 +1380,7 @@ describe('learning-scenario-service', () => {
       { filter: 'mine' as const, expectedMock: dbGetAllLearningScenariosByUser },
       { filter: 'official' as const, expectedMock: dbGetGlobalLearningScenarios },
     ])('routes filter=$filter to the correct db function', async ({ filter, expectedMock }) => {
-      (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(scenarios as never);
+      vi.mocked(expectedMock).mockResolvedValue(scenarios as never);
 
       const result = await getLearningScenariosByOverviewFilter({ filter, user });
 
@@ -1563,9 +1389,7 @@ describe('learning-scenario-service', () => {
     });
 
     it('routes filter=community to dbGetCommunityLearningScenarios', async () => {
-      (
-        dbGetCommunityLearningScenarios as MockedFunction<typeof dbGetCommunityLearningScenarios>
-      ).mockResolvedValue(scenarios as never);
+      vi.mocked(dbGetCommunityLearningScenarios).mockResolvedValue(scenarios as never);
 
       const result = await getLearningScenariosByOverviewFilter({ filter: 'community', user });
 
@@ -1602,14 +1426,13 @@ describe('learning-scenario-service', () => {
         ownerSchoolIds: [],
       } as unknown as LearningScenarioSelectModel;
 
-      (
-        dbGetLearningScenariosByAssociatedSchools as MockedFunction<
-          typeof dbGetLearningScenariosByAssociatedSchools
-        >
-      ).mockResolvedValue([schoolScenario] as never);
-      (
-        dbGetCommunityLearningScenarios as MockedFunction<typeof dbGetCommunityLearningScenarios>
-      ).mockResolvedValue([communityScenario, otherSchoolCommunityScenario] as never);
+      vi.mocked(dbGetLearningScenariosByAssociatedSchools).mockResolvedValue([
+        schoolScenario,
+      ] as never);
+      vi.mocked(dbGetCommunityLearningScenarios).mockResolvedValue([
+        communityScenario,
+        otherSchoolCommunityScenario,
+      ] as never);
 
       const result = await getLearningScenariosByOverviewFilter({ filter: 'school', user });
 
@@ -1682,11 +1505,9 @@ describe('learning-scenario-service', () => {
         userId,
         expiredAt: new Date(NOW.getTime() + 60 * 60 * 1000),
       });
-      (
-        dbGetLearningScenarioByIdWithShareData as MockedFunction<
-          typeof dbGetLearningScenarioByIdWithShareData
-        >
-      ).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetLearningScenarioByIdWithShareData).mockResolvedValue(
+        learningScenario as never,
+      );
 
       const result = await getSharedLearningScenario({
         learningScenarioId,
@@ -1704,11 +1525,9 @@ describe('learning-scenario-service', () => {
         userId,
         expiredAt: new Date(NOW.getTime() - 60 * 60 * 1000), // expired 1 hour ago, within 2-hour grace window
       });
-      (
-        dbGetLearningScenarioByIdWithShareData as MockedFunction<
-          typeof dbGetLearningScenarioByIdWithShareData
-        >
-      ).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetLearningScenarioByIdWithShareData).mockResolvedValue(
+        learningScenario as never,
+      );
 
       const result = await getSharedLearningScenario({
         learningScenarioId,
@@ -1726,11 +1545,9 @@ describe('learning-scenario-service', () => {
         userId,
         expiredAt: new Date(NOW.getTime() - SHARE_EXTENSION_WINDOW_MS - 1000), // expired 2 hours and 1 second ago
       });
-      (
-        dbGetLearningScenarioByIdWithShareData as MockedFunction<
-          typeof dbGetLearningScenarioByIdWithShareData
-        >
-      ).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetLearningScenarioByIdWithShareData).mockResolvedValue(
+        learningScenario as never,
+      );
 
       await expect(
         getSharedLearningScenario({ learningScenarioId, user: { id: userId } }),
@@ -1746,11 +1563,9 @@ describe('learning-scenario-service', () => {
         expiredAt: new Date(NOW.getTime() + 60 * 60 * 1000), // still active time-wise
         manuallyStoppedAt: new Date(NOW.getTime() - 30 * 60 * 1000), // but manually stopped 30 min ago
       });
-      (
-        dbGetLearningScenarioByIdWithShareData as MockedFunction<
-          typeof dbGetLearningScenarioByIdWithShareData
-        >
-      ).mockResolvedValue(learningScenario as never);
+      vi.mocked(dbGetLearningScenarioByIdWithShareData).mockResolvedValue(
+        learningScenario as never,
+      );
 
       await expect(
         getSharedLearningScenario({ learningScenarioId, user: { id: userId } }),
