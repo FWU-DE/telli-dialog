@@ -177,7 +177,7 @@ export async function dbGetCharacterByIdWithShareData({
 }: {
   characterId: string;
   user: Pick<UserModel, 'id'>;
-}): Promise<CharacterOptionalShareDataModel | undefined> {
+}): Promise<CharacterWithShareDataModel | undefined> {
   const latestShare = latestNonStoppedCharacterShare(user);
   const [row] = await baseCharacterWithShareQuery(latestShare)
     .innerJoin(latestShare, eq(latestShare.characterId, characterTable.id))

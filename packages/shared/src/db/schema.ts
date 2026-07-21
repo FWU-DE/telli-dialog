@@ -1186,19 +1186,6 @@ export type CharacterWithShareDataModel = z.infer<typeof characterWithShareDataM
 export type CharacterOptionalShareDataModel = z.infer<typeof characterOptionalShareDataModel>;
 
 /**
- * Type guard that validates CharacterWithShareDataModel using Zod schema
- */
-export function isCharacterWithShareData(
-  character: unknown,
-): character is CharacterWithShareDataModel {
-  const result = characterWithShareDataModel.safeParse(character);
-  if (!result.success) {
-    logError('isCharacterWithShareData: validation failed', result.error);
-  }
-  return result.success;
-}
-
-/**
  * Schema for table shared_character_chat_usage_tracking
  */
 export const sharedCharacterChatUsageTrackingTable = pgTable(

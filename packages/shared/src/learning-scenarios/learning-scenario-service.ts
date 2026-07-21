@@ -26,7 +26,6 @@ import {
   accessLevelSchema,
   FileModel,
   fileTable,
-  isLearningScenarioWithShareData,
   LearningScenarioFileMapping,
   LearningScenarioOptionalShareDataModel,
   LearningScenarioSelectModel,
@@ -229,11 +228,7 @@ export async function getSharedLearningScenario({
     learningScenarioId,
     user,
   });
-  if (!isLearningScenarioWithShareData(learningScenario)) {
-    throw new NotFoundError('Learning scenario not found');
-  }
-
-  if (learningScenario.manuallyStoppedAt !== null) {
+  if (!learningScenario || learningScenario.manuallyStoppedAt !== null) {
     throw new NotFoundError('Learning scenario not found');
   }
 

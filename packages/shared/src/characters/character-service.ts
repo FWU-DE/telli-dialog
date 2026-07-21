@@ -36,7 +36,6 @@ import {
   CharacterWithShareDataModel,
   FileModel,
   fileTable,
-  isCharacterWithShareData,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, InvalidArgumentError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
@@ -795,11 +794,7 @@ export const getSharedCharacter = async ({
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, user: { id: userId } });
 
-  if (!isCharacterWithShareData(character)) {
-    throw new NotFoundError('Character not found');
-  }
-
-  if (character.manuallyStoppedAt !== null) {
+  if (!character || character.manuallyStoppedAt !== null) {
     throw new NotFoundError('Character not found');
   }
 

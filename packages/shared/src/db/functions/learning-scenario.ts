@@ -312,7 +312,7 @@ export async function dbGetLearningScenarioByIdWithShareData({
 }: {
   learningScenarioId: string;
   user: Pick<UserModel, 'id'>;
-}): Promise<LearningScenarioOptionalShareDataModel | undefined> {
+}): Promise<LearningScenarioWithShareDataModel | undefined> {
   const latestShare = latestNonStoppedLearningScenarioShare(user);
   const [row] = await baseLearningScenarioWithShareQuery(latestShare)
     .innerJoin(latestShare, eq(latestShare.learningScenarioId, learningScenarioTable.id))
