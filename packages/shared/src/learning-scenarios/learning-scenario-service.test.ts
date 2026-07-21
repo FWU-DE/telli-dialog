@@ -1454,7 +1454,9 @@ describe('learning-scenario-service', () => {
   describe('getSharedLearningScenario', () => {
     const NOW = new Date('2026-07-20T12:00:00.000Z');
 
-    function mockLearningScenarioWithShareData(overrides: Record<string, unknown> = {}) {
+    function mockLearningScenarioWithShareData(
+      overrides: Record<string, unknown> = {},
+    ): LearningScenarioWithShareDataModel {
       return {
         id: generateUUID(),
         author: '',
@@ -1462,7 +1464,14 @@ describe('learning-scenario-service', () => {
         description: '',
         modelId: generateUUID(),
         userId: generateUUID(),
-        filterGroup: { school_types: [], grade_ranges: [], subjects: [] },
+        filterGroup: {
+          school_types: [],
+          grade_ranges: [],
+          subjects: [],
+          categories: [],
+          federal_states: [],
+          languages: [],
+        },
         studentExercise: '',
         additionalInstructions: null,
         restrictions: null,
@@ -1485,7 +1494,7 @@ describe('learning-scenario-service', () => {
         manuallyStoppedAt: null,
         startedBy: generateUUID(),
         ...overrides,
-      } as unknown as LearningScenarioWithShareDataModel;
+      };
     }
 
     beforeEach(() => {

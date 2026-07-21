@@ -1465,7 +1465,9 @@ describe('character-service', () => {
   describe('getSharedCharacter', () => {
     const NOW = new Date('2026-07-20T12:00:00.000Z');
 
-    function mockCharacterWithShareData(overrides: Record<string, unknown> = {}) {
+    function mockCharacterWithShareData(
+      overrides: Record<string, unknown> = {},
+    ): CharacterWithShareDataModel {
       return {
         id: generateUUID(),
         author: '',
@@ -1476,7 +1478,14 @@ describe('character-service', () => {
         instructions: '',
         learningContext: '',
         competence: '',
-        filterGroup: { school_types: [], grade_ranges: [], subjects: [] },
+        filterGroup: {
+          school_types: [],
+          grade_ranges: [],
+          subjects: [],
+          categories: [],
+          federal_states: [],
+          languages: [],
+        },
         accessLevel: 'private' as const,
         hasLinkAccess: false,
         isWebSearchEnabled: false,
@@ -1499,7 +1508,7 @@ describe('character-service', () => {
         manuallyStoppedAt: null,
         startedBy: generateUUID(),
         ...overrides,
-      } as unknown as CharacterWithShareDataModel;
+      };
     }
 
     beforeEach(() => {
