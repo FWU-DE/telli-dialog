@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { UserAndContext } from '@/auth/types';
 
 const mocks = vi.hoisted(() => ({
   dbGetAssistantByIdMock: vi.fn(),
@@ -194,5 +195,59 @@ describe('searchWeb', () => {
 
     expect(mocks.searchMock).toHaveBeenCalledTimes(1);
     expect(mocks.searchMock.mock.calls[0]![0]).not.toHaveProperty('includeDomains');
+  });
+});
+
+describe('resolveWebSearchConfig', () => {
+  const user = {
+    federalState: {
+      featureToggles: { isWebSearchEnabled: true },
+    },
+  } as unknown as UserAndContext;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('trims and drops empty domain entries from a character', async () => {
+    mocks.dbGetCharacterByIdMock.mockResolvedValue({
+      isWebSearchEnabled: true,
+      webSearchScope: 'included-domains',
+      webSearchIncludedDomains: ['  example.com  ', '', '   ', 'foo.de'],
+    });
+
+    const { resolveWebSearchConfig } = await import('./websearch');
+
+    const config = await resolveWebSearchConfig({
+      user,
+      characterId: 'character-uuid',
+    });
+
+    expect(config).toEqual({
+      enabled: true,
+      scope: 'included-domains',
+      includedDomains: ['example.com', 'foo.de'],
+    });
+  });
+
+  it('trims and drops empty domain entries from a learning scenario', async () => {
+    mocks.dbGetLearningScenarioByIdMock.mockResolvedValue({
+      isWebSearchEnabled: true,
+      webSearchScope: 'included-domains',
+      webSearchIncludedDomains: ['  example.com  ', '', '   ', 'foo.de'],
+    });
+
+    const { resolveWebSearchConfig } = await import('./websearch');
+
+    const config = await resolveWebSearchConfig({
+      user,
+      learningScenarioId: 'learning-scenario-uuid',
+    });
+
+    expect(config).toEqual({
+      enabled: true,
+      scope: 'included-domains',
+      includedDomains: ['example.com', 'foo.de'],
+    });
   });
 });

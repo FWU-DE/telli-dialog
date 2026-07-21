@@ -98,7 +98,7 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
   const maxLinksReached = links.length >= NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-4">
       {!isReadonly && (
         // the breakpoint is lg because the sidebar collapses at sm, we want the input to be big enough also between sm and lg
         <div className="flex w-full flex-col gap-2 lg:flex-row">

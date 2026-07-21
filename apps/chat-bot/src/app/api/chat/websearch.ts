@@ -36,6 +36,10 @@ const ENABLED_ALL_WEB_CONFIG: WebSearchConfig = {
   includedDomains: [],
 };
 
+function normalizeIncludedDomains(domains: string[]): string[] {
+  return domains.map((domain) => domain.trim()).filter((domain) => domain.length > 0);
+}
+
 export function isWebSearchAvailableForFederalState(
   federalState: UserAndContext['federalState'],
 ): boolean {
@@ -63,7 +67,7 @@ export async function resolveWebSearchConfig({
     return {
       enabled: true,
       scope: character.webSearchScope,
-      includedDomains: character.webSearchIncludedDomains,
+      includedDomains: normalizeIncludedDomains(character.webSearchIncludedDomains),
     };
   }
 
@@ -73,7 +77,7 @@ export async function resolveWebSearchConfig({
     return {
       enabled: true,
       scope: learningScenario.webSearchScope,
-      includedDomains: learningScenario.webSearchIncludedDomains,
+      includedDomains: normalizeIncludedDomains(learningScenario.webSearchIncludedDomains),
     };
   }
 
@@ -349,10 +353,7 @@ export async function runWebSearchPipeline({
   const decision = await isWebSearchNeeded({ messages, modelId, apiKeyId });
   if (!decision.needed) return [];
 
-  const includedDomains =
-    config.scope === 'included-domains' && config.includedDomains.length > 0
-      ? config.includedDomains
-      : undefined;
+  const includedDomains = config.scope === 'included-domains' ? config.includedDomains : undefined;
 
   return searchWeb({
     query: decision.query,

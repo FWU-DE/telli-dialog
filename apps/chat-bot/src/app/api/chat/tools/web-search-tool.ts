@@ -39,10 +39,7 @@ export async function buildWebSearchTool({
     return null;
   }
 
-  const includedDomains =
-    config.scope === 'included-domains'
-      ? config.includedDomains.map((domain) => domain.trim()).filter((domain) => domain.length > 0)
-      : undefined;
+  const includedDomains = config.scope === 'included-domains' ? config.includedDomains : undefined;
 
   const baseDescription =
     "Search the web for current information such as recent events, news, or facts that may have changed after the model's knowledge cutoff (weather, prices, scores, etc.). Returns a list of result snippets with titles and URLs.";
