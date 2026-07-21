@@ -151,4 +151,48 @@ describe('searchWeb', () => {
     expect(mocks.dbInsertConversationToolCallUsageMock).not.toHaveBeenCalled();
     expect(mocks.dbUpdateTokenUsageByCharacterChatIdMock).not.toHaveBeenCalled();
   });
+
+  it('forwards includeDomains to the Linkup client when includedDomains is non-empty', async () => {
+    const { searchWeb } = await import('./websearch');
+
+    await searchWeb({
+      query: 'aktuelles thema',
+      conversationId: 'conversation-1',
+      userId: 'user-1',
+      includedDomains: ['example.com', 'foo.de'],
+    });
+
+    expect(mocks.searchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        includeDomains: ['example.com', 'foo.de'],
+      }),
+    );
+  });
+
+  it('does not forward includeDomains when includedDomains is undefined', async () => {
+    const { searchWeb } = await import('./websearch');
+
+    await searchWeb({
+      query: 'aktuelles thema',
+      conversationId: 'conversation-1',
+      userId: 'user-1',
+    });
+
+    expect(mocks.searchMock).toHaveBeenCalledTimes(1);
+    expect(mocks.searchMock.mock.calls[0]![0]).not.toHaveProperty('includeDomains');
+  });
+
+  it('does not forward includeDomains when includedDomains is empty', async () => {
+    const { searchWeb } = await import('./websearch');
+
+    await searchWeb({
+      query: 'aktuelles thema',
+      conversationId: 'conversation-1',
+      userId: 'user-1',
+      includedDomains: [],
+    });
+
+    expect(mocks.searchMock).toHaveBeenCalledTimes(1);
+    expect(mocks.searchMock.mock.calls[0]![0]).not.toHaveProperty('includeDomains');
+  });
 });

@@ -485,9 +485,9 @@
       "tooltip": "Alle Änderungen werden automatisch gespeichert, sobald ein Eingabefeld verlassen wird."
     },
     "links": {
-      "empty-error": "Bitte gib eine URL ein.",
+      "empty-error": "Bitte eine URL eingeben.",
       "duplicate-error": "Diese URL wurde bereits hinzugefügt",
-      "invalid-error": "Bitte gib eine gültige URL ein.",
+      "invalid-error": "Bitte eine gültige URL eingeben.",
       "loading-error": "Die Webseite konnte nicht geladen werden.",
       "saving-error": "Der Link auf die Webseite konnte nicht gespeichert werden.",
       "delete-error": "Der Link auf die Webseite konnte nicht gelöscht werden.",
@@ -590,9 +590,9 @@
       "websites-aria-input": "Webseite eingeben",
       "websites-aria-add": "Webseite hinzufügen",
       "websites-aria-delete": "Webseite {website} entfernen",
-      "websites-empty-error": "Bitte gib eine URL ein.",
+      "websites-empty-error": "Bitte eine URL eingeben.",
       "websites-duplicate-error": "Diese URL wurde bereits hinzugefügt",
-      "websites-invalid-error": "Bitte gib eine gültige URL ein.",
+      "websites-invalid-error": "Bitte eine gültige URL eingeben.",
       "websites-counter": "{count} / {max} Domains"
     }
   },

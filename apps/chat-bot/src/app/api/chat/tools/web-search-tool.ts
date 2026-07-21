@@ -1,5 +1,5 @@
 import type { WebSearchResult } from '@shared/db/schema';
-import { isWebSearchEnabled, searchWeb } from '../websearch';
+import { resolveWebSearchConfig, searchWeb } from '../websearch';
 import type { BuildToolsContext, ToolDefinition, ToolRegistration } from './types';
 
 type WebSearchToolResult = {
@@ -28,16 +28,21 @@ export async function buildWebSearchTool({
   conversationId,
   onWebSearchResults,
 }: BuildWebSearchToolParams): Promise<ToolRegistration | null> {
-  const webSearchEnabled = await isWebSearchEnabled({
+  const config = await resolveWebSearchConfig({
     user,
     characterId,
     learningScenarioId,
     assistantId,
   });
 
-  if (!webSearchEnabled) {
+  if (!config.enabled) {
     return null;
   }
+
+  const includedDomains =
+    config.scope === 'included-domains'
+      ? config.includedDomains.map((domain) => domain.trim()).filter((domain) => domain.length > 0)
+      : undefined;
 
   const definition: ToolDefinition = {
     name: 'web_search',
@@ -65,6 +70,7 @@ export async function buildWebSearchTool({
       characterId,
       learningScenarioId,
       userId: user.id,
+      includedDomains,
     });
 
     const response: WebSearchToolResponse = {
