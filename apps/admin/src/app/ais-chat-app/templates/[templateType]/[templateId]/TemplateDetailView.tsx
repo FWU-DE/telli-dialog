@@ -37,7 +37,8 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const form = useForm<{ mappings: TemplateToFederalStateMapping[] }>();
-  const { control, reset } = form;
+  const { control, reset, setValue, watch } = form;
+  const watchedMappings = watch('mappings');
 
   const { fields } = useFieldArray({
     control,
@@ -116,6 +117,34 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(handleSubmit)}>
+            <div className="flex gap-2 mb-3">
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => {
+                  setValue(
+                    'mappings',
+                    watchedMappings.map((mapping) => ({ ...mapping, isMapped: true })),
+                    { shouldDirty: true },
+                  );
+                }}
+              >
+                Alle
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => {
+                  setValue(
+                    'mappings',
+                    watchedMappings.map((mapping) => ({ ...mapping, isMapped: false })),
+                    { shouldDirty: true },
+                  );
+                }}
+              >
+                Keine
+              </Button>
+            </div>
             {fields.map((field, index) => {
               return (
                 <FormFieldCheckbox
