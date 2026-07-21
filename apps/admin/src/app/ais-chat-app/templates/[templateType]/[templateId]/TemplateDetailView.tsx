@@ -11,7 +11,7 @@ import {
   TemplateToFederalStateMapping,
   TemplateTypes,
 } from '@shared/templates/template';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { Button } from '@ui/components/button';
 import { FormFieldCheckbox } from '@ais-chat/ui/components/form/form-field-checkbox';
 import { toast } from 'sonner';
@@ -37,8 +37,8 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const form = useForm<{ mappings: TemplateToFederalStateMapping[] }>();
-  const { control, reset, setValue, watch } = form;
-  const watchedMappings = watch('mappings');
+  const { control, reset, setValue } = form;
+  const watchedMappings = useWatch({ control, name: 'mappings' }) ?? [];
 
   const { fields } = useFieldArray({
     control,
