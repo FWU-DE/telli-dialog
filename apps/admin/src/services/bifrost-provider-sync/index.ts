@@ -26,27 +26,21 @@ export async function syncBifrostProvidersForOrganization(organizationId: string
   );
   const providerConfigs = buildBifrostProviderConfigs(models);
 
-  const syncResults = await Promise.allSettled(
-    providerConfigs.map(async (providerConfig) => {
+  const failedProviders: string[] = [];
+
+  for (const providerConfig of providerConfigs) {
+    try {
       await syncBifrostProvider(bifrostAdminUrl, providerConfig);
-      return providerConfig.provider;
-    }),
-  );
-  const failedProviders = syncResults.flatMap((result, index) => {
-    if (result.status === 'fulfilled') return [];
-    return [providerConfigs[index]?.provider ?? 'unknown'];
-  });
+    } catch (error) {
+      failedProviders.push(providerConfig.provider);
+      logError('Error syncing Bifrost provider', error, {
+        organizationId,
+        provider: providerConfig.provider,
+      });
+    }
+  }
 
   if (failedProviders.length > 0) {
-    for (const [index, result] of syncResults.entries()) {
-      if (result.status === 'rejected') {
-        logError('Error syncing Bifrost provider', result.reason, {
-          organizationId,
-          provider: providerConfigs[index]?.provider ?? 'unknown',
-        });
-      }
-    }
-
     logError('Error syncing Bifrost providers', undefined, {
       organizationId,
       providers: failedProviders,
