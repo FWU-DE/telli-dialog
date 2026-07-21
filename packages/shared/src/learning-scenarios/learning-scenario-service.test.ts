@@ -1493,6 +1493,8 @@ describe('learning-scenario-service', () => {
         expiredAt: new Date(NOW.getTime() + 60 * 60 * 1000),
         manuallyStoppedAt: null,
         startedBy: generateUUID(),
+        webSearchIncludedDomains: [],
+        webSearchScope: 'all-web',
         ...overrides,
       };
     }
