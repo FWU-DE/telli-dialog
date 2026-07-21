@@ -25,7 +25,8 @@
   "custom-chat": {
     "shared": {
       "join-code": "Join with code",
-      "enter-chat": "Start dialog",
+      "enter-chat": "To the dialog",
+      "start-chat": "Start dialog",
       "invalid-code-toast": "The entered code is either expired or invalid."
     },
     "share-page": {

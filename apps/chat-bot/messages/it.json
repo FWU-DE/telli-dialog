@@ -25,7 +25,8 @@
   "custom-chat": {
     "shared": {
       "join-code": "Unisciti con un codice",
-      "enter-chat": "Avvia dialogo",
+      "enter-chat": "Vai al dialogo",
+      "start-chat": "Avvia dialogo",
       "invalid-code-toast": "Il codice inserito è scaduto oppure non valido."
     },
     "share-page": {

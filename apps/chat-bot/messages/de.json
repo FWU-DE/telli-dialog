@@ -458,6 +458,7 @@
     "shared": {
       "join-code": "Mit Code beitreten",
       "enter-chat": "Zum Dialog",
+      "start-chat": "Dialog starten",
       "invalid-code-toast": "Der Code der eingegeben wurde, ist entweder abgelaufen oder ungültig."
     },
     "chat": "Chatten",

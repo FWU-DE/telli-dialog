@@ -30,7 +30,8 @@
   "custom-chat": {
     "shared": {
       "join-code": "الانضمام باستخدام رمز",
-      "enter-chat": "بدء الحوار",
+      "enter-chat": "إلى الحوار",
+      "start-chat": "بدء الحوار",
       "invalid-code-toast": "الرمز الذي تم إدخاله منتهي الصلاحية أو غير صالح."
     },
     "share-page": {

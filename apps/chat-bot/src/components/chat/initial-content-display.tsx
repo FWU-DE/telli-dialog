@@ -33,8 +33,12 @@ export function InitialChatContentDisplay({
         </div>
       )}
       {setDialogStarted !== undefined && (
-        <Button onClick={() => setDialogStarted(true)} className="mt-3">
-          {startDialogLabel ?? tCustomChat('enter-chat')}
+        <Button
+          onClick={() => setDialogStarted(true)}
+          className="mt-3"
+          data-testid="start-dialog-button"
+        >
+          {startDialogLabel ?? tCustomChat('start-chat')}
         </Button>
       )}
     </div>

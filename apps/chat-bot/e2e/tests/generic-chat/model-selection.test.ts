@@ -27,7 +27,7 @@ test('switching LLM model preserves the typed prompt in generic chat', async ({ 
   await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_2);
 
   // Verify prompt is preserved
-  await expect(page.getByPlaceholder('Wie kann ich Dir helfen?')).toHaveValue(prompt);
+  await expect(page.getByTestId('chat-input')).toHaveValue(prompt);
 });
 
 test('Starting a new chat clears the prompt and resets the page when already on home page', async ({
@@ -42,5 +42,5 @@ test('Starting a new chat clears the prompt and resets the page when already on 
   await page.getByLabel('Hauptnavigation').getByText('Neuer Chat').click();
 
   // The prompt should be gone after the page resets
-  await expect(page.getByPlaceholder('Wie kann ich Dir helfen?')).toHaveValue('');
+  await expect(page.getByTestId('chat-input')).toHaveValue('');
 });
