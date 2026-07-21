@@ -1,6 +1,6 @@
 import { LlmModel } from '@ais-chat/api-database';
 import { DEFAULT_IONOS_BASE_URL, DEFAULT_OPENAI_BASE_URL } from '@ais-chat/api-database/llm-model';
-import { BifrostProviderSyncError } from '../../../types/bifrost-provider-sync-error';
+import { BifrostProviderSyncError } from '@/types/bifrost-provider-sync-error';
 import { BifrostProviderConfig } from '../types';
 import {
   buildAzureAliases,

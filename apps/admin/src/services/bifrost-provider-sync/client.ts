@@ -1,6 +1,6 @@
-import { env } from '../../consts/env';
+import { env } from '@/consts/env';
+import { BifrostProviderSyncError } from '@/types/bifrost-provider-sync-error';
 import { logError } from '@shared/logging';
-import { BifrostProviderSyncError } from '../../types/bifrost-provider-sync-error';
 import {
   BifrostKey,
   BifrostProvider,
@@ -183,6 +183,7 @@ async function assertBifrostResponse(
 
 function redactBifrostResponse(responseText: string): string {
   try {
+    // Bifrost error payloads can echo submitted key configs, including Google service account JSON.
     return JSON.stringify(redactValue(JSON.parse(responseText)));
   } catch {
     return '[non-JSON response omitted]';
