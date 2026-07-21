@@ -28,3 +28,15 @@ export const LOCALE_TO_FILTER_LANGUAGE: Record<string, SupportedFilterLanguage> 
       filterLanguage,
     ]),
   ) as Record<string, SupportedFilterLanguage>;
+
+function isSupportedFilterLanguage(language: string): language is SupportedFilterLanguage {
+  return Object.hasOwn(LOCALE_BY_FILTER_LANGUAGE, language);
+}
+
+/**
+ * Returns the locale for a filter language, or `undefined` if the language
+ * is not one of the languages we ship translations for.
+ */
+export function getLocaleForFilterLanguage(language: string): string | undefined {
+  return isSupportedFilterLanguage(language) ? FILTER_LANGUAGE_TO_LOCALE[language] : undefined;
+}

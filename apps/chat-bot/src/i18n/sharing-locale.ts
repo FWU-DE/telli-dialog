@@ -11,7 +11,7 @@ import { constructLearningScenarioLanguageSystemPrompt } from '@/app/api/learnin
 import type { LlmModelSelectModel, filterGroup } from '@shared/db/schema';
 import {
   DEFAULT_LOCALE,
-  FILTER_LANGUAGE_TO_LOCALE,
+  getLocaleForFilterLanguage,
   LOCALE_TO_FILTER_LANGUAGE,
   SUPPORTED_LOCALES,
 } from './locales';
@@ -162,7 +162,7 @@ function getLocaleFromFilterLanguages(languages: string[] | undefined): string |
 
   // We only ship a subset of locales. For unsupported language filters,
   // use the default locale deterministically instead of model-based guessing.
-  return FILTER_LANGUAGE_TO_LOCALE[selectedLanguage] ?? DEFAULT_LOCALE;
+  return getLocaleForFilterLanguage(selectedLanguage) ?? DEFAULT_LOCALE;
 }
 
 /**
