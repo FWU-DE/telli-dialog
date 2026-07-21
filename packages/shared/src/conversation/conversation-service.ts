@@ -156,23 +156,10 @@ export async function getConversationMessageForExport({
     throw new NotFoundError('Conversation message not found');
   }
 
-  const messages = await getConversationMessages({ conversationId, userId });
-  const messageIndex = messages.findIndex(
-    (conversationMessage) => conversationMessage.id === messageId,
-  );
-  const previousUserMessage =
-    message.role === 'assistant'
-      ? messages
-          .slice(0, messageIndex)
-          .toReversed()
-          .find((conversationMessage) => conversationMessage.role === 'user')
-      : undefined;
-
   return {
     conversation,
     message,
     fileMapping,
-    imageMessageIds: [previousUserMessage?.id, message.id].filter((id) => id !== undefined),
   };
 }
 

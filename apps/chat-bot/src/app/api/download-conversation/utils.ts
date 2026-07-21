@@ -21,7 +21,7 @@ import sharp from 'sharp';
 
 const USER_FULL_NAME = 'Nutzer/in';
 const EXPORTED_IMAGE_MAX_HEIGHT = 256;
-type ExportedImageType = 'jpg' | 'png' | 'gif' | 'bmp';
+type ExportedImageType = 'jpg' | 'png';
 
 export async function generateConversationDocxFile({
   conversation,
@@ -130,12 +130,10 @@ function getConversationMessages({
 export async function generateConversationMessageDocxFile({
   message,
   fileMapping,
-  imageMessageIds,
   gptName,
 }: {
   message: ConversationMessageModel;
   fileMapping: Map<string, FileModel[]>;
-  imageMessageIds: string[];
   gptName: string;
 }): Promise<ArrayBuffer | undefined> {
   try {
@@ -161,8 +159,8 @@ export async function generateConversationMessageDocxFile({
     ];
 
     const messageParagraphs = [
-      ...(await getImageParagraphsForMessages({ messageIds: imageMessageIds, fileMapping })),
       ...markdownToDocx(message.content),
+      ...(await getImageParagraphsForMessage({ messageId: message.id, fileMapping })),
       new Paragraph({}),
       new Paragraph({
         children: [
@@ -187,21 +185,7 @@ export async function generateConversationMessageDocxFile({
   }
 }
 
-async function getImageParagraphsForMessages({
-  messageIds,
-  fileMapping,
-}: {
-  messageIds: string[];
-  fileMapping: Map<string, FileModel[]>;
-}): Promise<Paragraph[]> {
-  const imageParagraphs = await Promise.all(
-    messageIds.map((messageId) => getImageParagraphsForMessage({ messageId, fileMapping })),
-  );
-
-  return imageParagraphs.flat();
-}
-
-async function getImageParagraphsForMessage({
+export async function getImageParagraphsForMessage({
   messageId,
   fileMapping,
 }: {
@@ -273,7 +257,7 @@ function getDocxImageType(fileName: string): ExportedImageType | undefined {
     return 'jpg';
   }
 
-  if (extension === 'jpg' || extension === 'png' || extension === 'gif' || extension === 'bmp') {
+  if (extension === 'jpg' || extension === 'png') {
     return extension;
   }
 
