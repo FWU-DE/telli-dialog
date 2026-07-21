@@ -12,7 +12,7 @@ import { scrubSentryEvent } from '@ais-chat/shared-core/sentry/scrub';
  * How the sentry setup works:
  * 1. In the apps `layout.tsx`, a <script> tag must be embedded,
  *    which sets the client-side configuration for Sentry in `window.__PUBLIC_CONFIG__` (environment and DSN).
- *    The config is built dynamically using environment variables.
+ *    The config is dynamically built using environment variables.
  * 2. Next.js will execute the file `instrumentation-client.ts` in the browser,
  *    which will use the injected config to initialize Sentry.
  *
