@@ -54,6 +54,12 @@ async function resolveSharingLocaleByRoute({
     }
 
     const teacherUserAndContext = await getUserAndContextByUserId({ userId: character.userId });
+    const sharedPageLocaleDetectionEnabled =
+      teacherUserAndContext.federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true;
+    if (!sharedPageLocaleDetectionEnabled) {
+      return DEFAULT_LOCALE;
+    }
+
     const auxiliaryModel = await getStrongAuxiliaryModel(teacherUserAndContext.federalState.id);
     const [error, auxiliaryModelAndApiKey] = await getModelAndApiKeyWithResult({
       modelId: auxiliaryModel.id,
@@ -102,6 +108,12 @@ async function resolveSharingLocaleByRoute({
     const teacherUserAndContext = await getUserAndContextByUserId({
       userId: learningScenario.userId,
     });
+    const sharedPageLocaleDetectionEnabled =
+      teacherUserAndContext.federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true;
+    if (!sharedPageLocaleDetectionEnabled) {
+      return DEFAULT_LOCALE;
+    }
+
     const auxiliaryModel = await getStrongAuxiliaryModel(teacherUserAndContext.federalState.id);
     const [error, auxiliaryModelAndApiKey] = await getModelAndApiKeyWithResult({
       modelId: auxiliaryModel.id,
