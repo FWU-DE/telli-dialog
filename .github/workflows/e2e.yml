@@ -194,7 +194,7 @@ jobs:
           LLM_GPT5MINI_API_KEY: ${{ secrets.LLM_GPT5MINI_API_KEY }}
           LLM_GPT5MINI_BASE_URL: ${{ secrets.LLM_GPT5MINI_BASE_URL }}
           LLM_MOCK_API_KEY: mock-api-key
-          LLM_MOCK_BASE_URL: http://host.docker.internal:6556/v1
+          LLM_MOCK_BASE_URL: http://host.docker.internal:6556
 
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @ais-chat/shared db:migrate && pnpm --filter @ais-chat/shared db:seed
