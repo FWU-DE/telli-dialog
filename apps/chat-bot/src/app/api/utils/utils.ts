@@ -180,9 +180,21 @@ export async function getStrongAuxiliaryModel(
   const llmModels = await dbGetLlmModelsByFederalStateId({
     federalStateId,
   });
-  const auxiliaryModel = getDefaultStrongAuxModel(llmModels) ?? getAuxiliaryModel(federalStateId);
+  const auxiliaryModel = getDefaultStrongAuxModel(llmModels);
+  if (auxiliaryModel !== undefined) {
+    return auxiliaryModel;
+  }
 
-  return auxiliaryModel;
+  const fallbackAuxiliaryModel =
+    getDefaultAuxModel(llmModels) ?? getFallbackAuxModel(llmModels) ?? getFirstTextModel(llmModels);
+  if (fallbackAuxiliaryModel === undefined) {
+    const error = new Error('No auxiliary model found for federal state id ' + federalStateId);
+    logError(error.message, error);
+
+    throw error;
+  }
+
+  return fallbackAuxiliaryModel;
 }
 
 /**

@@ -8,7 +8,7 @@ import { getUserAndContextByUserId } from '@/auth/utils';
 import { getModelAndApiKeyWithResult, getStrongAuxiliaryModel } from '@/app/api/utils/utils';
 import { constructCharacterLanguageSystemPrompt } from '@/app/api/character/system-prompt';
 import { constructLearningScenarioLanguageSystemPrompt } from '@/app/api/learning-scenario/system-prompt';
-import { LlmModelSelectModel, filterGroup } from '@shared/db/schema';
+import type { LlmModelSelectModel, filterGroup } from '@shared/db/schema';
 import {
   DEFAULT_LOCALE,
   FILTER_LANGUAGE_TO_LOCALE,
