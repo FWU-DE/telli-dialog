@@ -47,3 +47,49 @@ export function parseHyperlinks(content: string): string[] | undefined {
 
   return matches;
 }
+
+/**
+ * Normalizes a URL to a domain.
+ *
+ * Accepted inputs (all produce `example.com`):
+ * - `example.com`
+ * - `EXAMPLE.COM`
+ * - `www.example.com`
+ * - `https://example.com`
+ * - `https://www.example.com/some/path?q=1#frag`
+ *
+ * Returns `null` for input that is empty, contains no dot, has an invalid
+ * hostname, or cannot be parsed as a URL. Subdomains other than `www` are
+ * preserved (e.g. `api.example.com` stays as-is).
+ *
+ * @param input The raw URL.
+ * @returns The normalized domain, or `null` if the input is not a valid domain.
+ */
+export function normalizeDomain(input: string): string | null {
+  const trimmed = input.trim();
+  if (trimmed === '') {
+    return null;
+  }
+
+  const hasScheme = /^https?:\/\//i.test(trimmed);
+  const candidate = hasScheme ? trimmed : `https://${trimmed}`;
+
+  let host: string;
+  try {
+    host = new URL(candidate).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+
+  if (host.startsWith('www.')) {
+    host = host.slice(4);
+  }
+
+  // Require at least one dot and only valid DNS label characters.
+  const hostnamePattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
+  if (!hostnamePattern.test(host)) {
+    return null;
+  }
+
+  return host;
+}
