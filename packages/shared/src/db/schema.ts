@@ -27,6 +27,7 @@ import {
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
 import { ToolCall } from '@ais-chat/ai-core/chat/types';
+import { logError } from '@shared/logging';
 
 // can be expanded to include other metadata of other file types
 export type FileMetadata = Record<string, unknown>;
@@ -931,6 +932,9 @@ export function isLearningScenarioWithShareData(
   scenario: unknown,
 ): scenario is LearningScenarioWithShareDataModel {
   const result = learningScenarioWithShareDataModel.safeParse(scenario);
+  if (!result.success) {
+    logError('isLearningScenarioWithShareData: validation failed', result.error);
+  }
   return result.success;
 }
 
@@ -1168,6 +1172,9 @@ export function isCharacterWithShareData(
   character: unknown,
 ): character is CharacterWithShareDataModel {
   const result = characterWithShareDataModel.safeParse(character);
+  if (!result.success) {
+    logError('isCharacterWithShareData: validation failed', result.error);
+  }
   return result.success;
 }
 
