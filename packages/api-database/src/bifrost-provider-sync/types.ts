@@ -30,6 +30,7 @@ export type BifrostProviderConfig = {
   provider: BifrostProvider;
   network_config?: {
     base_url?: string;
+    allow_private_network?: boolean;
   };
   custom_provider_config?: {
     base_provider_type: 'openai';
