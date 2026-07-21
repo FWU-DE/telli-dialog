@@ -3,6 +3,7 @@ import {
   type ApiKeyInsertModel,
   apiKeyTable,
   type LlmInsertModel,
+  type LlmModel,
   llmModelApiKeyMappingTable,
   llmModelTable,
   type OrganizationInsertModel,
@@ -10,7 +11,7 @@ import {
   type ProjectInsertModel,
   projectTable,
 } from './schema';
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { normalizeSeedModelsForBifrost, syncSeedModelsToBifrost } from './seed-bifrost';
 
 const ORGANIZATION_ID = 'cfeb82c6-396a-4c2d-954b-53e77acbbe7e';
@@ -278,7 +279,17 @@ export async function seedDatabase() {
     }
 
     // 5. Create/update API key to model mapping
-    const seededModels = [];
+    const seededModels: LlmModel[] = [];
+    await db.delete(llmModelApiKeyMappingTable).where(
+      and(
+        eq(llmModelApiKeyMappingTable.apiKeyId, apiKey.id),
+        inArray(
+          llmModelApiKeyMappingTable.llmModelId,
+          DEFAULT_MODELS.map((model) => model.id!),
+        ),
+      ),
+    );
+
     for (const model of DEFAULT_MODELS) {
       const [seededModel] = await db
         .insert(llmModelTable)
