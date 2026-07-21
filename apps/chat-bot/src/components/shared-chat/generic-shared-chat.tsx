@@ -321,6 +321,8 @@ export default function GenericSharedChat({
           dialogStarted={dialogStarted}
           imageSource={avatarPictureUrl}
           inviteCode={inviteCode}
+          sharedSessionId={sharedSessionId}
+          pendingFileMapping={pendingFileMapping}
         />
         <div ref={containerRef} className="relative flex min-h-0 flex-1 flex-col items-center">
           <div

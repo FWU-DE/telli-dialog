@@ -56,17 +56,15 @@ export async function GET(req: NextRequest) {
 
       fileName = generateFileName({ conversation, gptName });
     } else {
-      const { conversation, message, fileMapping, imageMessageIds } =
-        await getConversationMessageForExport({
-          conversationId,
-          messageId,
-          userId: user.id,
-        });
+      const { conversation, message, fileMapping } = await getConversationMessageForExport({
+        conversationId,
+        messageId,
+        userId: user.id,
+      });
 
       document = await generateConversationMessageDocxFile({
         message,
         fileMapping,
-        imageMessageIds,
         gptName,
       });
 
