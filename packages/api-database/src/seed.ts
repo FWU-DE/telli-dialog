@@ -34,7 +34,7 @@ const mockLlmBaseUrl = process.env.LLM_MOCK_BASE_URL ?? 'http://localhost:6556/v
 // See devops/docker/mock-llm/ for the server implementation.
 const mockLlm: LlmInsertModel = {
   organizationId: ORGANIZATION_ID,
-  provider: 'openai',
+  provider: 'bifrost',
   name: 'mock-echo',
   displayName: 'Mock LLM',
   description: 'Mock LLM for e2e testing — echoes back the received prompt',
