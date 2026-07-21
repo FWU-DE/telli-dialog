@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import CustomChatSharePageContent from './custom-chat-share-page-content';
 import { NextIntlClientProvider } from 'next-intl';
 import { resolveSharingLocale } from '@/i18n/sharing-locale';
-import { loadMessages } from '@/i18n/load-messages';
+import { loadTranslations } from '@/i18n/load-translations';
 
 type CustomChatSharePageProps = {
   backHref: string;
@@ -31,7 +31,7 @@ export default async function CustomChatSharePage({
 }: CustomChatSharePageProps) {
   const locale = await resolveSharingLocale(relativeShareUrl);
   const t = await getTranslations({ locale, namespace: 'custom-chat.share-page' });
-  const messages = await loadMessages(locale);
+  const messages = await loadTranslations(locale);
   const baseUrl = await getBaseUrlByHeaders();
   const host = await getHostByHeaders();
   const absoluteShareUrl = new URL(relativeShareUrl, baseUrl).href;

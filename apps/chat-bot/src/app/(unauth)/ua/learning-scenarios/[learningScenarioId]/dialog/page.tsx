@@ -13,7 +13,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { resolveSharingLocale } from '@/i18n/sharing-locale';
-import { loadMessages } from '@/i18n/load-messages';
+import { loadTranslations } from '@/i18n/load-translations';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('learning-scenarios.page-titles');
@@ -51,7 +51,7 @@ export default async function Page(
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
   const shareUrl = `/ua/learning-scenarios/${learningScenario.id}/dialog?inviteCode=${searchParams.inviteCode}`;
   const locale = await resolveSharingLocale(shareUrl);
-  const messages = await loadMessages(locale);
+  const messages = await loadTranslations(locale);
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>

@@ -1,5 +1,5 @@
 import { getRequestConfig } from 'next-intl/server';
-import { loadMessages } from './load-messages';
+import { loadTranslations } from './load-translations';
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './locales';
 
 export default getRequestConfig(async ({ requestLocale }) => {
@@ -11,6 +11,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
-    messages: await loadMessages(locale),
+    messages: await loadTranslations(locale),
   };
 });

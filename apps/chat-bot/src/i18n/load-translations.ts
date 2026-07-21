@@ -22,10 +22,10 @@ function deepMerge(base: JsonObject, override: JsonObject): JsonObject {
 }
 
 /**
- * Loads locale messages and merges them on top of German fallback messages.
+ * Loads locale translations and merges them on top of German fallback translations.
  * This prevents runtime failures when a non-default locale is incomplete.
  */
-export async function loadMessages(locale: string): Promise<JsonObject> {
+export async function loadTranslations(locale: string): Promise<JsonObject> {
   const fallbackMessages = (await import('../../messages/de.json')).default as JsonObject;
 
   if (locale === 'de') {
