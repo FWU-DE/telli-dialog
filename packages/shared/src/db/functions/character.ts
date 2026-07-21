@@ -23,6 +23,7 @@ import {
   CharacterWithShareDataModel,
   conversationTable,
   fileTable,
+  filterGroup,
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
   sharedCharacterConversation,
@@ -669,4 +670,17 @@ export async function dbUpdateCharacterShareTokenPointsLimit({
     .returning();
 
   return updatedShare;
+}
+
+export async function dbUpdateCharacterFilterGroup({
+  characterId,
+  filterGroup: updatedFilterGroup,
+}: {
+  characterId: string;
+  filterGroup: filterGroup;
+}): Promise<void> {
+  await db
+    .update(characterTable)
+    .set({ filterGroup: updatedFilterGroup })
+    .where(eq(characterTable.id, characterId));
 }

@@ -14,7 +14,6 @@ import { getTranslations } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { resolveSharingLocale } from '@/i18n/sharing-locale';
 import { loadMessages } from '@/i18n/load-messages';
-import { logInfo } from '@shared/logging';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('characters.page-titles');
@@ -47,13 +46,6 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
   const shareUrl = `/ua/characters/${character.id}/dialog?inviteCode=${searchParams.inviteCode}`;
   const locale = await resolveSharingLocale(shareUrl);
-  // TODO: REMOVE LOGS
-  logInfo('Resolved sharing locale', {
-    source: 'ua-character-dialog-page',
-    uiLink: shareUrl,
-    locale,
-    entityId: character.id,
-  });
   const messages = await loadMessages(locale);
 
   return (

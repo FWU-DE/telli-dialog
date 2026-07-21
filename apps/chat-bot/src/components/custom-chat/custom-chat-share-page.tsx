@@ -4,7 +4,6 @@ import CustomChatSharePageContent from './custom-chat-share-page-content';
 import { NextIntlClientProvider } from 'next-intl';
 import { resolveSharingLocale } from '@/i18n/sharing-locale';
 import { loadMessages } from '@/i18n/load-messages';
-import { logInfo } from '@shared/logging';
 
 type CustomChatSharePageProps = {
   backHref: string;
@@ -31,14 +30,6 @@ export default async function CustomChatSharePage({
   entityId,
 }: CustomChatSharePageProps) {
   const locale = await resolveSharingLocale(relativeShareUrl);
-  // TODO: REMOVE LOGS
-  logInfo('Resolved sharing locale', {
-    source: 'custom-chat-share-page',
-    uiLink: relativeShareUrl,
-    locale,
-    customChatVariant,
-    entityId,
-  });
   const t = await getTranslations({ locale, namespace: 'custom-chat.share-page' });
   const messages = await loadMessages(locale);
   const baseUrl = await getBaseUrlByHeaders();

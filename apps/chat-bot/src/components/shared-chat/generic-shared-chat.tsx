@@ -112,7 +112,7 @@ export default function GenericSharedChat({
   getSignedUrlFn,
 }: SharedChatViewProps) {
   const tCommon = useTranslations('common');
-  const tLearningScenarioShared = useTranslations('learning-scenarios.shared');
+  const tCustomChat = useTranslations('custom-chat.shared');
   const { shareSessionState } = calculateShareSessionState(entity);
   const chatActive = shareSessionState === ShareSessionState.RUNNING;
 
@@ -319,7 +319,7 @@ export default function GenericSharedChat({
                   dialogStartMode === 'explicit' ? setExplicitDialogStarted : undefined
                 }
                 startDialogLabel={
-                  dialogStartMode === 'explicit' ? tLearningScenarioShared('enter-chat') : undefined
+                  dialogStartMode === 'explicit' ? tCustomChat('enter-chat') : undefined
                 }
               />
             ) : (

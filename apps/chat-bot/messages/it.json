@@ -14,29 +14,35 @@
   "learning-scenarios": {
     "shared": {
       "excercise-title": "Il tuo compito",
-      "join-code": "Unisciti con un codice",
-      "enter-chat": "Vai al dialogo",
       "delete-chat-modal-title": "Cancellare la chat attuale?",
       "delete-chat-modal-description": "Verrà avviata una nuova chat. La chat attuale verrà eliminata in modo definitivo.",
       "delete-chat-modal-confirm-button": "Cancella"
     }
   },
+  "sharing": {
+    "copy-link": "Copia link"
+  },
   "custom-chat": {
+    "shared": {
+      "join-code": "Unisciti con un codice",
+      "enter-chat": "Avvia dialogo",
+      "invalid-code-toast": "Il codice inserito è scaduto oppure non valido."
+    },
     "share-page": {
       "go-to": "Vai su",
       "enter-code": "Inserisci il codice.",
-      "open-chat": "Apri chat",
-      "use-qr": "Oppure usa il codice QR.",
+      "open-chat": "Apri la chat",
+      "use-qr": "Scansiona il codice QR.",
       "copy-link": "Copia link di avvio",
       "learning-scenario": {
         "sub-header": "Scenario di apprendimento",
         "back-button": "Vai allo scenario di apprendimento",
-        "join": "Iniziare lo scenario di apprendimento"
+        "join": "Avvia lo scenario di apprendimento"
       },
       "character": {
         "sub-header": "Interlocutore",
         "back-button": "Vai all’interlocutore",
-        "join": "Partecipare al dialogo"
+        "join": "Partecipa al dialogo"
       }
     }
   }

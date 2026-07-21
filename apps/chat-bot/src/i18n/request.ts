@@ -1,8 +1,6 @@
 import { getRequestConfig } from 'next-intl/server';
 import { loadMessages } from './load-messages';
-
-const SUPPORTED_LOCALES = new Set(['de', 'en', 'fr', 'it', 'ar']);
-const DEFAULT_LOCALE = 'de';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './locales';
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const requestedLocale = await requestLocale;

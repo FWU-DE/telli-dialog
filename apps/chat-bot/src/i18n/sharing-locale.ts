@@ -2,21 +2,24 @@ import { cacheLife } from 'next/cache';
 import { generateTextWithBilling } from '@ais-chat/ai-core';
 import { dbGetCharacterById } from '@shared/db/functions/character';
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
+import { dbUpdateCharacterFilterGroup } from '@shared/db/functions/character';
+import { dbUpdateLearningScenarioFilterGroup } from '@shared/db/functions/learning-scenario';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { getModelAndApiKeyWithResult, getStrongAuxiliaryModel } from '@/app/api/utils/utils';
 import { constructCharacterLanguageSystemPrompt } from '@/app/api/character/system-prompt';
 import { constructLearningScenarioLanguageSystemPrompt } from '@/app/api/learning-scenario/system-prompt';
-import { LlmModelSelectModel } from '@shared/db/schema';
+import { LlmModelSelectModel, filterGroup } from '@shared/db/schema';
+import {
+  DEFAULT_LOCALE,
+  FILTER_LANGUAGE_TO_LOCALE,
+  LOCALE_TO_FILTER_LANGUAGE,
+  SUPPORTED_LOCALES,
+} from './locales';
 
-const DEFAULT_LOCALE = 'de';
-const SUPPORTED_LOCALES = new Set(['de', 'en', 'fr', 'it', 'ar']);
-const FILTER_LANGUAGE_TO_LOCALE: Record<string, string> = {
-  german: 'de',
-  english: 'en',
-  french: 'fr',
-  italian: 'it',
-};
-
+/**
+ * Resolves the locale for a shared chat entity (character or learning scenario).
+ * Parses the UI link to determine the entity type and ID, then resolves the locale.
+ */
 export async function resolveSharingLocale(uiLink: string): Promise<string> {
   const route = parseSharingRoute(uiLink);
 
@@ -27,6 +30,10 @@ export async function resolveSharingLocale(uiLink: string): Promise<string> {
   return resolveSharingLocaleByRoute({ routeType: route.type, entityId: route.entityId });
 }
 
+/**
+ * Resolves the locale for a character or learning scenario.
+ * Priority: filter language > LLM-determined language > default locale.
+ */
 async function resolveSharingLocaleByRoute({
   routeType,
   entityId,
@@ -34,12 +41,6 @@ async function resolveSharingLocaleByRoute({
   routeType: 'character' | 'learning-scenario';
   entityId: string;
 }): Promise<string> {
-  'use cache';
-  cacheLife({
-    expire: 60 * 60 * 24,
-    revalidate: 60 * 60 * 23,
-  });
-
   if (routeType === 'character') {
     const character = await dbGetCharacterById({ characterId: entityId });
 
@@ -47,11 +48,7 @@ async function resolveSharingLocaleByRoute({
       return DEFAULT_LOCALE;
     }
 
-    const localeFromFilterLanguage = await getLocaleFromFilterLanguages(
-      character.filterGroup?.languages,
-    );
-    // TODO: Remove logs
-    console.log('Locale from filter languages:', localeFromFilterLanguage);
+    const localeFromFilterLanguage = getLocaleFromFilterLanguages(character.filterGroup?.languages);
     if (localeFromFilterLanguage !== null) {
       return localeFromFilterLanguage;
     }
@@ -71,7 +68,19 @@ async function resolveSharingLocaleByRoute({
       character,
     });
 
-    return getLocale(auxiliaryModelAndApiKey, systemPrompt);
+    const locale = await getLocale(auxiliaryModelAndApiKey, systemPrompt);
+    if (locale === null) {
+      return DEFAULT_LOCALE;
+    }
+
+    await persistDetectedLanguage({
+      entityType: 'character',
+      entityId: character.id,
+      locale,
+      existingFilterGroup: character.filterGroup,
+    });
+
+    return locale;
   }
 
   if (routeType === 'learning-scenario') {
@@ -83,7 +92,7 @@ async function resolveSharingLocaleByRoute({
       return DEFAULT_LOCALE;
     }
 
-    const localeFromFilterLanguage = await getLocaleFromFilterLanguages(
+    const localeFromFilterLanguage = getLocaleFromFilterLanguages(
       learningScenario.filterGroup?.languages,
     );
     if (localeFromFilterLanguage !== null) {
@@ -93,8 +102,9 @@ async function resolveSharingLocaleByRoute({
     const teacherUserAndContext = await getUserAndContextByUserId({
       userId: learningScenario.userId,
     });
-    const [error, modelAndApiKey] = await getModelAndApiKeyWithResult({
-      modelId: learningScenario.modelId,
+    const auxiliaryModel = await getStrongAuxiliaryModel(teacherUserAndContext.federalState.id);
+    const [error, auxiliaryModelAndApiKey] = await getModelAndApiKeyWithResult({
+      modelId: auxiliaryModel.id,
       federalStateId: teacherUserAndContext.federalState.id,
     });
 
@@ -106,22 +116,29 @@ async function resolveSharingLocaleByRoute({
       learningScenario,
     });
 
-    return getLocale(modelAndApiKey, systemPrompt);
+    const locale = await getLocale(auxiliaryModelAndApiKey, systemPrompt);
+    if (locale === null) {
+      return DEFAULT_LOCALE;
+    }
+
+    await persistDetectedLanguage({
+      entityType: 'learning-scenario',
+      entityId: learningScenario.id,
+      locale,
+      existingFilterGroup: learningScenario.filterGroup,
+    });
+
+    return locale;
   }
 
   return DEFAULT_LOCALE;
 }
 
-async function getLocaleFromFilterLanguages(
-  languages: string[] | undefined,
-): Promise<string | null> {
-  'use cache';
-  cacheLife({
-    expire: 60 * 60 * 24,
-    revalidate: 60 * 60 * 23,
-  });
-  console.log('Filter languages:', languages);
-
+/**
+ * Checks if a single filter language is explicitly set.
+ * Returns the mapped locale for supported languages, or null to use LLM detection.
+ */
+function getLocaleFromFilterLanguages(languages: string[] | undefined): string | null {
   if (languages === undefined || languages.length !== 1) {
     return null;
   }
@@ -131,13 +148,19 @@ async function getLocaleFromFilterLanguages(
     return null;
   }
 
-  return FILTER_LANGUAGE_TO_LOCALE[selectedLanguage] ?? null;
+  // We only ship a subset of locales. For unsupported language filters,
+  // use the default locale deterministically instead of model-based guessing.
+  return FILTER_LANGUAGE_TO_LOCALE[selectedLanguage] ?? DEFAULT_LOCALE;
 }
 
+/**
+ * Calls the LLM to determine which language the entity's content is in.
+ * Results are cached for 24 hours based on the systemPrompt content.
+ */
 async function getLocale(
   auxiliaryModelAndApiKey: { model: LlmModelSelectModel; apiKeyId: string },
   systemPrompt: string,
-): Promise<string> {
+): Promise<string | null> {
   'use cache';
   cacheLife({
     expire: 60 * 60 * 24,
@@ -159,14 +182,68 @@ async function getLocale(
       ],
       auxiliaryModelAndApiKey.apiKeyId,
     );
-    console.log('Detected language code:', text);
-
     return normalizeLocale(text);
   } catch {
-    return DEFAULT_LOCALE;
+    return null;
   }
 }
 
+/**
+ * Persists a locale detected by the LLM back to the entity's filterGroup.languages.
+ * No-ops if the locale cannot be mapped to a known Language or is already in the list.
+ * Errors are caught so locale resolution is never blocked by a write failure.
+ */
+async function persistDetectedLanguage({
+  entityType,
+  entityId,
+  locale,
+  existingFilterGroup,
+}: {
+  entityType: 'character' | 'learning-scenario';
+  entityId: string;
+  locale: string;
+  existingFilterGroup: filterGroup | undefined;
+}): Promise<void> {
+  const detectedLanguage = LOCALE_TO_FILTER_LANGUAGE[locale];
+  if (detectedLanguage === undefined) {
+    return;
+  }
+
+  const currentLanguages = existingFilterGroup?.languages ?? [];
+  if (currentLanguages.includes(detectedLanguage)) {
+    return;
+  }
+
+  const updatedFilterGroup: filterGroup = {
+    school_types: existingFilterGroup?.school_types ?? [],
+    grade_ranges: existingFilterGroup?.grade_ranges ?? [],
+    subjects: existingFilterGroup?.subjects ?? [],
+    categories: existingFilterGroup?.categories ?? [],
+    federal_states: existingFilterGroup?.federal_states ?? [],
+    languages: [...currentLanguages, detectedLanguage],
+  };
+
+  try {
+    if (entityType === 'character') {
+      await dbUpdateCharacterFilterGroup({
+        characterId: entityId,
+        filterGroup: updatedFilterGroup,
+      });
+    } else {
+      await dbUpdateLearningScenarioFilterGroup({
+        learningScenarioId: entityId,
+        filterGroup: updatedFilterGroup,
+      });
+    }
+  } catch {
+    // write failure must not break locale resolution
+  }
+}
+
+/**
+ * Parses a sharing URL to extract the entity type and ID.
+ * Supports multiple URL patterns: dialog views and editor share views.
+ */
 function parseSharingRoute(
   uiLink: string,
 ):

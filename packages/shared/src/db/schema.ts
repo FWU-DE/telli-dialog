@@ -442,6 +442,7 @@ export type FederalState = z.infer<typeof federalStatesSchema>;
 export const languagesSchema = z.enum([
   'german',
   'english',
+  'arabic',
   'turkish',
   'french',
   'italian',

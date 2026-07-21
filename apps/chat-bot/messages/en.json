@@ -7,36 +7,42 @@
   "characters": {
     "shared": {
       "delete-chat-modal-title": "Delete current chat?",
-      "delete-chat-modal-description": "A new chat will be started. The current chat will be permanently deleted.",
+      "delete-chat-modal-description": "A new chat will be started. The current chat will be deleted permanently.",
       "delete-chat-modal-confirm-button": "Delete"
     }
   },
   "learning-scenarios": {
     "shared": {
       "excercise-title": "Your task",
-      "join-code": "Join with code",
-      "enter-chat": "Go to dialog",
       "delete-chat-modal-title": "Delete current chat?",
-      "delete-chat-modal-description": "A new chat will be started. The current chat will be permanently deleted.",
+      "delete-chat-modal-description": "A new chat will be started. The current chat will be deleted permanently.",
       "delete-chat-modal-confirm-button": "Delete"
     }
   },
+  "sharing": {
+    "copy-link": "Copy link"
+  },
   "custom-chat": {
+    "shared": {
+      "join-code": "Join with code",
+      "enter-chat": "Start dialog",
+      "invalid-code-toast": "The entered code is either expired or invalid."
+    },
     "share-page": {
       "go-to": "Go to",
       "enter-code": "Enter the code.",
       "open-chat": "Open chat",
-      "use-qr": "Or use the QR code.",
+      "use-qr": "Scan the QR code.",
       "copy-link": "Copy start link",
       "learning-scenario": {
         "sub-header": "Learning scenario",
-        "back-button": "To the learning scenario",
-        "join": "Start the learning scenario"
+        "back-button": "Back to learning scenario",
+        "join": "Start learning scenario"
       },
       "character": {
         "sub-header": "Dialog partner",
-        "back-button": "To the dialog partner",
-        "join": "Join the dialog"
+        "back-button": "Back to dialog partner",
+        "join": "Join dialog"
       }
     }
   }

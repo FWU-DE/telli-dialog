@@ -13,7 +13,7 @@ export default function SharedChatLoginForm() {
   const [inviteCode, setInviteCode] = React.useState('');
   const toast = useToast();
   const router = useRouter();
-  const t = useTranslations('learning-scenarios.shared');
+  const t = useTranslations('custom-chat.shared');
 
   async function getChatByInviteCode(formattedInviteCode: string) {
     const result = await getChatInfoByInviteCodeAction(formattedInviteCode);
