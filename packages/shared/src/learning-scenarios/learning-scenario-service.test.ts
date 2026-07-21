@@ -1523,7 +1523,7 @@ describe('learning-scenario-service', () => {
       const learningScenario = mockLearningScenarioWithShareData({
         id: learningScenarioId,
         userId,
-        expiredAt: new Date(NOW.getTime() - 60 * 60 * 1000), // expired 1 hour ago, within 2-hour grace window
+        expiredAt: new Date(NOW.getTime() - 60 * 60 * 1000), // expired 1 hour ago, within grace window
       });
       vi.mocked(dbGetLearningScenarioByIdWithShareData).mockResolvedValue(
         learningScenario as never,
