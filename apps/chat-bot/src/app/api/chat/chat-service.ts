@@ -399,6 +399,7 @@ export async function sendChatMessage({
       relatedFileEntities,
       attachedLinks,
       sourceUrls: ingestResult.processedUrls,
+      allowWebTools: true,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

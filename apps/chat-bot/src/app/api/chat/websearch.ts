@@ -97,6 +97,19 @@ export async function isWebSearchEnabled(params: {
   return (await resolveWebSearchConfig(params)).enabled;
 }
 
+export function isWebSearchEnabledForEntity({
+  featureToggles,
+  entity,
+}: {
+  featureToggles: { isWebSearchEnabled?: boolean | undefined };
+  entity: { isWebSearchEnabled: boolean };
+}): boolean {
+  if (featureToggles?.isWebSearchEnabled === true && entity.isWebSearchEnabled === true)
+    return true;
+
+  return false;
+}
+
 async function recordWebSearchUsage({
   conversationId,
   characterId,

@@ -29,6 +29,7 @@ const mocks = vi.hoisted(() => ({
   ingestWebContentMock: vi.fn(),
   resolveAgentNameForTracingMock: vi.fn(),
   combineSharedRelatedFilesMock: vi.fn(),
+  isWebSearchEnabledForEntityMock: vi.fn(),
 }));
 
 vi.mock('@ais-chat/ai-core', () => ({
@@ -119,6 +120,10 @@ vi.mock('../shared-chat/shared-chat-file-service', () => ({
   combineSharedRelatedFiles: mocks.combineSharedRelatedFilesMock,
 }));
 
+vi.mock('../chat/websearch', () => ({
+  isWebSearchEnabledForEntity: mocks.isWebSearchEnabledForEntityMock,
+}));
+
 const model = {
   id: 'model-1',
   name: 'Test model',
@@ -183,6 +188,7 @@ beforeEach(() => {
   mocks.dbGetRelatedLearningScenarioFilesMock.mockResolvedValue([]);
   mocks.combineSharedRelatedFilesMock.mockResolvedValue([]);
   mocks.ingestWebContentMock.mockResolvedValue({ processedUrls: [], errorUrls: [] });
+  mocks.isWebSearchEnabledForEntityMock.mockReturnValue(true);
   mocks.retrieveChunksMock.mockResolvedValue([]);
   mocks.constructLearningScenarioSystemPromptMock.mockReturnValue('system-prompt');
   mocks.limitChatHistoryMock.mockImplementation(
@@ -259,5 +265,40 @@ describe('sendLearningScenarioMessage', () => {
       sharedSessionId: 'session-1',
       userMessageId: 'message-1',
     });
+  });
+
+  it('passes allowWebTools=false to buildTools when websearch is disabled', async () => {
+    const { sendLearningScenarioMessage } = await import('./learning-scenario-chat-service');
+    mocks.getUserAndContextByUserIdMock.mockResolvedValue({
+      ...teacherUserAndContext,
+      federalState: {
+        ...teacherUserAndContext.federalState,
+        featureToggles: {
+          ...teacherUserAndContext.federalState.featureToggles,
+          isAgenticChatEnabled: true,
+        },
+      },
+    });
+    mocks.isWebSearchEnabledForEntityMock.mockReturnValue(false);
+    mocks.buildToolsMock.mockResolvedValue({ toolRegistry: {} });
+
+    await sendLearningScenarioMessage({
+      learningScenarioId: learningScenario.id,
+      inviteCode: 'invite-code',
+      messages,
+      modelId: model.id,
+    });
+
+    expect(mocks.isWebSearchEnabledForEntityMock).toHaveBeenCalledWith({
+      featureToggles: expect.objectContaining({
+        isAgenticChatEnabled: true,
+      }),
+      entity: learningScenario,
+    });
+    expect(mocks.buildToolsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allowWebTools: false,
+      }),
+    );
   });
 });
