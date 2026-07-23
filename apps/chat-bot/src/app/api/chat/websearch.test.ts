@@ -251,3 +251,49 @@ describe('resolveWebSearchConfig', () => {
     });
   });
 });
+
+describe('isWebSearchEnabledForEntity', () => {
+  it('returns true when federal-state toggle and entity setting are both true', async () => {
+    const { isWebSearchEnabledForEntity } = await import('./websearch');
+
+    const result = isWebSearchEnabledForEntity({
+      featureToggles: { isWebSearchEnabled: true },
+      entity: { isWebSearchEnabled: true },
+    });
+
+    expect(result).toBe(true);
+  });
+
+  it('returns false when federal-state toggle is false', async () => {
+    const { isWebSearchEnabledForEntity } = await import('./websearch');
+
+    const result = isWebSearchEnabledForEntity({
+      featureToggles: { isWebSearchEnabled: false },
+      entity: { isWebSearchEnabled: true },
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it('returns false when federal-state toggle is missing', async () => {
+    const { isWebSearchEnabledForEntity } = await import('./websearch');
+
+    const result = isWebSearchEnabledForEntity({
+      featureToggles: {},
+      entity: { isWebSearchEnabled: true },
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it('returns false when entity setting is false', async () => {
+    const { isWebSearchEnabledForEntity } = await import('./websearch');
+
+    const result = isWebSearchEnabledForEntity({
+      featureToggles: { isWebSearchEnabled: true },
+      entity: { isWebSearchEnabled: false },
+    });
+
+    expect(result).toBe(false);
+  });
+});
