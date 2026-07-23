@@ -61,7 +61,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
         usedBudget={usedBudget ?? 0}
         maxBudget={maxBudget ?? 500}
         budgetUsedBySharedChat={budgetUsedBySharedChat}
-        isWebSearchAvailable={isWebSearchAvailableForFederalState(federalState)}
+        isWebSearchAvailable={isWebSearchAvailableForFederalState(federalState.featureToggles)}
       />
     </DefaultPageLayout>
   );
