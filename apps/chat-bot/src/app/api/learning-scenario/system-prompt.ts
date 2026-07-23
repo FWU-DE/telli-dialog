@@ -37,3 +37,21 @@ ${learningScenario.additionalInstructions?.trim() ? `### Folgendes sollst du tun
 ${learningScenario.studentExercise?.trim() ? `### Folgendes ist der Auftrag an die Lernenden:\n${learningScenario.studentExercise}\n` : ''}
 ${ragContext}`;
 }
+
+// Create the system prompt for determining the language of the learning scenario assistant
+export function constructLearningScenarioLanguageSystemPrompt({
+  learningScenario,
+}: {
+  learningScenario: LearningScenarioSelectModel;
+}) {
+  return `
+
+## Kontext:
+### Thema des Chats 
+${learningScenario.name}
+
+${learningScenario.description?.trim() ? `### Zweck des Dialogs\n${learningScenario.description}\n` : ''}
+${learningScenario.additionalInstructions?.trim() ? `### Folgendes sollst du tun\n${learningScenario.additionalInstructions}\n` : ''}
+${learningScenario.studentExercise?.trim() ? `### Folgendes ist der Auftrag an die Lernenden:\n${learningScenario.studentExercise}\n` : ''}
+`;
+}

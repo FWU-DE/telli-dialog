@@ -55,7 +55,7 @@ test('teacher can create shared chat with web sources, student can join chat and
   await schoolChatPage.getByLabel('profileDropdown').waitFor();
 
   // send first message
-  const button = schoolChatPage.getByRole('button', { name: 'Dialog starten' });
+  const button = schoolChatPage.getByTestId('start-dialog-button');
   await button.waitFor();
   await button.click();
   await sendMessage(

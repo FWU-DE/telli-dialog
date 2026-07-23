@@ -15,7 +15,7 @@ export const LLM_MODELS = [
 ];
 
 export const SELECTORS = {
-  MESSAGE_INPUT: 'textarea[placeholder="Wie kann ich Dir helfen?"]',
+  MESSAGE_INPUT: '[data-testid="chat-input"]',
   SEND_BUTTON: 'button[aria-label="Nachricht abschicken"]',
   AI_MESSAGE: '[aria-label="assistant message 1"]',
   RELOAD_BUTTON: '[aria-label="Reload"]',

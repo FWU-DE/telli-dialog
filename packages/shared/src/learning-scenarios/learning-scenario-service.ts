@@ -61,7 +61,10 @@ import {
 } from '@shared/auth/authorization-service';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES } from '@shared/sharing/const';
+import {
+  MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES,
+  SHARE_EXTENSION_WINDOW_MS,
+} from '@shared/sharing/const';
 import {
   getChangedKeys,
   getPreservedUpdatedAtForExemptedKeys,
@@ -73,6 +76,7 @@ import {
 import { sharedLearningScenarioChatHasReachedTokenPointsLimit } from '@shared/users/usage';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { dbGetLearningScenarioChatUsageInCentByLearningScenarioId } from '@shared/db/functions/token-points';
+import { isShareWithinGraceWindow } from '@shared/sharing/is-share-within-grace-window';
 
 export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -203,7 +207,14 @@ async function getLearningScenarioInfo(
 
 /**
  * Returns a learning scenario with invite code and other sharing related data for sharing page.
- * @throws NotFoundError if learning scenario does not exist or is not shared
+ * The share must either be active (not yet expired) or within the grace window period
+ * (expired recently enough to still be manageable/extendable).
+ *
+ * @throws NotFoundError if:
+ *   - learning scenario does not exist
+ *   - share does not exist
+ *   - share has been manually stopped
+ *   - share is expired beyond the grace window
  */
 export async function getSharedLearningScenario({
   learningScenarioId,
@@ -217,7 +228,11 @@ export async function getSharedLearningScenario({
     learningScenarioId,
     user,
   });
-  if (!learningScenario || !learningScenario.inviteCode) {
+  if (!learningScenario || learningScenario.manuallyStoppedAt !== null) {
+    throw new NotFoundError('Learning scenario not found');
+  }
+
+  if (!isShareWithinGraceWindow(learningScenario.expiredAt, SHARE_EXTENSION_WINDOW_MS)) {
     throw new NotFoundError('Learning scenario not found');
   }
 

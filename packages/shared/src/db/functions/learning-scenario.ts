@@ -15,6 +15,7 @@ import { db } from '..';
 import { SHARE_EXTENSION_WINDOW_MS } from '@shared/sharing/const';
 import {
   fileTable,
+  filterGroup,
   LearningScenarioFileMapping,
   LearningScenarioOptionalShareDataModel,
   LearningScenarioSelectModel,
@@ -73,6 +74,32 @@ function latestLearningScenarioShare(
     })
     .from(sharedLearningScenarioTable)
     .where(eq(sharedLearningScenarioTable.userId, user.id))
+    .orderBy(
+      sharedLearningScenarioTable.learningScenarioId,
+      desc(sharedLearningScenarioTable.startedAt),
+    )
+    .as('latest_share');
+}
+
+/**
+ * Returns a subquery that selects the single most-recent non-manually-stopped share per learning
+ * scenario for a given user. This includes shares that have already expired, so the caller has
+ * to decide if it is still available (grace window) or already expired.
+ */
+function latestNonStoppedLearningScenarioShare(
+  user: Pick<UserModel, 'id'>,
+): ReturnType<typeof latestActiveLearningScenarioShare> {
+  return db
+    .selectDistinctOn([sharedLearningScenarioTable.learningScenarioId], {
+      ...getTableColumns(sharedLearningScenarioTable),
+    })
+    .from(sharedLearningScenarioTable)
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.userId, user.id),
+        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
+      ),
+    )
     .orderBy(
       sharedLearningScenarioTable.learningScenarioId,
       desc(sharedLearningScenarioTable.startedAt),
@@ -275,7 +302,10 @@ export async function dbGetLearningScenariosByIds({
  * Needs userId because the metadata for shared learning scenarios is both tied to the user and learning scenario,
  * this is especially important for shared learning scenarios (school wide or global).
  *
- * Returns undefined if the learning scenario does not exist or is not shared by the user
+ * Returns the latest share data even if expired, as long as it hasn't been manually stopped.
+ * The service layer (getSharedLearningScenario) is responsible for validating the grace window.
+ *
+ * Returns undefined if the learning scenario does not exist or has no non-manually-stopped shares
  */
 export async function dbGetLearningScenarioByIdWithShareData({
   learningScenarioId,
@@ -284,9 +314,9 @@ export async function dbGetLearningScenarioByIdWithShareData({
   learningScenarioId: string;
   user: Pick<UserModel, 'id'>;
 }): Promise<LearningScenarioWithShareDataModel | undefined> {
-  const activeShare = latestActiveLearningScenarioShare(user);
-  const [row] = await baseLearningScenarioWithShareQuery(activeShare)
-    .innerJoin(activeShare, eq(activeShare.learningScenarioId, learningScenarioTable.id))
+  const latestShare = latestNonStoppedLearningScenarioShare(user);
+  const [row] = await baseLearningScenarioWithShareQuery(latestShare)
+    .innerJoin(latestShare, eq(latestShare.learningScenarioId, learningScenarioTable.id))
     .where(eq(learningScenarioTable.id, learningScenarioId));
   return row;
 }
@@ -609,4 +639,17 @@ export async function dbLiftSuspensionOnLearningScenario({
   }
 
   return learningScenario;
+}
+
+export async function dbUpdateLearningScenarioFilterGroup({
+  learningScenarioId,
+  filterGroup: updatedFilterGroup,
+}: {
+  learningScenarioId: string;
+  filterGroup: filterGroup;
+}): Promise<void> {
+  await db
+    .update(learningScenarioTable)
+    .set({ filterGroup: updatedFilterGroup })
+    .where(eq(learningScenarioTable.id, learningScenarioId));
 }

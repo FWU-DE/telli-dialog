@@ -112,6 +112,7 @@ export default function GenericSharedChat({
   getSignedUrlFn,
 }: SharedChatViewProps) {
   const tCommon = useTranslations('common');
+  const tCustomChat = useTranslations('custom-chat.shared');
   const { shareSessionState } = calculateShareSessionState(entity);
   const chatActive = shareSessionState === ShareSessionState.RUNNING;
 
@@ -346,6 +347,9 @@ export default function GenericSharedChat({
                 setDialogStarted={
                   dialogStartMode === 'explicit' ? setExplicitDialogStarted : undefined
                 }
+                startDialogLabel={
+                  dialogStartMode === 'explicit' ? tCustomChat('enter-chat') : undefined
+                }
               />
             ) : (
               <Messages
@@ -394,6 +398,7 @@ export default function GenericSharedChat({
                       : (fileId) => getSignedUrlFn(fileId, sharedSessionId)
                   }
                   handleDeattachFile={handleDeattachFile}
+                  showPlaceholder={false}
                 />
               </div>
             )}

@@ -27,6 +27,7 @@ import {
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
 import { ToolCall } from '@ais-chat/ai-core/chat/types';
+import { logError } from '@shared/logging';
 
 // can be expanded to include other metadata of other file types
 export type FileMetadata = Record<string, unknown>;
@@ -195,6 +196,7 @@ export const federalStateFeatureTogglesSchema = z.object({
   isSharedChatEnabled: z.boolean().default(true),
   isCustomGptEnabled: z.boolean().default(true),
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
+  isSharedPageLocaleDetectionEnabled: z.boolean().optional(),
   isAgenticChatEnabled: z.boolean().optional(),
   isImageGenerationEnabled: z.boolean().optional(),
   isWebSearchEnabled: z.boolean().optional(),
@@ -370,6 +372,10 @@ export const accessLevelSchema = z.enum(['private', 'school', 'community', 'glob
 export const accessLevelEnum = pgEnum('access_level', accessLevelSchema.enum);
 export type AccessLevel = z.infer<typeof accessLevelSchema>;
 
+export const webSearchScopeSchema = z.enum(['all-web', 'included-domains']);
+export const webSearchScopeEnum = pgEnum('web_search_scope', webSearchScopeSchema.enum);
+export type WebSearchScope = z.infer<typeof webSearchScopeSchema>;
+
 export const suspensionRequestReasonSchema = z.enum([
   'copyright_violation',
   'false_or_outdated_information',
@@ -442,6 +448,7 @@ export type FederalState = z.infer<typeof federalStatesSchema>;
 export const languagesSchema = z.enum([
   'german',
   'english',
+  'arabic',
   'turkish',
   'french',
   'italian',
@@ -543,6 +550,11 @@ export const characterTable = pgTable(
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     isWebSearchEnabled: boolean('is_web_search_enabled').notNull().default(false),
+    webSearchScope: webSearchScopeEnum('web_search_scope').notNull().default('all-web'),
+    webSearchIncludedDomains: text('web_search_included_domains')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
       .defaultNow()
@@ -567,6 +579,7 @@ export const characterSelectSchema = createSelectSchema(characterTable)
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema,
     ownerSchoolIds: z.array(z.string()),
+    webSearchScope: webSearchScopeSchema,
   });
 export const characterInsertSchema = createInsertSchema(characterTable)
   .omit({
@@ -579,6 +592,7 @@ export const characterInsertSchema = createInsertSchema(characterTable)
   .extend({
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
+    webSearchScope: webSearchScopeSchema.optional(),
   });
 export const characterUpdateSchema = createUpdateSchema(characterTable)
   .omit({
@@ -592,6 +606,7 @@ export const characterUpdateSchema = createUpdateSchema(characterTable)
     id: z.string(),
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
+    webSearchScope: webSearchScopeSchema.optional(),
   });
 
 export type CharacterSelectModel = z.infer<typeof characterSelectSchema>;
@@ -768,6 +783,11 @@ export const learningScenarioTable = pgTable(
     originalLearningScenarioId: uuid('original_learning_scenario_id'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     isWebSearchEnabled: boolean('is_web_search_enabled').notNull().default(false),
+    webSearchScope: webSearchScopeEnum('web_search_scope').notNull().default('all-web'),
+    webSearchIncludedDomains: text('web_search_included_domains')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
   },
   (table) => [index().on(table.userId)],
 );
@@ -780,6 +800,7 @@ export const learningScenarioSelectSchema = createSelectSchema(learningScenarioT
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema,
     ownerSchoolIds: z.array(z.string()),
+    webSearchScope: webSearchScopeSchema,
   });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
   .omit({
@@ -791,6 +812,7 @@ export const learningScenarioInsertSchema = createInsertSchema(learningScenarioT
   .extend({
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
+    webSearchScope: webSearchScopeSchema.optional(),
   });
 export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
   .omit({ userId: true, createdAt: true, updatedAt: true, suspended: true })
@@ -799,6 +821,7 @@ export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioT
     id: z.string(),
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
+    webSearchScope: webSearchScopeSchema.optional(),
   });
 
 export type LearningScenarioSelectModel = z.infer<typeof learningScenarioSelectSchema>;
@@ -922,6 +945,20 @@ export type LearningScenarioWithShareDataModel = z.infer<typeof learningScenario
 export type LearningScenarioOptionalShareDataModel = z.infer<
   typeof learningScenarioOptionalShareDataModel
 >;
+
+/**
+ *  Type guard for learning scenario with share data
+ *  This uses Zod validation for compile-time and runtime safety.
+ */
+export function isLearningScenarioWithShareData(
+  scenario: unknown,
+): scenario is LearningScenarioWithShareDataModel {
+  const result = learningScenarioWithShareDataModel.safeParse(scenario);
+  if (!result.success) {
+    logError('isLearningScenarioWithShareData: validation failed', result.error);
+  }
+  return result.success;
+}
 
 export const toolCallNameSchema = z.enum(['web_search']);
 export const toolCallNameEnum = pgEnum('tool_call_name', toolCallNameSchema.enum);

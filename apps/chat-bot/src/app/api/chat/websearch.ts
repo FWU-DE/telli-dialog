@@ -5,7 +5,7 @@ import {
   WEBSEARCH_RESULT_LENGTH_LIMIT,
   WEBSEARCH_RESULTS_LIMIT,
 } from '@/configuration-text-inputs/const';
-import type { WebSearchResult } from '@shared/db/schema';
+import type { WebSearchResult, WebSearchScope } from '@shared/db/schema';
 import { logError } from '@shared/logging';
 import { dbInsertConversationToolCallUsage } from '@shared/db/functions/token-usage';
 import { dbUpdateTokenUsageByCharacterChatId } from '@shared/db/functions/character';
@@ -18,13 +18,35 @@ import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { dbGetCharacterById } from '@shared/db/functions/character';
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 
+export type WebSearchConfig = {
+  enabled: boolean;
+  scope: WebSearchScope;
+  includedDomains: string[];
+};
+
+const DISABLED_WEB_SEARCH_CONFIG: WebSearchConfig = {
+  enabled: false,
+  scope: 'all-web',
+  includedDomains: [],
+};
+
+const ENABLED_ALL_WEB_CONFIG: WebSearchConfig = {
+  enabled: true,
+  scope: 'all-web',
+  includedDomains: [],
+};
+
+function normalizeIncludedDomains(domains: string[]): string[] {
+  return domains.map((domain) => domain.trim()).filter((domain) => domain.length > 0);
+}
+
 export function isWebSearchAvailableForFederalState(
   federalState: UserAndContext['federalState'],
 ): boolean {
   return (federalState.featureToggles?.isWebSearchEnabled ?? false) && !!env.linkupApiKey;
 }
 
-export async function isWebSearchEnabled({
+export async function resolveWebSearchConfig({
   user,
   characterId,
   learningScenarioId,
@@ -34,17 +56,45 @@ export async function isWebSearchEnabled({
   characterId?: string;
   learningScenarioId?: string;
   assistantId?: string;
-}): Promise<boolean> {
-  if (!isWebSearchAvailableForFederalState(user.federalState)) return false;
+}): Promise<WebSearchConfig> {
+  if (!isWebSearchAvailableForFederalState(user.federalState)) {
+    return DISABLED_WEB_SEARCH_CONFIG;
+  }
+
   if (characterId) {
-    return (await dbGetCharacterById({ characterId }))?.isWebSearchEnabled ?? false;
+    const character = await dbGetCharacterById({ characterId });
+    if (!character?.isWebSearchEnabled) return DISABLED_WEB_SEARCH_CONFIG;
+    return {
+      enabled: true,
+      scope: character.webSearchScope,
+      includedDomains: normalizeIncludedDomains(character.webSearchIncludedDomains),
+    };
   }
+
   if (learningScenarioId) {
-    return (await dbGetLearningScenarioById({ learningScenarioId }))?.isWebSearchEnabled ?? false;
+    const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
+    if (!learningScenario?.isWebSearchEnabled) return DISABLED_WEB_SEARCH_CONFIG;
+    return {
+      enabled: true,
+      scope: learningScenario.webSearchScope,
+      includedDomains: normalizeIncludedDomains(learningScenario.webSearchIncludedDomains),
+    };
   }
-  if (!assistantId) return true;
-  if (assistantId === HELP_MODE_ASSISTANT_ID) return false;
-  return (await dbGetAssistantById({ assistantId }))?.isWebSearchEnabled ?? false;
+
+  if (!assistantId) return ENABLED_ALL_WEB_CONFIG;
+  if (assistantId === HELP_MODE_ASSISTANT_ID) return DISABLED_WEB_SEARCH_CONFIG;
+
+  const assistant = await dbGetAssistantById({ assistantId });
+  return assistant?.isWebSearchEnabled ? ENABLED_ALL_WEB_CONFIG : DISABLED_WEB_SEARCH_CONFIG;
+}
+
+export async function isWebSearchEnabled(params: {
+  user: UserAndContext;
+  characterId?: string;
+  learningScenarioId?: string;
+  assistantId?: string;
+}): Promise<boolean> {
+  return (await resolveWebSearchConfig(params)).enabled;
 }
 
 async function recordWebSearchUsage({
@@ -201,6 +251,7 @@ Beispiele:
  * @param characterId Optional character ID.
  * @param learningScenarioId Optional learning scenario ID.
  * @param userId The user ID.
+ * @param includedDomains Optional list of domains to restrict the search to.
  * @returns An array of text search results from the Linkup API.
  */
 export async function searchWeb({
@@ -209,12 +260,14 @@ export async function searchWeb({
   characterId,
   learningScenarioId,
   userId,
+  includedDomains,
 }: {
   query: string;
   conversationId?: string;
   characterId?: string;
   learningScenarioId?: string;
   userId: string;
+  includedDomains?: string[];
 }): Promise<WebSearchResult[]> {
   if (!env.linkupApiKey) {
     return [];
@@ -225,11 +278,14 @@ export async function searchWeb({
       apiKey: env.linkupApiKey,
     });
 
+    const hasIncludedDomains = includedDomains !== undefined && includedDomains.length > 0;
+
     const searchResults = await linkupClient.search({
       query: query,
       depth: 'standard',
       outputType: 'searchResults',
       maxResults: WEBSEARCH_RESULTS_LIMIT,
+      ...(hasIncludedDomains && { includeDomains: includedDomains }),
     });
 
     await recordWebSearchUsage({
@@ -286,16 +342,18 @@ export async function runWebSearchPipeline({
   apiKeyId: string;
   conversationId?: string;
 }): Promise<WebSearchResult[]> {
-  const enabled = await isWebSearchEnabled({
+  const config = await resolveWebSearchConfig({
     user,
     characterId,
     learningScenarioId,
     assistantId,
   });
-  if (!enabled) return [];
+  if (!config.enabled) return [];
 
   const decision = await isWebSearchNeeded({ messages, modelId, apiKeyId });
   if (!decision.needed) return [];
+
+  const includedDomains = config.scope === 'included-domains' ? config.includedDomains : undefined;
 
   return searchWeb({
     query: decision.query,
@@ -303,5 +361,6 @@ export async function runWebSearchPipeline({
     characterId,
     learningScenarioId,
     userId: user.id,
+    includedDomains,
   });
 }

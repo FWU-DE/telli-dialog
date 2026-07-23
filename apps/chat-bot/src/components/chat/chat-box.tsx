@@ -65,7 +65,7 @@ export function ChatBox({
   const userClassName =
     children.role === 'user'
       ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/30 max-w-[70%] wrap-break-word'
-      : 'w-fit';
+      : 'w-full min-w-0';
 
   // Check both DB file mapping and pending files for this message
   const dbFiles = fileMapping?.get(children.id);
@@ -189,12 +189,12 @@ export function ChatBox({
     <>
       <div key={index} className={cn('w-full', userClassName, margin)}>
         <div aria-label={`${children.role} message ${Math.floor(index / 2 + 1)}`}>
-          <div className={cn('flex', isAtLeast.sm ? 'flex-row' : 'flex-col')}>
+          <div className={cn('flex min-w-0', isAtLeast.sm ? 'flex-row' : 'flex-col')}>
             {children.role === 'assistant' && assistantIcon}
             <div
               className={cn(
                 'flex flex-col items-start gap-2',
-                children.role === 'assistant' && 'w-full',
+                children.role === 'assistant' && 'w-full min-w-0',
               )}
             >
               {maybeAssistantWebSearchSources}

@@ -53,5 +53,5 @@ test('after receiving the first message the typed prompt is not lost', async ({ 
   await page.getByLabel('Reload').waitFor();
 
   await expect(page).toHaveURL(/\/d\//);
-  await expect(page.getByPlaceholder('Wie kann ich Dir helfen?')).toHaveValue(prompt);
+  await expect(page.getByTestId('chat-input')).toHaveValue(prompt);
 });

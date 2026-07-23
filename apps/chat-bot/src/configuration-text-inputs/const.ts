@@ -18,6 +18,7 @@ export const RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT = 100_000; // Maximum number o
 
 // Web search
 export const WEBSEARCH_RESULTS_LIMIT = 10; // Number of websearch results to include in the RAG context
+export const MAX_WEB_SEARCH_INCLUDED_DOMAINS = 50; // Maximum number of domains that can be included in the web search scope
 export const WEBSEARCH_RESULT_LENGTH_LIMIT = 2500; // Maximum characters to include from each websearch result
 
 // Attachments

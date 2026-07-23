@@ -49,8 +49,6 @@ export async function buildTools({
   }
 
   const webScraperTool = buildWebScraperTool({
-    characterId,
-    learningScenarioId,
     sourceUrls,
     attachedLinks,
   });
