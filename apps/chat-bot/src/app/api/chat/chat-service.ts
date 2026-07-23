@@ -39,7 +39,7 @@ import { UserAndContext } from '@/auth/types';
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { buildTools } from './build-tools';
-import { runWebSearchPipeline } from './websearch';
+import { isWebSearchEnabledForEntity, runWebSearchPipeline } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
 import type {
   AssistantSelectModel,
@@ -390,6 +390,13 @@ export async function sendChatMessage({
       activeLearningScenario?.attachedLinks ??
       [];
 
+    const allowWebTools = isWebSearchEnabledForEntity({
+      featureToggles: user.federalState.featureToggles,
+      entity: activeCharacter ??
+        activeLearningScenario ??
+        activeAssistant ?? { isWebSearchEnabled: false },
+    });
+
     const tools = await buildTools({
       user,
       characterId,
@@ -399,7 +406,7 @@ export async function sendChatMessage({
       relatedFileEntities,
       attachedLinks,
       sourceUrls: ingestResult.processedUrls,
-      allowWebTools: true,
+      allowWebTools,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

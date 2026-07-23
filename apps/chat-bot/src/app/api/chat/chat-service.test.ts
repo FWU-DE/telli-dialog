@@ -39,6 +39,7 @@ const mocks = vi.hoisted(() => ({
   runAgentLoopMock: vi.fn(),
   buildToolsMock: vi.fn(),
   runWebSearchPipelineMock: vi.fn(),
+  isWebSearchEnabledForEntityMock: vi.fn(),
   constructChatSystemPromptMock: vi.fn(),
   getModelAndApiKeyWithResultMock: vi.fn(),
   getAuxiliaryModelMock: vi.fn(),
@@ -84,6 +85,7 @@ vi.mock('./build-tools', () => ({
 
 vi.mock('./websearch', () => ({
   runWebSearchPipeline: mocks.runWebSearchPipelineMock,
+  isWebSearchEnabledForEntity: mocks.isWebSearchEnabledForEntityMock,
 }));
 
 vi.mock('@shared/users/usage', () => ({
@@ -286,6 +288,7 @@ beforeEach(() => {
   mocks.getChatTitleMock.mockResolvedValue('Generated title');
   mocks.logErrorMock.mockImplementation(() => undefined);
   mocks.runWebSearchPipelineMock.mockResolvedValue(webSearchResults as never);
+  mocks.isWebSearchEnabledForEntityMock.mockReturnValue(true);
   mocks.buildToolsMock.mockResolvedValue(buildToolsOutput as never);
   mocks.generateTextStreamWithBillingMock.mockImplementation(async function* (
     _modelId: string,
