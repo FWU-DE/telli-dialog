@@ -22,8 +22,14 @@ export function constructToolGuidelines(activeTools: ToolDefinition[]) {
   const sections = ['\n## Fähigkeiten und Einschränkungen'];
 
   if (hasTool(activeTools, 'retrieve_text_chunks')) {
+    const supportedExtensions = [...SUPPORTED_DOCUMENTS_EXTENSIONS, ...SUPPORTED_IMAGE_EXTENSIONS]
+      .map((ext) => ext.toUpperCase())
+      .join(', ');
+
     sections.push(
-      `- Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Unterstützt sind nur: ${[...SUPPORTED_DOCUMENTS_EXTENSIONS, ...SUPPORTED_IMAGE_EXTENSIONS].map((ext) => ext.toUpperCase()).join(', ')}. Biete niemals an, andere Formate zu verarbeiten. Der Inhalt dieser Dateien steht dir zur Verfügung.`,
+      '- **Bei der ersten Nachricht:** Wenn Dateien oder Links vorhanden sind, rufe möglichst zuerst `retrieve_text_chunks` auf, bevor du antwortest.',
+      `- Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Unterstützt sind nur: ${supportedExtensions}. Biete niemals an, andere Formate zu verarbeiten. Der Inhalt dieser Dateien steht dir zur Verfügung. ` +
+        'Wenn eine Frage zum Thema des Chats oder der hochgeladenen Quellen passen könnte, rufe **zuerst** `retrieve_text_chunks` auf, um zu prüfen, ob die Antwort dort enthalten ist, **bevor** du antwortest oder sagst, dass du etwas nicht weißt.',
     );
   }
 

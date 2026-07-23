@@ -57,7 +57,12 @@ export function buildRetrieveTextChunksTool({
 
   const definition: ToolDefinition = {
     name: 'retrieve_text_chunks',
-    description: `Retrieve relevant text chunks from the attached sources. Available files right now: ${attachedFileDescriptions.join(', ') || 'none'}. Available linked pages right now: ${attachedSourceUrls.join(', ') || 'none'}. Use this tool when you need exact passages from the files or linked pages or want to inspect a specific topic inside the available sources. Returns up to ${VECTOR_SEARCH_LIMIT} chunks per call. Call it with a short, specific search string in the same language as the user.`,
+    description:
+      'Retrieve relevant text chunks from the attached sources. ' +
+      `Available files right now: ${attachedFileDescriptions.join(', ') || 'none'}. Available linked pages right now: ${attachedSourceUrls.join(', ') || 'none'}. ` +
+      'Use this tool when you need exact passages from the files or linked pages or want to inspect a specific topic inside the available sources. ' +
+      "Call this tool BEFORE answering or claiming you don't know something, whenever the question could relate to the sources' topic. " +
+      `Returns up to ${VECTOR_SEARCH_LIMIT} chunks per call. Call it with a short, specific search string in the same language as the user.`,
     parameters: {
       type: 'object',
       properties: {
