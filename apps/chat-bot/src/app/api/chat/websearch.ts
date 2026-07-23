@@ -40,10 +40,10 @@ function normalizeIncludedDomains(domains: string[]): string[] {
   return domains.map((domain) => domain.trim()).filter((domain) => domain.length > 0);
 }
 
-export function isWebSearchAvailableForFederalState(
-  federalState: UserAndContext['federalState'],
-): boolean {
-  return (federalState.featureToggles?.isWebSearchEnabled ?? false) && !!env.linkupApiKey;
+export function isWebSearchAvailableForFederalState(featureToggles: {
+  isWebSearchEnabled?: boolean;
+}): boolean {
+  return (featureToggles.isWebSearchEnabled ?? false) && !!env.linkupApiKey;
 }
 
 export async function resolveWebSearchConfig({
@@ -57,7 +57,7 @@ export async function resolveWebSearchConfig({
   learningScenarioId?: string;
   assistantId?: string;
 }): Promise<WebSearchConfig> {
-  if (!isWebSearchAvailableForFederalState(user.federalState)) {
+  if (!isWebSearchAvailableForFederalState(user.federalState.featureToggles)) {
     return DISABLED_WEB_SEARCH_CONFIG;
   }
 
@@ -88,15 +88,6 @@ export async function resolveWebSearchConfig({
   return assistant?.isWebSearchEnabled ? ENABLED_ALL_WEB_CONFIG : DISABLED_WEB_SEARCH_CONFIG;
 }
 
-export async function isWebSearchEnabled(params: {
-  user: UserAndContext;
-  characterId?: string;
-  learningScenarioId?: string;
-  assistantId?: string;
-}): Promise<boolean> {
-  return (await resolveWebSearchConfig(params)).enabled;
-}
-
 export function isWebSearchEnabledForEntity({
   featureToggles,
   entity,
@@ -104,7 +95,11 @@ export function isWebSearchEnabledForEntity({
   featureToggles: { isWebSearchEnabled?: boolean | undefined };
   entity: { isWebSearchEnabled: boolean };
 }): boolean {
-  if (featureToggles?.isWebSearchEnabled === true && entity.isWebSearchEnabled === true)
+  if (
+    isWebSearchAvailableForFederalState(featureToggles) &&
+    featureToggles?.isWebSearchEnabled === true &&
+    entity.isWebSearchEnabled === true
+  )
     return true;
 
   return false;
