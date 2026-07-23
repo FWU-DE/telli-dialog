@@ -394,7 +394,7 @@ export async function sendChatMessage({
       featureToggles: user.federalState.featureToggles,
       entity: activeCharacter ??
         activeLearningScenario ??
-        activeAssistant ?? { isWebSearchEnabled: false },
+        activeAssistant ?? { isWebSearchEnabled: true },
     });
 
     const tools = await buildTools({
