@@ -28,8 +28,7 @@ export function constructToolGuidelines(activeTools: ToolDefinition[]) {
 
     sections.push(
       '- **Bei der ersten Nachricht:** Wenn Dateien oder Links vorhanden sind, rufe möglichst zuerst `retrieve_text_chunks` auf, bevor du antwortest.',
-      `- Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Unterstützt sind nur: ${supportedExtensions}. Biete niemals an, andere Formate zu verarbeiten. ` +
-        'Wenn eine Frage zum Thema des Chats oder der hochgeladenen Quellen passen könnte, rufe **zuerst** `retrieve_text_chunks` auf, um zu prüfen, ob die Antwort dort enthalten ist, **bevor** du antwortest oder sagst, dass du etwas nicht weißt.',
+      `- Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Unterstützt sind nur: ${supportedExtensions}. Biete niemals an, andere Formate zu verarbeiten.`,
     );
   }
 
