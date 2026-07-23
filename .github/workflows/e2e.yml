@@ -50,17 +50,6 @@ jobs:
         env:
           RABBITMQ_DEFAULT_PASS: password
           RABBITMQ_DEFAULT_USER: user
-      xberg:
-        image: ghcr.io/xberg-io/xberg:1.0.0-rc.29-core
-        ports:
-          - 8000:8000
-        env:
-          XBERG_MAX_UPLOAD_SIZE_MB: '50'
-        options: >-
-          --health-cmd "curl -f http://localhost:8000/health"
-          --health-interval 30s
-          --health-timeout 10s
-          --health-retries 3
 
     env:
       DATABASE_URL: postgresql://admin:test1234@127.0.0.1:5432/app_db
@@ -85,6 +74,7 @@ jobs:
       TURBO_TELEMETRY_DISABLED: 1
       CRAWL4AI_API_TOKEN: ais-chat-crawl4ai-token
       XBERG_URL: http://localhost:8000
+      XBERG_MAX_UPLOAD_SIZE_MB: '50'
 
     steps:
       - name: Checkout code
@@ -110,6 +100,15 @@ jobs:
             -p 11235:11235 \
             -e CRAWL4AI_API_TOKEN=$CRAWL4AI_API_TOKEN \
             unclecode/crawl4ai:0.9.2 > /tmp/crawl4ai.log 2>&1 &
+
+      # xberg is not started under services because its startup time would delay the whole pipeline
+      - name: Start xberg container (in background)
+        run: |
+          docker run \
+            --name xberg \
+            -p 8000:8000 \
+            -e XBERG_MAX_UPLOAD_SIZE_MB=$XBERG_MAX_UPLOAD_SIZE_MB \
+            ghcr.io/xberg-io/xberg:1.0.0-rc.29-core > /tmp/xberg.log 2>&1 &
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -244,6 +243,12 @@ jobs:
         run: |
           echo "=== crawl4ai logs ==="
           cat /tmp/crawl4ai.log || true
+
+      - name: Print xberg logs
+        if: always()
+        run: |
+          echo "=== xberg logs ==="
+          cat /tmp/xberg.log || true
 
       - name: Print mock-llm logs
         if: always()
