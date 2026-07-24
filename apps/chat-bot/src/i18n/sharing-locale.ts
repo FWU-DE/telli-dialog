@@ -1,10 +1,11 @@
 import { cacheLife } from 'next/cache';
 import { generateTextWithBilling } from '@ais-chat/ai-core';
-import { dbGetCharacterById } from '@shared/db/functions/character';
-import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
-import { dbUpdateCharacterFilterGroup } from '@shared/db/functions/character';
-import { dbUpdateLearningScenarioFilterGroup } from '@shared/db/functions/learning-scenario';
-import { getUserAndContextByUserId } from '@/auth/utils';
+import { dbGetCharacterById, dbUpdateCharacterFilterGroup } from '@shared/db/functions/character';
+import {
+  dbGetLearningScenarioById,
+  dbUpdateLearningScenarioFilterGroup,
+} from '@shared/db/functions/learning-scenario';
+import { getMaybeUser, getUserAndContextByUserId } from '@/auth/utils';
 import { getModelAndApiKeyWithResult, getStrongAuxiliaryModel } from '@/app/api/utils/utils';
 import { constructCharacterLanguageSystemPrompt } from '@/app/api/character/system-prompt';
 import { constructLearningScenarioLanguageSystemPrompt } from '@/app/api/learning-scenario/system-prompt';
@@ -12,37 +13,24 @@ import type { LlmModelSelectModel, filterGroup } from '@shared/db/schema';
 import {
   DEFAULT_LOCALE,
   getLocaleForFilterLanguage,
+  getLocaleForFilterLanguageOrGermanName,
   LOCALE_TO_FILTER_LANGUAGE,
   SUPPORTED_LOCALES,
 } from './locales';
 
 /**
- * Resolves the locale for a shared chat entity (character or learning scenario).
- * Parses the UI link to determine the entity type and ID, then resolves the locale.
- */
-export async function resolveSharingLocale(uiLink: string): Promise<string> {
-  const route = parseSharingRoute(uiLink);
-
-  if (route === undefined) {
-    return DEFAULT_LOCALE;
-  }
-
-  return resolveSharingLocaleByRoute({ routeType: route.type, entityId: route.entityId });
-}
-
-/**
- * Resolves the locale for a character or learning scenario.
+ * Resolves the locale for a shared custom chat (character or learning scenario).
  * Priority: filter language > LLM-determined language > default locale.
  */
-async function resolveSharingLocaleByRoute({
-  routeType,
-  entityId,
+export async function resolveSharingLocale({
+  customChatVariant,
+  customChatId,
 }: {
-  routeType: 'character' | 'learning-scenario';
-  entityId: string;
+  customChatVariant: 'character' | 'learning-scenario';
+  customChatId: string;
 }): Promise<string> {
-  if (routeType === 'character') {
-    const character = await dbGetCharacterById({ characterId: entityId });
+  if (customChatVariant === 'character') {
+    const character = await dbGetCharacterById({ characterId: customChatId });
 
     if (character === undefined) {
       return DEFAULT_LOCALE;
@@ -65,7 +53,6 @@ async function resolveSharingLocaleByRoute({
       modelId: auxiliaryModel.id,
       federalStateId: teacherUserAndContext.federalState.id,
     });
-
     if (error !== null) {
       return DEFAULT_LOCALE;
     }
@@ -80,18 +67,19 @@ async function resolveSharingLocaleByRoute({
     }
 
     await persistDetectedLanguage({
-      entityType: 'character',
-      entityId: character.id,
+      customChatVariant: 'character',
+      customChatId: character.id,
+      ownerUserId: character.userId,
       locale,
-      existingFilterGroup: character.filterGroup,
+      existingFilterGroup: character.filterGroup ?? createEmptyFilterGroup(),
     });
 
     return locale;
   }
 
-  if (routeType === 'learning-scenario') {
+  if (customChatVariant === 'learning-scenario') {
     const learningScenario = await dbGetLearningScenarioById({
-      learningScenarioId: entityId,
+      learningScenarioId: customChatId,
     });
 
     if (learningScenario === undefined) {
@@ -134,10 +122,11 @@ async function resolveSharingLocaleByRoute({
     }
 
     await persistDetectedLanguage({
-      entityType: 'learning-scenario',
-      entityId: learningScenario.id,
+      customChatVariant: 'learning-scenario',
+      customChatId: learningScenario.id,
+      ownerUserId: learningScenario.userId,
       locale,
-      existingFilterGroup: learningScenario.filterGroup,
+      existingFilterGroup: learningScenario.filterGroup ?? createEmptyFilterGroup(),
     });
 
     return locale;
@@ -167,7 +156,7 @@ function getLocaleFromFilterLanguages(languages: string[] | undefined): string |
 
 /**
  * Calls the LLM to determine which language the entity's content is in.
- * Results are cached for 24 hours based on the systemPrompt content.
+ * Results are cached for 30 days based on the systemPrompt content.
  */
 async function getLocale(
   auxiliaryModelAndApiKey: { model: LlmModelSelectModel; apiKeyId: string },
@@ -175,8 +164,8 @@ async function getLocale(
 ): Promise<string | null> {
   'use cache';
   cacheLife({
-    expire: 60 * 60 * 24,
-    revalidate: 60 * 60 * 23,
+    expire: 60 * 60 * 24 * 30,
+    revalidate: 60 * 60 * 24 * 29,
   });
   try {
     const { text } = await generateTextWithBilling(
@@ -184,8 +173,7 @@ async function getLocale(
       [
         {
           role: 'system',
-          content:
-            'Determine the language in which the following assistant will respond to messages. Respond exclusively with one of the following language codes: de, en, fr, it, ar. If the language is not clear, respond with de.',
+          content: `Determine the language in which the following assistant will respond to messages. Respond exclusively with one of the following language codes: ${[...SUPPORTED_LOCALES].join(', ')}. If the language is not clear, respond with ${DEFAULT_LOCALE}.`,
         },
         {
           role: 'system',
@@ -202,93 +190,57 @@ async function getLocale(
 
 /**
  * Persists a locale detected by the LLM back to the entity's filterGroup.languages.
- * No-ops if the locale cannot be mapped to a known Language or is already in the list.
+ * Only the entity owner may persist; other users and unauthenticated viewers are ignored.
+ * Also no-ops if the locale cannot be mapped to a known Language or is already in the list.
  * Errors are caught so locale resolution is never blocked by a write failure.
  */
 async function persistDetectedLanguage({
-  entityType,
-  entityId,
+  customChatVariant,
+  customChatId,
+  ownerUserId,
   locale,
   existingFilterGroup,
 }: {
-  entityType: 'character' | 'learning-scenario';
-  entityId: string;
+  customChatVariant: 'character' | 'learning-scenario';
+  customChatId: string;
+  ownerUserId: string;
   locale: string;
-  existingFilterGroup: filterGroup | undefined;
+  existingFilterGroup: filterGroup;
 }): Promise<void> {
+  const triggeringUser = await getMaybeUser();
+  if (triggeringUser?.id !== ownerUserId) {
+    return;
+  }
   const detectedLanguage = LOCALE_TO_FILTER_LANGUAGE[locale];
   if (detectedLanguage === undefined) {
     return;
   }
 
-  const currentLanguages = existingFilterGroup?.languages ?? [];
+  const currentLanguages = existingFilterGroup.languages;
   if (currentLanguages.includes(detectedLanguage)) {
     return;
   }
 
   const updatedFilterGroup: filterGroup = {
-    school_types: existingFilterGroup?.school_types ?? [],
-    grade_ranges: existingFilterGroup?.grade_ranges ?? [],
-    subjects: existingFilterGroup?.subjects ?? [],
-    categories: existingFilterGroup?.categories ?? [],
-    federal_states: existingFilterGroup?.federal_states ?? [],
+    ...existingFilterGroup,
     languages: [...currentLanguages, detectedLanguage],
   };
 
   try {
-    if (entityType === 'character') {
+    if (customChatVariant === 'character') {
       await dbUpdateCharacterFilterGroup({
-        characterId: entityId,
+        characterId: customChatId,
         filterGroup: updatedFilterGroup,
       });
     } else {
       await dbUpdateLearningScenarioFilterGroup({
-        learningScenarioId: entityId,
+        learningScenarioId: customChatId,
         filterGroup: updatedFilterGroup,
       });
     }
   } catch {
     // write failure must not break locale resolution
   }
-}
-
-/**
- * Parses a sharing URL to extract the entity type and ID.
- * Supports multiple URL patterns: dialog views and editor share views.
- */
-function parseSharingRoute(
-  uiLink: string,
-):
-  | { type: 'character'; entityId: string }
-  | { type: 'learning-scenario'; entityId: string }
-  | undefined {
-  const pathname = uiLink.split('?')[0] ?? uiLink;
-
-  const characterShareMatch = pathname.match(/^\/(?:ua\/)?characters\/([^/]+)\/dialog$/);
-  if (characterShareMatch?.[1]) {
-    return { type: 'character', entityId: characterShareMatch[1] };
-  }
-
-  const learningScenarioShareMatch = pathname.match(
-    /^\/(?:ua\/)?learning-scenarios\/([^/]+)\/dialog$/,
-  );
-  if (learningScenarioShareMatch?.[1]) {
-    return { type: 'learning-scenario', entityId: learningScenarioShareMatch[1] };
-  }
-
-  const characterEditorShareMatch = pathname.match(/^\/characters\/editor\/([^/]+)\/share$/);
-  if (characterEditorShareMatch?.[1]) {
-    return { type: 'character', entityId: characterEditorShareMatch[1] };
-  }
-
-  const learningScenarioEditorShareMatch = pathname.match(
-    /^\/learning-scenarios\/editor\/([^/]+)\/share$/,
-  );
-  if (learningScenarioEditorShareMatch?.[1]) {
-    return { type: 'learning-scenario', entityId: learningScenarioEditorShareMatch[1] };
-  }
-
-  return undefined;
 }
 
 function normalizeLocale(text: string): string {
@@ -298,17 +250,18 @@ function normalizeLocale(text: string): string {
     return normalized;
   }
 
-  if (normalized.includes('de')) return 'de';
-  if (normalized.includes('en')) return 'en';
-  if (normalized.includes('fr')) return 'fr';
-  if (normalized.includes('it')) return 'it';
-  if (normalized.includes('ar')) return 'ar';
+  return getLocaleForFilterLanguageOrGermanName(normalized) ?? DEFAULT_LOCALE;
+}
 
-  if (normalized.includes('german') || normalized.includes('deutsch')) return 'de';
-  if (normalized.includes('english') || normalized.includes('englisch')) return 'en';
-  if (normalized.includes('french') || normalized.includes('französisch')) return 'fr';
-  if (normalized.includes('italian') || normalized.includes('italienisch')) return 'it';
-  if (normalized.includes('arabic') || normalized.includes('arabisch')) return 'ar';
-
-  return DEFAULT_LOCALE;
+// We need to ensure we always persist a complete filter group shape, since the field might be empty for older customChats
+// this way downstream code can safely spread/access fields without undefined checks.
+function createEmptyFilterGroup(): filterGroup {
+  return {
+    school_types: [],
+    grade_ranges: [],
+    subjects: [],
+    categories: [],
+    federal_states: [],
+    languages: [],
+  };
 }

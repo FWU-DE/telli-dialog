@@ -37,7 +37,7 @@ type CustomChatSharePageContentProps = {
   tBackButton: string;
   tSubHeader: string;
   customChatVariant: 'character' | 'learning-scenario';
-  entityId: string;
+  customChatId: string;
   expiredAt: Date | null;
   manuallyStoppedAt: Date | null;
 };
@@ -58,7 +58,7 @@ export default function CustomChatSharePageContent({
   tBackButton,
   tSubHeader,
   customChatVariant,
-  entityId,
+  customChatId,
   expiredAt,
   manuallyStoppedAt,
 }: CustomChatSharePageContentProps) {
@@ -66,8 +66,8 @@ export default function CustomChatSharePageContent({
   const formattedInviteCode = `${inviteCode.substring(0, 4)} ${inviteCode.substring(4, 8)}`;
   const shareUILink =
     customChatVariant === 'character'
-      ? `/characters/editor/${entityId}`
-      : `/learning-scenarios/editor/${entityId}`;
+      ? `/characters/editor/${customChatId}`
+      : `/learning-scenarios/editor/${customChatId}`;
 
   const { timeLeftInSeconds: sharedChatTimeLeftInitial } = calculateShareSessionState({
     expiredAt,
@@ -78,8 +78,8 @@ export default function CustomChatSharePageContent({
   const fetchShareData = async (): Promise<ServerActionResult<SharePollingData>> => {
     const result =
       customChatVariant === 'character'
-        ? await getCharacterShareDataAction({ characterId: entityId })
-        : await getLearningScenarioShareDataAction({ learningScenarioId: entityId });
+        ? await getCharacterShareDataAction({ characterId: customChatId })
+        : await getLearningScenarioShareDataAction({ learningScenarioId: customChatId });
 
     if (result.success) {
       return {

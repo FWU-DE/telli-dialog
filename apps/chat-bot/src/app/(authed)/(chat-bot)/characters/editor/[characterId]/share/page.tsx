@@ -40,7 +40,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
       customChatVariant="character"
       expiredAt={character.expiredAt}
       manuallyStoppedAt={character.manuallyStoppedAt}
-      entityId={character.id}
+      customChatId={character.id}
     />
   );
 }

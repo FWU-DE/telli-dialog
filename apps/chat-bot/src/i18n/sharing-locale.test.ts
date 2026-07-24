@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './locales';
 
 const mocks = vi.hoisted(() => ({
   cacheLifeMock: vi.fn(),
@@ -7,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   dbUpdateCharacterFilterGroupMock: vi.fn(),
   dbGetLearningScenarioByIdMock: vi.fn(),
   dbUpdateLearningScenarioFilterGroupMock: vi.fn(),
+  getMaybeUserMock: vi.fn(),
   getUserAndContextByUserIdMock: vi.fn(),
   getModelAndApiKeyWithResultMock: vi.fn(),
   getStrongAuxiliaryModelMock: vi.fn(),
@@ -33,6 +35,7 @@ vi.mock('@shared/db/functions/learning-scenario', () => ({
 }));
 
 vi.mock('@/auth/utils', () => ({
+  getMaybeUser: mocks.getMaybeUserMock,
   getUserAndContextByUserId: mocks.getUserAndContextByUserIdMock,
 }));
 
@@ -68,6 +71,16 @@ const modelAndApiKey = {
   apiKeyId: 'api-key-1',
 };
 
+const customChatCharacter = {
+  customChatVariant: 'character' as const,
+  customChatId: 'character-1',
+};
+
+const customChatLearningScenario = {
+  customChatVariant: 'learning-scenario' as const,
+  customChatId: 'scenario-1',
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
 
@@ -81,6 +94,7 @@ beforeEach(() => {
     userId: 'teacher-1',
     filterGroup: undefined,
   });
+  mocks.getMaybeUserMock.mockResolvedValue({ id: 'teacher-1' });
   mocks.getUserAndContextByUserIdMock.mockResolvedValue(teacherUserAndContext);
   mocks.getStrongAuxiliaryModelMock.mockResolvedValue(auxiliaryModel);
   mocks.getModelAndApiKeyWithResultMock.mockResolvedValue([null, modelAndApiKey]);
@@ -94,16 +108,6 @@ beforeEach(() => {
 });
 
 describe('resolveSharingLocale', () => {
-  it('returns default locale for unknown routes', async () => {
-    const { resolveSharingLocale } = await import('./sharing-locale');
-
-    const locale = await resolveSharingLocale('/not-a-shared-route');
-
-    expect(locale).toBe('de');
-    expect(mocks.dbGetCharacterByIdMock).not.toHaveBeenCalled();
-    expect(mocks.dbGetLearningScenarioByIdMock).not.toHaveBeenCalled();
-  });
-
   it('returns mapped locale from character single filter language and skips detection', async () => {
     const { resolveSharingLocale } = await import('./sharing-locale');
     mocks.dbGetCharacterByIdMock.mockResolvedValue({
@@ -119,7 +123,7 @@ describe('resolveSharingLocale', () => {
       },
     });
 
-    const locale = await resolveSharingLocale('/ua/characters/character-1/dialog?inviteCode=abc');
+    const locale = await resolveSharingLocale(customChatCharacter);
 
     expect(locale).toBe('en');
     expect(mocks.getUserAndContextByUserIdMock).not.toHaveBeenCalled();
@@ -141,7 +145,7 @@ describe('resolveSharingLocale', () => {
       },
     });
 
-    const locale = await resolveSharingLocale('/ua/characters/character-1/dialog?inviteCode=abc');
+    const locale = await resolveSharingLocale(customChatCharacter);
 
     expect(locale).toBe('de');
     expect(mocks.getUserAndContextByUserIdMock).not.toHaveBeenCalled();
@@ -159,7 +163,7 @@ describe('resolveSharingLocale', () => {
       },
     });
 
-    const locale = await resolveSharingLocale('/ua/characters/character-1/dialog?inviteCode=abc');
+    const locale = await resolveSharingLocale(customChatCharacter);
 
     expect(locale).toBe('de');
     expect(mocks.getStrongAuxiliaryModelMock).not.toHaveBeenCalled();
@@ -177,7 +181,7 @@ describe('resolveSharingLocale', () => {
     });
     mocks.generateTextWithBillingMock.mockResolvedValue({ text: 'english' });
 
-    const locale = await resolveSharingLocale('/characters/editor/character-1/share');
+    const locale = await resolveSharingLocale(customChatCharacter);
 
     expect(locale).toBe('en');
     expect(mocks.getStrongAuxiliaryModelMock).toHaveBeenCalledWith('federal-state-1');
@@ -202,7 +206,7 @@ describe('resolveSharingLocale', () => {
     const { resolveSharingLocale } = await import('./sharing-locale');
     mocks.getModelAndApiKeyWithResultMock.mockResolvedValue([new Error('missing key'), null]);
 
-    const locale = await resolveSharingLocale('/ua/characters/character-1/dialog?inviteCode=abc');
+    const locale = await resolveSharingLocale(customChatCharacter);
 
     expect(locale).toBe('de');
     expect(mocks.generateTextWithBillingMock).not.toHaveBeenCalled();
@@ -213,17 +217,28 @@ describe('resolveSharingLocale', () => {
     mocks.generateTextWithBillingMock.mockResolvedValue({ text: 'fr' });
     mocks.dbUpdateCharacterFilterGroupMock.mockRejectedValue(new Error('write failed'));
 
-    const locale = await resolveSharingLocale('/ua/characters/character-1/dialog?inviteCode=abc');
+    const locale = await resolveSharingLocale(customChatCharacter);
 
     expect(locale).toBe('fr');
     expect(mocks.dbUpdateCharacterFilterGroupMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not persist a detected language when the triggering user does not own the character', async () => {
+    const { resolveSharingLocale } = await import('./sharing-locale');
+    mocks.getMaybeUserMock.mockResolvedValue({ id: 'another-user' });
+    mocks.generateTextWithBillingMock.mockResolvedValue({ text: 'fr' });
+
+    const locale = await resolveSharingLocale(customChatCharacter);
+
+    expect(locale).toBe('fr');
+    expect(mocks.dbUpdateCharacterFilterGroupMock).not.toHaveBeenCalled();
   });
 
   it('returns default locale when character does not exist', async () => {
     const { resolveSharingLocale } = await import('./sharing-locale');
     mocks.dbGetCharacterByIdMock.mockResolvedValue(undefined);
 
-    const locale = await resolveSharingLocale('/ua/characters/character-1/dialog?inviteCode=abc');
+    const locale = await resolveSharingLocale(customChatCharacter);
 
     expect(locale).toBe('de');
     expect(mocks.getUserAndContextByUserIdMock).not.toHaveBeenCalled();
@@ -240,20 +255,18 @@ describe('resolveSharingLocale', () => {
       },
     });
 
-    const locale = await resolveSharingLocale(
-      '/ua/learning-scenarios/scenario-1/dialog?inviteCode=1',
-    );
+    const locale = await resolveSharingLocale(customChatLearningScenario);
 
     expect(locale).toBe('de');
     expect(mocks.getStrongAuxiliaryModelMock).not.toHaveBeenCalled();
     expect(mocks.generateTextWithBillingMock).not.toHaveBeenCalled();
   });
 
-  it('resolves and persists locale for learning-scenario editor share route', async () => {
+  it('resolves and persists locale for a learning scenario', async () => {
     const { resolveSharingLocale } = await import('./sharing-locale');
-    mocks.generateTextWithBillingMock.mockResolvedValue({ text: 'italian' });
+    mocks.generateTextWithBillingMock.mockResolvedValue({ text: 'italienisch' });
 
-    const locale = await resolveSharingLocale('/learning-scenarios/editor/scenario-1/share');
+    const locale = await resolveSharingLocale(customChatLearningScenario);
 
     expect(locale).toBe('it');
     expect(mocks.dbUpdateLearningScenarioFilterGroupMock).toHaveBeenCalledWith({
@@ -269,13 +282,22 @@ describe('resolveSharingLocale', () => {
     });
   });
 
+  it('does not persist a detected language for an unauthenticated learning-scenario viewer', async () => {
+    const { resolveSharingLocale } = await import('./sharing-locale');
+    mocks.getMaybeUserMock.mockResolvedValue(null);
+    mocks.generateTextWithBillingMock.mockResolvedValue({ text: 'italienisch' });
+
+    const locale = await resolveSharingLocale(customChatLearningScenario);
+
+    expect(locale).toBe('it');
+    expect(mocks.dbUpdateLearningScenarioFilterGroupMock).not.toHaveBeenCalled();
+  });
+
   it('falls back to default locale when auxiliary model answer contains multiple languages', async () => {
     const { resolveSharingLocale } = await import('./sharing-locale');
     mocks.generateTextWithBillingMock.mockResolvedValue({ text: 'de, en' });
 
-    const locale = await resolveSharingLocale(
-      '/ua/learning-scenarios/scenario-1/dialog?inviteCode=1',
-    );
+    const locale = await resolveSharingLocale(customChatLearningScenario);
 
     expect(locale).toBe('de');
     expect(mocks.dbUpdateLearningScenarioFilterGroupMock).toHaveBeenCalledWith({
@@ -296,7 +318,7 @@ describe('resolveSharingLocale', () => {
     mocks.generateTextWithBillingMock.mockResolvedValue({ text: 'fr' });
     mocks.constructCharacterLanguageSystemPromptMock.mockReturnValue('prompt-from-character');
 
-    const locale = await resolveSharingLocale('/ua/characters/character-1/dialog?inviteCode=abc');
+    const locale = await resolveSharingLocale(customChatCharacter);
 
     expect(locale).toBe('fr');
     expect(mocks.constructCharacterLanguageSystemPromptMock).toHaveBeenCalledWith({
@@ -311,8 +333,7 @@ describe('resolveSharingLocale', () => {
       [
         {
           role: 'system',
-          content:
-            'Determine the language in which the following assistant will respond to messages. Respond exclusively with one of the following language codes: de, en, fr, it, ar. If the language is not clear, respond with de.',
+          content: `Determine the language in which the following assistant will respond to messages. Respond exclusively with one of the following language codes: ${[...SUPPORTED_LOCALES].join(', ')}. If the language is not clear, respond with ${DEFAULT_LOCALE}.`,
         },
         {
           role: 'system',
@@ -327,9 +348,7 @@ describe('resolveSharingLocale', () => {
     const { resolveSharingLocale } = await import('./sharing-locale');
     mocks.generateTextWithBillingMock.mockResolvedValue({ text: 'klingon' });
 
-    const locale = await resolveSharingLocale(
-      '/ua/learning-scenarios/scenario-1/dialog?inviteCode=1',
-    );
+    const locale = await resolveSharingLocale(customChatLearningScenario);
 
     expect(locale).toBe('de');
   });

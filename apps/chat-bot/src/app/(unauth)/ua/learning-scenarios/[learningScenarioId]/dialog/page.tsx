@@ -49,8 +49,10 @@ export default async function Page(
 
   const federalState = await dbGetFederalStateByUserId({ userId: learningScenario.startedBy });
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
-  const shareUrl = `/ua/learning-scenarios/${learningScenario.id}/dialog?inviteCode=${searchParams.inviteCode}`;
-  const locale = await resolveSharingLocale(shareUrl);
+  const locale = await resolveSharingLocale({
+    customChatVariant: 'learning-scenario',
+    customChatId: learningScenario.id,
+  });
   const messages = await loadTranslations(locale);
 
   return (
