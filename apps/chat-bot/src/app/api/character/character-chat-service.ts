@@ -29,6 +29,7 @@ import {
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import { buildTools } from '../chat/build-tools';
+import { isWebSearchEnabledForEntity } from '../chat/websearch';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
@@ -152,12 +153,18 @@ export async function sendCharacterMessage({
   const assistantMessageId = crypto.randomUUID();
 
   if (agenticChatEnabled) {
+    const allowWebTools = isWebSearchEnabledForEntity({
+      featureToggles: teacherUserAndContext.federalState.featureToggles,
+      entity: character,
+    });
+
     const tools = await buildTools({
       user: teacherUserAndContext,
       characterId: character.id,
       relatedFileEntities,
       attachedLinks: character.attachedLinks,
       sourceUrls: processedUrls,
+      allowWebTools,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

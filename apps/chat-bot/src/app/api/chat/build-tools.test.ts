@@ -90,6 +90,7 @@ describe('buildTools', () => {
       user,
       conversationId: 'conv-1',
       relatedFileEntities,
+      allowWebTools: true,
     });
 
     expect(Object.keys(toolRegistry)).toEqual([
@@ -110,6 +111,7 @@ describe('buildTools', () => {
       user,
       conversationId: 'conv-1',
       relatedFileEntities,
+      allowWebTools: true,
     });
 
     expect(Object.keys(toolRegistry)).toEqual(['retrieve_entire_file', 'retrieve_text_chunks']);
@@ -124,6 +126,7 @@ describe('buildTools', () => {
       user,
       conversationId: 'conv-1',
       relatedFileEntities,
+      allowWebTools: true,
       onWebSearchResults,
     });
 
@@ -132,5 +135,20 @@ describe('buildTools', () => {
         onWebSearchResults,
       }),
     );
+  });
+
+  it('does not build web tools when allowWebTools is false', async () => {
+    const { buildTools } = await import('./build-tools');
+
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conv-1',
+      relatedFileEntities,
+      allowWebTools: false,
+    });
+
+    expect(Object.keys(toolRegistry)).toEqual(['retrieve_entire_file', 'retrieve_text_chunks']);
+    expect(mocks.buildWebSearchToolMock).not.toHaveBeenCalled();
+    expect(mocks.buildWebScraperToolMock).not.toHaveBeenCalled();
   });
 });

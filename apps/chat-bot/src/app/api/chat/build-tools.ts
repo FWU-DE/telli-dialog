@@ -15,6 +15,7 @@ type BuildToolsParams = {
   relatedFileEntities: FileModel[];
   sourceUrls?: string[];
   attachedLinks?: string[];
+  allowWebTools: boolean;
   onWebSearchResults?: (results: WebSearchResult[]) => void;
 };
 
@@ -31,30 +32,35 @@ export async function buildTools({
   relatedFileEntities,
   sourceUrls = [],
   attachedLinks = [],
+  allowWebTools,
   onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
   const toolRegistry: ToolRegistry = {};
 
-  const webSearchTool = await buildWebSearchTool({
-    user,
-    characterId,
-    learningScenarioId,
-    assistantId,
-    conversationId,
-    onWebSearchResults,
-  });
+  if (allowWebTools) {
+    const webSearchTool = await buildWebSearchTool({
+      user,
+      characterId,
+      learningScenarioId,
+      assistantId,
+      conversationId,
+      onWebSearchResults,
+    });
 
-  if (webSearchTool) {
-    toolRegistry[webSearchTool.definition.name] = webSearchTool;
+    if (webSearchTool) {
+      toolRegistry[webSearchTool.definition.name] = webSearchTool;
+    }
   }
 
-  const webScraperTool = buildWebScraperTool({
-    sourceUrls,
-    attachedLinks,
-  });
+  if (allowWebTools) {
+    const webScraperTool = buildWebScraperTool({
+      sourceUrls,
+      attachedLinks,
+    });
 
-  if (webScraperTool) {
-    toolRegistry[webScraperTool.definition.name] = webScraperTool;
+    if (webScraperTool) {
+      toolRegistry[webScraperTool.definition.name] = webScraperTool;
+    }
   }
 
   const retrieveEntireFileTool = buildRetrieveEntireFileTool({
