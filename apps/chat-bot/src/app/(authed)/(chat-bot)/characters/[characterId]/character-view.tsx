@@ -182,8 +182,8 @@ export function CharacterView({
                 label={t('initial-message-label')}
                 value={character.initialMessage}
               />
+              <FilterDisplaySection values={filterValues} />
             </FieldGroup>
-            <FilterDisplaySection values={filterValues} />
           </CardContent>
         </Card>
 

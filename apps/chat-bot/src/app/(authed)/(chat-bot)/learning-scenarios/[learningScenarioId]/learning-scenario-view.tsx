@@ -7,7 +7,6 @@ import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-update';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
-import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
 import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
@@ -36,6 +35,7 @@ import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-autho
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { FilterDisplaySection } from '@/components/custom-chat/filter/custom-chat-filter-display-section';
 import { extractFilterValues } from '@/components/custom-chat/filter/custom-chat-filter-utils';
+import { FieldGroup } from '@ui/components/field';
 
 export function LearningScenarioView({
   learningScenario,
@@ -188,7 +188,7 @@ export function LearningScenarioView({
 
         <Card>
           <CardContent>
-            <CustomChatFields>
+            <FieldGroup>
               <CustomChatFieldInfo label={t('name-label')} value={learningScenario.name} />
               <CustomChatFieldInfo
                 label={t('description-label')}
@@ -206,7 +206,7 @@ export function LearningScenarioView({
                 value={learningScenario.studentExercise}
               />
               <FilterDisplaySection values={filterValues} />
-            </CustomChatFields>
+            </FieldGroup>
           </CardContent>
         </Card>
       </div>
