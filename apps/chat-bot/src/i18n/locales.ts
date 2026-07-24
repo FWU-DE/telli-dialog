@@ -50,9 +50,10 @@ export function getLocaleForFilterLanguage(language: string): string | undefined
 }
 
 /**
- * Returns the locale for an English or German language name.
+ * Returns the locale for a filter language (e.g. `french`) or a German
+ * language name (e.g. `französisch`).
  */
-export function getLocaleForEnOrGerLanguageName(languageName: string): string | undefined {
+export function getLocaleForFilterLanguageOrGermanName(languageName: string): string | undefined {
   const filterLanguage = FILTER_LANGUAGE_BY_GERMAN_NAME.get(languageName) ?? languageName;
   return getLocaleForFilterLanguage(filterLanguage);
 }

@@ -13,7 +13,7 @@ import type { LlmModelSelectModel, filterGroup } from '@shared/db/schema';
 import {
   DEFAULT_LOCALE,
   getLocaleForFilterLanguage,
-  getLocaleForEnOrGerLanguageName,
+  getLocaleForFilterLanguageOrGermanName,
   LOCALE_TO_FILTER_LANGUAGE,
   SUPPORTED_LOCALES,
 } from './locales';
@@ -250,7 +250,7 @@ function normalizeLocale(text: string): string {
     return normalized;
   }
 
-  return getLocaleForEnOrGerLanguageName(normalized) ?? DEFAULT_LOCALE;
+  return getLocaleForFilterLanguageOrGermanName(normalized) ?? DEFAULT_LOCALE;
 }
 
 // We need to ensure we always persist a complete filter group shape, since the field might be empty for older customChats
