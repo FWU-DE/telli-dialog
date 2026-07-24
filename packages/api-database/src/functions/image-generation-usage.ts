@@ -1,4 +1,4 @@
-import { db } from '..';
+import { db } from '../db';
 import {
   ImageGenerationUsageInsertModel,
   imageGenerationUsageTrackingTable,

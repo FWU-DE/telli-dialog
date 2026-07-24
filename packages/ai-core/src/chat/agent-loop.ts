@@ -37,7 +37,7 @@ export function runAgentLoop({
   onError,
 }: RunAgentLoopParams): void {
   void (async () => {
-    const { generateAgenticStreamWithBilling } = await import('./index');
+    const { generateAgenticStreamWithBilling } = await import('./agentic-stream');
 
     let fullText = '';
     let totalUsage: TokenUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
