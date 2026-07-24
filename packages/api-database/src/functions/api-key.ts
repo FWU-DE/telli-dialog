@@ -8,7 +8,8 @@ import {
   llmModelTable,
   projectTable,
 } from '../schema';
-import { db, dbGetProjectById } from '..';
+import { db } from '../db';
+import { dbGetProjectById } from './projects';
 import { isDateBefore } from '../date';
 import { and, eq, getTableColumns, inArray } from 'drizzle-orm';
 

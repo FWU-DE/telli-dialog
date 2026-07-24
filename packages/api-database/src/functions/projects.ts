@@ -1,5 +1,7 @@
 import { and, eq } from 'drizzle-orm';
-import { ApiKeyModel, apiKeyTable, db, ProjectModel, projectTable, ProjectInsertModel } from '..';
+import { db } from '../db';
+import { apiKeyTable, projectTable } from '../schema';
+import type { ApiKeyModel, ProjectModel, ProjectInsertModel } from '../schema';
 
 export async function dbGetAllProjects() {
   return await db.select().from(projectTable).orderBy(projectTable.createdAt);

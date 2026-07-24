@@ -5,7 +5,7 @@ import type { Message, TokenUsage, StreamEvent } from './types';
 // Mock the generateAgenticStreamWithBilling import
 const mockGenerateAgenticStreamWithBilling = vi.fn();
 
-vi.mock('./index', () => ({
+vi.mock('./agentic-stream', () => ({
   generateAgenticStreamWithBilling: (...args: unknown[]) =>
     mockGenerateAgenticStreamWithBilling(...args),
 }));
