@@ -1,0 +1,50 @@
+{
+  "common": {
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "information-disclaimer": "AIS.chat can make mistakes. Think critically and check all information."
+  },
+  "characters": {
+    "shared": {
+      "delete-chat-modal-title": "Delete current chat?",
+      "delete-chat-modal-description": "A new chat will be started. The current chat will be deleted permanently.",
+      "delete-chat-modal-confirm-button": "Delete"
+    }
+  },
+  "learning-scenarios": {
+    "shared": {
+      "excercise-title": "Your task",
+      "delete-chat-modal-title": "Delete current chat?",
+      "delete-chat-modal-description": "A new chat will be started. The current chat will be deleted permanently.",
+      "delete-chat-modal-confirm-button": "Delete"
+    }
+  },
+  "sharing": {
+    "copy-link": "Copy link"
+  },
+  "custom-chat": {
+    "shared": {
+      "join-code": "Join with code",
+      "enter-chat": "To the dialog",
+      "start-chat": "Start dialog",
+      "invalid-code-toast": "The entered code is either expired or invalid."
+    },
+    "share-page": {
+      "go-to": "Go to",
+      "enter-code": "Enter the code.",
+      "open-chat": "Open chat",
+      "use-qr": "Scan the QR code.",
+      "copy-link": "Copy start link",
+      "learning-scenario": {
+        "sub-header": "Learning scenario",
+        "back-button": "Back to learning scenario",
+        "join": "Start learning scenario"
+      },
+      "character": {
+        "sub-header": "Dialog partner",
+        "back-button": "Back to dialog partner",
+        "join": "Join dialog"
+      }
+    }
+  }
+}

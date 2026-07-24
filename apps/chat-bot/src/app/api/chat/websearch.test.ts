@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { UserAndContext } from '@/auth/types';
 
 const mocks = vi.hoisted(() => ({
   dbGetAssistantByIdMock: vi.fn(),
@@ -150,5 +151,149 @@ describe('searchWeb', () => {
     });
     expect(mocks.dbInsertConversationToolCallUsageMock).not.toHaveBeenCalled();
     expect(mocks.dbUpdateTokenUsageByCharacterChatIdMock).not.toHaveBeenCalled();
+  });
+
+  it('forwards includeDomains to the Linkup client when includedDomains is non-empty', async () => {
+    const { searchWeb } = await import('./websearch');
+
+    await searchWeb({
+      query: 'aktuelles thema',
+      conversationId: 'conversation-1',
+      userId: 'user-1',
+      includedDomains: ['example.com', 'foo.de'],
+    });
+
+    expect(mocks.searchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        includeDomains: ['example.com', 'foo.de'],
+      }),
+    );
+  });
+
+  it('does not forward includeDomains when includedDomains is undefined', async () => {
+    const { searchWeb } = await import('./websearch');
+
+    await searchWeb({
+      query: 'aktuelles thema',
+      conversationId: 'conversation-1',
+      userId: 'user-1',
+    });
+
+    expect(mocks.searchMock).toHaveBeenCalledTimes(1);
+    expect(mocks.searchMock.mock.calls[0]![0]).not.toHaveProperty('includeDomains');
+  });
+
+  it('does not forward includeDomains when includedDomains is empty', async () => {
+    const { searchWeb } = await import('./websearch');
+
+    await searchWeb({
+      query: 'aktuelles thema',
+      conversationId: 'conversation-1',
+      userId: 'user-1',
+      includedDomains: [],
+    });
+
+    expect(mocks.searchMock).toHaveBeenCalledTimes(1);
+    expect(mocks.searchMock.mock.calls[0]![0]).not.toHaveProperty('includeDomains');
+  });
+});
+
+describe('resolveWebSearchConfig', () => {
+  const user = {
+    federalState: {
+      featureToggles: { isWebSearchEnabled: true },
+    },
+  } as unknown as UserAndContext;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('trims and drops empty domain entries from a character', async () => {
+    mocks.dbGetCharacterByIdMock.mockResolvedValue({
+      isWebSearchEnabled: true,
+      webSearchScope: 'included-domains',
+      webSearchIncludedDomains: ['  example.com  ', '', '   ', 'foo.de'],
+    });
+
+    const { resolveWebSearchConfig } = await import('./websearch');
+
+    const config = await resolveWebSearchConfig({
+      user,
+      characterId: 'character-uuid',
+    });
+
+    expect(config).toEqual({
+      enabled: true,
+      scope: 'included-domains',
+      includedDomains: ['example.com', 'foo.de'],
+    });
+  });
+
+  it('trims and drops empty domain entries from a learning scenario', async () => {
+    mocks.dbGetLearningScenarioByIdMock.mockResolvedValue({
+      isWebSearchEnabled: true,
+      webSearchScope: 'included-domains',
+      webSearchIncludedDomains: ['  example.com  ', '', '   ', 'foo.de'],
+    });
+
+    const { resolveWebSearchConfig } = await import('./websearch');
+
+    const config = await resolveWebSearchConfig({
+      user,
+      learningScenarioId: 'learning-scenario-uuid',
+    });
+
+    expect(config).toEqual({
+      enabled: true,
+      scope: 'included-domains',
+      includedDomains: ['example.com', 'foo.de'],
+    });
+  });
+});
+
+describe('isWebSearchEnabledForEntity', () => {
+  it('returns true when federal-state toggle and entity setting are both true', async () => {
+    const { isWebSearchEnabledForEntity } = await import('./websearch');
+
+    const result = isWebSearchEnabledForEntity({
+      featureToggles: { isWebSearchEnabled: true },
+      entity: { isWebSearchEnabled: true },
+    });
+
+    expect(result).toBe(true);
+  });
+
+  it('returns false when federal-state toggle is false', async () => {
+    const { isWebSearchEnabledForEntity } = await import('./websearch');
+
+    const result = isWebSearchEnabledForEntity({
+      featureToggles: { isWebSearchEnabled: false },
+      entity: { isWebSearchEnabled: true },
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it('returns false when federal-state toggle is missing', async () => {
+    const { isWebSearchEnabledForEntity } = await import('./websearch');
+
+    const result = isWebSearchEnabledForEntity({
+      featureToggles: {},
+      entity: { isWebSearchEnabled: true },
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it('returns false when entity setting is false', async () => {
+    const { isWebSearchEnabledForEntity } = await import('./websearch');
+
+    const result = isWebSearchEnabledForEntity({
+      featureToggles: { isWebSearchEnabled: true },
+      entity: { isWebSearchEnabled: false },
+    });
+
+    expect(result).toBe(false);
   });
 });

@@ -26,31 +26,25 @@ export async function syncBifrostProviders(
     logger,
   );
 
-  const syncResults = await Promise.allSettled(
-    providerConfigs.map(async (providerConfig) => {
+  const failedProviders: string[] = [];
+
+  for (const providerConfig of providerConfigs) {
+    try {
       await syncBifrostProvider({
         bifrostAdminUrl,
         bifrostManagementApiKey,
         providerConfig,
         logger,
       });
-      return providerConfig.provider;
-    }),
-  );
-  const failedProviders = syncResults.flatMap((result, index) => {
-    if (result.status === 'fulfilled') return [];
-    return [providerConfigs[index]?.provider ?? 'unknown'];
-  });
+    } catch (error) {
+      failedProviders.push(providerConfig.provider);
+      logger?.error?.('Error syncing Bifrost provider', error, {
+        provider: providerConfig.provider,
+      });
+    }
+  }
 
   if (failedProviders.length > 0) {
-    for (const [index, result] of syncResults.entries()) {
-      if (result.status === 'rejected') {
-        logger?.error?.('Error syncing Bifrost provider', result.reason, {
-          provider: providerConfigs[index]?.provider ?? 'unknown',
-        });
-      }
-    }
-
     logger?.error?.('Error syncing Bifrost providers', undefined, {
       providers: failedProviders,
     });

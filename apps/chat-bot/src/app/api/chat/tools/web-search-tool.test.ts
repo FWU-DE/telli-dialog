@@ -1,15 +1,28 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserAndContext } from '@/auth/types';
+import type { WebSearchConfig } from '../websearch';
 
 const mocks = vi.hoisted(() => ({
-  isWebSearchEnabledMock: vi.fn(),
+  resolveWebSearchConfigMock: vi.fn(),
   searchWebMock: vi.fn(),
 }));
 
 vi.mock('../websearch', () => ({
-  isWebSearchEnabled: mocks.isWebSearchEnabledMock,
+  resolveWebSearchConfig: mocks.resolveWebSearchConfigMock,
   searchWeb: mocks.searchWebMock,
 }));
+
+const disabledConfig: WebSearchConfig = {
+  enabled: false,
+  scope: 'all-web',
+  includedDomains: [],
+};
+
+const allWebConfig: WebSearchConfig = {
+  enabled: true,
+  scope: 'all-web',
+  includedDomains: [],
+};
 
 const user = {
   id: 'user-1',
@@ -33,13 +46,13 @@ const user = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.isWebSearchEnabledMock.mockResolvedValue(false);
+  mocks.resolveWebSearchConfigMock.mockResolvedValue(disabledConfig);
   mocks.searchWebMock.mockResolvedValue([]);
 });
 
 describe('buildWebSearchTool', () => {
   it('returns null when web search is disabled', async () => {
-    mocks.isWebSearchEnabledMock.mockResolvedValue(false);
+    mocks.resolveWebSearchConfigMock.mockResolvedValue(disabledConfig);
     const { buildWebSearchTool } = await import('./web-search-tool');
 
     const result = await buildWebSearchTool({
@@ -51,7 +64,7 @@ describe('buildWebSearchTool', () => {
   });
 
   it('adds a web search tool and returns search results as JSON', async () => {
-    mocks.isWebSearchEnabledMock.mockResolvedValue(true);
+    mocks.resolveWebSearchConfigMock.mockResolvedValue(allWebConfig);
     mocks.searchWebMock.mockResolvedValue([
       {
         name: 'Beispielartikel',
@@ -99,7 +112,7 @@ describe('buildWebSearchTool', () => {
   });
 
   it('calls onWebSearchResults callback when provided', async () => {
-    mocks.isWebSearchEnabledMock.mockResolvedValue(true);
+    mocks.resolveWebSearchConfigMock.mockResolvedValue(allWebConfig);
     mocks.searchWebMock.mockResolvedValue([
       {
         name: 'Test',
@@ -126,5 +139,47 @@ describe('buildWebSearchTool', () => {
         content: 'Content',
       },
     ]);
+  });
+
+  it('forwards includedDomains to searchWeb when scope is included-domains', async () => {
+    mocks.resolveWebSearchConfigMock.mockResolvedValue({
+      enabled: true,
+      scope: 'included-domains',
+      includedDomains: ['example.com', 'foo.de'],
+    } satisfies WebSearchConfig);
+
+    const { buildWebSearchTool } = await import('./web-search-tool');
+
+    const tool = await buildWebSearchTool({
+      user,
+      characterId: 'character-uuid',
+      conversationId: 'conversation-1',
+    });
+
+    await tool!.handler({ query: 'aktuelle information' });
+
+    expect(mocks.searchWebMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        includedDomains: ['example.com', 'foo.de'],
+      }),
+    );
+  });
+
+  it('does not forward includedDomains when scope is all-web', async () => {
+    mocks.resolveWebSearchConfigMock.mockResolvedValue(allWebConfig);
+
+    const { buildWebSearchTool } = await import('./web-search-tool');
+
+    const tool = await buildWebSearchTool({
+      user,
+      conversationId: 'conversation-1',
+    });
+
+    await tool!.handler({ query: 'aktuelle information' });
+
+    expect(mocks.searchWebMock).toHaveBeenCalledTimes(1);
+    expect(mocks.searchWebMock.mock.calls[0]![0]).toMatchObject({
+      includedDomains: undefined,
+    });
   });
 });

@@ -1,5 +1,5 @@
 import type { WebSearchResult } from '@shared/db/schema';
-import { isWebSearchEnabled, searchWeb } from '../websearch';
+import { resolveWebSearchConfig, searchWeb } from '../websearch';
 import type { BuildToolsContext, ToolDefinition, ToolRegistration } from './types';
 
 type WebSearchToolResult = {
@@ -28,21 +28,30 @@ export async function buildWebSearchTool({
   conversationId,
   onWebSearchResults,
 }: BuildWebSearchToolParams): Promise<ToolRegistration | null> {
-  const webSearchEnabled = await isWebSearchEnabled({
+  const config = await resolveWebSearchConfig({
     user,
     characterId,
     learningScenarioId,
     assistantId,
   });
 
-  if (!webSearchEnabled) {
+  if (!config.enabled) {
     return null;
   }
 
+  const includedDomains = config.scope === 'included-domains' ? config.includedDomains : undefined;
+
+  const baseDescription =
+    "Search the web for current information such as recent events, news, or facts that may have changed after the model's knowledge cutoff (weather, prices, scores, etc.). Returns a list of result snippets with titles and URLs.";
+
+  const description =
+    includedDomains && includedDomains.length > 0
+      ? `${baseDescription} Results are restricted to the following domains: ${includedDomains.join(', ')}.`
+      : baseDescription;
+
   const definition: ToolDefinition = {
     name: 'web_search',
-    description:
-      'Search the web for current information. Call this tool immediately and without asking for permission whenever the user asks about recent events, news, current data (weather, prices, scores), or any facts that may have changed after your knowledge cutoff. After receiving the results, synthesize them into a direct answer — do not call the tool again with a different query.',
+    description,
     parameters: {
       type: 'object',
       properties: {
@@ -65,6 +74,7 @@ export async function buildWebSearchTool({
       characterId,
       learningScenarioId,
       userId: user.id,
+      includedDomains,
     });
 
     const response: WebSearchToolResponse = {

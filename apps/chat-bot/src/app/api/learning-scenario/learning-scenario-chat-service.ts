@@ -6,7 +6,7 @@ import {
   runAgentLoop,
 } from '@ais-chat/ai-core';
 import { NotFoundError } from '@shared/error';
-import { createTextStream } from '@/utils/streaming';
+import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
@@ -29,6 +29,7 @@ import {
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import { buildTools } from '../chat/build-tools';
+import { isWebSearchEnabledForEntity } from '../chat/websearch';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
@@ -153,18 +154,35 @@ export async function sendLearningScenarioMessage({
       >
     | undefined;
 
+  const { stream, update, done, error: streamError } = createTextStream();
+  const assistantMessageId = crypto.randomUUID();
+
   if (agenticChatEnabled) {
-    const builtTools = await buildTools({
+    const allowWebTools = isWebSearchEnabledForEntity({
+      featureToggles: teacherUserAndContext.federalState.featureToggles,
+      entity: learningScenario,
+    });
+
+    const tools = await buildTools({
       user: teacherUserAndContext,
       learningScenarioId: learningScenario.id,
       relatedFileEntities,
       attachedLinks: learningScenario.attachedLinks,
       sourceUrls: processedUrls,
+      allowWebTools,
+      onWebSearchResults: (results) => {
+        update(
+          encodeChatStreamEvent({
+            type: 'web_search_results',
+            webSearchResults: results,
+          }),
+        );
+      },
     });
 
-    activeToolDefinitions = Object.values(builtTools.toolRegistry).map((entry) => entry.definition);
+    activeToolDefinitions = Object.values(tools.toolRegistry).map((entry) => entry.definition);
 
-    toolRegistry = builtTools.toolRegistry;
+    toolRegistry = tools.toolRegistry;
   } else {
     chunks = await retrieveChunks({
       messages,
@@ -205,9 +223,7 @@ export async function sendLearningScenarioMessage({
   );
 
   // Convert to ai-core format
-  // Create native stream
-  const { stream, update, done, error: streamError } = createTextStream();
-  const assistantMessageId = crypto.randomUUID();
+  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImages);
 
   if (agenticChatEnabled) {
     const agentName = resolveAgentNameForTracing({ learningScenarioId: learningScenario.id });
@@ -216,7 +232,7 @@ export async function sendLearningScenarioMessage({
       modelId: definedModel.id,
       modelName: definedModel.name,
       apiKeyId,
-      messages: convertToAiCoreMessages(systemPrompt, messagesWithImages),
+      messages: aiCoreMessages,
       toolRegistry,
       agentName,
       onTextChunk: (delta) => {
@@ -259,7 +275,7 @@ export async function sendLearningScenarioMessage({
       try {
         const textStream = generateTextStreamWithBilling(
           definedModel.id,
-          convertToAiCoreMessages(systemPrompt, messagesWithImages),
+          aiCoreMessages,
           apiKeyId,
           async ({ usage, priceInCents }) => {
             const { promptTokens, completionTokens } = usage;

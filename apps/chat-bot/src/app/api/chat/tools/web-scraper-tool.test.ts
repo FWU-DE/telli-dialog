@@ -18,32 +18,6 @@ beforeEach(() => {
 });
 
 describe('buildWebScraperTool', () => {
-  it('returns null when characterId is provided', async () => {
-    const { buildWebScraperTool } = await import('./web-scraper-tool');
-
-    const result = buildWebScraperTool({
-      characterId: 'character-1',
-      learningScenarioId: undefined,
-      sourceUrls: [],
-      attachedLinks: [],
-    });
-
-    expect(result).toBeNull();
-  });
-
-  it('returns null when learningScenarioId is provided', async () => {
-    const { buildWebScraperTool } = await import('./web-scraper-tool');
-
-    const result = buildWebScraperTool({
-      characterId: undefined,
-      learningScenarioId: 'scenario-1',
-      sourceUrls: [],
-      attachedLinks: [],
-    });
-
-    expect(result).toBeNull();
-  });
-
   it('adds a web scraper tool and returns scraped page content', async () => {
     const { buildWebScraperTool } = await import('./web-scraper-tool');
 

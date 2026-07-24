@@ -1,6 +1,7 @@
 import MarkdownDisplay from './markdown-display';
 import AvatarPicture from '../common/avatar-picture';
 import { Button } from '@ui/components/button';
+import { useTranslations } from 'next-intl';
 
 export function InitialChatContentDisplay({
   title,
@@ -8,13 +9,17 @@ export function InitialChatContentDisplay({
   description,
   excerciseDescription,
   setDialogStarted,
+  startDialogLabel,
 }: {
   title: string;
   imageSource?: string;
   description?: string;
   excerciseDescription?: string;
   setDialogStarted?: (dialogStarted: boolean) => void;
+  startDialogLabel?: string;
 }) {
+  const tCustomChat = useTranslations('custom-chat.shared');
+
   return (
     <div className="flex flex-col items-center justify-center h-full mx-auto p-4 gap-1">
       {imageSource && <AvatarPicture src={imageSource} alt={title} variant="normal" />}
@@ -28,8 +33,12 @@ export function InitialChatContentDisplay({
         </div>
       )}
       {setDialogStarted !== undefined && (
-        <Button onClick={() => setDialogStarted(true)} className="mt-3">
-          Dialog starten
+        <Button
+          onClick={() => setDialogStarted(true)}
+          className="mt-3"
+          data-testid="start-dialog-button"
+        >
+          {startDialogLabel ?? tCustomChat('start-chat')}
         </Button>
       )}
     </div>

@@ -15,6 +15,7 @@ import {
   categoriesSchema,
   federalStatesSchema,
   languagesSchema,
+  webSearchScopeSchema,
 } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/card';
@@ -126,6 +127,8 @@ function createLearningScenarioFormValuesSchema(t: LearningScenarioTranslator) {
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
     isWebSearchEnabled: z.boolean(),
+    webSearchScope: webSearchScopeSchema,
+    webSearchIncludedDomains: z.array(z.string()),
   });
 }
 
@@ -184,6 +187,8 @@ export function LearningScenarioEdit({
     ...getShareFormValues(learningScenario.accessLevel),
     hasLinkAccess: learningScenario.hasLinkAccess,
     isWebSearchEnabled: learningScenario.isWebSearchEnabled,
+    webSearchScope: learningScenario.webSearchScope,
+    webSearchIncludedDomains: learningScenario.webSearchIncludedDomains,
   };
 
   const {
@@ -567,9 +572,12 @@ export function LearningScenarioEdit({
               <CustomChatWebSearch
                 name="isWebSearchEnabled"
                 control={control}
-                onCheckedChange={() => {
+                onChange={() => {
                   void flushAutoSave();
                 }}
+                showScopeOptions
+                scopeName="webSearchScope"
+                includedDomainsName="webSearchIncludedDomains"
               />
             )}
 

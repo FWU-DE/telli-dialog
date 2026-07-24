@@ -39,7 +39,7 @@ import { UserAndContext } from '@/auth/types';
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { buildTools } from './build-tools';
-import { runWebSearchPipeline } from './websearch';
+import { isWebSearchEnabledForEntity, runWebSearchPipeline } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
 import type {
   AssistantSelectModel,
@@ -390,7 +390,14 @@ export async function sendChatMessage({
       activeLearningScenario?.attachedLinks ??
       [];
 
-    const builtTools = await buildTools({
+    const allowWebTools = isWebSearchEnabledForEntity({
+      featureToggles: user.federalState.featureToggles,
+      entity: activeCharacter ??
+        activeLearningScenario ??
+        activeAssistant ?? { isWebSearchEnabled: true },
+    });
+
+    const tools = await buildTools({
       user,
       characterId,
       learningScenarioId,
@@ -399,6 +406,7 @@ export async function sendChatMessage({
       relatedFileEntities,
       attachedLinks,
       sourceUrls: ingestResult.processedUrls,
+      allowWebTools,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({
@@ -409,7 +417,7 @@ export async function sendChatMessage({
       },
     });
 
-    toolRegistry = builtTools.toolRegistry;
+    toolRegistry = tools.toolRegistry;
     activeToolDefinitions = Object.values(toolRegistry).map((entry) => entry.definition);
   } else {
     // Fallback implementations of Websearch and Chunk Retrieval.

@@ -120,7 +120,7 @@ test.describe('create, share, chat, delete', () => {
     await page.waitForURL('/ua/learning-scenarios/**/dialog?inviteCode=*');
 
     // send first message
-    const startButton = page.getByRole('button', { name: 'Dialog starten' });
+    const startButton = page.getByTestId('start-dialog-button');
     await expect(startButton).toBeVisible();
     await startButton.click();
 
