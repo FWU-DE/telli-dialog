@@ -70,6 +70,12 @@ Prefer these strategies:
 
 Keep behavior unchanged while removing the cycle.
 
+After each import refactor, validate import hygiene in changed files:
+
+- Remove unused imports.
+- Ensure same-module files do not import through their own `index.ts` barrel.
+- Prefer direct relative imports for internal module references.
+
 ## Verify after fixes
 
 Re-run madge:
@@ -78,10 +84,18 @@ Re-run madge:
 pnpm exec madge . --extensions ts,tsx --circular --json
 ```
 
+Run lint as a required verification step:
+
+```sh
+pnpm run lint
+```
+
 Success criteria:
 
 - Output is `[]`.
-- No new type or lint errors introduced by the refactor.
+- Lint passes.
+- No unused imports remain in changed files.
+- No same-module internal imports use the module's own `index.ts` barrel.
 - Unit tests pass.
 
 ## Optional follow-up checks
@@ -89,7 +103,7 @@ Success criteria:
 After cycle fixes, run repository verification tasks if requested:
 
 ```sh
-pnpm run lint
 pnpm run check-types
+pnpm run lint
 pnpm run test
 ```
