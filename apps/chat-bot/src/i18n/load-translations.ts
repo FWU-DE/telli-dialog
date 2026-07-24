@@ -24,6 +24,9 @@ function deepMerge(base: JsonObject, override: JsonObject): JsonObject {
 /**
  * Loads locale translations and merges them on top of German fallback translations.
  * This prevents runtime failures when a non-default locale is incomplete.
+ *
+ * Merging messages from another locale is next-intl's documented pattern for
+ * locale-level fallback, see https://next-intl.dev/docs/usage/configuration#messages.
  */
 export async function loadTranslations(locale: string): Promise<JsonObject> {
   const fallbackMessages = (await import('../../messages/de.json')).default as JsonObject;

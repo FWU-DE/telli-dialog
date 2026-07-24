@@ -44,8 +44,10 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
   }
   const federalState = await dbGetFederalStateByUserId({ userId: character.startedBy });
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
-  const shareUrl = `/ua/characters/${character.id}/dialog?inviteCode=${searchParams.inviteCode}`;
-  const locale = await resolveSharingLocale(shareUrl);
+  const locale = await resolveSharingLocale({
+    customChatVariant: 'character',
+    customChatId: character.id,
+  });
   const messages = await loadTranslations(locale);
 
   return (

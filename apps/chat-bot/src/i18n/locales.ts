@@ -18,6 +18,14 @@ const LOCALE_BY_FILTER_LANGUAGE = {
 
 export type SupportedFilterLanguage = keyof typeof LOCALE_BY_FILTER_LANGUAGE;
 
+const FILTER_LANGUAGE_BY_GERMAN_NAME = new Map<string, SupportedFilterLanguage>([
+  ['deutsch', 'german'],
+  ['englisch', 'english'],
+  ['französisch', 'french'],
+  ['italienisch', 'italian'],
+  ['arabisch', 'arabic'],
+]);
+
 export const FILTER_LANGUAGE_TO_LOCALE: Record<SupportedFilterLanguage, string> =
   LOCALE_BY_FILTER_LANGUAGE;
 
@@ -39,4 +47,12 @@ function isSupportedFilterLanguage(language: string): language is SupportedFilte
  */
 export function getLocaleForFilterLanguage(language: string): string | undefined {
   return isSupportedFilterLanguage(language) ? FILTER_LANGUAGE_TO_LOCALE[language] : undefined;
+}
+
+/**
+ * Returns the locale for an English or German language name.
+ */
+export function getLocaleForEnOrGerLanguageName(languageName: string): string | undefined {
+  const filterLanguage = FILTER_LANGUAGE_BY_GERMAN_NAME.get(languageName) ?? languageName;
+  return getLocaleForFilterLanguage(filterLanguage);
 }
