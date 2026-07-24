@@ -58,7 +58,9 @@ export async function createImageAttachmentsForConversation(
 }
 
 function getImageContentType(type: string): string {
-  return type === 'jpg' ? 'image/jpeg' : `image/${type}`;
+  if (type === 'jpg') return 'image/jpeg';
+  if (type === 'svg') return 'image/svg+xml';
+  return `image/${type}`;
 }
 
 export async function preprocessImage(
