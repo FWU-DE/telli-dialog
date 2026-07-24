@@ -20,24 +20,18 @@ export async function sendMessage(page: Page, message: string) {
     const errorText = page.getByText('Ein Fehler ist aufgetreten');
 
     await enterMessage(page, message);
+    const waitForLoadingSpinner = loadingSpinner.waitFor();
     await page.keyboard.press('Enter');
-
-    // Firefox can miss the short-lived loading animation for fast mock responses.
-    // Keep waiting for completion, but only wait for spinner detachment if it was observed.
-    const didShowLoadingSpinner = await loadingSpinner
-      .waitFor({ timeout: 5_000 })
-      .then(() => true)
-      .catch(() => false);
-
-    if (didShowLoadingSpinner) {
-      await loadingSpinner.waitFor({ state: 'detached', timeout: 60_000 });
-    }
+    // Wait for the loading spinner to appear after sending the message
+    await waitForLoadingSpinner;
+    // Wait for the loading spinner to disappear, which indicates that the response has started streaming
+    await loadingSpinner.waitFor({ state: 'detached', timeout: 60_000 });
 
     // Either the response finishes successfully and shows the Reload button,
     // or an error message appears and the test should fail.
     await Promise.race([
-      reloadButton.waitFor({ timeout: 60_000 }),
-      errorText.waitFor({ timeout: 60_000 }).then(() => {
+      reloadButton.waitFor({ timeout: 20_000 }),
+      errorText.waitFor({ timeout: 20_000 }).then(() => {
         throw new Error('Error message appeared after sending message');
       }),
     ]);
