@@ -13,7 +13,7 @@
   },
   "learning-scenarios": {
     "shared": {
-      "excercise-title": "Ta tâche",
+      "exercise-title": "Ta tâche",
       "delete-chat-modal-title": "Supprimer le chat actuel?",
       "delete-chat-modal-description": "Un nouveau chat va être lancé. Le chat actuel sera définitivement supprimé.",
       "delete-chat-modal-confirm-button": "Supprimer"
