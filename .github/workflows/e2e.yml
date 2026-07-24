@@ -285,12 +285,6 @@ jobs:
           echo "=== mock-llm logs ==="
           cat /tmp/mock-llm.log || true
 
-      - name: Print Bifrost logs
-        if: always()
-        run: |
-          echo "=== Bifrost logs ==="
-          cat /tmp/bifrost.log || true
-
       - name: Print keycloak logs
         if: always()
         run: |
