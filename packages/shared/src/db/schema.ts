@@ -18,12 +18,21 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import { type DesignConfiguration, type LlmModelPriceMetadata } from './types';
+import { type KnotenpunktPriceMetadata } from '@shared/knotenpunkt/schema';
 import {
   conversationRoleSchema,
   conversationTypeSchema,
   imageStyleTypeSchema,
 } from '../utils/chat';
+
+export type DesignConfiguration = {
+  primaryColor: string;
+  primaryTextColor: string;
+  secondaryColor: string;
+  secondaryTextColor: string;
+};
+
+export type LlmModelPriceMetadata = KnotenpunktPriceMetadata;
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
 import { ToolCall } from '@ais-chat/ai-core/chat/types';

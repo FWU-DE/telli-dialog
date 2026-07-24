@@ -3,8 +3,6 @@ import { conversationMessageTable, conversationTable, userTable } from './schema
 import { PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js';
 import { ExtractTablesWithRelations } from 'drizzle-orm';
 import { NodePgQueryResultHKT } from 'drizzle-orm/node-postgres';
-import { type KnotenpunktPriceMetadata } from '@shared/knotenpunkt/schema';
-
 export type User = typeof userTable.$inferSelect;
 
 export type ConversationModel = typeof conversationTable.$inferSelect;
@@ -12,13 +10,6 @@ export type InsertConversationModel = typeof conversationTable.$inferInsert;
 
 export type ConversationMessageModel = typeof conversationMessageTable.$inferSelect;
 export type InsertConversationMessageModel = typeof conversationMessageTable.$inferInsert;
-
-export type DesignConfiguration = {
-  primaryColor: string;
-  primaryTextColor: string;
-  secondaryColor: string;
-  secondaryTextColor: string;
-};
 
 export type CustomTool = {
   type: 'function';
@@ -28,8 +19,6 @@ export type CustomTool = {
     parameters: object;
   };
 };
-
-export type LlmModelPriceMetadata = KnotenpunktPriceMetadata;
 
 export type WebSource = {
   name?: string;
