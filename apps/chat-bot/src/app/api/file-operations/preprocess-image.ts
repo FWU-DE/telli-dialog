@@ -28,6 +28,7 @@ export async function createImageAttachmentsForConversation(
 
   const imagePromises = imageFiles.map(async (file) => {
     let url: string;
+    const contentType = getImageContentType(file.type);
 
     try {
       if (imageAttachmentType === 'url') {
@@ -35,7 +36,7 @@ export async function createImageAttachmentsForConversation(
       } else if (imageAttachmentType === 'base64') {
         const fileStream = await getFileFromS3(`message_attachments/${file.id}`);
         const base64ImageData = await streamToBase64(fileStream);
-        url = `data:image/${file.type};base64,${base64ImageData}`;
+        url = `data:${contentType};base64,${base64ImageData}`;
       } else {
         throw new Error(`Unsupported image attachment type: ${imageAttachmentType}`);
       }
@@ -43,7 +44,7 @@ export async function createImageAttachmentsForConversation(
       return {
         type: 'image' as const,
         url,
-        contentType: `image/${file.type}`,
+        contentType,
         messageId: file.conversationMessageId,
       };
     } catch (error) {
@@ -54,6 +55,12 @@ export async function createImageAttachmentsForConversation(
 
   const images = await Promise.all(imagePromises);
   return images.filter((img) => img !== undefined);
+}
+
+function getImageContentType(type: string): string {
+  if (type === 'jpg') return 'image/jpeg';
+  if (type === 'svg') return 'image/svg+xml';
+  return `image/${type}`;
 }
 
 export async function preprocessImage(
