@@ -9,6 +9,11 @@ Most e2e tests use a local mock Azure/OpenAI Responses-compatible server (`devop
 as the default text model instead of calling real LLMs. The mock server streams deterministic SSE
 responses and can be controlled with `MOCK_LLM_COMMANDS` to trigger tool calls.
 
+Seeded e2e models are routed through Bifrost, including the mock models. Make sure Bifrost is
+running and `BIFROST_ADMIN_URL` is configured when seeding so the mock provider key is synced.
+For local Docker Compose runs, leave `LLM_MOCK_BASE_URL` unset or set it to `http://mock-llm:6556`;
+the URL must be reachable from the Bifrost container, not from the host.
+
 ### Starting the mock LLM locally
 
 Use the local Docker Compose setup which includes the mock server.

@@ -30,6 +30,7 @@ export type BifrostProviderConfig = {
   provider: BifrostProvider;
   network_config?: {
     base_url?: string;
+    allow_private_network?: boolean;
   };
   custom_provider_config?: {
     base_provider_type: 'openai';
@@ -60,4 +61,16 @@ export type BifrostProviderResponse = Omit<BifrostProviderConfig, 'provider' | '
   send_back_raw_request?: boolean;
   send_back_raw_response?: boolean;
   store_raw_request_response?: boolean;
+};
+
+export type BifrostProviderSyncLogger = {
+  info?: (message: string, context?: Record<string, unknown>) => void;
+  warning?: (message: string, context?: Record<string, unknown>) => void;
+  error?: (message: string, error?: unknown, context?: Record<string, unknown>) => void;
+};
+
+export type BifrostProviderSyncOptions = {
+  bifrostAdminUrl?: string;
+  bifrostManagementApiKey?: string;
+  logger?: BifrostProviderSyncLogger;
 };
