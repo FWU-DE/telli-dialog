@@ -30,7 +30,6 @@ graph LR
     users --> chatbot
     admins --> admin
     clients --> api
-    chatbot -->|model sync| api
     admin -->|model sync| api
 ```
 
@@ -58,7 +57,7 @@ graph TB
     admin["apps/admin\nNext.js · :3001"]
 
     admin --> auth["Authentication\n(Keycloak)"]
-    admin --> bifrost["Bifrost\n(org & identity mgmt)"]
+    admin -->|provider sync| bifrost["Bifrost\n(AI Gateway)"]
     admin --> data[("Data Stores\n(App DB · API DB)")]
     admin --> obs["Observability\n(Sentry · OpenTelemetry)"]
 ```
@@ -76,7 +75,7 @@ graph TB
     api --> obs["Observability\n(Sentry · OpenTelemetry)"]
 ```
 
-> **Note:** `apps/chat-bot` calls LLM providers directly via `@ais-chat/ai-core` (not through `apps/api`). `apps/api` is the AI gateway for external API clients and is also called by `apps/chat-bot` and `apps/admin` to sync the LLM model catalog (knotenpunkt).
+> **Note:** `apps/chat-bot` calls LLM providers directly via `@ais-chat/ai-core` (not through `apps/api`). `apps/api` is the AI gateway for external API clients and is also called by `apps/admin` to sync the LLM model catalog (knotenpunkt).
 
 ---
 
@@ -102,17 +101,12 @@ graph LR
         ui["@ais-chat/ui"]
     end
 
-    subgraph t3[" "]
-        direction TB
-        aicore["@ais-chat/ai-core"]
-        sharedcore["@ais-chat/shared-core"]
-    end
-
+    aicore["@ais-chat/ai-core"]
+    sharedcore["@ais-chat/shared-core"]
     apidb["@ais-chat/api-database"]
 
     style t1 fill:none,stroke:none
     style t2 fill:none,stroke:none
-    style t3 fill:none,stroke:none
 
     chatbot --> aicore & shared & ui
     admin --> shared & ui & apidb
@@ -260,9 +254,9 @@ graph LR
     usage --> apidb
 ```
 
-#### 5.4.4 `@ais-chat/ui` and `@ais-chat/shared-core`
+#### 5.4.4 `@ais-chat/ui`
 
-`@ais-chat/ui` is the shared UI component library based on [shadcn/ui](https://ui.shadcn.com/), providing reusable React components and global Tailwind styles used across `apps/chat-bot` and `apps/admin`. `@ais-chat/shared-core` contains cross-app, framework-agnostic utilities used by all three applications.
+`@ais-chat/ui` is the shared UI component library based on [shadcn/ui](https://ui.shadcn.com/), providing reusable React components and global Tailwind styles used across `apps/chat-bot` and `apps/admin`.
 
 ```mermaid
 %%{init: {'flowchart': {'curve': 'rounded'}}}%%
@@ -278,14 +272,23 @@ graph LR
         composites --> styles
     end
 
+    chat["apps/chat-bot"] --> composites
+    adm["apps/admin"] --> composites
+```
+
+#### 5.4.5 `@ais-chat/shared-core`
+
+`@ais-chat/shared-core` contains cross-app, framework-agnostic utilities used by all three applications.
+
+```mermaid
+%%{init: {'flowchart': {'curve': 'rounded'}}}%%
+graph LR
     subgraph core["@ais-chat/shared-core (cross-runtime)"]
         direction TB
         coreutils["src/crypto/ (hashing, key utils)"]
         coresentry["src/sentry/ (shared Sentry helpers)"]
     end
 
-    chat["apps/chat-bot"] --> composites
-    adm["apps/admin"] --> composites
     api["apps/api"] --> coreutils
     shared["@ais-chat/shared"] --> coreutils
     shared --> coresentry
@@ -779,7 +782,7 @@ Observations:
 ### 6.1 AI request flow
 
 How a chat message travels from the browser to a LLM provider and back.
-A periodic side-flow synchronises the LLM model catalog from `apps/api` into the App DB.
+A side-flow triggered by admin save flows synchronises the LLM model catalog from `apps/api` into the App DB.
 
 ```mermaid
 sequenceDiagram
