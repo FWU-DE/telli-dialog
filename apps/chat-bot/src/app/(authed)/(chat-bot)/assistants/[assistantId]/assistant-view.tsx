@@ -13,7 +13,6 @@ import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-update';
 import { Card, CardContent } from '@ui/components/card';
-import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
@@ -22,6 +21,7 @@ import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-cha
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
 import { FilterDisplaySection } from '@/components/custom-chat/filter/custom-chat-filter-display-section';
 import { extractFilterValues } from '@/components/custom-chat/filter/custom-chat-filter-utils';
+import { FieldGroup } from '@ui/components/field';
 
 export function AssistantView({
   assistant,
@@ -92,7 +92,7 @@ export function AssistantView({
 
       <Card>
         <CardContent>
-          <CustomChatFields>
+          <FieldGroup>
             <CustomChatFieldInfo label={t('name-label')} value={assistant.name} />
             <CustomChatFieldInfo label={t('description-label')} value={assistant.description} />
             <CustomChatFieldInfo label={t('instructions-label')} value={assistant.instructions} />
@@ -103,8 +103,8 @@ export function AssistantView({
                 value={suggestion}
               />
             ))}
-          </CustomChatFields>
-          <FilterDisplaySection values={filterValues} />
+            <FilterDisplaySection values={filterValues} />
+          </FieldGroup>
         </CardContent>
       </Card>
       <CustomChatFilesAndLinks

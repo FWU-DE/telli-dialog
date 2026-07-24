@@ -3,6 +3,7 @@ import {
   type ApiKeyInsertModel,
   apiKeyTable,
   type LlmInsertModel,
+  type LlmModel,
   llmModelApiKeyMappingTable,
   llmModelTable,
   type OrganizationInsertModel,
@@ -10,7 +11,8 @@ import {
   type ProjectInsertModel,
   projectTable,
 } from './schema';
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
+import { normalizeSeedModelsForBifrost, syncSeedModelsToBifrost } from './seed-bifrost';
 
 const ORGANIZATION_ID = 'cfeb82c6-396a-4c2d-954b-53e77acbbe7e';
 const PROJECT_ID = 'DE-TEST';
@@ -26,21 +28,19 @@ const gpt5nanoBaseUrl = process.env.LLM_GPT5NANO_BASE_URL ?? 'PLACEHOLDER_BASE_U
 const gpt5miniApiKey = process.env.LLM_GPT5MINI_API_KEY ?? 'API_KEY_PLACEHOLDER';
 const gpt5miniBaseUrl = process.env.LLM_GPT5MINI_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const mockLlmApiKey = process.env.LLM_MOCK_API_KEY ?? 'API_KEY_PLACEHOLDER';
-const mockLlmBaseUrl =
-  process.env.LLM_MOCK_BASE_URL ??
-  'http://localhost:6556/openai/deployments/mock-echo?api-version=2025-04-01-preview';
+const mockLlmBaseUrl = process.env.LLM_MOCK_BASE_URL ?? 'http://mock-llm:6556';
 
-// Mock LLM: Azure/OpenAI Responses-compatible server used as the default model in e2e tests.
+// Mock LLM: OpenAI Responses-compatible server used as the default model in e2e tests.
 // Echoes prompts or drives deterministic tool calls — no real API calls.
 // See devops/docker/mock-llm/ for the server implementation.
 const mockLlm: LlmInsertModel = {
   organizationId: ORGANIZATION_ID,
-  provider: 'azure',
+  provider: 'bifrost',
   name: 'mock-echo',
   displayName: 'Mock LLM',
   description: 'Mock LLM for e2e testing — echoes back the received prompt',
   setting: {
-    provider: 'azure',
+    provider: 'openai',
     apiKey: mockLlmApiKey,
     baseUrl: mockLlmBaseUrl,
   },
@@ -54,7 +54,7 @@ const mockLlm: LlmInsertModel = {
 // All prices are rough estimates, probably outdated and just for mocking purposes
 // Static ids are used to ensure that the models are not created again
 // the ids are taken from the staging/production database for interoperability to be able to connect to local AIS.chat api or staging
-const DEFAULT_MODELS: LlmInsertModel[] = [
+const DEFAULT_MODELS: LlmInsertModel[] = normalizeSeedModelsForBifrost([
   // Mock LLMs
   {
     ...mockLlm,
@@ -206,7 +206,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     },
     supportedImageFormats: ['jpg', 'jpeg', 'png', 'webp'],
   },
-];
+]);
 
 export async function seedDatabase() {
   console.log('Starting database seeding...');
@@ -279,8 +279,39 @@ export async function seedDatabase() {
     }
 
     // 5. Create/update API key to model mapping
+    const seededModels: LlmModel[] = [];
+    await db.delete(llmModelApiKeyMappingTable).where(
+      and(
+        eq(llmModelApiKeyMappingTable.apiKeyId, apiKey.id),
+        inArray(
+          llmModelApiKeyMappingTable.llmModelId,
+          DEFAULT_MODELS.map((model) => model.id!),
+        ),
+      ),
+    );
+
     for (const model of DEFAULT_MODELS) {
-      await db.insert(llmModelTable).values(model).onConflictDoNothing().returning();
+      const [seededModel] = await db
+        .insert(llmModelTable)
+        .values(model)
+        .onConflictDoUpdate({
+          target: llmModelTable.id,
+          set: {
+            provider: model.provider,
+            name: model.name,
+            displayName: model.displayName,
+            description: model.description,
+            setting: model.setting,
+            priceMetadata: model.priceMetadata,
+            supportedImageFormats: model.supportedImageFormats,
+            additionalParameters: model.additionalParameters,
+            isNew: model.isNew,
+            isDeleted: model.isDeleted,
+          },
+        })
+        .returning();
+
+      if (seededModel) seededModels.push(seededModel);
 
       await db
         .insert(llmModelApiKeyMappingTable)
@@ -290,6 +321,10 @@ export async function seedDatabase() {
         })
         .onConflictDoNothing();
     }
+
+    const modelsToSync =
+      seededModels.length > 0 ? seededModels : await db.select().from(llmModelTable);
+    await syncSeedModelsToBifrost(modelsToSync);
 
     // Print API key in a format parseable by CI (e.g. DE_TEST_API_KEY=sk_...)
     const apiKeyEnvVar = `${PROJECT_ID.replace('-', '_')}_API_KEY`;

@@ -13,6 +13,7 @@ import {
 } from './schema';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import { normalizeSeedModelsForBifrost, syncSeedModelsToBifrost } from './seed-bifrost';
 
 // Loads all required data from the staging database into the local database
 // including organizations, projects, api keys, llm models and mappings.
@@ -53,6 +54,8 @@ export async function seedDatabase() {
   console.log('Starting database seeding...');
 
   try {
+    const models = normalizeSeedModelsForBifrost(await getModels());
+
     // 1. Create organization
     await localDb
       .insert(organizationTable)
@@ -75,11 +78,27 @@ export async function seedDatabase() {
       .returning();
 
     // 4. Create LLM models
-    await localDb
-      .insert(llmModelTable)
-      .values(await getModels())
-      .onConflictDoNothing()
-      .returning();
+    for (const model of models) {
+      await localDb
+        .insert(llmModelTable)
+        .values(model)
+        .onConflictDoUpdate({
+          target: llmModelTable.id,
+          set: {
+            provider: model.provider,
+            name: model.name,
+            displayName: model.displayName,
+            description: model.description,
+            setting: model.setting,
+            priceMetadata: model.priceMetadata,
+            supportedImageFormats: model.supportedImageFormats,
+            additionalParameters: model.additionalParameters,
+            isNew: model.isNew,
+            isDeleted: model.isDeleted,
+          },
+        })
+        .returning();
+    }
 
     // 5. Create model-key mappings
     await localDb
@@ -87,6 +106,8 @@ export async function seedDatabase() {
       .values(await getModelKeyMappings())
       .onConflictDoNothing()
       .returning();
+
+    await syncSeedModelsToBifrost(models);
 
     // 6. Summary
     console.log('Database seeding completed successfully!');

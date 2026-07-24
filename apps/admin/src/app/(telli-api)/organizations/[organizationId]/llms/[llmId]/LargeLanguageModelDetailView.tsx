@@ -13,7 +13,7 @@ import { LargeLanguageModel } from '@/types/large-language-model';
 import { createLLMAction, updateLLMAction } from './actions';
 import { ROUTES } from '@/consts/routes';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
-import { isBifrostProviderSyncError } from '@/types/bifrost-provider-sync-error';
+import { isBifrostProviderSyncError } from '@ais-chat/api-database/bifrost-provider-sync';
 import { logError } from '@shared/logging';
 
 // Helper function to validate JSON

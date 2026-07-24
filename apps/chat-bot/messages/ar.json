@@ -13,7 +13,7 @@
   },
   "learning-scenarios": {
     "shared": {
-      "excercise-title": "مهمتك",
+      "exercise-title": "مهمتك",
       "delete-chat-modal-title": "هل تريد حذف المحادثة الحالية؟",
       "delete-chat-modal-description": "سيتم بدء محادثة جديدة. سيتم حذف المحادثة الحالية نهائيًا ولا يمكن التراجع عن ذلك.",
       "delete-chat-modal-confirm-button": "حذف"

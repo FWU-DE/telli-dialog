@@ -1,6 +1,6 @@
-import { LlmModel } from '@ais-chat/api-database';
-import { DEFAULT_IONOS_BASE_URL, DEFAULT_OPENAI_BASE_URL } from '@ais-chat/api-database/llm-model';
-import { BifrostProviderSyncError } from '@/types/bifrost-provider-sync-error';
+import { LlmModel } from '../../schema';
+import { DEFAULT_IONOS_BASE_URL, DEFAULT_OPENAI_BASE_URL } from '../../llm-model';
+import { BifrostProviderSyncError } from '../error';
 import { BifrostProviderConfig } from '../types';
 import {
   buildAzureAliases,
@@ -86,6 +86,15 @@ export function buildOpenAiProviderConfigs(models: LlmModel[]): BifrostProviderC
     },
     buildConfig: (setting) => {
       if (setting.provider !== 'openai') throw new BifrostProviderSyncError();
+      if (isMockLlmBaseUrl(setting.baseUrl)) {
+        return {
+          network_config: {
+            base_url: setting.baseUrl,
+            allow_private_network: true,
+          },
+        };
+      }
+
       return setting.baseUrl !== DEFAULT_OPENAI_BASE_URL
         ? { network_config: { base_url: setting.baseUrl } }
         : {};
@@ -101,6 +110,15 @@ export function buildOpenAiProviderConfigs(models: LlmModel[]): BifrostProviderC
       });
     },
   });
+}
+
+function isMockLlmBaseUrl(baseUrl: string): boolean {
+  try {
+    const url = new URL(baseUrl);
+    return url.port === '6556';
+  } catch {
+    return false;
+  }
 }
 
 export function buildIonosProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] {
