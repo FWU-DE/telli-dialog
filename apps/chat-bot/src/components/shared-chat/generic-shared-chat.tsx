@@ -342,7 +342,7 @@ export default function GenericSharedChat({
               <InitialChatContentDisplay
                 title={entity.name}
                 description={entity.description}
-                excerciseDescription={enableFloatingText ? exerciseDescription : undefined}
+                exerciseDescription={enableFloatingText ? exerciseDescription : undefined}
                 imageSource={avatarPictureUrl}
                 setDialogStarted={
                   dialogStartMode === 'explicit' ? setExplicitDialogStarted : undefined

@@ -68,7 +68,7 @@
     "katex": "0.17.0",
     "linkup-sdk": "3.2.7",
     "markdown-it": "14.3.0",
-    "nanoid": "5.1.16",
+    "nanoid": "6.0.0",
     "next": "16.2.11",
     "next-auth": "5.0.0-beta.32",
     "next-axiom": "1.10.0",

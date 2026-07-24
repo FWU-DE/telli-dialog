@@ -163,7 +163,7 @@ export function buildIonosProviderConfigs(models: LlmModel[]): BifrostProviderCo
 export function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderConfig[] {
   return buildSingleKeyProviderConfigs({
     provider: 'vertex',
-    models,
+    models: models.filter(hasVertexAuthCredentials),
     getGroupKey: (setting) => {
       if (setting.provider !== 'google') return undefined;
       const authCredentials = stringifyAuthCredentials(setting.authCredentials);
@@ -195,4 +195,12 @@ export function buildVertexProviderConfigs(models: LlmModel[]): BifrostProviderC
       });
     },
   });
+}
+
+function hasVertexAuthCredentials(model: LlmModel): boolean {
+  return (
+    model.setting.provider !== 'google' ||
+    (model.setting.authCredentials !== undefined &&
+      stringifyAuthCredentials(model.setting.authCredentials).trim() !== '')
+  );
 }

@@ -94,7 +94,7 @@ export default function LearningScenarioSharedChat({
       dialogStartMode="explicit"
       enableFloatingText
       exerciseDescription={sharedSchoolChat.studentExercise}
-      exerciseTitle={t('excercise-title')}
+      exerciseTitle={t('exercise-title')}
       uploadFileFn={uploadSharedLearningScenarioFile}
       getSignedUrlFn={getSignedUrlForSharedLearningScenarioFile}
     />

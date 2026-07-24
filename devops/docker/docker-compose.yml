@@ -57,7 +57,7 @@ services:
 
   # Valkey (Redis-compatible) for session storage
   valkey:
-    image: ghcr.io/valkey-io/valkey:9.1.0-alpine
+    image: ghcr.io/valkey-io/valkey:9.1.1-alpine
     restart: unless-stopped
     volumes:
       - valkey_data:/data
@@ -147,7 +147,7 @@ services:
       start_period: 30s
 
   bifrost:
-    image: maximhq/bifrost:v1.6.4
+    image: maximhq/bifrost:v1.6.5
     restart: unless-stopped
     environment:
       APP_HOST: 0.0.0.0
