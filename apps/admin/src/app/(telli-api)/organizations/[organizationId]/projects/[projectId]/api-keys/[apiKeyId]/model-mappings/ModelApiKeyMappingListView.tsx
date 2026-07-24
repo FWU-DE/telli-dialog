@@ -27,7 +27,7 @@ import {
   saveModelMappingsAction,
 } from './actions';
 import { LargeLanguageModel } from '@/types/large-language-model';
-import { isBifrostProviderSyncError } from '@ais-chat/api-database/bifrost-provider-sync';
+import { isBifrostProviderSyncError } from '@ais-chat/api-database/bifrost-provider-sync/error';
 import { ModelApiKeyMapping } from '@/types/model-mappings';
 
 export type ModelApiKeyMappingListViewProps = {
