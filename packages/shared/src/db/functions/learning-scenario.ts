@@ -15,7 +15,7 @@ import { db } from '..';
 import { SHARE_EXTENSION_WINDOW_MS } from '@shared/sharing/const';
 import {
   fileTable,
-  filterGroup,
+  FilterGroup,
   LearningScenarioFileMapping,
   LearningScenarioOptionalShareDataModel,
   LearningScenarioSelectModel,
@@ -646,7 +646,7 @@ export async function dbUpdateLearningScenarioFilterGroup({
   filterGroup: updatedFilterGroup,
 }: {
   learningScenarioId: string;
-  filterGroup: filterGroup;
+  filterGroup: FilterGroup;
 }): Promise<void> {
   await db
     .update(learningScenarioTable)

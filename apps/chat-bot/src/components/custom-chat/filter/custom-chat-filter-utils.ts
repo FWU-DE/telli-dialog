@@ -1,5 +1,5 @@
 import {
-  type filterGroup,
+  type FilterGroup,
   type SchoolType,
   type GradeRange,
   type Subject,
@@ -105,7 +105,7 @@ export function extractFilterValues(entity: EntityWithFilterValues): FilterValue
   };
 }
 
-export function toFilterGroup(values: FilterValues): filterGroup {
+export function toFilterGroup(values: FilterValues): FilterGroup {
   return {
     school_types: unique(values.schoolTypes),
     grade_ranges: unique(values.gradeRanges),

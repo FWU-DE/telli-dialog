@@ -9,7 +9,7 @@ import { getMaybeUser, getUserAndContextByUserId } from '@/auth/utils';
 import { getModelAndApiKeyWithResult, getStrongAuxiliaryModel } from '@/app/api/utils/utils';
 import { constructCharacterLanguageSystemPrompt } from '@/app/api/character/system-prompt';
 import { constructLearningScenarioLanguageSystemPrompt } from '@/app/api/learning-scenario/system-prompt';
-import type { LlmModelSelectModel, filterGroup } from '@shared/db/schema';
+import type { LlmModelSelectModel, FilterGroup } from '@shared/db/schema';
 import {
   DEFAULT_LOCALE,
   getLocaleForFilterLanguage,
@@ -205,7 +205,7 @@ async function persistDetectedLanguage({
   customChatId: string;
   ownerUserId: string;
   locale: string;
-  existingFilterGroup: filterGroup;
+  existingFilterGroup: FilterGroup;
 }): Promise<void> {
   const triggeringUser = await getMaybeUser();
   if (triggeringUser?.id !== ownerUserId) {
@@ -217,13 +217,13 @@ async function persistDetectedLanguage({
   }
 
   const currentLanguages = existingFilterGroup.languages;
-  if (currentLanguages.includes(detectedLanguage)) {
+  if (currentLanguages?.includes(detectedLanguage)) {
     return;
   }
 
-  const updatedFilterGroup: filterGroup = {
+  const updatedFilterGroup: FilterGroup = {
     ...existingFilterGroup,
-    languages: [...currentLanguages, detectedLanguage],
+    languages: [...(currentLanguages ?? []), detectedLanguage],
   };
 
   try {
@@ -255,7 +255,7 @@ function normalizeLocale(text: string): string {
 
 // We need to ensure we always persist a complete filter group shape, since the field might be empty for older customChats
 // this way downstream code can safely spread/access fields without undefined checks.
-function createEmptyFilterGroup(): filterGroup {
+function createEmptyFilterGroup(): FilterGroup {
   return {
     school_types: [],
     grade_ranges: [],
