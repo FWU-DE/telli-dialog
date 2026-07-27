@@ -6,6 +6,13 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
 import type { WebSearchResult } from '@shared/db/schema';
 import { Button } from '@ui/components/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@ui/components/dialog';
 
 function getSourceTitle(source: WebSearchResult) {
   return source.name.trim() || getSourceDomain(source);
@@ -142,5 +149,52 @@ export function WebSearchSourcesButton({
     >
       <GlobeSimpleIcon className="size-4" />
     </Button>
+  );
+}
+
+export function WebSearchSourcesDialog({ sources }: { sources: WebSearchResult[] }) {
+  const tWebsearch = useTranslations('websearch');
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          title={tWebsearch('results.show')}
+          aria-label={tWebsearch('results.show')}
+          variant="ghost"
+          size="icon"
+        >
+          <GlobeSimpleIcon className="size-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent showCloseButton>
+        <DialogHeader>
+          <DialogTitle>{tWebsearch('results.title')}</DialogTitle>
+        </DialogHeader>
+        <div className="overflow-y-auto">
+          <div className="flex flex-col">
+            {sources.map((source, index) => {
+              const title = getSourceTitle(source);
+              const domain = getSourceDomain(source);
+
+              return (
+                <a
+                  key={`${source.url}-${index}`}
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-auto w-full items-center gap-4 rounded-md px-3 py-2 text-left hover:bg-secondary/20"
+                  title={title}
+                  aria-label={tWebsearch('results.open-source', { source: title })}
+                >
+                  <span className="min-w-0 flex-1 truncate text-sm text-foreground">{title}</span>
+                  <span className="shrink-0 text-xs text-foreground/70">{domain}</span>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
