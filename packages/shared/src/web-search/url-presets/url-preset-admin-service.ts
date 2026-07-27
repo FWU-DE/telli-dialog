@@ -5,7 +5,10 @@ import { UrlPreset, UrlPresetInsert, UrlPresetUpdate } from './types';
 import { NotFoundError } from '@shared/error';
 
 export async function getAllUrlPresets(): Promise<UrlPreset[]> {
-  const presets = await db.select().from(urlPresetTable).orderBy(urlPresetTable.orderNumber);
+  const presets = await db
+    .select()
+    .from(urlPresetTable)
+    .orderBy(urlPresetTable.orderNumber, urlPresetTable.name);
   return presets;
 }
 
@@ -25,14 +28,14 @@ export async function insertUrlPreset(data: UrlPresetInsert): Promise<UrlPreset>
   return newPreset;
 }
 
-export async function updateUrlPreset(data: UrlPresetUpdate): Promise<UrlPreset> {
+export async function updateUrlPreset(id: string, data: UrlPresetUpdate): Promise<UrlPreset> {
   const [updatedPreset] = await db
     .update(urlPresetTable)
     .set(data)
-    .where(eq(urlPresetTable.id, data.id))
+    .where(eq(urlPresetTable.id, id))
     .returning();
   if (!updatedPreset) {
-    throw new Error('Failed to update UrlPreset');
+    throw new NotFoundError(`Failed to update UrlPreset with id ${id}`);
   }
   return updatedPreset;
 }
