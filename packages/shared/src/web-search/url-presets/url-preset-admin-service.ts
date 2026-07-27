@@ -1,0 +1,45 @@
+import { eq } from 'drizzle-orm';
+import { db } from '@shared/db';
+import { urlPresetTable } from '@shared/db/schema';
+import { UrlPreset, UrlPresetInsert, UrlPresetUpdate } from './types';
+import { NotFoundError } from '@shared/error';
+
+export async function getAllUrlPresets(): Promise<UrlPreset[]> {
+  const presets = await db.select().from(urlPresetTable).orderBy(urlPresetTable.orderNumber);
+  return presets;
+}
+
+export async function getUrlPresetById(id: string): Promise<UrlPreset> {
+  const [preset] = await db.select().from(urlPresetTable).where(eq(urlPresetTable.id, id));
+  if (!preset) {
+    throw new NotFoundError(`UrlPreset with id ${id} not found`);
+  }
+  return preset;
+}
+
+export async function insertUrlPreset(data: UrlPresetInsert): Promise<UrlPreset> {
+  const [newPreset] = await db.insert(urlPresetTable).values(data).returning();
+  if (!newPreset) {
+    throw new Error('Failed to insert UrlPreset');
+  }
+  return newPreset;
+}
+
+export async function updateUrlPreset(data: UrlPresetUpdate): Promise<UrlPreset> {
+  const [updatedPreset] = await db
+    .update(urlPresetTable)
+    .set(data)
+    .where(eq(urlPresetTable.id, data.id))
+    .returning();
+  if (!updatedPreset) {
+    throw new Error('Failed to update UrlPreset');
+  }
+  return updatedPreset;
+}
+
+export async function deleteUrlPreset(id: string): Promise<void> {
+  const result = await db.delete(urlPresetTable).where(eq(urlPresetTable.id, id)).execute();
+  if (result.rowCount !== 1) {
+    throw new NotFoundError(`UrlPreset with id ${id} not found`);
+  }
+}
