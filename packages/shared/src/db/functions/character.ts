@@ -23,7 +23,7 @@ import {
   CharacterWithShareDataModel,
   conversationTable,
   fileTable,
-  filterGroup,
+  FilterGroup,
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
   sharedCharacterConversation,
@@ -705,7 +705,7 @@ export async function dbUpdateCharacterFilterGroup({
   filterGroup: updatedFilterGroup,
 }: {
   characterId: string;
-  filterGroup: filterGroup;
+  filterGroup: FilterGroup;
 }): Promise<void> {
   await db
     .update(characterTable)

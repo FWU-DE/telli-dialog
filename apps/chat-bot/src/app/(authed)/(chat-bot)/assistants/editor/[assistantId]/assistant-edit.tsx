@@ -198,14 +198,7 @@ export function AssistantEdit({
           name: data.name.trim(),
           description: data.description,
           instructions: data.instructions,
-          filterGroup: toFilterGroup({
-            schoolTypes: data.schoolTypes,
-            gradeRanges: data.gradeRanges,
-            subjects: data.subjects,
-            categories: data.categories,
-            federalStates: data.federalStates,
-            languages: data.languages,
-          }),
+          filterGroup: toFilterGroup(data),
           hasLinkAccess: data.hasLinkAccess,
           isWebSearchEnabled: data.isWebSearchEnabled,
           promptSuggestions: data.promptSuggestions

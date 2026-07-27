@@ -87,12 +87,12 @@ beforeEach(() => {
   mocks.dbGetCharacterByIdMock.mockResolvedValue({
     id: 'character-1',
     userId: 'teacher-1',
-    filterGroup: undefined,
+    filterGroup: {},
   });
   mocks.dbGetLearningScenarioByIdMock.mockResolvedValue({
     id: 'scenario-1',
     userId: 'teacher-1',
-    filterGroup: undefined,
+    filterGroup: {},
   });
   mocks.getMaybeUserMock.mockResolvedValue({ id: 'teacher-1' });
   mocks.getUserAndContextByUserIdMock.mockResolvedValue(teacherUserAndContext);
@@ -192,11 +192,6 @@ describe('resolveSharingLocale', () => {
     expect(mocks.dbUpdateCharacterFilterGroupMock).toHaveBeenCalledWith({
       characterId: 'character-1',
       filterGroup: {
-        school_types: [],
-        grade_ranges: [],
-        subjects: [],
-        categories: [],
-        federal_states: [],
         languages: ['english'],
       },
     });
@@ -272,11 +267,6 @@ describe('resolveSharingLocale', () => {
     expect(mocks.dbUpdateLearningScenarioFilterGroupMock).toHaveBeenCalledWith({
       learningScenarioId: 'scenario-1',
       filterGroup: {
-        school_types: [],
-        grade_ranges: [],
-        subjects: [],
-        categories: [],
-        federal_states: [],
         languages: ['italian'],
       },
     });
@@ -303,11 +293,6 @@ describe('resolveSharingLocale', () => {
     expect(mocks.dbUpdateLearningScenarioFilterGroupMock).toHaveBeenCalledWith({
       learningScenarioId: 'scenario-1',
       filterGroup: {
-        school_types: [],
-        grade_ranges: [],
-        subjects: [],
-        categories: [],
-        federal_states: [],
         languages: ['german'],
       },
     });
@@ -325,7 +310,7 @@ describe('resolveSharingLocale', () => {
       character: {
         id: 'character-1',
         userId: 'teacher-1',
-        filterGroup: undefined,
+        filterGroup: {},
       },
     });
     expect(mocks.generateTextWithBillingMock).toHaveBeenCalledWith(
