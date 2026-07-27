@@ -171,7 +171,7 @@ export function WebSearchSourcesDialog({ sources }: { sources: WebSearchResult[]
         <DialogHeader>
           <DialogTitle>{tWebsearch('results.title')}</DialogTitle>
         </DialogHeader>
-        <div className="overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="flex flex-col">
             {sources.map((source, index) => {
               const title = getSourceTitle(source);
