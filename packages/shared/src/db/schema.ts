@@ -385,6 +385,8 @@ export const webSearchScopeSchema = z.enum(['all-web', 'included-domains']);
 export const webSearchScopeEnum = pgEnum('web_search_scope', webSearchScopeSchema.enum);
 export type WebSearchScope = z.infer<typeof webSearchScopeSchema>;
 
+export const webSearchIncludedDomainsSchema = z.array(z.httpUrl());
+
 export const suspensionRequestReasonSchema = z.enum([
   'copyright_violation',
   'false_or_outdated_information',
@@ -589,6 +591,7 @@ export const characterSelectSchema = createSelectSchema(characterTable)
     filterGroup: filterGroupSchema,
     ownerSchoolIds: z.array(z.string()),
     webSearchScope: webSearchScopeSchema,
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema,
   });
 export const characterInsertSchema = createInsertSchema(characterTable)
   .omit({
@@ -602,6 +605,7 @@ export const characterInsertSchema = createInsertSchema(characterTable)
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
     webSearchScope: webSearchScopeSchema.optional(),
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema.optional(),
   });
 export const characterUpdateSchema = createUpdateSchema(characterTable)
   .omit({
@@ -616,6 +620,7 @@ export const characterUpdateSchema = createUpdateSchema(characterTable)
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
     webSearchScope: webSearchScopeSchema.optional(),
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema.optional(),
   });
 
 export type CharacterSelectModel = z.infer<typeof characterSelectSchema>;
@@ -810,6 +815,7 @@ export const learningScenarioSelectSchema = createSelectSchema(learningScenarioT
     filterGroup: filterGroupSchema,
     ownerSchoolIds: z.array(z.string()),
     webSearchScope: webSearchScopeSchema,
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema,
   });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
   .omit({
@@ -822,6 +828,7 @@ export const learningScenarioInsertSchema = createInsertSchema(learningScenarioT
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
     webSearchScope: webSearchScopeSchema.optional(),
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema.optional(),
   });
 export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
   .omit({ userId: true, createdAt: true, updatedAt: true, suspended: true })
@@ -831,6 +838,7 @@ export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioT
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
     webSearchScope: webSearchScopeSchema.optional(),
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema.optional(),
   });
 
 export type LearningScenarioSelectModel = z.infer<typeof learningScenarioSelectSchema>;
@@ -1728,3 +1736,15 @@ export const voucherUpdateSchema = createUpdateSchema(VoucherTable)
 export type VoucherSelectModel = z.infer<typeof voucherSelectSchema>;
 export type VoucherInsertModel = z.infer<typeof voucherInsertSchema>;
 export type VoucherUpdateModel = z.infer<typeof voucherUpdateSchema>;
+
+/**** Url Presets ****/
+export const urlPresetTable = pgTable(
+  'url_preset',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: text('name').notNull(),
+    orderNumber: integer('order_number').notNull().default(0),
+    urls: text('urls').array().notNull(),
+  },
+  (table) => [unique().on(table.name)],
+);
