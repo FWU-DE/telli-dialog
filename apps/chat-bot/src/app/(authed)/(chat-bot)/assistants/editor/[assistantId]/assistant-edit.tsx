@@ -7,7 +7,16 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AssistantSelectModel, FileModel } from '@shared/db/schema';
+import {
+  AssistantSelectModel,
+  FileModel,
+  schoolTypesSchema,
+  gradeRangesSchema,
+  subjectsSchema,
+  categoriesSchema,
+  federalStatesSchema,
+  languagesSchema,
+} from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/card';
 import { FieldGroup } from '@ui/components/field';
@@ -39,7 +48,7 @@ import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-imag
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
-import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
 import { WebSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';
@@ -47,6 +56,16 @@ import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/cu
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
 import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
+import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
+import {
+  getAccessLevelFromShareForm,
+  getShareFormValues,
+} from '@/components/custom-chat/access-level-sharing';
+import FilterSelectSection from '@/components/custom-chat/filter/custom-chat-filter-select-section';
+import {
+  extractFilterValues,
+  toFilterGroup,
+} from '@/components/custom-chat/filter/custom-chat-filter-utils';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -83,7 +102,14 @@ function createAssistantFormValuesSchema(t: AssistantTranslator) {
     name: z.string().trim().min(1, t('name-required')).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
     description: z.string(),
     instructions: z.string(),
+    schoolTypes: z.array(schoolTypesSchema),
+    gradeRanges: z.array(gradeRangesSchema),
+    subjects: z.array(subjectsSchema),
+    categories: z.array(categoriesSchema),
+    federalStates: z.array(federalStatesSchema),
+    languages: z.array(languagesSchema),
     isSchoolShared: z.boolean(),
+    isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
     isWebSearchEnabled: z.boolean(),
     promptSuggestions: z
@@ -123,11 +149,18 @@ export function AssistantEdit({
     () => createAssistantFieldValidationConfig(t),
     [t],
   );
+  const filterValues = extractFilterValues(assistant);
   const initialValues: AssistantFormValues = {
     name: assistant.name,
     description: assistant.description ?? '',
     instructions: assistant.instructions ?? '',
-    isSchoolShared: assistant.accessLevel === 'school',
+    schoolTypes: filterValues.schoolTypes,
+    gradeRanges: filterValues.gradeRanges,
+    subjects: filterValues.subjects,
+    categories: filterValues.categories,
+    federalStates: filterValues.federalStates,
+    languages: filterValues.languages,
+    ...getShareFormValues(assistant.accessLevel),
     hasLinkAccess: assistant.hasLinkAccess,
     isWebSearchEnabled: assistant.isWebSearchEnabled,
     promptSuggestions:
@@ -141,6 +174,7 @@ export function AssistantEdit({
     trigger,
     getValues,
     reset,
+    setValue,
     formState: { isDirty },
   } = useForm<AssistantFormValues>({
     resolver: zodResolver(assistantFormValuesSchema),
@@ -164,6 +198,7 @@ export function AssistantEdit({
           name: data.name.trim(),
           description: data.description,
           instructions: data.instructions,
+          filterGroup: toFilterGroup(data),
           hasLinkAccess: data.hasLinkAccess,
           isWebSearchEnabled: data.isWebSearchEnabled,
           promptSuggestions: data.promptSuggestions
@@ -176,10 +211,18 @@ export function AssistantEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
+  const schoolTypes = useWatch({ control, name: 'schoolTypes' });
+  const gradeRanges = useWatch({ control, name: 'gradeRanges' });
+  const subjects = useWatch({ control, name: 'subjects' });
+  const categories = useWatch({ control, name: 'categories' });
+  const federalStates = useWatch({ control, name: 'federalStates' });
+  const languages = useWatch({ control, name: 'languages' });
   const savedAccessLevelRef = useRef(assistant.accessLevel);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
+  const isCommunityShared = useWatch({ control, name: 'isCommunityShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
-  const showShareInfo = isSchoolShared || hasLinkAccess;
+  const showShareInfo =
+    (isSchoolShared || isCommunityShared || hasLinkAccess) && !assistant.suspended;
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -267,8 +310,13 @@ export function AssistantEdit({
   }
 
   const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
-    if (name === 'isSchoolShared') {
-      const newAccessLevel = checked ? 'school' : 'private';
+    if (name === 'isSchoolShared' || name === 'isCommunityShared') {
+      const nextShareValues = {
+        isSchoolShared: name === 'isSchoolShared' ? checked : getValues('isSchoolShared'),
+        isCommunityShared: name === 'isCommunityShared' ? checked : getValues('isCommunityShared'),
+      };
+
+      const newAccessLevel = getAccessLevelFromShareForm(nextShareValues);
 
       if (newAccessLevel !== savedAccessLevelRef.current) {
         const result = await updateAssistantAccessLevelAction({
@@ -277,6 +325,9 @@ export function AssistantEdit({
         });
 
         if (!result.success) {
+          const savedShareValues = getShareFormValues(savedAccessLevelRef.current);
+          setValue('isSchoolShared', savedShareValues.isSchoolShared);
+          setValue('isCommunityShared', savedShareValues.isCommunityShared);
           toast.error(t('toasts.edit-toast-error'));
           return;
         }
@@ -291,7 +342,7 @@ export function AssistantEdit({
   const assistantActions = (
     <CustomChatActions>
       <CustomChatActionUse onClick={handleUseChat} />
-      <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
+      {!assistant.suspended && <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />}
       <CustomChatActionDelete
         onClick={handleDeleteAssistant}
         modalTitle={t('delete-modal-title')}
@@ -327,6 +378,7 @@ export function AssistantEdit({
             linkText={t('sharing-settings')}
           />
         )}
+        {assistant.suspended && <CustomChatSuspensionError info={t('suspension-error')} />}
         <CustomChatImageUpload
           avatarPictureUrl={avatarPictureUrl}
           onUploadPicture={handleUploadPicture}
@@ -410,9 +462,45 @@ export function AssistantEdit({
           <CustomShareSection
             control={control}
             schoolSharingName="isSchoolShared"
+            communitySharingName="isCommunityShared"
             linkSharingName="hasLinkAccess"
             linkToShare={`/assistants/${assistant.id}`}
             onShareChange={handleSharingChange}
+            suspended={assistant.suspended}
+          />
+          <FilterSelectSection
+            values={{
+              schoolTypes,
+              gradeRanges,
+              subjects,
+              categories,
+              federalStates,
+              languages,
+            }}
+            onSchoolTypesChange={(values) => {
+              setValue('schoolTypes', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onGradeRangesChange={(values) => {
+              setValue('gradeRanges', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onSubjectsChange={(values) => {
+              setValue('subjects', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onCategoriesChange={(values) => {
+              setValue('categories', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onFederalStatesChange={(values) => {
+              setValue('federalStates', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onLanguagesChange={(values) => {
+              setValue('languages', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
           />
         </form>
       </CustomChatLayoutContainer>

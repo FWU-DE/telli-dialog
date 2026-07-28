@@ -61,7 +61,8 @@ export function checkProductAccess({
               <a
                 href={federalState.trainingLink}
                 target="_blank"
-                className="text-vidis-hover-purple underline"
+                rel="noopener noreferrer"
+                className="underline"
               >
                 {federalState.trainingLink}
               </a>

@@ -36,6 +36,8 @@ export const ROUTES = {
     vouchers: (federalStateId: string) => `/ais-chat-app/federal-states/${federalStateId}/vouchers`,
     voucherNew: (federalStateId: string) =>
       `/ais-chat-app/federal-states/${federalStateId}/vouchers/new`,
-    modelRefresh: '/ais-chat-app/model-refresh',
+    suspensions: '/ais-chat-app/suspensions',
+    suspensionDetails: (entityType: string, entityId: string) =>
+      `/ais-chat-app/suspensions/${entityType}/${entityId}`,
   },
 };

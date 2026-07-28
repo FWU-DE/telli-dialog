@@ -1,5 +1,5 @@
 import { db } from '@shared/db';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 import { sharedCharacterConversation, sharedLearningScenarioTable } from '@shared/db/schema';
 import { NotFoundError } from '@shared/error';
 
@@ -33,6 +33,7 @@ async function tryGetLearningScenarioIdByInviteCode({ inviteCode }: { inviteCode
       and(
         eq(sharedLearningScenarioTable.inviteCode, inviteCode),
         isNull(sharedLearningScenarioTable.manuallyStoppedAt),
+        sql`${sharedLearningScenarioTable.expiredAt} >= now()`,
       ),
     );
   return maybeSharedChat?.learningScenarioId;
@@ -46,6 +47,7 @@ async function tryGetCharacterIdByInviteCode({ inviteCode }: { inviteCode: strin
       and(
         eq(sharedCharacterConversation.inviteCode, inviteCode),
         isNull(sharedCharacterConversation.manuallyStoppedAt),
+        sql`${sharedCharacterConversation.expiredAt} >= now()`,
       ),
     );
   return maybeCharacterChat?.characterId;

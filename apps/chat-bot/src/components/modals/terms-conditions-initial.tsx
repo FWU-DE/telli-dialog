@@ -2,19 +2,20 @@
 
 import React, { startTransition, useEffect, useRef, useState } from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { DisclaimerConfig } from './const';
 import { useTranslations } from 'next-intl';
-import Checkbox from '../common/checkbox';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 import MarkdownDisplay from '../chat/markdown-display';
 import { usePortalContainer } from '@ui/components/portal-container';
 import { useSession } from 'next-auth/react';
+import { Button } from '@ui/components/button';
+import type { ServerActionResult } from '@shared/actions/server-action-result';
+import { Checkbox } from '@ui/components/checkbox';
 
 type TermsConditionsModalProps = {
-  handleAccept(): Promise<boolean>;
+  handleAccept(): Promise<ServerActionResult<boolean>>;
   disclaimerConfig: DisclaimerConfig;
 } & React.ComponentProps<'button'>;
 
@@ -75,33 +76,32 @@ export default function TermsConditionsModal({
   };
 
   const acceptAndClose = async () => {
-    await session.update(await handleAccept());
+    const result = await handleAccept();
+    if (result.success) {
+      await session.update(result.value);
+    }
     router.refresh();
   };
 
   const navigationBar = (
     <div className="gap-6 flex flex-row">
       {pageNumber >= 1 ? (
-        <button onClick={prevPage} className={buttonSecondaryClassName}>
+        <Button onClick={prevPage} variant="outline" size="xl">
           {tCommon('back')}
-        </button>
+        </Button>
       ) : null}
       {pageNumber === disclaimerConfig.pageContents.length - 1 ? (
-        <button
+        <Button
           onClick={acceptAndClose}
-          className={buttonPrimaryClassName}
+          size="xl"
           disabled={!checked && disclaimerConfig.showCheckBox}
         >
           {tCommon('accept')}
-        </button>
+        </Button>
       ) : (
-        <button
-          onClick={nextPage}
-          className={buttonPrimaryClassName}
-          disabled={pageNumber > 0 && !scrollFinished}
-        >
+        <Button onClick={nextPage} size="xl" disabled={pageNumber > 0 && !scrollFinished}>
           {tCommon('continue')}
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -143,8 +143,12 @@ export default function TermsConditionsModal({
             )}
             {pageNumber === contents.length - 1 && disclaimerConfig.showCheckBox && (
               <div className="flex items-center gap-3 justify-center">
-                <Checkbox onCheckedChange={setChecked} checked={checked} />
-                <div className="flex-1 disclaimer">
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={(checkedState) => setChecked(checkedState === true)}
+                  aria-labelledby="terms-conditions-accept-label"
+                />
+                <div id="terms-conditions-accept-label" className="flex-1 disclaimer">
                   <MarkdownDisplay>{disclaimerConfig.acceptLabel ?? ''}</MarkdownDisplay>
                 </div>
               </div>

@@ -1,13 +1,72 @@
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, gt, isNull } from 'drizzle-orm';
 import { db } from '..';
 import { conversationMessageTable, conversationTable } from '../schema';
 import type { ConversationMessageModel, InsertConversationMessageModel } from '../types';
 import { isNotNull } from '../../utils/guard';
+import { logError } from '../../logging/logging';
+
+function logInsertConflicts({
+  chatContents,
+  insertedRows,
+}: {
+  chatContents: InsertConversationMessageModel[];
+  insertedRows: Array<{ id: string; conversationId: string; orderNumber: number }>;
+}) {
+  const totalSkipped = chatContents.length - insertedRows.length;
+
+  if (totalSkipped === 0) {
+    return;
+  }
+
+  const insertedIds = new Set(insertedRows.map((row) => row.id));
+  const insertedMessageKeys = new Set(
+    insertedRows.map((row) => `${row.conversationId}:${row.orderNumber}`),
+  );
+
+  const skippedMessages = chatContents
+    .filter((msg) => {
+      if (msg.id) {
+        return !insertedIds.has(msg.id);
+      }
+      return !insertedMessageKeys.has(`${msg.conversationId}:${msg.orderNumber}`);
+    })
+    .map((chatContent) => ({
+      conversationId: chatContent.conversationId,
+      messageId: chatContent.id,
+      orderNumber: chatContent.orderNumber,
+      role: chatContent.role,
+      userId: chatContent.userId,
+    }));
+
+  if (chatContents.length === 1) {
+    const skippedMessage = skippedMessages[0];
+
+    if (skippedMessage) {
+      logError('Skipped conversation message insert due to conflict.', undefined, skippedMessage);
+      return;
+    }
+
+    logError('Skipped conversation message insert due to conflict.', undefined, { totalSkipped });
+    return;
+  }
+
+  type LogDataType = Record<string, unknown>;
+  const logData: LogDataType = {
+    totalSkipped,
+  };
+
+  if (skippedMessages.length > 0) {
+    logData.skippedMessages = skippedMessages;
+  }
+
+  logError('Skipped conversation message batch inserts due to conflict.', undefined, logData);
+}
 
 export async function dbGetOrCreateConversation({
   conversationId,
   userId,
   characterId,
+  learningScenarioId,
   assistantId,
   type,
   name,
@@ -15,6 +74,7 @@ export async function dbGetOrCreateConversation({
   conversationId: string;
   userId: string;
   characterId?: string;
+  learningScenarioId?: string;
   assistantId?: string;
   type?: 'chat' | 'image-generation';
   name?: string;
@@ -26,6 +86,7 @@ export async function dbGetOrCreateConversation({
         id: conversationId,
         userId,
         characterId: characterId ?? null,
+        learningScenarioId: learningScenarioId ?? null,
         assistantId: assistantId ?? null,
         type: type ?? 'chat',
         name: name ?? null,
@@ -58,17 +119,67 @@ export async function dbGetConversationMessages({
     )
     .orderBy(conversationMessageTable.orderNumber);
 
-  const cleanedMessages = getLatestMessages(
-    messages.map((message) => message.conversation_message),
-  );
+  return messages.map((message) => message.conversation_message);
+}
 
-  return cleanedMessages;
+export async function dbGetConversationMessageById({
+  userId,
+  conversationId,
+  messageId,
+}: {
+  userId: string;
+  conversationId: string;
+  messageId: string;
+}) {
+  const [message] = await db
+    .select({ message: conversationMessageTable })
+    .from(conversationMessageTable)
+    .innerJoin(conversationTable, eq(conversationMessageTable.conversationId, conversationTable.id))
+    .where(
+      and(
+        eq(conversationMessageTable.id, messageId),
+        eq(conversationMessageTable.conversationId, conversationId),
+        eq(conversationTable.userId, userId),
+        isNull(conversationMessageTable.deletedAt),
+      ),
+    );
+
+  return message?.message;
 }
 
 export async function dbInsertChatContent(chatContent: InsertConversationMessageModel) {
-  return (
-    await db.insert(conversationMessageTable).values(chatContent).onConflictDoNothing().returning()
-  )[0];
+  const [insertedMessage] = await db
+    .insert(conversationMessageTable)
+    .values(chatContent)
+    .onConflictDoNothing()
+    .returning();
+
+  if (!insertedMessage) {
+    logInsertConflicts({
+      chatContents: [chatContent],
+      insertedRows: [],
+    });
+  }
+
+  return insertedMessage;
+}
+
+export async function dbInsertChatContentBatch(chatContents: InsertConversationMessageModel[]) {
+  const insertedRows = await db
+    .insert(conversationMessageTable)
+    .values(chatContents)
+    .onConflictDoNothing()
+    .returning({
+      id: conversationMessageTable.id,
+      conversationId: conversationMessageTable.conversationId,
+      orderNumber: conversationMessageTable.orderNumber,
+    });
+
+  if (insertedRows.length !== chatContents.length) {
+    logInsertConflicts({ chatContents, insertedRows });
+  }
+
+  return insertedRows;
 }
 
 export async function dbGetConversations(userId: string) {
@@ -123,20 +234,23 @@ export async function dbDeleteConversation(conversationId: string) {
     .where(eq(conversationTable.id, conversationId));
 }
 
-function getLatestMessages(messages: ConversationMessageModel[]): ConversationMessageModel[] {
-  const messageMap = new Map<number, ConversationMessageModel>();
-
-  messages.forEach((message) => {
-    const existing = messageMap.get(message.orderNumber);
-    // If there's no message for this orderNumber yet,
-    // or if the current message is more recent, update the map.
-    if (!existing || existing.createdAt.getTime() < message.createdAt.getTime()) {
-      messageMap.set(message.orderNumber, message);
-    }
-  });
-
-  // Return the deduplicated messages as an array.
-  return Array.from(messageMap.values());
+export async function dbDeleteRegeneratedConversationMessage({
+  conversationId,
+  orderNumber,
+}: {
+  conversationId: string;
+  orderNumber: number;
+}) {
+  await db
+    .update(conversationMessageTable)
+    .set({ content: ' ', deletedAt: new Date() })
+    .where(
+      and(
+        eq(conversationMessageTable.conversationId, conversationId),
+        gt(conversationMessageTable.orderNumber, orderNumber),
+        isNull(conversationMessageTable.deletedAt),
+      ),
+    );
 }
 
 export async function dbGetConversationAndMessages({
@@ -174,6 +288,6 @@ export async function dbGetConversationAndMessages({
   const nonNullMessages = rows.map((r) => r.conversation_message).filter(isNotNull);
   return {
     conversation: firstRow.conversation,
-    messages: getLatestMessages(nonNullMessages),
+    messages: nonNullMessages,
   };
 }

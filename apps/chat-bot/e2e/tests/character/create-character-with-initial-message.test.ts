@@ -42,10 +42,10 @@ test('teacher can create character with initial message and verify it appears in
 
   // test share page
   await page.getByTestId('token-points-select').click();
-  await page.getByRole('option', { name: '50 %' }).click();
+  await page.getByTestId('token-points-option-50').click();
   await page.getByTestId('usage-time-select').click();
-  await page.getByRole('option', { name: '45 Minuten' }).click();
-  await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
+  await page.getByTestId('usage-time-option-45').click();
+  await page.getByTestId('start-share-button').click();
 
   await page.waitForURL('/characters/editor/**/share');
   const code = await page.getByTestId('join-code').textContent();

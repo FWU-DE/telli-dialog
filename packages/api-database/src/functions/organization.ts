@@ -1,5 +1,7 @@
 import { eq } from 'drizzle-orm';
-import { db, llmModelTable, OrganizationInsertModel, organizationTable, projectTable } from '..';
+import { db } from '../db';
+import { llmModelTable, organizationTable, projectTable } from '../schema';
+import type { OrganizationInsertModel } from '../schema';
 import { isNotNull } from '../api-utils';
 
 export async function dbGetAllOrganizations() {

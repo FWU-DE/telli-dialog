@@ -43,10 +43,10 @@ test('teacher can create shared chat with web sources, student can join chat and
     await stopSharingButton.click();
   }
   await page.getByTestId('token-points-select').click();
-  await page.getByRole('option', { name: '50 %' }).click();
+  await page.getByTestId('token-points-option-50').click();
   await page.getByTestId('usage-time-select').click();
-  await page.getByRole('option', { name: '30 Minuten' }).click();
-  await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
+  await page.getByTestId('usage-time-option-30').click();
+  await page.getByTestId('start-share-button').click();
 
   // enter chat directly as a teacher
   const schoolChatPagePromise = page.waitForEvent('popup');
@@ -55,7 +55,7 @@ test('teacher can create shared chat with web sources, student can join chat and
   await schoolChatPage.getByLabel('profileDropdown').waitFor();
 
   // send first message
-  const button = schoolChatPage.getByRole('button', { name: 'Dialog starten' });
+  const button = schoolChatPage.getByTestId('start-dialog-button');
   await button.waitFor();
   await button.click();
   await sendMessage(

@@ -1,4 +1,4 @@
-import { db } from '..';
+import { db } from '../db';
 import {
   ImageGenerationUsageInsertModel,
   imageGenerationUsageTrackingTable,
@@ -25,8 +25,8 @@ export async function dbCreateImageGenerationUsage(
   let costsInCent = 0;
 
   // Calculate costs based on model price metadata
-  if (modelData.priceMetadata.type === 'image') {
-    costsInCent = modelData.priceMetadata.pricePerImageInCent;
+  if (modelData.priceMetadata.type === 'image' && imageGenerationUsage.costsInCent) {
+    costsInCent = imageGenerationUsage.costsInCent;
   }
 
   const insertedImageGenerationUsage = (

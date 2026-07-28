@@ -23,7 +23,10 @@ export async function createNewAssistantAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(createNewAssistant)({
+  return runServerAction(
+    'createNewAssistantAction',
+    createNewAssistant,
+  )({
     templateId,
     user,
     duplicateAssistantName,
@@ -39,7 +42,14 @@ export async function deleteFileMappingAndEntityAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(deleteFileMappingAndEntity)({ assistantId, fileId, user });
+  return runServerAction(
+    'deleteFileMappingAndEntityAction',
+    deleteFileMappingAndEntity,
+  )({
+    assistantId,
+    fileId,
+    user,
+  });
 }
 
 export async function linkFileToAssistantAction({
@@ -51,7 +61,14 @@ export async function linkFileToAssistantAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(linkFileToAssistant)({ fileId, assistantId, user });
+  return runServerAction(
+    'linkFileToAssistantAction',
+    linkFileToAssistant,
+  )({
+    fileId,
+    assistantId,
+    user,
+  });
 }
 
 export async function updateAssistantAccessLevelAction({
@@ -63,7 +80,10 @@ export async function updateAssistantAccessLevelAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(updateAssistantAccessLevel)({
+  return runServerAction(
+    'updateAssistantAccessLevelAction',
+    updateAssistantAccessLevel,
+  )({
     assistantId,
     accessLevel,
     user,
@@ -76,7 +96,10 @@ export async function updateAssistantAction({
 }: Partial<AssistantInsertModel> & { assistantId: string }) {
   const { user } = await requireAuth();
 
-  return runServerAction(updateAssistant)({
+  return runServerAction(
+    'updateAssistantAction',
+    updateAssistant,
+  )({
     assistantId,
     user,
     assistantProps: assistant,
@@ -86,7 +109,7 @@ export async function updateAssistantAction({
 export async function deleteAssistantAction({ assistantId }: { assistantId: string }) {
   const { user } = await requireAuth();
 
-  return runServerAction(deleteAssistant)({ assistantId, user });
+  return runServerAction('deleteAssistantAction', deleteAssistant)({ assistantId, user });
 }
 
 export async function uploadAvatarPictureForAssistantAction({
@@ -98,7 +121,10 @@ export async function uploadAvatarPictureForAssistantAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(uploadAvatarPictureForAssistant)({
+  return runServerAction(
+    'uploadAvatarPictureForAssistantAction',
+    uploadAvatarPictureForAssistant,
+  )({
     assistantId,
     croppedImageBlob,
     user,
@@ -114,7 +140,10 @@ export async function downloadFileFromAssistantAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(downloadFileFromAssistant)({
+  return runServerAction(
+    'downloadFileFromAssistantAction',
+    downloadFileFromAssistant,
+  )({
     assistantId,
     fileId,
     user,

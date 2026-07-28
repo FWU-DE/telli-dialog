@@ -26,17 +26,23 @@
     "send-message-placeholder": "Wie kann ich Dir helfen?",
     "information-disclaimer": "AIS.chat kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",
     "character-limit-reached": "Zeichenlimit erreicht",
-    "chat-expired": "Der Chat ist abgelaufen.",
+    "chat-expired-error": "Der Chat ist abgelaufen.",
     "new-chat": "Neuer Chat",
     "stop": "Stop",
     "copy": "Kopieren",
     "edit": "Bearbeiten",
     "copy-clipboard": "In die Zwischenablage kopieren",
+    "copy-clipboard-success": "In die Zwischenablage kopiert",
+    "copy-clipboard-error": "Fehler beim Kopieren in die Zwischenablage",
+    "message-download": "Nachricht als Word-Datei herunterladen",
+    "message-download-error": "Der Download der Nachricht ist fehlgeschlagen.",
     "regenerate-message": "Antwort erneut generieren",
     "image-load-failed": "Bild konnte nicht geladen werden",
     "rate-limit-error": "Das bereitgestellte Tokenvolumen wurde aufgebraucht.",
+    "not-found-error": "Diese Ressource existiert nicht oder ist nicht freigegeben.",
     "generic-error": "Ein Fehler ist aufgetreten",
-    "retry-button": "Erneut versuchen"
+    "retry-button": "Erneut versuchen",
+    "please-select": "Bitte auswählen"
   },
   "errors": {
     "no-api-key": "Dem Bundesland wurde noch kein API-Schlüssel zugewiesen."
@@ -49,11 +55,40 @@
     "countdown-timer-label": "Verbleibende Freigabezeit",
     "school": "Schulintern",
     "school-tooltip": "Wird schulintern sicht- und kopierbar. \nZu beachten: Eine Lehrkraft kann mehreren Schulen zugehörig sein. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
+    "community": "Community",
+    "community-tooltip": "Wird als deutschlandweite Community-Vorlage für alle AIS.chat-User sicht- und kopierbar.",
     "link": "Via Link",
     "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit AIS.chat-Zugang. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "copy-link": "Link kopieren",
     "link-copied": "Link in die Zwischenablage kopiert",
-    "link-copied-error": "Link konnte nicht kopiert werden"
+    "link-copied-error": "Link konnte nicht kopiert werden",
+    "expired-modal-description": "Der Dialog ist abgelaufen",
+    "community-confirmation": {
+      "title": "Community-Freigabe bestätigen",
+      "description": "Damit alle geteilten Inhalte in der Community hilfreich, hochwertig und rechtlich unbedenklich bleiben, sind vor dem Teilen die folgenden Kriterien sorgfältig zu prüfen und per Checkbox zu bestätigen.",
+      "cancel": "Abbrechen",
+      "accept": "Akzeptieren",
+      "sections": {
+        "copyright": "Urheberrecht",
+        "personal-data": "Personenbezogene oder ‑beziehbare Daten",
+        "ethics": "Ethik und Persönlichkeitsrecht",
+        "content": "Inhalt",
+        "terms": "Nutzungsbedingungen"
+      },
+      "items": {
+        "copyright-material-reviewed": "Im Hintergrundwissen vorhandenes Material ist geprüft (Datei und Link).",
+        "copyright-no-protected-upload": "Die Verwendung der Vorlage erfordert nicht den Upload urheberrechtlich geschützten Materials (z.B. abfotografierter Schüleraufsatz).",
+        "copyright-image-reviewed": "Das Bild zur Visualisierung der Assistenten / Dialogpartner / Lernszenarien ist geprüft.",
+        "copyright-sources-provided": "Hintergrundwissen ist mit Quellenangaben versehen.",
+        "personal-no-data": "Die Vorlage enthält keine personenbezogenen oder ‑beziehbaren Daten.",
+        "personal-no-invitation": "Die Vorlage lädt nicht zur Eingabe personenbezogener oder ‑beziehbarer Daten ein.",
+        "ethics-no-real-person": "Die Vorlage ist nicht nach historischen oder realen Personen benannt.",
+        "ethics-no-discrimination": "Die Vorlage ist in ihrer Konzeption nicht diskriminierend.",
+        "content-no-extremism-violence-sexualized": "Die Vorlage enthält keine extremistischen, gewaltverherrlichenden oder sexualisierten Inhalte.",
+        "content-no-false-outdated": "Die Vorlage enthält keine falschen oder veralteten Inhalte (z.B. telli statt AIS.chat).",
+        "terms-accepted": "Ich habe die [Nutzungsbedingungen](https://ais-chat.schule/terms-of-use/) gelesen und akzeptiere sie."
+      }
+    }
   },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei AIS.chat!",
@@ -167,6 +202,7 @@
     "initial-message-max-length": "Die Einstiegsfrage darf maximal {maxLength} Zeichen lang sein.",
     "initial-message-tooltip": "Mit welcher Einstiegsfrage soll der Dialogpartner die Lernenden begrüßen?",
     "sharing-info": "Dieser Dialogpartner ist für andere freigegeben.",
+    "suspension-error": "Dieser Dialogpartner verstößt gegen die Nutzungsrichtlinien und ist für andere nicht mehr sichtbar.",
     "sharing-settings": "Freigabe-Einstellungen",
     "delete-modal-title": "Dialogpartner löschen?",
     "delete-modal-description": "Soll der Dialogpartner wirklich gelöscht werden?",
@@ -184,23 +220,13 @@
     "duplicate-name-format-string": "Duplikat von {sourceName}",
     "shared": {
       "title": "Dialogpartner im Unterricht einsetzen",
-      "description": "Wie viel des monatlichen Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
+      "description": "Wie viel des monatlichen Tokenvolumens darf durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
-      "button-start": "Dialogpartner teilen",
       "delete-chat-modal-title": "Aktuellen Chat löschen?",
       "delete-chat-modal-description": "Es wird ein neuer Chat begonnen. Der aktuelle Chat wird unwiderruflich gelöscht.",
-      "delete-chat-modal-confirm-button": "Löschen",
-      "expired-modal-description": "Der Dialog ist abgelaufen"
-    },
-    "share-page": {
-      "back-button": "Zum Dialogpartner",
-      "join": "Dem Dialog beitreten",
-      "go-to": "Gehe auf",
-      "enter-code": "Gib den Code ein",
-      "open-chat": "Chat öffnen",
-      "use-qr": "Oder nutze den QR-Code"
+      "delete-chat-modal-confirm-button": "Löschen"
     },
     "copy-modal": {
       "title": "Dialogpartner kopieren",
@@ -275,7 +301,8 @@
       "list": "Lernszenarien Übersicht",
       "view": "Lernszenario anzeigen",
       "edit": "Lernszenario bearbeiten",
-      "share": "Lernszenario teilen"
+      "share": "Lernszenario teilen",
+      "chat": "Lernszenario Chat"
     },
     "description": "Im Dialog mit der KI setzen sich Lernende mit einem konkreten Thema auseinander und erarbeiten sich so einen Lerngegenstand interaktiv und selbstständig. Die zeitlich begrenzten Chats können einfach einzeln oder gruppenweise mit Lernenden geteilt werden.",
     "back-button": "Lernszenarien",
@@ -296,6 +323,7 @@
     "student-exercise-max-length": "Der Arbeitsauftrag darf maximal {maxLength} Zeichen lang sein.",
     "configuration-heading": "Details",
     "sharing-info": "Dieses Lernszenario ist für andere freigegeben.",
+    "suspension-error": "Dieses Lernszenario verstößt gegen die Nutzungsrichtlinien und ist für andere nicht mehr sichtbar.",
     "sharing-settings": "Freigabe-Einstellungen",
     "delete-modal-title": "Lernszenario löschen?",
     "delete-modal-description": "Soll das Lernszenario wirklich gelöscht werden?",
@@ -345,36 +373,22 @@
       "delete-confirm": "Soll das Lernszenario wirklich gelöscht werden? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
     },
     "shared": {
-      "excersise-title": "Dein Arbeitsauftrag",
+      "exercise-title": "Dein Arbeitsauftrag",
       "title": "Lernszenario einsetzen",
-      "description": "Wie viel des monatlichen Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
+      "description": "Wie viel des monatlichen Tokenvolumens darf durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
-      "button-start": "Szenario starten",
-      "invalid-code-toast": "Der Code der eingegeben wurde, ist entweder abgelaufen oder ungültig.",
-      "join-code": "Mit Code beitreten",
-      "enter-chat": "Zum Dialog",
       "delete-chat-modal-title": "Aktuellen Chat löschen?",
       "delete-chat-modal-description": "Es wird ein neuer Chat begonnen. Der aktuelle Chat wird unwiderruflich gelöscht.",
-      "delete-chat-modal-confirm-button": "Löschen",
-      "expired-modal-description": "Der Dialog ist abgelaufen"
+      "delete-chat-modal-confirm-button": "Löschen"
     },
     "share-with-learners": {
       "title": "Mit Lernenden teilen",
-      "description": "<b>Wie viel des monatlichen Tokenvolumens</b> soll durch diesen Chat maximal verbraucht und <b>wie lange</b> darf er aktiv benutzt werden?",
+      "description": "<b>Wie viel des monatlichen Tokenvolumens</b> darf durch diesen Chat maximal verbraucht und <b>wie lange</b> darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
-      "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",
       "share": "Teilen"
-    },
-    "share-page": {
-      "back-button": "Zum Lernszenario",
-      "join": "Das Lernszenario beginnen",
-      "go-to": "Gehe auf",
-      "enter-code": "Gib den Code ein.",
-      "open-chat": "Chat öffnen",
-      "use-qr": "Scanne den QR-Code."
     },
     "toasts": {
       "create-toast-success": "Das Lernszenario wurde erfolgreich erstellt.",
@@ -429,7 +443,9 @@
     "copy-image-error": "Bild konnte nicht kopiert werden",
     "copy-prompt-success": "Prompt in die Zwischenablage kopiert",
     "copy-prompt-error": "Prompt konnte nicht kopiert werden",
+    "download-image-error": "Bild konnte nicht heruntergeladen werden",
     "copy-image-tooltip": "Bild kopieren",
+    "download-image-tooltip": "Bild herunterladen",
     "copy-prompt-tooltip": "Prompt kopieren",
     "assistant-hint": "Hilfe beim Prompt? Bildassistenten nutzen →",
     "assistant-title": "Bildassistent",
@@ -456,6 +472,12 @@
     }
   },
   "custom-chat": {
+    "shared": {
+      "join-code": "Mit Code beitreten",
+      "enter-chat": "Zum Dialog",
+      "start-chat": "Dialog starten",
+      "invalid-code-toast": "Der Code der eingegeben wurde, ist entweder abgelaufen oder ungültig."
+    },
     "chat": "Chatten",
     "duplicate": "Duplizieren",
     "delete": "Löschen",
@@ -483,9 +505,9 @@
       "tooltip": "Alle Änderungen werden automatisch gespeichert, sobald ein Eingabefeld verlassen wird."
     },
     "links": {
-      "empty-error": "Bitte gib eine URL ein.",
+      "empty-error": "Bitte eine URL eingeben.",
       "duplicate-error": "Diese URL wurde bereits hinzugefügt",
-      "invalid-error": "Bitte gib eine gültige URL ein.",
+      "invalid-error": "Bitte eine gültige URL eingeben.",
       "loading-error": "Die Webseite konnte nicht geladen werden.",
       "saving-error": "Der Link auf die Webseite konnte nicht gespeichert werden.",
       "delete-error": "Der Link auf die Webseite konnte nicht gelöscht werden.",
@@ -502,25 +524,72 @@
     },
     "share-with-learners": {
       "title": "Mit Lernenden teilen",
-      "description": "<b>Wie viel des monatlichen Tokenvolumens</b> soll durch diesen Chat maximal verbraucht und <b>wie lange</b> darf er aktiv benutzt werden?",
+      "description": "<b>Wie viel des monatlichen Tokenvolumens</b> darf durch diesen Chat maximal verbraucht und <b>wie lange</b> darf er aktiv benutzt werden?",
       "token-points": "Tokenvolumen",
-      "max-usage": "Maximale Nutzungszeit",
-      "button-start": "Jetzt bereitstellen",
+      "max-token-points": "Maximales Tokenvolumen",
+      "max-usage-time": "Maximale Nutzungszeit",
+      "share-not-possible": "Teilen nicht mehr möglich. Bitte die Einstellungen prüfen",
+      "token-points-left": "Verbleibendes Tokenvolumen für diesen Dialog",
+      "token-points-spent": "Aufgebraucht",
+      "usage-time-left": "Verbleibende Nutzungszeit",
+      "warning-token-points": "Bitte das Maximum des erlaubten Tokenvolumens neu setzen, damit die Lernenden ihre Chats fortsetzen können.",
+      "warning-usage-time": "Bitte Zeit verlängern, damit die Lernenden ihre Chats fortsetzen können.",
+      "warning-token-points-and-usage-time": "Bitte das Maximum des erlaubten Tokenvolumens neu setzen sowie Zeit verlängern, damit die Lernenden ihre Chats fortsetzen können.",
+      "session-will-be-closed": "Sitzung wird automatisch beendet in {time}",
+      "button-start": "Teilen",
       "button-stop": "Stoppen",
-      "share": "Teilen"
+      "button-close-session": "Sitzung beenden",
+      "button-to-share-settings": "Zu den Einstellungen",
+      "stop-share-modal-title": "Sitzung beenden?",
+      "stop-share-modal-description": "Der Chat kann dann nicht mehr verlängert und wiederaufgenommen werden. Die Lernenden können ihre Chats nicht mehr fortsetzen.\n\nDie Lernenden können sich ihren Chat jedoch noch als Word-Datei herunterladen, sofern ihr Browser-Tab nicht geschlossen wurde.",
+      "button-to-share-page": "Teilen",
+      "share": "Teilen",
+      "maximum": "Maximum",
+      "minutes-count": "{count, plural, =1 {# Minute} other {# Minuten}}",
+      "days-count": "{count, plural, =1 {# Tag} other {# Tage}}",
+      "button-additional-time": "Verlängern",
+      "button-adjust-token-limit": "Maximum anpassen",
+      "additional-time-modal-title": "Nutzungszeit verlängern",
+      "additional-time-modal-description": "Um wie viel soll die Nutzungszeit für diesen Chat verlängert werden?",
+      "additional-time-modal-aria": "Zusätzliche Nutzungszeit auswählen",
+      "adjust-token-limit-modal-title": "Tokenvolumen anpassen",
+      "adjust-token-limit-modal-description": "Wie viel des monatlichen Tokenvolumens darf für diesen Chat maximal verbraucht werden?",
+      "adjust-token-limit-modal-aria": "Neues maximales Tokenvolumen auswählen",
+      "button-save": "Speichern"
+    },
+    "share-page": {
+      "go-to": "Gehe auf",
+      "enter-code": "Gib den Code ein.",
+      "open-chat": "Chat öffnen",
+      "use-qr": "Scanne den QR-Code.",
+      "copy-link": "Startlink kopieren",
+      "learning-scenario": {
+        "sub-header": "Lernszenario",
+        "back-button": "Zum Lernszenario",
+        "join": "Das Lernszenario beginnen"
+      },
+      "character": {
+        "sub-header": "Dialogpartner",
+        "back-button": "Zum Dialogpartner",
+        "join": "Dem Dialog beitreten"
+      }
     },
     "toasts": {
       "share-toast-error": "Das Teilen konnte nicht aktiviert werden.",
       "share-toast-success": "Erfolgreich zum Teilen freigegeben!",
       "stop-share-toast-success": "Das Teilen wurde erfolgreich beendet.",
-      "stop-share-toast-error": "Das Teilen konnte nicht beendet werden."
+      "stop-share-toast-error": "Das Teilen konnte nicht beendet werden.",
+      "add-time-toast-success": "Die zusätzliche Nutzungszeit wurde erfolgreich hinzugefügt.",
+      "add-time-toast-error": "Die zusätzliche Nutzungszeit konnte nicht hinzugefügt werden.",
+      "adjust-token-limit-toast-success": "Das maximale Tokenvolumen wurde erfolgreich angepasst.",
+      "adjust-token-limit-toast-error": "Das maximale Tokenvolumen konnte nicht angepasst werden."
     },
     "files-and-links": {
       "heading": "Hintergrundwissen",
       "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Die KI bezieht dieses Wissen bei Bedarf in ihre Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: {supported_formats}",
       "files": "Dateien",
-      "links": "Webseiten",
-      "links-tooltip": "Wichtig: Bitte jeweils konkrete Webseiten angeben (z.B. http://wikipedia.org/wiki/Astronomie). Nur http://wikipedia.org ist nicht ausreichend.",
+      "links": "Links",
+      "links-tooltip": "Der Link wird einmalig zum Zeitpunkt des Hinzufügens gelesen.\nBitte jeweils konkrete Webseiten angeben (z.B. http://wikipedia.org/wiki/Astronomie). Nur http://wikipedia.org ist nicht ausreichend.",
       "file-delete-error": "Fehler beim Löschen der Datei"
     },
     "instructions-example": {
@@ -529,9 +598,20 @@
       "close": "Schließen"
     },
     "web-search": {
-      "heading": "Websuche",
+      "heading": "Websuche für Aktuelles",
       "heading-tooltip": "Falls aktiviert, sucht AIS.chat automatisch im Internet, sofern aktuelle Informationen nötig sind.",
-      "activated": "Aktiviert"
+      "activated": "Aktiviert",
+      "scope-aria-label": "Umfang der Websuche",
+      "scope-all-web": "Gesamtes Web",
+      "scope-included-domains": "Nur nachfolgende Webseiten",
+      "websites-placeholder": "https://www.beispielwebseite.de/",
+      "websites-add": "Webseite hinzufügen",
+      "websites-aria-input": "Webseite eingeben",
+      "websites-aria-delete": "Webseite {website} entfernen",
+      "websites-empty-error": "Bitte eine URL eingeben.",
+      "websites-duplicate-error": "Diese URL wurde bereits hinzugefügt",
+      "websites-invalid-error": "Bitte eine gültige URL eingeben.",
+      "websites-counter": "{count} / {max} Domains"
     }
   },
   "assistants": {
@@ -575,6 +655,7 @@
     "custom-assets-links": "Webseiten",
     "custom-assets-links-content": "Bei Webseiten wird nur die angegebene Webseite selbst als Hintergrundwissen genutzt. Unterseiten werden nicht berücksichtigt.",
     "sharing-info": "Dieser Assistent ist für andere freigegeben.",
+    "suspension-error": "Dieser Assistent verstößt gegen die Nutzungsrichtlinien und ist für andere nicht mehr sichtbar.",
     "sharing-settings": "Freigabe-Einstellungen",
     "delete-button": "Löschen",
     "delete-modal-title": "Assistent löschen?",
@@ -596,6 +677,9 @@
     "filter-mine": "Meine",
     "filter-official": "Offiziell",
     "filter-school": "Schulintern",
+    "filter-community": "Community",
+    "filter-label": "Filter",
+    "filter-reset": "Zurücksetzen",
     "filter-tabs-label": "Filteroptionen",
     "info-tooltip-label": "Informationen anzeigen",
     "badge-mine": "von mir",
@@ -604,7 +688,162 @@
     "sort-date-asc": "Älteste zuerst",
     "sort-name-asc": "Alphabetisch A-Z",
     "sort-name-desc": "Alphabetisch Z-A",
+    "hits-for": "{count} Treffer zu",
     "close": "Schließen",
     "chat": "Chatten"
+  },
+  "filter": {
+    "filter-label": "Filter",
+    "filter-attributes": "Filterattribute",
+    "filter-edit-tooltip": "Falls eine Freigabe aktiviert ist, besteht über die Filterattribute eine bessere Auffindbarkeit für andere Lehrkräfte. \n\nDie Filterattribute beeinflussen mit Ausnahme der Sprache nicht die Chat-Antworten.",
+    "filter-detail-tooltip": "Über die Filterattribute besteht eine bessere Auffindbarkeit. \nDie Filterattribute beeinflussen mit Ausnahme der Sprache nicht die Chat-Antworten.",
+    "language-tooltip": "Die Sprache, in der AIS.chat antwortet. Legt auch die Sprache der Schüleroberfläche beim Teilen fest.",
+    "school-filter": "Schulform",
+    "grade-filter": "Klassenstufe",
+    "subject-filter": "Fach",
+    "category-filter": "Kategorie",
+    "federal-state-filter": "Bundesland",
+    "language-filter": "Sprache",
+    "selected-count": "{count} ausgewählt",
+    "subject-subgroup-languages": "Sprachen",
+    "subject-subgroup-social-sciences": "Gesellschaftswissenschaften",
+    "subject-subgroup-arts": "Kunst, Musik, Sport",
+    "subject-subgroup-other": "Weitere",
+    "subject-subgroup-stem": "MINT",
+    "subject-subgroup-ethics": "Ethik, Philosophie, Religion"
+  },
+  "subjects": {
+    "german-as-second-language": "Deutsch als Zweitsprache",
+    "history": "Geschichte",
+    "geography": "Geographie",
+    "politics": "Politische Bildung",
+    "economics": "Wirtschaftskunde",
+    "biology": "Biologie",
+    "chemistry": "Chemie",
+    "mathematics": "Mathematik",
+    "informatics": "Informatik/ITB",
+    "physics": "Physik",
+    "social-studies": "Sachkunde",
+    "environmental-studies": "Umwelt",
+    "music": "Musik",
+    "art": "Kunst",
+    "sports": "Sport",
+    "ethics": "Ethik",
+    "philosophy": "Philosophie",
+    "religion": "Religion",
+    "business-studies": "Wirtschaft & Beruf",
+    "health": "Gesundheit",
+    "intercultural-education": "Interkulturelle Bildung",
+    "media-education": "Medienpädagogik",
+    "education": "Pädagogik",
+    "psychology": "Psychologie",
+    "addiction-prevention": "Sucht und Prävention",
+    "comprehensive-subjects": "Übergreifende Themen",
+    "traffic-education": "Verkehrserziehung",
+    "german": "Deutsch",
+    "english": "Englisch",
+    "turkish": "Türkisch",
+    "french": "Französisch",
+    "italian": "Italienisch",
+    "spanish": "Spanisch",
+    "greek": "Griechisch",
+    "latin": "Latein",
+    "russian": "Russisch"
+  },
+  "languages": {
+    "german": "Deutsch",
+    "english": "Englisch",
+    "arabic": "Arabisch",
+    "turkish": "Türkisch",
+    "french": "Französisch",
+    "italian": "Italienisch",
+    "spanish": "Spanisch",
+    "greek": "Griechisch",
+    "latin": "Latein",
+    "russian": "Russisch"
+  },
+  "federal-states": {
+    "bavaria": "Bayern",
+    "berlin": "Berlin",
+    "brandenburg": "Brandenburg",
+    "bremen": "Bremen",
+    "hamburg": "Hamburg",
+    "hesse": "Hessen",
+    "mecklenburg-western-pomerania": "Mecklenburg-Vorpommern",
+    "lower-saxony": "Niedersachsen",
+    "northrhine-westphalia": "Nordrhein-Westfalen",
+    "rhineland-palatinate": "Rheinland-Pfalz",
+    "saarland": "Saarland",
+    "saxony": "Sachsen",
+    "saxony-anhalt": "Sachsen-Anhalt",
+    "schleswig-holstein": "Schleswig-Holstein",
+    "thuringia": "Thüringen",
+    "baden-wuerttemberg": "Baden-Württemberg"
+  },
+  "category": {
+    "artificial-intelligence": "KI & Prompting",
+    "writing": "Schreiben & Texte",
+    "projects": "Projekte",
+    "coaching": "Lernbegleitung & Coaching",
+    "organisation": "Organisation",
+    "feedback": "Feedback & Beurteilung",
+    "conversation": "Sprachpraxis & Konversationen",
+    "historical-figures": "Historische Persönlichkeiten & Zeitzeugen",
+    "experts": "Fachliche Experten",
+    "lesson-planning": "Unterrichtsplanung",
+    "school-development": "Schulentwicklung",
+    "teaching-material": "Materialerstellung"
+  },
+  "grade-range": {
+    "range-1": "1-4",
+    "range-2": "5-7",
+    "range-3": "8-10",
+    "range-4": "11-13"
+  },
+  "school-types": {
+    "elementary-school": "Grundschule",
+    "special-needs-school": "Förderschule",
+    "middle-school": "Mittel- / Hauptschule",
+    "secondary-school": "Realschule",
+    "grammar-school": "Gymnasium",
+    "comprehensive-school": "Gesamtschule",
+    "vocational-school": "Berufsschule",
+    "technical-college": "Fachoberschule",
+    "other": "Andere"
+  },
+  "suspension": {
+    "create-dialog-description": "Dieser Dialog kann genutzt werden, um unangemessene Inhalte zu melden.",
+    "create-dialog-description-label": "Beschreibung",
+    "create-dialog-reason-label": "Grund",
+    "create-dialog-reason-placeholder": "Grund auswählen",
+    "create-dialog-cancel-button-text": "Abbrechen",
+    "create-dialog-reasons": {
+      "copyright-violation": "Urheberrechtsverletzung",
+      "false-or-outdated-information": "Falsche oder veraltete Informationen",
+      "insufficient-sources": "Unzureichende Quellenangaben",
+      "discrimination": "Diskriminierung",
+      "personal-data-usage-or-query": "Nutzung oder Abfrage persönlicher Daten",
+      "violence-or-extremist-content": "Gewalt / extremistische Inhalte",
+      "sexualized-content": "Sexualisierte Inhalte",
+      "other": "Sonstiges"
+    },
+    "assistant": {
+      "create-button-text": "Assistent melden",
+      "create-dialog-title": "Assistent melden",
+      "create-dialog-confirm-button-text": "Assistent melden",
+      "create-dialog-success-message": "Vielen Dank!\nDer Assistent wurde gemeldet."
+    },
+    "character": {
+      "create-button-text": "Dialogpartner melden",
+      "create-dialog-title": "Dialogpartner melden",
+      "create-dialog-confirm-button-text": "Dialogpartner melden",
+      "create-dialog-success-message": "Vielen Dank!\nDer Dialogpartner wurde gemeldet."
+    },
+    "learningScenario": {
+      "create-button-text": "Lernszenario melden",
+      "create-dialog-title": "Lernszenario melden",
+      "create-dialog-confirm-button-text": "Lernszenario melden",
+      "create-dialog-success-message": "Vielen Dank!\nDas Lernszenario wurde gemeldet."
+    }
   }
 }

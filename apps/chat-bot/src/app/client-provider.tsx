@@ -5,9 +5,9 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import { DesignConfiguration } from '@ui/types/design-configuration';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Session } from 'next-auth';
-import { SessionProvider } from 'next-auth/react';
 import { ThemeProvider as NextThemeProvider } from '@ui/components/theme-provider';
 import { TooltipProvider } from '@ui/components/tooltip';
+import ResilientSessionProvider from '@/auth/ResilientSessionProvider';
 import SessionClearer from '@/auth/SessionClearer';
 
 const queryClient = new QueryClient();
@@ -32,10 +32,10 @@ export default function ClientProvider({
             disableTransitionOnChange
           >
             <ThemeProvider designConfiguration={designConfiguration}>
-              <SessionProvider session={session} refetchInterval={60} refetchOnWindowFocus>
+              <ResilientSessionProvider session={session} refetchInterval={60} refetchOnWindowFocus>
                 <SessionClearer />
                 {children}
-              </SessionProvider>
+              </ResilientSessionProvider>
             </ThemeProvider>
           </NextThemeProvider>
         </ToastProvider>

@@ -3,6 +3,26 @@
 This folder contains test files and utils for running e2e and api tests.
 For e2e tests we use [playwright](https://playwright.dev/).
 
+## Mock LLM
+
+Most e2e tests use a local mock Azure/OpenAI Responses-compatible server (`devops/docker/mock-llm/`)
+as the default text model instead of calling real LLMs. The mock server streams deterministic SSE
+responses and can be controlled with `MOCK_LLM_COMMANDS` to trigger tool calls.
+
+Seeded e2e models are routed through Bifrost, including the mock models. Make sure Bifrost is
+running and `BIFROST_ADMIN_URL` is configured when seeding so the mock provider key is synced.
+For local Docker Compose runs, leave `LLM_MOCK_BASE_URL` unset or set it to `http://mock-llm:6556`;
+the URL must be reachable from the Bifrost container, not from the host.
+
+### Starting the mock LLM locally
+
+Use the local Docker Compose setup which includes the mock server.
+
+### External-services tests
+
+Tests in `tests/external-services/` are intentionally excluded from the mock and always run against real LLMs.
+They are skipped from the chromium/firefox test projects and must be run separately.
+
 ## Run e2e tests
 
 Make sure that there is a `.env.local` file that contains the configuration necessary for the tests to run.

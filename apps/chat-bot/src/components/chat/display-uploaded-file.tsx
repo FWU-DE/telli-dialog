@@ -2,21 +2,24 @@ import React from 'react';
 import Image from 'next/image';
 import { FileStatus } from './upload-file-button';
 
-import ParagraphWithConditionalTitle from './paragraph-with-conditional-title';
 import { getFileIconByFileExtension } from '../icons/file-upload-icons/file-icons-dict';
 import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
 import CrossIcon from '../icons/cross';
-import { getFileExtension, isImageFile } from '@/utils/files/generic';
+import { getFileNameAndFileExtension, isImageFile } from '@/utils/files/generic';
 import { getReadOnlySignedUrlAction } from '@/app/api/file-operations/actions';
 import { useQuery } from '@tanstack/react-query';
 import { LocalFileState } from './send-message-form';
+import { cn } from '@/utils/tailwind';
 
 type DisplayUploadedFileProps = {
   fileName: string;
   status: FileStatus;
   file?: LocalFileState;
   onDeattachFile?: () => void;
+  getSignedUrl?: (fileId: string) => Promise<string>;
+  height?: 'default' | 'large';
+  width?: 'default' | 'small';
 };
 
 export default function DisplayUploadedFile({
@@ -24,11 +27,14 @@ export default function DisplayUploadedFile({
   status,
   file,
   onDeattachFile,
+  getSignedUrl,
+  height = 'default',
+  width = 'default',
 }: DisplayUploadedFileProps) {
-  const file_extension = getFileExtension(fileName);
+  const [fileStem, fileExtension] = getFileNameAndFileExtension(fileName);
   const isImage = isImageFile(fileName);
 
-  const { Icon: FileIcon, fillColor: backgroundColor } = getFileIconByFileExtension(file_extension);
+  const { Icon: FileIcon, fillColor: backgroundColor } = getFileIconByFileExtension(fileExtension);
 
   const { data: imageUrl, isLoading } = useQuery({
     queryKey: file
@@ -38,12 +44,17 @@ export default function DisplayUploadedFile({
       if (!file) {
         throw new Error('File is undefined');
       }
+
+      if (getSignedUrl !== undefined && file.fileId !== undefined) {
+        return getSignedUrl(file.fileId);
+      }
+
       const signedUrl = await getReadOnlySignedUrlAction({
         key: `message_attachments/${file.fileId}`,
       });
       return signedUrl;
     },
-    enabled: status === 'processed', // Only fetch when status is processed
+    enabled: status === 'processed' && file?.fileId !== undefined, // Only fetch when status is processed and a fileId exists
     staleTime: 5 * 60 * 1000, // 5 minutes - signed URLs are typically valid for longer
     gcTime: 10 * 60 * 1000, // 10 minutes garbage collection time
   });
@@ -62,7 +73,7 @@ export default function DisplayUploadedFile({
             <DeattachFileIcon />
           </button>
         )}
-        <div className="relative flex items-center gap-2 h-[56px] w-[56px] overflow-hidden rounded-enterprise-sm">
+        <div className="relative flex items-center gap-2 h-14 w-14 overflow-hidden rounded-enterprise-sm">
           {status === 'processed' && !isLoading && !!imageUrl ? (
             <Image
               src={imageUrl}
@@ -74,7 +85,7 @@ export default function DisplayUploadedFile({
               unoptimized // Since we're using signed URLs from S3
             />
           ) : status === 'uploading' || isLoading ? (
-            <Spinner className="w-[56px] h-5" />
+            <Spinner className="w-14 h-5" />
           ) : (
             <CrossIcon className="w-5 h-5" />
           )}
@@ -83,23 +94,34 @@ export default function DisplayUploadedFile({
     );
   }
 
-  // TODO: this shoulld only be a button if the fileId is present and otherwise just a div
-
   return (
-    <div className="flex items-center justify-left gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px]">
-      <div className="absolute inset-0 opacity-5" style={{ backgroundColor }} />
+    <div
+      className={cn(
+        'flex w-fit min-w-0 max-w-full shrink-0 items-center justify-start gap-2 pl-4 pr-6 text-sm relative group',
+        height === 'large' ? 'py-0 h-14' : 'py-2',
+      )}
+    >
+      <div className="absolute inset-0 opacity-5 rounded-lg" style={{ backgroundColor }} />
       {onDeattachFile !== undefined && (
         <button onClick={onDeattachFile} className="absolute right-0 top-0 hover:bg-neutral-200">
           <DeattachFileIcon />
         </button>
       )}
-      <div className="relative flex items-center gap-2 h-[24px]">
-        {status === 'processed' && <FileIcon className="w-8 h-8" />}
-        {status === 'uploading' && <Spinner className="w-5 h-5" />}
-        {status === 'failed' && <CrossIcon className="w-5 h-5" />}
-        <div className="flex flex-col">
-          <ParagraphWithConditionalTitle content={fileName} />
-          <span className="text-left text-gray-100 font-normal text-[10px]">{`.${getFileExtension(fileName)}`}</span>
+      <div
+        className={cn(
+          'relative flex items-center gap-2 min-w-0',
+          height === 'large' ? 'h-14' : 'h-6',
+        )}
+      >
+        {status === 'processed' && (
+          <FileIcon className="h-5 w-5 shrink-0" color={backgroundColor} />
+        )}
+        {status === 'uploading' && <Spinner className="h-5 w-5 shrink-0" />}
+        {status === 'failed' && <CrossIcon className="h-5 w-5 shrink-0" />}
+        <div className={cn('flex min-w-0 flex-col', width === 'small' ? 'max-w-24' : 'max-w-80')}>
+          <p className="truncate overflow-hidden text-sm" title={fileName}>
+            {fileStem}
+          </p>
         </div>
       </div>
     </div>

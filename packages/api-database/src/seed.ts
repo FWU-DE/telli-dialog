@@ -3,6 +3,7 @@ import {
   type ApiKeyInsertModel,
   apiKeyTable,
   type LlmInsertModel,
+  type LlmModel,
   llmModelApiKeyMappingTable,
   llmModelTable,
   type OrganizationInsertModel,
@@ -10,7 +11,8 @@ import {
   type ProjectInsertModel,
   projectTable,
 } from './schema';
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
+import { normalizeSeedModelsForBifrost, syncSeedModelsToBifrost } from './seed-bifrost';
 
 const ORGANIZATION_ID = 'cfeb82c6-396a-4c2d-954b-53e77acbbe7e';
 const PROJECT_ID = 'DE-TEST';
@@ -23,11 +25,50 @@ const gpt4oMiniApiKey = process.env.LLM_GPT4OMINI_API_KEY ?? 'API_KEY_PLACEHOLDE
 const gpt4oMiniBaseUrl = process.env.LLM_GPT4OMINI_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const gpt5nanoApiKey = process.env.LLM_GPT5NANO_API_KEY ?? 'API_KEY_PLACEHOLDER';
 const gpt5nanoBaseUrl = process.env.LLM_GPT5NANO_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
+const gpt5miniApiKey = process.env.LLM_GPT5MINI_API_KEY ?? 'API_KEY_PLACEHOLDER';
+const gpt5miniBaseUrl = process.env.LLM_GPT5MINI_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
+const mockLlmApiKey = process.env.LLM_MOCK_API_KEY ?? 'API_KEY_PLACEHOLDER';
+const mockLlmBaseUrl = process.env.LLM_MOCK_BASE_URL ?? 'http://mock-llm:6556';
+
+// Mock LLM: OpenAI Responses-compatible server used as the default model in e2e tests.
+// Echoes prompts or drives deterministic tool calls — no real API calls.
+// See devops/docker/mock-llm/ for the server implementation.
+const mockLlm: LlmInsertModel = {
+  organizationId: ORGANIZATION_ID,
+  provider: 'bifrost',
+  name: 'mock-echo',
+  displayName: 'Mock LLM',
+  description: 'Mock LLM for e2e testing — echoes back the received prompt',
+  setting: {
+    provider: 'openai',
+    apiKey: mockLlmApiKey,
+    baseUrl: mockLlmBaseUrl,
+  },
+  priceMetadata: {
+    type: 'text',
+    promptTokenPrice: 0,
+    completionTokenPrice: 0,
+  },
+};
 
 // All prices are rough estimates, probably outdated and just for mocking purposes
 // Static ids are used to ensure that the models are not created again
 // the ids are taken from the staging/production database for interoperability to be able to connect to local AIS.chat api or staging
-const DEFAULT_MODELS: LlmInsertModel[] = [
+const DEFAULT_MODELS: LlmInsertModel[] = normalizeSeedModelsForBifrost([
+  // Mock LLMs
+  {
+    ...mockLlm,
+    id: 'a0a46b60-41d5-4843-856d-c6d8172f0fca',
+    name: 'mock-echo-1',
+    displayName: process.env.E2E_TEXT_MODEL_1 ?? 'Mock LLM',
+  },
+  {
+    ...mockLlm,
+    id: '689342a5-89ed-4d43-bc8c-a1a00f464184',
+    name: 'mock-echo-2',
+    displayName: process.env.E2E_TEXT_MODEL_2 ?? 'Mock LLM (2)',
+  },
+  // Realm LLMs
   {
     id: 'b870b74d-7458-4dcf-99f6-ace83ef514f4',
     organizationId: ORGANIZATION_ID,
@@ -111,7 +152,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     priceMetadata: {
       type: 'text',
       promptTokenPrice: 165, // 0.165 € per 1M tokens
-      completionTokenPrice: 60, // 0.60 € per 1M tokens
+      completionTokenPrice: 60, // 0.060 € per 1M tokens
     },
     supportedImageFormats: ['jpg', 'jpeg', 'png', 'webp'],
   },
@@ -140,7 +181,32 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     },
     supportedImageFormats: ['jpg', 'jpeg', 'png', 'webp'],
   },
-];
+  {
+    id: 'f1c2d3e4-5b6a-7c8d-9e0f-1a2b3c4d5e6f',
+    organizationId: ORGANIZATION_ID,
+    provider: 'azure',
+    name: 'gpt-5-mini',
+    displayName: 'GPT-5 mini',
+    description: 'GPT-5 mini model for testing',
+    setting: {
+      provider: 'azure',
+      apiKey: gpt5miniApiKey,
+      baseUrl: gpt5miniBaseUrl,
+    },
+    priceMetadata: {
+      type: 'text',
+      promptTokenPrice: 211.2,
+      completionTokenPrice: 1672,
+    },
+    additionalParameters: {
+      reasoning: {
+        effort: 'low',
+        summary: null,
+      },
+    },
+    supportedImageFormats: ['jpg', 'jpeg', 'png', 'webp'],
+  },
+]);
 
 export async function seedDatabase() {
   console.log('Starting database seeding...');
@@ -213,8 +279,39 @@ export async function seedDatabase() {
     }
 
     // 5. Create/update API key to model mapping
+    const seededModels: LlmModel[] = [];
+    await db.delete(llmModelApiKeyMappingTable).where(
+      and(
+        eq(llmModelApiKeyMappingTable.apiKeyId, apiKey.id),
+        inArray(
+          llmModelApiKeyMappingTable.llmModelId,
+          DEFAULT_MODELS.map((model) => model.id!),
+        ),
+      ),
+    );
+
     for (const model of DEFAULT_MODELS) {
-      await db.insert(llmModelTable).values(model).onConflictDoNothing().returning();
+      const [seededModel] = await db
+        .insert(llmModelTable)
+        .values(model)
+        .onConflictDoUpdate({
+          target: llmModelTable.id,
+          set: {
+            provider: model.provider,
+            name: model.name,
+            displayName: model.displayName,
+            description: model.description,
+            setting: model.setting,
+            priceMetadata: model.priceMetadata,
+            supportedImageFormats: model.supportedImageFormats,
+            additionalParameters: model.additionalParameters,
+            isNew: model.isNew,
+            isDeleted: model.isDeleted,
+          },
+        })
+        .returning();
+
+      if (seededModel) seededModels.push(seededModel);
 
       await db
         .insert(llmModelApiKeyMappingTable)
@@ -224,6 +321,10 @@ export async function seedDatabase() {
         })
         .onConflictDoNothing();
     }
+
+    const modelsToSync =
+      seededModels.length > 0 ? seededModels : await db.select().from(llmModelTable);
+    await syncSeedModelsToBifrost(modelsToSync);
 
     // Print API key in a format parseable by CI (e.g. DE_TEST_API_KEY=sk_...)
     const apiKeyEnvVar = `${PROJECT_ID.replace('-', '_')}_API_KEY`;

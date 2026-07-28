@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { expect, Page, test } from '@playwright/test';
 import { waitForToast } from './utils';
 
@@ -8,8 +9,8 @@ export async function regenerateMessage(page: Page) {
 }
 
 export async function enterMessage(page: Page, message: string) {
-  await page.getByPlaceholder('Wie kann ich Dir helfen?').waitFor();
-  await page.getByPlaceholder('Wie kann ich Dir helfen?').fill(message);
+  await page.getByTestId('chat-input').waitFor();
+  await page.getByTestId('chat-input').fill(message);
 }
 
 export async function sendMessage(page: Page, message: string) {
@@ -45,7 +46,8 @@ export async function uploadFile(page: Page, filePath: string) {
 
   // Wait for the upload to complete
   const result = await uploadPromise;
-  expect(result.status()).toBe(200);
+  const filename = path.basename(filePath);
+  expect(result.status(), `File upload failed for ${filename}`).toBe(200);
 
   // Wait for the loading spinner to disappear
   await page.locator('form svg.animate-spin').waitFor({ state: 'detached' });

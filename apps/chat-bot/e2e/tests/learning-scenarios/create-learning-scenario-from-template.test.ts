@@ -7,7 +7,7 @@ import { configureLearningScenario } from '../../utils/learning-scenario';
 test.use({ storageState: AUTH_FILES.teacher });
 
 test('create learning scenario from template', async ({ page }) => {
-  await page.goto('/learning-scenarios');
+  await page.goto('/learning-scenarios?filter=all');
 
   const card = page.getByTestId('entity-card').filter({ hasText: 'Lern was über KI' }).first();
   await expect(card).toBeVisible();

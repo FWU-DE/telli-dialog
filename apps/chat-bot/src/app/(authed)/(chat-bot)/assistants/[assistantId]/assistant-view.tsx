@@ -13,11 +13,15 @@ import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-update';
 import { Card, CardContent } from '@ui/components/card';
-import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
-import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
 import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
+import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
+import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
+import { FilterDisplaySection } from '@/components/custom-chat/filter/custom-chat-filter-display-section';
+import { extractFilterValues } from '@/components/custom-chat/filter/custom-chat-filter-utils';
+import { FieldGroup } from '@ui/components/field';
 
 export function AssistantView({
   assistant,
@@ -33,6 +37,7 @@ export function AssistantView({
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('assistants');
+  const filterValues = extractFilterValues(assistant);
 
   const handleDuplicateAssistant = async () => {
     const createResult = await createNewAssistantAction({
@@ -72,7 +77,6 @@ export function AssistantView({
         <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
         <CustomChatLastUpdate date={assistant.updatedAt} />
       </CustomChatActions>
-
       <Card>
         <CardContent className="flex justify-center items-center">
           <CustomChatAvatarImage pictureUrl={pictureUrl} />
@@ -80,17 +84,15 @@ export function AssistantView({
       </Card>
 
       {assistant.accessLevel === 'global' && (
-        <Card className="w-full">
-          <CardContent className="flex flex-col items-center">
-            <div className="text-sm text-foreground/70">{t('author-label')}</div>
-            <div className="text-base font-medium">{t('author-text')}</div>
-          </CardContent>
-        </Card>
+        <CustomChatAuthorInfo
+          authorLabel={t('author-label')}
+          authorText={assistant.author !== '' ? assistant.author : t('author-text')}
+        />
       )}
 
       <Card>
         <CardContent>
-          <CustomChatFields>
+          <FieldGroup>
             <CustomChatFieldInfo label={t('name-label')} value={assistant.name} />
             <CustomChatFieldInfo label={t('description-label')} value={assistant.description} />
             <CustomChatFieldInfo label={t('instructions-label')} value={assistant.instructions} />
@@ -101,17 +103,22 @@ export function AssistantView({
                 value={suggestion}
               />
             ))}
-          </CustomChatFields>
+            <FilterDisplaySection values={filterValues} />
+          </FieldGroup>
         </CardContent>
       </Card>
-
       <CustomChatFilesAndLinks
         initialFiles={fileMappings}
         initialLinks={assistant.attachedLinks.map((l) => ({ link: l }))}
         onDownloadFile={handleDownloadFile}
       />
-
       {assistant.isWebSearchEnabled && isWebSearchAvailable && <CustomChatWebSearch readonly />}
+
+      {(assistant.hasLinkAccess || assistant.accessLevel === 'community') && (
+        <CustomChatCreateSuspensionRequestButton
+          entityRef={{ entityType: 'assistant', entityId: assistant.id }}
+        />
+      )}
     </CustomChatLayoutContainer>
   );
 }

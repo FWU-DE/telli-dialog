@@ -14,7 +14,7 @@ export async function getReadOnlySignedUrlAction({
   attachment,
   options,
 }: {
-  key: string | null | undefined;
+  key: string;
   filename?: string;
   contentType?: string;
   attachment?: boolean;

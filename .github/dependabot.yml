@@ -10,7 +10,9 @@ updates:
   - package-ecosystem: 'docker'
     directories:
       - '/apps/admin'
+      - '/apps/api'
       - '/apps/chat-bot'
+      - '/devops/docker/mock-llm'
     labels: ['dependencies']
     schedule:
       interval: 'weekly'

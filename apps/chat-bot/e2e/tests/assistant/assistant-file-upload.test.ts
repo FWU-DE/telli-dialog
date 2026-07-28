@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { AUTH_FILES } from '../../utils/const';
+import { AUTH_FILES, MOCK_LLM_COMMANDS } from '../../utils/const';
 import { sendMessage, uploadFile } from '../../utils/chat';
 
 test.use({ storageState: AUTH_FILES.teacher });
@@ -7,8 +7,8 @@ test.use({ storageState: AUTH_FILES.teacher });
 test('should upload file and chat with assistant template (Schulorganisationsassistent)', async ({
   page,
 }) => {
-  await page.goto('/assistants');
-  await page.waitForURL('/assistants');
+  await page.goto('/assistants?filter=all');
+  await page.waitForURL('/assistants**');
 
   // Wait for the Schulorganisationsassistent template card and click the chat button
   const card = page
@@ -28,11 +28,21 @@ test('should upload file and chat with assistant template (Schulorganisationsass
   // Verify file upload was successful
   await expect(page.locator('form').getByRole('img').nth(1)).toBeVisible();
 
+  // Wait for file indexing/retrieval to be available before sending message
+  // This ensures file chunks are available in the RAG context when the system prompt is built
+  await page.waitForTimeout(1000);
+
   // Send message about file contents
-  await sendMessage(page, 'Wie heißt die Hauptperson die in dieser Datei genannt wird?');
+  await sendMessage(
+    page,
+    `${MOCK_LLM_COMMANDS.CALL_RETRIEVE_ENTIRE_FILE} Wie heißt die Hauptperson die in dieser Datei genannt wird?`,
+  );
 
   // Verify the response contains expected content
-  const assistantMessage = page.getByLabel('assistant message 1');
-  await expect(assistantMessage).toBeVisible();
-  await expect(assistantMessage).toContainText(/Napol[eé]on Bonaparte/i);
+  // Get the last assistant message instead of relying on a fixed message index
+  const allAssistantMessages = page.locator('[aria-label^="assistant message"]');
+  const lastAssistantMessage = allAssistantMessages.last();
+  await expect(lastAssistantMessage).toBeVisible({ timeout: 10000 });
+  // 'Napoleon Bonaparte' is written in the uploaded file, which the mock LLM retrieves via tool call.
+  await expect(lastAssistantMessage).toContainText(/Napol[eé]on Bonaparte/i, { timeout: 10000 });
 });

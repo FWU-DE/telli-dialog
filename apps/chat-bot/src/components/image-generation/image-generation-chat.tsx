@@ -49,6 +49,7 @@ export default function ImageGenerationChat({
   const [displayedImage, setDisplayedImage] = useState<{
     prompt: string;
     imageUrl: string;
+    fileId: string;
   } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [editAssistantOpen, setEditAssistantOpen] = useState(false);
@@ -79,6 +80,7 @@ export default function ImageGenerationChat({
                 setDisplayedImage({
                   prompt: userMessage.content,
                   imageUrl: signedUrl,
+                  fileId: imageFile.id,
                 });
               }
             } catch (error) {
@@ -115,9 +117,11 @@ export default function ImageGenerationChat({
     });
     if (result.success) {
       if (result.value.imageUrl) {
+        setIsImageReady(false);
         setDisplayedImage({
           prompt: currentPrompt,
           imageUrl: result.value.imageUrl,
+          fileId: result.value.fileId,
         });
       }
 
@@ -210,6 +214,7 @@ export default function ImageGenerationChat({
                 ref={imageRef}
                 src={displayedImage.imageUrl}
                 alt={displayedImage.prompt}
+                data-testid="generated-image"
                 className="w-full rounded-xl"
                 width={800}
                 height={800}
@@ -221,6 +226,7 @@ export default function ImageGenerationChat({
               <div className="flex items-center justify-between mt-2">
                 <ImageActionButtons
                   imageRef={imageRef}
+                  fileId={displayedImage.fileId}
                   prompt={displayedImage.prompt}
                   isImageReady={isImageReady}
                 />

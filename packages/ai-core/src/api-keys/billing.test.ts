@@ -55,11 +55,45 @@ describe('billImageGenerationUsageToApiKey', () => {
     });
   });
 
+  it('should bill token-based image generation usage successfully', async () => {
+    const apiKeyId = 'test-api-key-123';
+    const imageModel: AiModel = {
+      id: 'model-789',
+      name: 'token-image-model',
+      displayName: 'Token Image Model',
+      provider: 'azure',
+      priceMetadata: {
+        type: 'image',
+        inputTextTokenPrice: 1,
+        outputTextTokenPrice: 2,
+        outputImageTokenPrice: 3,
+      },
+    } as AiModel;
+
+    const usage = {
+      input_text_tokens: 1_000_000,
+      output_text_tokens: 1_000_000,
+      output_image_tokens: 1_000_000,
+    };
+
+    mockDbCreateImageGenerationUsage.mockResolvedValue(undefined as never);
+
+    const result = await billImageGenerationUsageToApiKey(apiKeyId, imageModel, usage);
+
+    expect(result).toBe(6);
+    expect(mockDbCreateImageGenerationUsage).toHaveBeenCalledWith({
+      apiKeyId: 'test-api-key-123',
+      modelId: 'model-789',
+      costsInCent: 6,
+    });
+  });
+
   it('should throw an error if model is not an image model', async () => {
     const apiKeyId = 'test-api-key-123';
     const nonImageModel: AiModel = {
       id: 'model-456',
       name: 'text-model',
+      displayName: 'Text Model',
       provider: 'azure',
       priceMetadata: {
         type: 'text',
@@ -67,7 +101,7 @@ describe('billImageGenerationUsageToApiKey', () => {
     } as AiModel;
 
     await expect(billImageGenerationUsageToApiKey(apiKeyId, nonImageModel)).rejects.toThrow(
-      'Model model-456 is not an image model',
+      'Model Text Model is not an image model',
     );
 
     expect(mockDbCreateImageGenerationUsage).not.toHaveBeenCalled();

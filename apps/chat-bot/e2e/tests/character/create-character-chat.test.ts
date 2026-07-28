@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { AUTH_FILES } from '../../utils/const';
+import { AUTH_FILES, MOCK_LLM_COMMANDS } from '../../utils/const';
 import { regenerateMessage, sendMessage } from '../../utils/chat';
 import {
   configureCharacter,
@@ -7,7 +7,7 @@ import {
   deleteCharacter,
   deleteCharacterFromDetailPage,
 } from '../../utils/character';
-import { waitForAutosave, waitForToast, waitForToastDisappear } from '../../utils/utils';
+import { stopShare, waitForAutosave, waitForToast, waitForToastDisappear } from '../../utils/utils';
 import { nanoid } from 'nanoid';
 
 test.use({ storageState: AUTH_FILES.teacher });
@@ -43,10 +43,10 @@ test.describe('create, share, chat, delete', () => {
 
     // test share page
     await page.getByTestId('token-points-select').click();
-    await page.getByRole('option', { name: '50 %' }).click();
+    await page.getByTestId('token-points-option-50').click();
     await page.getByTestId('usage-time-select').click();
-    await page.getByRole('option', { name: '45 Minuten' }).click();
-    await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
+    await page.getByTestId('usage-time-option-45').click();
+    await page.getByTestId('start-share-button').click();
 
     await page.waitForURL('/characters/editor/**/share');
     const code = await page.getByTestId('join-code').textContent();
@@ -77,9 +77,11 @@ test.describe('create, share, chat, delete', () => {
     await page.waitForURL('/ua/characters/**/dialog?inviteCode=*');
 
     // send first message
-    await sendMessage(page, 'Wer bist du?');
+    await sendMessage(page, `${MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT} Wer bist du?`);
     await page.getByTestId('copy-to-clipboard').click();
 
+    // 'John Cena' is the character name and is included in the system prompt;
+    // the mock LLM echoes the system prompt back.
     await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');
 
     // regenerate last message
@@ -95,6 +97,51 @@ test.describe('create, share, chat, delete', () => {
 
     await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
     await expect(page.getByRole('heading', { name: characterName }).first()).not.toBeVisible();
+  });
+
+  test('teacher sees maximum token volume preselected after stopping share', async ({ page }) => {
+    const maxCharacterName = 'Max Token Character ' + nanoid(8);
+
+    await createCharacter(page);
+
+    await configureCharacter(page, {
+      name: maxCharacterName,
+      description: 'Test character for maximum token preselection after unsharing.',
+      instructions: 'Respond in short answers.',
+    });
+
+    // set share with learners limit params
+    await page.getByTestId('token-points-select').click();
+    await page.getByTestId('token-points-option-max').click();
+    await page.getByTestId('usage-time-select').click();
+    await page.getByTestId('usage-time-option-45').click();
+    const editorUrl = page.url();
+    await page.getByTestId('start-share-button').click();
+
+    // verify share page
+    await page.waitForURL('/characters/editor/**/share');
+    await expect(page.getByTestId('countdown-timer')).toBeVisible();
+
+    // stop share
+    await page.goto(editorUrl);
+    await page.waitForURL('/characters/editor/**');
+    await stopShare(page);
+    await expect(page.getByTestId('start-share-button')).toBeVisible();
+
+    // verify maximum token points is preselected after stopping share
+    await page.getByTestId('token-points-select').click();
+    await expect(page.getByTestId('token-points-option-max')).toHaveAttribute(
+      'data-state',
+      'checked',
+    );
+
+    // Close the select popover so it cannot intercept clicks on the delete button
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('token-points-option-max')).not.toBeVisible();
+
+    // cleanup
+    await deleteCharacterFromDetailPage(page);
+    await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
   });
 });
 

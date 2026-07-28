@@ -3,7 +3,17 @@
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
-import { CharacterOptionalShareDataModel, FileModel } from '@shared/db/schema';
+import {
+  CharacterOptionalShareDataModel,
+  FileModel,
+  schoolTypesSchema,
+  gradeRangesSchema,
+  subjectsSchema,
+  categoriesSchema,
+  federalStatesSchema,
+  languagesSchema,
+  webSearchScopeSchema,
+} from '@shared/db/schema';
 import { WebSource } from '@shared/db/types';
 import { useTranslations } from 'next-intl';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
@@ -12,10 +22,13 @@ import {
   deleteCharacterAction,
   deleteFileMappingAndEntityAction,
   downloadFileFromCharacterAction,
+  getCharacterShareDataAction,
   linkFileToCharacterAction,
   shareCharacterAction,
   unshareCharacterAction,
   updateCharacterAccessLevelAction,
+  extendCharacterShareExpirationAction,
+  updateCharacterShareTokenPointsLimitAction,
   updateCharacterAction,
   uploadAvatarPictureForCharacterAction,
 } from './actions';
@@ -27,11 +40,7 @@ import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
-import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
-import {
-  tokenPointsPercentageValues,
-  usageTimeValuesInMinutes,
-} from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
+import { CustomChatShareWithLearners } from '@/components/custom-chat/share-with-learners/custom-chat-share-with-learners';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
 import { FieldGroup } from '@ui/components/field';
@@ -49,12 +58,23 @@ import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { useForm, useWatch } from 'react-hook-form';
 import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
-import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
+import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { FormField } from '@ui/components/form/form-field';
 import { createNewCharacterAction } from '../../actions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
+import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
+import {
+  getAccessLevelFromShareForm,
+  getShareFormValues,
+} from '@/components/custom-chat/access-level-sharing';
+import FilterSelectSection from '@/components/custom-chat/filter/custom-chat-filter-select-section';
+import {
+  extractFilterValues,
+  toFilterGroup,
+} from '@/components/custom-chat/filter/custom-chat-filter-utils';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -95,8 +115,18 @@ function createCharacterFormValuesSchema(t: CharacterTranslator) {
     instructions: z.string(),
     initialMessage: z.string(),
     modelId: z.string(),
+    schoolTypes: z.array(schoolTypesSchema),
+    gradeRanges: z.array(gradeRangesSchema),
+    subjects: z.array(subjectsSchema),
+    categories: z.array(categoriesSchema),
+    federalStates: z.array(federalStatesSchema),
+    languages: z.array(languagesSchema),
     isSchoolShared: z.boolean(),
+    isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
+    isWebSearchEnabled: z.boolean(),
+    webSearchScope: webSearchScopeSchema,
+    webSearchIncludedDomains: z.array(z.string()),
   });
 }
 
@@ -107,11 +137,19 @@ export function CharacterEdit({
   relatedFiles,
   initialLinks,
   avatarPictureUrl,
+  usedBudget,
+  maxBudget,
+  budgetUsedBySharedChat,
+  isWebSearchAvailable,
 }: {
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
   initialLinks: WebSource[];
   avatarPictureUrl?: string;
+  usedBudget: number;
+  maxBudget: number;
+  budgetUsedBySharedChat: number;
+  isWebSearchAvailable: boolean;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -123,6 +161,7 @@ export function CharacterEdit({
   const maybeDefaultModelId = getDefaultModel(models)?.id;
   const isModelAvailable = character.modelId && models.some((m) => m.id === character.modelId);
   const selectedModelId = isModelAvailable ? character.modelId : maybeDefaultModelId;
+  const filterValues = extractFilterValues(character);
 
   const initialValues: CharacterFormValues = {
     name: character.name,
@@ -130,8 +169,17 @@ export function CharacterEdit({
     instructions: character.instructions ?? '',
     initialMessage: character.initialMessage ?? '',
     modelId: selectedModelId ?? '',
-    isSchoolShared: character.accessLevel === 'school',
+    schoolTypes: filterValues.schoolTypes,
+    gradeRanges: filterValues.gradeRanges,
+    subjects: filterValues.subjects,
+    categories: filterValues.categories,
+    federalStates: filterValues.federalStates,
+    languages: filterValues.languages,
+    ...getShareFormValues(character.accessLevel),
     hasLinkAccess: character.hasLinkAccess,
+    isWebSearchEnabled: character.isWebSearchEnabled,
+    webSearchScope: character.webSearchScope,
+    webSearchIncludedDomains: character.webSearchIncludedDomains,
   };
 
   const {
@@ -166,7 +214,11 @@ export function CharacterEdit({
           instructions: data.instructions,
           initialMessage: data.initialMessage,
           modelId: data.modelId,
+          filterGroup: toFilterGroup(data),
           hasLinkAccess: data.hasLinkAccess,
+          isWebSearchEnabled: data.isWebSearchEnabled,
+          webSearchScope: data.webSearchScope,
+          webSearchIncludedDomains: data.webSearchIncludedDomains,
         });
 
         return updateResult.success;
@@ -174,10 +226,18 @@ export function CharacterEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
+  const schoolTypes = useWatch({ control, name: 'schoolTypes' });
+  const gradeRanges = useWatch({ control, name: 'gradeRanges' });
+  const subjects = useWatch({ control, name: 'subjects' });
+  const categories = useWatch({ control, name: 'categories' });
+  const federalStates = useWatch({ control, name: 'federalStates' });
+  const languages = useWatch({ control, name: 'languages' });
   const savedAccessLevelRef = useRef(character.accessLevel);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
+  const isCommunityShared = useWatch({ control, name: 'isCommunityShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
-  const showShareInfo = isSchoolShared || hasLinkAccess;
+  const showShareInfo =
+    (isSchoolShared || isCommunityShared || hasLinkAccess) && !character.suspended;
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -239,18 +299,18 @@ export function CharacterEdit({
   };
 
   const handleDeleteFile = async (fileId: string) => {
-    return await deleteFileMappingAndEntityAction({
+    return deleteFileMappingAndEntityAction({
       characterId: character.id,
       fileId,
     });
   };
 
   const handleDownloadFile = async (fileId: string) => {
-    return await downloadFileFromCharacterAction({ characterId: character.id, fileId });
+    return downloadFileFromCharacterAction({ characterId: character.id, fileId });
   };
 
   const handleLinksChange = async (links: string[]) => {
-    return await updateCharacterAction({ id: character.id, attachedLinks: links });
+    return updateCharacterAction({ id: character.id, attachedLinks: links });
   };
 
   async function handleUploadPicture(croppedImageBlob: Blob) {
@@ -267,8 +327,13 @@ export function CharacterEdit({
   }
 
   const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
-    if (name === 'isSchoolShared') {
-      const newAccessLevel = checked ? 'school' : 'private';
+    if (name === 'isSchoolShared' || name === 'isCommunityShared') {
+      const nextShareValues = {
+        isSchoolShared: name === 'isSchoolShared' ? checked : getValues('isSchoolShared'),
+        isCommunityShared: name === 'isCommunityShared' ? checked : getValues('isCommunityShared'),
+      };
+
+      const newAccessLevel = getAccessLevelFromShareForm(nextShareValues);
 
       if (newAccessLevel !== savedAccessLevelRef.current) {
         const result = await updateCharacterAccessLevelAction({
@@ -277,6 +342,9 @@ export function CharacterEdit({
         });
 
         if (!result.success) {
+          const savedShareValues = getShareFormValues(savedAccessLevelRef.current);
+          setValue('isSchoolShared', savedShareValues.isSchoolShared);
+          setValue('isCommunityShared', savedShareValues.isCommunityShared);
           toast.error(t('toasts.edit-toast-error'));
           return;
         }
@@ -291,7 +359,7 @@ export function CharacterEdit({
   const actionButtons = (
     <CustomChatActions>
       <CustomChatActionUse onClick={handleUseChat} />
-      <CustomChatActionDuplicate onClick={handleDuplicateCharacter} />
+      {!character.suspended && <CustomChatActionDuplicate onClick={handleDuplicateCharacter} />}
       <CustomChatActionDelete
         onClick={handleDeleteCharacter}
         modalTitle={t('delete-modal-title')}
@@ -327,28 +395,52 @@ export function CharacterEdit({
             linkText={t('sharing-settings')}
           />
         )}
-
+        {character.suspended && <CustomChatSuspensionError info={t('suspension-error')} />}
         <CustomChatShareWithLearners
-          startedAt={character.startedAt}
+          expiredAt={character.expiredAt}
           manuallyStoppedAt={character.manuallyStoppedAt}
           maxUsageTimeLimit={character.maxUsageTimeLimit}
           tokenPointsLimit={character.tokenPointsLimit}
-          pointsPercentageValues={tokenPointsPercentageValues}
-          usageTimeValues={usageTimeValuesInMinutes}
-          onShare={async (data) => {
-            const result = await shareCharacterAction({
+          usedBudget={usedBudget}
+          budgetUsedBySharedChat={budgetUsedBySharedChat}
+          maxBudget={maxBudget}
+          onShare={(data) =>
+            shareCharacterAction({
               id: character.id,
               tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
               usageTimeLimit: data.usageTimeLimit,
-            });
-            return result;
-          }}
-          onUnshare={async () => {
-            const result = await unshareCharacterAction({
+            })
+          }
+          onUnshare={() =>
+            unshareCharacterAction({
               characterId: character.id,
+            })
+          }
+          onAddTime={async (data) => {
+            const result = await extendCharacterShareExpirationAction({
+              characterId: character.id,
+              additionalTimeInMinutes: data.additionalTimeInMinutes,
             });
-            return result;
+            if (result.success) {
+              return { success: true, expiredAt: result.value.expiredAt };
+            }
+            return { success: false };
           }}
+          onAdjustTokenLimit={async (data) => {
+            const result = await updateCharacterShareTokenPointsLimitAction({
+              characterId: character.id,
+              tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
+            });
+            if (result.success) {
+              return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
+            }
+            return { success: false };
+          }}
+          onPollShareData={() =>
+            getCharacterShareDataAction({
+              characterId: character.id,
+            })
+          }
           shareUILink={`/characters/editor/${character.id}/share`}
           sharingDisabled={!name || name.trim().length === 0}
         />
@@ -446,12 +538,61 @@ export function CharacterEdit({
             onDownloadFile={handleDownloadFile}
           />
 
+          {isWebSearchAvailable && (
+            <CustomChatWebSearch
+              name="isWebSearchEnabled"
+              control={control}
+              onChange={() => {
+                void flushAutoSave();
+              }}
+              showScopeOptions
+              scopeName="webSearchScope"
+              includedDomainsName="webSearchIncludedDomains"
+            />
+          )}
+
           <CustomShareSection
             control={control}
             schoolSharingName="isSchoolShared"
+            communitySharingName="isCommunityShared"
             linkSharingName="hasLinkAccess"
             linkToShare={`/characters/${character.id}`}
             onShareChange={handleSharingChange}
+            suspended={character.suspended}
+          />
+          <FilterSelectSection
+            values={{
+              schoolTypes,
+              gradeRanges,
+              subjects,
+              categories,
+              federalStates,
+              languages,
+            }}
+            onSchoolTypesChange={(values) => {
+              setValue('schoolTypes', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onGradeRangesChange={(values) => {
+              setValue('gradeRanges', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onSubjectsChange={(values) => {
+              setValue('subjects', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onCategoriesChange={(values) => {
+              setValue('categories', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onFederalStatesChange={(values) => {
+              setValue('federalStates', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
+            onLanguagesChange={(values) => {
+              setValue('languages', values, { shouldDirty: true });
+              void flushAutoSave();
+            }}
           />
         </form>
       </CustomChatLayoutContainer>

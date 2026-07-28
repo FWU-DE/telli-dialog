@@ -1,0 +1,50 @@
+{
+  "common": {
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "information-disclaimer": "AIS.chat peut faire des erreurs. Fais preuve d'esprit critique et vérifie toutes les informations."
+  },
+  "characters": {
+    "shared": {
+      "delete-chat-modal-title": "Supprimer le chat actuel?",
+      "delete-chat-modal-description": "Un nouveau chat va être lancé. Le chat actuel sera définitivement supprimé.",
+      "delete-chat-modal-confirm-button": "Supprimer"
+    }
+  },
+  "learning-scenarios": {
+    "shared": {
+      "exercise-title": "Ta tâche",
+      "delete-chat-modal-title": "Supprimer le chat actuel?",
+      "delete-chat-modal-description": "Un nouveau chat va être lancé. Le chat actuel sera définitivement supprimé.",
+      "delete-chat-modal-confirm-button": "Supprimer"
+    }
+  },
+  "sharing": {
+    "copy-link": "Copier le lien"
+  },
+  "custom-chat": {
+    "shared": {
+      "join-code": "Rejoindre avec un code",
+      "enter-chat": "Accéder au dialogue",
+      "start-chat": "Commencer le dialogue",
+      "invalid-code-toast": "Le code saisi est soit expiré, soit invalide."
+    },
+    "share-page": {
+      "go-to": "Aller à",
+      "enter-code": "Saisis le code.",
+      "open-chat": "Ouvrir le chat",
+      "use-qr": "Scanne le code QR.",
+      "copy-link": "Copier le lien de démarrage",
+      "learning-scenario": {
+        "sub-header": "Scénario d’apprentissage",
+        "back-button": "Vers le scénario d’apprentissage",
+        "join": "Lancer le scénario d'apprentissage"
+      },
+      "character": {
+        "sub-header": "Interlocuteur",
+        "back-button": "Vers l’interlocuteur",
+        "join": "Participer au dialogue"
+      }
+    }
+  }
+}

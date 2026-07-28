@@ -1,12 +1,11 @@
 'use client';
 
 import SharedChatLoginForm from '../../(authed)/(chat-bot)/learning-scenarios/_components/shared-chat-login-form';
-import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { signIn } from 'next-auth/react';
 import LogoWithName from '@/assets/logo-with-name.svg';
-import { cn } from '@/utils/tailwind';
 import { useSearchParams } from 'next/navigation';
 import { getSafeCallbackUrl } from '@/auth/callback-url';
+import { Button } from '@ui/components/button';
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -22,14 +21,16 @@ export default function LoginForm() {
           <span className="text-sm text-gray-200">oder</span>
           <hr className="grow border-t border-gray-200" />
         </div>
-        <button
-          className={cn(buttonSecondaryClassName, 'w-full')}
+        <Button
+          variant="outline"
+          size="xl"
+          className="w-full"
           onClick={() => signIn('vidis', { callbackUrl })}
           aria-label="Mit VIDIS einloggen"
           data-testid="vidis-login-button"
         >
           Mit VIDIS einloggen
-        </button>
+        </Button>
       </div>
     </main>
   );

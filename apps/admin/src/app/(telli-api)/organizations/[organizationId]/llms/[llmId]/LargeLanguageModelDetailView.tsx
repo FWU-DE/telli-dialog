@@ -13,6 +13,7 @@ import { LargeLanguageModel } from '@/types/large-language-model';
 import { createLLMAction, updateLLMAction } from './actions';
 import { ROUTES } from '@/consts/routes';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
+import { isBifrostProviderSyncError } from '@ais-chat/api-database/bifrost-provider-sync/error';
 import { logError } from '@shared/logging';
 
 // Helper function to validate JSON
@@ -105,6 +106,11 @@ export function LargeLanguageModelDetailView({
       }
     } catch (error) {
       logError('Error saving model', error);
+      if (isBifrostProviderSyncError(error)) {
+        toast.error('Fehler beim Aktualisieren des Sprachmodells in Bifrost');
+        return;
+      }
+
       toast.error(
         isCreate
           ? 'Fehler beim Erstellen des Sprachmodells'
@@ -152,7 +158,7 @@ export function LargeLanguageModelDetailView({
           <FormField
             name="provider"
             label="Anbieter *"
-            description="Name des Modell-Anbieters (ionos, azure, openai, google)"
+            description="Name des Modell-Anbieters (ionos, azure, openai, google, bifrost)"
             control={control}
           />
 

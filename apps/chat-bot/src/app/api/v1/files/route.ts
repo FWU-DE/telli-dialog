@@ -1,13 +1,7 @@
 import { getUser } from '@/auth/utils';
-import { getFileExtension } from '@/utils/files/generic';
-import { cnanoid } from '@ais-chat/shared/random/randomService';
 import { NextRequest, NextResponse } from 'next/server';
-import { extractFile } from '../../file-operations/extract-file';
-import { chunkAndEmbed } from '../../rag/rag-service';
-import { logDebug } from '@shared/logging';
-import { dbInsertFileWithChunks } from '@shared/db/functions/files';
-import { uploadMessageAttachment } from '@shared/files/fileService';
 import { handleErrorInRoute } from '@/error/handle-error-in-route';
+import { uploadFile } from '../../file-operations/file-upload-service';
 
 /**
  * Handles the POST request to upload a file.
@@ -38,8 +32,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const fileId = await handleFileUpload(file);
+
     return NextResponse.json({
-      body: JSON.stringify({ file_id: await handleFileUpload(file) }),
+      body: JSON.stringify({ file_id: fileId }),
       status: 200,
     });
   } catch (error) {
@@ -57,39 +53,11 @@ export async function POST(req: NextRequest) {
  */
 async function handleFileUpload(file: File) {
   const user = await getUser();
-  const fileId = `file_${cnanoid()}`;
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
 
-  const fileExtension = getFileExtension(file.name);
-  const extractResult = await extractFile({
-    fileContent: buffer,
-    type: fileExtension,
-  });
-
-  const [chunks] = await Promise.all([
-    chunkAndEmbed({
-      text: extractResult.content,
-      fileId,
-      federalStateId: user.federalState.id,
-    }),
-    uploadMessageAttachment({
-      fileId,
-      fileExtension,
-      buffer: extractResult.processedBuffer || buffer,
-    }),
-  ]);
-
-  const fileModel = {
-    id: fileId,
-    name: file.name,
-    size: extractResult.processedBuffer ? extractResult.processedBuffer.length : file.size,
-    type: fileExtension,
-    metadata: extractResult.metadata,
+  return uploadFile({
+    federalStateId: user.federalState.id,
+    file,
+    fileMetadata: {},
     userId: user.id,
-  };
-  await dbInsertFileWithChunks(fileModel, chunks);
-  logDebug(`File ${file.name} with type ${fileExtension} stored in db.`);
-
-  return fileId;
+  });
 }

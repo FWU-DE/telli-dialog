@@ -18,7 +18,8 @@ export const env = createEnv({
     vidisClientSecret: z.string(),
     vidisIssuerUri: z.string(),
     crawl4AIUrl: z.url().default('http://localhost:11235'),
-    linkupApiKey: z.string().optional(),
+    crawl4AIToken: z.string().optional(),
+    xbergUrl: z.url().default('http://localhost:8000'),
   },
   runtimeEnv: {
     apiKey: process.env.API_KEY,
@@ -35,6 +36,7 @@ export const env = createEnv({
     vidisClientSecret: process.env.VIDIS_CLIENT_SECRET,
     vidisIssuerUri: process.env.VIDIS_ISSUER_URI,
     crawl4AIUrl: process.env.CRAWL4AI_URL,
-    linkupApiKey: process.env.LINKUP_API_KEY,
+    crawl4AIToken: process.env.CRAWL4AI_API_TOKEN,
+    xbergUrl: process.env.XBERG_URL,
   },
 });

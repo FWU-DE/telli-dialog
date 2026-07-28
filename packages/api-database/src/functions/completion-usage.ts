@@ -1,4 +1,4 @@
-import { db } from '..';
+import { db } from '../db';
 import { CompletionUsageInsertModel, completionUsageTrackingTable, llmModelTable } from '../schema';
 import { and, eq, gte, sum } from 'drizzle-orm';
 import { getStartOfCurrentMonth } from '../api-utils';

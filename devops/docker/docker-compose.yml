@@ -5,7 +5,7 @@ services:
   # Containers share this network namespace via network_mode: "service:keycloak"
   # This is required to access keycloak using the same URL from within the container and the browser
   keycloak:
-    image: quay.io/keycloak/keycloak:26.6.1
+    image: quay.io/keycloak/keycloak:26.7.0
     restart: unless-stopped
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
@@ -21,6 +21,7 @@ services:
       - '3001:3001' # ais-chat-admin
       - '3002:3002' # ais-chat-api
       - '8080:8080' # keycloak
+      - '8089:8089' # bifrost
     depends_on:
       fix-keycloak-volume-ownership:
         condition: service_completed_successfully
@@ -56,7 +57,7 @@ services:
 
   # Valkey (Redis-compatible) for session storage
   valkey:
-    image: ghcr.io/valkey-io/valkey:8
+    image: ghcr.io/valkey-io/valkey:9.1.1-alpine
     restart: unless-stopped
     volumes:
       - valkey_data:/data
@@ -86,7 +87,9 @@ services:
 
   # Crawl4AI for web scraping capabilities
   crawl4ai:
-    image: unclecode/crawl4ai:0.8.6
+    image: unclecode/crawl4ai:0.9.2
+    environment:
+      CRAWL4AI_API_TOKEN: ais-chat-crawl4ai-token
     restart: unless-stopped
     ports:
       - '11235:11235'
@@ -103,6 +106,22 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  # Xberg text extraction service
+  xberg:
+    image: ghcr.io/xberg-io/xberg:1.0.0-rc.29-core
+    restart: unless-stopped
+    environment:
+      XBERG_MAX_UPLOAD_SIZE_MB: '50'
+    ports:
+      - '8000:8000'
+    volumes:
+      - xberg_cache:/app/.xberg
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://127.0.0.1:8000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # RustFS - S3-compatible object storage
   rustfs:
@@ -126,6 +145,19 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+  bifrost:
+    image: maximhq/bifrost:v1.6.5
+    restart: unless-stopped
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: '8089'
+    volumes:
+      - bifrost_data:/app/data
+    network_mode: service:keycloak
+    depends_on:
+      keycloak:
+        condition: service_started
 
   # AIS.chat API - OpenAI compatible API service
   ais-chat-api:
@@ -194,6 +226,10 @@ services:
 
       # Crawl4AI
       CRAWL4AI_URL: http://crawl4ai:11235
+      CRAWL4AI_API_TOKEN: ais-chat-crawl4ai-token
+
+      # Xberg text extraction
+      XBERG_URL: http://xberg:8000
 
       # S3 Object Storage for file uploads and image generation
       # Note: must be changed to a publicly accessible S3 storage, when LLM should have file access (e.g., uploading pictures and asking about content)
@@ -219,6 +255,8 @@ services:
       rabbitmq:
         condition: service_healthy
       crawl4ai:
+        condition: service_healthy
+      xberg:
         condition: service_healthy
       rustfs:
         condition: service_healthy
@@ -264,7 +302,7 @@ services:
 
   # Initialization container
   ais-chat-init:
-    image: alpine:3.23.4
+    image: alpine:3.24.1
     restart: no
     environment:
       # Database URLs for both databases
@@ -312,4 +350,6 @@ volumes:
   postgres_data:
   valkey_data:
   keycloak_data:
+  bifrost_data:
   rustfs_data:
+  xberg_cache:

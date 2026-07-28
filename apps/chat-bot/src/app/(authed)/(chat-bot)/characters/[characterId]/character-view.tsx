@@ -13,35 +13,48 @@ import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
+import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-update';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
-import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
+import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 import { Card, CardContent } from '@ui/components/card';
 import { FieldGroup } from '@ui/components/field';
 import { useToast } from '@/components/common/toast';
 import { createNewCharacterAction } from '../actions';
 import {
   downloadFileFromCharacterAction,
+  extendCharacterShareExpirationAction,
+  getCharacterShareDataAction,
   shareCharacterAction,
   unshareCharacterAction,
+  updateCharacterShareTokenPointsLimitAction,
 } from '../editor/[characterId]/actions';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
-import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
-import {
-  tokenPointsPercentageValues,
-  usageTimeValuesInMinutes,
-} from '../../learning-scenarios/editor/[learningScenarioId]/schema';
+import { CustomChatShareWithLearners } from '@/components/custom-chat/share-with-learners/custom-chat-share-with-learners';
+import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
+import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
+import { FilterDisplaySection } from '@/components/custom-chat/filter/custom-chat-filter-display-section';
+import { extractFilterValues } from '@/components/custom-chat/filter/custom-chat-filter-utils';
 
 export function CharacterView({
   character,
   relatedFiles,
   initialLinks,
   avatarPictureUrl,
+  usedBudget,
+  maxBudget,
+  budgetUsedBySharedChat,
+  isWebSearchAvailable,
 }: {
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
   initialLinks: WebSource[];
   avatarPictureUrl?: string;
+  usedBudget: number;
+  maxBudget: number;
+  budgetUsedBySharedChat: number;
+  isWebSearchAvailable: boolean;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -52,6 +65,7 @@ export function CharacterView({
   const isModelAvailable = character.modelId && models.some((m) => m.id === character.modelId);
   const selectedModelId = isModelAvailable ? character.modelId : maybeDefaultModelId;
   const selectedModel = models.find((m) => m.id === selectedModelId);
+  const filterValues = extractFilterValues(character);
 
   const handleUseChat = () => {
     router.push(`/characters/d/${character.id}`);
@@ -85,29 +99,54 @@ export function CharacterView({
       <CustomChatActions>
         <CustomChatActionUse onClick={handleUseChat} />
         <CustomChatActionDuplicate onClick={handleDuplicateCharacter} />
+        <CustomChatLastUpdate date={character.updatedAt} />
       </CustomChatActions>
 
       <CustomChatShareWithLearners
-        startedAt={character.startedAt}
+        expiredAt={character.expiredAt}
         manuallyStoppedAt={character.manuallyStoppedAt}
         maxUsageTimeLimit={character.maxUsageTimeLimit}
         tokenPointsLimit={character.tokenPointsLimit}
-        pointsPercentageValues={tokenPointsPercentageValues}
-        usageTimeValues={usageTimeValuesInMinutes}
-        onShare={async (data) => {
-          const result = await shareCharacterAction({
+        usedBudget={usedBudget}
+        budgetUsedBySharedChat={budgetUsedBySharedChat}
+        maxBudget={maxBudget}
+        onShare={(data) =>
+          shareCharacterAction({
             id: character.id,
             tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
             usageTimeLimit: data.usageTimeLimit,
-          });
-          return result;
-        }}
-        onUnshare={async () => {
-          const result = await unshareCharacterAction({
+          })
+        }
+        onUnshare={() =>
+          unshareCharacterAction({
             characterId: character.id,
+          })
+        }
+        onAddTime={async (data) => {
+          const result = await extendCharacterShareExpirationAction({
+            characterId: character.id,
+            additionalTimeInMinutes: data.additionalTimeInMinutes,
           });
-          return result;
+          if (result.success) {
+            return { success: true, expiredAt: result.value.expiredAt };
+          }
+          return { success: false };
         }}
+        onAdjustTokenLimit={async (data) => {
+          const result = await updateCharacterShareTokenPointsLimitAction({
+            characterId: character.id,
+            tokenPointsPercentageLimit: data.tokenPointsPercentageLimit,
+          });
+          if (result.success) {
+            return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
+          }
+          return { success: false };
+        }}
+        onPollShareData={() =>
+          getCharacterShareDataAction({
+            characterId: character.id,
+          })
+        }
         shareUILink={`/characters/editor/${character.id}/share`}
       />
 
@@ -121,12 +160,10 @@ export function CharacterView({
         </Card>
 
         {character.accessLevel === 'global' && (
-          <Card className="w-full">
-            <CardContent className="flex flex-col items-center">
-              <div className="text-sm text-foreground/70">{t('author-label')}</div>
-              <div className="text-base font-medium">{t('author-text')}</div>
-            </CardContent>
-          </Card>
+          <CustomChatAuthorInfo
+            authorLabel={t('author-label')}
+            authorText={character.author !== '' ? character.author : t('author-text')}
+          />
         )}
 
         <Card>
@@ -145,6 +182,7 @@ export function CharacterView({
                 label={t('initial-message-label')}
                 value={character.initialMessage}
               />
+              <FilterDisplaySection values={filterValues} />
             </FieldGroup>
           </CardContent>
         </Card>
@@ -155,6 +193,13 @@ export function CharacterView({
           onDownloadFile={handleDownloadFile}
         />
       </div>
+      {character.isWebSearchEnabled && isWebSearchAvailable && <CustomChatWebSearch readonly />}
+
+      {(character.hasLinkAccess || character.accessLevel === 'community') && (
+        <CustomChatCreateSuspensionRequestButton
+          entityRef={{ entityType: 'character', entityId: character.id }}
+        />
+      )}
     </CustomChatLayoutContainer>
   );
 }

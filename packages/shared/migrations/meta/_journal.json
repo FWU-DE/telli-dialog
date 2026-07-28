@@ -505,6 +505,104 @@
       "when": 1778624632586,
       "tag": "0071_overconfident_mimic",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1779441350859,
+      "tag": "0072_cold_taskmaster",
+      "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1780501042142,
+      "tag": "0073_chilly_black_tarantula",
+      "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1780651373605,
+      "tag": "0074_secret_tomas",
+      "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1780995048476,
+      "tag": "0075_cold_namora",
+      "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1781010786947,
+      "tag": "0076_reflective_gamma_corps",
+      "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1781537921418,
+      "tag": "0077_remarkable_vindicator",
+      "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1781711056187,
+      "tag": "0078_burly_silver_fox",
+      "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1782396876313,
+      "tag": "0079_eminent_thena",
+      "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1782403685677,
+      "tag": "0080_chief_kulan_gath",
+      "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1782473304780,
+      "tag": "0081_lovely_calypso",
+      "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1783933432002,
+      "tag": "0082_fast_electro",
+      "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "7",
+      "when": 1784067548717,
+      "tag": "0083_many_nehzno",
+      "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "7",
+      "when": 1784590193300,
+      "tag": "0084_wooden_the_fallen",
+      "breakpoints": true
+    },
+    {
+      "idx": 85,
+      "version": "7",
+      "when": 1785144710254,
+      "tag": "0085_luxuriant_silk_fever",
+      "breakpoints": true
     }
   ]
 }
