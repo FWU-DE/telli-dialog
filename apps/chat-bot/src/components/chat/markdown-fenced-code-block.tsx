@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@ui/components
 import { CodeIcon, DesktopIcon } from '@phosphor-icons/react';
 import { cn } from '@/utils/tailwind';
 import CopyToClipboardButton from '../common/clipboard-button';
-import { downloadFileFromBlob } from '@/utils/download-file-from-blob';
+import { downloadFileFromBlob } from '@/utils/files/blob-download';
 import {
   buildPreviewSrcDoc,
   previewDownloadFileName,

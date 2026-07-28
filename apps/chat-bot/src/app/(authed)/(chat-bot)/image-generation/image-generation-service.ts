@@ -1,5 +1,4 @@
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
-import { userHasReachedTokenPointsLimit } from '@/app/api/chat/usage';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { dbGetModelByIdAndFederalStateId } from '@shared/db/functions/llm-model';
@@ -19,6 +18,7 @@ import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/file
 import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
 import { NotFoundError } from '@shared/error';
 import { getAvailableImageModelsForFederalState } from '@shared/image-generation/image-generation-service';
+import { userHasReachedTokenPointsLimit } from '@shared/users/usage';
 export interface ImageGenerationParams {
   prompt: string;
   modelId: string;
@@ -164,6 +164,7 @@ export async function handleImageGeneration({
     return {
       imageUrl: signedUrl,
       conversationId,
+      fileId,
     };
   } catch (error) {
     if (conversationId) {

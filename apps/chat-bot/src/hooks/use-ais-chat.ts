@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { readTextStream } from '@/utils/streaming';
+import { decodeChatStreamEvent, readTextStream } from '@/utils/streaming';
+import type { WebSearchResult } from '@shared/db/schema';
 import {
   deserializeError,
   toUIMessages,
@@ -10,6 +11,7 @@ import {
   type ChatStatus,
   type SendMessageResult,
 } from '@/types/chat';
+import { logError } from '@shared/logging';
 
 // Re-export for consumers
 export type { ChatMessage, ChatStatus };
@@ -22,6 +24,7 @@ export type SendMessageFn = (params: {
   messages: ChatMessage[];
   modelId: string;
   fileIds?: string[];
+  sharedSessionId?: string;
 }) => Promise<SendMessageResult>;
 
 export type UseChatOptions = {
@@ -40,7 +43,10 @@ export type UseChatReturn = {
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSubmit: (e: React.FormEvent, options?: { fileIds?: string[] }) => Promise<void>;
+  handleSubmit: (
+    e: React.FormEvent,
+    options?: { fileIds?: string[]; userMessageId?: string; sharedSessionId?: string },
+  ) => Promise<void>;
   isLoading: boolean;
   status: ChatStatus;
   error: Error | null;
@@ -74,7 +80,9 @@ export function useAisChat({
   const [status, setStatus] = useState<ChatStatus>('ready');
   const [error, setError] = useState<Error | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const lastUserMessageRef = useRef<ChatMessage | null>(lastUserMessage(initialMessages));
+  // Seed from the actual initial state (which may have been restored from
+  // storage by the caller), so reload() works after a page refresh.
+  const lastUserMessageRef = useRef<ChatMessage | null>(lastUserMessage(messages));
 
   const isLoading = status === 'submitted' || status === 'streaming';
 
@@ -86,7 +94,12 @@ export function useAisChat({
   );
 
   const submitMessage = useCallback(
-    async (userMessage: ChatMessage, fileIds?: string[], existingMessages?: ChatMessage[]) => {
+    async (
+      userMessage: ChatMessage,
+      fileIds?: string[],
+      existingMessages?: ChatMessage[],
+      sharedSessionId?: string,
+    ) => {
       if (!modelId) {
         const err = new Error('No model selected');
         setError(err);
@@ -110,6 +123,7 @@ export function useAisChat({
           messages: newMessages,
           modelId,
           fileIds,
+          sharedSessionId,
         });
 
         if (result.error) {
@@ -118,6 +132,24 @@ export function useAisChat({
 
         // We need to handle the first chunk separately to avoid missing content
         let firstChunk = true;
+        let assistantWebSearchResults: WebSearchResult[] = result.webSearchResults ?? [];
+
+        const ensureAssistantMessage = () => {
+          if (!firstChunk) {
+            return;
+          }
+
+          const assistantMessage: ChatMessage = {
+            id: result.messageId,
+            role: 'assistant',
+            content: '',
+            webSearchResults: assistantWebSearchResults,
+          };
+
+          setMessages((prev) => [...prev, assistantMessage]);
+          setStatus('streaming');
+          firstChunk = false;
+        };
 
         // Stream the response using native ReadableStream
         for await (const content of readTextStream(result.stream)) {
@@ -126,19 +158,33 @@ export function useAisChat({
           }
 
           if (content !== undefined && content !== null) {
-            if (firstChunk) {
-              // Create assistant message placeholder
-              const assistantMessage: ChatMessage = {
-                id: result.messageId,
-                role: 'assistant',
-                content: '',
-                webSearchResults: result.webSearchResults,
-              };
+            const streamEvent = decodeChatStreamEvent(content);
 
-              setMessages((prev) => [...prev, assistantMessage]);
-              setStatus('streaming');
-              firstChunk = false;
+            if (streamEvent?.type === 'web_search_results') {
+              assistantWebSearchResults = streamEvent.webSearchResults;
+
+              if (firstChunk) {
+                continue;
+              }
+
+              setMessages((prev) => {
+                const updated = [...prev];
+                const lastIdx = updated.length - 1;
+
+                if (updated[lastIdx]?.role === 'assistant') {
+                  updated[lastIdx] = {
+                    ...updated[lastIdx]!,
+                    webSearchResults: assistantWebSearchResults,
+                  };
+                }
+
+                return updated;
+              });
+
+              continue;
             }
+
+            ensureAssistantMessage();
             setMessages((prev) => {
               const updated = [...prev];
               const lastIdx = updated.length - 1;
@@ -168,6 +214,7 @@ export function useAisChat({
         setError(error);
         setStatus('error');
         onError?.(error);
+        logError('Error in submitMessage', error);
 
         // Remove the assistant placeholder on error
         setMessages((prev) => {
@@ -185,13 +232,16 @@ export function useAisChat({
   );
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent, options?: { fileIds?: string[] }) => {
+    async (
+      e: React.FormEvent,
+      options?: { fileIds?: string[]; userMessageId?: string; sharedSessionId?: string },
+    ) => {
       e.preventDefault();
 
       if (!input.trim() || isLoading) return;
 
       const userMessage: ChatMessage = {
-        id: crypto.randomUUID(),
+        id: options?.userMessageId ?? crypto.randomUUID(),
         role: 'user',
         content: input.trim(),
       };
@@ -200,7 +250,7 @@ export function useAisChat({
       onMessageCreated?.(userMessage.id);
 
       setInput('');
-      await submitMessage(userMessage, options?.fileIds);
+      await submitMessage(userMessage, options?.fileIds, undefined, options?.sharedSessionId);
     },
     [input, isLoading, submitMessage, onMessageCreated],
   );

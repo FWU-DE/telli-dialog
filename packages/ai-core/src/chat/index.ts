@@ -4,9 +4,28 @@ import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
 import { getTextModelById, getTextModelByName } from '../models';
 import type { Message, TokenUsage, GenerationOptions } from './types';
+export { runAgentLoop, MAX_AGENTIC_ITERATIONS, MAX_TOOL_CALLS_PER_ITERATION } from './agent-loop';
+export { generateAgenticStreamWithBilling } from './agentic-stream';
+export { countTokens } from './utils';
 
 // Re-export types for external consumers
-export type { Message, TokenUsage, ChatAttachment, GenerationOptions } from './types';
+export type {
+  Message,
+  TokenUsage,
+  ChatAttachment,
+  ChatImageAttachment,
+  GenerationOptions,
+  ToolCall,
+  ToolDefinition,
+  ToolHandler,
+  ToolRegistry,
+  ToolRegistryEntry,
+  StreamEvent,
+  AgenticStreamFn,
+} from './types';
+
+// Re-export utility functions and guards
+export { isChatImageAttachment } from './types';
 
 /**
  * Generates text using the specified model and messages, with access control and billing.

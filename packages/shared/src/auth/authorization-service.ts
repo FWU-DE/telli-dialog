@@ -7,6 +7,7 @@ type AuthorizedItem = {
   hasLinkAccess: boolean;
   userId: string | null;
   ownerSchoolIds?: string[];
+  suspended: boolean;
 };
 
 export function verifyReadAccess<T extends AuthorizedItem>({
@@ -17,16 +18,19 @@ export function verifyReadAccess<T extends AuthorizedItem>({
   user?: Pick<UserModel, 'id' | 'schoolIds'>;
 }) {
   // allow access if shared by link
-  if (item.hasLinkAccess) return;
+  if (item.hasLinkAccess && !item.suspended) return;
+  // allow access if shared with the community
+  if (item.accessLevel === 'community' && !item.suspended) return;
   // allow access if shared globally
-  if (item.accessLevel === 'global') return;
+  if (item.accessLevel === 'global' && !item.suspended) return;
   // allow if owner (disregarding the access-level)
   if (item.userId && item.userId === user?.id) return;
   // allow if school-shared
   if (
     item.accessLevel === 'school' &&
     user?.schoolIds &&
-    item.ownerSchoolIds?.some((id) => user.schoolIds?.includes(id))
+    item.ownerSchoolIds?.some((id) => user.schoolIds?.includes(id)) &&
+    !item.suspended
   )
     return;
 
@@ -44,6 +48,48 @@ export function verifyWriteAccess<T extends AuthorizedItem>({
   if (item.userId && item.userId === user?.id) return;
 
   throw new ForbiddenError('Not authorized for write access');
+}
+
+export function verifySuspensionState<T extends Pick<AuthorizedItem, 'suspended'>>({
+  item,
+}: {
+  item: T;
+}) {
+  if (item.suspended) {
+    throw new ForbiddenError('Cannot perform this action: item is suspended');
+  }
+}
+
+export function filterReadableCustomChats<T extends AuthorizedItem>({
+  items,
+  user,
+}: {
+  items: T[];
+  user?: Pick<UserModel, 'id' | 'schoolIds'>;
+}) {
+  return items.filter((item) => {
+    try {
+      verifyReadAccess({ item, user });
+      return true;
+    } catch (error) {
+      if (error instanceof ForbiddenError) {
+        return false;
+      }
+      throw error;
+    }
+  });
+}
+
+export function filterCommunitySharedByAssociatedSchool<
+  T extends Pick<AuthorizedItem, 'ownerSchoolIds'>,
+>({ items, user }: { items: T[]; user: Pick<UserModel, 'schoolIds'> }) {
+  if (user.schoolIds.length === 0) {
+    return [];
+  }
+
+  return items.filter((item) =>
+    item.ownerSchoolIds?.some((schoolId) => user.schoolIds.includes(schoolId)),
+  );
 }
 
 export function requireTeacherRole(userRole: UserRole) {

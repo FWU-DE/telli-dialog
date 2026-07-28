@@ -1,13 +1,9 @@
 import { eq, inArray, and } from 'drizzle-orm';
-import {
-  db,
-  dbGetAllApiKeysByProjectId,
-  dbGetOrganizationAndProjectsByOrganizationId,
-  LlmInsertModel,
-  LlmModel,
-  llmModelApiKeyMappingTable,
-  llmModelTable,
-} from '..';
+import { llmModelApiKeyMappingTable, llmModelTable } from '../schema';
+import { db } from '../db';
+import { dbGetAllApiKeysByProjectId } from './api-key';
+import { dbGetOrganizationAndProjectsByOrganizationId } from './organization';
+import type { LlmInsertModel, LlmModel } from '../schema';
 
 export async function dbGetAllModels() {
   return db.select().from(llmModelTable).orderBy(llmModelTable.createdAt);

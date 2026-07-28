@@ -21,6 +21,7 @@ export function FilterTabs<T extends string>({ tabs, activeTab, onTabChange }: F
         <button
           key={tab.value}
           type="button"
+          data-testid={`filter-tab-${tab.value}`}
           aria-pressed={activeTab === tab.value}
           onClick={() => onTabChange(tab.value)}
           className={cn(

@@ -18,5 +18,5 @@
     "types": "@ais-chat/ui/types",
     "ui": "@ais-chat/ui/components"
   },
-  "iconLibrary": "lucide-react"
+  "iconLibrary": "@phosphor-icons/react"
 }

@@ -1,0 +1,47 @@
+name: ais-chat
+
+# Override file for a single-node Valkey cluster (cluster mode enabled).
+# Use together with docker-compose.local.yml:
+#
+#   docker compose -f devops/docker/docker-compose.local.yml \
+#                  -f devops/docker/docker-compose.valkey-cluster.yml up -d --build
+#
+# The standalone `valkey` service is replaced by a cluster-enabled node.
+# A one-shot init container bootstraps the cluster after the node is ready.
+
+services:
+  # Override the standalone valkey with a cluster-enabled single node.
+  # Announce 127.0.0.1 since the port is exported to the host — good enough for local dev.
+  valkey:
+    image: ghcr.io/valkey-io/valkey:9.1.1-alpine
+    restart: unless-stopped
+    command: >
+      valkey-server
+      --cluster-enabled yes
+      --cluster-announce-ip 127.0.0.1
+      --cluster-announce-port 6379
+      --appendonly yes
+    volumes: !override
+      - valkey_cluster_data:/data
+    ports: !override
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # One-shot container that bootstraps the single-node cluster.
+  # --cluster-replicas 0 allows a single-node cluster with no replicas.
+  valkey-cluster-init:
+    image: ghcr.io/valkey-io/valkey:9.1.1-alpine
+    restart: no
+    depends_on:
+      valkey:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "valkey-cli --cluster create valkey:6379 --cluster-replicas 0 --cluster-yes"
+
+volumes:
+  valkey_cluster_data:

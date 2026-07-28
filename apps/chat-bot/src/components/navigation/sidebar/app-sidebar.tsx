@@ -33,16 +33,11 @@ import { useState } from 'react';
 type AppSidebarProps = {
   federalState: FederalStateModel;
   user: UserModel;
-  currentModelCosts: number;
-  userPriceLimit: number;
+  usedBudget: number;
+  maxBudget: number;
 };
 
-export function AppSidebar({
-  federalState,
-  user,
-  currentModelCosts,
-  userPriceLimit,
-}: AppSidebarProps) {
+export function AppSidebar({ federalState, user, usedBudget, maxBudget }: AppSidebarProps) {
   const { toggleSidebar, open } = useSidebar();
   const t = useTranslations('sidebar');
   const [sidebarContentEl, setSidebarContentEl] = useState<HTMLDivElement | null>(null);
@@ -111,11 +106,7 @@ export function AppSidebar({
           </SidebarGroup>
 
           <SidebarGroup className="mt-2">
-            <MyTokenPoints
-              text={t('token-points')}
-              currentModelCosts={currentModelCosts}
-              userPriceLimit={userPriceLimit}
-            />
+            <MyTokenPoints text={t('token-points')} usedBudget={usedBudget} maxBudget={maxBudget} />
           </SidebarGroup>
 
           <SidebarGroup className="mt-4">

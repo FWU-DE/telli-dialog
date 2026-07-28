@@ -3,6 +3,8 @@ import {
   dbUpdateModelMappingsForApiKey,
 } from '@ais-chat/api-database';
 import { logInfo } from '@shared/logging';
+import { dbUpdateLlmModelsForAllFederalStates } from '@shared/db/functions/llm-model';
+import { syncBifrostProvidersForOrganization } from './bifrost-provider-sync-service';
 
 export async function getModelApiKeyMappings(
   organizationId: string,
@@ -24,6 +26,9 @@ export async function saveModelApiKeyMappings(
     apiKeyId,
     modelIds,
   );
+
+  await syncBifrostProvidersForOrganization(organizationId);
+  await dbUpdateLlmModelsForAllFederalStates();
 
   logInfo('API Key mapping was updated successfully', { projectId, apiKeyId, modelIds });
 

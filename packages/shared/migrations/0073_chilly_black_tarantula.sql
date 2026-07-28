@@ -1,0 +1,1 @@
+ALTER TYPE "public"."access_level" ADD VALUE 'community' BEFORE 'global';

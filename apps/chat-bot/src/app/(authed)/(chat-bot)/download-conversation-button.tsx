@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@ui/components/button';
 import { cn } from '@/utils/tailwind';
 import { BoxArrowDownIcon } from '@phosphor-icons/react';
-import { downloadFileFromBlob } from '@/utils/download-file-from-blob';
+import { downloadFileFromBlob, extractFilenameFromResponse } from '@/utils/files/blob-download';
 
 type DownloadConversationButtonProps = {
   conversationId: string;
@@ -16,6 +16,36 @@ type DownloadConversationButtonProps = {
   showText?: boolean;
   className?: string;
 };
+
+type DownloadConversationParams = {
+  conversationId: string;
+  characterName?: string;
+};
+
+export async function fetchConversationDownload({
+  conversationId,
+  characterName,
+}: DownloadConversationParams) {
+  const searchParams = new URLSearchParams({
+    conversationId,
+  });
+
+  if (characterName !== undefined) {
+    searchParams.append('enterpriseGptName', characterName);
+  }
+
+  const response = await fetch(`/api/download-conversation?${searchParams.toString()}`);
+  const fileName = extractFilenameFromResponse(response, `Konversation_${conversationId}.docx`);
+
+  if (!response.ok) {
+    throw new Error('Failed to download the document');
+  }
+
+  return {
+    blob: await response.blob(),
+    fileName,
+  };
+}
 
 export default function DownloadConversationButton({
   conversationId,
@@ -35,27 +65,10 @@ export default function DownloadConversationButton({
     try {
       setIsLoading(true);
 
-      const searchParams = new URLSearchParams({
+      const { blob, fileName } = await fetchConversationDownload({
         conversationId,
+        characterName,
       });
-
-      if (characterName !== undefined) {
-        searchParams.append('enterpriseGptName', characterName);
-      }
-
-      const response = await fetch(`/api/download-conversation?${searchParams.toString()}`);
-      const encodedFileName = response.headers.get('X-Filename')?.toString();
-
-      const fileName =
-        encodedFileName !== undefined
-          ? decodeURIComponent(encodedFileName)
-          : `Konversation_${conversationId}.docx`;
-
-      if (!response.ok) {
-        throw new Error('Failed to download the document');
-      }
-
-      const blob = await response.blob();
 
       downloadFileFromBlob(blob, fileName);
     } catch {
@@ -85,5 +98,3 @@ export default function DownloadConversationButton({
     </Button>
   );
 }
-
-export { downloadFileFromBlob } from '@/utils/download-file-from-blob';

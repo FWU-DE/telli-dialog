@@ -1,10 +1,11 @@
 'use client';
 
 import { useMainChat, type ChatMessage } from '@/hooks/use-chat-hooks';
-import React, { FormEvent, ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, SyntheticEvent, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
 import { type CharacterSelectModel, type AssistantSelectModel, FileModel } from '@shared/db/schema';
+import { type LearningScenarioSelectModel } from '@shared/db/schema';
 import PromptSuggestions from './prompt-suggestions';
 import MarkdownDisplay from './markdown-display';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
@@ -25,13 +26,15 @@ import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { getConversationPath } from '@/utils/chat/path';
 import { Messages, type PendingFileModel } from './messages';
 import { WebSource } from '@shared/db/types';
-import { useCheckStatusCode } from '@/hooks/use-response-status';
+import { FloatingText } from './floating-text';
+import { getErrorMessageByType } from '@/error/get-error-message-by-type';
 
 type ChatProps = {
   id: string;
   initialMessages: ChatMessage[];
   assistant?: AssistantSelectModel;
   character?: CharacterSelectModel;
+  learningScenario?: LearningScenarioSelectModel;
   imageSource?: string;
   promptSuggestions?: string[];
   initialFileMapping?: Map<string, FileModel[]>;
@@ -47,6 +50,7 @@ export default function Chat({
   initialMessages,
   assistant,
   character,
+  learningScenario,
   imageSource,
   promptSuggestions = [],
   initialFileMapping,
@@ -56,11 +60,14 @@ export default function Chat({
   conversationDownloadBasename,
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
+  const tCommon = useTranslations('common');
+  const tLearningScenarioShared = useTranslations('learning-scenarios.shared');
 
   const { selectedModel, setDownloadConversationEnabled } = useLlmModels();
   const conversationPath = getConversationPath({
     customGptId: assistant?.id,
     characterId: character?.id,
+    learningScenarioId: learningScenario?.id,
     conversationId: id,
   });
   const [fileMapping, setFileMapping] = useState<Map<string, FileModel[]>>(
@@ -98,11 +105,13 @@ export default function Chat({
     reload,
     stop,
     status,
+    error,
   } = useMainChat({
     conversationId: id,
     initialMessages: initialMessages,
     modelId: selectedModel?.id,
     characterId: character?.id,
+    learningScenarioId: learningScenario?.id,
     assistantId: assistant?.id,
     onMessageCreated: (messageId) => {
       // Associate pending files with the message ID immediately when the message is created
@@ -135,15 +144,13 @@ export default function Chat({
       logWarning('Assert: onFinish was called with zero assistant messages.');
       refetchConversations();
     },
-    onError: (error) => {
-      handleError(error);
+    onError: () => {
       refetchConversations();
     },
   });
 
-  const { error, handleError, resetError } = useCheckStatusCode();
-
   const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, status]);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Skip fetching file mappings if the conversation doesn't exist yet (no messages sent)
@@ -152,7 +159,9 @@ export default function Chat({
     }
 
     const fetchData = async () => {
-      const newFileMapping = await refetchFileMapping(id);
+      const result = await refetchFileMapping(id);
+      if (!result.success) return;
+      const newFileMapping = result.value;
       setFileMapping(newFileMapping);
 
       // Clean up pending files that now have DB entries
@@ -176,12 +185,11 @@ export default function Chat({
     void fetchData();
   }, [countOfFilesInChat, id, messages.length]);
 
-  async function customHandleSubmit(e: FormEvent) {
+  async function customHandleSubmit(e: SyntheticEvent) {
     e.preventDefault();
 
     try {
       reactivateAutoScrolling();
-      resetError();
 
       // Trigger refetch of the fileMapping from the DB
       setCountOfFilesInChat((prev) => prev + 1);
@@ -224,7 +232,6 @@ export default function Chat({
   }
 
   function handleReload() {
-    resetError();
     void reload();
   }
 
@@ -264,6 +271,14 @@ export default function Chat({
         description={character.description}
       />
     );
+  } else if (learningScenario !== undefined) {
+    placeholderElement = (
+      <InitialChatContentDisplay
+        title={learningScenario.name}
+        imageSource={imageSource}
+        description={learningScenario.description}
+      />
+    );
   } else if (assistant !== undefined && assistant.id === HELP_MODE_ASSISTANT_ID) {
     placeholderElement = (
       <div className="flex flex-col items-center justify-center gap-6 h-full p-4">
@@ -295,7 +310,7 @@ export default function Chat({
 
   const assistantIcon = AssistantIcon({
     customGptId: assistant?.id,
-    imageName: character?.name ?? assistant?.name,
+    imageName: character?.name ?? learningScenario?.name ?? assistant?.name,
     imageSource,
   });
 
@@ -303,8 +318,21 @@ export default function Chat({
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <div className="flex flex-col grow justify-between w-full overflow-hidden">
+      <div
+        ref={containerRef}
+        className="relative flex flex-col grow justify-between w-full overflow-hidden"
+      >
         <div ref={scrollRef} className="grow overflow-y-auto">
+          {learningScenario !== undefined && learningScenario.studentExercise.trim() !== '' && (
+            <FloatingText
+              learningContext={learningScenario.studentExercise}
+              dialogStarted={true}
+              title={tLearningScenarioShared('exercise-title')}
+              maxWidth={600}
+              maxHeight={600}
+              minMargin={16}
+            />
+          )}
           {messages.length === 0 ? (
             placeholderElement
           ) : (
@@ -313,6 +341,7 @@ export default function Chat({
               isLoading={isLoading}
               status={status}
               reload={reload}
+              conversationId={id}
               assistantIcon={assistantIcon}
               containerClassName="flex flex-col gap-2 mx-auto p-4"
               fileMapping={fileMapping}
@@ -321,7 +350,12 @@ export default function Chat({
               downloadFileBasename={conversationDownloadBasename}
             />
           )}
-          {error && <ErrorChatPlaceholder error={error} handleReload={handleReload} />}
+          {error && (
+            <ErrorChatPlaceholder
+              errorMessage={tCommon(getErrorMessageByType(error))}
+              handleReload={handleReload}
+            />
+          )}
         </div>
         <div className="w-full shrink-0 px-4 pb-4 pt-2 mx-auto">
           <div className="relative flex flex-col">

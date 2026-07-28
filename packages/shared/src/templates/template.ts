@@ -1,9 +1,12 @@
-export type TemplateTypes = 'character' | 'assistant' | 'learning-scenario';
+import { URL_ENTITY_TYPES, UrlEntityType } from '@shared/entities/entity-types';
 
-/* Unified template model for characters and assistants */
+export type TemplateTypes = UrlEntityType;
+
+/* Unified template model for assistants, characters and learning scenarios. */
 export type TemplateModel = {
   id: string;
   originalId: string | null;
+  author: string;
   type: TemplateTypes;
   name: string;
   createdAt: Date;
@@ -18,9 +21,5 @@ export type TemplateToFederalStateMapping = {
 /**** Guards ****/
 
 export function isTemplateType(templateType: string): templateType is TemplateTypes {
-  return (
-    templateType === 'character' ||
-    templateType === 'assistant' ||
-    templateType === 'learning-scenario'
-  );
+  return (URL_ENTITY_TYPES as readonly string[]).includes(templateType);
 }

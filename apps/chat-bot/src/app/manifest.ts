@@ -1,5 +1,4 @@
 import type { MetadataRoute } from 'next';
-import logoIcon from '@/assets/logo-only.svg?url';
 import appleTouchIcon from '@/assets/apple-touch-icon.png';
 import iconMaskable from '@/assets/icon-maskable.png';
 
@@ -16,7 +15,7 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#fff',
     icons: [
       {
-        src: logoIcon.src,
+        src: '/logo.svg',
         sizes: 'any',
         type: 'image/svg+xml',
         purpose: 'any',

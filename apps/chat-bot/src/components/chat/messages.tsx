@@ -12,12 +12,14 @@ interface MessagesProps {
   isLoading: boolean;
   status: ChatStatus;
   reload: () => void;
+  conversationId?: string;
   assistantIcon?: React.ReactNode;
   containerClassName: string;
   fileMapping?: Map<string, FileModel[]>;
   pendingFileMapping?: Map<string, PendingFileModel[]>;
   webSourceMapping?: Map<string, WebSource[]>;
   downloadFileBasename?: string | null;
+  getSignedUrlFn?: (fileId: string) => Promise<string>;
 }
 
 export function Messages({
@@ -25,12 +27,14 @@ export function Messages({
   isLoading,
   status,
   reload,
+  conversationId,
   assistantIcon,
   containerClassName,
   fileMapping,
   pendingFileMapping,
   webSourceMapping,
   downloadFileBasename,
+  getSignedUrlFn,
 }: MessagesProps) {
   return (
     <div className={containerClassName}>
@@ -43,10 +47,12 @@ export function Messages({
           isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
           isLoading={isLoading}
           regenerateMessage={reload}
+          conversationId={conversationId}
           assistantIcon={assistantIcon}
           webSources={message.role === 'user' ? webSourceMapping?.get(message.id) : undefined}
           status={status}
           downloadFileBasename={downloadFileBasename}
+          getSignedUrlFn={getSignedUrlFn}
         >
           {message}
         </ChatBox>

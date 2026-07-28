@@ -1,8 +1,13 @@
 # This Dockerfile uses a multi-stage build to create a minimal production image.
 # https://docs.docker.com/build/building/multi-stage/
 
+# Global build args must be declared before the first FROM to be explicit about
+# accepted inputs. They still need to be re-declared in each stage that uses them.
+ARG APP_VERSION
+ARG CI=true
+
 # Alpine image
-FROM node:24.15.0-alpine AS base
+FROM node:24.18.0-alpine AS base
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV TURBO_TELEMETRY_DISABLED=1
@@ -16,7 +21,10 @@ COPY . .
 # setup pnpm and pnpm install in order to install turbo in the correct version
 RUN corepack enable && corepack prepare
 RUN pnpm install --frozen-lockfile --dev
-RUN pnpm turbo prune ais-chat-app --docker
+
+ARG CI=true
+RUN CI=${CI} \
+    pnpm turbo prune ais-chat-app --docker
 
 # Build the project
 FROM base AS builder
@@ -40,13 +48,16 @@ COPY --from=pruner /app/out/full/ .
 # Copy git history, required for sentry to determine release name
 COPY .git ./.git
 
-ARG CI
+ARG CI=true
+ARG APP_VERSION
 
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
     --mount=type=secret,id=SENTRY_ORG,env=SENTRY_ORG \
     --mount=type=secret,id=SENTRY_PROJECT,env=SENTRY_PROJECT \
     --mount=type=secret,id=SENTRY_URL,env=SENTRY_URL \
+    --mount=type=secret,id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY \
     CI=${CI} \
+    APP_VERSION=${APP_VERSION} \
     pnpm turbo build:envless
 
 # Final image

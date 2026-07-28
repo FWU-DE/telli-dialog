@@ -1,21 +1,119 @@
 import { LinkupClient } from 'linkup-sdk';
 import { generateTextWithBilling, type Message } from '@ais-chat/ai-core';
-import { env } from '@/env';
+import { env } from './env';
 import {
   WEBSEARCH_RESULT_LENGTH_LIMIT,
   WEBSEARCH_RESULTS_LIMIT,
 } from '@/configuration-text-inputs/const';
-import type { WebSearchResult } from '@shared/db/schema';
+import type { WebSearchResult, WebSearchScope } from '@shared/db/schema';
 import { logError } from '@shared/logging';
 import { dbInsertConversationToolCallUsage } from '@shared/db/functions/token-usage';
+import { dbUpdateTokenUsageByCharacterChatId } from '@shared/db/functions/character';
+import { dbUpdateTokenUsageBySharedLearningScenarioId } from '@shared/db/functions/learning-scenario';
 import { dbGetToolCallCostByName } from '@shared/db/functions/tool-call';
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
+import { UserAndContext } from '@/auth/types';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
+import { dbGetAssistantById } from '@shared/db/functions/assistants';
+import { dbGetCharacterById } from '@shared/db/functions/character';
+import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
+
+export type WebSearchConfig = {
+  enabled: boolean;
+  scope: WebSearchScope;
+  includedDomains: string[];
+};
+
+const DISABLED_WEB_SEARCH_CONFIG: WebSearchConfig = {
+  enabled: false,
+  scope: 'all-web',
+  includedDomains: [],
+};
+
+const ENABLED_ALL_WEB_CONFIG: WebSearchConfig = {
+  enabled: true,
+  scope: 'all-web',
+  includedDomains: [],
+};
+
+function normalizeIncludedDomains(domains: string[]): string[] {
+  return domains.map((domain) => domain.trim()).filter((domain) => domain.length > 0);
+}
+
+export function isWebSearchAvailableForFederalState(featureToggles: {
+  isWebSearchEnabled?: boolean;
+}): boolean {
+  return (featureToggles.isWebSearchEnabled ?? false) && !!env.linkupApiKey;
+}
+
+export async function resolveWebSearchConfig({
+  user,
+  characterId,
+  learningScenarioId,
+  assistantId,
+}: {
+  user: UserAndContext;
+  characterId?: string;
+  learningScenarioId?: string;
+  assistantId?: string;
+}): Promise<WebSearchConfig> {
+  if (!isWebSearchAvailableForFederalState(user.federalState.featureToggles)) {
+    return DISABLED_WEB_SEARCH_CONFIG;
+  }
+
+  if (characterId) {
+    const character = await dbGetCharacterById({ characterId });
+    if (!character?.isWebSearchEnabled) return DISABLED_WEB_SEARCH_CONFIG;
+    return {
+      enabled: true,
+      scope: character.webSearchScope,
+      includedDomains: normalizeIncludedDomains(character.webSearchIncludedDomains),
+    };
+  }
+
+  if (learningScenarioId) {
+    const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
+    if (!learningScenario?.isWebSearchEnabled) return DISABLED_WEB_SEARCH_CONFIG;
+    return {
+      enabled: true,
+      scope: learningScenario.webSearchScope,
+      includedDomains: normalizeIncludedDomains(learningScenario.webSearchIncludedDomains),
+    };
+  }
+
+  if (!assistantId) return ENABLED_ALL_WEB_CONFIG;
+  if (assistantId === HELP_MODE_ASSISTANT_ID) return DISABLED_WEB_SEARCH_CONFIG;
+
+  const assistant = await dbGetAssistantById({ assistantId });
+  return assistant?.isWebSearchEnabled ? ENABLED_ALL_WEB_CONFIG : DISABLED_WEB_SEARCH_CONFIG;
+}
+
+export function isWebSearchEnabledForEntity({
+  featureToggles,
+  entity,
+}: {
+  featureToggles: { isWebSearchEnabled?: boolean | undefined };
+  entity: { isWebSearchEnabled: boolean };
+}): boolean {
+  if (
+    isWebSearchAvailableForFederalState(featureToggles) &&
+    featureToggles?.isWebSearchEnabled === true &&
+    entity.isWebSearchEnabled === true
+  )
+    return true;
+
+  return false;
+}
 
 async function recordWebSearchUsage({
   conversationId,
+  characterId,
+  learningScenarioId,
   userId,
 }: {
-  conversationId: string;
+  conversationId?: string;
+  characterId?: string;
+  learningScenarioId?: string;
   userId: string;
 }) {
   let costsInCent = 0;
@@ -27,18 +125,42 @@ async function recordWebSearchUsage({
   }
 
   try {
-    await dbInsertConversationToolCallUsage({
-      toolCallName: 'web_search',
-      conversationId,
-      userId,
-      costsInCent,
-    });
+    if (conversationId) {
+      await dbInsertConversationToolCallUsage({
+        toolCallName: 'web_search',
+        conversationId,
+        userId,
+        costsInCent,
+      });
+    } else if (characterId) {
+      await dbUpdateTokenUsageByCharacterChatId({
+        toolCallName: 'web_search',
+        characterId,
+        userId,
+        costsInCent,
+        completionTokens: 0,
+        promptTokens: 0,
+        modelId: null,
+      });
+    } else if (learningScenarioId) {
+      await dbUpdateTokenUsageBySharedLearningScenarioId({
+        toolCallName: 'web_search',
+        learningScenarioId,
+        userId,
+        costsInCent,
+        completionTokens: 0,
+        promptTokens: 0,
+        modelId: null,
+      });
+    } else {
+      logError('Missing billing context for web search usage tracking');
+    }
   } catch (error) {
     logError('Error recording web search usage billing.', error);
   }
 }
 
-export async function isWebSearchNeeded({
+async function isWebSearchNeeded({
   messages,
   modelId,
   apiKeyId,
@@ -133,16 +255,27 @@ Beispiele:
  * Search results can be used in the rag context of the system prompt.
  *
  * @param query The search query string.
+ * @param conversationId Optional conversation ID.
+ * @param characterId Optional character ID.
+ * @param learningScenarioId Optional learning scenario ID.
+ * @param userId The user ID.
+ * @param includedDomains Optional list of domains to restrict the search to.
  * @returns An array of text search results from the Linkup API.
  */
 export async function searchWeb({
   query,
   conversationId,
+  characterId,
+  learningScenarioId,
   userId,
+  includedDomains,
 }: {
   query: string;
-  conversationId: string;
+  conversationId?: string;
+  characterId?: string;
+  learningScenarioId?: string;
   userId: string;
+  includedDomains?: string[];
 }): Promise<WebSearchResult[]> {
   if (!env.linkupApiKey) {
     return [];
@@ -153,14 +286,20 @@ export async function searchWeb({
       apiKey: env.linkupApiKey,
     });
 
+    const hasIncludedDomains = includedDomains !== undefined && includedDomains.length > 0;
+
     const searchResults = await linkupClient.search({
       query: query,
       depth: 'standard',
       outputType: 'searchResults',
+      maxResults: WEBSEARCH_RESULTS_LIMIT,
+      ...(hasIncludedDomains && { includeDomains: includedDomains }),
     });
 
     await recordWebSearchUsage({
       conversationId,
+      characterId,
+      learningScenarioId,
       userId,
     });
 
@@ -168,14 +307,68 @@ export async function searchWeb({
       return [];
     }
 
-    return (searchResults.results as WebSearchResult[])
-      .slice(0, WEBSEARCH_RESULTS_LIMIT)
-      .map((result) => ({
-        ...result,
-        content: result.content.slice(0, WEBSEARCH_RESULT_LENGTH_LIMIT),
-      }));
+    return (searchResults.results as WebSearchResult[]).map((result) => ({
+      ...result,
+      content: result.content.slice(0, WEBSEARCH_RESULT_LENGTH_LIMIT),
+    }));
   } catch (error) {
     logError('Error during web search', error);
     return [];
   }
+}
+
+/**
+ * Runs the full web search flow: checks if web search is enabled for the user and context,
+ * determines whether the conversation requires a web search, and performs the search if needed.
+ *
+ * @param messages - The conversation message history used to determine search necessity.
+ * @param user - The authenticated user and their context, including federal state feature toggles.
+ * @param characterId - Optional character ID
+ * @param learningScenarioId - Optional learning scenario ID
+ * @param assistantId - Optional assistant ID
+ * @param modelId - The ID of the auxiliary model used for the search classification.
+ * @param apiKeyId - The API key ID of the auxiliary model.
+ * @param conversationId - Optional conversation ID.
+ * @returns An array of web search results, or an empty array if search is disabled or not needed.
+ */
+export async function runWebSearchPipeline({
+  messages,
+  user,
+  characterId,
+  learningScenarioId,
+  assistantId,
+  modelId,
+  apiKeyId,
+  conversationId,
+}: {
+  messages: Message[];
+  user: UserAndContext;
+  characterId?: string;
+  learningScenarioId?: string;
+  assistantId?: string;
+  modelId: string;
+  apiKeyId: string;
+  conversationId?: string;
+}): Promise<WebSearchResult[]> {
+  const config = await resolveWebSearchConfig({
+    user,
+    characterId,
+    learningScenarioId,
+    assistantId,
+  });
+  if (!config.enabled) return [];
+
+  const decision = await isWebSearchNeeded({ messages, modelId, apiKeyId });
+  if (!decision.needed) return [];
+
+  const includedDomains = config.scope === 'included-domains' ? config.includedDomains : undefined;
+
+  return searchWeb({
+    query: decision.query,
+    conversationId,
+    characterId,
+    learningScenarioId,
+    userId: user.id,
+    includedDomains,
+  });
 }

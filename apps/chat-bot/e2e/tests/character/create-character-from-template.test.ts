@@ -6,7 +6,7 @@ import { confirmDuplicate } from '../../utils/utils';
 test.use({ storageState: AUTH_FILES.teacher });
 
 test('create character from template', async ({ page }) => {
-  await page.goto('/characters');
+  await page.goto('/characters?filter=all');
 
   const card = page
     .getByTestId('entity-card')

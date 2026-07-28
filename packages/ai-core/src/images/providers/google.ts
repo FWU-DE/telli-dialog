@@ -1,65 +1,72 @@
+import type { GenerateImagesConfig, GenerateImagesResponse } from '@google/genai';
 import * as Sentry from '@sentry/core';
-import { GoogleAuth } from 'google-auth-library';
-import type { AiModel, ImageGenerationFn } from '../types';
-import { AiGenerationError, ProviderConfigurationError, ResponsibleAIError } from '../../errors';
+import type { AiModel, ImageGenerationFn, ImageResponse } from '../types';
+import { AiGenerationError, ResponsibleAIError } from '../../errors';
+import {
+  createGoogleClient,
+  formatGoogleError,
+  getGoogleServiceAddress,
+} from '../../google-client';
 
-interface GoogleClientConfig {
-  projectId: string;
-  location: string;
-  auth: GoogleAuth;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-interface GoogleVertexPrediction {
-  raiFilteredReason?: string;
-  bytesBase64Encoded?: string;
-}
+function createGoogleImageConfig(additionalParameters: Record<string, unknown>): {
+  config: GenerateImagesConfig;
+  outputMimeType: string;
+} {
+  const rawConfig = isRecord(additionalParameters.parameters)
+    ? additionalParameters.parameters
+    : additionalParameters;
+  const { sampleImageSize, safetySetting, ...rest } = rawConfig;
 
-interface GoogleVertexResponse {
-  predictions?: GoogleVertexPrediction[];
-}
-
-// Cache Google client to avoid recreating auth instances
-const googleClientCache = new Map<string, GoogleClientConfig>();
-
-// Create or retrieve a cached Google client configuration
-function createGoogleClient(model: AiModel): GoogleClientConfig {
-  if (model.setting.provider !== 'google') {
-    throw new ProviderConfigurationError('Invalid model configuration for Google');
-  }
-
-  const { projectId, location } = model.setting;
-  const cacheKey = `${projectId}-${location}` as const;
-
-  if (googleClientCache.has(cacheKey)) {
-    return googleClientCache.get(cacheKey)!;
-  }
-
-  // Initialize Google Auth with automatic credential detection
-  // The GOOGLE_APPLICATION_CREDENTIALS env var should point to the service account JSON file
-  const auth = new GoogleAuth({
-    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-  });
-
-  const client = {
-    projectId,
-    location,
-    auth,
+  const configRecord: Record<string, unknown> = {
+    numberOfImages: 1,
+    aspectRatio: '1:1',
+    imageSize: '1K',
+    safetyFilterLevel: 'block_only_high',
+    personGeneration: 'allow_adult',
+    language: 'auto',
+    includeRaiReason: true,
+    outputMimeType: 'image/png',
+    ...(typeof sampleImageSize === 'string' ? { imageSize: sampleImageSize } : {}),
+    ...(typeof safetySetting === 'string' ? { safetyFilterLevel: safetySetting } : {}),
+    ...rest,
   };
 
-  googleClientCache.set(cacheKey, client);
+  const outputMimeType =
+    typeof configRecord.outputMimeType === 'string' ? configRecord.outputMimeType : 'image/png';
 
-  return client;
+  return {
+    config: configRecord as GenerateImagesConfig,
+    outputMimeType,
+  };
+}
+
+function toGoogleOutputFormat(mimeType: string | undefined): ImageResponse['output_format'] {
+  switch (mimeType) {
+    case 'image/jpeg':
+    case 'image/jpg':
+      return 'jpeg';
+    case 'image/webp':
+      return 'webp';
+    case 'image/png':
+    default:
+      return 'png';
+  }
 }
 
 // Construct the Image Generation function for Google Vertex AI
 export function constructGoogleImageGenerationFn(model: AiModel): ImageGenerationFn {
   const clientConfig = createGoogleClient(model);
+  const additionalParameters = isRecord(model.additionalParameters)
+    ? model.additionalParameters
+    : {};
+  const { config, outputMimeType } = createGoogleImageConfig(additionalParameters);
+  const address = getGoogleServiceAddress(clientConfig.location);
 
   return async function getGoogleImageGeneration(params: Parameters<ImageGenerationFn>[0]) {
-    const { projectId, location, auth } = clientConfig;
-    const address = `${location}-aiplatform.googleapis.com`;
-    const endpoint = `https://${address}/v1/projects/${projectId}/locations/${location}/publishers/google/models/${model.name}:predict`;
-
     return Sentry.startSpan(
       {
         name: `generate_image ${model.name}`,
@@ -70,75 +77,49 @@ export function constructGoogleImageGenerationFn(model: AiModel): ImageGeneratio
           'gen_ai.request.model': model.name,
           'http.request.method': 'POST',
           'server.address': address,
-          'url.full': endpoint,
         },
       },
       async (span) => {
         try {
-          // Get access token - GoogleAuth handles caching and refresh automatically
-          const accessToken = await auth.getAccessToken();
-
-          // Prepare the request for Vertex AI Image Generation
-          const requestBody = {
-            instances: [
-              {
-                prompt: params.prompt,
-              },
-            ],
-            parameters: {
-              sampleCount: 1,
-              aspectRatio: '1:1',
-              sampleImageSize: '1K',
-              safetySetting: 'block_only_high',
-              personGeneration: 'allow_adult',
-              language: 'auto',
-            },
-          };
-
-          const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody),
+          const result: GenerateImagesResponse = await clientConfig.client.models.generateImages({
+            model: model.name,
+            prompt: params.prompt,
+            config,
           });
 
-          span.setAttribute('http.response.status_code', response.status);
+          const generatedImage = result.generatedImages?.[0];
+          if (!generatedImage) {
+            throw new AiGenerationError('No image generated from Google Vertex AI');
+          }
 
-          if (!response.ok) {
-            const errorDetails = await response.text();
-            throw new AiGenerationError(
-              `Google Vertex AI Image Generation request failed with status ${response.status}: ${response.statusText} \n\n ${errorDetails}`,
+          if (generatedImage.raiFilteredReason) {
+            span.setAttribute('gen_ai.response.finish_reasons', [generatedImage.raiFilteredReason]);
+            throw new ResponsibleAIError(
+              `Image generation was blocked due to safety settings: ${generatedImage.raiFilteredReason}`,
             );
           }
 
-          const result = (await response.json()) as GoogleVertexResponse;
-
-          // Convert Google's response to general Format
-          if (result.predictions && result.predictions.length > 0) {
-            const prediction = result.predictions[0]!;
-
-            if (prediction.raiFilteredReason) {
-              span.setAttribute('gen_ai.response.finish_reasons', [prediction.raiFilteredReason]);
-              throw new ResponsibleAIError(
-                `Image generation was blocked due to safety settings: ${prediction.raiFilteredReason}`,
-              );
-            }
-
-            if (!prediction.bytesBase64Encoded) {
-              throw new AiGenerationError('No image data received from Google Vertex AI');
-            }
-
-            span.setAttribute('gen_ai.response.finish_reasons', ['success']);
-            span.setAttribute('gen_ai.response.model', model.name);
-            return { data: [prediction.bytesBase64Encoded], output_format: 'png' };
+          if (!generatedImage.image?.imageBytes) {
+            throw new AiGenerationError('No image data received from Google Vertex AI');
           }
 
-          throw new AiGenerationError('No image generated from Google Vertex AI');
+          span.setAttribute('gen_ai.response.finish_reasons', ['success']);
+          span.setAttribute('gen_ai.response.model', model.name);
+
+          return {
+            data: [generatedImage.image.imageBytes],
+            output_format: toGoogleOutputFormat(generatedImage.image.mimeType ?? outputMimeType),
+          };
         } catch (error) {
           span.setAttribute('error', true);
-          throw error;
+
+          if (error instanceof ResponsibleAIError || error instanceof AiGenerationError) {
+            throw error;
+          }
+
+          throw new AiGenerationError(
+            formatGoogleError('Google Vertex AI Image Generation', error),
+          );
         }
       },
     );

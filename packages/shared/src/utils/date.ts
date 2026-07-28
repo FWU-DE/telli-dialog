@@ -37,6 +37,33 @@ export function formatDateToGermanTimestamp(
   return formatter.format(date);
 }
 
+export function formatDuration(totalSeconds: number): string {
+  const safeTotalSeconds = Math.max(0, Math.floor(totalSeconds));
+  const days = Math.floor(safeTotalSeconds / (24 * 3600));
+  const hours = Math.floor((safeTotalSeconds % (24 * 3600)) / 3600);
+  const minutes = Math.floor((safeTotalSeconds % 3600) / 60);
+  const seconds = safeTotalSeconds % 60;
+
+  if (days > 0) {
+    return `${days}d ${hours}h ${minutes}m`;
+  }
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m ${seconds}s`;
+  }
+
+  return `${String(minutes).padStart(2, '0')} : ${String(seconds).padStart(2, '0')}`;
+}
+
+export function formatDurationAsClock(totalSeconds: number): string {
+  const safeTotalSeconds = Math.max(0, Math.floor(totalSeconds));
+  const totalHours = Math.floor(safeTotalSeconds / 3600);
+  const minutes = Math.floor((safeTotalSeconds % 3600) / 60);
+  const seconds = safeTotalSeconds % 60;
+
+  return `${String(totalHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
 export function getWeekNumber(date: Date, timeZone: string = 'Europe/Berlin'): number {
   const zonedDate = new Date(
     new Intl.DateTimeFormat('en-US', {

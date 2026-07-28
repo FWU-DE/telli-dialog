@@ -117,3 +117,27 @@ export class SharedChatExpiredError extends AiGenerationError {
     return false;
   }
 }
+
+type AiGenerationErrorType<T extends AiGenerationError = AiGenerationError> = {
+  is: (error: unknown) => error is T;
+};
+
+export const aiGenerationErrorTypes = [
+  AiGenerationError,
+  ResponsibleAIError,
+  RateLimitExceededError,
+  InvalidModelError,
+  ProviderConfigurationError,
+  TokenPointsExceededError,
+  SharedChatExpiredError,
+] as const satisfies ReadonlyArray<AiGenerationErrorType>;
+
+export type KnownAiGenerationError = {
+  [
+    K in keyof typeof aiGenerationErrorTypes
+  ]: (typeof aiGenerationErrorTypes)[K] extends AiGenerationErrorType<infer T> ? T : never;
+}[number];
+
+export function isKnownAiGenerationError(error: unknown): error is KnownAiGenerationError {
+  return aiGenerationErrorTypes.some((errorType) => errorType.is(error));
+}

@@ -1,24 +1,24 @@
 // UI
 export const TEXT_INPUT_FIELDS_LENGTH_LIMIT = 500;
-export const TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS = 10000;
+export const TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS = 50_000;
 export const CHAT_MESSAGE_LENGTH_LIMIT = 6000;
 export const SMALL_TEXT_INPUT_FIELDS_LIMIT = 50;
-export const TOTAL_CHAT_LENGTH_LIMIT = 60_000; // Maximum total characters in chat history (~40 DIN A4 pages)
 
 // Web scraper
 export const WEB_SCRAPE_RESULT_LENGTH_LIMIT = 6000; // Maximum total characters from a single web scrape result (~4 DIN A4 pages)
 export const MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION = 5; // Maximum number of URLs to scrape per conversation
 
 // Chat history
-export const KEEP_RECENT_MESSAGES = 30; // Number of recent messages to keep in chat history
-export const KEEP_FIRST_MESSAGES = 2; // Number of first messages to keep in chat history
+export const TOTAL_CHAT_LENGTH_LIMIT = 60_000; // Maximum total characters in chat history (~40 DIN A4 pages)
 
 // RAG
 export const CHUNK_SIZE = 2500; // Number of characters per chunk when splitting text for RAG. Typical sweet spot to balance context richness with retrieval relevance
 export const VECTOR_SEARCH_LIMIT = 10; // Number of chunks to retrieve. One chunk is approximately 300 words or 400-500 tokens
+export const RETRIEVE_ENTIRE_FILE_CHARACTER_LIMIT = 100_000; // Maximum number of characters returned when retrieving a whole attached file
 
 // Web search
-export const WEBSEARCH_RESULTS_LIMIT = 5; // Number of websearch results to include in the RAG context
+export const WEBSEARCH_RESULTS_LIMIT = 10; // Number of websearch results to include in the RAG context
+export const MAX_WEB_SEARCH_INCLUDED_DOMAINS = 50; // Maximum number of domains that can be included in the web search scope
 export const WEBSEARCH_RESULT_LENGTH_LIMIT = 2500; // Maximum characters to include from each websearch result
 
 // Attachments

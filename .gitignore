@@ -52,6 +52,7 @@ certificates
 
 playwright-report/
 .playwright-auth/
+.playwright-mcp/
 test-results/
 
 # Sentry Config File

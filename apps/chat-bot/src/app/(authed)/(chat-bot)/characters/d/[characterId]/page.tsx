@@ -12,9 +12,18 @@ import { z } from 'zod';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import { type Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 const searchParamsSchema = z.object({ model: z.string().optional() });
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('characters.page-titles');
+  return {
+    title: t('chat'),
+  };
+}
 
 export default async function Page(props: PageProps<'/characters/d/[characterId]'>) {
   const { characterId } = await props.params;

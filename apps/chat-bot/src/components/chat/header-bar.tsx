@@ -3,12 +3,19 @@
 import { UserAndContext } from '@/auth/types';
 import SelectLlmModel from '../conversation/select-llm-model';
 import { NewChatButton } from '../navigation/sidebar/collapsible-sidebar';
-import DownloadConversationButton from '@/app/(authed)/(chat-bot)/download-conversation-button';
+import DownloadConversationButton, {
+  fetchConversationDownload,
+} from '@/app/(authed)/(chat-bot)/download-conversation-button';
+import { downloadFileFromBlob } from '@/utils/files/blob-download';
 import { useLlmModels } from '../providers/llm-model-provider';
 import {
-  DialogHeaderContent,
-  DialogHeaderCompactMenuContent,
-} from '@/components/layout/dialog-header';
+  ApplicationHeaderActions,
+  type HeaderActionConfig,
+} from '@/components/layout/application-header';
+import { BoxArrowDownIcon } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
+import { useToast } from '@/components/common/toast';
+import { useCallback } from 'react';
 
 export type ChatHeaderBarProps = {
   userAndContext: UserAndContext;
@@ -17,75 +24,74 @@ export type ChatHeaderBarProps = {
   chatId: string;
 };
 
-export function ChatHeaderBarContent({
+export function ChatHeaderBar({
   userAndContext,
   title,
   downloadConversationEnabled: downloadConversationEnabledProp,
   chatId,
 }: ChatHeaderBarProps) {
+  const tCommon = useTranslations('common');
+  const toast = useToast();
   const { downloadConversationEnabled: downloadConversationEnabledFromContext } = useLlmModels();
   const downloadConversationEnabled =
     downloadConversationEnabledProp || downloadConversationEnabledFromContext;
 
-  return (
-    <div className="flex flex-col w-full">
-      <div className="flex w-full gap-4 justify-center items-center">
-        <NewChatButton />
-        <SelectLlmModel isStudent={userAndContext.userRole === 'student'} />
-        <div className="grow"></div>
-        {title !== undefined && (
-          <div className="hidden sm:flex sm:w-1/3 lg:w-1/2">
-            <span className="font-normal text-xl truncate">{title}</span>
+  const handleDownload = useCallback(async () => {
+    if (!downloadConversationEnabled) {
+      return;
+    }
+
+    try {
+      const { blob, fileName } = await fetchConversationDownload({
+        conversationId: chatId,
+        characterName: title,
+      });
+      downloadFileFromBlob(blob, fileName);
+    } catch {
+      toast.error('Der Download der Konversation ist fehlgeschlagen.');
+    }
+  }, [chatId, downloadConversationEnabled, title, toast]);
+
+  const actions: HeaderActionConfig[] = [
+    {
+      id: 'chat-header-main-content',
+      headerNode: (
+        <div className="flex flex-col w-full">
+          <div className="flex w-full min-w-0 sm:gap-6 justify-center sm:justify-between items-center">
+            <NewChatButton />
+            <SelectLlmModel isStudent={userAndContext.userRole === 'student'} />
+            {title !== undefined && (
+              <div className="hidden min-w-0 sm:flex">
+                <span className="block w-full truncate font-normal text-xl">{title}</span>
+              </div>
+            )}
+            <div className="hidden sm:flex">
+              <DownloadConversationButton
+                conversationId={chatId}
+                characterName={title}
+                disabled={!downloadConversationEnabled}
+                showText={false}
+              />
+            </div>
           </div>
-        )}
-        <div className="hidden sm:flex">
-          <DownloadConversationButton
-            conversationId={chatId}
-            characterName={title}
-            disabled={!downloadConversationEnabled}
-            showText={false}
-          />
+          {title !== undefined && (
+            <div className="flex flex-1 w-full min-w-0 pb-2 sm:hidden">
+              <span className="w-full truncate text-center font-normal text-xl">{title}</span>
+            </div>
+          )}
         </div>
-      </div>
-      <div className="flex flex-1 w-full sm:hidden">
-        <span className="font-normal text-xl">{title}</span>
-      </div>
-    </div>
-  );
-}
+      ),
+    },
+    {
+      id: 'download-conversation',
+      menuItem: {
+        label: tCommon('conversation-download'),
+        icon: <BoxArrowDownIcon />,
+        disabled: !downloadConversationEnabled,
+        onSelect: handleDownload,
+      },
+    },
+  ];
 
-export function ChatHeaderBarCompactMenuContent({
-  title,
-  downloadConversationEnabled: downloadConversationEnabledProp,
-  chatId,
-}: Pick<ChatHeaderBarProps, 'title' | 'downloadConversationEnabled' | 'chatId'>) {
-  const { downloadConversationEnabled: downloadConversationEnabledFromContext } = useLlmModels();
-  const downloadConversationEnabled =
-    downloadConversationEnabledProp || downloadConversationEnabledFromContext;
-
-  return (
-    <DownloadConversationButton
-      conversationId={chatId}
-      characterName={title}
-      disabled={!downloadConversationEnabled}
-      showText={true}
-    />
-  );
-}
-
-export function ChatHeaderBar(props: ChatHeaderBarProps) {
-  return (
-    <>
-      <DialogHeaderCompactMenuContent>
-        <ChatHeaderBarCompactMenuContent
-          title={props.title}
-          chatId={props.chatId}
-          downloadConversationEnabled={props.downloadConversationEnabled}
-        />
-      </DialogHeaderCompactMenuContent>
-      <DialogHeaderContent>
-        <ChatHeaderBarContent {...props} />
-      </DialogHeaderContent>
-    </>
-  );
+  return <ApplicationHeaderActions actions={actions} />;
 }

@@ -3,7 +3,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { act } from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { downloadFileFromBlob } from '@/utils/download-file-from-blob';
+import { downloadFileFromBlob } from '@/utils/files/blob-download';
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
@@ -33,7 +33,7 @@ vi.mock('../common/clipboard-button', () => ({
   default: () => null,
 }));
 
-vi.mock('@/utils/download-file-from-blob', () => ({
+vi.mock('@/utils/files/blob-download', () => ({
   downloadFileFromBlob: vi.fn(),
 }));
 

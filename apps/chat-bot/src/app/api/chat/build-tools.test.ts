@@ -1,0 +1,154 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { UserAndContext } from '@/auth/types';
+import type { FileModel } from '@shared/db/schema';
+
+const mocks = vi.hoisted(() => ({
+  buildWebSearchToolMock: vi.fn(),
+  buildWebScraperToolMock: vi.fn(),
+  buildRetrieveEntireFileToolMock: vi.fn(),
+  buildRetrieveTextChunksToolMock: vi.fn(),
+}));
+
+vi.mock('./tools/web-search-tool', () => ({
+  buildWebSearchTool: mocks.buildWebSearchToolMock,
+}));
+
+vi.mock('./tools/web-scraper-tool', () => ({
+  buildWebScraperTool: mocks.buildWebScraperToolMock,
+}));
+
+vi.mock('./tools/retrieve-entire-file-tool', () => ({
+  buildRetrieveEntireFileTool: mocks.buildRetrieveEntireFileToolMock,
+}));
+
+vi.mock('./tools/retrieve-text-chunks-tool', () => ({
+  buildRetrieveTextChunksTool: mocks.buildRetrieveTextChunksToolMock,
+}));
+
+const user = {
+  id: 'user-1',
+  userRole: 'teacher',
+  federalState: {
+    id: 'federal-state-1',
+  },
+} as UserAndContext;
+
+const relatedFileEntities = [
+  {
+    id: 'file-1',
+    name: 'test.pdf',
+    size: 1000,
+  },
+] as FileModel[];
+
+beforeEach(() => {
+  vi.clearAllMocks();
+
+  // Default mock implementations - return tool-like objects
+  mocks.buildWebSearchToolMock.mockResolvedValue({
+    definition: {
+      name: 'web_search',
+      description: 'Search the web',
+      parameters: { type: 'object', properties: {} },
+    },
+    handler: vi.fn(),
+  });
+
+  mocks.buildWebScraperToolMock.mockReturnValue({
+    definition: {
+      name: 'web_scraper',
+      description: 'Scrape web pages',
+      parameters: { type: 'object', properties: {} },
+    },
+    handler: vi.fn(),
+  });
+
+  mocks.buildRetrieveEntireFileToolMock.mockReturnValue({
+    definition: {
+      name: 'retrieve_entire_file',
+      description: 'Retrieve entire file',
+      parameters: { type: 'object', properties: {} },
+    },
+    handler: vi.fn(),
+  });
+
+  mocks.buildRetrieveTextChunksToolMock.mockReturnValue({
+    definition: {
+      name: 'retrieve_text_chunks',
+      description: 'Retrieve text chunks',
+      parameters: { type: 'object', properties: {} },
+    },
+    handler: vi.fn(),
+  });
+});
+
+describe('buildTools', () => {
+  it('builds toolRegistry with all enabled tools', async () => {
+    const { buildTools } = await import('./build-tools');
+
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conv-1',
+      relatedFileEntities,
+      allowWebTools: true,
+    });
+
+    expect(Object.keys(toolRegistry)).toEqual([
+      'web_search',
+      'web_scraper',
+      'retrieve_entire_file',
+      'retrieve_text_chunks',
+    ]);
+  });
+
+  it('skips tools that return null', async () => {
+    mocks.buildWebSearchToolMock.mockResolvedValue(null);
+    mocks.buildWebScraperToolMock.mockReturnValue(null);
+
+    const { buildTools } = await import('./build-tools');
+
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conv-1',
+      relatedFileEntities,
+      allowWebTools: true,
+    });
+
+    expect(Object.keys(toolRegistry)).toEqual(['retrieve_entire_file', 'retrieve_text_chunks']);
+  });
+
+  it('passes onWebSearchResults callback to web search tool', async () => {
+    const { buildTools } = await import('./build-tools');
+
+    const onWebSearchResults = vi.fn();
+
+    await buildTools({
+      user,
+      conversationId: 'conv-1',
+      relatedFileEntities,
+      allowWebTools: true,
+      onWebSearchResults,
+    });
+
+    expect(mocks.buildWebSearchToolMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        onWebSearchResults,
+      }),
+    );
+  });
+
+  it('does not build web tools when allowWebTools is false', async () => {
+    const { buildTools } = await import('./build-tools');
+
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conv-1',
+      relatedFileEntities,
+      allowWebTools: false,
+    });
+
+    expect(Object.keys(toolRegistry)).toEqual(['retrieve_entire_file', 'retrieve_text_chunks']);
+    expect(mocks.buildWebSearchToolMock).not.toHaveBeenCalled();
+    expect(mocks.buildWebScraperToolMock).not.toHaveBeenCalled();
+  });
+});

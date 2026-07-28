@@ -1,5 +1,6 @@
 import { constructAzureEmbeddingGenerationFn } from './azure';
 import { constructIonosEmbeddingGenerationFn } from './ionos';
+import { constructBifrostEmbeddingGenerationFn } from './bifrost';
 import type { AiModel, EmbeddingGenerationFn } from '../types';
 import { ProviderConfigurationError } from '../../errors';
 
@@ -13,6 +14,9 @@ function getEmbeddingGenerationFnByModel({
   }
   if (model.provider === 'ionos') {
     return constructIonosEmbeddingGenerationFn(model);
+  }
+  if (model.provider === 'bifrost') {
+    return constructBifrostEmbeddingGenerationFn(model);
   }
 
   return undefined;

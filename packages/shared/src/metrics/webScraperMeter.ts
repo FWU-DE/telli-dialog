@@ -4,9 +4,9 @@ import { Counter, metrics } from '@opentelemetry/api';
  * Metric names following OpenTelemetry conventions
  */
 const METRIC_NAMES = {
-  CRAWL4AI_SUCCESS: 'telli_crawl4ai_success_total',
-  READABILITY_SUCCESS: 'telli_readability_success_total',
-  WEBSCRAPER_FAILED: 'telli_webscraper_failed_total',
+  CRAWL4AI_SUCCESS: 'crawl4ai_success_total',
+  READABILITY_SUCCESS: 'readability_success_total',
+  WEBSCRAPER_FAILED: 'webscraper_failed_total',
 } as const;
 
 /**
@@ -20,7 +20,7 @@ const METRIC_DESCRIPTIONS = {
 } as const;
 
 // Initialize meter with proper naming convention
-const meter = metrics.getMeter('telli.webscraper', '0.1.0');
+const meter = metrics.getMeter('ais-chat.webscraper', '0.1.0');
 
 // Initialize all counters at module load time for better performance
 const crawl4aiSuccessCounter: Counter = meter.createCounter(METRIC_NAMES.CRAWL4AI_SUCCESS, {

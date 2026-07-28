@@ -7,9 +7,9 @@ import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-update';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
-import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
-import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links/custom-chat-files-and-links';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
+import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 import type { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import type { WebSource } from '@shared/db/types';
 import { useRouter } from 'next/navigation';
@@ -22,34 +22,52 @@ import {
 import { Card, CardContent } from '@ui/components/card';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
-import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
+import { CustomChatShareWithLearners } from '@/components/custom-chat/share-with-learners/custom-chat-share-with-learners';
 import {
-  tokenPointsPercentageValues,
-  usageTimeValuesInMinutes,
-} from '../editor/[learningScenarioId]/schema';
-import {
+  extendLearningScenarioShareExpirationAction,
+  getLearningScenarioShareDataAction,
   shareLearningScenarioAction,
   unshareLearningScenarioAction,
+  updateLearningScenarioShareTokenPointsLimitAction,
 } from '../editor/[learningScenarioId]/actions';
+import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-chat/custom-chat-create-suspension-request-button';
+import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
+import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
+import { FilterDisplaySection } from '@/components/custom-chat/filter/custom-chat-filter-display-section';
+import { extractFilterValues } from '@/components/custom-chat/filter/custom-chat-filter-utils';
+import { FieldGroup } from '@ui/components/field';
 
 export function LearningScenarioView({
   learningScenario,
   fileMappings,
   pictureUrl,
   initialLinks,
+  usedBudget,
+  maxBudget,
+  budgetUsedBySharedChat,
+  isWebSearchAvailable,
 }: {
   learningScenario: LearningScenarioOptionalShareDataModel;
   fileMappings: FileModel[];
   pictureUrl: string | undefined;
   initialLinks: WebSource[];
+  usedBudget: number;
+  maxBudget: number;
+  budgetUsedBySharedChat: number;
+  isWebSearchAvailable: boolean;
 }) {
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('learning-scenarios');
   const tToast = useTranslations('learning-scenarios.toasts');
   const { models } = useLlmModels();
+  const filterValues = extractFilterValues(learningScenario);
 
   const modelDisplayName = models.find((m) => m.id === learningScenario.modelId)?.displayName;
+
+  const handleUseChat = () => {
+    router.push(`/learning-scenarios/d/${learningScenario.id}`);
+  };
 
   const handleDuplicateLearningScenario = async () => {
     const createResult = await createNewLearningScenarioFromTemplateAction({
@@ -68,18 +86,46 @@ export function LearningScenarioView({
   const handleShareLearningScenario = async (
     data: Parameters<typeof shareLearningScenarioAction>[0]['data'],
   ) => {
-    const result = await shareLearningScenarioAction({
+    return shareLearningScenarioAction({
       learningScenarioId: learningScenario.id,
       data,
     });
-    return result;
   };
 
   const handleUnshareLearningScenario = async () => {
-    const result = await unshareLearningScenarioAction({
+    return unshareLearningScenarioAction({
       learningScenarioId: learningScenario.id,
     });
-    return result;
+  };
+
+  const handleAddTimeToLearningScenario = async ({
+    additionalTimeInMinutes,
+  }: {
+    additionalTimeInMinutes: number;
+  }) => {
+    const result = await extendLearningScenarioShareExpirationAction({
+      learningScenarioId: learningScenario.id,
+      additionalTimeInMinutes,
+    });
+    if (result.success) {
+      return { success: true, expiredAt: result.value.expiredAt };
+    }
+    return { success: false };
+  };
+
+  const handleAdjustTokenLimitForLearningScenario = async ({
+    tokenPointsPercentageLimit,
+  }: {
+    tokenPointsPercentageLimit: number;
+  }) => {
+    const result = await updateLearningScenarioShareTokenPointsLimitAction({
+      learningScenarioId: learningScenario.id,
+      tokenPointsPercentageLimit,
+    });
+    if (result.success) {
+      return { success: true, tokenPointsLimit: result.value.tokenPointsLimit };
+    }
+    return { success: false };
   };
 
   async function handleDownloadFile(fileId: string) {
@@ -98,19 +144,28 @@ export function LearningScenarioView({
       />
       <CustomChatTitle title={learningScenario.name} />
       <CustomChatActions>
+        <CustomChatActionUse onClick={handleUseChat} />
         <CustomChatActionDuplicate onClick={handleDuplicateLearningScenario} />
         <CustomChatLastUpdate date={learningScenario.updatedAt} />
       </CustomChatActions>
 
       <CustomChatShareWithLearners
-        startedAt={learningScenario.startedAt}
+        expiredAt={learningScenario.expiredAt}
         manuallyStoppedAt={learningScenario.manuallyStoppedAt}
         maxUsageTimeLimit={learningScenario.maxUsageTimeLimit}
         tokenPointsLimit={learningScenario.tokenPointsLimit}
-        pointsPercentageValues={tokenPointsPercentageValues}
-        usageTimeValues={usageTimeValuesInMinutes}
+        usedBudget={usedBudget}
+        maxBudget={maxBudget}
+        budgetUsedBySharedChat={budgetUsedBySharedChat}
         onShare={handleShareLearningScenario}
         onUnshare={handleUnshareLearningScenario}
+        onAddTime={handleAddTimeToLearningScenario}
+        onAdjustTokenLimit={handleAdjustTokenLimitForLearningScenario}
+        onPollShareData={() =>
+          getLearningScenarioShareDataAction({
+            learningScenarioId: learningScenario.id,
+          })
+        }
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
         sharingDisabled={!learningScenario.name || learningScenario.name.trim().length === 0}
       />
@@ -125,17 +180,15 @@ export function LearningScenarioView({
         </Card>
 
         {learningScenario.accessLevel === 'global' && (
-          <Card className="w-full">
-            <CardContent className="flex flex-col items-center">
-              <div className="text-sm text-foreground/70">{t('author-label')}</div>
-              <div className="text-base font-medium">{t('author-text')}</div>
-            </CardContent>
-          </Card>
+          <CustomChatAuthorInfo
+            authorLabel={t('author-label')}
+            authorText={learningScenario.author !== '' ? learningScenario.author : t('author-text')}
+          />
         )}
 
         <Card>
           <CardContent>
-            <CustomChatFields>
+            <FieldGroup>
               <CustomChatFieldInfo label={t('name-label')} value={learningScenario.name} />
               <CustomChatFieldInfo
                 label={t('description-label')}
@@ -152,7 +205,8 @@ export function LearningScenarioView({
                 label={t('student-exercise-label')}
                 value={learningScenario.studentExercise}
               />
-            </CustomChatFields>
+              <FilterDisplaySection values={filterValues} />
+            </FieldGroup>
           </CardContent>
         </Card>
       </div>
@@ -161,6 +215,15 @@ export function LearningScenarioView({
         initialLinks={initialLinks}
         onDownloadFile={handleDownloadFile}
       />
+      {learningScenario.isWebSearchEnabled && isWebSearchAvailable && (
+        <CustomChatWebSearch readonly />
+      )}
+
+      {(learningScenario.hasLinkAccess || learningScenario.accessLevel === 'community') && (
+        <CustomChatCreateSuspensionRequestButton
+          entityRef={{ entityType: 'learningScenario', entityId: learningScenario.id }}
+        />
+      )}
     </CustomChatLayoutContainer>
   );
 }

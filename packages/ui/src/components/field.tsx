@@ -239,7 +239,7 @@ function FieldError({
       return null;
     }
 
-    if (errors?.length == 1) {
+    if (errors?.length === 1) {
       return errors[0]?.message;
     }
 

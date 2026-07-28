@@ -11,10 +11,19 @@ import { getConversationWithMessagesAndAssistant } from '@shared/assistants/assi
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import { type Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 
 const searchParamsSchema = z.object({ model: z.string().optional() });
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('assistants.page-titles');
+  return {
+    title: t('chat'),
+  };
+}
 
 export default async function Page(
   props: PageProps<'/assistants/d/[assistantId]/[conversationId]'>,

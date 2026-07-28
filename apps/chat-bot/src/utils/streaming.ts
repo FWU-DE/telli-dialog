@@ -3,7 +3,37 @@
  * Replaces ai/rsc's createStreamableValue and readStreamableValue.
  */
 
+import type { WebSearchResult } from '@shared/db/schema';
 import { logError } from '@shared/logging';
+
+const STREAM_EVENT_PREFIX = '\u001e';
+
+export type ChatStreamEvent = {
+  type: 'web_search_results';
+  webSearchResults: WebSearchResult[];
+};
+
+export function encodeChatStreamEvent(event: ChatStreamEvent): string {
+  return `${STREAM_EVENT_PREFIX}${JSON.stringify(event)}`;
+}
+
+export function decodeChatStreamEvent(chunk: string): ChatStreamEvent | null {
+  if (!chunk.startsWith(STREAM_EVENT_PREFIX)) {
+    return null;
+  }
+
+  try {
+    const event = JSON.parse(chunk.slice(STREAM_EVENT_PREFIX.length)) as ChatStreamEvent;
+
+    if (event.type !== 'web_search_results') {
+      return null;
+    }
+
+    return event;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Creates a streamable text value for Server Actions.

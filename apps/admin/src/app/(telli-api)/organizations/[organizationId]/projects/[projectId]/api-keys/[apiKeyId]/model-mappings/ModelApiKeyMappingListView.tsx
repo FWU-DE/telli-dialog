@@ -27,6 +27,7 @@ import {
   saveModelMappingsAction,
 } from './actions';
 import { LargeLanguageModel } from '@/types/large-language-model';
+import { isBifrostProviderSyncError } from '@ais-chat/api-database/bifrost-provider-sync/error';
 import { ModelApiKeyMapping } from '@/types/model-mappings';
 
 export type ModelApiKeyMappingListViewProps = {
@@ -99,6 +100,11 @@ export function ModelApiKeyMappingListView({
       await loadData();
     } catch (error) {
       logError('Error saving assignments', error);
+      if (isBifrostProviderSyncError(error)) {
+        toast.error('Fehler beim Aktualisieren der Bifrost-Zuordnung');
+        return;
+      }
+
       toast.error('Fehler beim Speichern der Zuordnungen');
     } finally {
       setIsSaving(false);

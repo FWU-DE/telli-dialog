@@ -5,10 +5,10 @@ import {
   ArrayPath,
   Control,
   Controller,
-  FieldArray,
   FieldValues,
   Path,
   useFieldArray,
+  UseFieldArrayAppend,
 } from 'react-hook-form';
 import { Field, FieldDescription, FieldError, FieldLegend, FieldSet } from '@ui/components/field';
 
@@ -21,7 +21,7 @@ export type FormFieldArrayProps<
   label: string;
   description: string;
   inputType?: string;
-  defaultAppendValue: FieldArray<TFieldValues, TName>;
+  defaultAppendValue: Parameters<UseFieldArrayAppend<TFieldValues, TName>>[0];
 };
 
 export function FormFieldArray<

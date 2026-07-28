@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { type ChatMessage as Message } from '@/types/chat';
 import { Button } from '@ui/components/button';
 import { BoxArrowDownIcon } from '@phosphor-icons/react';
-import { downloadFileFromBlob } from '@/utils/download-file-from-blob';
+import { downloadFileFromBlob, extractFilenameFromResponse } from '@/utils/files/blob-download';
 
 type DownloadConversationButtonProps = {
   conversationMessages: Message[];
@@ -19,6 +19,44 @@ type DownloadConversationButtonProps = {
   showText?: boolean;
   inviteCode: string;
 };
+
+type DownloadSharedConversationParams = {
+  conversationMessages: Message[];
+  sharedConversationName?: string;
+  characterName?: string;
+  inviteCode: string;
+};
+
+export async function fetchSharedConversationDownload({
+  conversationMessages,
+  sharedConversationName,
+  characterName,
+  inviteCode,
+}: DownloadSharedConversationParams) {
+  const response = await fetch(`/api/download-conversation/shared`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messages: conversationMessages,
+      characterName,
+      sharedConversationName,
+      inviteCode,
+    }),
+  });
+
+  const fileName = extractFilenameFromResponse(response, 'Konversation_AIS.chat.docx');
+
+  if (!response.ok) {
+    throw new Error('Failed to download the document');
+  }
+
+  return {
+    blob: await response.blob(),
+    fileName,
+  };
+}
 
 export default function DownloadSharedConversationButton({
   conversationMessages,
@@ -35,7 +73,12 @@ export default function DownloadSharedConversationButton({
   const tCommon = useTranslations('common');
 
   React.useEffect(() => {
+    // In dev with React StrictMode, effects may run setup/cleanup twice.
+    // Keep this ref accurate so async callbacks don't call setState after unmount.
+    isMountedRef.current = true;
+
     return () => {
+      // Component can be unmounted before the download is completed
       isMountedRef.current = false;
     };
   }, []);
@@ -48,31 +91,12 @@ export default function DownloadSharedConversationButton({
     try {
       setIsLoading(true);
 
-      const response = await fetch(`/api/download-conversation/shared`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: conversationMessages,
-          characterName,
-          sharedConversationName,
-          inviteCode,
-        }),
+      const { blob, fileName } = await fetchSharedConversationDownload({
+        conversationMessages,
+        sharedConversationName,
+        characterName,
+        inviteCode,
       });
-
-      const encodedFileName = response.headers.get('X-Filename')?.toString();
-
-      const fileName =
-        encodedFileName !== undefined
-          ? decodeURIComponent(encodedFileName)
-          : `Konversation_AIS.chat.docx`;
-
-      if (!response.ok) {
-        throw new Error('Failed to download the document');
-      }
-
-      const blob = await response.blob();
 
       downloadFileFromBlob(blob, fileName);
     } catch {
@@ -124,5 +148,3 @@ export default function DownloadSharedConversationButton({
     </Button>
   );
 }
-
-export { downloadFileFromBlob } from '@/utils/download-file-from-blob';

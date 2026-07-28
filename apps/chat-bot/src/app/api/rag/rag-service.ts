@@ -1,4 +1,4 @@
-import { ChunkInsertModel, ChunkSourceType, FileModelAndContent } from '@shared/db/schema';
+import { ChunkInsertModel, ChunkSourceType, FileModel } from '@shared/db/schema';
 import { type ChatMessage as Message } from '@/types/chat';
 import { chunkText } from './chunking';
 import { embedText, embedChunks } from './embedding';
@@ -6,6 +6,13 @@ import { vectorSearch } from './retrieval';
 import { RetrievedChunk, UnembeddedChunk } from './types';
 import { VECTOR_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { logError } from '@shared/logging';
+
+export const SUPPORTED_TEXT_TYPES = ['txt', 'pdf', 'docx', 'md'] as const;
+type SupportedTextType = (typeof SUPPORTED_TEXT_TYPES)[number];
+
+function isSupportedTextType({ type }: { type: string }): boolean {
+  return SUPPORTED_TEXT_TYPES.includes(type as SupportedTextType);
+}
 
 /**
  * Chunks and embeds text.
@@ -67,15 +74,43 @@ export async function retrieveChunks({
 }: {
   messages: Message[];
   federalStateId: string;
-  relatedFileEntities: FileModelAndContent[];
+  relatedFileEntities: FileModel[];
   sourceUrls?: string[];
 }): Promise<RetrievedChunk[]> {
-  if (relatedFileEntities.length === 0 && (!sourceUrls || sourceUrls.length === 0)) {
+  const relatedFiles = relatedFileEntities.filter(isSupportedTextType);
+
+  if (relatedFiles.length === 0 && (!sourceUrls || sourceUrls.length === 0)) {
     return [];
   }
 
   const lastUserMessage = messages.findLast((m) => m.role === 'user');
   const searchQuery = lastUserMessage?.content ?? '';
+
+  return retrieveChunksByQuery({
+    searchQuery,
+    federalStateId,
+    relatedFileEntities: relatedFiles,
+    sourceUrls,
+    limit: VECTOR_SEARCH_LIMIT,
+  });
+}
+
+export async function retrieveChunksByQuery({
+  searchQuery,
+  federalStateId,
+  relatedFileEntities,
+  sourceUrls,
+  limit = VECTOR_SEARCH_LIMIT,
+}: {
+  searchQuery: string;
+  federalStateId: string;
+  relatedFileEntities: FileModel[];
+  sourceUrls?: string[];
+  limit?: number;
+}): Promise<RetrievedChunk[]> {
+  if (relatedFileEntities.length === 0 && (!sourceUrls || sourceUrls.length === 0)) {
+    return [];
+  }
 
   if (searchQuery.trim() === '') {
     return [];
@@ -97,7 +132,7 @@ export async function retrieveChunks({
     embedding: queryEmbedding,
     fileIds,
     sourceUrls,
-    limit: VECTOR_SEARCH_LIMIT,
+    limit,
   });
 
   return chunks;

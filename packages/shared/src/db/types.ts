@@ -3,7 +3,6 @@ import { conversationMessageTable, conversationTable, userTable } from './schema
 import { PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js';
 import { ExtractTablesWithRelations } from 'drizzle-orm';
 import { NodePgQueryResultHKT } from 'drizzle-orm/node-postgres';
-
 export type User = typeof userTable.$inferSelect;
 
 export type ConversationModel = typeof conversationTable.$inferSelect;
@@ -11,13 +10,6 @@ export type InsertConversationModel = typeof conversationTable.$inferInsert;
 
 export type ConversationMessageModel = typeof conversationMessageTable.$inferSelect;
 export type InsertConversationMessageModel = typeof conversationMessageTable.$inferInsert;
-
-export type DesignConfiguration = {
-  primaryColor: string;
-  primaryTextColor: string;
-  secondaryColor: string;
-  secondaryTextColor: string;
-};
 
 export type CustomTool = {
   type: 'function';
@@ -27,21 +19,6 @@ export type CustomTool = {
     parameters: object;
   };
 };
-
-export type LlmModelPriceMetadata =
-  | {
-      type: 'text';
-      completionTokenPrice: number;
-      promptTokenPrice: number;
-    }
-  | {
-      type: 'embedding';
-      promptTokenPrice: number;
-    }
-  | {
-      type: 'image';
-      pricePerImageInCent: number;
-    };
 
 export type WebSource = {
   name?: string;

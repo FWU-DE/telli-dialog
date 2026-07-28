@@ -10,7 +10,7 @@ import { getImageModelById, getImageModelByName } from '../models';
  * This function first verifies that the provided API key has access to the requested image model.
  * If access is granted, it generates the image and bills the usage to the API key.
  *
- * @param model - The image model to use for generation
+ * @param modelId - The image model to use for generation
  * @param prompt - The text prompt describing the desired image
  * @param apiKeyId - The ID of the API key to verify access and bill usage
  *
@@ -36,7 +36,11 @@ export async function generateImageWithBilling(modelId: string, prompt: string, 
   try {
     const imageResponse = await generateImage(model, prompt);
 
-    const priceInCents = await billImageGenerationUsageToApiKey(apiKeyId, model);
+    const priceInCents = await billImageGenerationUsageToApiKey(
+      apiKeyId,
+      model,
+      imageResponse.usage,
+    );
 
     return {
       ...imageResponse,

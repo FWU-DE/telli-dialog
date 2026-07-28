@@ -1,6 +1,6 @@
 import React from 'react';
-import Checkbox from '@/components/common/checkbox';
 import { InfoTooltip } from '@ui/components/tooltip';
+import { Checkbox } from '@ui/components/checkbox';
 
 type CheckboxWithInfoProps = {
   label: string;
@@ -22,7 +22,7 @@ export default function CheckboxWithInfo({
   return (
     <div className="flex items-center gap-1">
       <Checkbox
-        label={label}
+        aria-label={label}
         checked={checked}
         onCheckedChange={onCheckedChange}
         disabled={disabled}

@@ -6,6 +6,8 @@ import {
 } from '@ais-chat/api-database';
 import { CreateLargeLanguageModel, UpdateLargeLanguageModel } from '../types/large-language-model';
 import { logInfo } from '@shared/logging';
+import { dbUpdateLlmModelsForAllFederalStates } from '@shared/db/functions/llm-model';
+import { syncBifrostProvidersForOrganization } from './bifrost-provider-sync-service';
 
 export async function getLargeLanguageModels(organizationId: string) {
   return dbGetAllModelsByOrganizationId(organizationId);
@@ -34,6 +36,8 @@ export async function createLargeLanguageModel(
     isDeleted: data.isDeleted,
   });
 
+  await syncBifrostProvidersForOrganization(organizationId);
+
   logInfo('LLM was created successfully', { organizationId, data });
 
   if (!model) throw new Error('Failed to create model');
@@ -61,6 +65,9 @@ export async function updateLargeLanguageModel(
     isNew: data.isNew,
     isDeleted: data.isDeleted,
   });
+
+  await syncBifrostProvidersForOrganization(organizationId);
+  await dbUpdateLlmModelsForAllFederalStates();
 
   logInfo('LLM was updated successfully', { organizationId, modelId, data });
 
