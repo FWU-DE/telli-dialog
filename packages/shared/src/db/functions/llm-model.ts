@@ -23,7 +23,17 @@ export async function dbGetLlmModelById({ modelId }: { modelId: string | undefin
     .from(llmModelTable)
     .where(eq(llmModelTable.id, modelId))
     .$withCache();
-  return model;
+  if (!model) return model;
+
+  const configurations = await db
+    .select()
+    .from(staticModelConfigurationTable)
+    .where(eq(staticModelConfigurationTable.modelId, model.id))
+    .$withCache();
+  return {
+    ...model,
+    staticModelRoles: configurations.map((configuration) => configuration.role),
+  };
 }
 
 export async function dbGetModelByName(name: string) {

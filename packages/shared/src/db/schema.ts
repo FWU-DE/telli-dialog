@@ -722,9 +722,6 @@ export const staticModelConfigurationTable = pgTable('static_model_configuration
 export type LlmModelWithStaticRoles = LlmModelSelectModel & {
   staticModelRoles: StaticModelRole[];
 };
-export type LlmModelWithOptionalStaticRoles = LlmModelSelectModel & {
-  staticModelRoles?: StaticModelRole[];
-};
 export type StaticModelConfiguration = typeof staticModelConfigurationTable.$inferSelect;
 
 /**

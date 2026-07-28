@@ -1,8 +1,4 @@
-import {
-  LlmModelSelectModel,
-  LlmModelWithOptionalStaticRoles,
-  LlmModelWithStaticRoles,
-} from '../db/schema';
+import { LlmModelSelectModel, LlmModelWithStaticRoles } from '../db/schema';
 import type { StaticModelRole } from '../db/schema';
 
 /**
@@ -10,10 +6,10 @@ import type { StaticModelRole } from '../db/schema';
  * @param models The list of LLM models
  * @returns The default model or undefined if none found
  */
-export function getDefaultModel<T extends LlmModelWithOptionalStaticRoles>(
-  models: T[],
-): T | undefined {
-  return getModelByRole(models, 'default-chat') ?? (getFirstTextModel(models) as T | undefined);
+export function getDefaultModel(
+  models: LlmModelWithStaticRoles[],
+): LlmModelWithStaticRoles | undefined {
+  return getModelByRole(models, 'default-chat') ?? getFirstTextModel(models);
 }
 
 export function getDefaultModelName(models: LlmModelWithStaticRoles[]): string {
@@ -22,10 +18,10 @@ export function getDefaultModelName(models: LlmModelWithStaticRoles[]): string {
   return model.name;
 }
 
-export function getModelByRole<T extends LlmModelWithOptionalStaticRoles>(
-  models: T[],
+export function getModelByRole(
+  models: LlmModelWithStaticRoles[],
   role: StaticModelRole,
-): T | undefined {
+): LlmModelWithStaticRoles | undefined {
   return models.find((model) => model.staticModelRoles?.includes(role));
 }
 
@@ -34,7 +30,7 @@ export function getModelByRole<T extends LlmModelWithOptionalStaticRoles>(
  * @param models The list of LLM models
  * @returns The first text model or undefined if none found
  */
-export function getFirstTextModel(models: LlmModelSelectModel[]): LlmModelSelectModel | undefined {
+export function getFirstTextModel<T extends LlmModelSelectModel>(models: T[]): T | undefined {
   return models.find(
     (m) => m.priceMetadata.type === 'text' && !m.name.toLowerCase().includes('mistral'),
   );
@@ -46,10 +42,10 @@ export function getFirstTextModel(models: LlmModelSelectModel[]): LlmModelSelect
  * @param excludeMistral Whether to exclude mistral models
  * @returns Filtered list of text models
  */
-export function getFilteredTextModels(
-  models: LlmModelSelectModel[],
+export function getFilteredTextModels<T extends LlmModelSelectModel>(
+  models: T[],
   excludeMistral: boolean = false,
-): LlmModelSelectModel[] {
+): T[] {
   let filteredModels = models.filter((m) => m.priceMetadata.type === 'text');
 
   if (excludeMistral) {

@@ -1,5 +1,5 @@
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { LlmModelSelectModel, LlmModelWithOptionalStaticRoles } from '@shared/db/schema';
+import { LlmModelWithStaticRoles } from '@shared/db/schema';
 import { getModelByRole } from '@shared/llm-models/llm-model-service';
 
 /**
@@ -11,7 +11,7 @@ export async function getAvailableImageModelsForFederalState({
   federalStateId,
 }: {
   federalStateId: string;
-}): Promise<LlmModelSelectModel[]> {
+}): Promise<LlmModelWithStaticRoles[]> {
   const allModels = await dbGetLlmModelsByFederalStateId({ federalStateId });
 
   // Filter for image generation models
@@ -25,7 +25,7 @@ export async function getAvailableImageModelsForFederalState({
  * otherwise returns the first model in the list or undefined if the list is empty.
  */
 export function getDefaultImageModel(
-  imageModels: LlmModelWithOptionalStaticRoles[],
-): LlmModelSelectModel | undefined {
+  imageModels: LlmModelWithStaticRoles[],
+): LlmModelWithStaticRoles | undefined {
   return getModelByRole(imageModels, 'default-image') ?? imageModels[0];
 }

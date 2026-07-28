@@ -1,23 +1,25 @@
 'use client';
 
-import { LlmModelSelectModel } from '@shared/db/schema';
+import { LlmModelWithStaticRoles } from '@shared/db/schema';
 import React from 'react';
 
 type ImageModelsProviderProps = {
-  models: LlmModelSelectModel[];
-  defaultImageModel: LlmModelSelectModel | undefined;
+  models: LlmModelWithStaticRoles[];
+  defaultImageModel: LlmModelWithStaticRoles | undefined;
   children: React.ReactNode;
 };
 
 type ImageModelsContextProps = {
-  models: LlmModelSelectModel[];
-  selectedModel: LlmModelSelectModel | undefined;
-  setSelectedModel: (model: LlmModelSelectModel) => void;
+  models: LlmModelWithStaticRoles[];
+  selectedModel: LlmModelWithStaticRoles | undefined;
+  setSelectedModel: (model: LlmModelWithStaticRoles) => void;
 };
 
 const ImageModelsContext = React.createContext<ImageModelsContextProps | undefined>(undefined);
 
-function getFirstImageModel(models: LlmModelSelectModel[]): LlmModelSelectModel | undefined {
+function getFirstImageModel(
+  models: LlmModelWithStaticRoles[],
+): LlmModelWithStaticRoles | undefined {
   return models.find((model) => model.priceMetadata.type === 'image');
 }
 
@@ -26,7 +28,7 @@ export function ImageModelsProvider({
   children,
   defaultImageModel,
 }: ImageModelsProviderProps) {
-  const [selectedModel, setSelectedModel] = React.useState<LlmModelSelectModel | undefined>(
+  const [selectedModel, setSelectedModel] = React.useState<LlmModelWithStaticRoles | undefined>(
     defaultImageModel ?? getFirstImageModel(models),
   );
 
