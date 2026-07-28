@@ -47,6 +47,7 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
   const locale = await resolveSharingLocale({
     customChatVariant: 'character',
     customChatId: character.id,
+    sharingUserId: character.startedBy,
   });
   const messages = await loadTranslations(locale);
 

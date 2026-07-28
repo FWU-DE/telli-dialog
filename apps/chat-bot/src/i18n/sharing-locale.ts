@@ -5,7 +5,8 @@ import {
   dbGetLearningScenarioById,
   dbUpdateLearningScenarioFilterGroup,
 } from '@shared/db/functions/learning-scenario';
-import { getMaybeUser, getUserAndContextByUserId } from '@/auth/utils';
+import { dbGetFederalStateByUserId } from '@shared/db/functions/school';
+import { getMaybeUser } from '@/auth/utils';
 import { getModelAndApiKeyWithResult, getStrongAuxiliaryModel } from '@/app/api/utils/utils';
 import { constructCharacterLanguageSystemPrompt } from '@/app/api/character/system-prompt';
 import { constructLearningScenarioLanguageSystemPrompt } from '@/app/api/learning-scenario/system-prompt';
@@ -21,13 +22,19 @@ import {
 /**
  * Resolves the locale for a shared custom chat (character or learning scenario).
  * Priority: filter language > LLM-determined language > default locale.
+ *
+ * `sharingUserId` identifies the user currently sharing the custom chat.
+ * It is used to resolve the federal state for the locale-detection feature toggle
+ * and auxiliary model.
  */
 export async function resolveSharingLocale({
   customChatVariant,
   customChatId,
+  sharingUserId,
 }: {
   customChatVariant: 'character' | 'learning-scenario';
   customChatId: string;
+  sharingUserId: string;
 }): Promise<string> {
   if (customChatVariant === 'character') {
     const character = await dbGetCharacterById({ characterId: customChatId });
@@ -41,17 +48,21 @@ export async function resolveSharingLocale({
       return localeFromFilterLanguage;
     }
 
-    const teacherUserAndContext = await getUserAndContextByUserId({ userId: character.userId });
+    const federalState = await dbGetFederalStateByUserId({ userId: sharingUserId });
+    if (federalState === undefined) {
+      return DEFAULT_LOCALE;
+    }
+
     const sharedPageLocaleDetectionEnabled =
-      teacherUserAndContext.federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true;
+      federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true;
     if (!sharedPageLocaleDetectionEnabled) {
       return DEFAULT_LOCALE;
     }
 
-    const auxiliaryModel = await getStrongAuxiliaryModel(teacherUserAndContext.federalState.id);
+    const auxiliaryModel = await getStrongAuxiliaryModel(federalState.id);
     const [error, auxiliaryModelAndApiKey] = await getModelAndApiKeyWithResult({
       modelId: auxiliaryModel.id,
-      federalStateId: teacherUserAndContext.federalState.id,
+      federalStateId: federalState.id,
     });
     if (error !== null) {
       return DEFAULT_LOCALE;
@@ -93,19 +104,21 @@ export async function resolveSharingLocale({
       return localeFromFilterLanguage;
     }
 
-    const teacherUserAndContext = await getUserAndContextByUserId({
-      userId: learningScenario.userId,
-    });
+    const federalState = await dbGetFederalStateByUserId({ userId: sharingUserId });
+    if (federalState === undefined) {
+      return DEFAULT_LOCALE;
+    }
+
     const sharedPageLocaleDetectionEnabled =
-      teacherUserAndContext.federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true;
+      federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true;
     if (!sharedPageLocaleDetectionEnabled) {
       return DEFAULT_LOCALE;
     }
 
-    const auxiliaryModel = await getStrongAuxiliaryModel(teacherUserAndContext.federalState.id);
+    const auxiliaryModel = await getStrongAuxiliaryModel(federalState.id);
     const [error, auxiliaryModelAndApiKey] = await getModelAndApiKeyWithResult({
       modelId: auxiliaryModel.id,
-      federalStateId: teacherUserAndContext.federalState.id,
+      federalStateId: federalState.id,
     });
 
     if (error !== null) {
