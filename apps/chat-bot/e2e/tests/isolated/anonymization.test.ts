@@ -45,6 +45,29 @@ test('user message with PII is anonymized when the toggle is enabled', async ({ 
   }
 });
 
+test('person names and locations are anonymized via the Presidio service', async ({ page }) => {
+  test.skip(
+    !process.env.ANONYMIZATION_SERVICE_URL,
+    'requires a running Presidio analyzer (ANONYMIZATION_SERVICE_URL)',
+  );
+
+  await setAnonymizationEnabled(true);
+
+  try {
+    await login(page, 'teacher');
+    await sendMessage(page, 'Antworte nur mit OK. Anna Schmidt wohnt in München.');
+
+    await page.reload();
+
+    const userMessage = page.getByLabel('user message 1');
+    await expect(userMessage).toContainText('[PERSON]');
+    await expect(userMessage).toContainText('[ORT]');
+    await expect(userMessage).not.toContainText('Anna Schmidt');
+  } finally {
+    await setAnonymizationEnabled(false);
+  }
+});
+
 test('user message keeps PII when the toggle is disabled', async ({ page }) => {
   await setAnonymizationEnabled(false);
 

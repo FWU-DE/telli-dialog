@@ -130,7 +130,10 @@ ANONYMIZATION_SERVICE_URL=http://localhost:5002 pnpm dev:chat-bot
 
 The CI workflow `.github/workflows/presidio.yml` builds this image and smoke-tests
 that German NER detects `PERSON` and `LOCATION` whenever the Presidio configuration
-changes.
+changes. In addition, the e2e pipeline (`.github/workflows/e2e.yml`) runs the same
+image alongside the full stack, so the NER path (person/location replacement in a
+real chat message) is covered end-to-end by
+`apps/chat-bot/e2e/tests/isolated/anonymization.test.ts`.
 
 ## Follow-ups
 
