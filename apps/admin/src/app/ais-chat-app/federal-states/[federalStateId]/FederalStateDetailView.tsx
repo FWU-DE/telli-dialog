@@ -64,6 +64,7 @@ function transformToFederalStateEditForm(federalState: FederalStateModel): Feder
       isSharedPageLocaleDetectionEnabled:
         federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true,
       isAgenticChatEnabled: federalState.featureToggles.isAgenticChatEnabled ?? false,
+      isAnonymizationEnabled: federalState.featureToggles.isAnonymizationEnabled ?? false,
     },
     supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
     designConfiguration: federalState.designConfiguration
@@ -272,6 +273,12 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="featureToggles.isAgenticChatEnabled"
             label="Agentic Chat aktivieren"
             description="Erlaubt die Nutzung des neuen agentic loop im Chat."
+            control={control}
+          />
+          <FormFieldCheckbox
+            name="featureToggles.isAnonymizationEnabled"
+            label="Anonymisierung aktivieren"
+            description="Entfernt personenbezogene Daten (z.B. E-Mail-Adressen, Telefonnummern, IBANs) aus Chat-Nachrichten und hochgeladenen Dokumenten, bevor sie verarbeitet werden. Die Erkennung von Namen erfordert einen konfigurierten Presidio-Analyzer (ANONYMIZATION_SERVICE_URL)."
             control={control}
           />
           <FormField

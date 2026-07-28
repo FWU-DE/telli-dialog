@@ -32,6 +32,14 @@ vi.mock('../file-extraction/file-extraction-xberg', () => ({
   fileExtractionXberg: mocks.fileExtractionXbergMock,
 }));
 
+vi.mock('@shared/db/functions/federal-state', () => ({
+  dbGetFederalState: vi.fn().mockResolvedValue({ featureToggles: {} }),
+}));
+
+vi.mock('../anonymization/anonymization-service', () => ({
+  anonymizeUserContent: vi.fn(async (text: string) => text),
+}));
+
 vi.mock('../file-operations/preprocess-image', () => ({
   preprocessImage: mocks.preprocessImageMock,
 }));

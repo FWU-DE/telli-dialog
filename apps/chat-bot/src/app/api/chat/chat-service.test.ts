@@ -83,6 +83,10 @@ vi.mock('./build-tools', () => ({
   buildTools: mocks.buildToolsMock,
 }));
 
+vi.mock('../anonymization/anonymization-service', () => ({
+  anonymizeUserContent: vi.fn(async (text: string) => text),
+}));
+
 vi.mock('./websearch', () => ({
   runWebSearchPipeline: mocks.runWebSearchPipelineMock,
   isWebSearchEnabledForEntity: mocks.isWebSearchEnabledForEntityMock,
