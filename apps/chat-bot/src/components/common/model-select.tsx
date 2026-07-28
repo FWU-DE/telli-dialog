@@ -2,7 +2,7 @@
 
 import React, { startTransition } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { type LlmModelWithStaticRoles } from '@shared/db/schema';
+import { type LlmModelSelectModel } from '@shared/db/schema';
 import { cn } from '@/utils/tailwind';
 import { useSearchParams } from 'next/navigation';
 import { useCustomPathname } from '@/hooks/use-custom-pathname';
@@ -11,9 +11,9 @@ import { Badge } from './badge';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
 
 type ModelSelectProps = {
-  models: LlmModelWithStaticRoles[];
-  selectedModel: LlmModelWithStaticRoles | undefined;
-  onModelChange: (model: LlmModelWithStaticRoles) => void;
+  models: LlmModelSelectModel[];
+  selectedModel: LlmModelSelectModel | undefined;
+  onModelChange: (model: LlmModelSelectModel) => void;
   modelType: 'text' | 'image';
   label: string;
   noModelsLabel: string;
@@ -34,7 +34,7 @@ export default function ModelSelect({
   const pathname = useCustomPathname();
   const searchParams = useSearchParams();
 
-  async function handleSelectModel(model: LlmModelWithStaticRoles) {
+  async function handleSelectModel(model: LlmModelSelectModel) {
     startTransition(async () => {
       setOptimisticModelId(model.name);
     });
@@ -117,7 +117,7 @@ export default function ModelSelect({
   );
 }
 
-function isGreenModel({ model }: { model: LlmModelWithStaticRoles }) {
+function isGreenModel({ model }: { model: LlmModelSelectModel }) {
   return model.priceMetadata.type === 'text' && model.priceMetadata.promptTokenPrice < 150; // in tenth of a cent
 }
 
@@ -125,7 +125,7 @@ function ModelSpan({
   model,
   modelType,
 }: {
-  model: LlmModelWithStaticRoles;
+  model: LlmModelSelectModel;
   modelType: 'text' | 'image';
 }) {
   return (

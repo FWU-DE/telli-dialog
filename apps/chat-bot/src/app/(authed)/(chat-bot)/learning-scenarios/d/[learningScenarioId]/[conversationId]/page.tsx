@@ -10,7 +10,7 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getDefaultModelName } from '@shared/llm-models/llm-model-service';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/static-model-service';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
@@ -66,9 +66,10 @@ export default async function Page(
   });
 
   const lastUsedModelInChat = rawChatMessages.at(-1)?.modelName;
+  const defaultModelName = await getDefaultModelNameByFederalStateId(federalState.id, models);
 
   const currentModel =
-    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? getDefaultModelName(models);
+    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? defaultModelName;
 
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;

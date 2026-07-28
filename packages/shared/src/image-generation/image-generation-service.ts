@@ -1,6 +1,8 @@
-import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { LlmModelWithStaticRoles } from '@shared/db/schema';
-import { getModelByRole } from '@shared/llm-models/llm-model-service';
+import {
+  dbGetLlmModelsByFederalStateId,
+  dbGetModelByRoleAndFederalStateId,
+} from '@shared/db/functions/llm-model';
+import { LlmModelSelectModel } from '@shared/db/schema';
 
 /**
  * Fetches available image generation models from database
@@ -11,7 +13,7 @@ export async function getAvailableImageModelsForFederalState({
   federalStateId,
 }: {
   federalStateId: string;
-}): Promise<LlmModelWithStaticRoles[]> {
+}): Promise<LlmModelSelectModel[]> {
   const allModels = await dbGetLlmModelsByFederalStateId({ federalStateId });
 
   // Filter for image generation models
@@ -24,8 +26,15 @@ export async function getAvailableImageModelsForFederalState({
  * Returns the default image generation model if it is included in the provided list,
  * otherwise returns the first model in the list or undefined if the list is empty.
  */
-export function getDefaultImageModel(
-  imageModels: LlmModelWithStaticRoles[],
-): LlmModelWithStaticRoles | undefined {
-  return getModelByRole(imageModels, 'default-image') ?? imageModels[0];
+export async function getDefaultImageModel({
+  imageModels,
+  federalStateId,
+}: {
+  imageModels: LlmModelSelectModel[];
+  federalStateId: string;
+}): Promise<LlmModelSelectModel | undefined> {
+  return (
+    (await dbGetModelByRoleAndFederalStateId({ role: 'default-image', federalStateId })) ??
+    imageModels[0]
+  );
 }

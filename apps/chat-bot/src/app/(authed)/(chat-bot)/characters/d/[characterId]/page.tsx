@@ -7,7 +7,7 @@ import { getCharacterForChatSession } from '@shared/characters/character-service
 import { requireAuth } from '@/auth/requireAuth';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getDefaultModelName } from '@shared/llm-models/llm-model-service';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/static-model-service';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
@@ -53,7 +53,10 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
   const characterModel = models.find((m) => m.id === character.modelId)?.name;
 
   const currentModel =
-    searchParams.model ?? characterModel ?? user.lastUsedModel ?? getDefaultModelName(models);
+    searchParams.model ??
+    characterModel ??
+    user.lastUsedModel ??
+    (await getDefaultModelNameByFederalStateId(federalState.id, models));
 
   const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;

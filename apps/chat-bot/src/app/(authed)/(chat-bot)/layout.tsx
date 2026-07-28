@@ -2,7 +2,7 @@ import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getDefaultModelName } from '@shared/llm-models/llm-model-service';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/static-model-service';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';
 import TermsConditionsModal from '@/components/modals/terms-conditions-initial';
@@ -43,6 +43,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     ]);
 
   const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
+  const defaultModelName = await getDefaultModelNameByFederalStateId(user.federalState.id, models);
   const userAndContext = {
     ...user,
     userRole: user.userRole,
@@ -60,7 +61,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
         <SidebarProvider className="min-h-0">
           <LlmModelsProvider
             models={models}
-            defaultLlmModelByCookie={user.lastUsedModel ?? getDefaultModelName(models)}
+            defaultLlmModelByCookie={user.lastUsedModel ?? defaultModelName}
           >
             <AppSidebar
               user={user}

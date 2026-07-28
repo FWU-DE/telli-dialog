@@ -61,7 +61,7 @@ export default async function Page(props: PageProps) {
   )?.modelName;
   const selectedModel =
     imageModels.find((model) => model.name === lastUsedModelInChat) ??
-    getDefaultImageModel(imageModels);
+    (await getDefaultImageModel({ imageModels, federalStateId: federalState.id }));
   const lastUsedStyleInChat = reversedMessages.find(
     (msg) => msg.parameters?.imageStyle !== undefined,
   )?.parameters?.imageStyle;

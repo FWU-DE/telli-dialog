@@ -1,28 +1,12 @@
-import { LlmModelSelectModel, LlmModelWithStaticRoles } from '../db/schema';
-import type { StaticModelRole } from '../db/schema';
+import { LlmModelSelectModel } from '../db/schema';
 
 /**
  * Get the default model from a list of models
  * @param models The list of LLM models
  * @returns The default model or undefined if none found
  */
-export function getDefaultModel(
-  models: LlmModelWithStaticRoles[],
-): LlmModelWithStaticRoles | undefined {
-  return getModelByRole(models, 'default-chat') ?? getFirstTextModel(models);
-}
-
-export function getDefaultModelName(models: LlmModelWithStaticRoles[]): string {
-  const model = getDefaultModel(models);
-  if (!model) throw new Error('No default text model found');
-  return model.name;
-}
-
-export function getModelByRole(
-  models: LlmModelWithStaticRoles[],
-  role: StaticModelRole,
-): LlmModelWithStaticRoles | undefined {
-  return models.find((model) => model.staticModelRoles?.includes(role));
+export function getDefaultModel(models: LlmModelSelectModel[]): LlmModelSelectModel | undefined {
+  return getFirstTextModel(models);
 }
 
 /**

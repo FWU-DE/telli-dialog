@@ -4,7 +4,7 @@ import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { redirect } from 'next/navigation';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getDefaultModelName } from '@shared/llm-models/llm-model-service';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/static-model-service';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import Logo from '@/components/common/logo';
@@ -53,9 +53,13 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   });
 
   const lastUsedModelInChat = messages.at(-1)?.modelName;
+  const defaultModelName = await getDefaultModelNameByFederalStateId(
+    userAndContext.federalState.id,
+    models,
+  );
 
   const currentModel =
-    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? getDefaultModelName(models);
+    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? defaultModelName;
 
   const convertedMessages = convertMessageModelToMessage(messages);
   const webSourceMapping = new Map<string, WebSource[]>();

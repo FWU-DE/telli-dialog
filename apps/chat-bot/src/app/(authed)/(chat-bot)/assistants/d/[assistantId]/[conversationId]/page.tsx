@@ -2,7 +2,7 @@ import Chat from '@/components/chat/chat';
 import Logo from '@/components/common/logo';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getDefaultModelName } from '@shared/llm-models/llm-model-service';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/static-model-service';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
@@ -51,9 +51,10 @@ export default async function Page(
   const logoElement = <Logo logoPath={federalState.pictureUrls?.logo} />;
 
   const lastUsedModelInChat = messages.at(-1)?.modelName;
+  const defaultModelName = await getDefaultModelNameByFederalStateId(federalState.id, models);
 
   const currentModel =
-    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? getDefaultModelName(models);
+    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? defaultModelName;
 
   const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
 

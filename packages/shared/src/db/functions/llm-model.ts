@@ -3,7 +3,6 @@ import { db } from '..';
 import {
   federalStateLlmModelMappingTable,
   LlmModelSelectModel,
-  LlmModelWithStaticRoles,
   llmModelTable,
   staticModelConfigurationTable,
   StaticModelRole,
@@ -23,17 +22,7 @@ export async function dbGetLlmModelById({ modelId }: { modelId: string | undefin
     .from(llmModelTable)
     .where(eq(llmModelTable.id, modelId))
     .$withCache();
-  if (!model) return model;
-
-  const configurations = await db
-    .select()
-    .from(staticModelConfigurationTable)
-    .where(eq(staticModelConfigurationTable.modelId, model.id))
-    .$withCache();
-  return {
-    ...model,
-    staticModelRoles: configurations.map((configuration) => configuration.role),
-  };
+  return model;
 }
 
 export async function dbGetModelByName(name: string) {
@@ -53,8 +42,8 @@ export async function dbGetLlmModelsByFederalStateId({
   federalStateId,
 }: {
   federalStateId: string;
-}): Promise<LlmModelWithStaticRoles[]> {
-  const models = await db
+}): Promise<LlmModelSelectModel[]> {
+  return db
     .select({ ...getTableColumns(llmModelTable) })
     .from(llmModelTable)
     .innerJoin(
@@ -68,17 +57,6 @@ export async function dbGetLlmModelsByFederalStateId({
       ),
     )
     .$withCache();
-  const configurations = await db.select().from(staticModelConfigurationTable).$withCache();
-  const rolesByModelId = new Map<string, StaticModelRole[]>();
-  for (const configuration of configurations) {
-    const roles = rolesByModelId.get(configuration.modelId) ?? [];
-    roles.push(configuration.role);
-    rolesByModelId.set(configuration.modelId, roles);
-  }
-  return models.map((model) => ({
-    ...model,
-    staticModelRoles: rolesByModelId.get(model.id) ?? [],
-  }));
 }
 
 export async function dbGetStaticModelConfigurations() {
@@ -93,6 +71,32 @@ export async function dbGetStaticModelByRole(role: StaticModelRole) {
     .where(eq(staticModelConfigurationTable.role, role))
     .$withCache();
   return result;
+}
+
+export async function dbGetModelByRoleAndFederalStateId({
+  role,
+  federalStateId,
+}: {
+  role: StaticModelRole;
+  federalStateId: string;
+}) {
+  const [model] = await db
+    .select({ ...getTableColumns(llmModelTable) })
+    .from(staticModelConfigurationTable)
+    .innerJoin(llmModelTable, eq(staticModelConfigurationTable.modelId, llmModelTable.id))
+    .innerJoin(
+      federalStateLlmModelMappingTable,
+      eq(federalStateLlmModelMappingTable.llmModelId, llmModelTable.id),
+    )
+    .where(
+      and(
+        eq(staticModelConfigurationTable.role, role),
+        eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
+        eq(llmModelTable.isDeleted, false),
+      ),
+    )
+    .$withCache();
+  return model;
 }
 
 export async function dbGetStaticModelConfigurationWithModels() {
@@ -186,7 +190,7 @@ export async function dbGetModelByIdAndFederalStateId({
 }: {
   modelId: string;
   federalStateId: string;
-}): Promise<LlmModelWithStaticRoles | undefined> {
+}): Promise<LlmModelSelectModel | undefined> {
   const [result] = await db
     .select({ ...getTableColumns(llmModelTable) })
     .from(llmModelTable)
@@ -202,16 +206,7 @@ export async function dbGetModelByIdAndFederalStateId({
     )
     .$withCache();
 
-  if (!result) return result;
-  const configurations = await db
-    .select()
-    .from(staticModelConfigurationTable)
-    .where(eq(staticModelConfigurationTable.modelId, result.id))
-    .$withCache();
-  return {
-    ...result,
-    staticModelRoles: configurations.map((configuration) => configuration.role),
-  };
+  return result;
 }
 
 async function dbUpsertLlmModels({ models }: { models: KnotenpunktLlmModel[] }) {

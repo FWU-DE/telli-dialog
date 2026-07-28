@@ -30,7 +30,10 @@ export default async function ImageGenerationPage() {
   const imageModels = await getAvailableImageModelsForFederalState({
     federalStateId: federalState.id,
   });
-  const selectedModel = getDefaultImageModel(imageModels);
+  const selectedModel = await getDefaultImageModel({
+    imageModels,
+    federalStateId: federalState.id,
+  });
 
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>

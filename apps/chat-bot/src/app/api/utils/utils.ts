@@ -2,15 +2,12 @@ import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/funct
 import {
   dbGetModelByIdAndFederalStateId,
   dbGetLlmModelsByFederalStateId,
+  dbGetModelByRoleAndFederalStateId,
 } from '@shared/db/functions/llm-model';
 import { errorifyAsyncFn } from '@shared/utils/error';
-import { LlmModelSelectModel, LlmModelWithStaticRoles } from '@shared/db/schema';
+import { LlmModelSelectModel } from '@shared/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
-import {
-  getDefaultModel,
-  getFirstTextModel,
-  getModelByRole,
-} from '@shared/llm-models/llm-model-service';
+import { getFirstTextModel } from '@shared/llm-models/llm-model-service';
 import { logError } from '@shared/logging';
 import { isValidPositiveNumber } from '@shared/utils/number';
 
@@ -31,7 +28,7 @@ async function getModelAndApiKey({
 }: {
   federalStateId: string;
   modelId: string;
-}): Promise<{ model: LlmModelWithStaticRoles; apiKeyId: string }> {
+}): Promise<{ model: LlmModelSelectModel; apiKeyId: string }> {
   const [error, federalStateObject] = await dbGetFederalStateWithDecryptedApiKeyWithResult({
     federalStateId,
   });
@@ -153,13 +150,13 @@ export function getTokenUsage(usage: { promptTokens: number; completionTokens: n
  * @returns The auxiliary model for the federal state
  */
 export async function getAuxiliaryModel(federalStateId: string): Promise<LlmModelSelectModel> {
-  const llmModels = await dbGetLlmModelsByFederalStateId({
-    federalStateId,
-  });
+  const [llmModels, configuredAuxiliaryModel, configuredFallbackModel] = await Promise.all([
+    dbGetLlmModelsByFederalStateId({ federalStateId }),
+    dbGetModelByRoleAndFederalStateId({ role: 'auxiliary', federalStateId }),
+    dbGetModelByRoleAndFederalStateId({ role: 'auxiliary-fallback', federalStateId }),
+  ]);
   const auxiliaryModel =
-    getModelByRole(llmModels, 'auxiliary') ??
-    getModelByRole(llmModels, 'auxiliary-fallback') ??
-    getFirstTextModel(llmModels);
+    configuredAuxiliaryModel ?? configuredFallbackModel ?? getFirstTextModel(llmModels);
   if (auxiliaryModel === undefined) {
     const error = new Error('No auxiliary model found for federal state id ' + federalStateId);
     logError(error.message, error);
@@ -178,18 +175,19 @@ export async function getAuxiliaryModel(federalStateId: string): Promise<LlmMode
 export async function getStrongAuxiliaryModel(
   federalStateId: string,
 ): Promise<LlmModelSelectModel> {
-  const llmModels = await dbGetLlmModelsByFederalStateId({
-    federalStateId,
-  });
-  const auxiliaryModel = getModelByRole(llmModels, 'strong-auxiliary');
+  const [llmModels, auxiliaryModel, configuredAuxiliaryModel, configuredFallbackModel] =
+    await Promise.all([
+      dbGetLlmModelsByFederalStateId({ federalStateId }),
+      dbGetModelByRoleAndFederalStateId({ role: 'strong-auxiliary', federalStateId }),
+      dbGetModelByRoleAndFederalStateId({ role: 'auxiliary', federalStateId }),
+      dbGetModelByRoleAndFederalStateId({ role: 'auxiliary-fallback', federalStateId }),
+    ]);
   if (auxiliaryModel !== undefined) {
     return auxiliaryModel;
   }
 
   const fallbackAuxiliaryModel =
-    getModelByRole(llmModels, 'auxiliary') ??
-    getModelByRole(llmModels, 'auxiliary-fallback') ??
-    getFirstTextModel(llmModels);
+    configuredAuxiliaryModel ?? configuredFallbackModel ?? getFirstTextModel(llmModels);
   if (fallbackAuxiliaryModel === undefined) {
     const error = new Error('No auxiliary model found for federal state id ' + federalStateId);
     logError(error.message, error);
@@ -206,10 +204,10 @@ export async function getStrongAuxiliaryModel(
  */
 export async function getDefaultModelByFederalStateId(
   federalStateId: string,
-): Promise<LlmModelWithStaticRoles | undefined> {
-  const llmModels = await dbGetLlmModelsByFederalStateId({
-    federalStateId,
-  });
-
-  return getDefaultModel(llmModels);
+): Promise<LlmModelSelectModel | undefined> {
+  const [configuredModel, llmModels] = await Promise.all([
+    dbGetModelByRoleAndFederalStateId({ role: 'default-chat', federalStateId }),
+    dbGetLlmModelsByFederalStateId({ federalStateId }),
+  ]);
+  return configuredModel ?? getFirstTextModel(llmModels);
 }

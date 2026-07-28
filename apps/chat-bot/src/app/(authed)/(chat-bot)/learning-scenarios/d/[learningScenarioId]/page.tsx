@@ -5,7 +5,7 @@ import Logo from '@/components/common/logo';
 import { requireAuth } from '@/auth/requireAuth';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getDefaultModelName } from '@shared/llm-models/llm-model-service';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/static-model-service';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
@@ -51,7 +51,7 @@ export default async function Page(props: PageProps<'/learning-scenarios/d/[lear
     searchParams.model ??
     learningScenarioModel ??
     user.lastUsedModel ??
-    getDefaultModelName(models);
+    (await getDefaultModelNameByFederalStateId(federalState.id, models));
 
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;

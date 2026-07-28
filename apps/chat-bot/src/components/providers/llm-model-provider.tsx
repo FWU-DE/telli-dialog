@@ -1,20 +1,20 @@
 'use client';
 
-import { LlmModelWithStaticRoles } from '@shared/db/schema';
+import { LlmModelSelectModel } from '@shared/db/schema';
 import React, { useState } from 'react';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 
 type LlmModelsProviderProps = {
-  models: LlmModelWithStaticRoles[];
+  models: LlmModelSelectModel[];
   defaultLlmModelByCookie: string;
   initialDownloadConversationEnabled?: boolean;
   children: React.ReactNode;
 };
 
 type LlmModelsContextProps = {
-  models: LlmModelWithStaticRoles[];
-  selectedModel: LlmModelWithStaticRoles | undefined;
-  setSelectedModel: (model: LlmModelWithStaticRoles) => Promise<void>;
+  models: LlmModelSelectModel[];
+  selectedModel: LlmModelSelectModel | undefined;
+  setSelectedModel: (model: LlmModelSelectModel) => Promise<void>;
   downloadConversationEnabled: boolean;
   setDownloadConversationEnabled: (value: boolean) => void;
 };
@@ -27,14 +27,14 @@ export function LlmModelsProvider({
   defaultLlmModelByCookie,
   initialDownloadConversationEnabled = false,
 }: LlmModelsProviderProps) {
-  const [selectedModel, setSelectedModelState] = useState<LlmModelWithStaticRoles | undefined>(() =>
+  const [selectedModel, setSelectedModelState] = useState<LlmModelSelectModel | undefined>(() =>
     getSelectedModel({ models, defaultLlmModelByCookie }),
   );
   const [downloadConversationEnabled, setDownloadConversationEnabled] = useState(
     initialDownloadConversationEnabled,
   );
 
-  async function setSelectedModel(model: LlmModelWithStaticRoles) {
+  async function setSelectedModel(model: LlmModelSelectModel) {
     // optimistically update selected model
     const previousModel = selectedModel;
     setSelectedModelState(model);
@@ -83,7 +83,7 @@ function getSelectedModel({
   models,
   defaultLlmModelByCookie,
 }: {
-  models: LlmModelWithStaticRoles[];
+  models: LlmModelSelectModel[];
   defaultLlmModelByCookie: string | undefined;
 }) {
   return models.find((model) => model.name === defaultLlmModelByCookie) ?? getDefaultModel(models);
