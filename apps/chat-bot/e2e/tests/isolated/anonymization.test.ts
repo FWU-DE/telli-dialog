@@ -138,6 +138,9 @@ test('student messages in a shared character chat are anonymized', async ({ page
       name: characterName,
       description: 'Testet die Anonymisierung im geteilten Dialog.',
       instructions: 'Antworte kurz.',
+      // Leave empty so no static initial message is shown; the mock LLM's echo of the
+      // (anonymized) user message becomes "assistant message 1" instead of "message 2".
+      initialMessage: '',
     });
 
     await page.getByTestId('token-points-select').click();

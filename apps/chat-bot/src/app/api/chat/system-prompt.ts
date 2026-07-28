@@ -1,8 +1,9 @@
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
-import { ObscuredFederalState } from '@/auth/utils';
+import type { ObscuredFederalState } from '@/auth/utils';
 import type {
   AssistantSelectModel,
   CharacterSelectModel,
+  FederalStateFeatureToggles,
   LearningScenarioSelectModel,
   WebSearchResult,
 } from '@shared/db/schema';
@@ -65,6 +66,8 @@ function constructHelpModeSystemPrompt({
   isTeacher,
   federalStateSupportEmails,
   chatStorageDuration,
+  isAnonymizationEnabled,
+  anonymizationMode,
   chunks,
   errorUrls,
   activeToolDefinitions,
@@ -72,6 +75,8 @@ function constructHelpModeSystemPrompt({
   isTeacher: boolean;
   federalStateSupportEmails: string[] | null;
   chatStorageDuration: number;
+  isAnonymizationEnabled: boolean;
+  anonymizationMode: FederalStateFeatureToggles['anonymizationMode'];
   chunks: RetrievedChunk[];
   errorUrls: string[];
   activeToolDefinitions: ToolDefinition[];
@@ -114,6 +119,11 @@ Assistenten, Dialogpartner und Lernszenarien lassen sich außerdem schulintern, 
 }
 
 Die Datenverarbeitung von AIS.chat erfolgt ausschließlich in der EU. Nutzerdaten werden nur pseudonymisiert verarbeitet.
+${
+  isAnonymizationEnabled
+    ? `Für dieses Bundesland ist zusätzlich die automatische Anonymisierung aktiviert: Personenbezogene Daten (z.B. Namen, E-Mail-Adressen, Telefonnummern) werden in Chat-Nachrichten und hochgeladenen Dokumenten automatisch erkannt und ${anonymizationMode === 'pseudonym' ? 'durch konsistente Pseudonyme (z.B. Fantasienamen) ersetzt, bevor sie an ein Sprachmodell gesendet werden' : 'durch Platzhalter wie [PERSON] oder [ORT] ersetzt, bevor sie an ein Sprachmodell gesendet werden'}. Ein Hinweis dazu wird unterhalb des Chat-Eingabefelds angezeigt.`
+    : ''
+}
 
 Die Bildgenerierung wird über die Sidebar erreicht. Die Bildgenerierung ist eine Funktion für Lehrkräfte und kann nicht den Schülern zur Verfügung gestellt werden. Imagen 4 kann keine Bilder von Kindern erstellen, alternativ kann hier gpt-image-1.5 genutzt werden.
 AIS.chat kann keine Dateien erstellen. User können Chatverläufe ausschließlich im docx-Format herunterladen.
@@ -171,6 +181,8 @@ export function constructChatSystemPrompt({
         isTeacher,
         federalStateSupportEmails: federalState.supportContacts,
         chatStorageDuration: federalState.chatStorageTime,
+        isAnonymizationEnabled: federalState.featureToggles.isAnonymizationEnabled ?? false,
+        anonymizationMode: federalState.featureToggles.anonymizationMode,
         chunks,
         errorUrls,
         activeToolDefinitions,
