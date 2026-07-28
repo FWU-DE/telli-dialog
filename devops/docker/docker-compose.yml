@@ -149,10 +149,15 @@ services:
   bifrost:
     image: maximhq/bifrost:v1.6.5
     restart: unless-stopped
+    env_file:
+      - ../../apps/api/.env.local
     environment:
       APP_HOST: 0.0.0.0
       APP_PORT: '8089'
+      BIFROST_ADMIN_USERNAME: admin
+      BIFROST_ADMIN_PASSWORD: admin
     volumes:
+      - ./bifrost/config.json:/app/data/config.json:ro
       - bifrost_data:/app/data
     network_mode: service:keycloak
     depends_on:

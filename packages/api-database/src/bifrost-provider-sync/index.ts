@@ -3,6 +3,7 @@ import { LlmModel } from '../schema';
 import { BifrostProviderSyncError } from './error';
 import { syncBifrostProvider } from './client';
 import { buildBifrostProviderConfigs } from './provider-config-builder';
+import { ensureBifrostVirtualKeyProviderAccess } from './virtual-key-sync';
 import { BifrostProviderSyncOptions } from './types';
 
 /**
@@ -50,6 +51,12 @@ export async function syncBifrostProviders(
     });
     throw new BifrostProviderSyncError();
   }
+
+  await ensureBifrostVirtualKeyProviderAccess({
+    bifrostAdminUrl,
+    bifrostManagementApiKey,
+    logger,
+  });
 }
 
 export async function syncBifrostProvidersForOrganization(
@@ -76,3 +83,4 @@ export async function syncBifrostProvidersForOrganization(
 export * from './error';
 export * from './types';
 export { buildBifrostProviderConfigs } from './provider-config-builder';
+export { ensureBifrostVirtualKeyProviderAccess } from './virtual-key-sync';

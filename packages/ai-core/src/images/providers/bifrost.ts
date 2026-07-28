@@ -23,6 +23,7 @@ function createBifrostClient(model: AiModel): {
   return {
     client: instrumentOpenAiClient(
       new OpenAI({
+        apiKey: 'not-needed',
         baseURL: env.bifrostBaseUrl,
         defaultHeaders: env.bifrostApiKey ? { 'x-bf-vk': env.bifrostApiKey } : undefined,
       }),

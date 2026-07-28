@@ -1,5 +1,7 @@
 export type BifrostProvider = 'azure' | 'openai' | 'vertex' | 'ionos';
 
+export const BIFROST_PROVIDERS: BifrostProvider[] = ['azure', 'openai', 'vertex', 'ionos'];
+
 export type BifrostSecret =
   | string
   | {
@@ -73,4 +75,28 @@ export type BifrostProviderSyncOptions = {
   bifrostAdminUrl?: string;
   bifrostManagementApiKey?: string;
   logger?: BifrostProviderSyncLogger;
+};
+
+/**
+ * Provider access configuration for a Bifrost virtual key.
+ *
+ * `provider` is a plain string (not `BifrostProvider`) because virtual keys read from Bifrost
+ * may include provider configs for providers this codebase doesn't manage (e.g. `anthropic`),
+ * which must be preserved untouched. `budgets` and `rate_limit` are treated as opaque - we only
+ * ever read and re-send them unchanged for provider configs we didn't add ourselves.
+ */
+export type BifrostVirtualKeyProviderConfig = {
+  id?: number;
+  provider: string;
+  allowed_models: string[];
+  blacklisted_models?: string[];
+  key_ids?: string[];
+  weight?: number | null;
+  budgets?: unknown[];
+  rate_limit?: unknown;
+};
+
+export type BifrostVirtualKey = {
+  id: string;
+  provider_configs: BifrostVirtualKeyProviderConfig[];
 };
