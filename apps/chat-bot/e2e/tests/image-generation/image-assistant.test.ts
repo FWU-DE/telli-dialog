@@ -139,7 +139,7 @@ test('edit assistant - opens and starts conversation after image generation', as
   await expect(firstBubble).not.toBeEmpty();
 
   // Simulate user input asking for a color change
-  const input = sheet.getByPlaceholder('Deine Antwort...');
+  const input = sheet.getByPlaceholder('Antwort...');
   await input.fill('Mach den Kreis grün statt blau');
   await sheet.getByRole('button', { name: 'Senden' }).click();
 

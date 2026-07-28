@@ -13,7 +13,10 @@ export async function imageEditAssistantAction(
   if (!(federalState.featureToggles.isImageAssistantEnabled ?? false)) {
     throw new ForbiddenError('Image assistant is not enabled for this federal state');
   }
-  return runServerAction(chatWithImageEditAssistant)({
+  return runServerAction(
+    'imageEditAssistantAction',
+    chatWithImageEditAssistant,
+  )({
     messages,
     originalPrompt: context.originalPrompt,
     imageUrl: context.imageUrl,
