@@ -3,7 +3,6 @@ import {
   dbCreateLlmModel,
   dbUpdateLlmModel,
   dbGetOrganizationById,
-  dbSetStaticModelRoles,
 } from '@ais-chat/api-database';
 import { CreateLargeLanguageModel, UpdateLargeLanguageModel } from '../types/large-language-model';
 import { logInfo } from '@shared/logging';
@@ -42,8 +41,6 @@ export async function createLargeLanguageModel(
   logInfo('LLM was created successfully', { organizationId, data });
 
   if (!model) throw new Error('Failed to create model');
-  await dbSetStaticModelRoles({ modelId: model.id, roles: data.staticModelRoles });
-  await dbUpdateLlmModelsForAllFederalStates();
   return model;
 }
 
@@ -68,8 +65,6 @@ export async function updateLargeLanguageModel(
     isNew: data.isNew,
     isDeleted: data.isDeleted,
   });
-
-  await dbSetStaticModelRoles({ modelId, roles: data.staticModelRoles });
 
   await syncBifrostProvidersForOrganization(organizationId);
   await dbUpdateLlmModelsForAllFederalStates();

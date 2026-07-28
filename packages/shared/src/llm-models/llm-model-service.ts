@@ -1,4 +1,5 @@
 import { LlmModelSelectModel, LlmModelWithStaticRoles } from '../db/schema';
+import { DEFAULT_CHAT_MODEL } from './default-llm-models';
 import type { StaticModelRole } from '../db/schema';
 
 /**
@@ -8,6 +9,10 @@ import type { StaticModelRole } from '../db/schema';
  */
 export function getDefaultModel<T extends LlmModelSelectModel>(models: T[]): T | undefined {
   return getModelWithRole(models, 'default-chat') ?? (getFirstTextModel(models) as T | undefined);
+}
+
+export function getDefaultModelName(models: LlmModelWithStaticRoles[]): string {
+  return getDefaultModel(models)?.name ?? DEFAULT_CHAT_MODEL;
 }
 
 export function getModelWithRole<T extends LlmModelSelectModel>(

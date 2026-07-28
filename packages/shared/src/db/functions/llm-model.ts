@@ -6,6 +6,7 @@ import {
   LlmModelWithStaticRoles,
   llmModelTable,
   staticModelConfigurationTable,
+  StaticModelRole,
 } from '../schema';
 import { KnotenpunktLlmModel } from '../../knotenpunkt/schema';
 import {
@@ -58,7 +59,7 @@ export async function dbGetLlmModelsByFederalStateId({
     )
     .$withCache();
   const configurations = await db.select().from(staticModelConfigurationTable).$withCache();
-  const rolesByModelId = new Map<string, string[]>();
+  const rolesByModelId = new Map<string, StaticModelRole[]>();
   for (const configuration of configurations) {
     const roles = rolesByModelId.get(configuration.modelId) ?? [];
     roles.push(configuration.role);
@@ -68,6 +69,29 @@ export async function dbGetLlmModelsByFederalStateId({
     ...model,
     staticModelRoles: rolesByModelId.get(model.id) ?? [],
   }));
+}
+
+export async function dbGetStaticModelConfigurations() {
+  return db.select().from(staticModelConfigurationTable).$withCache();
+}
+
+export async function dbGetStaticModelConfigurationWithModels() {
+  return db
+    .select({ role: staticModelConfigurationTable.role, model: llmModelTable })
+    .from(staticModelConfigurationTable)
+    .innerJoin(llmModelTable, eq(staticModelConfigurationTable.modelId, llmModelTable.id))
+    .$withCache();
+}
+
+export async function dbUpdateStaticModelConfigurations(
+  configurations: { role: StaticModelRole; modelId: string }[],
+) {
+  return db.transaction(async (tx) => {
+    await tx.delete(staticModelConfigurationTable);
+    return configurations.length > 0
+      ? tx.insert(staticModelConfigurationTable).values(configurations).returning()
+      : [];
+  });
 }
 
 export async function dbFindModelsToUpdate({
@@ -121,11 +145,6 @@ export async function dbUpdateLlmModelsForAllFederalStates() {
   const modelsToUpsert = stateUpdates.flatMap(({ models }) => models);
 
   await dbUpsertLlmModels({ models: modelsToUpsert });
-  const roleAssignments = modelsToSyncRoles(modelsToUpsert);
-  await db.delete(staticModelConfigurationTable);
-  if (roleAssignments.length > 0) {
-    await db.insert(staticModelConfigurationTable).values(roleAssignments);
-  }
 
   await Promise.all(
     stateUpdates.map(async ({ stateId, modelIdsToAdd, modelsToRemove }) => {
@@ -138,12 +157,6 @@ export async function dbUpdateLlmModelsForAllFederalStates() {
         modelIds: modelsToRemove,
       });
     }),
-  );
-}
-
-function modelsToSyncRoles(models: KnotenpunktLlmModel[]) {
-  return models.flatMap((model) =>
-    model.staticModelRoles.map((role) => ({ role, modelId: model.id })),
   );
 }
 

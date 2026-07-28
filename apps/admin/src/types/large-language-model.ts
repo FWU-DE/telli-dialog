@@ -12,16 +12,7 @@ export type LargeLanguageModel = {
   additionalParameters: object;
   isNew: boolean;
   isDeleted: boolean;
-  staticModelRoles: string[];
 };
-
-export type StaticModelRole =
-  | 'default-chat'
-  | 'default-chat-fallback'
-  | 'auxiliary'
-  | 'strong-auxiliary'
-  | 'auxiliary-fallback'
-  | 'default-image';
 
 export type CreateLargeLanguageModel = {
   name: string;
@@ -34,7 +25,6 @@ export type CreateLargeLanguageModel = {
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
-  staticModelRoles: StaticModelRole[];
 };
 
 export type UpdateLargeLanguageModel = {
@@ -48,5 +38,4 @@ export type UpdateLargeLanguageModel = {
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
-  staticModelRoles: StaticModelRole[];
 };

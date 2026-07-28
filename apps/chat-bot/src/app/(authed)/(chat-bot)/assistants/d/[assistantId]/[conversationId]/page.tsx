@@ -2,6 +2,7 @@ import Chat from '@/components/chat/chat';
 import Logo from '@/components/common/logo';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { getDefaultModelName } from '@shared/llm-models/llm-model-service';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
@@ -51,7 +52,8 @@ export default async function Page(
 
   const lastUsedModelInChat = messages.at(-1)?.modelName;
 
-  const currentModel = searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? '';
+  const currentModel =
+    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? getDefaultModelName(models);
 
   const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
 

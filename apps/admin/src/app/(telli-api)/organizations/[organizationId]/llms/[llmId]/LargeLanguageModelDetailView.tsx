@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/c
 import { Button } from '@ui/components/button';
 import { FormField } from '@ui/components/form/form-field';
 import { FormFieldCheckbox } from '@ais-chat/ui/components/form/form-field-checkbox';
-import { LargeLanguageModel, StaticModelRole } from '@/types/large-language-model';
+import { LargeLanguageModel } from '@/types/large-language-model';
 import { createLLMAction, updateLLMAction } from './actions';
 import { ROUTES } from '@/consts/routes';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
@@ -38,7 +38,6 @@ const llmFormSchema = z.object({
   additionalParameters: jsonStringSchema.optional().default(''),
   isNew: z.boolean().default(false),
   isDeleted: z.boolean().default(false),
-  roleFlags: z.record(z.string(), z.boolean()).default({}),
 });
 
 type LLMForm = z.infer<typeof llmFormSchema>;
@@ -75,7 +74,6 @@ export function LargeLanguageModelDetailView({
           additionalParameters: JSON.stringify(model.additionalParameters, null, 2),
           isNew: model.isNew,
           isDeleted: model.isDeleted,
-          roleFlags: Object.fromEntries(model.staticModelRoles.map((role) => [role, true])),
         }
       : {
           name: '',
@@ -88,7 +86,6 @@ export function LargeLanguageModelDetailView({
           additionalParameters: '{}',
           isNew: false,
           isDeleted: false,
-          roleFlags: {},
         },
   });
 
@@ -99,11 +96,7 @@ export function LargeLanguageModelDetailView({
     }
 
     try {
-      const { roleFlags, ...modelFields } = data;
-      const staticModelRoles = Object.entries(roleFlags)
-        .filter(([, enabled]) => enabled)
-        .map(([role]) => role) as StaticModelRole[];
-      const modelData = { ...modelFields, staticModelRoles };
+      const modelData = data;
       if (isCreate) {
         const newModel = await createLLMAction(organizationId, modelData);
         toast.success('Sprachmodell erfolgreich erstellt');
@@ -223,31 +216,6 @@ export function LargeLanguageModelDetailView({
             description="Kennzeichnet das Modell als gelöscht"
             control={control}
           />
-
-          <div className="space-y-3">
-            <p className="font-medium">Statische Modellrollen</p>
-            <p className="text-sm text-muted-foreground">
-              Eine Rolle kann jeweils nur einem Modell zugewiesen werden.
-            </p>
-            {(
-              [
-                ['default-chat', 'Standard-Chatmodell'],
-                ['default-chat-fallback', 'Fallback-Chatmodell'],
-                ['auxiliary', 'Hilfsmodell'],
-                ['strong-auxiliary', 'Starkes Hilfsmodell'],
-                ['auxiliary-fallback', 'Fallback-Hilfsmodell'],
-                ['default-image', 'Standard-Bildmodell'],
-              ] as [StaticModelRole, string][]
-            ).map(([role, label]) => (
-              <FormFieldCheckbox
-                key={role}
-                name={`roleFlags.${role}`}
-                label={label}
-                description={`Dieses Modell als ${label.toLowerCase()} verwenden`}
-                control={control}
-              />
-            ))}
-          </div>
 
           <div className="flex gap-3 justify-end pt-4">
             <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>

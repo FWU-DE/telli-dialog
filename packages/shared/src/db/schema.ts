@@ -705,16 +705,16 @@ export const llmModelUpdateSchema = createUpdateSchema(llmModelTable)
   });
 
 export type LlmModelSelectModel = z.infer<typeof llmModelSelectSchema>;
-export type LlmModelWithStaticRoles = LlmModelSelectModel & { staticModelRoles: string[] };
 export type LlmModelInsertModel = z.infer<typeof llmModelInsertSchema>;
 export type LlmModelUpdateModel = z.infer<typeof llmModelUpdateSchema>;
 
 export const staticModelConfigurationTable = pgTable('static_model_configuration', {
-  role: text('role').primaryKey(),
+  role: text('role').$type<StaticModelRole>().primaryKey(),
   modelId: uuid('model_id')
     .notNull()
     .references(() => llmModelTable.id),
 });
+export type LlmModelWithStaticRoles = LlmModelSelectModel & { staticModelRoles: StaticModelRole[] };
 export type StaticModelConfiguration = typeof staticModelConfigurationTable.$inferSelect;
 
 /**

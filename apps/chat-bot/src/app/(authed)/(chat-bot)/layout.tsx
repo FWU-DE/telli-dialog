@@ -2,6 +2,7 @@ import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { getDefaultModelName } from '@shared/llm-models/llm-model-service';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';
 import TermsConditionsModal from '@/components/modals/terms-conditions-initial';
@@ -57,7 +58,10 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     <SessionWatcher redirectTo="/api/auth/logout-callback">
       <FederalStateProvider federalState={federalState}>
         <SidebarProvider className="min-h-0">
-          <LlmModelsProvider models={models} defaultLlmModelByCookie={user.lastUsedModel ?? ''}>
+          <LlmModelsProvider
+            models={models}
+            defaultLlmModelByCookie={user.lastUsedModel ?? getDefaultModelName(models)}
+          >
             <AppSidebar
               user={user}
               federalState={federalState}

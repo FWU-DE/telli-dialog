@@ -7,6 +7,7 @@ export function AdminAppSidebar() {
       <SidebarItem label="Bundesländer" href={ROUTES.app.federalStates} />
       <SidebarItem label="Info-Banner" href={ROUTES.app.infoBanners} />
       <SidebarItem label="Tool Call Kosten" href={ROUTES.app.toolCallCosts} />
+      <SidebarItem label="Statische Modelle" href={ROUTES.app.staticModels} />
       <SidebarItem label="Vorlagen" href={ROUTES.app.templates} />
       <SidebarItem label="Sperrungen" href={ROUTES.app.suspensions} />
     </Sidebar>
