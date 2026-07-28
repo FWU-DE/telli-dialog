@@ -4,7 +4,7 @@ import { staticModelConfigurationTable, llmModelTable, StaticModelRole } from '.
 
 const defaultModelNames: Record<StaticModelRole, string> = {
   'default-chat': 'gpt-5-mini',
-  'default-chat-fallback': 'gpt-5-nano',
+  fallback: 'gpt-5-nano',
   auxiliary: 'gpt-4o-mini',
   'strong-auxiliary': 'gpt-5.5',
   'auxiliary-fallback': 'meta-llama/Llama-3.3-70B-Instruct',

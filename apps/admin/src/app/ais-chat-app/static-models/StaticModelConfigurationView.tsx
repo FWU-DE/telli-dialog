@@ -16,7 +16,7 @@ import { updateStaticModelConfigurationAction } from './actions';
 
 const roles: { role: StaticModelRole; label: string; type: 'text' | 'image' }[] = [
   { role: 'default-chat', label: 'Standard-Chatmodell', type: 'text' },
-  { role: 'default-chat-fallback', label: 'Fallback-Chatmodell', type: 'text' },
+  { role: 'fallback', label: 'Fallback-Modell', type: 'text' },
   { role: 'auxiliary', label: 'Hilfsmodell', type: 'text' },
   { role: 'strong-auxiliary', label: 'Starkes Hilfsmodell', type: 'text' },
   { role: 'auxiliary-fallback', label: 'Fallback-Hilfsmodell', type: 'text' },

@@ -673,7 +673,7 @@ export const llmModelTypeEnum = pgEnum('llm_model_type', llmModelTypeSchema.enum
 export type LlmModeType = z.infer<typeof llmModelTypeSchema>;
 export const staticModelRoleSchema = z.enum([
   'default-chat',
-  'default-chat-fallback',
+  'fallback',
   'auxiliary',
   'strong-auxiliary',
   'auxiliary-fallback',

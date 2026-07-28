@@ -9,7 +9,7 @@ INSERT INTO "static_model_configuration" ("role", "model_id")
 SELECT 'default-chat', "id" FROM "llm_model" WHERE "name" = 'gpt-5-mini' ORDER BY "created_at" LIMIT 1;
 --> statement-breakpoint
 INSERT INTO "static_model_configuration" ("role", "model_id")
-SELECT 'default-chat-fallback', "id" FROM "llm_model" WHERE "name" = 'gpt-5-nano' ORDER BY "created_at" LIMIT 1;
+SELECT 'fallback', "id" FROM "llm_model" WHERE "name" = 'gpt-5-nano' ORDER BY "created_at" LIMIT 1;
 --> statement-breakpoint
 INSERT INTO "static_model_configuration" ("role", "model_id")
 SELECT 'auxiliary', "id" FROM "llm_model" WHERE "name" = 'gpt-4o-mini' ORDER BY "created_at" LIMIT 1;
