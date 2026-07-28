@@ -222,14 +222,7 @@ export function LearningScenarioEdit({
             name: data.name.trim(),
             description: data.description ?? '',
             studentExercise: data.studentExercise ?? '',
-            filterGroup: toFilterGroup({
-              schoolTypes: data.schoolTypes,
-              gradeRanges: data.gradeRanges,
-              subjects: data.subjects,
-              categories: data.categories,
-              federalStates: data.federalStates,
-              languages: data.languages,
-            }),
+            filterGroup: toFilterGroup(data),
             attachedLinks: attachedLinksRef.current,
           },
         });
