@@ -1,5 +1,5 @@
 import {
-  type filterGroup,
+  type FilterGroup,
   type SchoolType,
   type GradeRange,
   type Subject,
@@ -54,10 +54,6 @@ function matchesSelectedGroup<T>(entityValues: T[], selectedValues: T[]): boolea
   return selectedValues.some((value) => entityValueSet.has(value));
 }
 
-export function hasActiveFilters(values: FilterValues): boolean {
-  return Object.values(values).some((groupValues) => groupValues.length > 0);
-}
-
 export function matchesFilterValues(
   entityValues: FilterValues,
   selectedValues: FilterValues,
@@ -105,7 +101,7 @@ export function extractFilterValues(entity: EntityWithFilterValues): FilterValue
   };
 }
 
-export function toFilterGroup(values: FilterValues): filterGroup {
+export function toFilterGroup(values: FilterValues): FilterGroup {
   return {
     school_types: unique(values.schoolTypes),
     grade_ranges: unique(values.gradeRanges),
@@ -158,11 +154,4 @@ export function getActiveFilterPills(
       value,
     })),
   ];
-}
-
-export function getActiveFilterPillLabels(
-  values: FilterValues,
-  t: ReturnType<typeof useTranslations<never>>,
-): string[] {
-  return getActiveFilterPills(values, t).map((pill) => pill.label);
 }

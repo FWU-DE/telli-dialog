@@ -523,14 +523,14 @@ export const subjectsSchema = z.enum([
 export type Subject = z.infer<typeof subjectsSchema>;
 
 export const filterGroupSchema = z.object({
-  school_types: z.array(schoolTypesSchema).default([]),
-  grade_ranges: z.array(gradeRangesSchema).default([]),
-  subjects: z.array(subjectsSchema).default([]),
-  categories: z.array(categoriesSchema).default([]),
-  federal_states: z.array(federalStatesSchema).default([]),
-  languages: z.array(languagesSchema).default([]),
+  school_types: z.array(schoolTypesSchema).optional(),
+  grade_ranges: z.array(gradeRangesSchema).optional(),
+  subjects: z.array(subjectsSchema).optional(),
+  categories: z.array(categoriesSchema).optional(),
+  federal_states: z.array(federalStatesSchema).optional(),
+  languages: z.array(languagesSchema).optional(),
 });
-export type filterGroup = z.infer<typeof filterGroupSchema>;
+export type FilterGroup = z.infer<typeof filterGroupSchema>;
 
 export const characterTable = pgTable(
   'character',
@@ -550,7 +550,7 @@ export const characterTable = pgTable(
     learningContext: text('learning_context').notNull().default(''),
     competence: text('competence').notNull().default(''),
     filterGroup: json('filter_attributes')
-      .$type<filterGroup>()
+      .$type<FilterGroup>()
       .notNull()
       .default(sql`'{}'::json`),
     // not required
@@ -775,7 +775,7 @@ export const learningScenarioTable = pgTable(
       .references(() => userTable.id)
       .notNull(),
     filterGroup: json('filter_attributes')
-      .$type<filterGroup>()
+      .$type<FilterGroup>()
       .notNull()
       .default(sql`'{}'::json`),
     studentExercise: text('student_exercise').default('').notNull(),
@@ -1279,7 +1279,7 @@ export const assistantTable = pgTable(
     description: text('description'),
     instructions: text('instructions'),
     filterGroup: json('filter_attributes')
-      .$type<filterGroup>()
+      .$type<FilterGroup>()
       .notNull()
       .default(sql`'{}'::json`),
     promptSuggestions: text('prompt_suggestions')
