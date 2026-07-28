@@ -41,7 +41,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
       expiredAt={character.expiredAt}
       manuallyStoppedAt={character.manuallyStoppedAt}
       customChatId={character.id}
-      sharingUserId={user.id}
+      sharingUserId={character.startedBy}
     />
   );
 }
