@@ -343,6 +343,7 @@ export default function Chat({
               fileMapping={fileMapping}
               pendingFileMapping={pendingFileMapping}
               webSourceMapping={webSourceMapping}
+              showWebSourcesInDialog={character !== undefined}
             />
           )}
           {error && (

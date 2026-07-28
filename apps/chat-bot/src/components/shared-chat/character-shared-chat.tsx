@@ -111,6 +111,7 @@ export default function CharacterSharedChat({
       assistantIcon={assistantIcon}
       uploadFileFn={uploadSharedCharacterFile}
       getSignedUrlFn={getSignedUrlForSharedCharacterFile}
+      showWebSourcesInDialog
     />
   );
 }

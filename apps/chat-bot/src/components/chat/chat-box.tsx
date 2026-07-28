@@ -16,6 +16,7 @@ import { ReactNode } from 'react';
 import { WebSource } from '@shared/db/types';
 import {
   WebSearchSourcesButton,
+  WebSearchSourcesDialog,
   WebSearchSourcesPanel,
   useWebSearchSourcesDisclosure,
 } from './sources/web-search-sources';
@@ -38,6 +39,7 @@ export function ChatBox({
   characterName,
   status,
   getSignedUrlFn,
+  showWebSourcesInDialog = false,
 }: {
   assistantIcon?: ReactNode;
   children: UIMessage;
@@ -52,6 +54,7 @@ export function ChatBox({
   characterName?: string;
   status: ChatStatus;
   getSignedUrlFn?: (fileId: string) => Promise<string>;
+  showWebSourcesInDialog?: boolean;
 }) {
   const tCommon = useTranslations('common');
   const { isAtLeast } = useBreakpoints();
@@ -136,7 +139,7 @@ export function ChatBox({
     ) : null;
 
   const maybeAssistantWebSearchSources =
-    assistantWebSearchSources.length > 0 ? (
+    assistantWebSearchSources.length > 0 && !showWebSourcesInDialog ? (
       <WebSearchSourcesPanel
         sources={assistantWebSearchSources}
         isOpen={isAssistantSourcesOpen}
@@ -147,7 +150,7 @@ export function ChatBox({
     ) : null;
 
   const margin =
-    allFiles !== undefined || userWebSources.length > 0 || assistantWebSearchSources.length > 0
+    allFiles !== undefined || userWebSources.length > 0 || maybeAssistantWebSearchSources !== null
       ? 'm-0 mt-4'
       : 'm-4';
 
@@ -174,12 +177,15 @@ export function ChatBox({
             <ReloadIcon className="w-5 h-5" />
           </div>
         </button>
-        {assistantWebSearchSources.length > 0 && (
-          <WebSearchSourcesButton
-            panelId={`assistant-web-sources-${children.id}`}
-            onClick={openOrScrollIntoView}
-          />
-        )}
+        {assistantWebSearchSources.length > 0 &&
+          (showWebSourcesInDialog ? (
+            <WebSearchSourcesDialog sources={assistantWebSearchSources} />
+          ) : (
+            <WebSearchSourcesButton
+              panelId={`assistant-web-sources-${children.id}`}
+              onClick={openOrScrollIntoView}
+            />
+          ))}
       </div>
     ) : null;
 
