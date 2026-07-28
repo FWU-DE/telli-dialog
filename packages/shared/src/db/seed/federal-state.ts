@@ -6,6 +6,7 @@ import { dbUpdateLlmModelsForAllFederalStates } from '../functions/llm-model';
 import { env } from '../../env';
 import { env as aiEnv } from '@ais-chat/ai-core/env';
 import { lookupApiKeys } from '@ais-chat/ai-core/api-keys/lookup';
+import { initializeStaticModelConfigurations } from './static-model-configuration';
 
 export async function insertFederalStates({ skip = true }: { skip: boolean }) {
   if (skip) return;
@@ -48,6 +49,7 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
   }
 
   await dbUpdateLlmModelsForAllFederalStates();
+  await initializeStaticModelConfigurations();
 
   console.log('federalState seed successful');
 }
