@@ -1,6 +1,12 @@
 import { and, eq, getTableColumns, inArray } from 'drizzle-orm';
 import { db } from '..';
-import { federalStateLlmModelMappingTable, LlmModelSelectModel, llmModelTable } from '../schema';
+import {
+  federalStateLlmModelMappingTable,
+  LlmModelSelectModel,
+  LlmModelWithStaticRoles,
+  llmModelTable,
+  staticModelConfigurationTable,
+} from '../schema';
 import { KnotenpunktLlmModel } from '../../knotenpunkt/schema';
 import {
   dbGetFederalStateWithDecryptedApiKeyWithResult,
@@ -36,8 +42,8 @@ export async function dbGetLlmModelsByFederalStateId({
   federalStateId,
 }: {
   federalStateId: string;
-}): Promise<LlmModelSelectModel[]> {
-  return db
+}): Promise<LlmModelWithStaticRoles[]> {
+  const models = await db
     .select({ ...getTableColumns(llmModelTable) })
     .from(llmModelTable)
     .innerJoin(
@@ -51,6 +57,17 @@ export async function dbGetLlmModelsByFederalStateId({
       ),
     )
     .$withCache();
+  const configurations = await db.select().from(staticModelConfigurationTable).$withCache();
+  const rolesByModelId = new Map<string, string[]>();
+  for (const configuration of configurations) {
+    const roles = rolesByModelId.get(configuration.modelId) ?? [];
+    roles.push(configuration.role);
+    rolesByModelId.set(configuration.modelId, roles);
+  }
+  return models.map((model) => ({
+    ...model,
+    staticModelRoles: rolesByModelId.get(model.id) ?? [],
+  }));
 }
 
 export async function dbFindModelsToUpdate({
@@ -104,6 +121,11 @@ export async function dbUpdateLlmModelsForAllFederalStates() {
   const modelsToUpsert = stateUpdates.flatMap(({ models }) => models);
 
   await dbUpsertLlmModels({ models: modelsToUpsert });
+  const roleAssignments = modelsToSyncRoles(modelsToUpsert);
+  await db.delete(staticModelConfigurationTable);
+  if (roleAssignments.length > 0) {
+    await db.insert(staticModelConfigurationTable).values(roleAssignments);
+  }
 
   await Promise.all(
     stateUpdates.map(async ({ stateId, modelIdsToAdd, modelsToRemove }) => {
@@ -119,13 +141,19 @@ export async function dbUpdateLlmModelsForAllFederalStates() {
   );
 }
 
+function modelsToSyncRoles(models: KnotenpunktLlmModel[]) {
+  return models.flatMap((model) =>
+    model.staticModelRoles.map((role) => ({ role, modelId: model.id })),
+  );
+}
+
 export async function dbGetModelByIdAndFederalStateId({
   modelId,
   federalStateId,
 }: {
   modelId: string;
   federalStateId: string;
-}) {
+}): Promise<LlmModelWithStaticRoles | undefined> {
   const [result] = await db
     .select({ ...getTableColumns(llmModelTable) })
     .from(llmModelTable)
@@ -141,7 +169,16 @@ export async function dbGetModelByIdAndFederalStateId({
     )
     .$withCache();
 
-  return result;
+  if (!result) return result;
+  const configurations = await db
+    .select()
+    .from(staticModelConfigurationTable)
+    .where(eq(staticModelConfigurationTable.modelId, result.id))
+    .$withCache();
+  return {
+    ...result,
+    staticModelRoles: configurations.map((configuration) => configuration.role),
+  };
 }
 
 async function dbUpsertLlmModels({ models }: { models: KnotenpunktLlmModel[] }) {

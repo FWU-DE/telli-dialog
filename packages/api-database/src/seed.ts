@@ -6,11 +6,13 @@ import {
   type LlmModel,
   llmModelApiKeyMappingTable,
   llmModelTable,
+  staticModelConfigurationTable,
   type OrganizationInsertModel,
   organizationTable,
   type ProjectInsertModel,
   projectTable,
 } from './schema';
+import type { StaticModelRole } from './types';
 import { and, eq, inArray } from 'drizzle-orm';
 import { normalizeSeedModelsForBifrost, syncSeedModelsToBifrost } from './seed-bifrost';
 
@@ -320,6 +322,21 @@ export async function seedDatabase() {
           apiKeyId: apiKey.id,
         })
         .onConflictDoNothing();
+    }
+
+    await db.delete(staticModelConfigurationTable);
+    const seededRoleModels = new Map<StaticModelRole, string>([
+      ['auxiliary', 'gpt-4o-mini'],
+      ['default-chat-fallback', 'gpt-5-nano'],
+      ['default-chat', 'gpt-5-mini'],
+    ]);
+    for (const [role, name] of seededRoleModels) {
+      const model = seededModels.find((candidate) => candidate.name === name);
+      if (model)
+        await db.insert(staticModelConfigurationTable).values({
+          role: role as StaticModelRole,
+          modelId: model.id,
+        });
     }
 
     const modelsToSync =

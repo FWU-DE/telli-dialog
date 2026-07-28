@@ -8,7 +8,6 @@ import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
 import { type Metadata } from 'next';
@@ -47,8 +46,7 @@ export default async function Page(props: PageProps<'/learning-scenarios/d/[lear
   });
   const learningScenarioModel = models.find((m) => m.id === learningScenario.modelId)?.name;
 
-  const currentModel =
-    searchParams.model ?? learningScenarioModel ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+  const currentModel = searchParams.model ?? learningScenarioModel ?? user.lastUsedModel ?? '';
 
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;

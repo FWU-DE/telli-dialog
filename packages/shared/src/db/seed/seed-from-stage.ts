@@ -57,7 +57,7 @@ async function seedDatabase() {
 
     await localDb
       .insert(llmModelTable)
-      .values(await getLlmModels())
+      .values((await getLlmModels()) as (typeof llmModelTable.$inferInsert)[])
       .onConflictDoNothing();
 
     await localDb

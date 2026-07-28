@@ -1,4 +1,3 @@
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import Chat from '@/components/chat/chat';
 import Logo from '@/components/common/logo';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
@@ -52,8 +51,7 @@ export default async function Page(
 
   const lastUsedModelInChat = messages.at(-1)?.modelName;
 
-  const currentModel =
-    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+  const currentModel = searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? '';
 
   const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
 

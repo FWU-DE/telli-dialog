@@ -2,8 +2,7 @@
 
 import { LlmModelSelectModel } from '@shared/db/schema';
 import React, { useState } from 'react';
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
-import { getFirstTextModel } from '@shared/llm-models/llm-model-service';
+import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 
 type LlmModelsProviderProps = {
   models: LlmModelSelectModel[];
@@ -87,9 +86,5 @@ function getSelectedModel({
   models: LlmModelSelectModel[];
   defaultLlmModelByCookie: string | undefined;
 }) {
-  return (
-    models.find((model) => model.name === defaultLlmModelByCookie) ??
-    models.find((model) => model.name === DEFAULT_CHAT_MODEL) ??
-    getFirstTextModel(models)
-  );
+  return models.find((model) => model.name === defaultLlmModelByCookie) ?? getDefaultModel(models);
 }

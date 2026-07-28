@@ -13,7 +13,6 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import type { ChatMessage as Message } from '@/types/chat';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { type Metadata } from 'next';
@@ -76,8 +75,7 @@ export default async function Page(
 
   const lastUsedModelInChat = rawChatMessages.at(-1)?.modelName;
 
-  const currentModel =
-    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+  const currentModel = searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? '';
 
   const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;

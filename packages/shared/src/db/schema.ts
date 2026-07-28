@@ -666,6 +666,15 @@ export type CharacterTemplateMappingInsertModel = z.infer<
 export const llmModelTypeSchema = z.enum(['text', 'image', 'fc']);
 export const llmModelTypeEnum = pgEnum('llm_model_type', llmModelTypeSchema.enum);
 export type LlmModeType = z.infer<typeof llmModelTypeSchema>;
+export const staticModelRoleSchema = z.enum([
+  'default-chat',
+  'default-chat-fallback',
+  'auxiliary',
+  'strong-auxiliary',
+  'auxiliary-fallback',
+  'default-image',
+]);
+export type StaticModelRole = z.infer<typeof staticModelRoleSchema>;
 
 export const llmModelTable = pgTable(
   'llm_model',
@@ -696,8 +705,17 @@ export const llmModelUpdateSchema = createUpdateSchema(llmModelTable)
   });
 
 export type LlmModelSelectModel = z.infer<typeof llmModelSelectSchema>;
+export type LlmModelWithStaticRoles = LlmModelSelectModel & { staticModelRoles: string[] };
 export type LlmModelInsertModel = z.infer<typeof llmModelInsertSchema>;
 export type LlmModelUpdateModel = z.infer<typeof llmModelUpdateSchema>;
+
+export const staticModelConfigurationTable = pgTable('static_model_configuration', {
+  role: text('role').primaryKey(),
+  modelId: uuid('model_id')
+    .notNull()
+    .references(() => llmModelTable.id),
+});
+export type StaticModelConfiguration = typeof staticModelConfigurationTable.$inferSelect;
 
 /**
  * Schema for table federal_state_llm_model_mapping

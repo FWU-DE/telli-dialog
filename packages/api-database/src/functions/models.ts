@@ -1,9 +1,14 @@
-import { eq, inArray, and } from 'drizzle-orm';
-import { llmModelApiKeyMappingTable, llmModelTable } from '../schema';
+import { eq, inArray, and, or } from 'drizzle-orm';
+import {
+  llmModelApiKeyMappingTable,
+  llmModelTable,
+  staticModelConfigurationTable,
+} from '../schema';
 import { db } from '../db';
 import { dbGetAllApiKeysByProjectId } from './api-key';
 import { dbGetOrganizationAndProjectsByOrganizationId } from './organization';
 import type { LlmInsertModel, LlmModel } from '../schema';
+import { staticModelRoleSchema, StaticModelRole } from '../types';
 
 export async function dbGetAllModels() {
   return db.select().from(llmModelTable).orderBy(llmModelTable.createdAt);
@@ -55,11 +60,18 @@ export async function dbHasApiKeyAccessToModel({
 }
 
 export async function dbGetAllModelsByOrganizationId(organizationId: string) {
-  return await db
+  const models = await db
     .select()
     .from(llmModelTable)
     .where(eq(llmModelTable.organizationId, organizationId))
     .orderBy(llmModelTable.name, llmModelTable.createdAt);
+  const configurations = await db.select().from(staticModelConfigurationTable);
+  return models.map((model) => ({
+    ...model,
+    staticModelRoles: configurations
+      .filter((configuration) => configuration.modelId === model.id)
+      .map((configuration) => configuration.role),
+  }));
 }
 
 /**
@@ -78,7 +90,17 @@ export async function dbGetModelsByApiKeyId({ apiKeyId }: { apiKeyId: string }) 
     )
     .where(eq(llmModelApiKeyMappingTable.apiKeyId, apiKeyId));
 
-  return rows.map((r) => r.llm_model);
+  const configurations = await db.select().from(staticModelConfigurationTable);
+  const rolesByModelId = new Map<string, StaticModelRole[]>();
+  for (const configuration of configurations) {
+    const roles = rolesByModelId.get(configuration.modelId) ?? [];
+    roles.push(configuration.role);
+    rolesByModelId.set(configuration.modelId, roles);
+  }
+  return rows.map((r) => ({
+    ...r.llm_model,
+    staticModelRoles: rolesByModelId.get(r.llm_model.id) ?? [],
+  }));
 }
 
 export async function dbCreateLlmModel(llmModel: LlmInsertModel) {
@@ -103,6 +125,62 @@ export async function dbUpdateLlmModel(
   )[0];
 
   return updatedModel;
+}
+
+export async function dbSetStaticModelRoles({
+  modelId,
+  roles,
+}: {
+  modelId: string;
+  roles: string[];
+}) {
+  const validatedRoles = roles.map((role) => staticModelRoleSchema.parse(role));
+  return db.transaction(async (tx) => {
+    const [existingModel] = await tx
+      .select({ priceMetadata: llmModelTable.priceMetadata })
+      .from(llmModelTable)
+      .where(eq(llmModelTable.id, modelId));
+
+    if (!existingModel) throw new Error(`Model not found: ${modelId}`);
+
+    const isImageModel = existingModel.priceMetadata.type === 'image';
+    const hasImageRole = validatedRoles.includes('default-image');
+    const hasTextRole = validatedRoles.some((role) => role !== 'default-image');
+    if ((isImageModel && (!hasImageRole || hasTextRole)) || (!isImageModel && hasImageRole)) {
+      throw new Error('Static model roles do not match the model modality');
+    }
+
+    await tx
+      .delete(staticModelConfigurationTable)
+      .where(
+        validatedRoles.length > 0
+          ? or(
+              eq(staticModelConfigurationTable.modelId, modelId),
+              inArray(staticModelConfigurationTable.role, validatedRoles),
+            )
+          : eq(staticModelConfigurationTable.modelId, modelId),
+      );
+    if (validatedRoles.length > 0) {
+      await tx
+        .insert(staticModelConfigurationTable)
+        .values(validatedRoles.map((role) => ({ role, modelId })));
+    }
+    return existingModel;
+  });
+}
+
+export async function dbGetStaticModelRolesByModelIds(modelIds: string[]) {
+  const configurations = await db
+    .select()
+    .from(staticModelConfigurationTable)
+    .where(inArray(staticModelConfigurationTable.modelId, modelIds));
+  const rolesByModelId = new Map<string, StaticModelRole[]>();
+  for (const configuration of configurations) {
+    const roles = rolesByModelId.get(configuration.modelId) ?? [];
+    roles.push(configuration.role);
+    rolesByModelId.set(configuration.modelId, roles);
+  }
+  return rolesByModelId;
 }
 
 export async function dbDeleteLlmModelById(id: string) {

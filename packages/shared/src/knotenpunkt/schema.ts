@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+const staticModelRoleSchema = z.enum([
+  'default-chat',
+  'default-chat-fallback',
+  'auxiliary',
+  'strong-auxiliary',
+  'auxiliary-fallback',
+  'default-image',
+]);
+
 const knotenpunktPriceMetadata = z.union([
   z.object({
     type: z.literal('text'),
@@ -34,5 +43,6 @@ export const knotenpunktLlmModelSchema = z.object({
   createdAt: z.coerce.date(),
   isNew: z.boolean().optional().default(false),
   isDeleted: z.boolean().optional().default(false),
+  staticModelRoles: z.array(staticModelRoleSchema).default([]),
 });
 export type KnotenpunktLlmModel = z.infer<typeof knotenpunktLlmModelSchema>;

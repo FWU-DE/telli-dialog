@@ -3,7 +3,6 @@ import { generateUUID } from '@shared/utils/uuid';
 import { getRandomPromptSuggestions } from '@/utils/prompt-suggestions/utils';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import Logo from '@/components/common/logo';
 import { requireAuth } from '@/auth/requireAuth';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
@@ -41,7 +40,7 @@ export default async function Page() {
     <LlmModelsProvider
       key={id}
       models={models}
-      defaultLlmModelByCookie={userAndContext.lastUsedModel ?? DEFAULT_CHAT_MODEL}
+      defaultLlmModelByCookie={userAndContext.lastUsedModel ?? ''}
     >
       <DefaultPageLayout
         layoutConfig={{

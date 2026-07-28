@@ -1,13 +1,22 @@
-import { LlmModelSelectModel } from '../db/schema';
-import { DEFAULT_CHAT_MODEL } from './default-llm-models';
+import { LlmModelSelectModel, LlmModelWithStaticRoles } from '../db/schema';
+import type { StaticModelRole } from '../db/schema';
 
 /**
  * Get the default model from a list of models
  * @param models The list of LLM models
  * @returns The default model or undefined if none found
  */
-export function getDefaultModel(models: LlmModelSelectModel[]): LlmModelSelectModel | undefined {
-  return models.find((m) => m.name === DEFAULT_CHAT_MODEL) ?? getFirstTextModel(models);
+export function getDefaultModel<T extends LlmModelSelectModel>(models: T[]): T | undefined {
+  return getModelWithRole(models, 'default-chat') ?? (getFirstTextModel(models) as T | undefined);
+}
+
+export function getModelWithRole<T extends LlmModelSelectModel>(
+  models: T[],
+  role: StaticModelRole,
+): T | undefined {
+  return models.find((model) =>
+    (model as unknown as LlmModelWithStaticRoles).staticModelRoles?.includes(role),
+  ) as T | undefined;
 }
 
 /**

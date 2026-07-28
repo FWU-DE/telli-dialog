@@ -1,5 +1,15 @@
 import { z } from 'zod';
 
+export const staticModelRoleSchema = z.enum([
+  'default-chat',
+  'default-chat-fallback',
+  'auxiliary',
+  'strong-auxiliary',
+  'auxiliary-fallback',
+  'default-image',
+]);
+export type StaticModelRole = z.infer<typeof staticModelRoleSchema>;
+
 export const llmModelPriceMetadataSchema = z.union([
   z.object({
     type: z.literal('text'),

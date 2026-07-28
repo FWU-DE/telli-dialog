@@ -10,7 +10,6 @@ import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
@@ -52,8 +51,7 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
   });
   const characterModel = models.find((m) => m.id === character.modelId)?.name;
 
-  const currentModel =
-    searchParams.model ?? characterModel ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+  const currentModel = searchParams.model ?? characterModel ?? user.lastUsedModel ?? '';
 
   const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;

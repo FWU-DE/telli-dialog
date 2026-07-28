@@ -10,7 +10,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { LlmModelPriceMetadata } from './types';
+import { LlmModelPriceMetadata, StaticModelRole } from './types';
 import { LlmModelProviderSettings } from './llm-model';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 
@@ -69,6 +69,17 @@ export const llmUpdateModelSchema = createUpdateSchema(llmModelTable).omit({
 });
 export type LlmInsertModel = typeof llmModelTable.$inferInsert;
 export type LlmModel = typeof llmModelTable.$inferSelect;
+
+export const staticModelConfigurationTable = pgTable('static_model_configuration', {
+  role: text('role').$type<StaticModelRole>().primaryKey(),
+  modelId: uuid('model_id')
+    .notNull()
+    .references(() => llmModelTable.id),
+});
+export const staticModelConfigurationInsertSchema = createInsertSchema(
+  staticModelConfigurationTable,
+);
+export type StaticModelConfiguration = typeof staticModelConfigurationTable.$inferSelect;
 
 export const apiKeyStateEnum = pgEnum('api_key_state', ['active', 'inactive', 'deleted']);
 
