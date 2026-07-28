@@ -247,6 +247,32 @@ describe('sendCharacterMessage', () => {
     });
   });
 
+  it('anonymizes all incoming user messages when the toggle is enabled', async () => {
+    mocks.getUserAndContextByUserIdMock.mockResolvedValue({
+      ...teacherUserAndContext,
+      federalState: {
+        ...teacherUserAndContext.federalState,
+        featureToggles: {
+          ...teacherUserAndContext.federalState.featureToggles,
+          isAnonymizationEnabled: true,
+        },
+      },
+    });
+
+    const { sendCharacterMessage } = await import('./character-chat-service');
+    const { anonymizeChatMessages } = await import('../anonymization/anonymization-service');
+
+    const result = await sendCharacterMessage({
+      characterId: character.id,
+      inviteCode: 'invite-code',
+      messages,
+      modelId: model.id,
+    });
+    await collectStream(result.stream);
+
+    expect(vi.mocked(anonymizeChatMessages)).toHaveBeenCalledWith(messages, undefined);
+  });
+
   it('forwards fileIds to shared file service', async () => {
     const { sendCharacterMessage } = await import('./character-chat-service');
 
