@@ -9,6 +9,7 @@ export function AdminAppSidebar() {
       <SidebarItem label="Tool Call Kosten" href={ROUTES.app.toolCallCosts} />
       <SidebarItem label="Vorlagen" href={ROUTES.app.templates} />
       <SidebarItem label="Sperrungen" href={ROUTES.app.suspensions} />
+      <SidebarItem label="Webseitenpakete" href={ROUTES.app.urlPresets} />
     </Sidebar>
   );
 }

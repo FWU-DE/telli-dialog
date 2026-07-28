@@ -39,5 +39,6 @@ export const ROUTES = {
     suspensions: '/ais-chat-app/suspensions',
     suspensionDetails: (entityType: string, entityId: string) =>
       `/ais-chat-app/suspensions/${entityType}/${entityId}`,
+    urlPresets: '/ais-chat-app/url-presets',
   },
 };

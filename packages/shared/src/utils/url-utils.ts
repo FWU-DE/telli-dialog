@@ -48,6 +48,10 @@ export function parseHyperlinks(content: string): string[] | undefined {
   return matches;
 }
 
+// Require at least one dot and only valid DNS label characters.
+export const domainPattern =
+  /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
+
 /**
  * Normalizes a URL to a domain.
  *
@@ -85,9 +89,7 @@ export function normalizeDomain(input: string): string | null {
     host = host.slice(4);
   }
 
-  // Require at least one dot and only valid DNS label characters.
-  const hostnamePattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
-  if (!hostnamePattern.test(host)) {
+  if (!domainPattern.test(host)) {
     return null;
   }
 
