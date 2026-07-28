@@ -610,6 +610,13 @@
       "when": 1785231516401,
       "tag": "0086_wandering_stepford_cuckoos",
       "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "7",
+      "when": 1785247372062,
+      "tag": "0087_medical_mandroid",
+      "breakpoints": true
     }
   ]
 }

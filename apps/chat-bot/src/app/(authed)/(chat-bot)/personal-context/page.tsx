@@ -43,6 +43,7 @@ export default async function Page() {
       <PersonalContextEditor
         initialContent={personalContext.content}
         initialEnabled={personalContext.enabled}
+        initialAutoUpdateEnabled={personalContext.autoUpdateEnabled}
       />
     </DefaultPageLayout>
   );
