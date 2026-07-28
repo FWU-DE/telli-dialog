@@ -96,13 +96,12 @@ export function LargeLanguageModelDetailView({
     }
 
     try {
-      const modelData = data;
       if (isCreate) {
-        const newModel = await createLLMAction(organizationId, modelData);
+        const newModel = await createLLMAction(organizationId, data);
         toast.success('Sprachmodell erfolgreich erstellt');
         router.push(ROUTES.api.llmDetails(organizationId, newModel.id));
       } else if (model) {
-        await updateLLMAction(organizationId, model.id, modelData);
+        await updateLLMAction(organizationId, model.id, data);
         toast.success('Sprachmodell erfolgreich aktualisiert');
       }
     } catch (error) {
