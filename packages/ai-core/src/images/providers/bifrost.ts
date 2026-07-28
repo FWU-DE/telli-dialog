@@ -23,8 +23,8 @@ function createBifrostClient(model: AiModel): {
   return {
     client: instrumentOpenAiClient(
       new OpenAI({
-        apiKey: env.bifrostApiKey ?? 'not-needed',
         baseURL: env.bifrostBaseUrl,
+        defaultHeaders: env.bifrostApiKey ? { 'x-bf-vk': env.bifrostApiKey } : undefined,
       }),
     ),
     modelName: `${provider}/${provider === 'vertex' ? stripAnthropicPrefix(model.name) : model.name}`,
