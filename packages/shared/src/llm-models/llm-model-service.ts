@@ -3,7 +3,6 @@ import {
   LlmModelWithOptionalStaticRoles,
   LlmModelWithStaticRoles,
 } from '../db/schema';
-import { DEFAULT_CHAT_MODEL } from './default-llm-models';
 import type { StaticModelRole } from '../db/schema';
 
 /**
@@ -18,7 +17,9 @@ export function getDefaultModel<T extends LlmModelWithOptionalStaticRoles>(
 }
 
 export function getDefaultModelName(models: LlmModelWithStaticRoles[]): string {
-  return getDefaultModel(models)?.name ?? DEFAULT_CHAT_MODEL;
+  const model = getDefaultModel(models);
+  if (!model) throw new Error('No default text model found');
+  return model.name;
 }
 
 export function getModelWithRole<T extends LlmModelWithOptionalStaticRoles>(

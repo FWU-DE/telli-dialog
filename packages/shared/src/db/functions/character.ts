@@ -29,8 +29,7 @@ import {
   sharedCharacterConversation,
   userTable,
 } from '../schema';
-import { dbGetModelByName } from './llm-model';
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
+import { dbGetStaticModelByRole } from './llm-model';
 import { UserModel } from '@shared/auth/user-model';
 
 /**
@@ -246,7 +245,7 @@ export async function dbCreateCharacter(
 ) {
   let modelId = character.modelId;
   if (!modelId) {
-    modelId = (await dbGetModelByName(DEFAULT_CHAT_MODEL))?.id;
+    modelId = (await dbGetStaticModelByRole('default-chat'))?.id;
     if (!modelId) {
       throw new Error('No default model found');
     }

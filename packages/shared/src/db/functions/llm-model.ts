@@ -75,6 +75,16 @@ export async function dbGetStaticModelConfigurations() {
   return db.select().from(staticModelConfigurationTable).$withCache();
 }
 
+export async function dbGetStaticModelByRole(role: StaticModelRole) {
+  const [result] = await db
+    .select({ ...getTableColumns(llmModelTable) })
+    .from(staticModelConfigurationTable)
+    .innerJoin(llmModelTable, eq(staticModelConfigurationTable.modelId, llmModelTable.id))
+    .where(eq(staticModelConfigurationTable.role, role))
+    .$withCache();
+  return result;
+}
+
 export async function dbGetStaticModelConfigurationWithModels() {
   return db
     .select({ role: staticModelConfigurationTable.role, model: llmModelTable })
