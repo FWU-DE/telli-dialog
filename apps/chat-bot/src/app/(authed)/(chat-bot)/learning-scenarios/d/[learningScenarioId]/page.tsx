@@ -71,7 +71,7 @@ export default async function Page(props: PageProps<'/learning-scenarios/d/[lear
           initialMessages={[]}
           learningScenario={learningScenario}
           imageSource={avatarPictureUrl}
-          enableFileUpload={false}
+          enableFileUpload={true}
           logoElement={logoElement}
         />
       </DefaultPageLayout>

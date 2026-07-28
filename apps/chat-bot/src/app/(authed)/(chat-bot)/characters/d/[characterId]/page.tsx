@@ -75,7 +75,7 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
           initialMessages={initialMessages}
           character={character}
           imageSource={avatarPictureUrl}
-          enableFileUpload={false}
+          enableFileUpload={true}
           logoElement={logoElement}
         />
       </DefaultPageLayout>
