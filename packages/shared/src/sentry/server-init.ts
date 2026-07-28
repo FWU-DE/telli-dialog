@@ -9,6 +9,7 @@ import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { SentrySampler, SentrySpanProcessor } from '@sentry/opentelemetry';
 import { scrubSentryEvent } from '@ais-chat/shared-core/sentry/scrub';
+import { registerCleanupHandler } from '../shutdown/cleanup';
 import { env } from './env';
 
 /**
@@ -16,23 +17,34 @@ import { env } from './env';
  */
 export function initSentry({
   scrubSensitiveData = true,
+  aiServerActionNames = [],
   serviceName,
   traceExcludedUrls,
 }: {
   serviceName: string;
   /** List of URL paths, which should not be traced */
   traceExcludedUrls: string[];
+  /**
+   * Server Action names that are known to call LLM/AI services.
+   * These actions will be traced with a different sampling rate.
+   */
+  aiServerActionNames?: string[];
   /** Whether to scrub sensitive data from Sentry events before sending */
   scrubSensitiveData?: boolean;
 }) {
+  const aiServerActionNameSet = new Set(aiServerActionNames.map((name) => `serverAction/${name}`));
+
   const sentryClient = Sentry.init({
     debug: false,
     dsn: env.sentryDsn,
     environment: env.sentryEnvironment,
+    // Disable streaming so gen_ai spans are ingested in Sentry
+    // (streaming is broken, possibly due to OTel setup, or it's not available in self-hosted Sentry)
+    streamGenAiSpans: false,
     integrations: [
       Sentry.captureConsoleIntegration({ levels: ['fatal', 'error', 'warn', 'info'] }),
     ],
-    tracesSampler: ({ normalizedRequest, inheritOrSampleWith }) => {
+    tracesSampler: ({ name, normalizedRequest, inheritOrSampleWith }) => {
       const url = normalizedRequest?.url ?? '';
       // Extract pathname if it's a full URL, otherwise use as-is
       const pathname = url.startsWith('http') ? new URL(url).pathname : url.split('?')[0];
@@ -42,7 +54,18 @@ export function initSentry({
         return 0;
       }
 
-      return inheritOrSampleWith(env.sentryTracesSampleRate);
+      // If parent was sampled, honor that decision
+      const parentSamplingDecision = inheritOrSampleWith(0);
+      if (parentSamplingDecision) {
+        return true;
+      }
+
+      // Parent was not sampled or absent, use backend's own sampling rates
+      if (aiServerActionNameSet.has(name)) {
+        return env.sentryTracesSampleRateAi;
+      }
+
+      return env.sentryTracesSampleRate;
     },
     ...(scrubSensitiveData && {
       beforeBreadcrumb: (breadcrumb) => scrubSentryEvent(breadcrumb),
@@ -91,14 +114,11 @@ export function initSentry({
 
   sdk.start();
 
-  // gracefully shut down the SDK on process exit
-  process.on('SIGTERM', () => {
-    sdk
-      .shutdown()
-      .then(() => console.log('Tracing terminated'))
-      .catch((error) => console.log('Error terminating tracing', error))
-      .finally(() => process.exit(0));
-  });
-
   Sentry.validateOpenTelemetrySetup();
+
+  registerCleanupHandler(async () => {
+    console.log('[shutdown] Shutting down OpenTelemetry SDK...');
+    await sdk.shutdown();
+    console.log('[shutdown] OpenTelemetry SDK shutdown completed');
+  });
 }

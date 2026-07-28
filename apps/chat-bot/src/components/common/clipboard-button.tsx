@@ -5,13 +5,29 @@ import React from 'react';
 import ClipboardLightIcon from '../icons/clipboard-light';
 import { Button } from '@ui/components/button';
 import { useTranslations } from 'next-intl';
+import type { ComponentProps, ReactNode } from 'react';
+import { useToast } from './toast';
 
 type CopyToClipboardButtonProps = {
   text: string;
   className?: string;
+  children?: ReactNode;
+  variant?: ComponentProps<typeof Button>['variant'];
+  size?: ComponentProps<typeof Button>['size'];
+  'aria-label'?: string;
+  defaultIcons?: boolean;
 };
 
-export default function CopyToClipboardButton({ text, className }: CopyToClipboardButtonProps) {
+export default function CopyToClipboardButton({
+  text,
+  className,
+  children,
+  variant = 'ghost',
+  size = 'icon-round',
+  'aria-label': ariaLabel,
+  defaultIcons = true,
+}: CopyToClipboardButtonProps) {
+  const toast = useToast();
   const t = useTranslations('common');
   const [isCopied, setIsCopied] = React.useState(false);
 
@@ -29,30 +45,34 @@ export default function CopyToClipboardButton({ text, className }: CopyToClipboa
     };
   }, [isCopied]);
 
-  const handleCopy = React.useCallback(async () => {
+  const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(text);
       setIsCopied(true);
+      toast.success(t('copy-clipboard-success'));
     } catch {
       setIsCopied(false);
+      toast.error(t('copy-clipboard-error'));
     }
-  }, [text]);
+  };
 
   return (
     <Button
       type="button"
-      variant="ghost"
-      size="icon-round"
-      aria-label={t('copy-clipboard')}
+      variant={variant}
+      size={size}
+      aria-label={ariaLabel ?? t('copy-clipboard')}
       data-testid="copy-to-clipboard"
       onClick={handleCopy}
       className="text-primary"
     >
-      {isCopied ? (
-        <CheckIcon className={className} />
-      ) : (
-        <ClipboardLightIcon className={className} />
-      )}
+      {defaultIcons &&
+        (isCopied ? (
+          <CheckIcon className={className} />
+        ) : (
+          <ClipboardLightIcon className={className} />
+        ))}
+      {children}
     </Button>
   );
 }

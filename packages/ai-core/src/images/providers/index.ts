@@ -1,5 +1,6 @@
 import { constructIonosImageGenerationFn } from './ionos';
-import { ImageGenerationFn, AiModel } from '../types';
+import { constructBifrostImageGenerationFn } from './bifrost';
+import type { AiModel, ImageGenerationFn } from '../types';
 import { constructAzureImageGenerationFn } from './azure';
 import { constructGoogleImageGenerationFn } from './google';
 import { ProviderConfigurationError } from '../../errors';
@@ -14,6 +15,9 @@ function getImageGenerationFnByModel({ model }: { model: AiModel }): ImageGenera
   }
   if (model.provider === 'google') {
     return constructGoogleImageGenerationFn(model);
+  }
+  if (model.provider === 'bifrost') {
+    return constructBifrostImageGenerationFn(model);
   }
 
   return undefined;

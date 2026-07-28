@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const llmModelPriceMetadataSchema = z.discriminatedUnion('type', [
+export const llmModelPriceMetadataSchema = z.union([
   z.object({
     type: z.literal('text'),
     completionTokenPrice: z.number(),
@@ -9,6 +9,12 @@ export const llmModelPriceMetadataSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('image'),
     pricePerImageInCent: z.number(),
+  }),
+  z.object({
+    type: z.literal('image'),
+    inputTextTokenPrice: z.number(),
+    outputTextTokenPrice: z.number().optional(),
+    outputImageTokenPrice: z.number(),
   }),
   z.object({
     type: z.literal('embedding'),

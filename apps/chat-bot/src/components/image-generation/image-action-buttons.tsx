@@ -2,17 +2,25 @@
 
 import React from 'react';
 import { useToast } from '../common/toast';
-import { CopyIcon, InfoIcon } from '@phosphor-icons/react';
+import { CopyIcon, DownloadSimpleIcon, InfoIcon } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import { logError } from '@shared/logging';
+import { Button } from '@ui/components/button';
+import { downloadFileFromBlob } from '@/utils/files/blob-download';
 
 interface ImageActionButtonsProps {
   imageRef: React.RefObject<HTMLImageElement | null>;
+  fileId: string;
   prompt: string;
   isImageReady: boolean;
 }
 
-export function ImageActionButtons({ imageRef, prompt, isImageReady }: ImageActionButtonsProps) {
+export function ImageActionButtons({
+  imageRef,
+  fileId,
+  prompt,
+  isImageReady,
+}: ImageActionButtonsProps) {
   const toast = useToast();
   const t = useTranslations('image-generation');
 
@@ -60,6 +68,26 @@ export function ImageActionButtons({ imageRef, prompt, isImageReady }: ImageActi
     }
   }
 
+  async function handleDownloadImage() {
+    try {
+      const img = imageRef.current;
+      if (!img || !img.complete || !img.currentSrc) {
+        throw new Error('Image not loaded');
+      }
+
+      const response = await fetch(img.currentSrc);
+      if (!response.ok) {
+        throw new Error('Failed to fetch image for download');
+      }
+
+      const blob = await response.blob();
+      downloadFileFromBlob(blob, `AIS.chat-Bild-${fileId}.png`);
+    } catch (error) {
+      logError('Failed to download image', error);
+      toast.error(t('download-image-error'));
+    }
+  }
+
   function handleCopyPrompt() {
     navigator.clipboard
       .writeText(prompt)
@@ -72,22 +100,39 @@ export function ImageActionButtons({ imageRef, prompt, isImageReady }: ImageActi
   }
 
   return (
-    <div className="flex gap-2 mt-3">
-      <button
+    <div className="flex mt-1.5">
+      <Button
         onClick={handleCopyImage}
-        className="flex items-center justify-center text-primary transition-colors"
+        variant="ghost"
+        size="icon-sm"
         title={t('copy-image-tooltip')}
+        aria-label={t('copy-image-tooltip')}
+        data-testid="image-copy-button"
         disabled={!isImageReady}
       >
-        <CopyIcon size={16} />
-      </button>
-      <button
-        onClick={handleCopyPrompt}
-        className="flex items-center justify-center text-primary transition-colors"
-        title={t('copy-prompt-tooltip')}
+        <CopyIcon />
+      </Button>
+      <Button
+        onClick={handleDownloadImage}
+        variant="ghost"
+        size="icon-sm"
+        title={t('download-image-tooltip')}
+        aria-label={t('download-image-tooltip')}
+        data-testid="image-download-button"
+        disabled={!isImageReady}
       >
-        <InfoIcon size={16} />
-      </button>
+        <DownloadSimpleIcon />
+      </Button>
+      <Button
+        onClick={handleCopyPrompt}
+        variant="ghost"
+        size="icon-sm"
+        title={t('copy-prompt-tooltip')}
+        aria-label={t('copy-prompt-tooltip')}
+        data-testid="image-copy-prompt-button"
+      >
+        <InfoIcon />
+      </Button>
     </div>
   );
 }

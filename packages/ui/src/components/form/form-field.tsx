@@ -26,14 +26,7 @@ export type FormFieldProps<
   children?: (input: ReactNode) => ReactNode;
   /** Input type: 'text', 'textArea', 'number', 'email', 'password', 'checkbox', 'url', or 'datetime-local' */
   type?:
-    | 'text'
-    | 'textArea'
-    | 'number'
-    | 'email'
-    | 'password'
-    | 'checkbox'
-    | 'url'
-    | 'datetime-local';
+    'text' | 'textArea' | 'number' | 'email' | 'password' | 'checkbox' | 'url' | 'datetime-local';
   /** Whether the field is required */
   required?: boolean;
   /** Maximum number of characters allowed */

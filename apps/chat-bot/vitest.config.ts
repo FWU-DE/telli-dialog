@@ -1,4 +1,5 @@
 import { coverageConfigDefaults, defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
 import path from 'path';
 import fs from 'node:fs';
 import { config as dotenvConfig } from '@dotenvx/dotenvx';
@@ -13,6 +14,7 @@ if (fs.existsSync(envTestPath)) {
 }
 
 export default defineConfig({
+  plugins: [react()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

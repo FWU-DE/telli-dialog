@@ -1,7 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateImage } from './index';
 import { ProviderConfigurationError } from '../../errors';
 import type { AiModel } from '../types';
+import { constructIonosImageGenerationFn } from './ionos';
+import { constructAzureImageGenerationFn } from './azure';
+import { constructGoogleImageGenerationFn } from './google';
+import { constructBifrostImageGenerationFn } from './bifrost';
 
 // Mock provider modules
 vi.mock('./ionos', () => ({
@@ -16,13 +20,14 @@ vi.mock('./google', () => ({
   constructGoogleImageGenerationFn: vi.fn(),
 }));
 
-import { constructIonosImageGenerationFn } from './ionos';
-import { constructAzureImageGenerationFn } from './azure';
-import { constructGoogleImageGenerationFn } from './google';
+vi.mock('./bifrost', () => ({
+  constructBifrostImageGenerationFn: vi.fn(),
+}));
 
 const mockConstructIonosImageGenerationFn = vi.mocked(constructIonosImageGenerationFn);
 const mockConstructAzureImageGenerationFn = vi.mocked(constructAzureImageGenerationFn);
 const mockConstructGoogleImageGenerationFn = vi.mocked(constructGoogleImageGenerationFn);
+const mockConstructBifrostImageGenerationFn = vi.mocked(constructBifrostImageGenerationFn);
 
 describe('generateImage', () => {
   beforeEach(() => {
@@ -107,6 +112,33 @@ describe('generateImage', () => {
     expect(result).toEqual({
       data: ['base64-google-image'],
       output_format: 'jpeg',
+    });
+  });
+
+  it('should generate image using Bifrost provider', async () => {
+    const model: AiModel = {
+      id: 'model-101',
+      name: 'bifrost-image-model',
+      provider: 'bifrost',
+    } as AiModel;
+
+    const mockGenerationFn = vi.fn().mockResolvedValue({
+      data: ['base64-bifrost-image'],
+      output_format: 'png',
+    });
+
+    mockConstructBifrostImageGenerationFn.mockReturnValue(mockGenerationFn);
+
+    const result = await generateImage(model, 'bifrost prompt');
+
+    expect(mockConstructBifrostImageGenerationFn).toHaveBeenCalledWith(model);
+    expect(mockGenerationFn).toHaveBeenCalledWith({
+      prompt: 'bifrost prompt',
+      model: 'bifrost-image-model',
+    });
+    expect(result).toEqual({
+      data: ['base64-bifrost-image'],
+      output_format: 'png',
     });
   });
 

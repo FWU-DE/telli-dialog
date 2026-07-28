@@ -39,6 +39,7 @@ export const mockUserAndContext = (): UserAndContext => {
         isCustomGptEnabled: false,
         isSharedChatEnabled: false,
         isShareTemplateWithSchoolEnabled: false,
+        isAgenticChatEnabled: true,
       },
       pictureUrls: null,
       hasApiKeyAssigned: true,
@@ -83,6 +84,7 @@ export const mockConversationUsage = (): ConversationUsageTrackingSelectModel =>
 export const mockLearningScenario = (): LearningScenarioSelectModel => {
   return {
     id: generateUUID(),
+    author: '',
     name: generateRandomString(10),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -91,16 +93,25 @@ export const mockLearningScenario = (): LearningScenarioSelectModel => {
     userId: generateUUID(),
     studentExercise: generateRandomString(10),
     attachedLinks: [],
-    schoolType: null,
-    gradeLevel: null,
-    subject: null,
+    filterGroup: {
+      school_types: [],
+      grade_ranges: [],
+      subjects: [],
+      categories: [],
+      federal_states: [],
+      languages: [],
+    },
     additionalInstructions: null,
     restrictions: null,
     pictureId: null,
     accessLevel: 'private',
     originalLearningScenarioId: null,
     isDeleted: false,
+    suspended: false,
     hasLinkAccess: false,
+    isWebSearchEnabled: false,
+    webSearchScope: 'all-web',
+    webSearchIncludedDomains: [],
     ownerSchoolIds: [generateUUID()],
   };
 };
@@ -137,6 +148,7 @@ export const mockSharedCharacterChatUsage = (): SharedCharacterChatUsageTracking
 export const mockCharacter = (): CharacterSelectModel => {
   return {
     id: generateUUID(),
+    author: '',
     userId: generateUUID(),
     modelId: generateUUID(),
     name: generateRandomString(10),
@@ -144,9 +156,14 @@ export const mockCharacter = (): CharacterSelectModel => {
     instructions: generateRandomString(10),
     learningContext: generateRandomString(10),
     competence: generateRandomString(10),
-    schoolType: generateRandomString(10),
-    gradeLevel: generateRandomString(10),
-    subject: generateRandomString(10),
+    filterGroup: {
+      school_types: [],
+      grade_ranges: [],
+      subjects: [],
+      categories: [],
+      federal_states: [],
+      languages: [],
+    },
     specifications: generateRandomString(10),
     restrictions: generateRandomString(10),
     pictureId: generateUUID(),
@@ -157,7 +174,11 @@ export const mockCharacter = (): CharacterSelectModel => {
     attachedLinks: [],
     originalCharacterId: null,
     isDeleted: false,
+    suspended: false,
     hasLinkAccess: false,
+    isWebSearchEnabled: false,
+    webSearchScope: 'all-web',
+    webSearchIncludedDomains: [],
     ownerSchoolIds: [generateUUID()],
   };
 };

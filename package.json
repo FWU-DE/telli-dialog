@@ -1,6 +1,7 @@
 {
   "name": "ais-chat",
   "version": "0.1.0",
+  "description": "AIS.chat monorepo",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -22,17 +23,11 @@
     "db:seed:from-stage": "pnpm --filter @ais-chat/api-database db:seed:from-stage && pnpm --filter @ais-chat/shared db:seed:from-stage",
     "jira:description": "pnpm --filter ais-chat-api exec tsx ../../scripts/jira-description.ts"
   },
-  "packageManager": "pnpm@10.32.1",
+  "packageManager": "pnpm@11.11.0",
   "devDependencies": {
     "@ais-chat/typescript-config": "workspace:*",
-    "prettier": "3.8.3",
-    "turbo": "2.9.10"
-  },
-  "pnpm": {
-    "overrides": {
-      "glob@<11.1.0": ">=11.1.0",
-      "minimatch@~3.1.4": "^3.1.4",
-      "minimatch@~9.0.0": "^9.0.7"
-    }
+    "madge": "8.0.0",
+    "prettier": "3.9.5",
+    "turbo": "2.10.5"
   }
 }

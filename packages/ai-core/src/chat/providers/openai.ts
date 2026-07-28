@@ -1,17 +1,27 @@
+import { instrumentOpenAiClient } from '@sentry/core';
 import OpenAI from 'openai';
-import type { AiModel, TextStreamFn, TextGenerationFn, TokenUsage } from '../types';
+import type {
+  AgenticStreamFn,
+  AiModel,
+  TextGenerationFn,
+  TextStreamFn,
+  TokenUsage,
+} from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { toOpenAIMessages } from '../utils';
+import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
 
 function createOpenAIClient(model: AiModel): OpenAI {
   if (model.setting.provider !== 'openai') {
     throw new ProviderConfigurationError('Invalid model configuration for OpenAI');
   }
 
-  return new OpenAI({
-    apiKey: model.setting.apiKey,
-    baseURL: model.setting.baseUrl,
-  });
+  return instrumentOpenAiClient(
+    new OpenAI({
+      apiKey: model.setting.apiKey,
+      baseURL: model.setting.baseUrl,
+    }),
+  );
 }
 
 export function constructOpenAITextStreamFn(model: AiModel): TextStreamFn {
@@ -90,5 +100,29 @@ export function constructOpenAITextGenerationFn(model: AiModel): TextGenerationF
         totalTokens: usage.total_tokens,
       },
     };
+  };
+}
+
+export function constructOpenAIAgenticStreamFn(model: AiModel): AgenticStreamFn {
+  const client = createOpenAIClient(model);
+
+  return async function* getOpenAIAgenticTextStream({
+    messages,
+    model: modelName,
+    maxTokens,
+    temperature,
+    tools,
+    toolChoice,
+  }) {
+    yield* streamOpenAICompatibleAgenticResponse({
+      client,
+      messages,
+      modelName,
+      maxTokens,
+      temperature,
+      tools,
+      toolChoice,
+      providerName: 'OpenAI',
+    });
   };
 }

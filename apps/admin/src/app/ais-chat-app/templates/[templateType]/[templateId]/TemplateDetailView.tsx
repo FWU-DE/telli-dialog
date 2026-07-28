@@ -11,7 +11,7 @@ import {
   TemplateToFederalStateMapping,
   TemplateTypes,
 } from '@shared/templates/template';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { Button } from '@ui/components/button';
 import { FormFieldCheckbox } from '@ais-chat/ui/components/form/form-field-checkbox';
 import { toast } from 'sonner';
@@ -37,7 +37,8 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const form = useForm<{ mappings: TemplateToFederalStateMapping[] }>();
-  const { control, reset } = form;
+  const { control, reset, setValue } = form;
+  const watchedMappings = useWatch({ control, name: 'mappings' }) ?? [];
 
   const { fields } = useFieldArray({
     control,
@@ -85,6 +86,17 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
     loadData();
   }, [templateType, templateId]);
 
+  async function handleAuthorChanged() {
+    try {
+      const template = await getTemplateByIdAction(templateType, templateId);
+      setTemplate(template);
+    } catch (error) {
+      toast.error('Fehler beim Laden des Templates.', {
+        description: (error as Error).message,
+      });
+    }
+  }
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -95,7 +107,9 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>{template && <TemplateInfoCard template={template} />}</div>
+      <div>
+        {template && <TemplateInfoCard template={template} onDataChanged={handleAuthorChanged} />}
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Template Zuordnungen</CardTitle>
@@ -103,6 +117,34 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(handleSubmit)}>
+            <div className="flex gap-2 mb-3">
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => {
+                  setValue(
+                    'mappings',
+                    watchedMappings.map((mapping) => ({ ...mapping, isMapped: true })),
+                    { shouldDirty: true },
+                  );
+                }}
+              >
+                Alle
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => {
+                  setValue(
+                    'mappings',
+                    watchedMappings.map((mapping) => ({ ...mapping, isMapped: false })),
+                    { shouldDirty: true },
+                  );
+                }}
+              >
+                Keine
+              </Button>
+            </div>
             {fields.map((field, index) => {
               return (
                 <FormFieldCheckbox

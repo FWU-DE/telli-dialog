@@ -1,12 +1,15 @@
 'use server';
 
 import { AccessLevel, LearningScenarioSelectModel } from '@shared/db/schema';
-import { SharedConversationShareFormValues } from './schema';
+import { ShareWithLearnersLimitParams } from '@/components/custom-chat/share-with-learners/custom-chat-share-with-learners-limit-params';
 import { runServerAction } from '@shared/actions/run-server-action';
 import {
+  extendLearningScenarioShareExpiration,
+  getActiveLearningScenarioShareData,
   removeFileFromLearningScenario,
   shareLearningScenario,
   unshareLearningScenario,
+  updateLearningScenarioShareTokenPointsLimit,
   updateLearningScenario,
   updateLearningScenarioAccessLevel,
   uploadAvatarPictureForLearningScenario,
@@ -22,7 +25,10 @@ export async function updateLearningScenarioAccessLevelAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(updateLearningScenarioAccessLevel)({
+  return runServerAction(
+    'updateLearningScenarioAccessLevelAction',
+    updateLearningScenarioAccessLevel,
+  )({
     learningScenarioId,
     accessLevel,
     user,
@@ -38,7 +44,10 @@ export async function updateLearningScenarioAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(updateLearningScenario)({
+  return runServerAction(
+    'updateLearningScenarioAction',
+    updateLearningScenario,
+  )({
     learningScenarioId,
     user,
     data,
@@ -50,11 +59,14 @@ export async function shareLearningScenarioAction({
   data,
 }: {
   learningScenarioId: string;
-  data: SharedConversationShareFormValues;
+  data: ShareWithLearnersLimitParams;
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(shareLearningScenario)({
+  return runServerAction(
+    'shareLearningScenarioAction',
+    shareLearningScenario,
+  )({
     learningScenarioId,
     user,
     data,
@@ -68,7 +80,68 @@ export async function unshareLearningScenarioAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(unshareLearningScenario)({ learningScenarioId, user });
+  return runServerAction(
+    'unshareLearningScenarioAction',
+    unshareLearningScenario,
+  )({
+    learningScenarioId,
+    user,
+  });
+}
+
+export async function extendLearningScenarioShareExpirationAction({
+  learningScenarioId,
+  additionalTimeInMinutes,
+}: {
+  learningScenarioId: string;
+  additionalTimeInMinutes: number;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'extendLearningScenarioShareExpirationAction',
+    extendLearningScenarioShareExpiration,
+  )({
+    learningScenarioId,
+    additionalTimeInMinutes,
+    user,
+  });
+}
+
+export async function updateLearningScenarioShareTokenPointsLimitAction({
+  learningScenarioId,
+  tokenPointsPercentageLimit,
+}: {
+  learningScenarioId: string;
+  tokenPointsPercentageLimit: number;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'updateLearningScenarioShareTokenPointsLimitAction',
+    updateLearningScenarioShareTokenPointsLimit,
+  )({
+    learningScenarioId,
+    tokenPointsPercentageLimit,
+    user,
+  });
+}
+
+export async function getLearningScenarioShareDataAction({
+  learningScenarioId,
+}: {
+  learningScenarioId: string;
+}) {
+  const { user, federalState } = await requireAuth();
+
+  return runServerAction(
+    'getLearningScenarioShareDataAction',
+    getActiveLearningScenarioShareData,
+  )({
+    learningScenarioId,
+    user,
+    federalState,
+  });
 }
 
 export async function removeFileFromLearningScenarioAction({
@@ -79,7 +152,10 @@ export async function removeFileFromLearningScenarioAction({
   fileId: string;
 }) {
   const { user } = await requireAuth();
-  return runServerAction(removeFileFromLearningScenario)({
+  return runServerAction(
+    'removeFileFromLearningScenarioAction',
+    removeFileFromLearningScenario,
+  )({
     learningScenarioId,
     fileId,
     user,
@@ -95,7 +171,10 @@ export async function uploadAvatarPictureForLearningScenarioAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(uploadAvatarPictureForLearningScenario)({
+  return runServerAction(
+    'uploadAvatarPictureForLearningScenarioAction',
+    uploadAvatarPictureForLearningScenario,
+  )({
     learningScenarioId,
     croppedImageBlob,
     user,

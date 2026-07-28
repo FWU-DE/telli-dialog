@@ -8,7 +8,7 @@ export function AdminAppSidebar() {
       <SidebarItem label="Info-Banner" href={ROUTES.app.infoBanners} />
       <SidebarItem label="Tool Call Kosten" href={ROUTES.app.toolCallCosts} />
       <SidebarItem label="Vorlagen" href={ROUTES.app.templates} />
-      <SidebarItem label="Modelle aktualisieren" href={ROUTES.app.modelRefresh} />
+      <SidebarItem label="Sperrungen" href={ROUTES.app.suspensions} />
     </Sidebar>
   );
 }

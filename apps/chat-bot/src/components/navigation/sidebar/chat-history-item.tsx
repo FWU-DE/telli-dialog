@@ -22,6 +22,7 @@ import {
   DotsThreeIcon,
   ImageSquareIcon,
   LegoSmileyIcon,
+  MountainsIcon,
   QuestionIcon,
   StudentIcon,
   TrashIcon,
@@ -161,6 +162,7 @@ export function ChatHistoryItem({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem
+                className="text-sm"
                 onClick={() => {
                   setIsEditable(true);
                 }}
@@ -169,10 +171,11 @@ export function ChatHistoryItem({
               </DropdownMenuItem>
               <DropdownMenuItem
                 variant="destructive"
+                className="text-sm"
                 data-testid="delete-conversation"
                 onClick={() => onDeleteConversation(conversation.id)}
               >
-                <TrashIcon />
+                <TrashIcon className="size-4" />
                 <span>{t('delete-chat')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -186,6 +189,10 @@ export function ChatHistoryItem({
 function buildConversationUrl({ conversation }: { conversation: ConversationModel }) {
   if (conversation.characterId !== null) {
     return `/characters/d/${conversation.characterId}/${conversation.id}`;
+  }
+
+  if (conversation.learningScenarioId !== null) {
+    return `/learning-scenarios/d/${conversation.learningScenarioId}/${conversation.id}`;
   }
 
   if (conversation.assistantId !== null) {
@@ -206,6 +213,9 @@ function determineConversationIcon(
     case 'chat':
       if (conversation.characterId) {
         return <StudentIcon />;
+      }
+      if (conversation.learningScenarioId) {
+        return <MountainsIcon />;
       }
       if (conversation.assistantId) {
         if (conversation.assistantId === HELP_MODE_ASSISTANT_ID) {

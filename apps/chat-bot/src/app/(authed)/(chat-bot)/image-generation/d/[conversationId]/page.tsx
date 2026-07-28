@@ -10,8 +10,17 @@ import {
 } from '@shared/image-generation/image-generation-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('image-generation.page-titles');
+  return {
+    title: t('chat'),
+  };
+}
 
 interface PageProps {
   params: Promise<{ conversationId: string }>;

@@ -21,3 +21,9 @@ export async function sendRabbitmqEvent(event: object) {
     span.end();
   });
 }
+
+export async function shutdownRabbitMQ() {
+  console.log('[shutdown] Closing RabbitMQ connection...');
+  await rabbit.close();
+  console.log('[shutdown] RabbitMQ connection closed');
+}

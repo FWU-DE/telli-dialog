@@ -33,6 +33,12 @@ export const db = drizzle({
     : undefined,
 });
 
+export async function shutdownDatabase() {
+  console.log('[shutdown] Closing PostgreSQL connection pool...');
+  await pool.end();
+  console.log('[shutdown] PostgreSQL connection pool closed');
+}
+
 export async function runDatabaseMigration() {
   try {
     logInfo('Running database migrations...');

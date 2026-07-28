@@ -106,7 +106,7 @@ For detailed variable documentation and values for local development with docker
 For local development spin up all required services using docker compose:
 
 ```sh
-docker compose -f devops/docker/docker-compose.local.yml up -d
+docker compose -f devops/docker/docker-compose.local.yml up -d --build
 ```
 
 #### Port conflicts
@@ -241,6 +241,8 @@ Without these, placeholder values are used and the models will not work until re
 
 Also add `API_KEY` to `apps/chat-bot/.env.local` — it must match the value set in `apps/api/.env.local`:
 
+The seeded models are routed through Bifrost. Start the local Docker services before seeding and keep `BIFROST_ADMIN_URL` configured so the seed can sync provider keys to Bifrost. With the standard local Docker Compose setup, leave `LLM_MOCK_BASE_URL` unset or set it to `http://mock-llm:6556`; the URL must be reachable from the Bifrost container, not from the host.
+
 ```sh
 API_KEY=<same-value-as-in-apps/api/.env.local>
 ```
@@ -293,6 +295,29 @@ valkey-cli PING
 valkey-cli --stats
 ```
 
+#### Testing Valkey cluster mode locally
+
+To test cluster mode locally, use the override file `docker-compose.valkey-cluster.yml` alongside the base file:
+
+```sh
+docker compose \
+  -f devops/docker/docker-compose.local.yml \
+  -f devops/docker/docker-compose.valkey-cluster.yml \
+  up -d --build
+```
+
+This replaces the standalone Valkey node with a single-node cluster.
+A one-shot `valkey-cluster-init` container bootstraps the cluster automatically on first start.
+
+To reset cluster state, stop only the valkey container and remove its volume:
+
+```sh
+docker compose -f devops/docker/docker-compose.local.yml \
+               -f devops/docker/docker-compose.valkey-cluster.yml \
+               down valkey valkey-cluster-init
+docker volume rm ais-chat_valkey_cluster_data
+```
+
 ## Monitoring
 
 To set up the monitoring and tracing stack in local development, use the following docker compose file:
@@ -312,6 +337,22 @@ The e2e tests are integrated into the pipeline and run on every pull request.
 
 If you need to run load tests, you need to install `k6`.
 See the [official install guide](https://grafana.com/docs/k6/latest/set-up/install-k6/) for your platform.
+
+## Updating Agent Skills
+
+Installed coding-agent skills are stored in `.agents/skills/`, and the resolved source/hash is tracked in `skills-lock.json`.
+
+To update a skill (for example `shadcn`):
+
+1. Install or update the skill from the upstream source:
+
+   ```sh
+   pnpx skills install shadcn/ui
+   ```
+
+2. Review changes in `.agents/skills/shadcn/`.
+3. Confirm `skills-lock.json` was updated consistently.
+4. Commit the skill files and `skills-lock.json` in the same commit.
 
 ## More
 

@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import loadingTransparentGif from '@/assets/loading-transparent.gif';
+import { cn } from '@/utils/tailwind';
 
 interface LoadingAnimationProps {
   message?: string;
@@ -15,7 +16,10 @@ export default function LoadingAnimation({
 }: LoadingAnimationProps) {
   return (
     <div
-      className={`flex flex-col items-center justify-center aspect-square border-2 border-none bg-gray-50 rounded-enterprise-md mb-4 ${className}`}
+      className={cn(
+        'mx-auto w-full max-w-md aspect-square max-h-[60vh] flex flex-col items-center justify-center bg-gray-50 rounded-enterprise-md mb-4',
+        className,
+      )}
     >
       {/* TODO: When both gifs are combined, replace with loadingGif. */}
       <Image src={loadingTransparentGif} alt="Ladeanimation" width="107" height="107" unoptimized />

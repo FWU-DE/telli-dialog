@@ -53,15 +53,15 @@ export async function dbGetLlmModelsByFederalStateId({
     .$withCache();
 }
 
-export async function dbUpdateLlmModelsByFederalStateId({
+export async function dbFindModelsToUpdate({
   federalStateId,
 }: {
   federalStateId: string;
-}): Promise<LlmModelSelectModel[]> {
+}): Promise<{ models: KnotenpunktLlmModel[]; modelIdsToAdd: string[]; modelsToRemove: string[] }> {
   const [error, result] = await dbGetFederalStateWithDecryptedApiKeyWithResult({ federalStateId });
   if (error !== null) {
     logError('Error getting federal state with decrypted API key', error, { federalStateId });
-    return [];
+    return { models: [], modelIdsToAdd: [], modelsToRemove: [] };
   }
   // Fetch models from Knotenpunkt and load existing models in parallel
   const [models, existingModels] = await Promise.all([
@@ -74,31 +74,49 @@ export async function dbUpdateLlmModelsByFederalStateId({
     .filter((existingModel) => !models.some((model) => model.id === existingModel.id))
     .map((model) => model.id);
 
-  // Remove outdated models and upsert new/updated models in parallel
-  await Promise.all([
-    dbRemoveLlmModelsFromFederalState({
-      federalStateId,
-      modelIds: modelsToRemove,
-    }),
-    dbUpsertLlmModelsByModelsAndFederalStateId({
-      federalStateId,
-      models,
-    }),
-  ]);
-  return models;
+  // Determine model ids to add to federal state (those that are not already associated)
+  const existingModelIds = new Set(existingModels.map((model) => model.id));
+  const modelIdsToAdd = models
+    .filter((model) => !existingModelIds.has(model.id))
+    .map((model) => model.id);
+
+  return { models, modelIdsToAdd, modelsToRemove };
 }
 
-export async function dbUpdateLlmModelsForAllFederalStates(): Promise<
-  Record<string, LlmModelSelectModel[]>
-> {
+export async function dbUpdateLlmModelsForAllFederalStates() {
   const states = await dbGetFederalStates();
 
-  const models: Record<string, LlmModelSelectModel[]> = {};
-  for (const state of states) {
-    models[state.id] = await dbUpdateLlmModelsByFederalStateId({ federalStateId: state.id });
-  }
+  const stateUpdates = await Promise.all(
+    states.map(async (state) => {
+      const { models, modelIdsToAdd, modelsToRemove } = await dbFindModelsToUpdate({
+        federalStateId: state.id,
+      });
 
-  return models;
+      return {
+        stateId: state.id,
+        modelIdsToAdd,
+        modelsToRemove,
+        models,
+      };
+    }),
+  );
+
+  const modelsToUpsert = stateUpdates.flatMap(({ models }) => models);
+
+  await dbUpsertLlmModels({ models: modelsToUpsert });
+
+  await Promise.all(
+    stateUpdates.map(async ({ stateId, modelIdsToAdd, modelsToRemove }) => {
+      await dbUpsertFederalStateLlmModelMappings({
+        federalStateId: stateId,
+        modelIds: modelIdsToAdd,
+      });
+      await dbRemoveLlmModelsFromFederalState({
+        federalStateId: stateId,
+        modelIds: modelsToRemove,
+      });
+    }),
+  );
 }
 
 export async function dbGetModelByIdAndFederalStateId({
@@ -126,20 +144,20 @@ export async function dbGetModelByIdAndFederalStateId({
   return result;
 }
 
-export async function dbUpsertLlmModelsByModelsAndFederalStateId({
-  federalStateId,
-  models,
-}: {
-  federalStateId: string;
-  models: KnotenpunktLlmModel[];
-}) {
-  const insertedModels: LlmModelSelectModel[] = [];
+async function dbUpsertLlmModels({ models }: { models: KnotenpunktLlmModel[] }) {
+  // remove duplicates by id to avoid unnecessary upserts
+  const uniqueModelsMap: Record<string, KnotenpunktLlmModel> = {};
   for (const model of models) {
+    uniqueModelsMap[model.id] = model;
+  }
+  const uniqueModels = Object.values(uniqueModelsMap);
+  const insertedModels: LlmModelSelectModel[] = [];
+  for (const model of uniqueModels) {
     await db
       .insert(llmModelTable)
       .values(model)
       .onConflictDoUpdate({
-        target: [llmModelTable.name, llmModelTable.provider],
+        target: llmModelTable.id,
         set: {
           name: model.name,
           displayName: model.displayName,
@@ -152,12 +170,24 @@ export async function dbUpsertLlmModelsByModelsAndFederalStateId({
         },
       });
     insertedModels.push(model);
-    await db
-      .insert(federalStateLlmModelMappingTable)
-      .values({ federalStateId, llmModelId: model.id })
-      .onConflictDoNothing();
   }
+
   return insertedModels;
+}
+
+async function dbUpsertFederalStateLlmModelMappings({
+  federalStateId,
+  modelIds,
+}: {
+  federalStateId: string;
+  modelIds: string[];
+}) {
+  if (modelIds.length === 0) return;
+
+  await db
+    .insert(federalStateLlmModelMappingTable)
+    .values(modelIds.map((llmModelId) => ({ federalStateId, llmModelId })))
+    .onConflictDoNothing();
 }
 
 /**

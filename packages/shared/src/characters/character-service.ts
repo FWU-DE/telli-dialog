@@ -1,20 +1,30 @@
 import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import {
+  dbCreateCharacterShare,
   dbDeleteCharacterByIdAndUser,
+  dbExtendSharedCharacterConversationExpiration,
   dbGetAllAccessibleCharacters,
   dbGetAllCharactersByUser,
   dbGetCharacterById,
   dbGetCharacterByIdOptionalShareData,
   dbGetCharacterByIdWithShareData,
+  dbGetCommunityCharacters,
   dbGetCharacters,
   dbGetCharactersByAssociatedSchools,
   dbGetCharactersByUser,
   dbGetGlobalCharacters,
-  dbGetSharedCharacterConversations,
+  dbGetLatestManageableCharacterShare,
+  dbStopCharacterShare,
+  dbUpdateCharacterShareTokenPointsLimit,
 } from '@shared/db/functions/character';
 import { dbGetFileForCharacter, dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { FederalStateModel } from '@shared/federal-states/types';
+import {
+  getUsedBudgetInCentByUser,
+  getMaxBudgetInCentByUser,
+} from '@shared/users/user-budget-service';
 import {
   AccessLevel,
   accessLevelSchema,
@@ -26,9 +36,8 @@ import {
   CharacterWithShareDataModel,
   FileModel,
   fileTable,
-  sharedCharacterConversation,
 } from '@shared/db/schema';
-import { checkParameterUUID, ForbiddenError } from '@shared/error';
+import { checkParameterUUID, ForbiddenError, InvalidArgumentError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
 import {
   deleteAvatarPicture,
@@ -40,21 +49,35 @@ import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import {
+  MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES,
+  SHARE_EXTENSION_WINDOW_MS,
+} from '@shared/sharing/const';
+import {
   copyCharacter,
   copyEntityPictureIfExists,
   copyRelatedTemplateFiles,
 } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
+import {
+  getChangedKeys,
+  getPreservedUpdatedAtForExemptedKeys,
+} from '@shared/utils/preserve-updated-at';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@ais-chat/shared-core/crypto/blob-hash';
 import {
   requireTeacherRole,
+  verifySuspensionState,
   verifyReadAccess,
   verifyWriteAccess,
+  filterCommunitySharedByAssociatedSchool,
+  filterReadableCustomChats,
 } from '@shared/auth/authorization-service';
+import { dbGetSharedCharacterChatUsageInCentByCharacterId } from '@shared/db/functions/token-points';
+import { sharedCharacterChatHasReachedTokenPointsLimit } from '@shared/users/usage';
+import { isShareWithinGraceWindow } from '@shared/sharing/is-share-within-grace-window';
 
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
@@ -79,6 +102,16 @@ export const createNewCharacter = async ({
   requireTeacherRole(user.userRole);
 
   if (templateId !== undefined) {
+    const sourceCharacter = await dbGetCharacterById({ characterId: templateId });
+    if (!sourceCharacter) {
+      throw new NotFoundError('Character not found');
+    }
+    verifyReadAccess({
+      item: sourceCharacter,
+      user,
+    });
+    verifySuspensionState({ item: sourceCharacter });
+
     let insertedCharacter = await copyCharacter(
       templateId,
       'private',
@@ -229,7 +262,7 @@ export const linkFileToCharacter = async ({
 };
 
 /**
- * User can share a character he owns with the school (access level = school)
+ * User can share a character he owns with the school or community
  * or unshare it (access level = private).
  * User is not allowed to set the access level to global.
  */
@@ -245,18 +278,28 @@ export const updateCharacterAccessLevel = async ({
   checkParameterUUID(characterId);
   accessLevelSchema.parse(accessLevel);
 
-  // Authorization check
   if (accessLevel === 'global') {
     throw new ForbiddenError('Not authorized to set the access level to global');
   }
 
   const { character } = await getCharacterInfo(characterId, user.id);
   verifyWriteAccess({ item: character, user });
+  verifySuspensionState({ item: character });
+
+  if (character.accessLevel === accessLevel) {
+    return character;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: character,
+    values: { accessLevel },
+    exemptedKeys: ['accessLevel'],
+  });
 
   // Update the access level in database
   const [updatedCharacter] = await db
     .update(characterTable)
-    .set({ accessLevel })
+    .set({ accessLevel, ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}) })
     .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
     .returning();
 
@@ -296,10 +339,27 @@ export const updateCharacter = async ({
   if (cleanedCharacter === undefined) return;
 
   const parsedCharacterValues = updateCharacterSchema.parse(cleanedCharacter);
+  const changedKeys = getChangedKeys({
+    entity: existingCharacter,
+    values: parsedCharacterValues,
+  });
+
+  if (changedKeys.length === 0) {
+    return existingCharacter;
+  }
+
+  const preservedUpdatedAt = getPreservedUpdatedAtForExemptedKeys({
+    entity: existingCharacter,
+    values: parsedCharacterValues,
+    exemptedKeys: ['hasLinkAccess'],
+  });
 
   const [updatedCharacter] = await db
     .update(characterTable)
-    .set({ ...parsedCharacterValues })
+    .set({
+      ...parsedCharacterValues,
+      ...(preservedUpdatedAt ? { updatedAt: preservedUpdatedAt } : {}),
+    })
     .where(and(eq(characterTable.id, character.id), eq(characterTable.userId, user.id)))
     .returning();
 
@@ -339,6 +399,89 @@ export const deleteCharacter = async ({
   return deletedCharacter;
 };
 
+export const getActiveCharacterShareData = async ({
+  characterId,
+  user,
+  federalState,
+}: {
+  characterId: string;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+  federalState: FederalStateModel;
+}): Promise<{
+  expiredAt: Date | null;
+  manuallyStoppedAt: Date | null;
+  tokenPointsLimit: number | null;
+  budgetUsedBySharedChat: number;
+  tokenLimitExceeded: boolean;
+}> => {
+  checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
+
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyReadAccess({ item: character, user });
+
+  const share = await dbGetLatestManageableCharacterShare({ characterId, user });
+
+  if (!share) {
+    return {
+      expiredAt: null,
+      manuallyStoppedAt: null,
+      tokenPointsLimit: null,
+      budgetUsedBySharedChat: 0,
+      tokenLimitExceeded: false,
+    };
+  }
+
+  const budgetUsedBySharedChat = await dbGetSharedCharacterChatUsageInCentByCharacterId({
+    characterId,
+    userId: user.id,
+    expiredAt: share.expiredAt,
+    startedAt: share.startedAt,
+  });
+
+  const tokenLimitExceeded = await sharedCharacterChatHasReachedTokenPointsLimit({
+    user: { ...user, federalState },
+    character: {
+      ...character,
+      tokenPointsLimit: share.tokenPointsLimit,
+      expiredAt: share.expiredAt,
+      startedAt: share.startedAt,
+    },
+  });
+
+  return {
+    expiredAt: share.expiredAt,
+    manuallyStoppedAt: share.manuallyStoppedAt,
+    tokenPointsLimit: share.tokenPointsLimit,
+    budgetUsedBySharedChat,
+    tokenLimitExceeded,
+  };
+};
+
+/**
+ * Checks if any recent shares exist for a character that would prevent a new share.
+ * A recent share is one that is either:
+ * 1. Running (not yet expired and not manually stopped)
+ * 2. Expired but within the 2-hour grace window (still extendable)
+ *
+ * @throws Error if a share exists that prevents creating a new one
+ */
+const checkRecentCharacterShares = async ({
+  characterId,
+  user,
+}: {
+  characterId: string;
+  user: Pick<UserModel, 'id'>;
+}): Promise<void> => {
+  const share = await dbGetLatestManageableCharacterShare({ characterId, user });
+
+  if (share) {
+    throw new InvalidArgumentError(
+      'A share session already exists or has recently expired. Please extend the existing session instead of starting a new one.',
+    );
+  }
+};
+
 /**
  * A teacher can share a character with students.
  * The teacher can share his own characters or characters that are released for the school or global.
@@ -366,30 +509,28 @@ export const shareCharacter = async ({
 
   // validate input parameters
   if (tokenPointsPercentageLimit < 0 || tokenPointsPercentageLimit > 100) {
-    throw new Error('token points percentage limit must be between 0 and 100');
+    throw new InvalidArgumentError('token points percentage limit must be between 0 and 100');
   }
   if (usageTimeLimitMinutes <= 0 || usageTimeLimitMinutes > 30 * 24 * 60) {
-    throw new Error('usage time limit must be between 1 and 43200 minutes');
+    throw new InvalidArgumentError('usage time limit must be between 1 and 43200 minutes');
   }
 
-  const activeShares = await dbGetSharedCharacterConversations({ characterId, user });
-  if (activeShares.length > 0) throw new Error('There can only be one active share at a time');
+  // Check for existing active or recently-expired shares within the grace window
+  await checkRecentCharacterShares({
+    characterId,
+    user,
+  });
 
-  const tokenPointsLimit = tokenPointsPercentageLimit;
-  const maxUsageTimeLimit = usageTimeLimitMinutes;
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
-  const [newSharedChat] = await db
-    .insert(sharedCharacterConversation)
-    .values({
-      userId: user.id,
-      characterId,
-      tokenPointsLimit,
-      maxUsageTimeLimit,
-      inviteCode,
-      startedAt,
-    })
-    .returning();
+  const newSharedChat = await dbCreateCharacterShare({
+    user,
+    characterId,
+    tokenPointsLimit: tokenPointsPercentageLimit,
+    maxUsageTimeLimit: usageTimeLimitMinutes,
+    inviteCode,
+    startedAt,
+  });
 
   if (newSharedChat === undefined) {
     throw new Error('Could not share character chat');
@@ -412,26 +553,123 @@ export const unshareCharacter = async ({
   // Authorization check: user must be a teacher and owner of the sharing itself
   requireTeacherRole(user.userRole);
 
-  const sharedConversations = await dbGetSharedCharacterConversations({
+  const share = await dbGetLatestManageableCharacterShare({
     characterId,
     user,
   });
-  if (sharedConversations.length === 0)
+  if (!share) {
     throw new NotFoundError('No active sharing found for this character');
+  }
 
   // unshare character instance by setting manuallyStoppedAt
-  const sharedConversationIds = sharedConversations.map((s) => s.id);
-  const [updatedCharacter] = await db
-    .update(sharedCharacterConversation)
-    .set({ manuallyStoppedAt: new Date() })
-    .where(inArray(sharedCharacterConversation.id, sharedConversationIds))
-    .returning();
+  const updatedCharacter = await dbStopCharacterShare({ shareId: share.id });
 
   if (!updatedCharacter) {
     throw new Error('Could not stop sharing of character');
   }
 
   return updatedCharacter;
+};
+
+/**
+ * Extends the expiration of an active character share.
+ * @throws InvalidArgumentError if no active sharing exists for the character.
+ */
+export const extendCharacterShareExpiration = async ({
+  characterId,
+  additionalTimeInMinutes,
+  user,
+}: {
+  characterId: string;
+  additionalTimeInMinutes: number;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}) => {
+  checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
+
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyReadAccess({ item: character, user });
+
+  if (additionalTimeInMinutes <= 0 || additionalTimeInMinutes > 30 * 24 * 60) {
+    throw new InvalidArgumentError('additional time must be between 1 and 43200 minutes');
+  }
+
+  const currentShare = await dbGetLatestManageableCharacterShare({ characterId, user });
+  if (!currentShare) {
+    throw new InvalidArgumentError('No active sharing found for this character');
+  }
+
+  const currentRemainingUsageTimeInMinutes = Math.max(
+    0,
+    Math.ceil((currentShare.expiredAt.getTime() - Date.now()) / 60_000),
+  );
+
+  if (
+    currentRemainingUsageTimeInMinutes + additionalTimeInMinutes >
+    MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES
+  ) {
+    throw new InvalidArgumentError('total usage time limit must not exceed 130 days');
+  }
+
+  const updatedShare = await dbExtendSharedCharacterConversationExpiration({
+    share: currentShare,
+    additionalTimeInMinutes,
+  });
+
+  if (!updatedShare) {
+    throw new InvalidArgumentError('No active sharing found for this character');
+  }
+
+  return updatedShare;
+};
+
+/**
+ * Increases the token points limit of an active character share.
+ * @throws InvalidArgumentError if no sharing exists for the character.
+ * @throws InvalidArgumentError if the new limit is not higher than the current limit.
+ */
+export const updateCharacterShareTokenPointsLimit = async ({
+  characterId,
+  tokenPointsPercentageLimit,
+  user,
+}: {
+  characterId: string;
+  tokenPointsPercentageLimit: number;
+  user: Pick<UserModel, 'id' | 'userRole' | 'schoolIds'>;
+}) => {
+  checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
+
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyReadAccess({ item: character, user });
+
+  if (tokenPointsPercentageLimit <= 0 || tokenPointsPercentageLimit > 100) {
+    throw new InvalidArgumentError('token points percentage limit must be between 1 and 100');
+  }
+
+  const currentShare = await dbGetLatestManageableCharacterShare({ characterId, user });
+
+  if (!currentShare) {
+    throw new InvalidArgumentError('No sharing found for this character');
+  }
+
+  if (tokenPointsPercentageLimit <= currentShare.tokenPointsLimit) {
+    throw new InvalidArgumentError(
+      'token points percentage limit must be higher than current limit',
+    );
+  }
+
+  const updatedShare = await dbUpdateCharacterShareTokenPointsLimit({
+    characterId,
+    user,
+    tokenPointsLimit: tokenPointsPercentageLimit,
+  });
+
+  if (!updatedShare) {
+    throw new InvalidArgumentError('No sharing found for this character');
+  }
+
+  return updatedShare;
 };
 
 /**
@@ -478,15 +716,21 @@ export const getCharacterForChatSession = async ({
 export const getCharacterForEditView = async ({
   characterId,
   user,
+  federalState,
 }: {
   characterId: string;
-  user: Pick<UserModel, 'id' | 'schoolIds'>;
+  user: Pick<UserModel, 'id' | 'schoolIds' | 'userRole'>;
+  federalState: FederalStateModel;
 }): Promise<{
   character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
   maybeSignedPictureUrl: string | undefined;
+  maxBudget: number | null;
+  usedBudget: number;
+  budgetUsedBySharedChat: number;
 }> => {
   checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
   const character = await dbGetCharacterByIdOptionalShareData({ characterId, user });
   if (!character) throw new NotFoundError('Character not found');
   verifyReadAccess({ item: character, user });
@@ -495,15 +739,50 @@ export const getCharacterForEditView = async ({
     characterId,
     user,
   });
-  const maybeSignedPictureUrl = await getReadOnlySignedUrl({
-    key: character.pictureId,
+  const maybeSignedPictureUrl = character.pictureId
+    ? await getReadOnlySignedUrl({
+        key: character.pictureId,
+      })
+    : undefined;
+
+  const maxBudget = await getMaxBudgetInCentByUser({
+    user,
+    federalState,
   });
-  return { character, relatedFiles, maybeSignedPictureUrl };
+  const usedBudget = await getUsedBudgetInCentByUser({
+    user,
+  });
+
+  let budgetUsedBySharedChat = 0;
+  if (character.startedAt && character.expiredAt) {
+    budgetUsedBySharedChat = await dbGetSharedCharacterChatUsageInCentByCharacterId({
+      characterId: character.id,
+      userId: user.id,
+      expiredAt: character.expiredAt,
+      startedAt: character.startedAt,
+    });
+  }
+
+  return {
+    character,
+    relatedFiles,
+    maybeSignedPictureUrl,
+    maxBudget,
+    usedBudget,
+    budgetUsedBySharedChat,
+  };
 };
 
 /**
  * Returns a character with invite code and other sharing related data for sharing page.
- * @throws NotFoundError if character does not exist or is not shared
+ * The share must either be active (not yet expired) or within the grace window period
+ * (expired recently enough to still be manageable/extendable).
+ *
+ * @throws NotFoundError if:
+ *   - character does not exist
+ *   - share does not exist
+ *   - share has been manually stopped
+ *   - share is expired beyond the grace window
  */
 export const getSharedCharacter = async ({
   characterId,
@@ -514,7 +793,14 @@ export const getSharedCharacter = async ({
 }): Promise<CharacterWithShareDataModel> => {
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, user: { id: userId } });
-  if (!character || !character.inviteCode) throw new NotFoundError('Character not found');
+
+  if (!character || character.manuallyStoppedAt !== null) {
+    throw new NotFoundError('Character not found');
+  }
+
+  if (!isShareWithinGraceWindow(character.expiredAt, SHARE_EXTENSION_WINDOW_MS)) {
+    throw new NotFoundError('Character not found');
+  }
 
   return character;
 };
@@ -546,16 +832,26 @@ export async function getCharacterByAccessLevel({
   accessLevel: AccessLevel;
   user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<CharacterOptionalShareDataModel[]> {
+  let characters: CharacterOptionalShareDataModel[];
+
   switch (accessLevel) {
+    case 'community':
+      characters = await dbGetCommunityCharacters({ user });
+      break;
     case 'global':
-      return dbGetGlobalCharacters({ user });
+      characters = await dbGetGlobalCharacters({ user });
+      break;
     case 'school':
-      return dbGetCharactersByAssociatedSchools({ user });
+      characters = await dbGetCharactersByAssociatedSchools({ user });
+      break;
     case 'private':
-      return dbGetCharactersByUser({ user });
+      characters = await dbGetCharactersByUser({ user });
+      break;
     default:
       return [];
   }
+
+  return filterReadableCustomChats({ items: characters, user });
 }
 
 export async function getCharactersByOverviewFilter({
@@ -565,18 +861,37 @@ export async function getCharactersByOverviewFilter({
   filter: OverviewFilter;
   user: Pick<UserModel, 'id' | 'schoolIds' | 'federalStateId'>;
 }): Promise<CharacterOptionalShareDataModel[]> {
+  let characters: CharacterOptionalShareDataModel[];
+
   switch (filter) {
     case 'all':
-      return dbGetAllAccessibleCharacters({ user });
+      characters = await dbGetAllAccessibleCharacters({ user });
+      break;
     case 'mine':
-      return await dbGetAllCharactersByUser({ user });
+      characters = await dbGetAllCharactersByUser({ user });
+      break;
     case 'official':
-      return await dbGetGlobalCharacters({ user });
-    case 'school':
-      return await dbGetCharactersByAssociatedSchools({ user });
+      characters = await dbGetGlobalCharacters({ user });
+      break;
+    case 'community':
+      characters = await dbGetCommunityCharacters({ user });
+      break;
+    case 'school': {
+      const [schoolCharacters, communityCharacters] = await Promise.all([
+        dbGetCharactersByAssociatedSchools({ user }),
+        dbGetCommunityCharacters({ user }),
+      ]);
+      characters = [
+        ...schoolCharacters,
+        ...filterCommunitySharedByAssociatedSchool({ items: communityCharacters, user }),
+      ];
+      break;
+    }
     default:
       return [];
   }
+
+  return filterReadableCustomChats({ items: characters, user });
 }
 
 /**

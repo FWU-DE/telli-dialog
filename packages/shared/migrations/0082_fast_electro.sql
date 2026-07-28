@@ -1,0 +1,2 @@
+CREATE INDEX "shared_character_conversation_character_id_user_id_index" ON "shared_character_conversation" USING btree ("character_id","user_id");--> statement-breakpoint
+CREATE INDEX "shared_learning_scenario_learning_scenario_id_user_id_index" ON "shared_learning_scenario" USING btree ("learning_scenario_id","user_id");

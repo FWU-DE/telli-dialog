@@ -57,7 +57,7 @@ export default function ModelSelect({
 
   return (
     <div className="flex flex-col gap-2 rounded-enterprise-md p-2">
-      <span className="text-xs text-gray-600 hidden sm:block">{label}</span>
+      <span className="hidden whitespace-nowrap text-xs text-gray-600 sm:block">{label}</span>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger
           disabled={models.length < 2}
@@ -66,10 +66,11 @@ export default function ModelSelect({
         >
           <button
             type="button"
-            className="flex items-center gap-2 cursor-pointer disabled:cursor-default"
+            className="flex min-w-0 items-center gap-2 cursor-pointer disabled:cursor-default"
             aria-label={`Select ${modelType} Model Dropdown`}
+            data-testid={`${modelType}-model-dropdown`}
           >
-            <span className="text-primary text-base font-medium">
+            <span className="min-w-0 flex-1 line-clamp-2 text-primary text-base font-medium text-left">
               {currentSelectedModel?.displayName ?? noModelsLabel}
             </span>
             {currentSelectedModel &&

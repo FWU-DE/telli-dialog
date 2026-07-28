@@ -10,16 +10,17 @@ import {
 import StopIcon from '../icons/stop';
 import ArrowRightIcon from '../icons/arrow-right';
 import UploadFileButton from './upload-file-button';
+import type { FileUploadResponse } from './upload-file-button';
 import { useToast } from '../common/toast';
 import {
   ChangeEvent,
   Dispatch,
-  FormEvent,
   KeyboardEvent,
   SetStateAction,
   startTransition,
   useEffect,
   useState,
+  SyntheticEvent,
 } from 'react';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
@@ -35,6 +36,9 @@ export function ChatInputBox({
   customHandleSubmit,
   input,
   enableFileUpload = false,
+  fileUploadFn,
+  getSignedUrlFn,
+  showPlaceholder = true,
 }: {
   files?: Map<string, LocalFileState>;
   setFiles?: Dispatch<SetStateAction<Map<string, LocalFileState>>>;
@@ -42,9 +46,12 @@ export function ChatInputBox({
   handleDeattachFile?: (localId: string) => void;
   handleInputChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   handleStopGeneration: () => void;
-  customHandleSubmit: (e: FormEvent) => Promise<void>;
+  customHandleSubmit: (e: SyntheticEvent) => Promise<void>;
   input: string;
   enableFileUpload?: boolean;
+  fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
+  getSignedUrlFn?: (fileId: string) => Promise<string>;
+  showPlaceholder?: boolean;
 }) {
   const tCommon = useTranslations('common');
   const tFileInteraction = useTranslations('file-interaction');
@@ -146,6 +153,9 @@ export function ChatInputBox({
                 status={file.status}
                 file={file}
                 onDeattachFile={() => handleDeattachFile(localId)}
+                getSignedUrl={getSignedUrlFn}
+                height="large"
+                width="small"
               />
             ))}
           </div>
@@ -154,7 +164,7 @@ export function ChatInputBox({
           <AutoResizeTextarea
             /* eslint-disable-next-line jsx-a11y/no-autofocus */
             autoFocus
-            placeholder={tCommon('send-message-placeholder')}
+            placeholder={showPlaceholder ? tCommon('send-message-placeholder') : ''}
             className="w-full text-base focus:outline-hidden max-h-40 sm:max-h-60 overflow-y-auto placeholder:text-muted-foreground p-2"
             onChange={handleInputChange}
             value={input}
@@ -169,6 +179,7 @@ export function ChatInputBox({
                 setFiles={setFiles}
                 files={files}
                 setFileUploading={setFileUploading}
+                fileUploadFn={fileUploadFn}
               />
             </div>
           )}

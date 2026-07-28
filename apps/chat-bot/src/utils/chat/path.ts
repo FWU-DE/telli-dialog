@@ -9,14 +9,20 @@
 export function getConversationPath({
   customGptId,
   characterId,
+  learningScenarioId,
   conversationId,
 }: {
   customGptId?: string;
   characterId?: string;
+  learningScenarioId?: string;
   conversationId: string;
 }) {
   if (characterId !== undefined) {
     return `/characters/d/${characterId}/${conversationId}`;
+  }
+
+  if (learningScenarioId !== undefined) {
+    return `/learning-scenarios/d/${learningScenarioId}/${conversationId}`;
   }
 
   if (customGptId !== undefined) {

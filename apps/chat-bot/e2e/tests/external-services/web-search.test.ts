@@ -4,10 +4,16 @@ import { sendMessage } from '../../utils/chat';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
-// Test is flaky --> TD-1226
 test.fixme(
   'should successfully perform web search',
-  { tag: '@external-services' },
+  {
+    tag: '@external-services',
+    annotation: {
+      type: 'issue',
+      description:
+        'This test is currently failing because llm decides not to run web search. Maybe obsolete with agentic workflow.',
+    },
+  },
   async ({ page }) => {
     await page.goto('/');
 

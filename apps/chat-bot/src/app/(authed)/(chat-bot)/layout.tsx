@@ -2,7 +2,6 @@ import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
@@ -17,7 +16,11 @@ import AppSidebar from '@/components/navigation/sidebar/app-sidebar';
 import { SidebarProvider } from '@ais-chat/ui/components/sidebar';
 import SessionWatcher from '@/auth/SessionWatcher';
 import { getActiveBannersForUser } from '@shared/info-banners/info-banner-service';
-import { DialogWrapper } from '@/components/layout/dialog-header';
+import { ApplicationLayout } from '@/components/layout/application-layout';
+import {
+  getMaxBudgetInCentByUser,
+  getUsedBudgetInCentByUser,
+} from '@shared/users/user-budget-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,12 +29,12 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   const user = await getUser();
   if (!user.federalState.hasApiKeyAssigned) throw new Error(t('no-api-key'));
 
-  const [federalState, models, priceInCent, userPriceLimit, hasCompletedTraining, activeBanners] =
+  const [federalState, models, usedBudget, maxBudget, hasCompletedTraining, activeBanners] =
     await Promise.all([
       getFederalStateById(user.federalState.id),
       dbGetLlmModelsByFederalStateId({ federalStateId: user.federalState.id }),
-      getPriceInCentByUser(user),
-      getPriceLimitInCentByUser(user),
+      getUsedBudgetInCentByUser({ user }),
+      getMaxBudgetInCentByUser({ user, federalState: user.federalState }),
       userHasCompletedTraining(),
       getActiveBannersForUser({
         federalStateId: user.federalState.id,
@@ -62,12 +65,12 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
             <AppSidebar
               user={user}
               federalState={federalState}
-              currentModelCosts={priceInCent ?? 0}
-              userPriceLimit={userPriceLimit ?? 500}
+              usedBudget={usedBudget ?? 0}
+              maxBudget={maxBudget ?? 500}
             />
-            <DialogWrapper userAndContext={userAndContext} infoBanners={activeBanners}>
+            <ApplicationLayout userAndContext={userAndContext} infoBanners={activeBanners}>
               {children}
-            </DialogWrapper>
+            </ApplicationLayout>
           </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (

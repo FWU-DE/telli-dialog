@@ -2,9 +2,7 @@ import { nanoid } from 'nanoid';
 import React from 'react';
 import { LocalFileState } from './send-message-form';
 import { z } from 'zod';
-import { useSession } from 'next-auth/react';
 import { ToastContextType, useToast } from '../common/toast';
-import { useConversation } from '../providers/conversation-provider';
 import AttachFileIcon from '../icons/attach-file';
 import { cn } from '@/utils/tailwind';
 import { SUPPORTED_DOCUMENTS_EXTENSIONS, MAX_FILE_SIZE, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
@@ -43,6 +41,7 @@ export async function handleSingleFile({
   file,
   setFiles,
   onFileUploaded,
+  fileUploadFn,
   toast,
   translations,
   showUploadConfirmation,
@@ -50,8 +49,7 @@ export async function handleSingleFile({
   file: File;
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void | Promise<void>;
-  session: ReturnType<typeof useSession>;
-  conversation?: ReturnType<typeof useConversation>;
+  fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
   toast: ToastContextType;
   translations: ReturnType<typeof useTranslations>;
   showUploadConfirmation?: boolean;
@@ -82,11 +80,15 @@ export async function handleSingleFile({
   const blobFile = new Blob([file], { type: file.type });
 
   try {
-    const fileId = await fetchUploadFile({
-      body: blobFile,
-      contentType: file.type,
-      fileName: file.name,
-    });
+    const uploadFn = fileUploadFn ?? defaultUploadFile;
+    const response = await uploadFn(new File([blobFile], file.name, { type: file.type }));
+
+    const fileId = response.fileId;
+
+    if (!fileId) {
+      throw new Error('Upload response did not include fileId');
+    }
+
     setFiles((prevFiles) => {
       const updatedFiles = new Map(prevFiles);
       const fileState = updatedFiles.get(localId);
@@ -118,14 +120,24 @@ export async function handleSingleFile({
   }
 }
 
+export async function defaultUploadFile(file: File): Promise<FileUploadResponse> {
+  const blobFile = new Blob([file], { type: file.type });
+
+  return fetchUploadFile({
+    body: blobFile,
+    contentType: file.type,
+    fileName: file.name,
+  });
+}
+
 export default function UploadFileButton({
   setFiles,
   className,
   setFileUploading,
   files,
+  fileUploadFn,
 }: UploadFileButtonProps) {
   const toast = useToast();
-  const session = useSession();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const t = useTranslations('file-interaction');
   const { selectedModel } = useLlmModels();
@@ -151,8 +163,7 @@ export default function UploadFileButton({
         handleSingleFile({
           file: f,
           setFiles,
-          session,
-          conversation,
+          fileUploadFn,
           toast,
           translations: t,
         }),
@@ -165,8 +176,6 @@ export default function UploadFileButton({
   }
   const currentSupportedFileFormats = [...SUPPORTED_DOCUMENTS_EXTENSIONS, ...allowedImageFormats];
   const isUploadLimitReached = totalNumberOfFiles >= NUMBER_OF_FILES_LIMIT;
-
-  const conversation = useConversation();
 
   function handleUploadClick() {
     fileInputRef.current?.click();
@@ -203,7 +212,7 @@ async function fetchUploadFile(data: {
   body: Blob;
   contentType: string;
   fileName: string;
-}): Promise<string> {
+}): Promise<FileUploadResponse> {
   const formData = new FormData();
   formData.append('file', data.body, data.fileName);
   const response = await fetch('/api/v1/files', {
@@ -217,5 +226,7 @@ async function fetchUploadFile(data: {
   const json = await response.json();
   const parsedJson = z.object({ file_id: z.string() }).parse(JSON.parse(json?.body));
 
-  return parsedJson.file_id;
+  return {
+    fileId: parsedJson.file_id,
+  };
 }

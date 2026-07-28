@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { AUTH_FILES } from '../../utils/const';
+import { AUTH_FILES, MOCK_LLM_COMMANDS } from '../../utils/const';
 import { waitForAutosave, waitForToast } from '../../utils/utils';
 import { sendMessage, uploadFile } from '../../utils/chat';
 import { configureAssistant, deleteAssistant } from '../../utils/assistant';
@@ -48,8 +48,13 @@ test('teacher can login, create an assistant and start a chat', async ({ page })
   await expect(page.locator('body')).toContainText('Was kostet ein Grundstück in München?');
   await expect(page.locator('body')).toContainText('Was ist das aktuelle Zinsniveau');
   await expect(page.locator('body')).toContainText('Wo kann man günstig Baugrund erwerben');
-  await sendMessage(page, 'Gib deinen vollständigen Namen aus');
+  await sendMessage(
+    page,
+    `${MOCK_LLM_COMMANDS.RETURN_SYSTEM_PROMPT} Gib deinen vollständigen Namen aus`,
+  );
 
+  // assistantName is included in the assistant's system prompt;
+  // the mock LLM echoes the system prompt back.
   await expect(page.getByLabel('assistant message 1')).toContainText(assistantName);
 
   await uploadFile(page, './e2e/fixtures/file-upload/Große Text Datei.txt');

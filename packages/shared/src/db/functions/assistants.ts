@@ -28,7 +28,9 @@ export async function dbGetAssistantsByUserId({
 }: {
   user: Pick<UserModel, 'id'>;
 }): Promise<AssistantSelectModel[]> {
-  return baseAssistantQuery().where(eq(assistantTable.userId, user.id));
+  return baseAssistantQuery()
+    .where(eq(assistantTable.userId, user.id))
+    .orderBy(desc(assistantTable.createdAt));
 }
 
 export async function dbGetAssistantById({
@@ -41,6 +43,18 @@ export async function dbGetAssistantById({
   if (!assistant) throw new NotFoundError('Assistant not found');
 
   return assistant;
+}
+
+export async function dbGetAssistantsByIds({
+  assistantIds,
+}: {
+  assistantIds: string[];
+}): Promise<AssistantSelectModel[]> {
+  if (assistantIds.length === 0) {
+    return [];
+  }
+
+  return baseAssistantQuery().where(inArray(assistantTable.id, assistantIds));
 }
 
 export async function dbGetGlobalGpts({
@@ -68,6 +82,12 @@ export async function dbGetGlobalGpts({
       .where(eq(assistantTable.accessLevel, 'global'))
       .orderBy(desc(assistantTable.createdAt));
   }
+}
+
+export async function dbGetCommunityGpts(): Promise<AssistantSelectModel[]> {
+  return baseAssistantQuery()
+    .where(eq(assistantTable.accessLevel, 'community'))
+    .orderBy(desc(assistantTable.createdAt));
 }
 
 export async function dbGetGlobalAssistantByName({
@@ -131,7 +151,8 @@ export async function dbGetAssistantByIdOrAssociatedSchool({
             arrayOverlaps(userTable.schoolIds, user.schoolIds),
           )
         : undefined,
-      eq(assistantTable.accessLevel, 'global'),
+      and(eq(assistantTable.id, assistantId), eq(assistantTable.accessLevel, 'community')),
+      and(eq(assistantTable.id, assistantId), eq(assistantTable.accessLevel, 'global')),
     ),
   );
 
@@ -156,20 +177,35 @@ export async function dbUpsertAssistant({
   return dbGetAssistantById({ assistantId: insertedAssistant.id });
 }
 
-export async function dbUpdateAssistant({
-  assistantId,
-  assistant,
-}: {
-  assistantId: string;
-  assistant: Partial<AssistantInsertModel>;
-}): Promise<AssistantSelectModel | undefined> {
+export async function dbSetAssistantSuspended({ assistantId }: { assistantId: string }) {
   const [updatedAssistant] = await db
     .update(assistantTable)
-    .set(assistant)
+    .set({
+      suspended: true,
+      accessLevel: 'private',
+      hasLinkAccess: false,
+    })
     .where(eq(assistantTable.id, assistantId))
     .returning();
 
-  if (!updatedAssistant) throw new Error('Could not update assistant');
+  if (!updatedAssistant) {
+    throw new NotFoundError('Assistant not found');
+  }
+
+  return dbGetAssistantById({ assistantId: updatedAssistant.id });
+}
+
+export async function dbLiftSuspensionOnAssistant({ assistantId }: { assistantId: string }) {
+  const [updatedAssistant] = await db
+    .update(assistantTable)
+    .set({ suspended: false })
+    .where(eq(assistantTable.id, assistantId))
+    .returning();
+
+  if (!updatedAssistant) {
+    throw new NotFoundError('Assistant not found');
+  }
+
   return dbGetAssistantById({ assistantId: updatedAssistant.id });
 }
 

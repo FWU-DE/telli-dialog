@@ -6,6 +6,15 @@ import { AUTH_FILES, LLM_MODELS_FILE } from './utils/const';
 import { selectDifferentModel } from './utils/chat';
 import { LLM_MODELS } from './utils/llm-models';
 
+/**
+ * Display names of models that exist only for e2e testing purposes and must
+ * not appear in the external-services test matrix (which tests real LLMs).
+ */
+const MOCK_MODEL_DISPLAY_NAMES = new Set<string>([
+  LLM_MODELS.TEXT_MODEL_1,
+  LLM_MODELS.TEXT_MODEL_2,
+]);
+
 async function readModelsFromDropdown(page: Page): Promise<string[]> {
   const dropdown = page.getByLabel(`Select text Model Dropdown`);
 
@@ -30,10 +39,11 @@ async function readModelsFromDropdown(page: Page): Promise<string[]> {
 }
 
 async function saveLlmModels(page: Page) {
-  const llmModels = await readModelsFromDropdown(page);
+  const allModels = await readModelsFromDropdown(page);
+  const realModels = allModels.filter((name) => !MOCK_MODEL_DISPLAY_NAMES.has(name));
 
   await fs.mkdir(path.dirname(LLM_MODELS_FILE), { recursive: true });
-  await fs.writeFile(LLM_MODELS_FILE, JSON.stringify(llmModels, null, 2));
+  await fs.writeFile(LLM_MODELS_FILE, JSON.stringify(realModels, null, 2));
 }
 
 async function saveAuthState(baseUrl: string) {
@@ -65,7 +75,8 @@ async function saveAuthState(baseUrl: string) {
  *
  * - Reads available text models from the UI dropdown (menuitem data-testid) and
  *   writes their display names to LLM_MODELS_FILE so tests can discover them
- *   dynamically at load time.
+ *   dynamically at load time. Mock models are excluded so that the
+ *   external-services suite only tests real LLMs.
  * - For each user defined in AUTH_FILES, performs a real browser login and
  *   saves the resulting storage state under `.playwright-auth/`. Tests restore
  *   this session via `test.use({ storageState: AUTH_FILES.<user> })`, avoiding

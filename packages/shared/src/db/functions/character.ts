@@ -4,12 +4,15 @@ import {
   desc,
   eq,
   getTableColumns,
+  gte,
   inArray,
   isNull,
   or,
   sql,
 } from 'drizzle-orm';
 import { db } from '..';
+import { NotFoundError } from '@shared/error';
+import { SHARE_EXTENSION_WINDOW_MS } from '@shared/sharing/const';
 import {
   CharacterFileMapping,
   CharacterInsertModel,
@@ -20,6 +23,7 @@ import {
   CharacterWithShareDataModel,
   conversationTable,
   fileTable,
+  FilterGroup,
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
   sharedCharacterConversation,
@@ -34,7 +38,7 @@ import { UserModel } from '@shared/auth/user-model';
  *
  * A share is expired if either:
  * - `manually_stopped_at IS NOT NULL` (explicitly stopped), or
- * - `started_at + maxUsageTimeLimit < now` (time limit elapsed; `manually_stopped_at` may still be NULL for these)
+ * - `expired_at < now` (time limit elapsed; `manually_stopped_at` may still be NULL for these)
  *
  * When multiple non-expired rows exist, `DISTINCT ON (character_id) ORDER BY started_at DESC`
  * ensures only the most-recent row is returned, preventing duplicate entity rows in JOINs.
@@ -49,7 +53,7 @@ function latestActiveCharacterShare(user: Pick<UserModel, 'id'>) {
       and(
         eq(sharedCharacterConversation.userId, user.id),
         isNull(sharedCharacterConversation.manuallyStoppedAt),
-        sql`${sharedCharacterConversation.startedAt} + ${sharedCharacterConversation.maxUsageTimeLimit} * interval '1 minute' >= now()`,
+        sql`${sharedCharacterConversation.expiredAt} >= now()`,
       ),
     )
     .orderBy(sharedCharacterConversation.characterId, desc(sharedCharacterConversation.startedAt))
@@ -74,6 +78,29 @@ function latestCharacterShare(
     .as('latest_share');
 }
 
+/**
+ * Returns a subquery that selects the single most-recent non-manually-stopped share per character
+ * for a given user. This includes shares that have already expired, so the caller has
+ * to decide if it is still available (grace window) or already expired.
+ */
+function latestNonStoppedCharacterShare(
+  user: Pick<UserModel, 'id'>,
+): ReturnType<typeof latestActiveCharacterShare> {
+  return db
+    .selectDistinctOn([sharedCharacterConversation.characterId], {
+      ...getTableColumns(sharedCharacterConversation),
+    })
+    .from(sharedCharacterConversation)
+    .where(
+      and(
+        eq(sharedCharacterConversation.userId, user.id),
+        isNull(sharedCharacterConversation.manuallyStoppedAt),
+      ),
+    )
+    .orderBy(sharedCharacterConversation.characterId, desc(sharedCharacterConversation.startedAt))
+    .as('latest_share');
+}
+
 function baseCharacterQuery() {
   return db
     .select({
@@ -92,6 +119,7 @@ function baseCharacterWithShareQuery(activeShare: ReturnType<typeof latestActive
       inviteCode: activeShare.inviteCode,
       maxUsageTimeLimit: activeShare.maxUsageTimeLimit,
       startedAt: activeShare.startedAt,
+      expiredAt: activeShare.expiredAt,
       manuallyStoppedAt: activeShare.manuallyStoppedAt,
       startedBy: activeShare.userId,
       ownerSchoolIds: userTable.schoolIds,
@@ -125,6 +153,7 @@ export async function dbGetCharacters({
       or(
         eq(characterTable.userId, user.id),
         schoolCondition,
+        eq(characterTable.accessLevel, 'community'),
         eq(characterTable.accessLevel, 'global'),
       ),
       eq(characterTable.isDeleted, false),
@@ -137,6 +166,11 @@ export async function dbGetCharacters({
 /**
  * Needs userId because the metadata for shared characters is both tied to the user and character,
  * this is especially important for shared characters (school wide or global).
+ *
+ * Returns the latest share data even if expired, as long as it hasn't been manually stopped.
+ * The service layer (getSharedCharacter) is responsible for validating the grace window.
+ *
+ * Returns undefined if the character does not exist or has no non-manually-stopped shares
  */
 export async function dbGetCharacterByIdWithShareData({
   characterId,
@@ -145,9 +179,9 @@ export async function dbGetCharacterByIdWithShareData({
   characterId: string;
   user: Pick<UserModel, 'id'>;
 }): Promise<CharacterWithShareDataModel | undefined> {
-  const activeShare = latestActiveCharacterShare(user);
-  const [row] = await baseCharacterWithShareQuery(activeShare)
-    .innerJoin(activeShare, eq(activeShare.characterId, characterTable.id))
+  const latestShare = latestNonStoppedCharacterShare(user);
+  const [row] = await baseCharacterWithShareQuery(latestShare)
+    .innerJoin(latestShare, eq(latestShare.characterId, characterTable.id))
     .where(eq(characterTable.id, characterId));
   return row;
 }
@@ -172,6 +206,18 @@ export async function dbGetCharacterByIdOptionalShareData({
 export async function dbGetCharacterById({ characterId }: { characterId: string }) {
   const [row] = await baseCharacterQuery().where(eq(characterTable.id, characterId));
   return row;
+}
+
+export async function dbGetCharactersByIds({
+  characterIds,
+}: {
+  characterIds: string[];
+}): Promise<CharacterSelectModel[]> {
+  if (characterIds.length === 0) {
+    return [];
+  }
+
+  return baseCharacterQuery().where(inArray(characterTable.id, characterIds));
 }
 
 export async function dbGetCopyTemplateCharacter({
@@ -236,6 +282,20 @@ export async function dbGetGlobalCharacters({
           : undefined,
       ),
     )
+    .orderBy(desc(characterTable.createdAt));
+
+  return characters;
+}
+
+export async function dbGetCommunityCharacters({
+  user,
+}: {
+  user: Pick<UserModel, 'id'>;
+}): Promise<CharacterOptionalShareDataModel[]> {
+  const activeShare = latestActiveCharacterShare(user);
+  const characters = await baseCharacterWithShareQuery(activeShare)
+    .leftJoin(activeShare, eq(activeShare.characterId, characterTable.id))
+    .where(eq(characterTable.accessLevel, 'community'))
     .orderBy(desc(characterTable.createdAt));
 
   return characters;
@@ -324,6 +384,7 @@ export async function dbGetAllAccessibleCharacters({
               arrayOverlaps(userTable.schoolIds, user.schoolIds),
             )
           : undefined,
+        eq(characterTable.accessLevel, 'community'),
         and(
           eq(characterTable.accessLevel, 'global'),
           eq(characterTemplateMappingTable.federalStateId, federalStateId),
@@ -406,6 +467,7 @@ export async function dbGetCharacterByIdAndInviteCode({
       inviteCode: sharedCharacterConversation.inviteCode,
       maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
       startedAt: sharedCharacterConversation.startedAt,
+      expiredAt: sharedCharacterConversation.expiredAt,
       manuallyStoppedAt: sharedCharacterConversation.manuallyStoppedAt,
       startedBy: sharedCharacterConversation.userId,
       ownerSchoolIds: userTable.schoolIds,
@@ -458,16 +520,195 @@ export async function dbGetGlobalCharacterByName({
   return character;
 }
 
+export async function dbSetCharacterSuspended({ characterId }: { characterId: string }) {
+  const [updatedCharacter] = await db
+    .update(characterTable)
+    .set({
+      suspended: true,
+      accessLevel: 'private',
+      hasLinkAccess: false,
+    })
+    .where(eq(characterTable.id, characterId))
+    .returning();
+
+  if (!updatedCharacter) {
+    throw new NotFoundError('Character not found');
+  }
+
+  const character = await dbGetCharacterById({ characterId: updatedCharacter.id });
+  if (!character) {
+    throw new NotFoundError('Character not found');
+  }
+
+  return character;
+}
+
+export async function dbLiftSuspensionOnCharacter({ characterId }: { characterId: string }) {
+  const [updatedCharacter] = await db
+    .update(characterTable)
+    .set({ suspended: false })
+    .where(eq(characterTable.id, characterId))
+    .returning();
+
+  if (!updatedCharacter) {
+    throw new NotFoundError('Character not found');
+  }
+
+  const character = await dbGetCharacterById({ characterId: updatedCharacter.id });
+  if (!character) {
+    throw new NotFoundError('Character not found');
+  }
+
+  return character;
+}
+
 /**
- * Returns all active (non-stopped, non-expired) shared character conversations for a given character and user.
+ * Returns the latest manageable share for a character owned/started by the given user,
+ * or `null` when none exists.
+ *
+ * A share is "manageable" when it has not been manually stopped and its expiration is
+ * still within the grace window (`SHARE_EXTENSION_WINDOW_MS`) — i.e. it is either still
+ * running or expired recently enough that it can still be extended or adjusted.
  */
-export async function dbGetSharedCharacterConversations({
+export async function dbGetLatestManageableCharacterShare({
   characterId,
   user,
 }: {
   characterId: string;
   user: Pick<UserModel, 'id'>;
 }) {
-  const activeShare = latestActiveCharacterShare(user);
-  return db.select().from(activeShare).where(eq(activeShare.characterId, characterId));
+  const graceWindowStart = new Date(Date.now() - SHARE_EXTENSION_WINDOW_MS);
+
+  const [share] = await db
+    .select()
+    .from(sharedCharacterConversation)
+    .where(
+      and(
+        eq(sharedCharacterConversation.characterId, characterId),
+        eq(sharedCharacterConversation.userId, user.id),
+        isNull(sharedCharacterConversation.manuallyStoppedAt),
+        gte(sharedCharacterConversation.expiredAt, graceWindowStart),
+      ),
+    )
+    .orderBy(desc(sharedCharacterConversation.startedAt))
+    .limit(1);
+
+  return share ?? null;
+}
+
+/**
+ * Creates a new share for a character.
+ * Always inserts a new row; the caller is responsible for ensuring no
+ * manageable share already exists.
+ */
+export async function dbCreateCharacterShare({
+  user,
+  characterId,
+  tokenPointsLimit,
+  maxUsageTimeLimit,
+  inviteCode,
+  startedAt,
+}: {
+  user: Pick<UserModel, 'id'>;
+  characterId: string;
+  tokenPointsLimit: number;
+  maxUsageTimeLimit: number;
+  inviteCode: string;
+  startedAt: Date;
+}) {
+  const expiredAt = new Date(startedAt.getTime() + maxUsageTimeLimit * 60 * 1000);
+  const [newShare] = await db
+    .insert(sharedCharacterConversation)
+    .values({
+      userId: user.id,
+      characterId,
+      tokenPointsLimit,
+      maxUsageTimeLimit,
+      inviteCode,
+      startedAt,
+      expiredAt,
+    })
+    .returning();
+
+  return newShare;
+}
+
+/**
+ * Marks a character share as manually stopped.
+ * Returns `null` if the share does not exist.
+ */
+export async function dbStopCharacterShare({ shareId }: { shareId: string }) {
+  const [updatedShare] = await db
+    .update(sharedCharacterConversation)
+    .set({ manuallyStoppedAt: new Date() })
+    .where(eq(sharedCharacterConversation.id, shareId))
+    .returning();
+
+  return updatedShare ?? null;
+}
+
+/**
+ * Extends the expiration timestamp of an already loaded manageable character share.
+ * Respects the grace window, so a share that expired recently can still be extended.
+ */
+export async function dbExtendSharedCharacterConversationExpiration({
+  share,
+  additionalTimeInMinutes,
+}: {
+  share: { id: string; expiredAt: Date };
+  additionalTimeInMinutes: number;
+}) {
+  const now = new Date();
+  const baseDate = share.expiredAt > now ? share.expiredAt : now;
+  const newExpiredAt = new Date(baseDate.getTime() + additionalTimeInMinutes * 60 * 1000);
+
+  const [updatedShare] = await db
+    .update(sharedCharacterConversation)
+    .set({ expiredAt: newExpiredAt })
+    .where(eq(sharedCharacterConversation.id, share.id))
+    .returning();
+
+  return updatedShare ?? null;
+}
+
+/**
+ * Updates the token points limit of the latest manageable character share for the given user.
+ * Respects the grace window, so a share that expired recently can still be adjusted.
+ * Returns `null` if no manageable share exists.
+ */
+export async function dbUpdateCharacterShareTokenPointsLimit({
+  characterId,
+  user,
+  tokenPointsLimit,
+}: {
+  characterId: string;
+  user: Pick<UserModel, 'id'>;
+  tokenPointsLimit: number;
+}) {
+  const latestManageableShare = await dbGetLatestManageableCharacterShare({ characterId, user });
+
+  if (!latestManageableShare) {
+    return null;
+  }
+
+  const [updatedShare] = await db
+    .update(sharedCharacterConversation)
+    .set({ tokenPointsLimit })
+    .where(eq(sharedCharacterConversation.id, latestManageableShare.id))
+    .returning();
+
+  return updatedShare;
+}
+
+export async function dbUpdateCharacterFilterGroup({
+  characterId,
+  filterGroup: updatedFilterGroup,
+}: {
+  characterId: string;
+  filterGroup: FilterGroup;
+}): Promise<void> {
+  await db
+    .update(characterTable)
+    .set({ filterGroup: updatedFilterGroup })
+    .where(eq(characterTable.id, characterId));
 }

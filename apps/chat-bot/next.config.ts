@@ -5,6 +5,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const isDevBuild = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
 
 const baseNextConfig: NextConfig = {
+  deploymentId: process.env.APP_VERSION,
   transpilePackages: [
     '@ais-chat/ui',
     '@ais-chat/shared',
@@ -23,6 +24,7 @@ const baseNextConfig: NextConfig = {
   // if you want to host it on vercel, remove this option
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/output#automatically-copying-traced-files
   output: 'standalone',
+  reactCompiler: true,
   images: {
     // When images are hosted on the same cloud as the application, access is routed on the local network and needs to be allowed
     dangerouslyAllowLocalIP: true,

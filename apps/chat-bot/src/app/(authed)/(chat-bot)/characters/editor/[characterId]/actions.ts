@@ -1,15 +1,18 @@
 'use server';
 
 import { AccessLevel } from '@shared/db/schema';
-import { SharedConversationShareFormValues } from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
+import { ShareWithLearnersLimitParams } from '@/components/custom-chat/share-with-learners/custom-chat-share-with-learners-limit-params';
 import { requireAuth } from '@/auth/requireAuth';
 import {
   deleteCharacter,
   deleteFileMappingAndEntity,
   downloadFileFromCharacter,
+  extendCharacterShareExpiration,
+  getActiveCharacterShareData,
   linkFileToCharacter,
   shareCharacter,
   unshareCharacter,
+  updateCharacterShareTokenPointsLimit,
   updateCharacter,
   updateCharacterAccessLevel,
   UpdateCharacterActionModel,
@@ -26,7 +29,10 @@ export async function updateCharacterAccessLevelAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(updateCharacterAccessLevel)({
+  return runServerAction(
+    'updateCharacterAccessLevelAction',
+    updateCharacterAccessLevel,
+  )({
     characterId,
     accessLevel,
     user,
@@ -36,7 +42,10 @@ export async function updateCharacterAccessLevelAction({
 export async function updateCharacterAction(character: UpdateCharacterActionModel) {
   const { user } = await requireAuth();
 
-  return runServerAction(updateCharacter)({
+  return runServerAction(
+    'updateCharacterAction',
+    updateCharacter,
+  )({
     user,
     ...character,
   });
@@ -45,7 +54,10 @@ export async function updateCharacterAction(character: UpdateCharacterActionMode
 export async function deleteCharacterAction({ characterId }: { characterId: string }) {
   const { user } = await requireAuth();
 
-  return runServerAction(deleteCharacter)({
+  return runServerAction(
+    'deleteCharacterAction',
+    deleteCharacter,
+  )({
     characterId,
     user,
   });
@@ -55,23 +67,80 @@ export async function shareCharacterAction({
   id,
   tokenPointsPercentageLimit,
   usageTimeLimit,
-}: { id: string } & SharedConversationShareFormValues) {
+}: { id: string } & ShareWithLearnersLimitParams) {
   const { user } = await requireAuth();
 
-  return runServerAction(shareCharacter)({
+  return runServerAction(
+    'shareCharacterAction',
+    shareCharacter,
+  )({
     characterId: id,
     tokenPointsPercentageLimit,
     usageTimeLimitMinutes: usageTimeLimit,
-    user: user,
+    user,
   });
 }
 
 export async function unshareCharacterAction({ characterId }: { characterId: string }) {
   const { user } = await requireAuth();
 
-  return runServerAction(unshareCharacter)({
+  return runServerAction(
+    'unshareCharacterAction',
+    unshareCharacter,
+  )({
     characterId,
     user: user,
+  });
+}
+
+export async function extendCharacterShareExpirationAction({
+  characterId,
+  additionalTimeInMinutes,
+}: {
+  characterId: string;
+  additionalTimeInMinutes: number;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'extendCharacterShareExpirationAction',
+    extendCharacterShareExpiration,
+  )({
+    characterId,
+    additionalTimeInMinutes,
+    user,
+  });
+}
+
+export async function updateCharacterShareTokenPointsLimitAction({
+  characterId,
+  tokenPointsPercentageLimit,
+}: {
+  characterId: string;
+  tokenPointsPercentageLimit: number;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(
+    'updateCharacterShareTokenPointsLimitAction',
+    updateCharacterShareTokenPointsLimit,
+  )({
+    characterId,
+    tokenPointsPercentageLimit,
+    user,
+  });
+}
+
+export async function getCharacterShareDataAction({ characterId }: { characterId: string }) {
+  const { user, federalState } = await requireAuth();
+
+  return runServerAction(
+    'getCharacterShareDataAction',
+    getActiveCharacterShareData,
+  )({
+    characterId,
+    user,
+    federalState,
   });
 }
 
@@ -84,7 +153,10 @@ export async function deleteFileMappingAndEntityAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(deleteFileMappingAndEntity)({
+  return runServerAction(
+    'deleteFileMappingAndEntityAction',
+    deleteFileMappingAndEntity,
+  )({
     characterId,
     fileId,
     user,
@@ -100,7 +172,14 @@ export async function linkFileToCharacterAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(linkFileToCharacter)({ fileId, characterId, user });
+  return runServerAction(
+    'linkFileToCharacterAction',
+    linkFileToCharacter,
+  )({
+    fileId,
+    characterId,
+    user,
+  });
 }
 
 export async function uploadAvatarPictureForCharacterAction({
@@ -112,7 +191,10 @@ export async function uploadAvatarPictureForCharacterAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(uploadAvatarPictureForCharacter)({
+  return runServerAction(
+    'uploadAvatarPictureForCharacterAction',
+    uploadAvatarPictureForCharacter,
+  )({
     characterId,
     croppedImageBlob,
     user,
@@ -128,7 +210,10 @@ export async function downloadFileFromCharacterAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(downloadFileFromCharacter)({
+  return runServerAction(
+    'downloadFileFromCharacterAction',
+    downloadFileFromCharacter,
+  )({
     characterId,
     fileId,
     user,

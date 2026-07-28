@@ -1,19 +1,19 @@
 'use client';
 
 import { useToast } from '@/components/common/toast';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { inputFieldClassName } from '@/utils/tailwind/input';
 import React from 'react';
 import { getChatInfoByInviteCodeAction } from './actions';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
+import { Button } from '@ui/components/button';
 
 export default function SharedChatLoginForm() {
   const [inviteCode, setInviteCode] = React.useState('');
   const toast = useToast();
   const router = useRouter();
-  const t = useTranslations('learning-scenarios.shared');
+  const t = useTranslations('custom-chat.shared');
 
   async function getChatByInviteCode(formattedInviteCode: string) {
     const result = await getChatInfoByInviteCodeAction(formattedInviteCode);
@@ -54,13 +54,9 @@ export default function SharedChatLoginForm() {
         }}
         className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
       />
-      <button
-        type="button"
-        onClick={handleInviteCodeSubmit}
-        className={cn(buttonPrimaryClassName, 'mt-4')}
-      >
+      <Button type="button" size="xl" onClick={handleInviteCodeSubmit} className="mt-4">
         {t('enter-chat')}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -3,14 +3,23 @@
 import useBreakpoints from '../hooks/use-breakpoints';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
-import DownloadSharedConversationButton from '@/app/(unauth)/ua/download-shared-conversation-button';
+import DownloadSharedConversationButton, {
+  fetchSharedConversationDownload,
+} from '@/app/(unauth)/ua/download-shared-conversation-button';
+import { downloadFileFromBlob } from '@/utils/files/blob-download';
 import Image from 'next/image';
-import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
+import ProfileMenu from '../navigation/profile-menu';
+import {
+  ThreeDotsProfileMenu,
+  type ThreeDotsProfileMenuItem,
+} from '../navigation/three-dots-profile-menu';
 import { type ChatMessage as Message } from '@/types/chat';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
 import { ConfirmAlertDialog, useConfirmAlertDialog } from '@ui/components/alert-dialog';
 import { Button } from '@ui/components/button';
-import { TrashSimpleIcon } from '@phosphor-icons/react';
+import { BoxArrowDownIcon, TrashSimpleIcon } from '@phosphor-icons/react';
+import { useToast } from '@/components/common/toast';
+import React from 'react';
 
 export function SharedChatHeader({
   chatActive,
@@ -36,10 +45,45 @@ export function SharedChatHeader({
   const { isBelow } = useBreakpoints();
   const tCommon = useTranslations('common');
   const { dialogProps: deleteDialogProps, confirm: confirmDelete } = useConfirmAlertDialog();
+  const toast = useToast();
 
   const showCompactHeader = isBelow[reductionBreakpoint];
 
-  const openDeleteConfirm = () => confirmDelete(handleOpenNewChat);
+  const openDeleteConfirm = React.useCallback(() => {
+    confirmDelete(handleOpenNewChat);
+  }, [confirmDelete, handleOpenNewChat]);
+
+  const customMenuItems: ThreeDotsProfileMenuItem[] = [
+    {
+      id: 'delete-chat',
+      label: tCommon('delete'),
+      icon: <TrashSimpleIcon className="size-5 text-primary" />,
+      onSelect: openDeleteConfirm,
+    },
+    {
+      id: 'download-chat',
+      label: tCommon('conversation-download'),
+      icon: <BoxArrowDownIcon className="size-5 text-primary" />,
+      disabled: !chatActive || !hasMessages,
+      onSelect: async () => {
+        if (!chatActive || !hasMessages) {
+          return;
+        }
+
+        try {
+          const { blob, fileName } = await fetchSharedConversationDownload({
+            conversationMessages: messages,
+            sharedConversationName: title,
+            inviteCode,
+          });
+
+          downloadFileFromBlob(blob, fileName);
+        } catch {
+          toast.error('Der Download der Konversation ist fehlgeschlagen.');
+        }
+      },
+    },
+  ];
 
   return (
     <header
@@ -87,27 +131,7 @@ export function SharedChatHeader({
           <ProfileMenu userAndContext={undefined} />
         </>
       ) : (
-        <ThreeDotsProfileMenu
-          downloadButtonJSX={
-            <DownloadSharedConversationButton
-              conversationMessages={messages}
-              disabled={!chatActive || !hasMessages}
-              sharedConversationName={title}
-              showText={true}
-              inviteCode={inviteCode}
-            />
-          }
-          deleteButtonJSX={
-            <Button
-              variant="ghost"
-              onClick={openDeleteConfirm}
-              data-testid="custom-chat-delete-button"
-            >
-              <TrashSimpleIcon className="size-5 text-primary" />
-              {tCommon('delete')}
-            </Button>
-          }
-        />
+        <ThreeDotsProfileMenu customItems={customMenuItems} />
       )}
       <ConfirmAlertDialog
         title={t('delete-chat-modal-title')}

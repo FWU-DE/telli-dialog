@@ -1,3 +1,5 @@
+import { notifyPathnameChanged } from '@/utils/navigation/pathname-store';
+
 /**
  * Opens a URL in a new browser tab with secure defaults.
  */
@@ -15,5 +17,5 @@ export function openInNewTab(url: string) {
  */
 export function navigateWithoutRefresh(path: string) {
   window.history.replaceState(window.history.state, '', path);
-  window.dispatchEvent(new Event('ais-chat:pathnameChange'));
+  notifyPathnameChanged();
 }

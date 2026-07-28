@@ -33,6 +33,8 @@
     --coral: #e94d52;
     --dark-red: #9f070d;
     --light-red: #fef6f6;
+    --dark-green: #00594f;
+    --light-green: #6ce9d70d;
 
     --background: #ffffffff; /* normal background for pages */
     --background-2: #fafafaff; /* alternative background for cards, popovers, etc. */
@@ -61,8 +63,8 @@
 
     --success: #02a59bff;
     --success-foreground: #ffffff;
-    --error: #ffffff;
-    --error-foreground: #ffffff;
+    --error: #9f070d;
+    --error-foreground: #000000;
     --warning: #facc15ff;
     --warning-foreground: #ffffff;
 
@@ -106,7 +108,7 @@
 
     --success: #ffffff;
     --success-foreground: #ffffff;
-    --error: #ffffff;
+    --error: #9f070d;
     --error-foreground: #ffffff;
     --warning: #ffffff;
     --warning-foreground: #ffffff;
@@ -149,6 +151,12 @@
   }
 }
 
+@layer utilities {
+  .h-12\.5 {
+    height: 3.125rem;
+  }
+}
+
 @theme inline {
   --spacing: 0.25rem;
 
@@ -163,6 +171,8 @@
   --color-coral: var(--coral);
   --color-dark-red: var(--dark-red);
   --color-light-red: var(--light-red);
+  --color-dark-green: var(--dark-green);
+  --color-light-green: var(--light-green);
   --color-background: var(--background);
   --color-background-2: var(--background-2);
   --color-foreground: var(--foreground);
@@ -222,7 +232,6 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-error: var(--error);
   --color-error-foreground: var(--error-foreground);
-
   --color-icon: var(--icon);
 }
 

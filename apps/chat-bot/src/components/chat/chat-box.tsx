@@ -19,6 +19,7 @@ import {
   WebSearchSourcesPanel,
   useWebSearchSourcesDisclosure,
 } from './sources/web-search-sources';
+import DownloadConversationMessageButton from './download-conversation-message-button';
 
 // Re-export for consumers
 export type { PendingFileModel };
@@ -33,7 +34,10 @@ export function ChatBox({
   isLastNonUser,
   isLoading,
   regenerateMessage,
+  conversationId,
+  characterName,
   status,
+  getSignedUrlFn,
 }: {
   assistantIcon?: ReactNode;
   children: UIMessage;
@@ -44,7 +48,10 @@ export function ChatBox({
   isLastNonUser: boolean;
   isLoading: boolean;
   regenerateMessage: () => void;
+  conversationId?: string;
+  characterName?: string;
   status: ChatStatus;
+  getSignedUrlFn?: (fileId: string) => Promise<string>;
 }) {
   const tCommon = useTranslations('common');
   const { isAtLeast } = useBreakpoints();
@@ -58,7 +65,7 @@ export function ChatBox({
   const userClassName =
     children.role === 'user'
       ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/30 max-w-[70%] wrap-break-word'
-      : 'w-fit';
+      : 'w-full min-w-0';
 
   // Check both DB file mapping and pending files for this message
   const dbFiles = fileMapping?.get(children.id);
@@ -84,7 +91,7 @@ export function ChatBox({
 
   const maybeFileAttachment =
     hasFiles && children.role === 'user' ? (
-      <div className="flex flex-col gap-4 pb-0 pt-0 self-end mb-4">
+      <div className="flex w-full min-w-0 flex-col items-end gap-4 self-end pb-0 pt-0 mb-4">
         {/* Display images */}
         {imageFiles.length > 0 && (
           <div className="flex flex-row gap-2 overflow-auto">
@@ -94,13 +101,14 @@ export function ChatBox({
                 status="processed"
                 key={file.id}
                 showBanner={false}
+                getSignedUrl={getSignedUrlFn}
               />
             ))}
           </div>
         )}
         {/* Display non-image files */}
         {nonImageFiles.length > 0 && (
-          <div className="flex flex-row gap-2 overflow-auto">
+          <div className="flex w-fit max-w-full min-w-0 flex-row flex-wrap justify-end gap-2 overflow-hidden">
             {nonImageFiles.map((file) => (
               <DisplayUploadedFile fileName={file.name} status="processed" key={file.id} />
             ))}
@@ -147,6 +155,15 @@ export function ChatBox({
     isLastNonUser && status !== 'streaming' ? (
       <div className="flex items-center gap-1 mt-1">
         <CopyToClipboardButton text={children.content} className="size-5" />
+        {status === 'ready' &&
+          conversationId !== undefined &&
+          children.id !== 'initial-message' && (
+            <DownloadConversationMessageButton
+              conversationId={conversationId}
+              messageId={children.id}
+              characterName={characterName}
+            />
+          )}
         <button
           title={tCommon('regenerate-message')}
           type="button"
@@ -172,12 +189,12 @@ export function ChatBox({
     <>
       <div key={index} className={cn('w-full', userClassName, margin)}>
         <div aria-label={`${children.role} message ${Math.floor(index / 2 + 1)}`}>
-          <div className={cn('flex', isAtLeast.sm ? 'flex-row' : 'flex-col')}>
+          <div className={cn('flex min-w-0', isAtLeast.sm ? 'flex-row' : 'flex-col')}>
             {children.role === 'assistant' && assistantIcon}
             <div
               className={cn(
                 'flex flex-col items-start gap-2',
-                children.role === 'assistant' && 'w-full',
+                children.role === 'assistant' && 'w-full min-w-0',
               )}
             >
               {maybeAssistantWebSearchSources}

@@ -7,9 +7,11 @@ export const env = createEnv({
   client: {},
   emptyStringAsUndefined: true,
   server: {
-    valkeyUrl: z.string(),
+    valkeyMode: z.enum(['standalone', 'cluster']).default('standalone'),
+    valkeyUrl: z.url(),
   },
   runtimeEnv: {
+    valkeyMode: process.env.VALKEY_MODE,
     valkeyUrl: process.env.VALKEY_URL,
   },
 });
