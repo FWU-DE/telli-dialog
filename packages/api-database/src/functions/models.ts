@@ -55,7 +55,7 @@ export async function dbHasApiKeyAccessToModel({
 }
 
 export async function dbGetAllModelsByOrganizationId(organizationId: string) {
-  return db
+  return await db
     .select()
     .from(llmModelTable)
     .where(eq(llmModelTable.organizationId, organizationId))
