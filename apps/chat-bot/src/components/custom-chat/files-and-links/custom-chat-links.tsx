@@ -7,7 +7,7 @@ import { Button } from '@ui/components/button';
 import { Spinner } from '@ui/components/spinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/tooltip';
 import { WebSource } from '@shared/db/types';
-import { parseHyperlinks, getDisplayUrl } from '@/utils/web-search/parsing';
+import { parseHyperlinks, getDisplayUrl } from '@shared/utils/url-utils';
 import {
   NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
