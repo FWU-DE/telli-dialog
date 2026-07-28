@@ -1,15 +1,6 @@
 import { LlmModelSelectModel } from '../db/schema';
 
 /**
- * Get the default model from a list of models
- * @param models The list of LLM models
- * @returns The default model or undefined if none found
- */
-export function getDefaultModel(models: LlmModelSelectModel[]): LlmModelSelectModel | undefined {
-  return getFirstTextModel(models);
-}
-
-/**
  * Get the first text model from a list of models, excluding mistral models.
  * @param models The list of LLM models
  * @returns The first text model or undefined if none found

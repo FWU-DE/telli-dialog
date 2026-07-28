@@ -46,18 +46,20 @@ export default async function Page(props: PageProps<'/learning-scenarios/d/[lear
     federalStateId: federalState.id,
   });
   const learningScenarioModel = models.find((m) => m.id === learningScenario.modelId)?.name;
+  const defaultModelName = await getDefaultModelNameByFederalStateId(federalState.id, models);
 
   const currentModel =
-    searchParams.model ??
-    learningScenarioModel ??
-    user.lastUsedModel ??
-    (await getDefaultModelNameByFederalStateId(federalState.id, models));
+    searchParams.model ?? learningScenarioModel ?? user.lastUsedModel ?? defaultModelName;
 
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
 
   return (
-    <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
+    <LlmModelsProvider
+      models={models}
+      initialModelName={currentModel}
+      defaultModelName={defaultModelName}
+    >
       <DefaultPageLayout
         layoutConfig={{
           layout: 'chat',

@@ -42,7 +42,8 @@ export default async function Page() {
     <LlmModelsProvider
       key={id}
       models={models}
-      defaultLlmModelByCookie={userAndContext.lastUsedModel ?? defaultModelName}
+      initialModelName={userAndContext.lastUsedModel ?? defaultModelName}
+      defaultModelName={defaultModelName}
     >
       <DefaultPageLayout
         layoutConfig={{

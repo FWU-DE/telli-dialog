@@ -77,7 +77,8 @@ export default async function Page(
   return (
     <LlmModelsProvider
       models={models}
-      defaultLlmModelByCookie={currentModel}
+      initialModelName={currentModel}
+      defaultModelName={defaultModelName}
       initialDownloadConversationEnabled={rawChatMessages.length > 0}
     >
       <DefaultPageLayout

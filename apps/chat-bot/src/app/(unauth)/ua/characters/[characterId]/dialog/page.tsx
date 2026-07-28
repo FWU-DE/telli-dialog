@@ -52,7 +52,11 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
+      <LlmModelsProvider
+        models={[model]}
+        initialModelName={model.name}
+        defaultModelName={model.name}
+      >
         <ThemeProvider designConfiguration={designConfiguration}>
           <CharacterSharedChat
             {...character}

@@ -59,7 +59,6 @@ import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-se
 import { WebSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/share-with-learners/custom-chat-share-with-learners';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
@@ -165,8 +164,8 @@ export function LearningScenarioEdit({
     [t],
   );
 
-  const { models } = useLlmModels();
-  const maybeDefaultModelId = getDefaultModel(models)?.id;
+  const { models, defaultModel } = useLlmModels();
+  const maybeDefaultModelId = defaultModel?.id;
   const isModelAvailable =
     learningScenario.modelId && models.some((m) => m.id === learningScenario.modelId);
   const selectedModelId = isModelAvailable ? learningScenario.modelId : maybeDefaultModelId;

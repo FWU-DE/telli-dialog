@@ -5,7 +5,6 @@ import { createNewCharacterAction } from './actions';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { Button } from '@ui/components/button';
 import { PlusIcon } from '@phosphor-icons/react';
 
@@ -14,9 +13,9 @@ export function CreateNewCharacterButton() {
   const toast = useToast();
   const t = useTranslations('characters');
 
-  const { models } = useLlmModels();
+  const { defaultModel } = useLlmModels();
 
-  const maybeDefaultModelId = getDefaultModel(models)?.id;
+  const maybeDefaultModelId = defaultModel?.id;
 
   async function handleNewCharacter() {
     const createResult = await createNewCharacterAction({ modelId: maybeDefaultModelId });

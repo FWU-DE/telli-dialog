@@ -40,12 +40,16 @@ export default async function Page(props: PageProps<'/assistants/d/[assistantId]
     federalStateId: federalState.id,
   });
 
-  const currentModel =
-    user.lastUsedModel ?? (await getDefaultModelNameByFederalStateId(federalState.id, models));
+  const defaultModelName = await getDefaultModelNameByFederalStateId(federalState.id, models);
+  const currentModel = user.lastUsedModel ?? defaultModelName;
   const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
 
   return (
-    <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
+    <LlmModelsProvider
+      models={models}
+      initialModelName={currentModel}
+      defaultModelName={defaultModelName}
+    >
       <DefaultPageLayout
         layoutConfig={{
           layout: 'chat',

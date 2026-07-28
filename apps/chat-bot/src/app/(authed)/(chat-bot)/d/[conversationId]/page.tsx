@@ -79,7 +79,8 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   return (
     <LlmModelsProvider
       models={models}
-      defaultLlmModelByCookie={currentModel}
+      initialModelName={currentModel}
+      defaultModelName={defaultModelName}
       initialDownloadConversationEnabled={convertedMessages.length > 0}
     >
       <DefaultPageLayout

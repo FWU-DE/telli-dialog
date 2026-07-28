@@ -61,7 +61,8 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
         <SidebarProvider className="min-h-0">
           <LlmModelsProvider
             models={models}
-            defaultLlmModelByCookie={user.lastUsedModel ?? defaultModelName}
+            initialModelName={user.lastUsedModel ?? defaultModelName}
+            defaultModelName={defaultModelName}
           >
             <AppSidebar
               user={user}
