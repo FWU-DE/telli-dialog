@@ -39,6 +39,10 @@ vi.mock('@ais-chat/ai-core', () => ({
   SharedChatExpiredError: class SharedChatExpiredError extends Error {},
 }));
 
+vi.mock('../anonymization/anonymization-service', () => ({
+  anonymizeChatMessages: vi.fn(async (messages) => messages),
+}));
+
 vi.mock('@/auth/utils', () => ({
   getUserAndContextByUserId: mocks.getUserAndContextByUserIdMock,
 }));
@@ -242,6 +246,32 @@ describe('sendLearningScenarioMessage', () => {
       urls: ['https://scenario.example/context'],
       federalStateId: teacherUserAndContext.federalState.id,
     });
+  });
+
+  it('anonymizes all incoming user messages when the toggle is enabled', async () => {
+    mocks.getUserAndContextByUserIdMock.mockResolvedValue({
+      ...teacherUserAndContext,
+      federalState: {
+        ...teacherUserAndContext.federalState,
+        featureToggles: {
+          ...teacherUserAndContext.federalState.featureToggles,
+          isAnonymizationEnabled: true,
+        },
+      },
+    });
+
+    const { sendLearningScenarioMessage } = await import('./learning-scenario-chat-service');
+    const { anonymizeChatMessages } = await import('../anonymization/anonymization-service');
+
+    const result = await sendLearningScenarioMessage({
+      learningScenarioId: learningScenario.id,
+      inviteCode: 'invite-code',
+      messages,
+      modelId: model.id,
+    });
+    await collectStream(result.stream);
+
+    expect(vi.mocked(anonymizeChatMessages)).toHaveBeenCalledWith(messages, undefined);
   });
 
   it('forwards fileIds to shared file service', async () => {

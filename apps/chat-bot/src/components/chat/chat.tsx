@@ -41,6 +41,7 @@ type ChatProps = {
   enableFileUpload: boolean;
   webSourceMapping?: Map<string, WebSource[]>;
   logoElement: ReactNode;
+  showAnonymizationHint?: boolean;
 };
 
 export default function Chat({
@@ -55,6 +56,7 @@ export default function Chat({
   enableFileUpload,
   webSourceMapping,
   logoElement,
+  showAnonymizationHint = false,
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
   const tCommon = useTranslations('common');
@@ -371,6 +373,7 @@ export default function Chat({
               handleInputChange={handleInputChange}
               input={input}
               isLoading={isLoading}
+              showAnonymizationHint={showAnonymizationHint}
             />
           </div>
         </div>

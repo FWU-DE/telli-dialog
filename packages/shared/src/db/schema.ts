@@ -209,6 +209,8 @@ export const federalStateFeatureTogglesSchema = z.object({
   isAgenticChatEnabled: z.boolean().optional(),
   isImageGenerationEnabled: z.boolean().optional(),
   isWebSearchEnabled: z.boolean().optional(),
+  isAnonymizationEnabled: z.boolean().optional(),
+  anonymizationMode: z.enum(['placeholder', 'pseudonym']).optional(),
 });
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
 

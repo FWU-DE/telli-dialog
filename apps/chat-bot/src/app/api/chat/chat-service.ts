@@ -55,6 +55,7 @@ import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { deepEqual } from '@/utils/object';
 import { resolveAgentNameForTracing } from '../utils/agent-name';
 import { userHasReachedTokenPointsLimit } from '@shared/users/usage';
+import { anonymizeUserContent } from '../anonymization/anonymization-service';
 
 // Exports for testing
 export { handleRegenerationProcessing, prepareMessageForProcessing };
@@ -317,6 +318,15 @@ export async function sendChatMessage({
   const userMessage = messages[messages.length - 1];
   if (!userMessage || userMessage.role !== 'user') {
     throw new Error('No user message found');
+  }
+
+  // Anonymize at ingress so persistence, RAG, web search, title generation and the
+  // LLM request all operate on the redacted text (see docs/pii-anonymization.md)
+  if (user.federalState.featureToggles.isAnonymizationEnabled) {
+    userMessage.content = await anonymizeUserContent(
+      userMessage.content,
+      user.federalState.featureToggles.anonymizationMode,
+    );
   }
 
   const activeUserMessage = userMessage;

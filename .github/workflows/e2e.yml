@@ -75,6 +75,7 @@ jobs:
       CRAWL4AI_API_TOKEN: ais-chat-crawl4ai-token
       XBERG_URL: http://localhost:8000
       XBERG_MAX_UPLOAD_SIZE_MB: '50'
+      ANONYMIZATION_SERVICE_URL: http://localhost:5002
 
     steps:
       - name: Checkout code
@@ -109,6 +110,13 @@ jobs:
             -p 8000:8000 \
             -e XBERG_MAX_UPLOAD_SIZE_MB=$XBERG_MAX_UPLOAD_SIZE_MB \
             ghcr.io/xberg-io/xberg:1.0.0-rc.29-core > /tmp/xberg.log 2>&1 &
+
+      # presidio-analyzer is built from devops/docker/presidio (German NER model);
+      # build and start in background because the model download takes a few minutes
+      - name: Build and start presidio-analyzer container (in background)
+        run: |
+          (docker build -t presidio-analyzer-de devops/docker/presidio && \
+            docker run --name presidio -p 5002:3000 presidio-analyzer-de) > /tmp/presidio.log 2>&1 &
 
       - name: Start bifrost container (in background)
         run: |
@@ -220,6 +228,22 @@ jobs:
           LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
           BIFROST_BASE_URL: http://localhost:8089/openai/v1
 
+      # The anonymization e2e test fails closed when the configured Presidio
+      # service is unreachable, so make sure it is ready before running tests
+      - name: Wait for presidio-analyzer to be ready
+        run: |
+          timeout=300
+          elapsed=0
+          until curl -sf http://localhost:5002/health > /dev/null 2>&1; do
+            if [ $elapsed -ge $timeout ]; then
+              echo "presidio-analyzer did not become ready within ${timeout}s"
+              exit 1
+            fi
+            echo "$(date) - waiting for presidio-analyzer to be ready"
+            sleep 5
+            elapsed=$((elapsed + 5))
+          done
+
       - name: Run E2E tests (app)
         run: pnpm --filter ais-chat-app e2e
         env:
@@ -290,3 +314,10 @@ jobs:
         run: |
           echo "=== keycloak logs ==="
           cat /tmp/keycloak.log || true
+
+      - name: Print presidio logs
+        if: always()
+        run: |
+          echo "=== presidio logs ==="
+          cat /tmp/presidio.log || true
+          docker logs presidio || true

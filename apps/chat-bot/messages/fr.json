@@ -2,7 +2,8 @@
   "common": {
     "delete": "Supprimer",
     "cancel": "Annuler",
-    "information-disclaimer": "AIS.chat peut faire des erreurs. Fais preuve d'esprit critique et vérifie toutes les informations."
+    "information-disclaimer": "AIS.chat peut faire des erreurs. Fais preuve d'esprit critique et vérifie toutes les informations.",
+    "anonymization-hint": "Anonymisation active : les données personnelles telles que les noms, adresses e-mail et numéros de téléphone sont automatiquement remplacées avant le traitement."
   },
   "characters": {
     "shared": {

@@ -67,6 +67,7 @@ export default async function Page(props: PageProps<'/learning-scenarios/d/[lear
         }}
       >
         <Chat
+          showAnonymizationHint={federalState.featureToggles.isAnonymizationEnabled ?? false}
           id={id}
           initialMessages={[]}
           learningScenario={learningScenario}

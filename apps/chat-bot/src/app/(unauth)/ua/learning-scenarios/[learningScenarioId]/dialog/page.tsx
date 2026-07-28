@@ -60,6 +60,7 @@ export default async function Page(
       <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
         <ThemeProvider designConfiguration={designConfiguration}>
           <LearningScenarioSharedChat
+            showAnonymizationHint={federalState?.featureToggles.isAnonymizationEnabled ?? false}
             {...learningScenario}
             inviteCode={searchParams.inviteCode}
             avatarPictureUrl={avatarPictureUrl}

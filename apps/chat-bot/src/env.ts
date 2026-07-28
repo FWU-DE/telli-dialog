@@ -20,6 +20,8 @@ export const env = createEnv({
     crawl4AIUrl: z.url().default('http://localhost:11235'),
     crawl4AIToken: z.string().optional(),
     xbergUrl: z.url().default('http://localhost:8000'),
+    anonymizationServiceUrl: z.url().optional(),
+    anonymizationLanguage: z.string().default('de'),
   },
   runtimeEnv: {
     apiKey: process.env.API_KEY,
@@ -38,5 +40,7 @@ export const env = createEnv({
     crawl4AIUrl: process.env.CRAWL4AI_URL,
     crawl4AIToken: process.env.CRAWL4AI_API_TOKEN,
     xbergUrl: process.env.XBERG_URL,
+    anonymizationServiceUrl: process.env.ANONYMIZATION_SERVICE_URL,
+    anonymizationLanguage: process.env.ANONYMIZATION_LANGUAGE,
   },
 });

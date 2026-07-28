@@ -9,8 +9,13 @@ import { z } from 'zod';
 
 export default function LearningScenarioSharedChat({
   avatarPictureUrl,
+  showAnonymizationHint,
   ...sharedSchoolChat
-}: LearningScenarioWithShareDataModel & { inviteCode: string; avatarPictureUrl?: string }) {
+}: LearningScenarioWithShareDataModel & {
+  inviteCode: string;
+  avatarPictureUrl?: string;
+  showAnonymizationHint?: boolean;
+}) {
   const t = useTranslations('learning-scenarios.shared');
   const { id, inviteCode, modelId } = sharedSchoolChat;
 
@@ -86,6 +91,7 @@ export default function LearningScenarioSharedChat({
 
   return (
     <GenericSharedChat
+      showAnonymizationHint={showAnonymizationHint}
       headerT={t}
       entity={sharedSchoolChat}
       inviteCode={inviteCode}
