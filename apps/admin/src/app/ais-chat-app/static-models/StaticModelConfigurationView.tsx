@@ -29,7 +29,7 @@ type Props = {
 };
 
 export default function StaticModelConfigurationView({ models, configurations }: Props) {
-  const [selected, setSelected] = useState<Record<StaticModelRole, string>>(
+  const [selected, setSelected] = useState<Partial<Record<StaticModelRole, string>>>(
     () =>
       Object.fromEntries(configurations.map(({ role, model }) => [role, model.id])) as Record<
         StaticModelRole,
@@ -38,14 +38,18 @@ export default function StaticModelConfigurationView({ models, configurations }:
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isComplete = roles.every((role) => selected[role.role] !== undefined);
+
   async function save() {
     setIsSubmitting(true);
     try {
-      await updateStaticModelConfigurationAction(
-        roles
-          .map(({ role }) => ({ role, modelId: selected[role] }))
-          .filter(({ modelId }) => modelId),
+      const result = await updateStaticModelConfigurationAction(
+        roles.map(({ role }) => ({ role, modelId: selected[role] ?? '' })),
       );
+      if (!result.success) {
+        toast.error(result.error.message);
+        return;
+      }
       toast.success('Statische Modelle erfolgreich aktualisiert.');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Fehler beim Speichern.');
@@ -63,6 +67,11 @@ export default function StaticModelConfigurationView({ models, configurations }:
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {!isComplete && (
+          <p className="text-sm text-destructive">
+            Alle statischen Modellrollen müssen vor dem Speichern konfiguriert werden.
+          </p>
+        )}
         {roles.map(({ role, label, type }) => (
           <div className="space-y-2" key={role}>
             <label className="text-sm font-medium">{label}</label>
@@ -85,7 +94,7 @@ export default function StaticModelConfigurationView({ models, configurations }:
             </Select>
           </div>
         ))}
-        <Button onClick={() => void save()} disabled={isSubmitting}>
+        <Button onClick={() => void save()} disabled={isSubmitting || !isComplete}>
           {isSubmitting ? 'Speichert...' : 'Speichern'}
         </Button>
       </CardContent>
