@@ -59,7 +59,11 @@ import {
   getPersonalContextContent,
   resolvePersonalContextEnabled,
 } from '@shared/personal-context/personal-context-service';
-import { updatePersonalContextFromExchange } from '@shared/personal-context/personal-context-extraction';
+import {
+  buildExtractionWindow,
+  shouldRunPersonalContextExtraction,
+  updatePersonalContextFromConversation,
+} from '@shared/personal-context/personal-context-extraction';
 
 // Exports for testing
 export { handleRegenerationProcessing, prepareMessageForProcessing };
@@ -586,13 +590,21 @@ export async function sendChatMessage({
       }),
     );
 
-    // Runs on the auxiliary model so it works with any selected chat model.
-    // Fire-and-forget: it must never delay or break the response.
-    if (personalContextEnabled) {
-      void updatePersonalContextFromExchange({
+    // Batched rather than per turn: runs every few user messages over the whole window
+    // since the last run. Uses the auxiliary model so it works with any selected chat
+    // model. Fire-and-forget: it must never delay or break the response.
+    const conversationForExtraction = [
+      ...fullMessages.map((message) => ({ role: message.role, content: message.content })),
+      { role: 'assistant', content: fullText },
+    ];
+    const userMessageCount = conversationForExtraction.filter(
+      (message) => message.role === 'user',
+    ).length;
+
+    if (personalContextEnabled && shouldRunPersonalContextExtraction({ userMessageCount })) {
+      void updatePersonalContextFromConversation({
         userId: user.id,
-        userMessage: activeUserMessage.content,
-        assistantMessage: fullText,
+        conversationWindow: buildExtractionWindow({ messages: conversationForExtraction }),
         modelId: auxiliaryModel.id,
         apiKeyId: activeAuxiliaryModelAndApiKey.apiKeyId,
       });
