@@ -18,12 +18,14 @@ import {
   SUGGESTION_GUIDELINES,
 } from '../utils/system-prompt';
 import type { ToolDefinition } from '@ais-chat/ai-core';
+import { constructFederalStateContext } from '../utils/federal-state-context';
 
 function constructAisChatSystemPrompt(
   chunks: RetrievedChunk[],
   errorUrls: string[],
   webSearchResults: WebSearchResult[],
   activeToolDefinitions: ToolDefinition[],
+  federalStateId: string,
 ) {
   const ragContext = constructRagContext(chunks, errorUrls, webSearchResults);
 
@@ -32,6 +34,7 @@ Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und 
 Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. 
 Heute ist der ${formatDateToGermanTimestamp(new Date())}.
 ${LANGUAGE_GUIDELINES}
+${constructFederalStateContext(federalStateId)}
 ${constructToolGuidelines(activeToolDefinitions)}
 ${FORMAT_GUIDELINES}
 ${SUGGESTION_GUIDELINES}
@@ -44,12 +47,14 @@ function constructAssistantSystemPrompt(
   errorUrls: string[],
   webSearchResults: WebSearchResult[] = [],
   activeToolDefinitions: ToolDefinition[] = [],
+  federalStateId: string = '',
 ) {
   const ragContext = constructRagContext(chunks, errorUrls, webSearchResults);
 
   return `Du bist ein hilfreicher Assistent, der in einer Schule eingesetzt wird, um eine Lehrkraft zu unterstützen. Dein Name ist ${assistant.name}.
 
 ${LANGUAGE_GUIDELINES}
+${constructFederalStateContext(federalStateId)}
 ${constructToolGuidelines(activeToolDefinitions)}
 ${FORMAT_GUIDELINES}
 ${SUGGESTION_GUIDELINES}
@@ -183,8 +188,15 @@ export function constructChatSystemPrompt({
       errorUrls,
       webSearchResults,
       activeToolDefinitions,
+      federalState.id,
     );
   }
 
-  return constructAisChatSystemPrompt(chunks, errorUrls, webSearchResults, activeToolDefinitions);
+  return constructAisChatSystemPrompt(
+    chunks,
+    errorUrls,
+    webSearchResults,
+    activeToolDefinitions,
+    federalState.id,
+  );
 }
