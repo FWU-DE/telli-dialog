@@ -135,6 +135,35 @@ image alongside the full stack, so the NER path (person/location replacement in 
 real chat message) is covered end-to-end by
 `apps/chat-bot/e2e/tests/isolated/anonymization.test.ts`.
 
+### Privacy properties of the Presidio service, and why it has no Sentry
+
+Verified against the presidio-analyzer source (v2.2.364):
+
+- **Stateless, nothing at rest.** The analyzer processes each `/analyze` request in
+  memory and returns entity spans; the core library contains no persistence (no file
+  writes, no database). The spaCy model is baked into the image at build time — no
+  runtime downloads.
+- **No telemetry / no phoning home.** The core library makes no outbound HTTP calls.
+  Cloud-capable recognizers exist only under `third_party/` (Azure AI Language,
+  Azure OpenAI, AHDS) and require explicit endpoint/key configuration. Our
+  `recognizer-registry-conf.yaml` enables exactly four local recognizers
+  (Spacy, Email, Phone, Iban), which pins the service to local-only detection.
+  In production the container should additionally run with egress denied
+  (network policy) — it needs no outbound connectivity at all.
+- **No PII in logs by default.** Decision-process tracing (`log_decision_process`)
+  defaults to off, and our client never requests `return_decision_process`. Startup
+  logs list loaded recognizers, not payloads. Do not enable decision-process tracing
+  in production.
+- **Deliberately no Sentry/error-SDK inside the service.** Requests to this service
+  contain the raw text _before_ anonymization — the most sensitive data in the whole
+  pipeline. An error-tracking SDK there could attach request context to events and
+  exfiltrate exactly what the feature protects. Monitoring is covered without it:
+  the app fails closed on any Presidio error and the chat-bot's existing Sentry
+  instrumentation captures those errors (the error messages contain status codes,
+  never text; `packages/shared-core/src/sentry/scrub.ts` additionally scrubs
+  content fields), and availability is monitored via the `/health` endpoint
+  (compose healthcheck / readiness probes).
+
 ## Follow-ups
 
 - Anonymize tool outputs in the agentic loop (web fetches; file contents are already
