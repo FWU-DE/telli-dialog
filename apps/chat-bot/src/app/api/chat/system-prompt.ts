@@ -11,6 +11,7 @@ import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { constructCharacterSystemPrompt } from '../character/system-prompt';
 import { constructLearningScenarioSystemPrompt } from '../learning-scenario/system-prompt';
 import {
+  constructPersonalContext,
   constructRagContext,
   constructToolGuidelines,
   FORMAT_GUIDELINES,
@@ -24,17 +25,19 @@ function constructAisChatSystemPrompt(
   errorUrls: string[],
   webSearchResults: WebSearchResult[],
   activeToolDefinitions: ToolDefinition[],
+  personalContext: string | undefined,
 ) {
   const ragContext = constructRagContext(chunks, errorUrls, webSearchResults);
 
-  return `Du bist AIS.chat, der datenschutzkonforme KI-Chatbot für den Schulunterricht. 
-Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. 
-Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. 
+  return `Du bist AIS.chat, der datenschutzkonforme KI-Chatbot für den Schulunterricht.
+Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen.
+Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben.
 Heute ist der ${formatDateToGermanTimestamp(new Date())}.
 ${LANGUAGE_GUIDELINES}
 ${constructToolGuidelines(activeToolDefinitions)}
 ${FORMAT_GUIDELINES}
 ${SUGGESTION_GUIDELINES}
+${constructPersonalContext(personalContext)}
 ${ragContext}`;
 }
 
@@ -44,6 +47,7 @@ function constructAssistantSystemPrompt(
   errorUrls: string[],
   webSearchResults: WebSearchResult[] = [],
   activeToolDefinitions: ToolDefinition[] = [],
+  personalContext: string | undefined = undefined,
 ) {
   const ragContext = constructRagContext(chunks, errorUrls, webSearchResults);
 
@@ -53,6 +57,7 @@ ${LANGUAGE_GUIDELINES}
 ${constructToolGuidelines(activeToolDefinitions)}
 ${FORMAT_GUIDELINES}
 ${SUGGESTION_GUIDELINES}
+${constructPersonalContext(personalContext)}
 
 Die folgenden Anweisungen wurden von der Lehrkraft erstellt und haben bei Widersprüchen immer Vorrang vor den allgemeinen Richtlinien.
 
@@ -142,6 +147,7 @@ export function constructChatSystemPrompt({
   errorUrls,
   webSearchResults = [],
   activeToolDefinitions = [],
+  personalContext,
 }: {
   character?: CharacterSelectModel;
   learningScenario?: LearningScenarioSelectModel;
@@ -152,6 +158,7 @@ export function constructChatSystemPrompt({
   errorUrls: string[];
   webSearchResults?: WebSearchResult[];
   activeToolDefinitions?: ToolDefinition[];
+  personalContext?: string | undefined;
 }) {
   if (character !== undefined) {
     return constructCharacterSystemPrompt({ character, chunks, activeToolDefinitions });
@@ -183,8 +190,15 @@ export function constructChatSystemPrompt({
       errorUrls,
       webSearchResults,
       activeToolDefinitions,
+      personalContext,
     );
   }
 
-  return constructAisChatSystemPrompt(chunks, errorUrls, webSearchResults, activeToolDefinitions);
+  return constructAisChatSystemPrompt(
+    chunks,
+    errorUrls,
+    webSearchResults,
+    activeToolDefinitions,
+    personalContext,
+  );
 }

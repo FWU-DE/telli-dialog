@@ -61,6 +61,7 @@ function transformToFederalStateEditForm(federalState: FederalStateModel): Feder
       ...federalState.featureToggles,
       isImageGenerationEnabled: federalState.featureToggles.isImageGenerationEnabled ?? false,
       isWebSearchEnabled: federalState.featureToggles.isWebSearchEnabled ?? false,
+      isPersonalContextEnabled: federalState.featureToggles.isPersonalContextEnabled ?? false,
       isSharedPageLocaleDetectionEnabled:
         federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true,
       isAgenticChatEnabled: federalState.featureToggles.isAgenticChatEnabled ?? false,
@@ -260,6 +261,12 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="featureToggles.isWebSearchEnabled"
             label="Websuche aktivieren"
             description="Erlaubt die Nutzung der Websuchfunktion."
+            control={control}
+          />
+          <FormFieldCheckbox
+            name="featureToggles.isPersonalContextEnabled"
+            label="Persönlichen Kontext aktivieren"
+            description="Erlaubt Lehrkräften ein persönliches Kontextprofil, das in Chats einbezogen wird."
             control={control}
           />
           <FormFieldCheckbox

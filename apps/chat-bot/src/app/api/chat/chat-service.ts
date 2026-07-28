@@ -55,6 +55,11 @@ import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { deepEqual } from '@/utils/object';
 import { resolveAgentNameForTracing } from '../utils/agent-name';
 import { userHasReachedTokenPointsLimit } from '@shared/users/usage';
+import {
+  getPersonalContextContent,
+  resolvePersonalContextEnabled,
+} from '@shared/personal-context/personal-context-service';
+import { updatePersonalContextFromExchange } from '@shared/personal-context/personal-context-extraction';
 
 // Exports for testing
 export { handleRegenerationProcessing, prepareMessageForProcessing };
@@ -451,6 +456,19 @@ export async function sendChatMessage({
   // Prune messages
   const prunedMessages = limitChatHistory(fullMessages);
 
+  const personalContextEnabled = resolvePersonalContextEnabled({
+    featureToggles: user.federalState.featureToggles,
+    userRole: user.userRole,
+    conversation: activeConversation,
+    assistant: activeAssistant,
+    character: activeCharacter,
+    learningScenario: activeLearningScenario,
+  });
+
+  const personalContext = personalContextEnabled
+    ? await getPersonalContextContent({ userId: user.id })
+    : undefined;
+
   // Build system prompt
   const systemPrompt = constructChatSystemPrompt({
     character: activeCharacter,
@@ -462,6 +480,7 @@ export async function sendChatMessage({
     errorUrls,
     webSearchResults,
     activeToolDefinitions,
+    personalContext,
   });
 
   // Check if the model supports images based on supportedImageFormats
@@ -566,6 +585,18 @@ export async function sendChatMessage({
         conversation: activeConversation,
       }),
     );
+
+    // Runs on the auxiliary model so it works with any selected chat model.
+    // Fire-and-forget: it must never delay or break the response.
+    if (personalContextEnabled) {
+      void updatePersonalContextFromExchange({
+        userId: user.id,
+        userMessage: activeUserMessage.content,
+        assistantMessage: fullText,
+        modelId: auxiliaryModel.id,
+        apiKeyId: activeAuxiliaryModelAndApiKey.apiKeyId,
+      });
+    }
   }
 
   async function persistEmptyAssistantMessage() {
