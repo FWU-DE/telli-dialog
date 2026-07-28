@@ -116,31 +116,21 @@ Overlapping detections are resolved by score, then by span length.
   - `ANONYMIZATION_SERVICE_URL` — optional URL of a presidio-analyzer instance.
   - `ANONYMIZATION_LANGUAGE` — language passed to Presidio, default `de`.
 
-### Running Presidio locally
+### Running Presidio locally (German configuration)
+
+A German-configured presidio-analyzer lives in `devops/docker/presidio/`: the
+Dockerfile adds the `de_core_news_lg` spaCy model on top of the stock image (which is
+English-only) and wires in `nlp-conf.yaml` / `analyzer-conf.yaml` so requests with
+`language: de` work. It is part of the local docker compose behind an opt-in profile:
 
 ```sh
-docker run -p 5002:3000 mcr.microsoft.com/presidio-analyzer:latest
-ANONYMIZATION_SERVICE_URL=http://localhost:5002 ANONYMIZATION_LANGUAGE=en pnpm dev:chat-bot
+docker compose -f devops/docker/docker-compose.local.yml --profile anonymization up -d
+ANONYMIZATION_SERVICE_URL=http://localhost:5002 pnpm dev:chat-bot
 ```
 
-The stock image ships with an English spaCy model only. For German NER, build an image
-with a German model and NLP configuration, e.g.:
-
-```dockerfile
-FROM mcr.microsoft.com/presidio-analyzer:latest
-RUN python -m spacy download de_core_news_lg
-COPY nlp-conf.yaml /app/nlp-conf.yaml
-ENV NLP_CONF_FILE=/app/nlp-conf.yaml
-```
-
-with `nlp-conf.yaml`:
-
-```yaml
-nlp_engine_name: spacy
-models:
-  - lang_code: de
-    model_name: de_core_news_lg
-```
+The CI workflow `.github/workflows/presidio.yml` builds this image and smoke-tests
+that German NER detects `PERSON` and `LOCATION` whenever the Presidio configuration
+changes.
 
 ## Follow-ups
 
@@ -151,5 +141,5 @@ models:
 - UI hint in the chat when a message was anonymized.
 - Optional LLM-based second-pass check (AnonyMeister's "Tiefenprüfung") using the
   federal state's configured auxiliary model instead of a local Ollama instance.
-- Deploy a German-configured presidio-analyzer alongside the app (docker compose /
-  Helm) and document it in the operations guide.
+- Deploy the German-configured presidio-analyzer image (`devops/docker/presidio/`)
+  alongside the app in production and document it in the operations guide.

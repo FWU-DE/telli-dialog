@@ -119,6 +119,20 @@ services:
     ports:
       - '6556:6556'
 
+  # Presidio analyzer with German NER model for the PII anonymization feature
+  # (see docs/pii-anonymization.md). Opt-in via profile because the image build
+  # downloads a large spaCy model:
+  #   docker compose -f devops/docker/docker-compose.local.yml --profile anonymization up -d
+  # Then set ANONYMIZATION_SERVICE_URL=http://localhost:5002 for the chat-bot app.
+  presidio-analyzer:
+    build:
+      context: ./presidio
+    profiles:
+      - anonymization
+    restart: unless-stopped
+    ports:
+      - '5002:3000'
+
   bifrost:
     image: maximhq/bifrost:v1.6.5
     restart: unless-stopped
