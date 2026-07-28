@@ -16,6 +16,7 @@ type CustomChatSharePageProps = {
   expiredAt: Date | null;
   manuallyStoppedAt: Date | null;
   customChatId: string;
+  sharingUserId: string;
 };
 
 export default async function CustomChatSharePage({
@@ -28,10 +29,12 @@ export default async function CustomChatSharePage({
   expiredAt,
   manuallyStoppedAt,
   customChatId,
+  sharingUserId,
 }: CustomChatSharePageProps) {
   const locale = await resolveSharingLocale({
     customChatVariant,
     customChatId,
+    sharingUserId,
   });
   const t = await getTranslations({ locale, namespace: 'custom-chat.share-page' });
   const messages = await loadTranslations(locale);
