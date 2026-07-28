@@ -152,7 +152,11 @@ services:
     environment:
       APP_HOST: 0.0.0.0
       APP_PORT: '8089'
+      BIFROST_ADMIN_USERNAME: admin
+      BIFROST_ADMIN_PASSWORD: admin
+      BIFROST_API_KEY: sk-bf-example-key
     volumes:
+      - ./bifrost/config.json:/app/data/config.json:ro
       - bifrost_data:/app/data
     network_mode: service:keycloak
     depends_on:

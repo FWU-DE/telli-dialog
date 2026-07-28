@@ -3,7 +3,8 @@ import { LlmModel } from '../schema';
 import { BifrostProviderSyncError } from './error';
 import { syncBifrostProvider } from './client';
 import { buildBifrostProviderConfigs } from './provider-config-builder';
-import { BifrostProviderSyncOptions } from './types';
+import { ensureBifrostVirtualKeyProviderAccess } from './virtual-key-sync';
+import type { BifrostProviderSyncOptions } from './types';
 
 /**
  * Mirrors API DB model/provider configuration into Bifrost.
@@ -15,7 +16,7 @@ export async function syncBifrostProviders(
   models: LlmModel[],
   options: BifrostProviderSyncOptions,
 ): Promise<void> {
-  const { bifrostAdminUrl, bifrostManagementApiKey, logger } = options;
+  const { bifrostAdminUrl, bifrostAdminUsername, bifrostAdminPassword, logger } = options;
   if (!bifrostAdminUrl) {
     logger?.info?.('Bifrost provider sync skipped because BIFROST_ADMIN_URL is not configured');
     return;
@@ -32,7 +33,8 @@ export async function syncBifrostProviders(
     try {
       await syncBifrostProvider({
         bifrostAdminUrl,
-        bifrostManagementApiKey,
+        bifrostAdminUsername,
+        bifrostAdminPassword,
         providerConfig,
         logger,
       });
@@ -50,6 +52,13 @@ export async function syncBifrostProviders(
     });
     throw new BifrostProviderSyncError();
   }
+
+  await ensureBifrostVirtualKeyProviderAccess({
+    bifrostAdminUrl,
+    bifrostAdminUsername,
+    bifrostAdminPassword,
+    logger,
+  });
 }
 
 export async function syncBifrostProvidersForOrganization(
@@ -76,3 +85,4 @@ export async function syncBifrostProvidersForOrganization(
 export * from './error';
 export * from './types';
 export { buildBifrostProviderConfigs } from './provider-config-builder';
+export { ensureBifrostVirtualKeyProviderAccess } from './virtual-key-sync';

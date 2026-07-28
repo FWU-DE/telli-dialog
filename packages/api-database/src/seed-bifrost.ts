@@ -23,7 +23,8 @@ export function normalizeSeedModelsForBifrost<TModel extends SeedModel>(
 export async function syncSeedModelsToBifrost(models: LlmModel[]): Promise<void> {
   await syncBifrostProviders(models, {
     bifrostAdminUrl: process.env.BIFROST_ADMIN_URL,
-    bifrostManagementApiKey: process.env.BIFROST_MANAGEMENT_API_KEY,
+    bifrostAdminUsername: process.env.BIFROST_ADMIN_USERNAME,
+    bifrostAdminPassword: process.env.BIFROST_ADMIN_PASSWORD,
     logger: {
       info: (message, context) => {
         console.log(message, context ?? '');

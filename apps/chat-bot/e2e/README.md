@@ -10,7 +10,8 @@ as the default text model instead of calling real LLMs. The mock server streams 
 responses and can be controlled with `MOCK_LLM_COMMANDS` to trigger tool calls.
 
 Seeded e2e models are routed through Bifrost, including the mock models. Make sure Bifrost is
-running and `BIFROST_ADMIN_URL` is configured when seeding so the mock provider key is synced.
+running and `BIFROST_ADMIN_URL`, `BIFROST_ADMIN_USERNAME`, and `BIFROST_ADMIN_PASSWORD` are
+configured when seeding so the mock provider key is synced.
 For local Docker Compose runs, leave `LLM_MOCK_BASE_URL` unset or set it to `http://mock-llm:6556`;
 the URL must be reachable from the Bifrost container, not from the host.
 
