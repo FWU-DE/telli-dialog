@@ -8,6 +8,7 @@ import { errorifyAsyncFn } from '@shared/utils/error';
 import { LlmModelSelectModel } from '@shared/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
 import { getFirstTextModel } from '@shared/llm-models/llm-model-service';
+import { getDefaultModel } from '@shared/llm-models/static-model-service';
 import { logError } from '@shared/logging';
 import { isValidPositiveNumber } from '@shared/utils/number';
 
@@ -205,9 +206,6 @@ export async function getStrongAuxiliaryModel(
 export async function getDefaultModelByFederalStateId(
   federalStateId: string,
 ): Promise<LlmModelSelectModel | undefined> {
-  const [configuredModel, llmModels] = await Promise.all([
-    dbGetModelByRoleAndFederalStateId({ role: 'default-chat', federalStateId }),
-    dbGetLlmModelsByFederalStateId({ federalStateId }),
-  ]);
-  return configuredModel ?? getFirstTextModel(llmModels);
+  const models = await dbGetLlmModelsByFederalStateId({ federalStateId });
+  return getDefaultModel({ federalStateId, models });
 }
