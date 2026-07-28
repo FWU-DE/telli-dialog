@@ -9,7 +9,7 @@ import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
 import {
   getDefaultModel,
   getFirstTextModel,
-  getModelWithRole,
+  getModelByRole,
 } from '@shared/llm-models/llm-model-service';
 import { logError } from '@shared/logging';
 import { isValidPositiveNumber } from '@shared/utils/number';
@@ -157,8 +157,8 @@ export async function getAuxiliaryModel(federalStateId: string): Promise<LlmMode
     federalStateId,
   });
   const auxiliaryModel =
-    getModelWithRole(llmModels, 'auxiliary') ??
-    getModelWithRole(llmModels, 'auxiliary-fallback') ??
+    getModelByRole(llmModels, 'auxiliary') ??
+    getModelByRole(llmModels, 'auxiliary-fallback') ??
     getFirstTextModel(llmModels);
   if (auxiliaryModel === undefined) {
     const error = new Error('No auxiliary model found for federal state id ' + federalStateId);
@@ -181,14 +181,14 @@ export async function getStrongAuxiliaryModel(
   const llmModels = await dbGetLlmModelsByFederalStateId({
     federalStateId,
   });
-  const auxiliaryModel = getModelWithRole(llmModels, 'strong-auxiliary');
+  const auxiliaryModel = getModelByRole(llmModels, 'strong-auxiliary');
   if (auxiliaryModel !== undefined) {
     return auxiliaryModel;
   }
 
   const fallbackAuxiliaryModel =
-    getModelWithRole(llmModels, 'auxiliary') ??
-    getModelWithRole(llmModels, 'auxiliary-fallback') ??
+    getModelByRole(llmModels, 'auxiliary') ??
+    getModelByRole(llmModels, 'auxiliary-fallback') ??
     getFirstTextModel(llmModels);
   if (fallbackAuxiliaryModel === undefined) {
     const error = new Error('No auxiliary model found for federal state id ' + federalStateId);

@@ -13,7 +13,7 @@ import type { StaticModelRole } from '../db/schema';
 export function getDefaultModel<T extends LlmModelWithOptionalStaticRoles>(
   models: T[],
 ): T | undefined {
-  return getModelWithRole(models, 'default-chat') ?? (getFirstTextModel(models) as T | undefined);
+  return getModelByRole(models, 'default-chat') ?? (getFirstTextModel(models) as T | undefined);
 }
 
 export function getDefaultModelName(models: LlmModelWithStaticRoles[]): string {
@@ -22,7 +22,7 @@ export function getDefaultModelName(models: LlmModelWithStaticRoles[]): string {
   return model.name;
 }
 
-export function getModelWithRole<T extends LlmModelWithOptionalStaticRoles>(
+export function getModelByRole<T extends LlmModelWithOptionalStaticRoles>(
   models: T[],
   role: StaticModelRole,
 ): T | undefined {

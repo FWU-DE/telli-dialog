@@ -1,6 +1,6 @@
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { LlmModelSelectModel, LlmModelWithOptionalStaticRoles } from '@shared/db/schema';
-import { getModelWithRole } from '@shared/llm-models/llm-model-service';
+import { getModelByRole } from '@shared/llm-models/llm-model-service';
 
 /**
  * Fetches available image generation models from database
@@ -27,5 +27,5 @@ export async function getAvailableImageModelsForFederalState({
 export function getDefaultImageModel(
   imageModels: LlmModelWithOptionalStaticRoles[],
 ): LlmModelSelectModel | undefined {
-  return getModelWithRole(imageModels, 'default-image') ?? imageModels[0];
+  return getModelByRole(imageModels, 'default-image') ?? imageModels[0];
 }
