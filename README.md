@@ -120,7 +120,7 @@ RABBITMQ_AMQP_HOST_PORT=5673
 RABBITMQ_MGMT_HOST_PORT=15673
 ```
 
-Update the matching variables in `apps/chat-bot/.env.local` and `apps/admin/.env.local` accordingly (e.g. `VIDIS_BASE_URI=http://localhost:8081/…`).
+Update the matching variables in `apps/chat-bot/.env.local` and `apps/admin/.env.local` accordingly (e.g. `VIDIS_ISSUER_URI=http://localhost:8081/…` and `KEYCLOAK_ISSUER=http://localhost:8081/…`).
 
 #### Local S3 storage (RustFS) for file uploads and image generation
 
@@ -165,9 +165,12 @@ OTC_SECRET_ACCESS_KEY=rustfsadmin123
 OTC_BUCKET_NAME=ais-chat
 ```
 
-After starting RustFS, create the bucket and allow public GET access so images render in the browser:
+After starting RustFS, create the bucket and allow public GET access so images render in the browser. The AWS CLI reads `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`, not the `OTC_*` variables, so export the RustFS credentials first:
 
 ```sh
+export AWS_ACCESS_KEY_ID=rustfsadmin
+export AWS_SECRET_ACCESS_KEY=rustfsadmin123
+
 aws --endpoint-url http://localhost:9000 \
     --region us-east-1 \
     s3 mb s3://ais-chat
@@ -186,16 +189,18 @@ aws --endpoint-url http://localhost:9000 \
 ```
 
 To remove all data and start from scratch, you can stop and remove the container and its volume.
-This will delete your database and keycloak configuration.
+This will delete your database and keycloak configuration. Include the RustFS override file too if you added it above:
 
 ```sh
-docker compose -f devops/docker/docker-compose.local.yml down -v
+docker compose -f devops/docker/docker-compose.local.yml \
+               -f devops/docker/docker-compose.local.override.yml down -v
 ```
 
 To delete only the keycloak data, shutdown all containers and delete the volume:
 
 ```sh
-docker compose -f devops/docker/docker-compose.local.yml down
+docker compose -f devops/docker/docker-compose.local.yml \
+               -f devops/docker/docker-compose.local.override.yml down
 docker volume rm ais-chat_keycloak_data
 ```
 
