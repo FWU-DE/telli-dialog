@@ -23,10 +23,9 @@ import {
  * Resolves the locale for a shared custom chat (character or learning scenario).
  * Priority: filter language > LLM-determined language > default locale.
  *
- * `sharingUserId` identifies the user currently sharing the custom chat (e.g. the teacher who
- * started the active share session), which may differ from the entity's owner (e.g. school-wide
- * sharing). It is used to resolve the federal state for the locale-detection feature toggle and
- * auxiliary model.
+ * `sharingUserId` identifies the user currently sharing the custom chat.
+ * It is used to resolve the federal state for the locale-detection feature toggle
+ * and auxiliary model.
  */
 export async function resolveSharingLocale({
   customChatVariant,
