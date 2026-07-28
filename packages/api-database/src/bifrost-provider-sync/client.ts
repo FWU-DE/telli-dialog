@@ -15,24 +15,28 @@ import { assertBifrostResponse, bifrostFetch } from './http';
  */
 export async function syncBifrostProvider({
   bifrostAdminUrl,
-  bifrostManagementApiKey,
+  bifrostAdminUsername,
+  bifrostAdminPassword,
   providerConfig,
   logger,
 }: {
   bifrostAdminUrl: string;
-  bifrostManagementApiKey?: string;
+  bifrostAdminUsername?: string;
+  bifrostAdminPassword?: string;
   providerConfig: BifrostProviderConfig;
   logger?: BifrostProviderSyncLogger;
 }): Promise<void> {
   await ensureBifrostProvider({
     bifrostAdminUrl,
-    bifrostManagementApiKey,
+    bifrostAdminUsername,
+    bifrostAdminPassword,
     providerConfig,
     logger,
   });
   const existingKeysBeforeSync = await listBifrostProviderKeys({
     bifrostAdminUrl,
-    bifrostManagementApiKey,
+    bifrostAdminUsername,
+    bifrostAdminPassword,
     provider: providerConfig.provider,
     logger,
   });
@@ -40,7 +44,8 @@ export async function syncBifrostProvider({
     providerConfig.keys.map((key) =>
       syncBifrostProviderKey({
         bifrostAdminUrl,
-        bifrostManagementApiKey,
+        bifrostAdminUsername,
+        bifrostAdminPassword,
         provider: providerConfig.provider,
         key,
         existingKeys: existingKeysBeforeSync,
@@ -52,18 +57,21 @@ export async function syncBifrostProvider({
 
 async function ensureBifrostProvider({
   bifrostAdminUrl,
-  bifrostManagementApiKey,
+  bifrostAdminUsername,
+  bifrostAdminPassword,
   providerConfig,
   logger,
 }: {
   bifrostAdminUrl: string;
-  bifrostManagementApiKey?: string;
+  bifrostAdminUsername?: string;
+  bifrostAdminPassword?: string;
   providerConfig: BifrostProviderConfig;
   logger?: BifrostProviderSyncLogger;
 }): Promise<void> {
   const providerResponse = await bifrostFetch({
     bifrostAdminUrl,
-    bifrostManagementApiKey,
+    bifrostAdminUsername,
+    bifrostAdminPassword,
     path: `/api/providers/${providerConfig.provider}`,
     init: {
       method: 'GET',
@@ -74,7 +82,8 @@ async function ensureBifrostProvider({
     await assertBifrostResponse(
       bifrostFetch({
         bifrostAdminUrl,
-        bifrostManagementApiKey,
+        bifrostAdminUsername,
+        bifrostAdminPassword,
         path: '/api/providers',
         init: {
           method: 'POST',
@@ -97,7 +106,8 @@ async function ensureBifrostProvider({
   await assertBifrostResponse(
     bifrostFetch({
       bifrostAdminUrl,
-      bifrostManagementApiKey,
+      bifrostAdminUsername,
+      bifrostAdminPassword,
       path: `/api/providers/${providerConfig.provider}`,
       init: {
         method: 'PUT',
@@ -111,14 +121,16 @@ async function ensureBifrostProvider({
 
 async function syncBifrostProviderKey({
   bifrostAdminUrl,
-  bifrostManagementApiKey,
+  bifrostAdminUsername,
+  bifrostAdminPassword,
   provider,
   key,
   existingKeys,
   logger,
 }: {
   bifrostAdminUrl: string;
-  bifrostManagementApiKey?: string;
+  bifrostAdminUsername?: string;
+  bifrostAdminPassword?: string;
   provider: BifrostProvider;
   key: BifrostKey;
   existingKeys: BifrostKey[];
@@ -130,7 +142,8 @@ async function syncBifrostProviderKey({
     await assertBifrostResponse(
       bifrostFetch({
         bifrostAdminUrl,
-        bifrostManagementApiKey,
+        bifrostAdminUsername,
+        bifrostAdminPassword,
         path: `/api/providers/${provider}/keys/${existingKey.id}`,
         init: {
           method: 'PUT',
@@ -146,7 +159,8 @@ async function syncBifrostProviderKey({
   await assertBifrostResponse(
     bifrostFetch({
       bifrostAdminUrl,
-      bifrostManagementApiKey,
+      bifrostAdminUsername,
+      bifrostAdminPassword,
       path: `/api/providers/${provider}/keys`,
       init: {
         method: 'POST',
@@ -160,19 +174,22 @@ async function syncBifrostProviderKey({
 
 async function listBifrostProviderKeys({
   bifrostAdminUrl,
-  bifrostManagementApiKey,
+  bifrostAdminUsername,
+  bifrostAdminPassword,
   provider,
   logger,
 }: {
   bifrostAdminUrl: string;
-  bifrostManagementApiKey?: string;
+  bifrostAdminUsername?: string;
+  bifrostAdminPassword?: string;
   provider: BifrostProvider;
   logger?: BifrostProviderSyncLogger;
 }): Promise<BifrostKey[]> {
   const keysResponse = await assertBifrostResponse(
     bifrostFetch({
       bifrostAdminUrl,
-      bifrostManagementApiKey,
+      bifrostAdminUsername,
+      bifrostAdminPassword,
       path: `/api/providers/${provider}/keys`,
       init: { method: 'GET' },
     }),

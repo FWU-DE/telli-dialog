@@ -5,7 +5,8 @@ import { logError, logInfo, logWarning } from '@shared/logging';
 export async function syncBifrostProvidersForOrganization(organizationId: string): Promise<void> {
   await syncBifrostProvidersForOrganizationInDatabase(organizationId, {
     bifrostAdminUrl: env.bifrostAdminUrl,
-    bifrostManagementApiKey: env.bifrostManagementApiKey,
+    bifrostAdminUsername: env.bifrostAdminUsername,
+    bifrostAdminPassword: env.bifrostAdminPassword,
     logger: {
       info: logInfo,
       warning: logWarning,

@@ -73,7 +73,8 @@ export type BifrostProviderSyncLogger = {
 
 export type BifrostProviderSyncOptions = {
   bifrostAdminUrl?: string;
-  bifrostManagementApiKey?: string;
+  bifrostAdminUsername?: string;
+  bifrostAdminPassword?: string;
   logger?: BifrostProviderSyncLogger;
 };
 

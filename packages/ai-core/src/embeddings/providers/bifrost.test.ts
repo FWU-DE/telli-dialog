@@ -54,9 +54,8 @@ describe('constructBifrostEmbeddingGenerationFn', () => {
     const result = await generateEmbeddings({ texts: ['hello'], model: model.name });
 
     expect(openAiConstructorMock).toHaveBeenCalledWith({
-      apiKey: 'not-needed',
+      apiKey: 'bifrost-api-key',
       baseURL: 'http://localhost:8089/openai/v1',
-      defaultHeaders: { 'x-bf-vk': 'bifrost-api-key' },
     });
     expect(createMock).toHaveBeenCalledWith({
       model: 'openai/embedding-model',

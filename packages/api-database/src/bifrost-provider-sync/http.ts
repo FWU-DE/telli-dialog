@@ -3,20 +3,28 @@ import { BifrostProviderSyncLogger } from './types';
 
 export async function bifrostFetch({
   bifrostAdminUrl,
-  bifrostManagementApiKey,
+  bifrostAdminUsername,
+  bifrostAdminPassword,
   path,
   init,
 }: {
   bifrostAdminUrl: string;
-  bifrostManagementApiKey?: string;
+  bifrostAdminUsername?: string;
+  bifrostAdminPassword?: string;
   path: string;
   init: RequestInit;
 }): Promise<Response> {
+  const hasBasicCredentials =
+    bifrostAdminUsername !== undefined && bifrostAdminPassword !== undefined;
+  const authorizationHeader = hasBasicCredentials
+    ? `Basic ${Buffer.from(`${bifrostAdminUsername}:${bifrostAdminPassword}`).toString('base64')}`
+    : undefined;
+
   return fetch(new URL(path, bifrostAdminUrl), {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      ...(bifrostManagementApiKey ? { Authorization: `Bearer ${bifrostManagementApiKey}` } : {}),
+      ...(authorizationHeader ? { Authorization: authorizationHeader } : {}),
       ...init.headers,
     },
   });

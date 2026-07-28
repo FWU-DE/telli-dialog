@@ -15,11 +15,13 @@ const LIST_VIRTUAL_KEYS_PAGE_SIZE = 100;
  */
 export async function listBifrostVirtualKeys({
   bifrostAdminUrl,
-  bifrostManagementApiKey,
+  bifrostAdminUsername,
+  bifrostAdminPassword,
   logger,
 }: {
   bifrostAdminUrl: string;
-  bifrostManagementApiKey?: string;
+  bifrostAdminUsername?: string;
+  bifrostAdminPassword?: string;
   logger?: BifrostProviderSyncLogger;
 }): Promise<BifrostVirtualKey[]> {
   const virtualKeys: BifrostVirtualKey[] = [];
@@ -29,7 +31,8 @@ export async function listBifrostVirtualKeys({
     const response = await assertBifrostResponse(
       bifrostFetch({
         bifrostAdminUrl,
-        bifrostManagementApiKey,
+        bifrostAdminUsername,
+        bifrostAdminPassword,
         path: `/api/governance/virtual-keys?limit=${LIST_VIRTUAL_KEYS_PAGE_SIZE}&offset=${offset}`,
         init: { method: 'GET' },
       }),
@@ -54,13 +57,15 @@ export async function listBifrostVirtualKeys({
 
 export async function updateBifrostVirtualKeyProviders({
   bifrostAdminUrl,
-  bifrostManagementApiKey,
+  bifrostAdminUsername,
+  bifrostAdminPassword,
   virtualKeyId,
   providerConfigs,
   logger,
 }: {
   bifrostAdminUrl: string;
-  bifrostManagementApiKey?: string;
+  bifrostAdminUsername?: string;
+  bifrostAdminPassword?: string;
   virtualKeyId: string;
   providerConfigs: BifrostVirtualKeyProviderConfig[];
   logger?: BifrostProviderSyncLogger;
@@ -68,7 +73,8 @@ export async function updateBifrostVirtualKeyProviders({
   await assertBifrostResponse(
     bifrostFetch({
       bifrostAdminUrl,
-      bifrostManagementApiKey,
+      bifrostAdminUsername,
+      bifrostAdminPassword,
       path: `/api/governance/virtual-keys/${virtualKeyId}`,
       init: {
         method: 'PUT',

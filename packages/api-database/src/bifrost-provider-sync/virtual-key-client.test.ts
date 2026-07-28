@@ -27,7 +27,8 @@ describe('listBifrostVirtualKeys', () => {
 
     const virtualKeys = await listBifrostVirtualKeys({
       bifrostAdminUrl: 'http://localhost:8080',
-      bifrostManagementApiKey: 'management-key',
+      bifrostAdminUsername: 'admin',
+      bifrostAdminPassword: 'secret',
     });
 
     expect(virtualKeys).toEqual([{ id: 'vk-all', provider_configs: [] }]);
@@ -36,7 +37,7 @@ describe('listBifrostVirtualKeys', () => {
     expect(url.toString()).toBe(
       'http://localhost:8080/api/governance/virtual-keys?limit=100&offset=0',
     );
-    expect(init.headers).toMatchObject({ Authorization: 'Bearer management-key' });
+    expect(init.headers).toMatchObject({ Authorization: 'Basic YWRtaW46c2VjcmV0' });
   });
 
   test('paginates until every virtual key has been collected', async () => {
@@ -113,7 +114,8 @@ describe('updateBifrostVirtualKeyProviders', () => {
 
     await updateBifrostVirtualKeyProviders({
       bifrostAdminUrl: 'http://localhost:8080',
-      bifrostManagementApiKey: 'management-key',
+      bifrostAdminUsername: 'admin',
+      bifrostAdminPassword: 'secret',
       virtualKeyId: 'vk-all',
       providerConfigs: [{ provider: 'azure', allowed_models: ['gpt-4o'], key_ids: ['*'] }],
     });
@@ -122,7 +124,7 @@ describe('updateBifrostVirtualKeyProviders', () => {
     const [url, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
     expect(url.toString()).toBe('http://localhost:8080/api/governance/virtual-keys/vk-all');
     expect(init.method).toBe('PUT');
-    expect(init.headers).toMatchObject({ Authorization: 'Bearer management-key' });
+    expect(init.headers).toMatchObject({ Authorization: 'Basic YWRtaW46c2VjcmV0' });
     expect(JSON.parse(init.body as string)).toEqual({
       provider_configs: [{ provider: 'azure', allowed_models: ['gpt-4o'], key_ids: ['*'] }],
     });

@@ -29,9 +29,8 @@ function createBifrostClient(model: AiModel): { client: OpenAI; modelName: strin
   return {
     client: instrumentOpenAiClient(
       new OpenAI({
-        apiKey: 'not-needed',
+        apiKey: env.bifrostApiKey ?? 'not-needed',
         baseURL: env.bifrostBaseUrl,
-        defaultHeaders: env.bifrostApiKey ? { 'x-bf-vk': env.bifrostApiKey } : undefined,
       }),
     ),
     modelName: `${provider}/${modelName}`,

@@ -26,11 +26,13 @@ const MANAGED_PROVIDERS = new Set<string>(BIFROST_PROVIDERS);
  */
 export async function ensureBifrostVirtualKeyProviderAccess({
   bifrostAdminUrl,
-  bifrostManagementApiKey,
+  bifrostAdminUsername,
+  bifrostAdminPassword,
   logger,
 }: {
   bifrostAdminUrl: string;
-  bifrostManagementApiKey?: string;
+  bifrostAdminUsername?: string;
+  bifrostAdminPassword?: string;
   logger?: BifrostProviderSyncLogger;
 }): Promise<void> {
   const models = await dbGetAllModels();
@@ -48,7 +50,8 @@ export async function ensureBifrostVirtualKeyProviderAccess({
 
   const virtualKeys = await listBifrostVirtualKeys({
     bifrostAdminUrl,
-    bifrostManagementApiKey,
+    bifrostAdminUsername,
+    bifrostAdminPassword,
     logger,
   });
 
@@ -58,7 +61,8 @@ export async function ensureBifrostVirtualKeyProviderAccess({
     try {
       await syncVirtualKeyProviderAccess({
         bifrostAdminUrl,
-        bifrostManagementApiKey,
+        bifrostAdminUsername,
+        bifrostAdminPassword,
         virtualKey,
         allowedModelsByProvider,
         logger,
@@ -81,13 +85,15 @@ export async function ensureBifrostVirtualKeyProviderAccess({
 
 async function syncVirtualKeyProviderAccess({
   bifrostAdminUrl,
-  bifrostManagementApiKey,
+  bifrostAdminUsername,
+  bifrostAdminPassword,
   virtualKey,
   allowedModelsByProvider,
   logger,
 }: {
   bifrostAdminUrl: string;
-  bifrostManagementApiKey?: string;
+  bifrostAdminUsername?: string;
+  bifrostAdminPassword?: string;
   virtualKey: BifrostVirtualKey;
   allowedModelsByProvider: Map<string, string[]>;
   logger?: BifrostProviderSyncLogger;
@@ -107,7 +113,8 @@ async function syncVirtualKeyProviderAccess({
 
   await updateBifrostVirtualKeyProviders({
     bifrostAdminUrl,
-    bifrostManagementApiKey,
+    bifrostAdminUsername,
+    bifrostAdminPassword,
     virtualKeyId: virtualKey.id,
     providerConfigs: [...untouchedProviderConfigs, ...managedProviderConfigs],
     logger,

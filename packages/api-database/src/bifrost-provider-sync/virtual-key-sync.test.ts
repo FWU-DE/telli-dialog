@@ -33,7 +33,11 @@ const authoritativeProviderConfigs: BifrostProviderConfig[] = [
 ];
 
 function options() {
-  return { bifrostAdminUrl: 'http://localhost:8080', bifrostManagementApiKey: 'management-key' };
+  return {
+    bifrostAdminUrl: 'http://localhost:8080',
+    bifrostAdminUsername: 'admin',
+    bifrostAdminPassword: 'secret',
+  };
 }
 
 function getUpdateCallArgs(callIndex = 0): Parameters<typeof updateBifrostVirtualKeyProviders>[0] {
