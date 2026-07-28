@@ -385,7 +385,7 @@ export const webSearchScopeSchema = z.enum(['all-web', 'included-domains']);
 export const webSearchScopeEnum = pgEnum('web_search_scope', webSearchScopeSchema.enum);
 export type WebSearchScope = z.infer<typeof webSearchScopeSchema>;
 
-export const webSearchIncludedDomainsSchema = z.array(z.httpUrl());
+export const webSearchIncludedDomainsSchema = z.array(z.string());
 
 export const suspensionRequestReasonSchema = z.enum([
   'copyright_violation',

@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Input } from '@ui/components/input';
 import { Button } from '@ui/components/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/tooltip';
-import { normalizeDomain } from '@/utils/web-search/parsing';
+import { normalizeDomain } from '@shared/utils/url-utils';
 import {
   MAX_WEB_SEARCH_INCLUDED_DOMAINS,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,

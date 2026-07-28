@@ -1,4 +1,4 @@
-import { parseHyperlinks } from '@/utils/web-search/parsing';
+import { parseHyperlinks } from '@shared/utils/url-utils';
 import { MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { type ChatMessage } from '../chat/actions';
 import type {

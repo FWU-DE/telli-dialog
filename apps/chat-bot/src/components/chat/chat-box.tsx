@@ -7,7 +7,7 @@ import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 import Citation from './sources/citation';
-import { parseHyperlinks } from '@/utils/web-search/parsing';
+import { parseHyperlinks } from '@shared/utils/url-utils';
 import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { isImageFile } from '@/utils/files/generic';

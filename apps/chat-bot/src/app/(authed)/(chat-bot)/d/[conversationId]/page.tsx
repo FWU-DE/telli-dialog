@@ -6,7 +6,7 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
-import { parseHyperlinks } from '@/utils/web-search/parsing';
+import { parseHyperlinks } from '@shared/utils/url-utils';
 import Logo from '@/components/common/logo';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';

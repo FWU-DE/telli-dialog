@@ -3,7 +3,7 @@ import './citation.css';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils/tailwind';
 import SearchIcon from '@/components/icons/search';
-import { getDisplayUrl } from '@/utils/web-search/parsing';
+import { getDisplayUrl } from '@shared/utils/url-utils';
 import { openInNewTab } from '@/utils/navigation/router';
 import Spinner from '@/components/icons/spinner';
 import { WebSource } from '@shared/db/types';
