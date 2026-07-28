@@ -2,7 +2,8 @@
   "common": {
     "delete": "Delete",
     "cancel": "Cancel",
-    "information-disclaimer": "AIS.chat can make mistakes. Think critically and check all information."
+    "information-disclaimer": "AIS.chat can make mistakes. Think critically and check all information.",
+    "anonymization-hint": "Anonymization active: personal data such as names, email addresses and phone numbers is automatically replaced before processing."
   },
   "characters": {
     "shared": {

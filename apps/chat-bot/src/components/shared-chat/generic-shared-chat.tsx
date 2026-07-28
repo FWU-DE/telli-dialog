@@ -40,6 +40,7 @@ type EntityMeta = ShareSessionInput & {
 };
 
 export type SharedChatViewProps = {
+  showAnonymizationHint?: boolean;
   /**
    * Translation function used by the chat header. Pre-resolved by the caller so
    * the view stays agnostic of the translation namespace.
@@ -99,6 +100,7 @@ export type SharedChatViewProps = {
  */
 export default function GenericSharedChat({
   headerT,
+  showAnonymizationHint = false,
   entity,
   inviteCode,
   avatarPictureUrl,
@@ -379,6 +381,7 @@ export default function GenericSharedChat({
             {showChatInputBox && (
               <div className="flex flex-col">
                 <ChatInputBox
+                  showAnonymizationHint={showAnonymizationHint}
                   files={files}
                   setFiles={setFiles}
                   customHandleSubmit={customHandleSubmit}

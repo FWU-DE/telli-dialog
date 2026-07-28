@@ -124,7 +124,7 @@ async function uploadDocumentFile({
   // (see docs/pii-anonymization.md). The original file in object storage is unchanged.
   const federalState = await dbGetFederalState(federalStateId);
   const content = federalState.featureToggles.isAnonymizationEnabled
-    ? await anonymizeUserContent(extractedContent)
+    ? await anonymizeUserContent(extractedContent, federalState.featureToggles.anonymizationMode)
     : extractedContent;
 
   const [chunks] = await Promise.all([

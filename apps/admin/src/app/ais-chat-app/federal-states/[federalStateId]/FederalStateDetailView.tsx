@@ -1,6 +1,14 @@
 'use client';
 import { Button } from '@ui/components/button';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import { Field, FieldDescription, FieldError, FieldLabel } from '@ui/components/field';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@ui/components/select';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateFederalStateAction } from './actions';
 import {
@@ -65,6 +73,7 @@ function transformToFederalStateEditForm(federalState: FederalStateModel): Feder
         federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true,
       isAgenticChatEnabled: federalState.featureToggles.isAgenticChatEnabled ?? false,
       isAnonymizationEnabled: federalState.featureToggles.isAnonymizationEnabled ?? false,
+      anonymizationMode: federalState.featureToggles.anonymizationMode ?? 'placeholder',
     },
     supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
     designConfiguration: federalState.designConfiguration
@@ -280,6 +289,30 @@ export function FederalStateView(props: FederalStateViewProps) {
             label="Anonymisierung aktivieren"
             description="Entfernt personenbezogene Daten (z.B. E-Mail-Adressen, Telefonnummern, IBANs) aus Chat-Nachrichten und hochgeladenen Dokumenten, bevor sie verarbeitet werden. Die Erkennung von Namen erfordert einen konfigurierten Presidio-Analyzer (ANONYMIZATION_SERVICE_URL)."
             control={control}
+          />
+          <Controller
+            name="featureToggles.anonymizationMode"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="anonymizationMode">Anonymisierungs-Modus</FieldLabel>
+                <FieldDescription>
+                  Platzhalter ersetzt erkannte Daten durch generische Marker wie [PERSON] und [ORT].
+                  Pseudonyme ersetzt Personennamen durch konsistente fiktive Namen, damit längere
+                  Texte lesbar bleiben.
+                </FieldDescription>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="h-11 w-full" id="anonymizationMode">
+                    <SelectValue placeholder="Modus auswählen" />
+                  </SelectTrigger>
+                  <SelectContent position="popper" align="start">
+                    <SelectItem value="placeholder">Platzhalter</SelectItem>
+                    <SelectItem value="pseudonym">Pseudonyme</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
           />
           <FormField
             name="designConfiguration"

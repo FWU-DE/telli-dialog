@@ -137,12 +137,20 @@ real chat message) is covered end-to-end by
 
 ## Follow-ups
 
-- Hook the same ingress anonymization into the shared-chat / character / learning-scenario
-  chat services (anonymous student flows).
-- Anonymize tool outputs in the agentic loop (web fetches, full-file retrieval).
-- Admin-selectable replacement mode (placeholder vs. pseudonym) per federal state.
-- UI hint in the chat when a message was anonymized.
+- Anonymize tool outputs in the agentic loop (web fetches; file contents are already
+  anonymized at upload time).
 - Optional LLM-based second-pass check (AnonyMeister's "Tiefenprüfung") using the
   federal state's configured auxiliary model instead of a local Ollama instance.
 - Deploy the German-configured presidio-analyzer image (`devops/docker/presidio/`)
   alongside the app in production and document it in the operations guide.
+
+Implemented beyond the original MVP scope:
+
+- Ingress anonymization in the anonymous student flows (character / learning scenario
+  shared chats). Because those histories are not persisted server-side and the client
+  resends the original messages each turn, all incoming user messages are anonymized
+  per request.
+- Replacement mode (`placeholder` / `pseudonym`) selectable per federal state via
+  `featureToggles.anonymizationMode` in the admin app.
+- A hint below the chat input (all locales) when anonymization is active for the
+  federal state, shown in the regular chat and in shared chats.

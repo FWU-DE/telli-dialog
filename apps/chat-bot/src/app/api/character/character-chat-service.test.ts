@@ -39,6 +39,10 @@ vi.mock('@ais-chat/ai-core', () => ({
   SharedChatExpiredError: class SharedChatExpiredError extends Error {},
 }));
 
+vi.mock('../anonymization/anonymization-service', () => ({
+  anonymizeChatMessages: vi.fn(async (messages) => messages),
+}));
+
 vi.mock('@/auth/utils', () => ({
   getUserAndContextByUserId: mocks.getUserAndContextByUserIdMock,
 }));

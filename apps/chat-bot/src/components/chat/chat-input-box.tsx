@@ -39,6 +39,7 @@ export function ChatInputBox({
   fileUploadFn,
   getSignedUrlFn,
   showPlaceholder = true,
+  showAnonymizationHint = false,
 }: {
   files?: Map<string, LocalFileState>;
   setFiles?: Dispatch<SetStateAction<Map<string, LocalFileState>>>;
@@ -52,6 +53,7 @@ export function ChatInputBox({
   fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
   getSignedUrlFn?: (fileId: string) => Promise<string>;
   showPlaceholder?: boolean;
+  showAnonymizationHint?: boolean;
 }) {
   const tCommon = useTranslations('common');
   const tFileInteraction = useTranslations('file-interaction');
@@ -189,6 +191,11 @@ export function ChatInputBox({
       <span className="text-xs mt-2 font-normal text-main-900 flex self-center text-center">
         {tCommon('information-disclaimer')}
       </span>
+      {showAnonymizationHint && (
+        <span className="text-xs mt-1 font-normal text-main-900 flex self-center text-center">
+          {tCommon('anonymization-hint')}
+        </span>
+      )}
     </>
   );
 }

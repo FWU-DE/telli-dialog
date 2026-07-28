@@ -55,6 +55,7 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
       <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
         <ThemeProvider designConfiguration={designConfiguration}>
           <CharacterSharedChat
+            showAnonymizationHint={federalState?.featureToggles.isAnonymizationEnabled ?? false}
             {...character}
             initialMessage={character.initialMessage ?? ''}
             inviteCode={searchParams.inviteCode}

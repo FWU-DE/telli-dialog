@@ -323,7 +323,10 @@ export async function sendChatMessage({
   // Anonymize at ingress so persistence, RAG, web search, title generation and the
   // LLM request all operate on the redacted text (see docs/pii-anonymization.md)
   if (user.federalState.featureToggles.isAnonymizationEnabled) {
-    userMessage.content = await anonymizeUserContent(userMessage.content);
+    userMessage.content = await anonymizeUserContent(
+      userMessage.content,
+      user.federalState.featureToggles.anonymizationMode,
+    );
   }
 
   const activeUserMessage = userMessage;

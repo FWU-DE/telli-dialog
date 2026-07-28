@@ -15,8 +15,13 @@ import { z } from 'zod';
  */
 export default function CharacterSharedChat({
   avatarPictureUrl,
+  showAnonymizationHint,
   ...character
-}: CharacterWithShareDataModel & { inviteCode: string; avatarPictureUrl?: string }) {
+}: CharacterWithShareDataModel & {
+  inviteCode: string;
+  avatarPictureUrl?: string;
+  showAnonymizationHint?: boolean;
+}) {
   const t = useTranslations('characters.shared');
   const { id, inviteCode, modelId } = character;
 
@@ -102,6 +107,7 @@ export default function CharacterSharedChat({
 
   return (
     <GenericSharedChat
+      showAnonymizationHint={showAnonymizationHint}
       headerT={t}
       entity={character}
       inviteCode={inviteCode}
