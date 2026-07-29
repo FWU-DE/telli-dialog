@@ -7,11 +7,11 @@ import { useTranslations } from 'next-intl';
 import { Input } from '@ui/components/input';
 import { Button } from '@ui/components/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/tooltip';
-import { normalizeDomain } from '@shared/utils/url-utils';
 import {
   MAX_WEB_SEARCH_INCLUDED_DOMAINS,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
+import { utils } from '@shared/utils';
 import { useToast } from '@/components/common/toast';
 import { cn } from '@/utils/tailwind';
 
@@ -48,7 +48,7 @@ export function CustomChatWebSearchIncludedDomains<TFieldValues extends FieldVal
             return;
           }
 
-          const normalizedDomain = normalizeDomain(trimmed);
+          const normalizedDomain = utils.url.normalizeDomain(trimmed);
           if (normalizedDomain === null) {
             toast.error(t('websites-invalid-error'));
             return;
