@@ -5,7 +5,7 @@ import Logo from '@/components/common/logo';
 import { requireAuth } from '@/auth/requireAuth';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/static-model-service';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/llm-model-service';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';

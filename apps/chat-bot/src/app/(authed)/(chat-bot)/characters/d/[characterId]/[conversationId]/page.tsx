@@ -11,7 +11,7 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/static-model-service';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/llm-model-service';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
 import type { ChatMessage as Message } from '@/types/chat';

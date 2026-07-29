@@ -4,7 +4,7 @@ import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { redirect } from 'next/navigation';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/static-model-service';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/llm-model-service';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import Logo from '@/components/common/logo';

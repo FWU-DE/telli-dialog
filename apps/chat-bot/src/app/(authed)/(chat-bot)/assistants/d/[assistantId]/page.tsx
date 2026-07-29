@@ -2,7 +2,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import Chat from '@/components/chat/chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/static-model-service';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/llm-model-service';
 import Logo from '@/components/common/logo';
 import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';

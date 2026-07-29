@@ -8,7 +8,7 @@ import { errorifyAsyncFn } from '@shared/utils/error';
 import { LlmModelSelectModel } from '@shared/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
 import { getFirstTextModel } from '@shared/llm-models/llm-model-service';
-import { getDefaultModel } from '@shared/llm-models/static-model-service';
+import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { logError } from '@shared/logging';
 import { isValidPositiveNumber } from '@shared/utils/number';
 

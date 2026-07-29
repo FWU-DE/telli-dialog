@@ -3,7 +3,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import { getRandomPromptSuggestions } from '@/utils/prompt-suggestions/utils';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/static-model-service';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/llm-model-service';
 import Logo from '@/components/common/logo';
 import { requireAuth } from '@/auth/requireAuth';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
