@@ -7,7 +7,12 @@ import {
   deleteUrlPresetAction,
   updateUrlPresetAction,
 } from './actions';
-import { UrlPreset, UrlPresetInsert, UrlPresetUpdate } from '@shared/web-search/url-presets/types';
+import {
+  UrlPreset,
+  UrlPresetInsert,
+  UrlPresetUpdate,
+  urlPresetUpdateSchema,
+} from '@shared/web-search/url-presets/types';
 import {
   Card,
   CardAction,
@@ -23,14 +28,20 @@ import { Chip } from '@ui/components/chip';
 import { TrashSimpleIcon } from '@phosphor-icons/react';
 import { CreateNewUrlPreset } from './CreateNewUrlPreset';
 import { EditUrlPresetForm } from './EditUrlPresetForm';
+import { toast } from 'sonner';
 
 export function UrlPresetsListView() {
   const [urlPresets, setUrlPresets] = useState<UrlPreset[]>([]);
 
   const loadUrlPresets = async () => {
     startTransition(async () => {
-      const urlPresets = await getUrlPresetsAction();
-      setUrlPresets(urlPresets);
+      const result = await getUrlPresetsAction();
+      if (result.success) {
+        setUrlPresets(result.value);
+      } else {
+        toast.error(result.error.message);
+        setUrlPresets([]);
+      }
     });
   };
 
@@ -44,13 +55,23 @@ export function UrlPresetsListView() {
       orderNumber: urlPresets.length + 1,
       urls: [],
     };
-    const insertedUrlPreset = await insertUrlPresetAction(newUrlPreset);
-    setUrlPresets((prev) => [...prev, insertedUrlPreset]);
+    const result = await insertUrlPresetAction(newUrlPreset);
+    if (result.success) {
+      setUrlPresets((prev) => [...prev, result.value]);
+    } else {
+      toast.error(result.error.message);
+      await loadUrlPresets();
+    }
   }
 
   async function handleDeleteUrlPreset(id: string): Promise<void> {
-    await deleteUrlPresetAction(id);
-    setUrlPresets((prev) => prev.filter((preset) => preset.id !== id));
+    const result = await deleteUrlPresetAction(id);
+    if (result.success) {
+      setUrlPresets((prev) => prev.filter((preset) => preset.id !== id));
+    } else {
+      toast.error(result.error.message);
+      await loadUrlPresets();
+    }
   }
 
   async function handleAddUrlToPreset(presetId: string, url: string): Promise<void> {
@@ -58,11 +79,16 @@ export function UrlPresetsListView() {
     if (!preset) return;
 
     const presetData: UrlPresetUpdate = {
-      ...preset,
+      ...urlPresetUpdateSchema.parse(preset),
       urls: [...preset.urls, url],
     };
     const updatedPreset = await updateUrlPresetAction(presetId, presetData);
-    setUrlPresets((prev) => prev.map((p) => (p.id === presetId ? updatedPreset : p)));
+    if (updatedPreset.success) {
+      setUrlPresets((prev) => prev.map((p) => (p.id === presetId ? updatedPreset.value : p)));
+    } else {
+      toast.error(updatedPreset.error.message);
+      await loadUrlPresets();
+    }
   }
 
   async function handleDeleteUrlFromPreset(presetId: string, url: string): Promise<void> {
@@ -70,11 +96,16 @@ export function UrlPresetsListView() {
     if (!preset) return;
 
     const presetData: UrlPresetUpdate = {
-      ...preset,
+      ...urlPresetUpdateSchema.parse(preset),
       urls: preset.urls.filter((u) => u !== url),
     };
-    const updatedPreset = await updateUrlPresetAction(presetId, presetData);
-    setUrlPresets((prev) => prev.map((p) => (p.id === presetId ? updatedPreset : p)));
+    const result = await updateUrlPresetAction(presetId, presetData);
+    if (result.success) {
+      setUrlPresets((prev) => prev.map((p) => (p.id === presetId ? result.value : p)));
+    } else {
+      toast.error(result.error.message);
+      await loadUrlPresets();
+    }
   }
 
   async function handleUpdateUrlPreset(
@@ -90,15 +121,20 @@ export function UrlPresetsListView() {
       name,
       orderNumber,
     };
-    const updatedPreset = await updateUrlPresetAction(presetId, presetData);
-    setUrlPresets((prev) => prev.map((p) => (p.id === presetId ? updatedPreset : p)));
+    const result = await updateUrlPresetAction(presetId, presetData);
+    if (result.success) {
+      setUrlPresets((prev) => prev.map((p) => (p.id === presetId ? result.value : p)));
+    } else {
+      toast.error(result.error.message);
+      await loadUrlPresets();
+    }
   }
 
   return (
     <div className="flex flex-col gap-4">
       <CreateNewUrlPreset onCreate={handleNewUrlPreset} />
       {urlPresets
-        .sort((a, b) => a.orderNumber - b.orderNumber)
+        .toSorted((a, b) => a.orderNumber - b.orderNumber)
         .map((preset) => (
           <Card key={preset.id} className="bg-gray-100">
             <CardHeader>
@@ -124,7 +160,7 @@ export function UrlPresetsListView() {
               <div>Webseiten</div>
               <div className="flex flex-row flex-wrap gap-2">
                 {preset.urls
-                  .sort((a, b) => a.localeCompare(b))
+                  .toSorted((a, b) => a.localeCompare(b))
                   .map((url, index) => (
                     <Chip key={`url_${index}`}>
                       {url}

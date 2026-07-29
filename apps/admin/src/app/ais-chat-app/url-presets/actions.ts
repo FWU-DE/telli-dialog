@@ -1,6 +1,7 @@
 'use server';
 
 import { requireAdminAuth } from '@/auth/requireAdminAuth';
+import { runServerAction } from '@shared/actions/run-server-action';
 import { UrlPresetInsert, UrlPresetUpdate } from '@shared/web-search/url-presets/types';
 import {
   insertUrlPreset,
@@ -12,23 +13,23 @@ import {
 export async function getUrlPresetsAction() {
   await requireAdminAuth();
 
-  return getAllUrlPresets();
+  return runServerAction('getAllUrlPresets', getAllUrlPresets)();
 }
 
 export async function insertUrlPresetAction(data: UrlPresetInsert) {
   await requireAdminAuth();
 
-  return insertUrlPreset(data);
+  return runServerAction('insertUrlPreset', insertUrlPreset)(data);
 }
 
 export async function updateUrlPresetAction(id: string, data: UrlPresetUpdate) {
   await requireAdminAuth();
 
-  return updateUrlPreset(id, data);
+  return runServerAction('updateUrlPreset', updateUrlPreset)(id, data);
 }
 
 export async function deleteUrlPresetAction(id: string) {
   await requireAdminAuth();
 
-  return deleteUrlPreset(id);
+  return runServerAction('deleteUrlPreset', deleteUrlPreset)(id);
 }
