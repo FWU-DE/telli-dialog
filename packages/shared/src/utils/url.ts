@@ -1,3 +1,8 @@
+export const regexes = {
+  domainOnly: /^(?!:\/\/)([a-zA-Z0-9-_]+\.)+[a-zA-Z]{2,11}?$/,
+  domainWithOptionalProtocol: /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-_]+\.)+[a-zA-Z]{2,11}?$/,
+};
+
 /**
  * Strips the protocol and "www." prefix from a URL for display purposes.
  * Also converts the URL to lowercase for consistent display.
@@ -49,8 +54,7 @@ export function parseHyperlinks(content: string): string[] | undefined {
 }
 
 // Require at least one dot and only valid DNS label characters.
-export const domainPattern =
-  /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
+const domainPattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
 
 /**
  * Normalizes a URL to a domain.

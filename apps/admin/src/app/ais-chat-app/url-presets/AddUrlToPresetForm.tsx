@@ -6,10 +6,17 @@ import z from 'zod';
 import { Button } from '@ui/components/button';
 import { Input } from '@ui/components/input';
 import { Field, FieldError } from '@ui/components/field';
-import { domainPattern, normalizeDomain } from '@shared/utils/url-utils';
+import { utils } from '@shared/utils';
 
 const addUrlFormSchema = z.object({
-  url: z.string().trim().min(1, 'URL ist erforderlich').regex(domainPattern, 'Ungültige URL'),
+  url: z
+    .string()
+    .trim()
+    .min(1, 'Domain ist erforderlich')
+    .regex(
+      utils.url.regexes.domainWithOptionalProtocol,
+      'Bitte eine gültige URL ohne Unterseiten eingeben',
+    ),
 });
 
 type AddUrlForm = z.infer<typeof addUrlFormSchema>;
@@ -32,7 +39,7 @@ export function AddUrlToPresetForm({ existingUrls, onAdd }: AddUrlToPresetFormPr
   });
 
   async function onSubmit(data: AddUrlForm) {
-    const url = normalizeDomain(data.url);
+    const url = utils.url.normalizeDomain(data.url);
     if (!url) {
       setError('url', { message: 'Ungültige URL' });
       return;
