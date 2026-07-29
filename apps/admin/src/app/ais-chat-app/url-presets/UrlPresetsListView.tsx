@@ -151,11 +151,10 @@ export function UrlPresetsListView() {
               <CardAction>
                 <Button variant="destructive" onClick={() => handleDeleteUrlPreset(preset.id)}>
                   <TrashSimpleIcon />
-                  Delete
+                  Löschen
                 </Button>
               </CardAction>
             </CardHeader>
-            <Separator className="mx-2" />
             <CardContent className="flex flex-col gap-2">
               <div>Webseiten</div>
               <div className="flex flex-row flex-wrap gap-2">
@@ -175,7 +174,6 @@ export function UrlPresetsListView() {
                   ))}
               </div>
             </CardContent>
-            <Separator className="mx-2" />
             <CardFooter>
               <AddUrlToPresetForm
                 existingUrls={preset.urls}
