@@ -10,6 +10,7 @@ import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
+import { getChatModelFallback, markSkippedChatModels } from '../utils/model-circuit-breaker';
 import {
   dbGetCharacterByIdAndInviteCode,
   dbUpdateTokenUsageByCharacterChatId,
@@ -90,6 +91,10 @@ export async function sendCharacterMessage({
   }
 
   const { model: definedModel, apiKeyId } = modelAndApiKey;
+  const { generationModelId, fallbackModelIds, candidateModelIds } = await getChatModelFallback({
+    model: definedModel,
+    federalStateId: teacherUserAndContext.federalState.id,
+  });
   const agenticChatEnabled =
     teacherUserAndContext.federalState.featureToggles.isAgenticChatEnabled ?? false;
 
@@ -224,9 +229,13 @@ export async function sendCharacterMessage({
     const agentName = resolveAgentNameForTracing({ characterId: character.id });
 
     runAgentLoop({
-      modelId: definedModel.id,
+      modelId: generationModelId,
       modelName: definedModel.name,
       apiKeyId,
+      fallbackModelIds,
+      onModelUsed: (modelId) => {
+        void markSkippedChatModels({ candidateModelIds, usedModelId: modelId });
+      },
       messages: aiCoreMessages,
       toolRegistry,
       agentName,
@@ -269,10 +278,11 @@ export async function sendCharacterMessage({
     void (async () => {
       try {
         const textStream = generateTextStreamWithBilling(
-          definedModel.id,
+          generationModelId,
           aiCoreMessages,
           apiKeyId,
-          async ({ usage, priceInCents }) => {
+          async ({ usage, priceInCents, modelId }) => {
+            await markSkippedChatModels({ candidateModelIds, usedModelId: modelId });
             const { promptTokens, completionTokens } = usage;
 
             await dbUpdateTokenUsageByCharacterChatId({
@@ -296,6 +306,7 @@ export async function sendCharacterMessage({
               }),
             );
           },
+          { fallbackModelIds },
         );
 
         for await (const chunk of textStream) {

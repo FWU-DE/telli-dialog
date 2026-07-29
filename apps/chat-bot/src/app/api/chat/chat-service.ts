@@ -8,6 +8,7 @@ import {
 } from '@ais-chat/ai-core';
 import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { getModelAndApiKeyWithResult, getAuxiliaryModel } from '../utils/utils';
+import { getChatModelFallback, markSkippedChatModels } from '../utils/model-circuit-breaker';
 import {
   dbGetConversationAndMessages,
   dbGetOrCreateConversation,
@@ -214,6 +215,10 @@ export async function sendChatMessage({
   }
 
   const { model: definedModel, apiKeyId } = modelAndApiKey;
+  const { generationModelId, fallbackModelIds, candidateModelIds } = await getChatModelFallback({
+    model: definedModel,
+    federalStateId: user.federalState.id,
+  });
 
   // Get auxiliary model for title generation
   const auxiliaryModel = await getAuxiliaryModel(user.federalState.id);
@@ -549,7 +554,7 @@ export async function sendChatMessage({
     await dbInsertConversationUsage({
       conversationId: activeConversation.id,
       userId: user.id,
-      modelId: definedModel.id,
+      modelId: generationModelId,
       completionTokens,
       promptTokens,
       costsInCent: priceInCents,
@@ -588,6 +593,10 @@ export async function sendChatMessage({
       modelId: definedModel.id,
       modelName: definedModel.name,
       apiKeyId,
+      fallbackModelIds,
+      onModelUsed: (modelId) => {
+        void markSkippedChatModels({ candidateModelIds, usedModelId: modelId });
+      },
       messages: aiCoreMessages,
       toolRegistry,
       agentName,
@@ -615,12 +624,14 @@ export async function sendChatMessage({
 
       try {
         const textStream = generateTextStreamWithBilling(
-          definedModel.id,
+          generationModelId,
           aiCoreMessages,
           apiKeyId,
-          async ({ usage, priceInCents }) => {
+          async ({ usage, priceInCents, modelId }) => {
+            await markSkippedChatModels({ candidateModelIds, usedModelId: modelId });
             await persistAssistantMessage({ fullText, usage, priceInCents });
           },
+          { fallbackModelIds },
         );
 
         for await (const chunk of textStream) {

@@ -15,6 +15,8 @@ type RunAgentLoopParams = {
   messages: AiCoreMessage[];
   toolRegistry?: ToolRegistry;
   agentName: string;
+  fallbackModelIds?: string[];
+  onModelUsed?: (modelId?: string) => void;
   onTextChunk: (delta: string) => void;
   onComplete: (result: {
     fullText: string;
@@ -32,6 +34,8 @@ export function runAgentLoop({
   messages,
   toolRegistry,
   agentName,
+  fallbackModelIds,
+  onModelUsed,
   onTextChunk,
   onComplete,
   onError,
@@ -74,7 +78,8 @@ export function runAgentLoop({
               modelId,
               loopMessages,
               apiKeyId,
-              async ({ usage, priceInCents }) => {
+              async ({ usage, priceInCents, modelId }) => {
+                onModelUsed?.(modelId);
                 totalUsage = {
                   promptTokens: totalUsage.promptTokens + usage.promptTokens,
                   completionTokens: totalUsage.completionTokens + usage.completionTokens,
@@ -82,7 +87,11 @@ export function runAgentLoop({
                 };
                 totalPriceInCents += priceInCents;
               },
-              tools.length > 0 && !isLastIteration ? { tools, toolChoice: 'auto' } : undefined,
+              tools.length > 0 && !isLastIteration
+                ? { tools, toolChoice: 'auto', fallbackModelIds }
+                : fallbackModelIds?.length
+                  ? { fallbackModelIds }
+                  : undefined,
             );
 
             for await (const event of stream) {

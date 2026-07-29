@@ -10,6 +10,7 @@ import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
+import { getChatModelFallback, markSkippedChatModels } from '../utils/model-circuit-breaker';
 import {
   dbGetLearningScenarioByIdAndInviteCode,
   dbUpdateTokenUsageBySharedLearningScenarioId,
@@ -95,6 +96,10 @@ export async function sendLearningScenarioMessage({
   }
 
   const { model: definedModel, apiKeyId } = modelAndApiKey;
+  const { generationModelId, fallbackModelIds, candidateModelIds } = await getChatModelFallback({
+    model: definedModel,
+    federalStateId: teacherUserAndContext.federalState.id,
+  });
   const agenticChatEnabled =
     teacherUserAndContext.federalState.featureToggles.isAgenticChatEnabled ?? false;
 
@@ -229,9 +234,13 @@ export async function sendLearningScenarioMessage({
     const agentName = resolveAgentNameForTracing({ learningScenarioId: learningScenario.id });
 
     runAgentLoop({
-      modelId: definedModel.id,
+      modelId: generationModelId,
       modelName: definedModel.name,
       apiKeyId,
+      fallbackModelIds,
+      onModelUsed: (modelId) => {
+        void markSkippedChatModels({ candidateModelIds, usedModelId: modelId });
+      },
       messages: aiCoreMessages,
       toolRegistry,
       agentName,
@@ -274,10 +283,11 @@ export async function sendLearningScenarioMessage({
     void (async () => {
       try {
         const textStream = generateTextStreamWithBilling(
-          definedModel.id,
+          generationModelId,
           aiCoreMessages,
           apiKeyId,
-          async ({ usage, priceInCents }) => {
+          async ({ usage, priceInCents, modelId }) => {
+            await markSkippedChatModels({ candidateModelIds, usedModelId: modelId });
             const { promptTokens, completionTokens } = usage;
 
             await dbUpdateTokenUsageBySharedLearningScenarioId({
@@ -301,6 +311,7 @@ export async function sendLearningScenarioMessage({
               }),
             );
           },
+          { fallbackModelIds },
         );
 
         for await (const chunk of textStream) {

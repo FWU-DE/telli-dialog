@@ -62,8 +62,21 @@ export async function generateTextWithBilling(
   }
 
   try {
-    const textResponse = await generateText(model, messages, options);
-    const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, textResponse.usage);
+    const fallbackModels = await resolveFallbackModels(options?.fallbackModelIds);
+    const fallbackAccess = await Promise.all(
+      fallbackModels.map((fallbackModel) => hasAccessToModel(apiKeyId, fallbackModel)),
+    );
+    if (fallbackAccess.some((hasAccess) => !hasAccess)) {
+      throw new InvalidModelError('API key does not have access to a configured fallback model');
+    }
+    const generationOptions = fallbackModels.length ? { ...options, fallbackModels } : options;
+    const textResponse = await generateText(model, messages, generationOptions);
+    const billingModel = getModelById([model, ...fallbackModels], textResponse.modelId) ?? model;
+    const priceInCents = await billTextGenerationUsageToApiKey(
+      apiKeyId,
+      billingModel,
+      textResponse.usage,
+    );
 
     return {
       ...textResponse,
@@ -97,7 +110,11 @@ export async function* generateTextStreamWithBilling(
   modelId: string,
   messages: Message[],
   apiKeyId: string,
-  onComplete?: (result: { usage: TokenUsage; priceInCents: number }) => void | Promise<void>,
+  onComplete?: (result: {
+    usage: TokenUsage;
+    priceInCents: number;
+    modelId?: string;
+  }) => void | Promise<void>,
   options?: GenerationOptions,
 ) {
   const model = await getTextModelById(modelId);
@@ -117,14 +134,23 @@ export async function* generateTextStreamWithBilling(
   }
 
   try {
-    const billingCallback = async (usage: TokenUsage) => {
-      const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, usage);
+    const fallbackModels = await resolveFallbackModels(options?.fallbackModelIds);
+    const fallbackAccess = await Promise.all(
+      fallbackModels.map((fallbackModel) => hasAccessToModel(apiKeyId, fallbackModel)),
+    );
+    if (fallbackAccess.some((hasAccess) => !hasAccess)) {
+      throw new InvalidModelError('API key does not have access to a configured fallback model');
+    }
+    const billingCallback = async (usage: TokenUsage, modelId?: string) => {
+      const billingModel = getModelById([model, ...fallbackModels], modelId) ?? model;
+      const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, billingModel, usage);
       if (onComplete) {
-        await onComplete({ usage, priceInCents });
+        await onComplete({ usage, priceInCents, modelId });
       }
     };
 
-    const stream = generateTextStream(model, messages, billingCallback, options);
+    const generationOptions = fallbackModels.length ? { ...options, fallbackModels } : options;
+    const stream = generateTextStream(model, messages, billingCallback, generationOptions);
 
     for await (const chunk of stream) {
       yield chunk;
@@ -138,6 +164,15 @@ export async function* generateTextStreamWithBilling(
     }
     throw error;
   }
+}
+
+async function resolveFallbackModels(modelIds: string[] | undefined) {
+  if (!modelIds?.length) return [];
+  return Promise.all(modelIds.map((modelId) => getTextModelById(modelId)));
+}
+
+function getModelById<T extends { id: string }>(models: T[], modelId: string | undefined) {
+  return modelId ? models.find((candidate) => candidate.id === modelId) : undefined;
 }
 
 // ── Name-based variants (for API app) ──

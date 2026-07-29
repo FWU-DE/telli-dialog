@@ -23,7 +23,11 @@ export async function* generateAgenticStreamWithBilling(
   modelId: string,
   messages: Message[],
   apiKeyId: string,
-  onComplete?: (result: { usage: TokenUsage; priceInCents: number }) => void | Promise<void>,
+  onComplete?: (result: {
+    usage: TokenUsage;
+    priceInCents: number;
+    modelId?: string;
+  }) => void | Promise<void>,
   options?: GenerationOptions,
 ): AsyncGenerator<StreamEvent> {
   const model = await getTextModelById(modelId);
@@ -42,15 +46,26 @@ export async function* generateAgenticStreamWithBilling(
   }
 
   try {
-    const stream = generateAgenticStream(model, messages, options);
+    const fallbackModels = options?.fallbackModelIds
+      ? await Promise.all(options.fallbackModelIds.map((id) => getTextModelById(id)))
+      : [];
+    const stream = generateAgenticStream(model, messages, { ...options, fallbackModels });
 
     for await (const event of stream) {
       yield event;
 
       if (event.type === 'finish') {
-        const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, event.usage);
+        const billingModel = event.modelId
+          ? ([model, ...fallbackModels].find((candidate) => candidate.id === event.modelId) ??
+            model)
+          : model;
+        const priceInCents = await billTextGenerationUsageToApiKey(
+          apiKeyId,
+          billingModel,
+          event.usage,
+        );
         if (onComplete) {
-          await onComplete({ usage: event.usage, priceInCents });
+          await onComplete({ usage: event.usage, priceInCents, modelId: event.modelId });
         }
       }
     }

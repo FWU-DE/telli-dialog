@@ -103,7 +103,9 @@ export async function generateText(
       `No text generation function found for provider: ${model.provider}`,
     );
   }
-  return generationFn({ messages, model: model.name, ...options });
+  const providerOptions = { ...options };
+  delete providerOptions.fallbackModelIds;
+  return generationFn({ messages, model: model.name, ...providerOptions });
 }
 
 export function generateTextStream(
@@ -118,7 +120,9 @@ export function generateTextStream(
       `No text stream function found for provider: ${model.provider}`,
     );
   }
-  return streamFn({ messages, model: model.name, ...options }, onComplete);
+  const providerOptions = { ...options };
+  delete providerOptions.fallbackModelIds;
+  return streamFn({ messages, model: model.name, ...providerOptions }, onComplete);
 }
 
 export function generateAgenticStream(
@@ -132,5 +136,7 @@ export function generateAgenticStream(
       `No agentic stream function found for provider: ${model.provider}`,
     );
   }
-  return streamFn({ messages, model: model.name, ...options });
+  const providerOptions = { ...options };
+  delete providerOptions.fallbackModelIds;
+  return streamFn({ messages, model: model.name, ...providerOptions });
 }

@@ -65,6 +65,10 @@ export type GenerationOptions = {
   temperature?: number;
   tools?: ToolDefinition[];
   toolChoice?: 'auto' | 'none' | 'required';
+  /** Models Bifrost may try after the requested model, in order. */
+  fallbackModels?: AiModel[];
+  /** IDs used by callers to resolve fallback models in the API database. */
+  fallbackModelIds?: string[];
 };
 
 export type TextGenerationArgs = {
@@ -81,6 +85,7 @@ export type TokenUsage = {
 export type TextResponse = {
   text: string;
   usage: TokenUsage;
+  modelId?: string;
 };
 
 /**
@@ -89,13 +94,13 @@ export type TextResponse = {
 export type StreamEvent =
   | { type: 'text'; delta: string }
   | { type: 'tool_call'; call: ToolCall }
-  | { type: 'finish'; usage: TokenUsage };
+  | { type: 'finish'; usage: TokenUsage; modelId?: string };
 
 export type TextGenerationFn = (args: TextGenerationArgs) => Promise<TextResponse>;
 
 export type TextStreamFn = (
   args: TextGenerationArgs,
-  onComplete?: (usage: TokenUsage) => void | Promise<void>,
+  onComplete?: (usage: TokenUsage, modelId?: string) => void | Promise<void>,
 ) => AsyncGenerator<string>;
 
 export type AgenticStreamFn = (args: TextGenerationArgs) => AsyncGenerator<StreamEvent>;
