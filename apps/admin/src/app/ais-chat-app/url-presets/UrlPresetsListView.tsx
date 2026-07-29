@@ -21,6 +21,7 @@ import { Separator } from '@ui/components/separator';
 import { AddUrlToPresetForm } from './AddUrlToPresetForm';
 import { Chip } from '@ui/components/chip';
 import { TrashSimpleIcon } from '@phosphor-icons/react';
+import { CreateNewUrlPreset } from './CreateNewUrlPreset';
 
 export function UrlPresetsListView() {
   const [urlPresets, setUrlPresets] = useState<UrlPreset[]>([]);
@@ -76,10 +77,8 @@ export function UrlPresetsListView() {
   }
 
   return (
-    <div>
-      <div>
-        <Button onClick={handleNewUrlPreset}>Neues Webseitenpaket</Button>
-      </div>
+    <div className="flex flex-col gap-4">
+      <CreateNewUrlPreset onCreate={handleNewUrlPreset} />
       {urlPresets.map((preset) => (
         <Card key={preset.id} className="">
           <CardHeader>
