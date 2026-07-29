@@ -39,6 +39,7 @@ yarn-error.log*
 !.env.example
 !.env
 !.env.e2e
+devops/docker/.env
 
 # vercel
 .vercel
@@ -61,3 +62,4 @@ test-results/
 apps/chat-bot/e2e/load_test/*.js
 apps/chat-bot/e2e/load_test/success-results/
 apps/chat-bot/e2e/load_test/error-results/
+.gstack/
