@@ -2,7 +2,7 @@
 
 import { LlmModelSelectModel } from '@shared/db/schema';
 import React, { useState } from 'react';
-import { getFirstTextModel } from '@shared/llm-models/llm-model-service';
+import { getFirstTextModel } from '@shared/llm-models/llm-model-utils';
 
 type LlmModelsProviderProps = {
   models: LlmModelSelectModel[];
