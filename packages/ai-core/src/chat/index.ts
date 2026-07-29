@@ -62,13 +62,7 @@ export async function generateTextWithBilling(
   }
 
   try {
-    const fallbackModels = await resolveFallbackModels(options?.fallbackModelIds);
-    const fallbackAccess = await Promise.all(
-      fallbackModels.map((fallbackModel) => hasAccessToModel(apiKeyId, fallbackModel)),
-    );
-    if (fallbackAccess.some((hasAccess) => !hasAccess)) {
-      throw new InvalidModelError('API key does not have access to a configured fallback model');
-    }
+    const fallbackModels = await resolveFallbackModels(options?.fallbackModelIds, apiKeyId);
     const generationOptions = fallbackModels.length ? { ...options, fallbackModels } : options;
     const textResponse = await generateText(model, messages, generationOptions);
     const billingModel = getModelById([model, ...fallbackModels], textResponse.modelId) ?? model;
@@ -134,13 +128,7 @@ export async function* generateTextStreamWithBilling(
   }
 
   try {
-    const fallbackModels = await resolveFallbackModels(options?.fallbackModelIds);
-    const fallbackAccess = await Promise.all(
-      fallbackModels.map((fallbackModel) => hasAccessToModel(apiKeyId, fallbackModel)),
-    );
-    if (fallbackAccess.some((hasAccess) => !hasAccess)) {
-      throw new InvalidModelError('API key does not have access to a configured fallback model');
-    }
+    const fallbackModels = await resolveFallbackModels(options?.fallbackModelIds, apiKeyId);
     const billingCallback = async (usage: TokenUsage, modelId?: string) => {
       const billingModel = getModelById([model, ...fallbackModels], modelId) ?? model;
       const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, billingModel, usage);
@@ -166,9 +154,15 @@ export async function* generateTextStreamWithBilling(
   }
 }
 
-async function resolveFallbackModels(modelIds: string[] | undefined) {
+async function resolveFallbackModels(modelIds: string[] | undefined, apiKeyId: string) {
   if (!modelIds?.length) return [];
-  return Promise.all(modelIds.map((modelId) => getTextModelById(modelId)));
+  const models = await Promise.all(
+    modelIds.map(async (modelId) => {
+      const model = await getTextModelById(modelId);
+      return (await hasAccessToModel(apiKeyId, model)) ? model : undefined;
+    }),
+  );
+  return models.filter((model): model is NonNullable<typeof model> => model !== undefined);
 }
 
 function getModelById<T extends { id: string }>(models: T[], modelId: string | undefined) {

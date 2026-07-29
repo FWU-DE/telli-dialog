@@ -246,7 +246,11 @@ export async function sendCharacterMessage({
       onComplete: async ({ usage, priceInCents, modelId, modelUsages }) => {
         const { promptTokens, completionTokens } = usage;
 
-        for (const modelUsage of modelUsages ?? [{ modelId, usage, priceInCents }]) {
+        // Agentic requests can invoke several models across iterations. Persist each usage
+        // entry separately so pricing and reporting stay associated with the serving model.
+        for (const modelUsage of modelUsages ?? [
+          { modelId: modelId ?? generationModelId, usage, priceInCents },
+        ]) {
           await dbUpdateTokenUsageByCharacterChatId({
             modelId: modelUsage.modelId ?? generationModelId,
             completionTokens: modelUsage.usage.completionTokens,

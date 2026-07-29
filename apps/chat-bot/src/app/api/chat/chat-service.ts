@@ -510,7 +510,7 @@ export async function sendChatMessage({
     usage: TokenUsage;
     priceInCents: number;
     modelId?: string;
-    modelUsages?: Array<{ modelId?: string; usage: TokenUsage; priceInCents: number }>;
+    modelUsages?: Array<{ modelId: string; usage: TokenUsage; priceInCents: number }>;
     agentLoopMessages?: AiCoreMessage[];
   }) {
     const persistedAgentLoopMessages = filterPersistedAgentLoopMessages(agentLoopMessages);
@@ -556,13 +556,15 @@ export async function sendChatMessage({
 
     const { promptTokens, completionTokens } = usage;
 
-    const usages = modelUsages ?? [{ modelId, usage, priceInCents }];
+    // Agentic requests can invoke several models across iterations. Persist each usage
+    // entry separately so pricing and reporting stay associated with the serving model.
+    const usages = modelUsages ?? [{ modelId: modelId ?? generationModelId, usage, priceInCents }];
     await Promise.all(
       usages.map((modelUsage) =>
         dbInsertConversationUsage({
           conversationId: activeConversation.id,
           userId: user.id,
-          modelId: modelUsage.modelId ?? modelId,
+          modelId: modelUsage.modelId,
           completionTokens: modelUsage.usage.completionTokens,
           promptTokens: modelUsage.usage.promptTokens,
           costsInCent: modelUsage.priceInCents,

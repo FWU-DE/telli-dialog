@@ -251,7 +251,11 @@ export async function sendLearningScenarioMessage({
       onComplete: async ({ usage, priceInCents, modelId, modelUsages }) => {
         const { promptTokens, completionTokens } = usage;
 
-        for (const modelUsage of modelUsages ?? [{ modelId, usage, priceInCents }]) {
+        // Agentic requests can invoke several models across iterations. Persist each usage
+        // entry separately so pricing and reporting stay associated with the serving model.
+        for (const modelUsage of modelUsages ?? [
+          { modelId: modelId ?? generationModelId, usage, priceInCents },
+        ]) {
           await dbUpdateTokenUsageBySharedLearningScenarioId({
             modelId: modelUsage.modelId ?? generationModelId,
             completionTokens: modelUsage.usage.completionTokens,
