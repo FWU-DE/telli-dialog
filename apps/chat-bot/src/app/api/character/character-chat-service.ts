@@ -247,7 +247,8 @@ export async function sendCharacterMessage({
         const { promptTokens, completionTokens } = usage;
 
         // Agentic requests can invoke several models across iterations. Persist each usage
-        // entry separately so pricing and reporting stay associated with the serving model.
+        // entry separately so pricing and reporting stay associated with the serving model. The
+        // fallback is only needed until non-agentic streaming chat is removed.
         for (const modelUsage of modelUsages ?? [
           { modelId: modelId ?? generationModelId, usage, priceInCents },
         ]) {
