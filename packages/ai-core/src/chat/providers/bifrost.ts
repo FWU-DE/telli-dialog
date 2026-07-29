@@ -69,12 +69,14 @@ function getUsedModelId(extraFields: unknown, models: AiModel[]): string | undef
   const returnedNames = [fields.model_deployment, fields.model_requested].filter(
     (value): value is string => typeof value === 'string',
   );
-  return models.find((candidate) => {
-    const candidateName = getBifrostModelName(candidate);
-    return returnedNames.some(
-      (returnedName) => returnedName === candidateName || returnedName === candidate.name,
-    );
-  })?.id;
+  for (const returnedName of returnedNames) {
+    const matchingModel = models.find((candidate) => {
+      const candidateName = getBifrostModelName(candidate);
+      return returnedName === candidateName || returnedName === candidate.name;
+    });
+    if (matchingModel) return matchingModel.id;
+  }
+  return undefined;
 }
 
 export function constructBifrostTextStreamFn(model: AiModel): TextStreamFn {

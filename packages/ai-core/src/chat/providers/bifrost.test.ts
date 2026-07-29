@@ -184,4 +184,27 @@ describe('Bifrost chat provider', () => {
       totalTokens: 9,
     });
   });
+
+  it('uses the actual deployment when identifying a fallback response', async () => {
+    responsesCreateMock.mockResolvedValue({
+      output: [{ type: 'message', content: [{ type: 'output_text', text: 'Fallback' }] }],
+      usage: { input_tokens: 1, output_tokens: 2, total_tokens: 3 },
+      extra_fields: {
+        model_requested: 'azure/primary',
+        model_deployment: 'openai/fallback',
+      },
+    });
+
+    const primary = createBifrostModel('azure');
+    const fallback = { ...createBifrostModel('openai'), id: 'model-fallback', name: 'fallback' };
+    const generateText = constructBifrostTextGenerationFn(primary);
+
+    const result = await generateText({
+      messages: [{ role: 'user', content: 'Hello' }],
+      model: primary.name,
+      fallbackModels: [fallback],
+    });
+
+    expect(result.modelId).toBe('model-fallback');
+  });
 });

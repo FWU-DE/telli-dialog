@@ -243,17 +243,19 @@ export async function sendCharacterMessage({
       onTextChunk: (delta) => {
         update(delta);
       },
-      onComplete: async ({ usage, priceInCents }) => {
+      onComplete: async ({ usage, priceInCents, modelId, modelUsages }) => {
         const { promptTokens, completionTokens } = usage;
 
-        await dbUpdateTokenUsageByCharacterChatId({
-          modelId: definedModel.id,
-          completionTokens,
-          promptTokens,
-          characterId: character.id,
-          userId: teacherUserAndContext.id,
-          costsInCent: priceInCents,
-        });
+        for (const modelUsage of modelUsages ?? [{ modelId, usage, priceInCents }]) {
+          await dbUpdateTokenUsageByCharacterChatId({
+            modelId: modelUsage.modelId ?? generationModelId,
+            completionTokens: modelUsage.usage.completionTokens,
+            promptTokens: modelUsage.usage.promptTokens,
+            characterId: character.id,
+            userId: teacherUserAndContext.id,
+            costsInCent: modelUsage.priceInCents,
+          });
+        }
 
         await sendRabbitmqEvent(
           constructNewMessageEvent({
@@ -287,7 +289,7 @@ export async function sendCharacterMessage({
             const { promptTokens, completionTokens } = usage;
 
             await dbUpdateTokenUsageByCharacterChatId({
-              modelId: definedModel.id,
+              modelId: modelId ?? generationModelId,
               completionTokens,
               promptTokens,
               characterId: character.id,

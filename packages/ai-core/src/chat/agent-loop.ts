@@ -22,6 +22,8 @@ type RunAgentLoopParams = {
     fullText: string;
     usage: TokenUsage;
     priceInCents: number;
+    modelId?: string;
+    modelUsages: Array<{ modelId?: string; usage: TokenUsage; priceInCents: number }>;
     agentLoopMessages: AiCoreMessage[];
   }) => void;
   onError: (error: Error) => void;
@@ -46,6 +48,8 @@ export function runAgentLoop({
     let fullText = '';
     let totalUsage: TokenUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
     let totalPriceInCents = 0;
+    let lastModelId: string | undefined;
+    const modelUsages: Array<{ modelId?: string; usage: TokenUsage; priceInCents: number }> = [];
     const loopMessages = [...messages];
     const tools = toolRegistry ? Object.values(toolRegistry).map((entry) => entry.definition) : [];
 
@@ -80,6 +84,8 @@ export function runAgentLoop({
               apiKeyId,
               async ({ usage, priceInCents, modelId }) => {
                 onModelUsed?.(modelId);
+                lastModelId = modelId;
+                modelUsages.push({ modelId, usage, priceInCents });
                 totalUsage = {
                   promptTokens: totalUsage.promptTokens + usage.promptTokens,
                   completionTokens: totalUsage.completionTokens + usage.completionTokens,
@@ -181,6 +187,8 @@ export function runAgentLoop({
         fullText,
         usage: totalUsage,
         priceInCents: totalPriceInCents,
+        modelId: lastModelId,
+        modelUsages,
         agentLoopMessages: loopMessages.slice(messages.length),
       });
     } catch (error) {

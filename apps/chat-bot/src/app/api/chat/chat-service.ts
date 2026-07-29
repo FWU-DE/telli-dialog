@@ -502,11 +502,15 @@ export async function sendChatMessage({
     fullText,
     usage,
     priceInCents,
+    modelId = generationModelId,
     agentLoopMessages = [],
+    modelUsages,
   }: {
     fullText: string;
     usage: TokenUsage;
     priceInCents: number;
+    modelId?: string;
+    modelUsages?: Array<{ modelId?: string; usage: TokenUsage; priceInCents: number }>;
     agentLoopMessages?: AiCoreMessage[];
   }) {
     const persistedAgentLoopMessages = filterPersistedAgentLoopMessages(agentLoopMessages);
@@ -552,14 +556,19 @@ export async function sendChatMessage({
 
     const { promptTokens, completionTokens } = usage;
 
-    await dbInsertConversationUsage({
-      conversationId: activeConversation.id,
-      userId: user.id,
-      modelId: generationModelId,
-      completionTokens,
-      promptTokens,
-      costsInCent: priceInCents,
-    });
+    const usages = modelUsages ?? [{ modelId, usage, priceInCents }];
+    await Promise.all(
+      usages.map((modelUsage) =>
+        dbInsertConversationUsage({
+          conversationId: activeConversation.id,
+          userId: user.id,
+          modelId: modelUsage.modelId ?? modelId,
+          completionTokens: modelUsage.usage.completionTokens,
+          promptTokens: modelUsage.usage.promptTokens,
+          costsInCent: modelUsage.priceInCents,
+        }),
+      ),
+    );
 
     await sendRabbitmqEvent(
       constructNewMessageEvent({
@@ -591,7 +600,7 @@ export async function sendChatMessage({
 
     // Start the agent loop in the background
     runAgentLoop({
-      modelId: definedModel.id,
+      modelId: generationModelId,
       modelName: definedModel.name,
       apiKeyId,
       fallbackModelIds,
@@ -604,9 +613,23 @@ export async function sendChatMessage({
       onTextChunk: (delta: string) => {
         update(delta);
       },
-      onComplete: async ({ fullText, usage, priceInCents, agentLoopMessages }) => {
+      onComplete: async ({
+        fullText,
+        usage,
+        priceInCents,
+        modelId,
+        modelUsages,
+        agentLoopMessages,
+      }) => {
         try {
-          await persistAssistantMessage({ fullText, usage, priceInCents, agentLoopMessages });
+          await persistAssistantMessage({
+            fullText,
+            usage,
+            priceInCents,
+            modelId,
+            modelUsages,
+            agentLoopMessages,
+          });
           done();
         } catch (error) {
           logError('Error during agent loop completion:', error);
