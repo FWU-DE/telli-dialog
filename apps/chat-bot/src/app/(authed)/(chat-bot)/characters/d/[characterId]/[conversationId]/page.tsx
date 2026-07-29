@@ -104,7 +104,7 @@ export default async function Page(
           id={chat.id}
           initialMessages={chatMessages}
           character={character}
-          enableFileUpload={false}
+          enableFileUpload={true}
           imageSource={avatarPictureUrl}
           logoElement={logoElement}
         />

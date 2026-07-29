@@ -52,6 +52,7 @@ export default async function Page(
   const locale = await resolveSharingLocale({
     customChatVariant: 'learning-scenario',
     customChatId: learningScenario.id,
+    sharingUserId: learningScenario.startedBy,
   });
   const messages = await loadTranslations(locale);
 

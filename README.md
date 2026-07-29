@@ -158,7 +158,7 @@ LLM_GPT5NANO_BASE_URL=...
 
 Without these, placeholder values are used and the models will not work until real keys are configured.
 
-The seeded models are routed through Bifrost. Start the local Docker services before seeding and keep `BIFROST_ADMIN_URL` configured so the seed can sync provider keys to Bifrost. With the standard local Docker Compose setup, leave `LLM_MOCK_BASE_URL` unset or set it to `http://mock-llm:6556`; the URL must be reachable from the Bifrost container, not from the host.
+The seeded models are routed through Bifrost. Start the local Docker services before seeding and keep `BIFROST_ADMIN_URL`, `BIFROST_ADMIN_USERNAME`, and `BIFROST_ADMIN_PASSWORD` configured so the seed can sync provider keys to Bifrost. With the standard local Docker Compose setup, `BIFROST_ADMIN_USERNAME=admin` and `BIFROST_ADMIN_PASSWORD=admin` work out of the box. Leave `LLM_MOCK_BASE_URL` unset or set it to `http://mock-llm:6556`; the URL must be reachable from the Bifrost container, not from the host.
 
 ```sh
 pnpm db:seed
