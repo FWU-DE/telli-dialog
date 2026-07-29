@@ -22,7 +22,6 @@ import {
   CardTitle,
 } from '@ui/components/card';
 import { Button } from '@ui/components/button';
-import { Separator } from '@ui/components/separator';
 import { AddUrlToPresetForm } from './AddUrlToPresetForm';
 import { Chip } from '@ui/components/chip';
 import { TrashSimpleIcon } from '@phosphor-icons/react';
