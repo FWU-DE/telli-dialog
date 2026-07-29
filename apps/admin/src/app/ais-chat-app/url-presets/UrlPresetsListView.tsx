@@ -19,6 +19,8 @@ import {
 import { Button } from '@ui/components/button';
 import { Separator } from '@ui/components/separator';
 import { AddUrlToPresetForm } from './AddUrlToPresetForm';
+import { Chip } from '@ui/components/chip';
+import { TrashSimpleIcon } from '@phosphor-icons/react';
 
 export function UrlPresetsListView() {
   const [urlPresets, setUrlPresets] = useState<UrlPreset[]>([]);
@@ -90,8 +92,16 @@ export function UrlPresetsListView() {
           <CardContent>
             {preset.urls.map((url, index) => (
               <div className="flex" key={`url_container_${index}`}>
-                <div key={`url_${index}`}>{url}</div>
-                <Button onClick={() => handleDeleteUrlFromPreset(preset.id, url)}>Delete</Button>
+                <Chip>
+                  {url}
+                  <Button
+                    onClick={() => handleDeleteUrlFromPreset(preset.id, url)}
+                    variant="ghost"
+                    size="icon-sm"
+                  >
+                    <TrashSimpleIcon data-icon="inline-end" />
+                  </Button>
+                </Chip>
               </div>
             ))}
           </CardContent>
