@@ -1,4 +1,5 @@
-import { ApiKeyModel, dbValidateApiKey } from '@ais-chat/api-database';
+import { dbValidateApiKey } from '@ais-chat/api-database';
+import type { ApiKeyModel } from '@ais-chat/api-database';
 import { errorifyAsyncFn } from '@ais-chat/api-database/utils';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ChatCompletionChunk } from 'openai/resources/chat/completions.js';
