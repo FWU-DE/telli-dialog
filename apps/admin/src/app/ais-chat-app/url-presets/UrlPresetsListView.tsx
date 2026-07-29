@@ -22,6 +22,7 @@ import { AddUrlToPresetForm } from './AddUrlToPresetForm';
 import { Chip } from '@ui/components/chip';
 import { TrashSimpleIcon } from '@phosphor-icons/react';
 import { CreateNewUrlPreset } from './CreateNewUrlPreset';
+import { EditUrlPresetForm } from './EditUrlPresetForm';
 
 export function UrlPresetsListView() {
   const [urlPresets, setUrlPresets] = useState<UrlPreset[]>([]);
@@ -76,41 +77,74 @@ export function UrlPresetsListView() {
     setUrlPresets((prev) => prev.map((p) => (p.id === presetId ? updatedPreset : p)));
   }
 
+  async function handleUpdateUrlPreset(
+    presetId: string,
+    name: string,
+    orderNumber: number,
+  ): Promise<void> {
+    const preset = urlPresets.find((preset) => preset.id === presetId);
+    if (!preset) return;
+
+    const presetData: UrlPresetUpdate = {
+      ...preset,
+      name,
+      orderNumber,
+    };
+    const updatedPreset = await updateUrlPresetAction(presetId, presetData);
+    setUrlPresets((prev) => prev.map((p) => (p.id === presetId ? updatedPreset : p)));
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <CreateNewUrlPreset onCreate={handleNewUrlPreset} />
-      {urlPresets.map((preset) => (
-        <Card key={preset.id} className="">
-          <CardHeader>
-            <CardTitle>{preset.name}</CardTitle>
-            <CardAction>
-              <Button onClick={() => handleDeleteUrlPreset(preset.id)}>Delete</Button>
-            </CardAction>
-          </CardHeader>
-          <Separator className="mx-2" />
-          <CardContent className="flex flex-row flex-wrap gap-2">
-            {preset.urls.map((url, index) => (
-              <Chip key={`url_${index}`}>
-                {url}
-                <Button
-                  onClick={() => handleDeleteUrlFromPreset(preset.id, url)}
-                  variant="ghost"
-                  size="icon-sm"
-                >
-                  <TrashSimpleIcon data-icon="inline-end" />
+      {urlPresets
+        .sort((a, b) => a.orderNumber - b.orderNumber)
+        .map((preset) => (
+          <Card key={preset.id} className="bg-gray-100">
+            <CardHeader>
+              <CardTitle>
+                <EditUrlPresetForm
+                  currentName={preset.name}
+                  existingNames={urlPresets.filter((p) => p.id !== preset.id).map((p) => p.name)}
+                  currentOrderNumber={preset.orderNumber}
+                  onUpdate={({ name, orderNumber }) =>
+                    handleUpdateUrlPreset(preset.id, name, orderNumber)
+                  }
+                />
+              </CardTitle>
+              <CardAction>
+                <Button variant="destructive" onClick={() => handleDeleteUrlPreset(preset.id)}>
+                  <TrashSimpleIcon />
+                  Delete
                 </Button>
-              </Chip>
-            ))}
-          </CardContent>
-          <Separator className="mx-2" />
-          <CardFooter>
-            <AddUrlToPresetForm
-              existingUrls={preset.urls}
-              onAdd={(url) => handleAddUrlToPreset(preset.id, url)}
-            />
-          </CardFooter>
-        </Card>
-      ))}
+              </CardAction>
+            </CardHeader>
+            <Separator className="mx-2" />
+            <CardContent className="flex flex-row flex-wrap gap-2">
+              {preset.urls
+                .sort((a, b) => a.localeCompare(b))
+                .map((url, index) => (
+                  <Chip key={`url_${index}`}>
+                    {url}
+                    <Button
+                      onClick={() => handleDeleteUrlFromPreset(preset.id, url)}
+                      variant="ghost"
+                      size="icon-sm"
+                    >
+                      <TrashSimpleIcon data-icon="inline-end" />
+                    </Button>
+                  </Chip>
+                ))}
+            </CardContent>
+            <Separator className="mx-2" />
+            <CardFooter>
+              <AddUrlToPresetForm
+                existingUrls={preset.urls}
+                onAdd={(url) => handleAddUrlToPreset(preset.id, url)}
+              />
+            </CardFooter>
+          </Card>
+        ))}
     </div>
   );
 }
