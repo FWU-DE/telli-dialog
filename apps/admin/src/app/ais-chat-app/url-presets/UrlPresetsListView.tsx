@@ -120,21 +120,24 @@ export function UrlPresetsListView() {
               </CardAction>
             </CardHeader>
             <Separator className="mx-2" />
-            <CardContent className="flex flex-row flex-wrap gap-2">
-              {preset.urls
-                .sort((a, b) => a.localeCompare(b))
-                .map((url, index) => (
-                  <Chip key={`url_${index}`}>
-                    {url}
-                    <Button
-                      onClick={() => handleDeleteUrlFromPreset(preset.id, url)}
-                      variant="ghost"
-                      size="icon-sm"
-                    >
-                      <TrashSimpleIcon data-icon="inline-end" />
-                    </Button>
-                  </Chip>
-                ))}
+            <CardContent className="flex flex-col gap-2">
+              <div>Webseiten</div>
+              <div className="flex flex-row flex-wrap gap-2">
+                {preset.urls
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((url, index) => (
+                    <Chip key={`url_${index}`}>
+                      {url}
+                      <Button
+                        onClick={() => handleDeleteUrlFromPreset(preset.id, url)}
+                        variant="ghost"
+                        size="icon-sm"
+                      >
+                        <TrashSimpleIcon data-icon="inline-end" />
+                      </Button>
+                    </Chip>
+                  ))}
+              </div>
             </CardContent>
             <Separator className="mx-2" />
             <CardFooter>

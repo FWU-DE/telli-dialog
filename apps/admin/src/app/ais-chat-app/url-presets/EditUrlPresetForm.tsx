@@ -12,8 +12,8 @@ const editFormSchema = z.object({
   name: z.string().trim().min(1, 'Name ist erforderlich'),
   orderNumber: z
     .number({ message: 'Die Ordnungsnummer muss eine nicht-negative ganze Zahl sein' })
-    .int('Die Ordnungsnummer muss eine nicht-negative ganze Zahl sein')
-    .nonnegative('Die Ordnungsnummer muss eine nicht-negative ganze Zahl sein'),
+    .int('Die Nummer muss eine nicht-negative ganze Zahl sein')
+    .nonnegative('Die Nummer muss eine nicht-negative ganze Zahl sein'),
 });
 
 type EditForm = z.infer<typeof editFormSchema>;
@@ -86,14 +86,8 @@ export function EditUrlPresetForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-3">
-      <FormField name="name" control={control} label="Name" placeholder="Name" required />
-      <FormField
-        name="orderNumber"
-        control={control}
-        label="Ordnungsnummer"
-        type="number"
-        required
-      />
+      <FormField name="name" control={control} label="Name" placeholder="Name" />
+      <FormField name="orderNumber" control={control} label="Reihenfolge" type="number" />
       <div className="flex justify-end gap-2">
         <Button
           type="button"
