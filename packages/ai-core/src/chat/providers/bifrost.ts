@@ -16,6 +16,8 @@ type BifrostUpstreamProvider = 'azure' | 'openai' | 'ionos' | 'vertex';
 
 type BifrostExtraFields = {
   provider?: string;
+  // Bifrost returns the originally requested model and the deployment that served it.
+  // The deployment may identify a fallback, but it can also be an upstream-specific alias.
   model_requested?: string;
   model_deployment?: string;
 };
