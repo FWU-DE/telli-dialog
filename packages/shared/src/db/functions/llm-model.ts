@@ -73,7 +73,7 @@ export async function dbGetStaticModelByRole(role: StaticModelRole) {
   return result;
 }
 
-export async function dbGetModelByRoleAndFederalStateId({
+export async function dbFindModelByRoleAndFederalStateId({
   role,
   federalStateId,
 }: {

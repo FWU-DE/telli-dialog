@@ -2,13 +2,15 @@ import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/funct
 import {
   dbGetModelByIdAndFederalStateId,
   dbGetLlmModelsByFederalStateId,
-  dbGetModelByRoleAndFederalStateId,
 } from '@shared/db/functions/llm-model';
 import { errorifyAsyncFn } from '@shared/utils/error';
 import { LlmModelSelectModel } from '@shared/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
 import { getFirstTextModel } from '@shared/llm-models/llm-model-utils';
-import { getDefaultModel } from '@shared/llm-models/llm-model-service';
+import {
+  findStaticModelByRoleAndFederalStateId,
+  getDefaultModel,
+} from '@shared/llm-models/llm-model-service';
 import { logError } from '@shared/logging';
 import { isValidPositiveNumber } from '@shared/utils/number';
 
@@ -153,8 +155,8 @@ export function getTokenUsage(usage: { promptTokens: number; completionTokens: n
 export async function getAuxiliaryModel(federalStateId: string): Promise<LlmModelSelectModel> {
   const [llmModels, configuredAuxiliaryModel, configuredFallbackModel] = await Promise.all([
     dbGetLlmModelsByFederalStateId({ federalStateId }),
-    dbGetModelByRoleAndFederalStateId({ role: 'auxiliary', federalStateId }),
-    dbGetModelByRoleAndFederalStateId({ role: 'auxiliary-fallback', federalStateId }),
+    findStaticModelByRoleAndFederalStateId({ role: 'auxiliary', federalStateId }),
+    findStaticModelByRoleAndFederalStateId({ role: 'auxiliary-fallback', federalStateId }),
   ]);
   const auxiliaryModel =
     configuredAuxiliaryModel ?? configuredFallbackModel ?? getFirstTextModel(llmModels);
@@ -179,9 +181,9 @@ export async function getStrongAuxiliaryModel(
   const [llmModels, auxiliaryModel, configuredAuxiliaryModel, configuredFallbackModel] =
     await Promise.all([
       dbGetLlmModelsByFederalStateId({ federalStateId }),
-      dbGetModelByRoleAndFederalStateId({ role: 'strong-auxiliary', federalStateId }),
-      dbGetModelByRoleAndFederalStateId({ role: 'auxiliary', federalStateId }),
-      dbGetModelByRoleAndFederalStateId({ role: 'auxiliary-fallback', federalStateId }),
+      findStaticModelByRoleAndFederalStateId({ role: 'strong-auxiliary', federalStateId }),
+      findStaticModelByRoleAndFederalStateId({ role: 'auxiliary', federalStateId }),
+      findStaticModelByRoleAndFederalStateId({ role: 'auxiliary-fallback', federalStateId }),
     ]);
   if (auxiliaryModel !== undefined) {
     return auxiliaryModel;

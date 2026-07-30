@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@ui/components/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@ui/components/card';
 import {
   Select,
   SelectContent,
@@ -94,10 +101,12 @@ export default function StaticModelConfigurationView({ models, configurations }:
             </Select>
           </div>
         ))}
+      </CardContent>
+      <CardFooter>
         <Button onClick={() => void save()} disabled={isSubmitting || !isComplete}>
           {isSubmitting ? 'Speichert...' : 'Speichern'}
         </Button>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 }

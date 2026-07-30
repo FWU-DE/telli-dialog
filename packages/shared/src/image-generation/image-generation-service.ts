@@ -1,8 +1,6 @@
-import {
-  dbGetLlmModelsByFederalStateId,
-  dbGetModelByRoleAndFederalStateId,
-} from '@shared/db/functions/llm-model';
+import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { LlmModelSelectModel } from '@shared/db/schema';
+import { findStaticModelByRoleAndFederalStateId } from '@shared/llm-models/llm-model-service';
 
 /**
  * Fetches available image generation models from database
@@ -34,7 +32,7 @@ export async function getDefaultImageModel({
   federalStateId: string;
 }): Promise<LlmModelSelectModel | undefined> {
   return (
-    (await dbGetModelByRoleAndFederalStateId({ role: 'default-image', federalStateId })) ??
+    (await findStaticModelByRoleAndFederalStateId({ role: 'default-image', federalStateId })) ??
     imageModels[0]
   );
 }
