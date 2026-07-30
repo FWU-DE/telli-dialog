@@ -540,14 +540,11 @@ export function CharacterEdit({
 
           {isWebSearchAvailable && (
             <CustomChatWebSearch
-              name="isWebSearchEnabled"
               control={control}
               onChange={() => {
                 void flushAutoSave();
               }}
               showScopeOptions
-              scopeName="webSearchScope"
-              includedDomainsName="webSearchIncludedDomains"
             />
           )}
 

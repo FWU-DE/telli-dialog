@@ -451,7 +451,6 @@ export function AssistantEdit({
 
           {isWebSearchAvailable && (
             <CustomChatWebSearch
-              name="isWebSearchEnabled"
               control={control}
               onCheckedChange={() => {
                 void flushAutoSave();
