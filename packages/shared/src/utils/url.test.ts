@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseHyperlinks, getDisplayUrl, normalizeDomain } from './url-utils';
+import { parseHyperlinks, getDisplayUrl, normalizeDomain } from './url';
 
 describe('parseHyperlinks', () => {
   it('should return undefined for content without URLs', () => {

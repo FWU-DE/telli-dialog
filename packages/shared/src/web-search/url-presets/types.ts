@@ -1,8 +1,8 @@
-import { normalizeDomain } from '@shared/utils/url-utils';
+import { utils } from '@shared/utils';
 import z from 'zod';
 
 export const domainSchema = z.string().transform((value, ctx) => {
-  const parsedUrl = normalizeDomain(value);
+  const parsedUrl = utils.url.normalizeDomain(value);
   if (parsedUrl === null) {
     ctx.issues.push({
       format: 'url',

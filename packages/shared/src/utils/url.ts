@@ -1,3 +1,11 @@
+export const regexes = {
+  // Require at least one dot and only valid DNS label characters.
+  domain: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/,
+  url: /(https?:\/\/)(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,63}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi,
+  urlWithOptionalProtocol:
+    /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,63}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi,
+};
+
 /**
  * Strips the protocol and "www." prefix from a URL for display purposes.
  * Also converts the URL to lowercase for consistent display.
@@ -38,9 +46,7 @@ export function getDisplayUrl(uri: string) {
  * @returns An array of URLs found in the content, or undefined if none are found.
  */
 export function parseHyperlinks(content: string): string[] | undefined {
-  const urlPattern =
-    /(https?:\/\/)(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,24}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi;
-  const matches = content.match(urlPattern) || [];
+  const matches = content.match(regexes.url) || [];
   if (matches[0] === undefined) {
     return undefined;
   }
@@ -85,9 +91,7 @@ export function normalizeDomain(input: string): string | null {
     host = host.slice(4);
   }
 
-  // Require at least one dot and only valid DNS label characters.
-  const hostnamePattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
-  if (!hostnamePattern.test(host)) {
+  if (!regexes.domain.test(host)) {
     return null;
   }
 

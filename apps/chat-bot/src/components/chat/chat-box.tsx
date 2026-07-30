@@ -7,7 +7,6 @@ import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 import Citation from './sources/citation';
-import { parseHyperlinks } from '@shared/utils/url-utils';
 import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { isImageFile } from '@/utils/files/generic';
@@ -21,6 +20,7 @@ import {
   useWebSearchSourcesDisclosure,
 } from './sources/web-search-sources';
 import DownloadConversationMessageButton from './download-conversation-message-button';
+import { utils } from '@shared/utils';
 
 // Re-export for consumers
 export type { PendingFileModel };
@@ -77,7 +77,8 @@ export function ChatBox({
   const allFiles = dbFiles ?? pendingFiles;
   const hasFiles = allFiles !== undefined && allFiles.length > 0;
 
-  const parsedUrls = children.role === 'user' ? (parseHyperlinks(children.content) ?? []) : [];
+  const parsedUrls =
+    children.role === 'user' ? (utils.url.parseHyperlinks(children.content) ?? []) : [];
   const userWebSources = children.role === 'user' ? [...(webSources ?? [])] : [];
   const assistantWebSearchSources =
     children.role === 'assistant' ? (children.webSearchResults ?? []) : [];
