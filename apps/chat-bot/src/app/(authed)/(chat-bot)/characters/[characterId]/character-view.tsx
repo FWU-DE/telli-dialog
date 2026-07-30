@@ -17,7 +17,7 @@ import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
-import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
+import { CustomChatWebSearch } from '@/components/custom-chat/web-search/custom-chat-web-search';
 import { Card, CardContent } from '@ui/components/card';
 import { FieldGroup } from '@ui/components/field';
 import { useToast } from '@/components/common/toast';

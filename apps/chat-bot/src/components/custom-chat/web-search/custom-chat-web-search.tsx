@@ -2,7 +2,7 @@
 
 import { Switch } from '@ui/components/switch';
 import { useTranslations } from 'next-intl';
-import { CustomChatHeading2 } from './custom-chat-heading2';
+import { CustomChatHeading2 } from '../custom-chat-heading2';
 import { CustomChatWebSearchIncludedDomains } from './custom-chat-web-search-included-domains';
 import { Card, CardContent } from '@ui/components/card';
 import { Control, Controller, FieldPath, FieldValues } from 'react-hook-form';

@@ -55,7 +55,7 @@ import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-cha
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
-import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
+import { CustomChatWebSearch } from '@/components/custom-chat/web-search/custom-chat-web-search';
 import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
 import {
   getAccessLevelFromShareForm,
