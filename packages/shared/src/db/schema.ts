@@ -74,6 +74,38 @@ export type UserInsertModel = z.infer<typeof userInsertSchema>;
 export type UserUpdateModel = z.infer<typeof userUpdateSchema>;
 
 /**
+ * Schema for table personal_context
+ *
+ * Holds the user-owned markdown document that is injected as background
+ * information into chats. Kept in its own table so the frequently loaded
+ * user_entity row stays small.
+ */
+export const personalContextTable = pgTable('personal_context', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .references(() => userTable.id, { onDelete: 'cascade' })
+    .notNull()
+    .unique(),
+  content: text('content').notNull().default(''),
+  enabled: boolean('enabled').notNull().default(true),
+  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+    .defaultNow()
+    .$onUpdateFn(() => new Date())
+    .notNull(),
+});
+
+export const personalContextSelectSchema = createSelectSchema(personalContextTable);
+export const personalContextInsertSchema = createInsertSchema(personalContextTable).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type PersonalContextSelectModel = z.infer<typeof personalContextSelectSchema>;
+export type PersonalContextInsertModel = z.infer<typeof personalContextInsertSchema>;
+
+/**
  * Schema for table conversation
  */
 export const conversationTypeEnum = pgEnum('conversation_type', conversationTypeSchema.enum);
@@ -93,6 +125,8 @@ export const conversationTable = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
     type: conversationTypeEnum('type').notNull().default('chat'),
+    // null = inherit the default for this conversation's mode, true/false = explicit user override
+    personalContextEnabled: boolean('personal_context_enabled'),
   },
   (table) => [
     index().on(table.userId),
@@ -209,6 +243,7 @@ export const federalStateFeatureTogglesSchema = z.object({
   isAgenticChatEnabled: z.boolean().optional(),
   isImageGenerationEnabled: z.boolean().optional(),
   isWebSearchEnabled: z.boolean().optional(),
+  isPersonalContextEnabled: z.boolean().optional(),
 });
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
 
@@ -1275,6 +1310,7 @@ export const assistantTable = pgTable(
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     isWebSearchEnabled: boolean('is_web_search_enabled').notNull().default(false),
+    isPersonalContextEnabled: boolean('is_personal_context_enabled').notNull().default(false),
     pictureId: text('picture_id'),
     description: text('description'),
     instructions: text('instructions'),

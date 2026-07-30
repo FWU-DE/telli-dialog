@@ -16,12 +16,14 @@ import { BoxArrowDownIcon } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/common/toast';
 import { useCallback } from 'react';
+import { PersonalContextToggle } from './personal-context-toggle';
 
 export type ChatHeaderBarProps = {
   userAndContext: UserAndContext;
   title?: string;
   downloadConversationEnabled: boolean;
   chatId: string;
+  personalContext?: { enabled: boolean };
 };
 
 export function ChatHeaderBar({
@@ -29,6 +31,7 @@ export function ChatHeaderBar({
   title,
   downloadConversationEnabled: downloadConversationEnabledProp,
   chatId,
+  personalContext,
 }: ChatHeaderBarProps) {
   const tCommon = useTranslations('common');
   const toast = useToast();
@@ -64,6 +67,12 @@ export function ChatHeaderBar({
               <div className="hidden min-w-0 sm:flex">
                 <span className="block w-full truncate font-normal text-xl">{title}</span>
               </div>
+            )}
+            {personalContext !== undefined && (
+              <PersonalContextToggle
+                conversationId={chatId}
+                initialEnabled={personalContext.enabled}
+              />
             )}
             <div className="hidden sm:flex">
               <DownloadConversationButton

@@ -1,4 +1,5 @@
 import { isWebSearchAvailableForFederalState } from '@/app/api/chat/websearch';
+import { isPersonalContextAvailable } from '@shared/personal-context/personal-context-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAssistantByUser } from '@shared/assistants/assistant-service';
@@ -37,6 +38,10 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
         initialLinks={initialLinks}
         avatarPictureUrl={pictureUrl}
         isWebSearchAvailable={isWebSearchAvailableForFederalState(federalState.featureToggles)}
+        isPersonalContextAvailable={isPersonalContextAvailable({
+          featureToggles: federalState.featureToggles,
+          userRole: user.userRole,
+        })}
       />
     </DefaultPageLayout>
   );

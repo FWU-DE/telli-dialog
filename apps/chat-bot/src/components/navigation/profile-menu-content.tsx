@@ -6,7 +6,8 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { IMPRESSUM_URL, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from './const';
 import { DropdownMenuItem } from '@ui/components/dropdown-menu';
-import { SignOutIcon } from '@phosphor-icons/react';
+import { BrainIcon, SignOutIcon } from '@phosphor-icons/react';
+import { isPersonalContextAvailable } from '@shared/personal-context/personal-context-availability';
 
 async function logout() {
   window.location.assign('/api/auth/logout');
@@ -15,9 +16,28 @@ async function logout() {
 export function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAndContext }) {
   const tCommon = useTranslations('common');
   const tLegal = useTranslations('legal');
+  const tPersonalContext = useTranslations('personal-context');
+
+  const showPersonalContext =
+    userAndContext !== undefined &&
+    isPersonalContextAvailable({
+      featureToggles: userAndContext.federalState.featureToggles,
+      userRole: userAndContext.userRole,
+    });
 
   return (
     <>
+      {showPersonalContext && (
+        <>
+          <DropdownMenuItem asChild>
+            <Link href="/personal-context">
+              <BrainIcon />
+              {tPersonalContext('heading')}
+            </Link>
+          </DropdownMenuItem>
+          <hr className="border-gray-200 mx-2" />
+        </>
+      )}
       <DropdownMenuItem asChild>
         <Link href={PRIVACY_POLICY_URL} prefetch={false} target="_blank" rel="noopener noreferrer">
           {tLegal('privacy-policy')}

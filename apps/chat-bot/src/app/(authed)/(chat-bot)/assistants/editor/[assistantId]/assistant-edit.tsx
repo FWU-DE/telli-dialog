@@ -56,6 +56,7 @@ import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/cu
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
 import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
+import { CustomChatPersonalContext } from '@/components/custom-chat/custom-chat-personal-context';
 import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
 import {
   getAccessLevelFromShareForm,
@@ -112,6 +113,7 @@ function createAssistantFormValuesSchema(t: AssistantTranslator) {
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
     isWebSearchEnabled: z.boolean(),
+    isPersonalContextEnabled: z.boolean(),
     promptSuggestions: z
       .array(
         z.object({
@@ -133,12 +135,14 @@ export function AssistantEdit({
   initialLinks,
   avatarPictureUrl,
   isWebSearchAvailable,
+  isPersonalContextAvailable,
 }: {
   assistant: AssistantSelectModel;
   relatedFiles: FileModel[];
   initialLinks: WebSource[];
   avatarPictureUrl?: string;
   isWebSearchAvailable: boolean;
+  isPersonalContextAvailable: boolean;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -163,6 +167,7 @@ export function AssistantEdit({
     ...getShareFormValues(assistant.accessLevel),
     hasLinkAccess: assistant.hasLinkAccess,
     isWebSearchEnabled: assistant.isWebSearchEnabled,
+    isPersonalContextEnabled: assistant.isPersonalContextEnabled,
     promptSuggestions:
       assistant.promptSuggestions && assistant.promptSuggestions.length > 0
         ? assistant.promptSuggestions.map((s) => ({ value: s }))
@@ -201,6 +206,7 @@ export function AssistantEdit({
           filterGroup: toFilterGroup(data),
           hasLinkAccess: data.hasLinkAccess,
           isWebSearchEnabled: data.isWebSearchEnabled,
+          isPersonalContextEnabled: data.isPersonalContextEnabled,
           promptSuggestions: data.promptSuggestions
             .map((suggestion) => suggestion.value.trim())
             .filter((suggestion) => suggestion.length > 0),
@@ -452,6 +458,16 @@ export function AssistantEdit({
           {isWebSearchAvailable && (
             <CustomChatWebSearch
               name="isWebSearchEnabled"
+              control={control}
+              onCheckedChange={() => {
+                void flushAutoSave();
+              }}
+            />
+          )}
+
+          {isPersonalContextAvailable && (
+            <CustomChatPersonalContext
+              name="isPersonalContextEnabled"
               control={control}
               onCheckedChange={() => {
                 void flushAutoSave();

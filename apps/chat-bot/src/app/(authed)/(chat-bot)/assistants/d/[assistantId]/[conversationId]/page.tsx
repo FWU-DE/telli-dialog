@@ -7,6 +7,10 @@ import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
+import {
+  isPersonalContextAvailable,
+  resolvePersonalContextEnabled,
+} from '@shared/personal-context/personal-context-service';
 import { getConversationWithMessagesAndAssistant } from '@shared/assistants/assistant-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
@@ -56,6 +60,16 @@ export default async function Page(
     searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
   const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
+  const personalContextAvailable = isPersonalContextAvailable({
+    featureToggles: federalState.featureToggles,
+    userRole: user.userRole,
+  });
+  const personalContextEnabled = resolvePersonalContextEnabled({
+    featureToggles: federalState.featureToggles,
+    userRole: user.userRole,
+    conversation,
+    assistant,
+  });
 
   return (
     <LlmModelsProvider
@@ -71,6 +85,9 @@ export default async function Page(
             title: assistant.name,
             downloadConversationEnabled: chatMessages.length > 0,
             userAndContext,
+            personalContext: personalContextAvailable
+              ? { enabled: personalContextEnabled }
+              : undefined,
           },
         }}
       >
