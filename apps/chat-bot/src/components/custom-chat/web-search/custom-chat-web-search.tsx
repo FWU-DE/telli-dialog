@@ -8,16 +8,31 @@ import { WebSearchEditView } from './web-search-edit-view';
 import { WebSearchReadonlyView } from './web-search-readonly-view';
 import type { WebSearchFields } from './web-search.types';
 
+/** This type is for assistants that do not have webSearchScope and webSearchIncludedDomains */
+type WebSearchBaseFields = Pick<WebSearchFields, 'isWebSearchEnabled'>;
+/** This type is for characters and learningScenarios */
+type WebSearchScopeFields = Pick<
+  WebSearchFields,
+  'isWebSearchEnabled' | 'webSearchScope' | 'webSearchIncludedDomains'
+>;
+
 type WebSearchProps<TFieldValues extends FieldValues = FieldValues> =
   | {
       readonly: true;
     }
   | {
       readonly?: false;
-      control: Control<TFieldValues & WebSearchFields>;
+      control: Control<TFieldValues & WebSearchBaseFields>;
       onCheckedChange?: (checked: boolean) => void;
       onChange?: () => void;
-      showScopeOptions?: boolean;
+      showScopeOptions?: false;
+    }
+  | {
+      readonly?: false;
+      control: Control<TFieldValues & WebSearchScopeFields>;
+      onCheckedChange?: (checked: boolean) => void;
+      onChange?: () => void;
+      showScopeOptions: true;
     };
 
 export function CustomChatWebSearch<TFieldValues extends FieldValues = FieldValues>(
