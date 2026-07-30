@@ -46,5 +46,10 @@
         "join": "Join dialog"
       }
     }
+  },
+  "websearch": {
+    "results": {
+      "title": "Web sources"
+    }
   }
 }
