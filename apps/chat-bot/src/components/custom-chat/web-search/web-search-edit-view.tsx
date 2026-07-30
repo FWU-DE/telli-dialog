@@ -2,18 +2,33 @@
 
 import { Switch } from '@ui/components/switch';
 import { useTranslations } from 'next-intl';
-import { FieldPath, FieldValues, useController } from 'react-hook-form';
+import { Control, FieldPath, FieldValues, useController } from 'react-hook-form';
 import { WebSearchScopeOptions } from './web-search-scope-options';
-import type { WebSearchEditableProps, WebSearchFields } from './web-search.types';
+import { WebSearchIncludedDomains } from './web-search-included-domains';
+import type { WebSearchScope } from '@shared/db/schema';
+import type { WebSearchFields } from './web-search.types';
+
+type WebSearchEditViewProps<TFieldValues extends FieldValues = FieldValues> = {
+  readonly?: false;
+  control: Control<TFieldValues & WebSearchFields>;
+  onCheckedChange?: (checked: boolean) => void;
+  onChange?: () => void;
+  showScopeOptions?: boolean;
+};
 
 export function WebSearchEditView<TFieldValues extends FieldValues = FieldValues>(
-  props: WebSearchEditableProps<TFieldValues>,
+  props: WebSearchEditViewProps<TFieldValues>,
 ) {
   const t = useTranslations('custom-chat.web-search');
   const { field, fieldState } = useController({
     name: 'isWebSearchEnabled' as FieldPath<TFieldValues & WebSearchFields>,
     control: props.control,
   });
+  const { field: scopeField } = useController({
+    name: 'webSearchScope' as FieldPath<TFieldValues & WebSearchFields>,
+    control: props.control,
+  });
+  const scopeValue = (scopeField.value as WebSearchScope) ?? 'all-web';
 
   return (
     <div className="flex flex-col gap-6">
@@ -28,7 +43,18 @@ export function WebSearchEditView<TFieldValues extends FieldValues = FieldValues
         aria-invalid={fieldState.invalid}
       />
       {props.showScopeOptions === true && field.value === true ? (
-        <WebSearchScopeOptions control={props.control} onChange={props.onChange} />
+        <>
+          <WebSearchScopeOptions
+            scopeValue={scopeValue}
+            onScopeChange={(value) => {
+              scopeField.onChange(value);
+              props.onChange?.();
+            }}
+          />
+          {scopeValue === 'included-domains' && (
+            <WebSearchIncludedDomains control={props.control} onChange={props.onChange} />
+          )}
+        </>
       ) : null}
     </div>
   );
