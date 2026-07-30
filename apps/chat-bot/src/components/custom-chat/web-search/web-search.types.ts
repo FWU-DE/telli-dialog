@@ -7,7 +7,7 @@ export type WebSearchFields = {
   webSearchIncludedDomains?: string[];
 };
 
-export type CustomChatWebSearchProps<TFieldValues extends FieldValues = FieldValues> =
+export type WebSearchProps<TFieldValues extends FieldValues = FieldValues> =
   | {
       readonly: true;
       control?: never;
@@ -30,5 +30,7 @@ export type CustomChatWebSearchProps<TFieldValues extends FieldValues = FieldVal
       showScopeOptions: true;
     };
 
-export type EditableCustomChatWebSearchProps<TFieldValues extends FieldValues = FieldValues> =
-  Exclude<CustomChatWebSearchProps<TFieldValues>, { readonly: true }>;
+export type WebSearchEditableProps<TFieldValues extends FieldValues = FieldValues> = Exclude<
+  WebSearchProps<TFieldValues>,
+  { readonly: true }
+>;

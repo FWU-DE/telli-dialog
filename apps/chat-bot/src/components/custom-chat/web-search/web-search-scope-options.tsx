@@ -5,10 +5,10 @@ import { Control, FieldPath, FieldValues, useController } from 'react-hook-form'
 import { RadioGroup, RadioGroupItem } from '@ui/components/radio-group';
 import { FieldLabel } from '@ui/components/field';
 import type { WebSearchScope } from '@shared/db/schema';
-import { CustomChatWebSearchIncludedDomains } from './custom-chat-web-search-included-domains';
-import type { WebSearchFields } from './custom-chat-web-search.types';
+import { WebSearchIncludedDomains } from './web-search-included-domains';
+import type { WebSearchFields } from './web-search.types';
 
-export function CustomChatWebSearchScopeOptions<TFieldValues extends FieldValues>({
+export function WebSearchScopeOptions<TFieldValues extends FieldValues>({
   control,
   onChange,
 }: {
@@ -48,7 +48,7 @@ export function CustomChatWebSearchScopeOptions<TFieldValues extends FieldValues
         </div>
       </RadioGroup>
       {scopeValue === 'included-domains' && (
-        <CustomChatWebSearchIncludedDomains control={control} onChange={onChange} />
+        <WebSearchIncludedDomains control={control} onChange={onChange} />
       )}
     </>
   );

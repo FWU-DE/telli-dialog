@@ -14,9 +14,9 @@ import {
 import { utils } from '@shared/utils';
 import { useToast } from '@/components/common/toast';
 import { cn } from '@/utils/tailwind';
-import type { WebSearchFields } from './custom-chat-web-search.types';
+import type { WebSearchFields } from './web-search.types';
 
-export function CustomChatWebSearchIncludedDomains<TFieldValues extends FieldValues>({
+export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
   control,
   onChange,
 }: {
