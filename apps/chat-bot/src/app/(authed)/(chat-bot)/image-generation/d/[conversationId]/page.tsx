@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import ImageGenerationChat from '@/components/image-generation/image-generation-chat';
 import { ImageModelsProvider } from '@/components/providers/image-model-provider';
 import { ImageStyleProvider } from '@/components/providers/image-style-provider';
+import { ImageAssistantProvider } from '@/components/providers/image-assistant-provider';
 import {
   getAvailableImageModelsForFederalState,
   getDefaultImageModel,
@@ -69,17 +70,21 @@ export default async function Page(props: PageProps) {
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider defaultImageStyle={lastUsedStyleInChat}>
-        <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
-          <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-auto">
-              <ImageGenerationChat
-                conversationId={conversationId}
-                initialMessages={messages}
-                fileMapping={fileMapping}
-              />
+        <ImageAssistantProvider
+          isEnabled={federalState.featureToggles.isImageAssistantEnabled ?? false}
+        >
+          <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
+            <div className="flex flex-col h-full">
+              <div className="flex-1 overflow-auto">
+                <ImageGenerationChat
+                  conversationId={conversationId}
+                  initialMessages={messages}
+                  fileMapping={fileMapping}
+                />
+              </div>
             </div>
-          </div>
-        </DefaultPageLayout>
+          </DefaultPageLayout>
+        </ImageAssistantProvider>
       </ImageStyleProvider>
     </ImageModelsProvider>
   );

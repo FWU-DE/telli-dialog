@@ -37,10 +37,15 @@ function encodeRFC5987Value(value: string) {
   );
 }
 
+const s3Endpoint = env.otcS3Hostname.startsWith('http')
+  ? env.otcS3Hostname
+  : `https://${env.otcS3Hostname}`;
+
 const s3Client = new S3Client({
-  // region: 'eu-de',
   region: 'eu-nl',
-  endpoint: `https://${env.otcS3Hostname}`,
+  endpoint: s3Endpoint,
+  // Use path-style for local S3-compatible services (e.g. RustFS on localhost)
+  forcePathStyle: new URL(s3Endpoint).hostname === 'localhost',
   credentials: {
     accessKeyId: env.otcAccessKeyId,
     secretAccessKey: env.otcSecretAccessKey,

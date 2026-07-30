@@ -209,6 +209,7 @@ export const federalStateFeatureTogglesSchema = z.object({
   isAgenticChatEnabled: z.boolean().optional(),
   isImageGenerationEnabled: z.boolean().optional(),
   isWebSearchEnabled: z.boolean().optional(),
+  isImageAssistantEnabled: z.boolean().optional(),
 });
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
 

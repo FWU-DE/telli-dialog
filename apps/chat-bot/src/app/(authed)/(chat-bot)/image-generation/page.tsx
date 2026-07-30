@@ -1,5 +1,6 @@
 import { ImageModelsProvider } from '@/components/providers/image-model-provider';
 import { ImageStyleProvider } from '@/components/providers/image-style-provider';
+import { ImageAssistantProvider } from '@/components/providers/image-assistant-provider';
 import ImageGenerationChat from '@/components/image-generation/image-generation-chat';
 import {
   getAvailableImageModelsForFederalState,
@@ -35,13 +36,17 @@ export default async function ImageGenerationPage() {
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider>
-        <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
-          <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-auto">
-              <ImageGenerationChat />
+        <ImageAssistantProvider
+          isEnabled={federalState.featureToggles.isImageAssistantEnabled ?? false}
+        >
+          <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
+            <div className="flex flex-col h-full">
+              <div className="flex-1 overflow-auto">
+                <ImageGenerationChat />
+              </div>
             </div>
-          </div>
-        </DefaultPageLayout>
+          </DefaultPageLayout>
+        </ImageAssistantProvider>
       </ImageStyleProvider>
     </ImageModelsProvider>
   );

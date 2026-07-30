@@ -11,7 +11,8 @@ test.describe('with stored auth', () => {
 
     // send first message
     await sendMessage(page, 'Wieviel ist 2+2? [Hinweis: Ergebnis ist 4]');
-    await expect(page.getByLabel('assistant message 1')).toContainText('4');
+    // Firefox can be slow to reflect aria-label after streaming ends — allow extra time
+    await expect(page.getByLabel('assistant message 1')).toContainText('4', { timeout: 15000 });
 
     // send second message
     await sendMessage(page, 'Wieviel ist 3+3? [Hinweis: Ergebnis ist 6]');

@@ -61,6 +61,7 @@ function transformToFederalStateEditForm(federalState: FederalStateModel): Feder
       ...federalState.featureToggles,
       isImageGenerationEnabled: federalState.featureToggles.isImageGenerationEnabled ?? false,
       isWebSearchEnabled: federalState.featureToggles.isWebSearchEnabled ?? false,
+      isImageAssistantEnabled: federalState.featureToggles.isImageAssistantEnabled ?? false,
       isSharedPageLocaleDetectionEnabled:
         federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true,
       isAgenticChatEnabled: federalState.featureToggles.isAgenticChatEnabled ?? false,
@@ -260,6 +261,12 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="featureToggles.isWebSearchEnabled"
             label="Websuche aktivieren"
             description="Erlaubt die Nutzung der Websuchfunktion."
+            control={control}
+          />
+          <FormFieldCheckbox
+            name="featureToggles.isImageAssistantEnabled"
+            label="Bildassistent aktivieren"
+            description="Zeigt den geführten Bildprompt-Assistenten in der Bildgenerierungsansicht an."
             control={control}
           />
           <FormFieldCheckbox
