@@ -1,6 +1,7 @@
 export const regexes = {
-  domainOnly: /^(?!:\/\/)([a-zA-Z0-9-_]+\.)+[a-zA-Z]{2,11}?$/,
-  domainWithOptionalProtocol: /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-_]+\.)+[a-zA-Z]{2,11}?$/,
+  url: /(https?:\/\/)(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,63}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi,
+  urlWithOptionalProtocol:
+    /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,63}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi,
 };
 
 /**
@@ -53,9 +54,6 @@ export function parseHyperlinks(content: string): string[] | undefined {
   return matches;
 }
 
-// Require at least one dot and only valid DNS label characters.
-const domainPattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
-
 /**
  * Normalizes a URL to a domain.
  *
@@ -91,10 +89,6 @@ export function normalizeDomain(input: string): string | null {
 
   if (host.startsWith('www.')) {
     host = host.slice(4);
-  }
-
-  if (!domainPattern.test(host)) {
-    return null;
   }
 
   return host;

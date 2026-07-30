@@ -14,7 +14,7 @@ const addUrlFormSchema = z.object({
     .trim()
     .min(1, 'Domain ist erforderlich')
     .regex(
-      utils.url.regexes.domainWithOptionalProtocol,
+      utils.url.regexes.urlWithOptionalProtocol,
       'Bitte eine gültige URL ohne Unterseiten eingeben',
     ),
 });

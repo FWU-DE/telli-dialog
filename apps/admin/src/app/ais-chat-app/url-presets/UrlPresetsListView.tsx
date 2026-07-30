@@ -31,6 +31,7 @@ import { toast } from 'sonner';
 
 export function UrlPresetsListView() {
   const [urlPresets, setUrlPresets] = useState<UrlPreset[]>([]);
+  const [isBusy, setIsBusy] = useState(false);
 
   const loadUrlPresets = async () => {
     startTransition(async () => {
@@ -64,6 +65,7 @@ export function UrlPresetsListView() {
   }
 
   async function handleDeleteUrlPreset(id: string): Promise<void> {
+    setIsBusy(true);
     const result = await deleteUrlPresetAction(id);
     if (result.success) {
       setUrlPresets((prev) => prev.filter((preset) => preset.id !== id));
@@ -71,6 +73,7 @@ export function UrlPresetsListView() {
       toast.error(result.error.message);
       await loadUrlPresets();
     }
+    setIsBusy(false);
   }
 
   async function handleAddUrlToPreset(presetId: string, url: string): Promise<void> {
@@ -115,6 +118,7 @@ export function UrlPresetsListView() {
     const preset = urlPresets.find((preset) => preset.id === presetId);
     if (!preset) return;
 
+    setIsBusy(true);
     const presetData: UrlPresetUpdate = {
       ...preset,
       name,
@@ -127,6 +131,7 @@ export function UrlPresetsListView() {
       toast.error(result.error.message);
       await loadUrlPresets();
     }
+    setIsBusy(false);
   }
 
   return (
@@ -148,7 +153,11 @@ export function UrlPresetsListView() {
                 />
               </CardTitle>
               <CardAction>
-                <Button variant="destructive" onClick={() => handleDeleteUrlPreset(preset.id)}>
+                <Button
+                  variant="destructive"
+                  disabled={isBusy}
+                  onClick={() => handleDeleteUrlPreset(preset.id)}
+                >
                   <TrashSimpleIcon />
                   Löschen
                 </Button>
