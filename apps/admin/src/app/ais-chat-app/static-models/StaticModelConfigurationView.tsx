@@ -18,7 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@ui/components/select';
-import type { LlmModelSelectModel, StaticModelRole } from '@shared/db/schema';
+import type {
+  LlmModelSelectModel,
+  StaticModelsConfiguration,
+  StaticModelRole,
+} from '@shared/db/schema';
 import { updateStaticModelConfigurationAction } from './actions';
 
 const roles: { role: StaticModelRole; label: string; type: 'text' | 'image' }[] = [
@@ -32,16 +36,12 @@ const roles: { role: StaticModelRole; label: string; type: 'text' | 'image' }[] 
 
 type Props = {
   models: LlmModelSelectModel[];
-  configurations: { role: StaticModelRole; model: LlmModelSelectModel }[];
+  configuration: StaticModelsConfiguration | undefined;
 };
 
-export default function StaticModelConfigurationView({ models, configurations }: Props) {
+export default function StaticModelConfigurationView({ models, configuration }: Props) {
   const [selected, setSelected] = useState<Partial<Record<StaticModelRole, string>>>(
-    () =>
-      Object.fromEntries(configurations.map(({ role, model }) => [role, model.id])) as Record<
-        StaticModelRole,
-        string
-      >,
+    () => configuration ?? {},
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -50,9 +50,7 @@ export default function StaticModelConfigurationView({ models, configurations }:
   async function save() {
     setIsSubmitting(true);
     try {
-      const result = await updateStaticModelConfigurationAction(
-        roles.map(({ role }) => ({ role, modelId: selected[role] ?? '' })),
-      );
+      const result = await updateStaticModelConfigurationAction(selected);
       if (!result.success) {
         toast.error(result.error.message);
         return;

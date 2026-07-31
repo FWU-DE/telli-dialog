@@ -680,6 +680,15 @@ export const staticModelRoleSchema = z.enum([
   'default-image',
 ]);
 export type StaticModelRole = z.infer<typeof staticModelRoleSchema>;
+export const staticModelsConfigurationSchema = z.object({
+  'default-chat': z.string().uuid(),
+  fallback: z.string().uuid(),
+  auxiliary: z.string().uuid(),
+  'strong-auxiliary': z.string().uuid(),
+  'auxiliary-fallback': z.string().uuid(),
+  'default-image': z.string().uuid(),
+});
+export type StaticModelsConfiguration = z.infer<typeof staticModelsConfigurationSchema>;
 
 export const llmModelTable = pgTable(
   'llm_model',
@@ -713,13 +722,13 @@ export type LlmModelSelectModel = z.infer<typeof llmModelSelectSchema>;
 export type LlmModelInsertModel = z.infer<typeof llmModelInsertSchema>;
 export type LlmModelUpdateModel = z.infer<typeof llmModelUpdateSchema>;
 
-export const staticModelConfigurationTable = pgTable('static_model_configuration', {
-  role: text('role').$type<StaticModelRole>().primaryKey(),
-  modelId: uuid('model_id')
-    .notNull()
-    .references(() => llmModelTable.id),
+/** Generic project-wide JSON configuration object; services validate each key's value schema. */
+export type ConfigurationValue = Record<string, unknown>;
+export const configurationTable = pgTable('configuration', {
+  key: text('key').primaryKey(),
+  value: json('value').$type<ConfigurationValue>().notNull(),
 });
-export type StaticModelConfiguration = typeof staticModelConfigurationTable.$inferSelect;
+export type Configuration = typeof configurationTable.$inferSelect;
 
 /**
  * Schema for table federal_state_llm_model_mapping

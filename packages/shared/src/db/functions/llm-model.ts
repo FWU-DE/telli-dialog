@@ -1,12 +1,6 @@
 import { and, eq, getTableColumns, inArray } from 'drizzle-orm';
 import { db } from '..';
-import {
-  federalStateLlmModelMappingTable,
-  LlmModelSelectModel,
-  llmModelTable,
-  staticModelConfigurationTable,
-  StaticModelRole,
-} from '../schema';
+import { federalStateLlmModelMappingTable, LlmModelSelectModel, llmModelTable } from '../schema';
 import { KnotenpunktLlmModel } from '../../knotenpunkt/schema';
 import {
   dbGetFederalStateWithDecryptedApiKeyWithResult,
@@ -59,63 +53,29 @@ export async function dbGetLlmModelsByFederalStateId({
     .$withCache();
 }
 
-export async function dbGetStaticModelConfigurations() {
-  return db.select().from(staticModelConfigurationTable).$withCache();
-}
-
-export async function dbGetStaticModelByRole(role: StaticModelRole) {
-  const [result] = await db
-    .select({ ...getTableColumns(llmModelTable) })
-    .from(staticModelConfigurationTable)
-    .innerJoin(llmModelTable, eq(staticModelConfigurationTable.modelId, llmModelTable.id))
-    .where(eq(staticModelConfigurationTable.role, role))
-    .$withCache();
-  return result;
-}
-
-export async function dbFindModelByRoleAndFederalStateId({
-  role,
+export async function dbFindModelByIdAndFederalStateId({
+  modelId,
   federalStateId,
 }: {
-  role: StaticModelRole;
+  modelId: string;
   federalStateId: string;
 }) {
   const [model] = await db
     .select({ ...getTableColumns(llmModelTable) })
-    .from(staticModelConfigurationTable)
-    .innerJoin(llmModelTable, eq(staticModelConfigurationTable.modelId, llmModelTable.id))
+    .from(llmModelTable)
     .innerJoin(
       federalStateLlmModelMappingTable,
       eq(federalStateLlmModelMappingTable.llmModelId, llmModelTable.id),
     )
     .where(
       and(
-        eq(staticModelConfigurationTable.role, role),
+        eq(llmModelTable.id, modelId),
         eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
         eq(llmModelTable.isDeleted, false),
       ),
     )
     .$withCache();
   return model;
-}
-
-export async function dbGetStaticModelConfigurationWithModels() {
-  return db
-    .select({ role: staticModelConfigurationTable.role, model: llmModelTable })
-    .from(staticModelConfigurationTable)
-    .innerJoin(llmModelTable, eq(staticModelConfigurationTable.modelId, llmModelTable.id))
-    .$withCache();
-}
-
-export async function dbUpdateStaticModelConfigurations(
-  configurations: { role: StaticModelRole; modelId: string }[],
-) {
-  return db.transaction(async (tx) => {
-    await tx.delete(staticModelConfigurationTable);
-    return configurations.length > 0
-      ? tx.insert(staticModelConfigurationTable).values(configurations).returning()
-      : [];
-  });
 }
 
 export async function dbFindModelsToUpdate({

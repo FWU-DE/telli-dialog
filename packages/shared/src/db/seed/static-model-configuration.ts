@@ -1,6 +1,8 @@
-import { asc, eq } from 'drizzle-orm';
-import { db } from '..';
-import { staticModelConfigurationTable, llmModelTable, StaticModelRole } from '../schema';
+import { dbGetConfiguration, dbUpsertConfiguration } from '../functions/configuration';
+import { dbGetAllLlmModels } from '../functions/llm-model';
+import { staticModelsConfigurationSchema, StaticModelRole } from '../schema';
+import { STATIC_MODELS_CONFIGURATION_KEY } from '@shared/llm-models/llm-model-service';
+import { getFirstTextModel } from '@shared/llm-models/llm-model-utils';
 
 const defaultModelNames: Record<StaticModelRole, string> = {
   'default-chat': 'gpt-5-mini',
@@ -12,24 +14,24 @@ const defaultModelNames: Record<StaticModelRole, string> = {
 };
 
 export async function initializeStaticModelConfigurations() {
-  const configurations = await db.select().from(staticModelConfigurationTable);
-  const configuredRoles = new Set(configurations.map((configuration) => configuration.role));
+  const configuration = await dbGetConfiguration(STATIC_MODELS_CONFIGURATION_KEY);
+  if (!configuration || !staticModelsConfigurationSchema.safeParse(configuration.value).success) {
+    const models = await dbGetAllLlmModels();
+    const firstTextModel = getFirstTextModel(models);
+    const firstImageModel = models.find((model) => model.priceMetadata.type === 'image');
+    const staticModelsConfiguration = Object.fromEntries(
+      Object.entries(defaultModelNames).map(([role, modelName]) => {
+        const model =
+          models.find((candidate) => candidate.name === modelName) ??
+          (role === 'default-image' ? firstImageModel : firstTextModel);
+        if (!model) throw new Error(`No model available to configure ${role}`);
+        return [role, model.id];
+      }),
+    );
 
-  for (const [role, modelName] of Object.entries(defaultModelNames) as [
-    StaticModelRole,
-    string,
-  ][]) {
-    if (configuredRoles.has(role)) continue;
-
-    const [model] = await db
-      .select({ id: llmModelTable.id })
-      .from(llmModelTable)
-      .where(eq(llmModelTable.name, modelName))
-      .orderBy(asc(llmModelTable.createdAt))
-      .limit(1);
-
-    if (model) {
-      await db.insert(staticModelConfigurationTable).values({ role, modelId: model.id });
-    }
+    await dbUpsertConfiguration({
+      key: STATIC_MODELS_CONFIGURATION_KEY,
+      value: staticModelsConfigurationSchema.parse(staticModelsConfiguration),
+    });
   }
 }

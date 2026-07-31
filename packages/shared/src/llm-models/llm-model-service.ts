@@ -1,67 +1,62 @@
 import {
-  dbFindModelByRoleAndFederalStateId,
   dbGetAllLlmModels,
-  dbGetStaticModelConfigurationWithModels,
-  dbUpdateStaticModelConfigurations,
+  dbGetLlmModelById,
+  dbFindModelByIdAndFederalStateId,
 } from '@shared/db/functions/llm-model';
+import { dbGetConfiguration, dbUpsertConfiguration } from '@shared/db/functions/configuration';
 import {
-  staticModelRoleSchema,
   type LlmModelSelectModel,
+  staticModelsConfigurationSchema,
+  type StaticModelsConfiguration,
   type StaticModelRole,
 } from '../db/schema';
 import { InvalidArgumentError } from '@shared/error/invalid-argument-error';
 import { getFirstTextModel } from './llm-model-utils';
-import { z } from 'zod';
 
-const staticModelConfigurationsSchema = z
-  .array(
-    z.object({
-      role: staticModelRoleSchema,
-      modelId: z.string().uuid(),
-    }),
-  )
-  .length(staticModelRoleSchema.options.length)
-  .refine(
-    (configurations) =>
-      new Set(configurations.map((configuration) => configuration.role)).size ===
-      configurations.length,
-    'Each static model role must be configured exactly once.',
-  );
+export const STATIC_MODELS_CONFIGURATION_KEY = 'static_models';
 
-export type StaticModelConfigurationInput = z.infer<typeof staticModelConfigurationsSchema>;
+export type StaticModelConfigurationInput = StaticModelsConfiguration;
 
-/** Returns all models and their current static role assignments for administration. */
+/** Returns all models and the current static model configuration for administration. */
 export async function getStaticModelConfiguration() {
-  const [models, configurations] = await Promise.all([
+  const [models, configuration] = await Promise.all([
     dbGetAllLlmModels(),
-    dbGetStaticModelConfigurationWithModels(),
+    dbGetConfiguration(STATIC_MODELS_CONFIGURATION_KEY),
   ]);
-  return { models, configurations };
+  const parsedConfiguration = configuration
+    ? staticModelsConfigurationSchema.safeParse(configuration.value)
+    : undefined;
+  return {
+    models,
+    configuration: parsedConfiguration?.success ? parsedConfiguration.data : undefined,
+  };
 }
 
 /** Validates and persists a complete set of static model role assignments. */
 export async function updateStaticModelConfiguration(input: unknown) {
-  const configurations = staticModelConfigurationsSchema.safeParse(input);
-  if (!configurations.success) {
+  const configuration = staticModelsConfigurationSchema.safeParse(input);
+  if (!configuration.success) {
     throw new InvalidArgumentError('Static model configuration is invalid.');
   }
 
   const models = await dbGetAllLlmModels();
-  const modelsById = new Map(models.map((model) => [model.id, model]));
 
-  for (const configuration of configurations.data) {
-    const model = modelsById.get(configuration.modelId);
+  for (const [role, modelId] of Object.entries(configuration.data) as [StaticModelRole, string][]) {
+    const model = models.find((candidate) => candidate.id === modelId);
     if (!model || model.isDeleted) {
-      throw new InvalidArgumentError(`Configured model is not available: ${configuration.role}`);
+      throw new InvalidArgumentError(`Configured model is not available: ${role}`);
     }
 
-    const requiresImageModel = configuration.role === 'default-image';
+    const requiresImageModel = role === 'default-image';
     if ((model.priceMetadata.type === 'image') !== requiresImageModel) {
-      throw new InvalidArgumentError(`Configured model type is invalid: ${configuration.role}`);
+      throw new InvalidArgumentError(`Configured model type is invalid: ${role}`);
     }
   }
 
-  return dbUpdateStaticModelConfigurations(configurations.data);
+  return dbUpsertConfiguration({
+    key: STATIC_MODELS_CONFIGURATION_KEY,
+    value: configuration.data,
+  });
 }
 
 /** Finds a configured model only when it is available to the given federal state. */
@@ -72,7 +67,17 @@ export async function findStaticModelByRoleAndFederalStateId({
   role: StaticModelRole;
   federalStateId: string;
 }) {
-  return dbFindModelByRoleAndFederalStateId({ role, federalStateId });
+  const configuration = await getStaticModelsConfiguration();
+  if (!configuration) return undefined;
+  return dbFindModelByIdAndFederalStateId({
+    modelId: configuration[role],
+    federalStateId,
+  });
+}
+
+export async function findStaticModelByRole(role: StaticModelRole) {
+  const configuration = await getStaticModelsConfiguration();
+  return configuration ? dbGetLlmModelById({ modelId: configuration[role] }) : undefined;
 }
 
 /** Resolves the configured default chat model with a compatible text-model fallback. */
@@ -87,6 +92,14 @@ export async function getDefaultModel({
     (await findStaticModelByRoleAndFederalStateId({ role: 'default-chat', federalStateId })) ??
     getFirstTextModel(models)
   );
+}
+
+async function getStaticModelsConfiguration() {
+  const configuration = await dbGetConfiguration(STATIC_MODELS_CONFIGURATION_KEY);
+  const parsedConfiguration = configuration
+    ? staticModelsConfigurationSchema.safeParse(configuration.value)
+    : undefined;
+  return parsedConfiguration?.success ? parsedConfiguration.data : undefined;
 }
 
 export async function getDefaultModelNameByFederalStateId(

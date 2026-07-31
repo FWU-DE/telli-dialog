@@ -1,5 +1,5 @@
 {
-  "id": "363b288c-b4fc-4918-bc41-e6c603fca670",
+  "id": "331844a1-71e7-4a91-89a7-6b20911ffd24",
   "prevId": "2f905f50-8ee2-45ab-b048-562ba5948530",
   "version": "7",
   "dialect": "postgresql",
@@ -1124,6 +1124,31 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.configuration": {
+      "name": "configuration",
+      "schema": "",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -3020,45 +3045,6 @@
         "shared_learning_scenario_usage_tracking_model_id_fk": {
           "name": "shared_learning_scenario_usage_tracking_model_id_fk",
           "tableFrom": "shared_learning_scenario_usage_tracking",
-          "tableTo": "llm_model",
-          "columnsFrom": [
-            "model_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.static_model_configuration": {
-      "name": "static_model_configuration",
-      "schema": "",
-      "columns": {
-        "role": {
-          "name": "role",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "model_id": {
-          "name": "model_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "static_model_configuration_model_id_llm_model_id_fk": {
-          "name": "static_model_configuration_model_id_llm_model_id_fk",
-          "tableFrom": "static_model_configuration",
           "tableTo": "llm_model",
           "columnsFrom": [
             "model_id"

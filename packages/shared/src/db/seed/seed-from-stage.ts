@@ -6,8 +6,8 @@ import {
   FederalStateSelectModel,
   LlmModelSelectModel,
   FederalStateLlmModelMappingSelectModel,
-  staticModelConfigurationTable,
-  StaticModelConfiguration,
+  configurationTable,
+  Configuration,
 } from '../schema';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
@@ -48,8 +48,8 @@ async function getFederalStateLlmModelMappings(): Promise<
   return await stageDb.select().from(federalStateLlmModelMappingTable);
 }
 
-async function getStaticModelConfigurations(): Promise<StaticModelConfiguration[]> {
-  return await stageDb.select().from(staticModelConfigurationTable);
+async function getConfigurations(): Promise<Configuration[]> {
+  return await stageDb.select().from(configurationTable);
 }
 
 async function seedDatabase() {
@@ -66,10 +66,10 @@ async function seedDatabase() {
       .values(await getLlmModels())
       .onConflictDoNothing();
 
-    const staticModelConfigurations = await getStaticModelConfigurations();
-    await localDb.delete(staticModelConfigurationTable);
-    if (staticModelConfigurations.length > 0) {
-      await localDb.insert(staticModelConfigurationTable).values(staticModelConfigurations);
+    const configurations = await getConfigurations();
+    await localDb.delete(configurationTable);
+    if (configurations.length > 0) {
+      await localDb.insert(configurationTable).values(configurations);
     }
 
     await localDb

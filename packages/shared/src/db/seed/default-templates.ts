@@ -12,7 +12,7 @@ import { DUMMY_USER_ID } from './user-entity';
 import { dbUpsertAssistant } from '../functions/assistants';
 import { updateTemplateMappings } from '@shared/templates/template-service';
 import { FEDERAL_STATES } from './federal-state';
-import { dbGetStaticModelByRole } from '@shared/db/functions/llm-model';
+import { findStaticModelByRole } from '@shared/llm-models/llm-model-service';
 import { db } from '@shared/db';
 
 export async function insertTemplateCharacters() {
@@ -67,7 +67,7 @@ export async function insertTemplateLearningScenarios() {
     'shared-chats/_templates',
   );
 
-  const modelId = (await dbGetStaticModelByRole('default-chat'))?.id;
+  const modelId = (await findStaticModelByRole('default-chat'))?.id;
   if (!modelId) {
     throw new Error('No default model found');
   }
