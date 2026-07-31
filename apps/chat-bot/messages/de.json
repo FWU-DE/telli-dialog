@@ -594,7 +594,11 @@
       "websites-empty-error": "Bitte eine URL eingeben.",
       "websites-duplicate-error": "Diese URL wurde bereits hinzugefügt",
       "websites-invalid-error": "Bitte eine gültige URL eingeben.",
-      "websites-counter": "{count} / {max} Domains"
+      "websites-counter": "{count} / {max} Domains",
+      "websites-presets-load-error": "Fehler beim Laden der URL-Presets",
+      "presets-title": "Webseitenpakete",
+      "presets-domain-count": "{count, plural, =1 {# Webseite} other {# Webseiten}}",
+      "presets-add-preset-button": "Paket hinzufügen"
     }
   },
   "assistants": {

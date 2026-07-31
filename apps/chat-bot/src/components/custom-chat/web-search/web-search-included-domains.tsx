@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Control, FieldPath, FieldValues, useController } from 'react-hook-form';
 import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
@@ -15,7 +15,7 @@ import { utils } from '@shared/utils';
 import { useToast } from '@/components/common/toast';
 import { cn } from '@/utils/tailwind';
 import type { WebSearchFields } from './web-search.types';
-import { getAllUrlPresetsAction } from './web-search-actions';
+import { useUrlPresets } from './use-url-presets';
 import { WebSearchUrlPresets } from './web-search-url-presets';
 import { UrlPreset } from '@shared/web-search/url-presets/types';
 
@@ -29,7 +29,7 @@ export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
   const t = useTranslations('custom-chat.web-search');
   const toast = useToast();
   const [currentWebsite, setCurrentWebsite] = useState('');
-  const [urlPresets, setUrlPresets] = useState<UrlPreset[]>([]);
+  const { data: availablePresets, isError } = useUrlPresets();
   const { field } = useController({
     name: 'webSearchIncludedDomains' as FieldPath<TFieldValues & WebSearchFields>,
     control,
@@ -37,15 +37,11 @@ export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
   const websites = (field.value as string[] | undefined) ?? [];
   const isLimitReached = websites.length >= MAX_WEB_SEARCH_INCLUDED_DOMAINS;
 
-  async function loadAllUrlPresets() {
-    const result = await getAllUrlPresetsAction();
-    if (!result.success) {
-      toast.error('Fehler beim Laden der URL-Presets');
-    } else {
-      const presets = result.value;
-      setUrlPresets(presets);
+  useEffect(() => {
+    if (isError) {
+      toast.error(t('websites-presets-load-error'));
     }
-  }
+  }, [isError, toast, t]);
 
   function handleAddPreset(preset: UrlPreset) {
     field.onChange([...websites, ...preset.urls]);
@@ -165,7 +161,7 @@ export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
           max: MAX_WEB_SEARCH_INCLUDED_DOMAINS,
         })}
       </div>
-      <WebSearchUrlPresets presets={urlPresets} onAddPreset={handleAddPreset} />
+      <WebSearchUrlPresets presets={availablePresets ?? []} onAddPreset={handleAddPreset} />
     </div>
   );
 }
