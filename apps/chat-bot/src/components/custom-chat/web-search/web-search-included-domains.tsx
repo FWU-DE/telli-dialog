@@ -44,7 +44,8 @@ export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
   }, [isError, toast, t]);
 
   function handleAddPreset(preset: UrlPreset) {
-    field.onChange([...websites, ...preset.urls]);
+    const missingWebsites = preset.urls.filter((url) => !websites.includes(url));
+    field.onChange([...websites, ...missingWebsites]);
     onChange?.();
   }
 
@@ -161,7 +162,11 @@ export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
           max: MAX_WEB_SEARCH_INCLUDED_DOMAINS,
         })}
       </div>
-      <WebSearchUrlPresets presets={availablePresets ?? []} onAddPreset={handleAddPreset} />
+      <WebSearchUrlPresets
+        availablePresets={availablePresets ?? []}
+        selectedWebsites={websites}
+        onAddPreset={handleAddPreset}
+      />
     </div>
   );
 }
