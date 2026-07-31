@@ -77,11 +77,17 @@ export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
     onChange?.();
   }
 
+  function handleClearWebsites() {
+    field.onChange([]);
+    onChange?.();
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <WebSearchSelectedWebsites
-        websites={websites}
-        isLimitReached={isLimitReached}
+        availablePresets={availablePresets ?? []}
+        selectedWebsites={websites}
+        onClearWebsites={handleClearWebsites}
         onDeleteWebsite={handleDeleteWebsite}
       />
 

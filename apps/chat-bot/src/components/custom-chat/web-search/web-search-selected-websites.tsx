@@ -3,74 +3,89 @@
 import { TrashSimpleIcon } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@ui/components/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/tooltip';
 import { MAX_WEB_SEARCH_INCLUDED_DOMAINS } from '@/configuration-text-inputs/const';
 import { cn } from '@/utils/tailwind';
+import { Card, CardContent } from '@ui/components/card';
+import { UrlPreset } from '@shared/web-search/url-presets/types';
+import { Chip } from '@ui/components/chip';
 
 type WebSearchSelectedWebsitesProps = {
-  websites: string[];
-  isLimitReached: boolean;
+  availablePresets: UrlPreset[];
+  selectedWebsites: string[];
   onDeleteWebsite: (index: number) => void;
+  onClearWebsites: () => void;
 };
 
 export function WebSearchSelectedWebsites({
-  websites,
-  isLimitReached,
+  availablePresets,
+  selectedWebsites,
   onDeleteWebsite,
+  onClearWebsites,
 }: WebSearchSelectedWebsitesProps) {
   const t = useTranslations('custom-chat.web-search');
 
-  if (websites.length === 0) {
+  if (selectedWebsites.length === 0) {
     return null;
   }
 
-  return (
-    <div className="flex flex-wrap gap-2">
-      <div
-        className={cn(
-          'text-sm self-end',
-          isLimitReached ? 'text-destructive' : 'text-muted-foreground',
-        )}
-      >
-        {t('websites-counter', {
-          count: websites.length,
-          max: MAX_WEB_SEARCH_INCLUDED_DOMAINS,
-        })}
-      </div>
+  const isLimitReached = selectedWebsites.length >= MAX_WEB_SEARCH_INCLUDED_DOMAINS;
 
-      {websites.map((website, index) => {
-        return (
-          <div
-            key={website}
-            className="flex items-center gap-1 h-9 px-3 py-0.5 rounded-md bg-primary/15 text-primary text-sm font-medium"
-          >
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <a
-                  href={`https://${website}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="max-w-37.5 truncate"
-                >
-                  {website}
-                </a>
-              </TooltipTrigger>
-              <TooltipContent>{website}</TooltipContent>
-            </Tooltip>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hover:bg-primary/15"
-              aria-label={t('websites-aria-delete', {
-                website,
-              })}
-              onClick={() => onDeleteWebsite(index)}
-            >
-              <TrashSimpleIcon className="size-4" />
-            </Button>
-          </div>
-        );
-      })}
+  const selectedWebsitesByPresetName = new Map<string, string[]>(
+    availablePresets
+      .map((preset): [string, string[]] => [
+        preset.name,
+        preset.urls.filter((url) => selectedWebsites.includes(url)),
+      ])
+      .filter(([, urls]) => urls.length > 0),
+  );
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Card className="pt-0 bg-background-2">
+        <CardContent>
+          {Array.from(selectedWebsitesByPresetName.entries()).map(([presetName, websites]) => {
+            return (
+              <div key={presetName} className="mt-6">
+                <div className="text-xs uppercase text-muted-foreground">{presetName}</div>
+                <ul className="flex flex-wrap gap-2 mt-3">
+                  {websites.map((website, index) => (
+                    <li key={presetName + index}>
+                      <Chip key={presetName + index}>
+                        {website}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="hover:bg-primary/15"
+                          aria-label={t('websites-aria-delete', {
+                            website,
+                          })}
+                          onClick={() => onDeleteWebsite(index)}
+                        >
+                          <TrashSimpleIcon data-icon="inline-end" />
+                        </Button>
+                      </Chip>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
+      <div className="flex items-center justify-end gap-2">
+        <div
+          className={cn('text-sm', isLimitReached ? 'text-destructive' : 'text-muted-foreground')}
+        >
+          {t('websites-counter', {
+            count: selectedWebsites.length,
+            max: MAX_WEB_SEARCH_INCLUDED_DOMAINS,
+          })}
+        </div>
+        <Button variant="link" size="sm" onClick={onClearWebsites}>
+          <TrashSimpleIcon />
+          {t('websites-clear-button')}
+        </Button>
+      </div>
     </div>
   );
 }
