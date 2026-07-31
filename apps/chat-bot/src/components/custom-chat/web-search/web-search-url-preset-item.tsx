@@ -26,7 +26,7 @@ export function WebSearchUrlPresetItem({
       <div className="flex gap-2 items-center">
         <span className="text-sm grow">{preset.name}</span>
         <span className="text-sm whitespace-nowrap">
-          ({t('presets-domain-count', { count: preset.urls.length })})
+          {t('presets-domain-count', { count: preset.urls.length })}
         </span>
 
         <CollapsibleTrigger asChild>
