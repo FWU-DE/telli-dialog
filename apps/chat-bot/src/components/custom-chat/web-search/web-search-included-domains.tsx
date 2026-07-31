@@ -2,15 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { Control, FieldPath, FieldValues, useController } from 'react-hook-form';
-import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
+import { TrashSimpleIcon } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
-import { Input } from '@ui/components/input';
 import { Button } from '@ui/components/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/tooltip';
-import {
-  MAX_WEB_SEARCH_INCLUDED_DOMAINS,
-  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
-} from '@/configuration-text-inputs/const';
+import { MAX_WEB_SEARCH_INCLUDED_DOMAINS } from '@/configuration-text-inputs/const';
 import { utils } from '@shared/utils';
 import { useToast } from '@/components/common/toast';
 import { cn } from '@/utils/tailwind';
@@ -18,6 +14,7 @@ import type { WebSearchFields } from './web-search.types';
 import { useUrlPresets } from './use-url-presets';
 import { WebSearchUrlPresets } from './web-search-url-presets';
 import { UrlPreset } from '@shared/web-search/url-presets/types';
+import { WebSearchWebsiteInput } from './web-search-website-input';
 
 export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
   control,
@@ -85,37 +82,20 @@ export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="mt-1 flex w-full flex-col gap-2 lg:flex-row">
-        <Input
-          wrapperClassName="flex-1"
-          type="text"
-          inputMode="url"
-          placeholder={t('websites-placeholder')}
-          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-          showCharacterCount={false}
-          value={currentWebsite}
-          disabled={isLimitReached}
-          aria-label={t('websites-aria-input')}
-          onChange={(e) => setCurrentWebsite(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              handleAddWebsite();
-            }
-          }}
-        />
-        <Button
-          className="self-center"
-          onClick={handleAddWebsite}
-          disabled={isLimitReached}
-          aria-label={t('websites-add')}
-        >
-          <PlusIcon className="size-4" />
-          {t('websites-add')}
-        </Button>
-      </div>
       {websites.length > 0 && (
         <div className="flex flex-wrap gap-2">
+          <div
+            className={cn(
+              'text-sm self-end',
+              isLimitReached ? 'text-destructive' : 'text-muted-foreground',
+            )}
+          >
+            {t('websites-counter', {
+              count: websites.length,
+              max: MAX_WEB_SEARCH_INCLUDED_DOMAINS,
+            })}
+          </div>
+
           {websites.map((website, index) => {
             return (
               <div
@@ -151,17 +131,14 @@ export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
           })}
         </div>
       )}
-      <div
-        className={cn(
-          'text-sm self-end',
-          isLimitReached ? 'text-destructive' : 'text-muted-foreground',
-        )}
-      >
-        {t('websites-counter', {
-          count: websites.length,
-          max: MAX_WEB_SEARCH_INCLUDED_DOMAINS,
-        })}
-      </div>
+
+      <WebSearchWebsiteInput
+        currentWebsite={currentWebsite}
+        onCurrentWebsiteChange={setCurrentWebsite}
+        onAddWebsite={handleAddWebsite}
+        isLimitReached={isLimitReached}
+      />
+
       <WebSearchUrlPresets
         availablePresets={availablePresets ?? []}
         selectedWebsites={websites}
