@@ -598,6 +598,7 @@
       "websites-clear-button": "Alle entfernen",
       "websites-presets-load-error": "Fehler beim Laden der URL-Presets",
       "presets-title": "Webseitenpakete",
+      "presets-title-unassigned": "Selbst hinzugefügt",
       "presets-domain-count": "{count, plural, =1 {# Webseite} other {# Webseiten}}",
       "presets-add-preset-button": "Paket hinzufügen"
     }

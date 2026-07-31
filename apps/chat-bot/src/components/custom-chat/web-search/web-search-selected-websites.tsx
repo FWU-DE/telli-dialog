@@ -12,7 +12,7 @@ import { Chip } from '@ui/components/chip';
 type WebSearchSelectedWebsitesProps = {
   availablePresets: UrlPreset[];
   selectedWebsites: string[];
-  onDeleteWebsite: (index: number) => void;
+  onDeleteWebsite: (website: string) => void;
   onClearWebsites: () => void;
 };
 
@@ -39,6 +39,12 @@ export function WebSearchSelectedWebsites({
       .filter(([, urls]) => urls.length > 0),
   );
 
+  const allPresetUrls = new Set(availablePresets.flatMap((preset) => preset.urls));
+  const unassignedWebsites = selectedWebsites.filter((website) => !allPresetUrls.has(website));
+  if (unassignedWebsites.length > 0) {
+    selectedWebsitesByPresetName.set('unassigned', unassignedWebsites);
+  }
+
   return (
     <div className="flex flex-col gap-1.5">
       <Card className="pt-0 bg-background-2">
@@ -46,7 +52,9 @@ export function WebSearchSelectedWebsites({
           {Array.from(selectedWebsitesByPresetName.entries()).map(([presetName, websites]) => {
             return (
               <div key={presetName} className="mt-6">
-                <div className="text-xs uppercase text-muted-foreground">{presetName}</div>
+                <div className="text-xs uppercase text-muted-foreground">
+                  {presetName === 'unassigned' ? t('presets-title-unassigned') : presetName}
+                </div>
                 <ul className="flex flex-wrap gap-2 mt-3">
                   {websites.map((website, index) => (
                     <li key={presetName + index}>
@@ -59,7 +67,7 @@ export function WebSearchSelectedWebsites({
                           aria-label={t('websites-aria-delete', {
                             website,
                           })}
-                          onClick={() => onDeleteWebsite(index)}
+                          onClick={() => onDeleteWebsite(website)}
                         >
                           <TrashSimpleIcon data-icon="inline-end" />
                         </Button>

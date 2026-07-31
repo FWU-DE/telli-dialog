@@ -72,8 +72,8 @@ export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
     onChange?.();
   }
 
-  function handleDeleteWebsite(index: number) {
-    field.onChange(websites.filter((_, i) => i !== index));
+  function handleDeleteWebsite(website: string) {
+    field.onChange(websites.filter((w) => w !== website));
     onChange?.();
   }
 
