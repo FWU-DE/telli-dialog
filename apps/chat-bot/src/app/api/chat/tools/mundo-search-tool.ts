@@ -11,7 +11,7 @@ export function buildMundoSearchTool(): ToolRegistration {
   const definition: ToolDefinition = {
     name: 'mundo_search',
     description:
-      'Search the public MUNDO educational media library (mundo.schule) for teaching materials such as videos, worksheets, and interactive content. Use this tool when the user (typically a teacher) asks for lesson materials or media suggestions for a specific topic. Returns up to 10 matching MUNDO media entries with title, description, learn resource type, language, and a direct URL to the MUNDO detail page.',
+      'Search the public MUNDO educational media library (mundo.schule) for teaching materials, e.g. videos or worksheets. Use this tool when the user (typically a teacher) asks for lesson materials or media suggestions for a specific topic. Returns up to 10 matching MUNDO media entries with title, description, learn resource type, language, and a direct URL to the MUNDO detail page.',
     parameters: {
       type: 'object',
       properties: {
