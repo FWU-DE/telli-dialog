@@ -51,6 +51,12 @@ export function constructToolGuidelines(activeTools: ToolDefinition[]) {
     );
   }
 
+  if (hasTool(activeTools, 'mundo_search')) {
+    sections.push(
+      '- Du kannst die **MUNDO-Mediathek** (mundo.schule) nach passenden Bildungsmedien, z.B. Videos, Arbeitsblättern oder interaktiven Inhalten durchsuchen. Wenn nach Unterrichtsmaterialien oder Medienvorschlägen zu einem Thema, Fach oder einer Klassenstufe gefragt wird, nutze `mundo_search`. Du erhältst bis zu 10 Treffer; wähle davon höchstens 5 passende Quellen aus und liste nur deren Links (Feld `url`) mit einem kurzen Hinweis auf, damit die Lehrkraft die Medien direkt öffnen kann.',
+    );
+  }
+
   sections.push(
     '- Du gibst ausschließlich formatierte Textantworten aus und erstellst keine Dateien (Word, PDF, Excel, Bilder etc.). Biete das Erstellen von Dateien niemals an.',
   );
