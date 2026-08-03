@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
-import { getConversation, getConversationMessages } from './conversation-service';
+import {
+  getConversation,
+  getConversationAndMessagesForExport,
+  getConversationMessageForExport,
+  getConversationMessages,
+} from './conversation-service';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import {
@@ -13,6 +18,10 @@ vi.mock('../db/functions/chat', () => ({
   dbGetConversationById: vi.fn(),
   dbGetConversationMessageById: vi.fn(),
   dbGetConversationMessages: vi.fn(),
+}));
+
+vi.mock('../db/functions/character', () => ({
+  dbGetCharacterById: vi.fn(),
 }));
 
 describe('conversation-service', () => {
@@ -96,6 +105,83 @@ describe('conversation-service', () => {
           conversationId,
           userId,
         }),
+      ).rejects.toThrowError(NotFoundError);
+    });
+  });
+
+  describe('getConversationAndMessagesForExport', () => {
+    it('should exclude tool result messages from export', async () => {
+      const userId = generateUUID();
+      const conversationId = generateUUID();
+
+      (dbGetConversationById as MockedFunction<typeof dbGetConversationById>).mockResolvedValue({
+        id: conversationId,
+        userId,
+        characterId: null,
+      } as ConversationModel);
+
+      (
+        dbGetConversationMessages as MockedFunction<typeof dbGetConversationMessages>
+      ).mockResolvedValue([
+        {
+          id: generateUUID(),
+          role: 'user',
+          content: 'Hallo',
+          toolCallId: null,
+        },
+        {
+          id: generateUUID(),
+          role: 'assistant',
+          content: 'Ich suche das fuer dich.',
+          toolCallId: null,
+        },
+        {
+          id: generateUUID(),
+          role: 'tool',
+          content: '{"chunks":[],"error":"No matching chunks found."}',
+          toolCallId: 'call-1',
+        },
+        {
+          id: generateUUID(),
+          role: 'assistant',
+          content: 'Hier ist meine Antwort.',
+          toolCallId: null,
+        },
+      ] as never);
+
+      const result = await getConversationAndMessagesForExport({ conversationId, userId });
+
+      expect(result.messages.map((message) => message.role)).toEqual([
+        'user',
+        'assistant',
+        'assistant',
+      ]);
+      expect(result.messages.some((message) => message.role === 'tool')).toBe(false);
+    });
+  });
+
+  describe('getConversationMessageForExport', () => {
+    it('should reject tool result messages', async () => {
+      const userId = generateUUID();
+      const conversationId = generateUUID();
+      const messageId = generateUUID();
+
+      (dbGetConversationById as MockedFunction<typeof dbGetConversationById>).mockResolvedValue({
+        id: conversationId,
+        userId,
+      } as ConversationModel);
+
+      (
+        dbGetConversationMessageById as MockedFunction<typeof dbGetConversationMessageById>
+      ).mockResolvedValue({
+        id: messageId,
+        role: 'tool',
+        content: '{"chunks":[],"error":"No matching chunks found."}',
+        toolCallId: 'call-1',
+      } as never);
+
+      await expect(
+        getConversationMessageForExport({ conversationId, messageId, userId }),
       ).rejects.toThrowError(NotFoundError);
     });
   });

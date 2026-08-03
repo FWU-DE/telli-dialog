@@ -13,6 +13,10 @@ import { ConversationMessageModel, ConversationModel } from '@shared/db/types';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 import { dbGetCharacterById } from '@shared/db/functions/character';
 
+function isToolResultMessage(message: ConversationMessageModel): boolean {
+  return message.role === 'tool' || message.toolCallId !== null;
+}
+
 /**
  * Returns all conversations that belong to the user for the chat history.
  *
@@ -128,7 +132,7 @@ export async function getConversationAndMessagesForExport({
   }
   return {
     conversation,
-    messages,
+    messages: messages.filter((message) => !isToolResultMessage(message)),
   };
 }
 
@@ -149,6 +153,10 @@ export async function getConversationMessageForExport({
   const message = await dbGetConversationMessageById({ conversationId, messageId, userId });
 
   if (!message) {
+    throw new NotFoundError('Conversation message not found');
+  }
+
+  if (isToolResultMessage(message)) {
     throw new NotFoundError('Conversation message not found');
   }
 
