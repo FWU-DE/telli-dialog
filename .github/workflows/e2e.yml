@@ -117,7 +117,7 @@ jobs:
             --network host \
             -e APP_HOST=0.0.0.0 \
             -e APP_PORT=8089 \
-            maximhq/bifrost:v1.6.5 > /tmp/bifrost.log 2>&1 &
+            maximhq/bifrost:v1.6.6 > /tmp/bifrost.log 2>&1 &
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
