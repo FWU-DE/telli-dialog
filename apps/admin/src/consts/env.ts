@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const env = createEnv({
   emptyStringAsUndefined: true,
   server: {
-    bifrostAdminUrl: z.string().url().optional(),
+    bifrostAdminUrl: z.url().optional(),
     bifrostAdminUsername: z.string().optional(),
     bifrostAdminPassword: z.string().optional(),
     databaseUrl: z.string(),

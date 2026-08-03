@@ -101,6 +101,12 @@ The project uses environment variables in `.env.local` files for local developme
 
 For detailed variable documentation and values for local development with docker-compose, see the `.env.example` files in each app directory.
 
+**How env files are loaded:**
+
+- Precedence (highest to lowest): `.env.local` > `.env.development`. `.env.development` holds working defaults for local dev, so `.env.local` doesn't need to set them.
+- `apps/chat-bot`/`apps/admin` get this (plus a lower-priority `.env` tier) via Next.js's built-in env loading.
+- `apps/api` (Fastify) has no built-in loading, so `apps/api/src/load-env.ts` replicates the `.env.local` > `.env.development` precedence manually (no `.env` tier, since no app ships one).
+
 ### Service dependencies
 
 For local development spin up all required services using docker compose:
