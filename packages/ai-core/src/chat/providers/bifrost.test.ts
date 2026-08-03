@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { constructBifrostTextGenerationFn, constructBifrostTextStreamFn } from './bifrost';
 import type { AiModel } from '../types';
+import { calculateCompletionUsage } from '../utils';
 
 const { responsesCreateMock, openAiConstructorMock, instrumentOpenAiClientMock, MockOpenAI } =
   vi.hoisted(() => {
@@ -182,6 +183,69 @@ describe('Bifrost chat provider', () => {
       promptTokens: 4,
       completionTokens: 5,
       totalTokens: 9,
+    });
+  });
+
+  it('estimates usage when the response does not include it', async () => {
+    const messages = [{ role: 'user' as const, content: 'Hello' }];
+    const text = 'Hello from Bifrost';
+    responsesCreateMock.mockResolvedValue({
+      output: [
+        {
+          type: 'message',
+          content: [{ type: 'output_text', text }],
+        },
+      ],
+    });
+
+    const model = createBifrostModel('azure');
+    const generateText = constructBifrostTextGenerationFn(model);
+
+    const result = await generateText({ messages, model: model.name });
+    const usage = calculateCompletionUsage({
+      messages,
+      modelMessage: { role: 'assistant', content: text },
+    });
+
+    expect(result).toEqual({
+      text,
+      usage: {
+        promptTokens: usage.prompt_tokens,
+        completionTokens: usage.completion_tokens,
+        totalTokens: usage.total_tokens,
+      },
+    });
+  });
+
+  it('estimates streamed usage when the completion event does not include it', async () => {
+    const messages = [{ role: 'user' as const, content: 'Hello' }];
+    const text = 'Hello from Bifrost';
+    responsesCreateMock.mockResolvedValue({
+      [Symbol.asyncIterator]: async function* () {
+        yield { type: 'response.output_text.delta', delta: 'Hello' };
+        yield { type: 'response.output_text.delta', delta: ' from Bifrost' };
+        yield { type: 'response.completed', response: {} };
+      },
+    });
+
+    const model = createBifrostModel('azure');
+    const streamText = constructBifrostTextStreamFn(model);
+    const onComplete = vi.fn();
+
+    for await (const chunk of streamText({ messages, model: model.name }, onComplete)) {
+      // Consume the stream so its completion callback is called.
+      void chunk;
+    }
+
+    const usage = calculateCompletionUsage({
+      messages,
+      modelMessage: { role: 'assistant', content: text },
+    });
+
+    expect(onComplete).toHaveBeenCalledWith({
+      promptTokens: usage.prompt_tokens,
+      completionTokens: usage.completion_tokens,
+      totalTokens: usage.total_tokens,
     });
   });
 });

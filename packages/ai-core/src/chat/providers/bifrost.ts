@@ -7,8 +7,8 @@ import type {
   TextStreamFn,
   TokenUsage,
 } from '../types';
-import { AiGenerationError, ProviderConfigurationError } from '../../errors';
-import { toOpenAIResponsesInput } from '../utils';
+import { ProviderConfigurationError } from '../../errors';
+import { calculateCompletionUsage, toOpenAIResponsesInput } from '../utils';
 import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
 import { env } from '../../env';
 
@@ -63,10 +63,12 @@ export function constructBifrostTextStreamFn(model: AiModel): TextStreamFn {
       ...model.additionalParameters,
     });
 
+    let content = '';
     let usage: TokenUsage | undefined;
 
     for await (const event of response) {
       if (event.type === 'response.output_text.delta') {
+        content += event.delta;
         yield event.delta;
       }
 
@@ -80,7 +82,16 @@ export function constructBifrostTextStreamFn(model: AiModel): TextStreamFn {
     }
 
     if (!usage) {
-      throw new AiGenerationError('No usage data returned from Bifrost stream');
+      const calculatedUsage = calculateCompletionUsage({
+        messages,
+        modelMessage: { role: 'assistant', content },
+      });
+
+      usage = {
+        completionTokens: calculatedUsage.completion_tokens,
+        promptTokens: calculatedUsage.prompt_tokens,
+        totalTokens: calculatedUsage.total_tokens,
+      };
     }
 
     if (onComplete) {
@@ -128,17 +139,17 @@ export function constructBifrostTextGenerationFn(model: AiModel): TextGeneration
         : '';
 
     const usage = response.usage;
-
-    if (!usage) {
-      throw new AiGenerationError('No usage data returned from Bifrost');
-    }
+    const calculatedUsage = calculateCompletionUsage({
+      messages,
+      modelMessage: { role: 'assistant', content: text },
+    });
 
     return {
       text,
       usage: {
-        completionTokens: usage.output_tokens,
-        promptTokens: usage.input_tokens,
-        totalTokens: usage.total_tokens,
+        completionTokens: usage?.output_tokens ?? calculatedUsage.completion_tokens,
+        promptTokens: usage?.input_tokens ?? calculatedUsage.prompt_tokens,
+        totalTokens: usage?.total_tokens ?? calculatedUsage.total_tokens,
       },
     };
   };
