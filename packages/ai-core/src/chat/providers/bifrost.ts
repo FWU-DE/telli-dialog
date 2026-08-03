@@ -138,19 +138,30 @@ export function constructBifrostTextGenerationFn(model: AiModel): TextGeneration
             .join('')
         : '';
 
-    const usage = response.usage;
-    const calculatedUsage = calculateCompletionUsage({
-      messages,
-      modelMessage: { role: 'assistant', content: text },
-    });
+    let usage: TokenUsage;
+
+    if (response.usage) {
+      usage = {
+        completionTokens: response.usage.output_tokens,
+        promptTokens: response.usage.input_tokens,
+        totalTokens: response.usage.total_tokens,
+      };
+    } else {
+      const calculatedUsage = calculateCompletionUsage({
+        messages,
+        modelMessage: { role: 'assistant', content: text },
+      });
+
+      usage = {
+        completionTokens: calculatedUsage.completion_tokens,
+        promptTokens: calculatedUsage.prompt_tokens,
+        totalTokens: calculatedUsage.total_tokens,
+      };
+    }
 
     return {
       text,
-      usage: {
-        completionTokens: usage?.output_tokens ?? calculatedUsage.completion_tokens,
-        promptTokens: usage?.input_tokens ?? calculatedUsage.prompt_tokens,
-        totalTokens: usage?.total_tokens ?? calculatedUsage.total_tokens,
-      },
+      usage,
     };
   };
 }
