@@ -147,7 +147,7 @@ services:
       start_period: 30s
 
   bifrost:
-    image: maximhq/bifrost:v1.6.7
+    image: ghcr.io/maximhq/bifrost:v1.6.7
     restart: unless-stopped
     environment:
       APP_HOST: 0.0.0.0
