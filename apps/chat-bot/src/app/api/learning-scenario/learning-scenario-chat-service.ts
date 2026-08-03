@@ -170,6 +170,7 @@ export async function sendLearningScenarioMessage({
       attachedLinks: learningScenario.attachedLinks,
       sourceUrls: processedUrls,
       allowWebTools,
+      allowMundoSearch: false,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

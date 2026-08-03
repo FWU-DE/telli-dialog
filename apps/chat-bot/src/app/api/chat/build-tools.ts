@@ -5,6 +5,7 @@ import { buildWebSearchTool } from './tools/web-search-tool';
 import { buildWebScraperTool } from './tools/web-scraper-tool';
 import { buildRetrieveEntireFileTool } from './tools/retrieve-entire-file-tool';
 import { buildRetrieveTextChunksTool } from './tools/retrieve-text-chunks-tool';
+import { buildMundoSearchTool } from './tools/mundo-search-tool';
 
 type BuildToolsParams = {
   user: UserAndContext;
@@ -16,6 +17,7 @@ type BuildToolsParams = {
   sourceUrls?: string[];
   attachedLinks?: string[];
   allowWebTools: boolean;
+  allowMundoSearch?: boolean;
   onWebSearchResults?: (results: WebSearchResult[]) => void;
 };
 
@@ -33,6 +35,7 @@ export async function buildTools({
   sourceUrls = [],
   attachedLinks = [],
   allowWebTools,
+  allowMundoSearch,
   onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
   const toolRegistry: ToolRegistry = {};
@@ -61,6 +64,11 @@ export async function buildTools({
     if (webScraperTool) {
       toolRegistry[webScraperTool.definition.name] = webScraperTool;
     }
+  }
+
+  if (allowMundoSearch) {
+    const mundoSearchTool = buildMundoSearchTool();
+    toolRegistry[mundoSearchTool.definition.name] = mundoSearchTool;
   }
 
   const retrieveEntireFileTool = buildRetrieveEntireFileTool({
