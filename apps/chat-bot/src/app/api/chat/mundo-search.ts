@@ -15,6 +15,11 @@ const mundoSearchTileSchema = z.object({
   description: z.string().nullish(),
   learnResourceType: z.array(z.string()).nullish(),
   language: z.array(z.string()).nullish(),
+  source: z
+    .object({
+      name: z.string().nullish(),
+    })
+    .nullish(),
 });
 
 const mundoSearchApiResponseSchema = z.object({
@@ -26,9 +31,10 @@ type MundoSearchTile = z.infer<typeof mundoSearchTileSchema>;
 export type MundoSearchResult = {
   title: string;
   description: string;
-  learnResourceType: string[];
+  resourceType: string[];
   language: string[];
   url: string;
+  source: string;
 };
 
 function truncate(value: string | null | undefined, limit: number): string {
@@ -50,21 +56,40 @@ function formatElement(element: MundoSearchTile): MundoSearchResult | null {
   return {
     title: truncate(element.title, MUNDO_SEARCH_TITLE_LENGTH_LIMIT),
     description: truncate(element.description, MUNDO_SEARCH_DESCRIPTION_LENGTH_LIMIT),
-    learnResourceType: normalizeList(element.learnResourceType),
+    resourceType: normalizeList(element.learnResourceType),
     language: normalizeList(element.language),
     url: `${MUNDO_DETAILS_URL_PREFIX}${identifier}`,
+    source: element.source?.name?.trim() ?? '',
   };
 }
 
-export async function mundoSearch({ query }: { query: string }): Promise<MundoSearchResult[]> {
+export const MUNDO_CLASS_LEVELS = ['1-4', '5-10', '11-13'] as const;
+export type MundoClassLevel = (typeof MUNDO_CLASS_LEVELS)[number];
+
+function sanitizeClassLevel(value: string | undefined): MundoClassLevel | null {
+  if (typeof value !== 'string') return null;
+  return (MUNDO_CLASS_LEVELS as readonly string[]).includes(value)
+    ? (value as MundoClassLevel)
+    : null;
+}
+
+export async function mundoSearch({
+  query,
+  classLevel,
+}: {
+  query: string;
+  classLevel?: string;
+}): Promise<MundoSearchResult[]> {
   try {
+    const filteredClassLevel = sanitizeClassLevel(classLevel);
+    const filterClassLevels = filteredClassLevel ? [filteredClassLevel] : [];
     const response = await fetch(MUNDO_SEARCH_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-      body: JSON.stringify({ search: query }),
+      body: JSON.stringify({ search: query, filters: { classLevels: filterClassLevels } }),
       signal: AbortSignal.timeout(MUNDO_SEARCH_TIMEOUT_MS),
     });
 
