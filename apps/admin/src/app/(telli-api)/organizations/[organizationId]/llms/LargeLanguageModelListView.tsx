@@ -24,6 +24,7 @@ import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 import type { LargeLanguageModel } from '@/types/large-language-model';
+import { ROUTES } from '@/consts/routes';
 
 export type LargeLanguageModelListViewProps = {
   organizationId: string;
@@ -57,8 +58,11 @@ export function LargeLanguageModelListView({
           Liste aller verfügbaren Sprachmodelle für diese Organisation.
         </CardDescription>
         <CardAction>
+          <Link href={ROUTES.api.providerKeys(organizationId)}>
+            <Button variant="outline">Provider-Schlüssel</Button>
+          </Link>
           <Link href={`/organizations/${organizationId}/llms/new`}>
-            <Button>Neues Modell</Button>
+            <Button className="ml-2">Neues Modell</Button>
           </Link>
           <Button className="ml-2" onClick={handleRefresh} disabled={isRefreshing}>
             Aktualisieren

@@ -1,0 +1,83 @@
+import Link from 'next/link';
+import { Search } from 'lucide-react';
+import { Button } from '@ui/components/button';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@ui/components/card';
+import { Checkbox } from '@ui/components/checkbox';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@ui/components/table';
+import { ROUTES } from '@/consts/routes';
+import type { ProviderKey } from '@/types/provider-key';
+
+export function ProviderKeyListView({
+  organizationId,
+  providerKeys,
+}: {
+  organizationId: string;
+  providerKeys: ProviderKey[];
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Provider-Schlüssel</CardTitle>
+        <CardDescription>Provider-Zugänge und ihre zugewiesenen Sprachmodelle.</CardDescription>
+        <CardAction>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link href={ROUTES.api.llms(organizationId)}>Sprachmodelle</Link>
+            </Button>
+            <Button asChild>
+              <Link href={ROUTES.api.providerKeyNew(organizationId)}>Neuer Provider-Schlüssel</Link>
+            </Button>
+          </div>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Provider</TableHead>
+              <TableHead>Gewichtung</TableHead>
+              <TableHead className="text-center">Aktiv</TableHead>
+              <TableHead>Modelle</TableHead>
+              <TableHead>Erstellt am</TableHead>
+              <TableHead className="w-12">Aktionen</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {providerKeys.map((providerKey) => (
+              <TableRow key={providerKey.id}>
+                <TableCell className="font-medium">{providerKey.name}</TableCell>
+                <TableCell>{providerKey.provider}</TableCell>
+                <TableCell>{providerKey.weight}</TableCell>
+                <TableCell className="text-center">
+                  <Checkbox checked={providerKey.isEnabled} disabled />
+                </TableCell>
+                <TableCell>{providerKey.models.length}</TableCell>
+                <TableCell>{new Date(providerKey.createdAt).toLocaleString()}</TableCell>
+                <TableCell>
+                  <Link href={ROUTES.api.providerKeyDetails(organizationId, providerKey.id)}>
+                    <Search className="text-primary" />
+                  </Link>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}

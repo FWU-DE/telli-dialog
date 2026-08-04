@@ -30,9 +30,7 @@ const jsonStringSchema = z.string().refine((str) => {
 const llmFormSchema = z.object({
   name: z.string().min(1, 'Name ist erforderlich'),
   displayName: z.string().min(1, 'Anzeigename ist erforderlich'),
-  provider: z.string().min(1, 'Anbieter ist erforderlich'),
   description: z.string().optional().default(''),
-  setting: jsonStringSchema.optional().default(''),
   priceMetadata: jsonStringSchema.optional().default(''),
   supportedImageFormats: jsonStringSchema.optional().default(''),
   additionalParameters: jsonStringSchema.optional().default(''),
@@ -66,9 +64,7 @@ export function LargeLanguageModelDetailView({
       ? {
           name: model.name,
           displayName: model.displayName,
-          provider: model.provider,
           description: model.description,
-          setting: JSON.stringify(model.setting, null, 2),
           priceMetadata: JSON.stringify(model.priceMetadata, null, 2),
           supportedImageFormats: JSON.stringify(model.supportedImageFormats, null, 2),
           additionalParameters: JSON.stringify(model.additionalParameters, null, 2),
@@ -78,9 +74,7 @@ export function LargeLanguageModelDetailView({
       : {
           name: '',
           displayName: '',
-          provider: '',
           description: '',
-          setting: '{}',
           priceMetadata: '{}',
           supportedImageFormats: '[]',
           additionalParameters: '{}',
@@ -156,24 +150,9 @@ export function LargeLanguageModelDetailView({
           />
 
           <FormField
-            name="provider"
-            label="Anbieter *"
-            description="Name des Modell-Anbieters (ionos, azure, openai, google, bifrost)"
-            control={control}
-          />
-
-          <FormField
             name="description"
             label="Beschreibung"
             description="Kurze Beschreibung des Modells"
-            control={control}
-            type="textArea"
-          />
-
-          <FormField
-            name="setting"
-            label="Einstellungen"
-            description="JSON-Konfiguration für das Modell"
             control={control}
             type="textArea"
           />

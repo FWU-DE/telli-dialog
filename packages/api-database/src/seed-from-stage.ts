@@ -5,11 +5,15 @@ import {
   apiKeyTable,
   llmModelTable,
   llmModelApiKeyMappingTable,
+  llmModelProviderKeyMappingTable,
+  llmProviderKeyTable,
   OrganizationModel,
   ProjectModel,
   LlmModel,
   ApiKeyModel,
   LlmModelApiKeyMappingModel,
+  LlmModelProviderKeyMappingModel,
+  LlmProviderKeyModel,
 } from './schema';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
@@ -48,6 +52,14 @@ async function getModels(): Promise<LlmModel[]> {
 
 async function getModelKeyMappings(): Promise<LlmModelApiKeyMappingModel[]> {
   return await stageDb.select().from(llmModelApiKeyMappingTable);
+}
+
+async function getProviderKeys(): Promise<LlmProviderKeyModel[]> {
+  return await stageDb.select().from(llmProviderKeyTable);
+}
+
+async function getModelProviderKeyMappings(): Promise<LlmModelProviderKeyMappingModel[]> {
+  return await stageDb.select().from(llmModelProviderKeyMappingTable);
 }
 
 export async function seedDatabase() {
@@ -100,6 +112,15 @@ export async function seedDatabase() {
         .returning();
     }
 
+    await localDb
+      .insert(llmProviderKeyTable)
+      .values(await getProviderKeys())
+      .onConflictDoNothing();
+    await localDb
+      .insert(llmModelProviderKeyMappingTable)
+      .values(await getModelProviderKeyMappings())
+      .onConflictDoNothing();
+
     // 5. Create model-key mappings
     await localDb
       .insert(llmModelApiKeyMappingTable)
@@ -107,7 +128,7 @@ export async function seedDatabase() {
       .onConflictDoNothing()
       .returning();
 
-    await syncSeedModelsToBifrost(models);
+    await syncSeedModelsToBifrost();
 
     // 6. Summary
     console.log('Database seeding completed successfully!');

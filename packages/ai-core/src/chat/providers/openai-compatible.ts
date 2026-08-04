@@ -15,7 +15,7 @@ type OpenAICompatibleAgenticStreamArgs = {
   providerName: string;
   createOptions?: Parameters<OpenAI['responses']['create']>[1];
   additionalParameters?: Record<string, unknown>;
-  getModelId?: (extraFields: unknown) => string | undefined;
+  getModelId?: (extraFields: unknown) => string | undefined | Promise<string | undefined>;
 };
 
 type ToolCallAccumulator = {
@@ -102,7 +102,7 @@ export async function* streamOpenAICompatibleAgenticResponse({
         promptTokens: chunk.response.usage.input_tokens,
         totalTokens: chunk.response.usage.total_tokens,
       };
-      modelId = getModelId?.(
+      modelId = await getModelId?.(
         (chunk.response as typeof chunk.response & { extra_fields?: unknown }).extra_fields,
       );
     }

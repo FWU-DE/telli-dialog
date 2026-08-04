@@ -19,13 +19,17 @@ export async function createLargeLanguageModel(
 ) {
   const organization = await dbGetOrganizationById(organizationId);
   if (!organization) throw new Error('Organization not found');
+  const existingModels = await dbGetAllModelsByOrganizationId(organizationId);
+  if (existingModels.some(({ name }) => name === data.name)) {
+    throw new Error('A model with this name already exists for this organization');
+  }
 
   const model = await dbCreateLlmModel({
     name: data.name,
     displayName: data.displayName,
-    provider: data.provider,
+    provider: 'bifrost',
     description: data.description ?? '',
-    setting: data.setting ? JSON.parse(data.setting) : {},
+    setting: { provider: 'bifrost' },
     priceMetadata: data.priceMetadata
       ? JSON.parse(data.priceMetadata)
       : { type: 'text' as const, completionTokenPrice: 0, promptTokenPrice: 0 },
@@ -49,12 +53,17 @@ export async function updateLargeLanguageModel(
   modelId: string,
   data: UpdateLargeLanguageModel,
 ) {
+  const existingModels = await dbGetAllModelsByOrganizationId(organizationId);
+  if (existingModels.some(({ id, name }) => id !== modelId && name === data.name)) {
+    throw new Error('A model with this name already exists for this organization');
+  }
+
   const model = await dbUpdateLlmModel(modelId, organizationId, {
     name: data.name,
     displayName: data.displayName,
-    provider: data.provider,
+    provider: 'bifrost',
     description: data.description,
-    setting: data.setting ? JSON.parse(data.setting) : undefined,
+    setting: { provider: 'bifrost' },
     priceMetadata: data.priceMetadata ? JSON.parse(data.priceMetadata) : undefined,
     supportedImageFormats: data.supportedImageFormats
       ? JSON.parse(data.supportedImageFormats)

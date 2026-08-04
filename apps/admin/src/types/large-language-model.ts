@@ -17,9 +17,7 @@ export type LargeLanguageModel = {
 export type CreateLargeLanguageModel = {
   name: string;
   displayName: string;
-  provider: string;
   description?: string;
-  setting?: string;
   priceMetadata?: string;
   supportedImageFormats?: string;
   additionalParameters?: string;
@@ -30,9 +28,7 @@ export type CreateLargeLanguageModel = {
 export type UpdateLargeLanguageModel = {
   name: string;
   displayName: string;
-  provider: string;
   description?: string;
-  setting?: string;
   priceMetadata?: string;
   supportedImageFormats?: string;
   additionalParameters?: string;

@@ -4,8 +4,6 @@ import type { AiModel, EmbeddingGenerationFn } from '../types';
 import { ProviderConfigurationError } from '../../errors';
 import { env } from '../../env';
 
-type BifrostUpstreamProvider = 'azure' | 'openai' | 'ionos' | 'vertex';
-
 function createBifrostClient(model: AiModel): {
   client: OpenAI;
   modelName: string;
@@ -18,8 +16,6 @@ function createBifrostClient(model: AiModel): {
     throw new ProviderConfigurationError('BIFROST_BASE_URL is not configured');
   }
 
-  const provider = getBifrostUpstreamProvider(model);
-
   return {
     client: instrumentOpenAiClient(
       new OpenAI({
@@ -27,22 +23,8 @@ function createBifrostClient(model: AiModel): {
         baseURL: env.bifrostBaseUrl,
       }),
     ),
-    modelName: `${provider}/${provider === 'vertex' ? stripAnthropicPrefix(model.name) : model.name}`,
+    modelName: model.name,
   };
-}
-
-function getBifrostUpstreamProvider(model: AiModel): BifrostUpstreamProvider {
-  const settingProvider = model.setting.provider;
-  if (settingProvider === 'azure') return 'azure';
-  if (settingProvider === 'openai') return 'openai';
-  if (settingProvider === 'ionos') return 'ionos';
-  if (settingProvider === 'google') return 'vertex';
-
-  throw new ProviderConfigurationError('Unsupported Bifrost upstream provider');
-}
-
-function stripAnthropicPrefix(modelName: string): string {
-  return modelName.replace(/^anthropic\//, '');
 }
 
 export function constructBifrostEmbeddingGenerationFn(model: AiModel): EmbeddingGenerationFn {

@@ -3,7 +3,6 @@ import {
   type ApiKeyInsertModel,
   apiKeyTable,
   type LlmInsertModel,
-  type LlmModel,
   llmModelApiKeyMappingTable,
   llmModelTable,
   type OrganizationInsertModel,
@@ -12,7 +11,11 @@ import {
   projectTable,
 } from './schema';
 import { and, eq, inArray } from 'drizzle-orm';
-import { normalizeSeedModelsForBifrost, syncSeedModelsToBifrost } from './seed-bifrost';
+import {
+  normalizeSeedModelsForBifrost,
+  seedProviderKeysForModels,
+  syncSeedModelsToBifrost,
+} from './seed-bifrost';
 
 const ORGANIZATION_ID = 'cfeb82c6-396a-4c2d-954b-53e77acbbe7e';
 const PROJECT_ID = 'DE-TEST';
@@ -279,7 +282,6 @@ export async function seedDatabase() {
     }
 
     // 5. Create/update API key to model mapping
-    const seededModels: LlmModel[] = [];
     await db.delete(llmModelApiKeyMappingTable).where(
       and(
         eq(llmModelApiKeyMappingTable.apiKeyId, apiKey.id),
@@ -291,9 +293,9 @@ export async function seedDatabase() {
     );
 
     for (const model of DEFAULT_MODELS) {
-      const [seededModel] = await db
+      await db
         .insert(llmModelTable)
-        .values(model)
+        .values({ ...model, provider: 'bifrost', setting: { provider: 'bifrost' } })
         .onConflictDoUpdate({
           target: llmModelTable.id,
           set: {
@@ -301,17 +303,14 @@ export async function seedDatabase() {
             name: model.name,
             displayName: model.displayName,
             description: model.description,
-            setting: model.setting,
+            setting: { provider: 'bifrost' },
             priceMetadata: model.priceMetadata,
             supportedImageFormats: model.supportedImageFormats,
             additionalParameters: model.additionalParameters,
             isNew: model.isNew,
             isDeleted: model.isDeleted,
           },
-        })
-        .returning();
-
-      if (seededModel) seededModels.push(seededModel);
+        });
 
       await db
         .insert(llmModelApiKeyMappingTable)
@@ -322,9 +321,8 @@ export async function seedDatabase() {
         .onConflictDoNothing();
     }
 
-    const modelsToSync =
-      seededModels.length > 0 ? seededModels : await db.select().from(llmModelTable);
-    await syncSeedModelsToBifrost(modelsToSync);
+    await seedProviderKeysForModels(DEFAULT_MODELS);
+    await syncSeedModelsToBifrost();
 
     // Print API key in a format parseable by CI (e.g. DE_TEST_API_KEY=sk_...)
     const apiKeyEnvVar = `${PROJECT_ID.replace('-', '_')}_API_KEY`;

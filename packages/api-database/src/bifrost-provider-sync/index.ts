@@ -1,10 +1,13 @@
-import { dbGetAllModelsByOrganizationId } from '../functions';
-import { LlmModel } from '../schema';
+import { dbGetAllProviderKeysWithModels, type LlmProviderKeyWithModels } from '../functions';
 import { BifrostProviderSyncError } from './error';
 import { syncBifrostProvider } from './client';
 import { buildBifrostProviderConfigs } from './provider-config-builder';
 import { ensureBifrostVirtualKeyProviderAccess } from './virtual-key-sync';
-import type { BifrostProviderSyncOptions } from './types';
+import {
+  BIFROST_PROVIDERS,
+  type BifrostProviderConfig,
+  type BifrostProviderSyncOptions,
+} from './types';
 
 /**
  * Mirrors API DB model/provider configuration into Bifrost.
@@ -13,7 +16,7 @@ import type { BifrostProviderSyncOptions } from './types';
  * visibility but should not be synced to Bifrost.
  */
 export async function syncBifrostProviders(
-  models: LlmModel[],
+  providerKeys: LlmProviderKeyWithModels[],
   options: BifrostProviderSyncOptions,
 ): Promise<void> {
   const { bifrostAdminUrl, bifrostAdminUsername, bifrostAdminPassword, logger } = options;
@@ -22,10 +25,7 @@ export async function syncBifrostProviders(
     return;
   }
 
-  const providerConfigs = buildBifrostProviderConfigs(
-    models.filter((model) => !model.isDeleted),
-    logger,
-  );
+  const providerConfigs = buildBifrostProviderConfigs(providerKeys, logger);
 
   const failedProviders: string[] = [];
 
@@ -53,6 +53,8 @@ export async function syncBifrostProviders(
     throw new BifrostProviderSyncError();
   }
 
+  await deleteEmptyManagedProviders(providerConfigs, options);
+
   await ensureBifrostVirtualKeyProviderAccess({
     bifrostAdminUrl,
     bifrostAdminUsername,
@@ -61,12 +63,31 @@ export async function syncBifrostProviders(
   });
 }
 
+async function deleteEmptyManagedProviders(
+  providerConfigs: BifrostProviderConfig[],
+  options: BifrostProviderSyncOptions,
+): Promise<void> {
+  const configuredProviders = new Set(providerConfigs.map(({ provider }) => provider));
+  const emptyProviderConfigs = BIFROST_PROVIDERS.filter(
+    (provider) => !configuredProviders.has(provider),
+  ).map((provider) => ({ provider, keys: [] }) satisfies BifrostProviderConfig);
+  for (const providerConfig of emptyProviderConfigs) {
+    await syncBifrostProvider({
+      bifrostAdminUrl: options.bifrostAdminUrl!,
+      bifrostAdminUsername: options.bifrostAdminUsername,
+      bifrostAdminPassword: options.bifrostAdminPassword,
+      providerConfig,
+      logger: options.logger,
+    });
+  }
+}
+
 export async function syncBifrostProvidersForOrganization(
   organizationId: string,
   options: BifrostProviderSyncOptions,
 ): Promise<void> {
-  const models = await dbGetAllModelsByOrganizationId(organizationId);
-  await syncBifrostProviders(models, {
+  const providerKeys = await dbGetAllProviderKeysWithModels();
+  await syncBifrostProviders(providerKeys, {
     ...options,
     logger: options.logger
       ? {
@@ -80,6 +101,10 @@ export async function syncBifrostProvidersForOrganization(
         }
       : undefined,
   });
+}
+
+export async function syncAllBifrostProviders(options: BifrostProviderSyncOptions): Promise<void> {
+  await syncBifrostProviders(await dbGetAllProviderKeysWithModels(), options);
 }
 
 export * from './error';
