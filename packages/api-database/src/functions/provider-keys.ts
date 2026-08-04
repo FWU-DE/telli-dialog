@@ -121,6 +121,47 @@ export async function dbReplaceProviderKeyModelMappings({
   });
 }
 
+export async function dbReplaceModelProviderKeyMappings({
+  modelId,
+  organizationId,
+  providerKeys,
+}: {
+  modelId: string;
+  organizationId: string;
+  providerKeys: Array<{ providerKeyId: string; upstreamModelName: string }>;
+}) {
+  await db.transaction(async (transaction) => {
+    const [model] = await transaction
+      .select({ id: llmModelTable.id })
+      .from(llmModelTable)
+      .where(and(eq(llmModelTable.id, modelId), eq(llmModelTable.organizationId, organizationId)))
+      .limit(1);
+    if (!model) throw new Error('Model not found');
+
+    const organizationProviderKeys = await transaction
+      .select({ id: llmProviderKeyTable.id })
+      .from(llmProviderKeyTable)
+      .where(eq(llmProviderKeyTable.organizationId, organizationId));
+    const providerKeyIds = new Set(organizationProviderKeys.map(({ id }) => id));
+    if (providerKeys.some(({ providerKeyId }) => !providerKeyIds.has(providerKeyId))) {
+      throw new Error('Models can only be assigned to provider keys in the same organization');
+    }
+
+    await transaction
+      .delete(llmModelProviderKeyMappingTable)
+      .where(eq(llmModelProviderKeyMappingTable.llmModelId, modelId));
+    if (providerKeys.length > 0) {
+      await transaction.insert(llmModelProviderKeyMappingTable).values(
+        providerKeys.map(({ providerKeyId, upstreamModelName }) => ({
+          llmModelId: modelId,
+          providerKeyId,
+          upstreamModelName,
+        })),
+      );
+    }
+  });
+}
+
 export async function dbGetModelIdByProviderAndUpstreamName({
   modelIds,
   provider,

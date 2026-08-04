@@ -3,6 +3,7 @@ import {
   dbCreateLlmModel,
   dbUpdateLlmModel,
   dbGetOrganizationById,
+  dbReplaceModelProviderKeyMappings,
 } from '@ais-chat/api-database';
 import { CreateLargeLanguageModel, UpdateLargeLanguageModel } from '../types/large-language-model';
 import { logInfo } from '@shared/logging';
@@ -40,11 +41,15 @@ export async function createLargeLanguageModel(
     isDeleted: data.isDeleted,
   });
 
-  await syncBifrostProvidersForOrganization(organizationId);
-
   logInfo('LLM was created successfully', { organizationId, data });
 
   if (!model) throw new Error('Failed to create model');
+  await dbReplaceModelProviderKeyMappings({
+    modelId: model.id,
+    organizationId,
+    providerKeys: data.providerKeys,
+  });
+  await syncBifrostProvidersForOrganization(organizationId);
   return model;
 }
 
@@ -73,6 +78,12 @@ export async function updateLargeLanguageModel(
       : undefined,
     isNew: data.isNew,
     isDeleted: data.isDeleted,
+  });
+
+  await dbReplaceModelProviderKeyMappings({
+    modelId,
+    organizationId,
+    providerKeys: data.providerKeys,
   });
 
   await syncBifrostProvidersForOrganization(organizationId);

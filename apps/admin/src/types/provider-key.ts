@@ -8,5 +8,4 @@ export type SaveProviderKey = {
   settings: string;
   weight: number;
   isEnabled: boolean;
-  models: Array<{ modelId: string; upstreamModelName: string }>;
 };

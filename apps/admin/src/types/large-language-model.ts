@@ -23,6 +23,7 @@ export type CreateLargeLanguageModel = {
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
+  providerKeys: Array<{ providerKeyId: string; upstreamModelName: string }>;
 };
 
 export type UpdateLargeLanguageModel = {
@@ -34,4 +35,5 @@ export type UpdateLargeLanguageModel = {
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
+  providerKeys: Array<{ providerKeyId: string; upstreamModelName: string }>;
 };

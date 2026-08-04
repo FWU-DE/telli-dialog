@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import { getLargeLanguageModelsAction } from '../../llms/actions';
 import { getProviderKeysAction } from '../actions';
 import { ProviderKeyDetailView } from './ProviderKeyDetailView';
 
@@ -9,10 +8,8 @@ export default async function ProviderKeyPage(
   props: PageProps<'/organizations/[organizationId]/provider-keys/[providerKeyId]'>,
 ) {
   const { organizationId, providerKeyId } = await props.params;
-  const models = await getLargeLanguageModelsAction(organizationId);
-
   if (providerKeyId === 'new') {
-    return <ProviderKeyDetailView organizationId={organizationId} models={models} mode="create" />;
+    return <ProviderKeyDetailView organizationId={organizationId} mode="create" />;
   }
 
   const result = await getProviderKeysAction(organizationId);
@@ -21,11 +18,6 @@ export default async function ProviderKeyPage(
   if (!providerKey) notFound();
 
   return (
-    <ProviderKeyDetailView
-      organizationId={organizationId}
-      providerKey={providerKey}
-      models={models}
-      mode="edit"
-    />
+    <ProviderKeyDetailView organizationId={organizationId} providerKey={providerKey} mode="edit" />
   );
 }
