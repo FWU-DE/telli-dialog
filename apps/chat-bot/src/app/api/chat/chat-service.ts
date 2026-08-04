@@ -605,7 +605,7 @@ export async function sendChatMessage({
     // Start the agent loop in the background
     runAgentLoop({
       modelId: generationModelId,
-      modelName: definedModel.name,
+      modelName: generationModelName,
       apiKeyId,
       fallbackModelIds,
       onModelUsed: (modelId) => {
