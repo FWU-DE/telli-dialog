@@ -94,11 +94,8 @@ export function runAgentLoop({
                 };
                 totalPriceInCents += priceInCents;
               },
-              tools.length > 0 && !isLastIteration
-                ? { tools, toolChoice: 'auto', fallbackModelIds }
-                : fallbackModelIds?.length
-                  ? { fallbackModelIds }
-                  : undefined,
+              tools.length > 0 && !isLastIteration ? { tools, toolChoice: 'auto' } : undefined,
+              fallbackModelIds,
             );
 
             for await (const event of stream) {

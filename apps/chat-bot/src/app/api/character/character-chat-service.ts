@@ -91,10 +91,11 @@ export async function sendCharacterMessage({
   }
 
   const { model: definedModel, apiKeyId } = modelAndApiKey;
-  const { generationModelId, fallbackModelIds, candidateModelIds } = await getChatModelFallback({
-    model: definedModel,
-    federalStateId: teacherUserAndContext.federalState.id,
-  });
+  const { generationModelId, generationModelName, fallbackModelIds, candidateModelIds } =
+    await getChatModelFallback({
+      model: definedModel,
+      federalStateId: teacherUserAndContext.federalState.id,
+    });
   const agenticChatEnabled =
     teacherUserAndContext.federalState.featureToggles.isAgenticChatEnabled ?? false;
 
@@ -231,7 +232,7 @@ export async function sendCharacterMessage({
 
     runAgentLoop({
       modelId: generationModelId,
-      modelName: definedModel.name,
+      modelName: generationModelName,
       apiKeyId,
       fallbackModelIds,
       onModelUsed: (modelId) => {
@@ -314,7 +315,8 @@ export async function sendCharacterMessage({
               }),
             );
           },
-          { fallbackModelIds },
+          undefined,
+          fallbackModelIds,
         );
 
         for await (const chunk of textStream) {

@@ -44,6 +44,7 @@ export async function generateTextWithBilling(
   messages: Message[],
   apiKeyId: string,
   options?: GenerationOptions,
+  fallbackModelIds?: string[],
 ) {
   const model = await getTextModelById(modelId);
 
@@ -62,7 +63,7 @@ export async function generateTextWithBilling(
   }
 
   try {
-    const fallbackModels = await resolveFallbackModels(options?.fallbackModelIds, apiKeyId);
+    const fallbackModels = await resolveFallbackModels(fallbackModelIds, apiKeyId);
     const generationOptions = fallbackModels.length ? { ...options, fallbackModels } : options;
     const textResponse = await generateText(model, messages, generationOptions);
     const billingModel = getModelById([model, ...fallbackModels], textResponse.modelId) ?? model;
@@ -110,6 +111,7 @@ export async function* generateTextStreamWithBilling(
     modelId?: string;
   }) => void | Promise<void>,
   options?: GenerationOptions,
+  fallbackModelIds?: string[],
 ) {
   const model = await getTextModelById(modelId);
 
@@ -128,7 +130,7 @@ export async function* generateTextStreamWithBilling(
   }
 
   try {
-    const fallbackModels = await resolveFallbackModels(options?.fallbackModelIds, apiKeyId);
+    const fallbackModels = await resolveFallbackModels(fallbackModelIds, apiKeyId);
     const billingCallback = async (usage: TokenUsage, modelId?: string) => {
       const billingModel = getModelById([model, ...fallbackModels], modelId) ?? model;
       const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, billingModel, usage);

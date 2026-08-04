@@ -29,6 +29,7 @@ export async function* generateAgenticStreamWithBilling(
     modelId?: string;
   }) => void | Promise<void>,
   options?: GenerationOptions,
+  fallbackModelIds?: string[],
 ): AsyncGenerator<StreamEvent> {
   const model = await getTextModelById(modelId);
 
@@ -46,8 +47,18 @@ export async function* generateAgenticStreamWithBilling(
   }
 
   try {
-    const fallbackModels = options?.fallbackModelIds
-      ? await Promise.all(options.fallbackModelIds.map((id) => getTextModelById(id)))
+    const fallbackModels = fallbackModelIds
+      ? (
+          await Promise.all(
+            fallbackModelIds.map(async (id) => {
+              const fallbackModel = await getTextModelById(id);
+              return (await hasAccessToModel(apiKeyId, fallbackModel)) ? fallbackModel : undefined;
+            }),
+          )
+        ).filter(
+          (fallbackModel): fallbackModel is NonNullable<typeof fallbackModel> =>
+            fallbackModel !== undefined,
+        )
       : [];
     const stream = generateAgenticStream(model, messages, { ...options, fallbackModels });
 

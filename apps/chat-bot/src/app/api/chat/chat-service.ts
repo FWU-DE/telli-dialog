@@ -215,10 +215,11 @@ export async function sendChatMessage({
   }
 
   const { model: definedModel, apiKeyId } = modelAndApiKey;
-  const { generationModelId, fallbackModelIds, candidateModelIds } = await getChatModelFallback({
-    model: definedModel,
-    federalStateId: user.federalState.id,
-  });
+  const { generationModelId, generationModelName, fallbackModelIds, candidateModelIds } =
+    await getChatModelFallback({
+      model: definedModel,
+      federalStateId: user.federalState.id,
+    });
 
   // Get auxiliary model for title generation
   const auxiliaryModel = await getAuxiliaryModel(user.federalState.id);
@@ -343,7 +344,7 @@ export async function sendChatMessage({
       content: userMessage.content,
       role: 'user',
       userId: user.id,
-      modelName: definedModel.name,
+      modelName: generationModelName,
       orderNumber: userMessageOrderNumber,
     });
   }
@@ -658,7 +659,8 @@ export async function sendChatMessage({
             await markSkippedChatModels({ candidateModelIds, usedModelId: modelId });
             await persistAssistantMessage({ fullText, usage, priceInCents });
           },
-          { fallbackModelIds },
+          undefined,
+          fallbackModelIds,
         );
 
         for await (const chunk of textStream) {

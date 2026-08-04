@@ -65,15 +65,15 @@ export type GenerationOptions = {
   temperature?: number;
   tools?: ToolDefinition[];
   toolChoice?: 'auto' | 'none' | 'required';
-  /** Models Bifrost may try after the requested model, in order. */
+  /** Resolved server-side models used only by the Bifrost provider. */
   fallbackModels?: AiModel[];
-  /** IDs used by callers to resolve fallback models in the API database. */
-  fallbackModelIds?: string[];
 };
 
 export type TextGenerationArgs = {
   messages: Message[];
   model: string;
+  /** Resolved server-side models used only by the Bifrost provider. */
+  fallbackModels?: AiModel[];
 } & GenerationOptions;
 
 export type TokenUsage = {

@@ -33,7 +33,12 @@ export async function getChatModelFallback({
   federalStateId: string;
 }) {
   if (model.provider !== 'bifrost') {
-    return { generationModelId: model.id, fallbackModelIds: [], candidateModelIds: [model.id] };
+    return {
+      generationModelId: model.id,
+      generationModelName: model.name,
+      fallbackModelIds: [],
+      candidateModelIds: [model.id],
+    };
   }
 
   const fallback = await dbGetModelByRoleAndFederalStateId({
@@ -41,7 +46,12 @@ export async function getChatModelFallback({
     federalStateId,
   });
   if (!fallback || fallback.id === model.id) {
-    return { generationModelId: model.id, fallbackModelIds: [], candidateModelIds: [model.id] };
+    return {
+      generationModelId: model.id,
+      generationModelName: model.name,
+      fallbackModelIds: [],
+      candidateModelIds: [model.id],
+    };
   }
 
   const unavailable = await Promise.all(
@@ -52,6 +62,7 @@ export async function getChatModelFallback({
 
   return {
     generationModelId: candidates[0]!.id,
+    generationModelName: candidates[0]!.name,
     fallbackModelIds: candidates.slice(1).map((candidate) => candidate.id),
     candidateModelIds: candidates.map((candidate) => candidate.id),
   };
