@@ -5,6 +5,7 @@ import { CaretDownIcon, CaretUpIcon, PlusIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/button';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { MAX_WEB_SEARCH_INCLUDED_DOMAINS } from '@/configuration-text-inputs/const';
 
 type WebSearchUrlPresetItemProps = {
   selectedWebsites: string[];
@@ -20,6 +21,8 @@ export function WebSearchUrlPresetItem({
   const [isExpanded, setIsExpanded] = useState(false);
   const t = useTranslations('custom-chat.web-search');
   const isFullyAdded = preset.urls.every((url) => selectedWebsites.includes(url));
+
+  const isLimitReached = selectedWebsites.length >= MAX_WEB_SEARCH_INCLUDED_DOMAINS;
 
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
@@ -39,7 +42,7 @@ export function WebSearchUrlPresetItem({
           size="sm"
           className="ml-2 py-0"
           onClick={() => onAddPreset(preset)}
-          disabled={isFullyAdded}
+          disabled={isFullyAdded || isLimitReached}
         >
           <PlusIcon />
           {t('presets-add-preset-button')}

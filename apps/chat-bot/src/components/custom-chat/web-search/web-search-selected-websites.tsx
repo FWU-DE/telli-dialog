@@ -30,7 +30,10 @@ export function WebSearchSelectedWebsites({
 
   const isLimitReached = selectedWebsites.length >= MAX_WEB_SEARCH_INCLUDED_DOMAINS;
 
-  const selectedWebsitesByPresetName = new Map<string, string[]>(
+  const allPresetUrls = new Set(availablePresets.flatMap((preset) => preset.urls));
+  const unassignedWebsites = selectedWebsites.filter((website) => !allPresetUrls.has(website));
+
+  const websitesByPreset = new Map<string, string[]>(
     availablePresets
       .map((preset): [string, string[]] => [
         preset.name,
@@ -39,11 +42,10 @@ export function WebSearchSelectedWebsites({
       .filter(([, urls]) => urls.length > 0),
   );
 
-  const allPresetUrls = new Set(availablePresets.flatMap((preset) => preset.urls));
-  const unassignedWebsites = selectedWebsites.filter((website) => !allPresetUrls.has(website));
-  if (unassignedWebsites.length > 0) {
-    selectedWebsitesByPresetName.set('unassigned', unassignedWebsites);
-  }
+  const selectedWebsitesByPresetName =
+    unassignedWebsites.length > 0
+      ? new Map([['unassigned', unassignedWebsites], ...websitesByPreset])
+      : new Map(websitesByPreset);
 
   return (
     <div className="flex flex-col gap-1.5">
