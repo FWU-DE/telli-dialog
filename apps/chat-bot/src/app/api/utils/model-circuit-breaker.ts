@@ -1,4 +1,4 @@
-import { dbGetModelByRoleAndFederalStateId } from '@shared/db/functions/llm-model';
+import { findStaticModelByRoleAndFederalStateId } from '@shared/llm-models/llm-model-service';
 import { logError } from '@shared/logging';
 import { valkey } from '@shared/valkey';
 import type { LlmModelSelectModel } from '@shared/db/schema';
@@ -41,7 +41,7 @@ export async function getChatModelFallback({
     };
   }
 
-  const fallback = await dbGetModelByRoleAndFederalStateId({
+  const fallback = await findStaticModelByRoleAndFederalStateId({
     role: 'fallback',
     federalStateId,
   });
