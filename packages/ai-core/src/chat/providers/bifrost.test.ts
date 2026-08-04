@@ -103,6 +103,7 @@ describe('Bifrost chat provider', () => {
     expect(openAiConstructorMock).toHaveBeenCalledWith({
       apiKey: 'bifrost-api-key',
       baseURL: 'http://localhost:8089/openai/v1',
+      defaultHeaders: { 'x-bf-vk': 'bifrost-api-key' },
     });
     expect(responsesCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({

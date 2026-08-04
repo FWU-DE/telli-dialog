@@ -19,16 +19,26 @@ CREATE TABLE "llm_provider_key" (
 --> statement-breakpoint
 INSERT INTO "llm_provider_key" ("name", "provider", "settings", "organization_id")
 SELECT
-	(provider || '-' || left(md5(settings::text), 8)) AS "name",
+	(provider || '-' || left(md5(normalized_settings::text), 8)) AS "name",
 	provider,
-	settings,
+	normalized_settings::json,
 	organization_id
 FROM (
-	SELECT DISTINCT ON (organization_id, COALESCE(settings->>'provider', provider), settings::text)
+	SELECT DISTINCT ON (organization_id, COALESCE(settings->>'provider', provider), normalized_settings::text)
 		COALESCE(settings->>'provider', provider) AS provider,
-		settings,
+		normalized_settings,
 		organization_id
-	FROM "llm_model"
+	FROM "llm_model",
+	LATERAL (
+		SELECT CASE
+			WHEN COALESCE(settings->>'provider', provider) = 'azure' THEN jsonb_set(
+				settings::jsonb,
+				'{baseUrl}',
+				to_jsonb(regexp_replace(settings->>'baseUrl', '^(https?://[^/]+).*$', '\1'))
+			)
+			ELSE settings::jsonb
+		END AS normalized_settings
+	) normalized
 ) existing_keys;--> statement-breakpoint
 INSERT INTO "llm_model_provider_key_mapping" ("llm_model_id", "provider_key_id", "upstream_model_name")
 SELECT
@@ -45,7 +55,14 @@ FROM "llm_model" model
 JOIN "llm_provider_key" provider_key
 	ON provider_key.organization_id = model.organization_id
 	AND provider_key.provider = COALESCE(model.settings->>'provider', model.provider)
-	AND provider_key.settings::text = model.settings::text;--> statement-breakpoint
+	AND provider_key.settings::jsonb = CASE
+		WHEN COALESCE(model.settings->>'provider', model.provider) = 'azure' THEN jsonb_set(
+			model.settings::jsonb,
+			'{baseUrl}',
+			to_jsonb(regexp_replace(model.settings->>'baseUrl', '^(https?://[^/]+).*$', '\1'))
+		)
+		ELSE model.settings::jsonb
+	END;--> statement-breakpoint
 UPDATE "llm_model" SET "provider" = 'bifrost', "settings" = '{"provider":"bifrost"}'::json;--> statement-breakpoint
 ALTER TABLE "llm_model" ALTER COLUMN "provider" SET DEFAULT 'bifrost';--> statement-breakpoint
 ALTER TABLE "llm_model_provider_key_mapping" ADD CONSTRAINT "llm_model_provider_key_mapping_llm_model_id_llm_model_id_fk" FOREIGN KEY ("llm_model_id") REFERENCES "public"."llm_model"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

@@ -26,7 +26,8 @@ export async function seedProviderKeysForModels(models: SeedModel[]): Promise<vo
   const groupedModels = new Map<string, SeedModel[]>();
   for (const model of models) {
     if (!BIFROST_UPSTREAM_PROVIDERS.has(model.setting.provider)) continue;
-    const groupKey = `${model.organizationId}:${stableStringify(model.setting)}`;
+    const providerKeySettings = getProviderKeySettings(model);
+    const groupKey = `${model.organizationId}:${stableStringify(providerKeySettings)}`;
     groupedModels.set(groupKey, [...(groupedModels.get(groupKey) ?? []), model]);
   }
 
@@ -34,18 +35,19 @@ export async function seedProviderKeysForModels(models: SeedModel[]): Promise<vo
     const firstModel = providerModels[0];
     if (!firstModel) continue;
     const provider = firstModel.setting.provider;
-    const name = `${provider}-${createHash('sha256').update(stableStringify(firstModel.setting)).digest('hex').slice(0, 8)}`;
+    const settings = getProviderKeySettings(firstModel);
+    const name = `${provider}-${createHash('sha256').update(stableStringify(settings)).digest('hex').slice(0, 8)}`;
     const [providerKey] = await db
       .insert(llmProviderKeyTable)
       .values({
         name,
         provider,
-        settings: firstModel.setting,
+        settings,
         organizationId: firstModel.organizationId,
       })
       .onConflictDoUpdate({
         target: [llmProviderKeyTable.organizationId, llmProviderKeyTable.name],
-        set: { provider, settings: firstModel.setting },
+        set: { provider, settings },
       })
       .returning();
     if (!providerKey) continue;
@@ -66,6 +68,15 @@ export async function seedProviderKeysForModels(models: SeedModel[]): Promise<vo
         upstreamModelName: getUpstreamModelName(model),
       });
     }
+  }
+}
+
+function getProviderKeySettings(model: SeedModel): SeedModel['setting'] {
+  if (model.setting.provider !== 'azure') return model.setting;
+  try {
+    return { ...model.setting, baseUrl: new URL(model.setting.baseUrl).origin };
+  } catch {
+    return model.setting;
   }
 }
 
