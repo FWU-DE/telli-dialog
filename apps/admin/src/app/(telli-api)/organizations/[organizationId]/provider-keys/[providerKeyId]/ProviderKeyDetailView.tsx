@@ -103,11 +103,13 @@ export function ProviderKeyDetailView({
 
     try {
       if (isCreate) {
-        const created = await createProviderKeyAction(organizationId, payload);
+        const result = await createProviderKeyAction(organizationId, payload);
+        if (!result.success) throw new Error(result.error.message);
         toast.success('Provider-Schlüssel erfolgreich erstellt');
-        router.push(ROUTES.api.providerKeyDetails(organizationId, created.id));
+        router.push(ROUTES.api.providerKeyDetails(organizationId, result.value.id));
       } else if (providerKey) {
-        await updateProviderKeyAction(organizationId, providerKey.id, payload);
+        const result = await updateProviderKeyAction(organizationId, providerKey.id, payload);
+        if (!result.success) throw new Error(result.error.message);
         toast.success('Provider-Schlüssel erfolgreich aktualisiert');
       }
     } catch (error) {

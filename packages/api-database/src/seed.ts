@@ -299,7 +299,7 @@ export async function seedDatabase() {
         .onConflictDoUpdate({
           target: llmModelTable.id,
           set: {
-            provider: model.provider,
+            provider: 'bifrost',
             name: model.name,
             displayName: model.displayName,
             description: model.description,

@@ -15,8 +15,9 @@ export default async function ProviderKeyPage(
     return <ProviderKeyDetailView organizationId={organizationId} models={models} mode="create" />;
   }
 
-  const providerKeys = await getProviderKeysAction(organizationId);
-  const providerKey = providerKeys.find(({ id }) => id === providerKeyId);
+  const result = await getProviderKeysAction(organizationId);
+  if (!result.success) throw new Error(result.error.message);
+  const providerKey = result.value.find(({ id }) => id === providerKeyId);
   if (!providerKey) notFound();
 
   return (

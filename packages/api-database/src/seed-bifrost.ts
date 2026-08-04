@@ -99,6 +99,7 @@ function getUpstreamModelName(model: SeedModel): string {
   try {
     const parts = new URL(model.setting.baseUrl).pathname.split('/').filter(Boolean);
     const deploymentIndex = parts.indexOf('deployments');
+    if (deploymentIndex === -1) return model.name;
     return parts[deploymentIndex + 1] ?? model.name;
   } catch {
     return model.name;

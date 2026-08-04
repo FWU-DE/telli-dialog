@@ -112,14 +112,34 @@ export async function seedDatabase() {
         .returning();
     }
 
-    await localDb
-      .insert(llmProviderKeyTable)
-      .values(await getProviderKeys())
-      .onConflictDoNothing();
-    await localDb
-      .insert(llmModelProviderKeyMappingTable)
-      .values(await getModelProviderKeyMappings())
-      .onConflictDoNothing();
+    const localProviderKeyIds = new Map<string, string>();
+    for (const providerKey of await getProviderKeys()) {
+      const [localProviderKey] = await localDb
+        .insert(llmProviderKeyTable)
+        .values(providerKey)
+        .onConflictDoUpdate({
+          target: [llmProviderKeyTable.organizationId, llmProviderKeyTable.name],
+          set: {
+            provider: providerKey.provider,
+            settings: providerKey.settings,
+            weight: providerKey.weight,
+            isEnabled: providerKey.isEnabled,
+          },
+        })
+        .returning({ id: llmProviderKeyTable.id });
+      if (localProviderKey) localProviderKeyIds.set(providerKey.id, localProviderKey.id);
+    }
+
+    const modelProviderKeyMappings = (await getModelProviderKeyMappings()).map((mapping) => ({
+      ...mapping,
+      providerKeyId: localProviderKeyIds.get(mapping.providerKeyId) ?? mapping.providerKeyId,
+    }));
+    if (modelProviderKeyMappings.length > 0) {
+      await localDb
+        .insert(llmModelProviderKeyMappingTable)
+        .values(modelProviderKeyMappings)
+        .onConflictDoNothing();
+    }
 
     // 5. Create model-key mappings
     await localDb

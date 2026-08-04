@@ -86,6 +86,8 @@ export async function syncBifrostProvidersForOrganization(
   organizationId: string,
   options: BifrostProviderSyncOptions,
 ): Promise<void> {
+  // Bifrost provider configuration and virtual keys are shared across organizations. Rebuild the
+  // complete desired state so syncing one organization cannot remove another organization's keys.
   const providerKeys = await dbGetAllProviderKeysWithModels();
   await syncBifrostProviders(providerKeys, {
     ...options,
