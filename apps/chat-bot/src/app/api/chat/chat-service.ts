@@ -407,6 +407,7 @@ export async function sendChatMessage({
       attachedLinks,
       sourceUrls: ingestResult.processedUrls,
       allowWebTools,
+      allowMundoSearch: true,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

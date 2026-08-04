@@ -7,7 +7,6 @@ import { Button } from '@ui/components/button';
 import { Spinner } from '@ui/components/spinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/tooltip';
 import { WebSource } from '@shared/db/types';
-import { parseHyperlinks, getDisplayUrl } from '@shared/utils/url-utils';
 import {
   NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
@@ -15,6 +14,7 @@ import {
 import { useToast } from '@/components/common/toast';
 import { ingestWebContentAction } from '@/components/custom-chat/files-and-links/actions';
 import { useTranslations } from 'next-intl';
+import { utils } from '@shared/utils';
 
 export type CustomChatLinksProps = {
   initialLinks: WebSource[];
@@ -47,7 +47,7 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
       return;
     }
 
-    const parsedUrls = parseHyperlinks(normalizedLink);
+    const parsedUrls = utils.url.parseHyperlinks(normalizedLink);
     if (!parsedUrls || parsedUrls[0] !== normalizedLink) {
       toast.error(t('invalid-error'));
       return;
@@ -134,7 +134,7 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
         <div className="flex flex-wrap gap-2">
           {links.map((link, index) => {
             const isProcessing = processingLinks.has(link.link);
-            const displayTitle = getDisplayUrl(link.link);
+            const displayTitle = utils.url.getDisplayUrl(link.link);
             return (
               <div
                 key={link.link}

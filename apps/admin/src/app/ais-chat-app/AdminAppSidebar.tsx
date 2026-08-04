@@ -10,6 +10,7 @@ export function AdminAppSidebar() {
       <SidebarItem label="Statische Modelle" href={ROUTES.app.staticModels} />
       <SidebarItem label="Vorlagen" href={ROUTES.app.templates} />
       <SidebarItem label="Sperrungen" href={ROUTES.app.suspensions} />
+      <SidebarItem label="Webseitenpakete" href={ROUTES.app.urlPresets} />
     </Sidebar>
   );
 }

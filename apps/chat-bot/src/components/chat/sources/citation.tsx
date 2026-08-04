@@ -3,10 +3,10 @@ import './citation.css';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils/tailwind';
 import SearchIcon from '@/components/icons/search';
-import { getDisplayUrl } from '@shared/utils/url-utils';
 import { openInNewTab } from '@/utils/navigation/router';
 import Spinner from '@/components/icons/spinner';
 import { WebSource } from '@shared/db/types';
+import { utils } from '@shared/utils';
 
 function truncateText(text: string, maxLength: number) {
   return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
@@ -21,7 +21,7 @@ export default function Citation({
   className?: string;
   isLoading?: boolean;
 }) {
-  const displayUrl = getDisplayUrl(webSource.link);
+  const displayUrl = utils.url.getDisplayUrl(webSource.link);
   const displayTitle = truncateText(displayUrl, 30);
 
   return (

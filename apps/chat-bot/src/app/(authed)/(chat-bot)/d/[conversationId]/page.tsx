@@ -6,7 +6,6 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/llm-model-service';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
-import { parseHyperlinks } from '@shared/utils/url-utils';
 import Logo from '@/components/common/logo';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
@@ -15,6 +14,7 @@ import { WebSource } from '@shared/db/types';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { utils } from '@shared/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,7 +67,7 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
 
   // prepare urls for citations
   for (const message of messages.filter((msg) => msg.role === 'user')) {
-    const urls = parseHyperlinks(message.content);
+    const urls = utils.url.parseHyperlinks(message.content);
     if (urls && urls.length > 0) {
       const webSources: WebSource[] = urls.map((url) => ({
         link: url,

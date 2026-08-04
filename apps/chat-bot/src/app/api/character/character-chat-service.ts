@@ -165,6 +165,7 @@ export async function sendCharacterMessage({
       attachedLinks: character.attachedLinks,
       sourceUrls: processedUrls,
       allowWebTools,
+      allowMundoSearch: false,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

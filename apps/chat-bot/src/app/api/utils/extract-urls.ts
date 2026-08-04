@@ -1,4 +1,3 @@
-import { parseHyperlinks } from '@shared/utils/url-utils';
 import { MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { type ChatMessage } from '../chat/actions';
 import type {
@@ -6,10 +5,11 @@ import type {
   CharacterSelectModel,
   LearningScenarioSelectModel,
 } from '@shared/db/schema';
+import { utils } from '@shared/utils';
 
 // Extract unique URLs from message content
 function extractUniqueUrls(content: string): string[] {
-  return [...new Set(parseHyperlinks(content) ?? [])].filter((l) => l !== '');
+  return [...new Set(utils.url.parseHyperlinks(content) ?? [])].filter((l) => l !== '');
 }
 
 function sanitizeLinks(links: string[] | null | undefined): string[] {
