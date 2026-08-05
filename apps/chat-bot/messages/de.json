@@ -27,6 +27,7 @@
     "information-disclaimer": "AIS.chat kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",
     "character-limit-reached": "Zeichenlimit erreicht",
     "chat-expired-error": "Der Chat ist abgelaufen.",
+    "empty-response-error": "Antwort konnte nicht generiert werden",
     "new-chat": "Neuer Chat",
     "stop": "Stop",
     "copy": "Kopieren",

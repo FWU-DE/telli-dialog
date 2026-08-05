@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/core';
+
 /**
  * Base error class for AI generation errors.
  * Only use directly if no child error class fits the case.
@@ -11,6 +13,45 @@ export class AiGenerationError extends Error {
   static is(error: unknown): error is AiGenerationError {
     if (error && typeof error === 'object') {
       return 'name' in error && error.name === 'AiGenerationError';
+    }
+    return false;
+  }
+}
+
+/**
+ * Error thrown when a provider returns an empty or unusable generation result.
+ */
+export class EmptyResponseError extends AiGenerationError {
+  constructor({
+    providerName,
+    modelName,
+    hasContent,
+    stage,
+    message = 'Empty response from provider',
+  }: {
+    providerName: string;
+    modelName: string;
+    hasContent: boolean;
+    stage: string;
+    message?: string;
+  }) {
+    super(message);
+    this.name = 'EmptyResponseError';
+
+    Sentry.captureMessage(`Empty response from ${providerName}`, {
+      level: 'warning',
+      extra: {
+        provider: providerName,
+        stage,
+        modelName,
+        hasContent,
+      },
+    });
+  }
+
+  static is(error: unknown): error is EmptyResponseError {
+    if (error && typeof error === 'object') {
+      return 'name' in error && error.name === 'EmptyResponseError';
     }
     return false;
   }
@@ -124,6 +165,7 @@ type AiGenerationErrorType<T extends AiGenerationError = AiGenerationError> = {
 
 export const aiGenerationErrorTypes = [
   AiGenerationError,
+  EmptyResponseError,
   ResponsibleAIError,
   RateLimitExceededError,
   InvalidModelError,

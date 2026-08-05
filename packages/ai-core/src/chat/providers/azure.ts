@@ -7,7 +7,7 @@ import type {
   TextStreamFn,
   TokenUsage,
 } from '../types';
-import { AiGenerationError, ProviderConfigurationError } from '../../errors';
+import { EmptyResponseError, ProviderConfigurationError } from '../../errors';
 import { toOpenAIResponsesInput } from '../utils';
 import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
 
@@ -55,10 +55,12 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
       },
     );
 
+    let hasContent = false;
     let usage: TokenUsage | undefined;
 
     for await (const event of response) {
       if (event.type === 'response.output_text.delta') {
+        hasContent = true;
         yield event.delta;
       }
 
@@ -71,8 +73,13 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
       }
     }
 
-    if (!usage) {
-      throw new AiGenerationError('No usage data returned from Azure OpenAI Responses API stream');
+    if (!usage || !hasContent) {
+      throw new EmptyResponseError({
+        providerName: 'Azure OpenAI',
+        modelName: deployment,
+        hasContent,
+        stage: 'stream',
+      });
     }
 
     if (onComplete) {
@@ -133,8 +140,13 @@ export function constructAzureResponsesGenerationFn(model: AiModel): TextGenerat
 
     const usage = response.usage;
 
-    if (!usage) {
-      throw new AiGenerationError('No usage data returned from Azure OpenAI Responses API');
+    if (!usage || text.trim().length === 0) {
+      throw new EmptyResponseError({
+        providerName: 'Azure OpenAI',
+        modelName: deployment,
+        hasContent: text.trim().length > 0,
+        stage: 'generation',
+      });
     }
 
     return {
