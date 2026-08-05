@@ -115,7 +115,6 @@ jobs:
           docker run \
             --name bifrost \
             --network host \
-            -e APP_HOST=0.0.0.0 \
             -e APP_PORT=8089 \
             ghcr.io/maximhq/bifrost:v1.6.7 > /tmp/bifrost.log 2>&1 &
 
