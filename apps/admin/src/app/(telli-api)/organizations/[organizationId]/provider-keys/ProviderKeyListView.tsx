@@ -46,7 +46,7 @@ export function ProviderKeyListView({
               <TableHead>Name</TableHead>
               <TableHead>Provider</TableHead>
               <TableHead>Gewichtung</TableHead>
-              <TableHead className="text-center">Aktiv</TableHead>
+              <TableHead>Aktiv</TableHead>
               <TableHead>Modelle</TableHead>
               <TableHead>Erstellt am</TableHead>
               <TableHead className="w-12">Aktionen</TableHead>

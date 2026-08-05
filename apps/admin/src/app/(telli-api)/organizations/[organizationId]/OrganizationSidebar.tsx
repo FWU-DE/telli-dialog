@@ -7,7 +7,6 @@ export function OrganizationSidebar({ organizationId }: { organizationId: string
       <SidebarItem label="Modelle" href={ROUTES.api.llms(organizationId)} />
       <SidebarItem label="Provider-Keys" href={ROUTES.api.providerKeys(organizationId)} />
       <SidebarItem label="Projekte" href={ROUTES.api.projects(organizationId)} />
-      <SidebarItem label="Alle Organisationen" href={ROUTES.api.organizations} />
     </Sidebar>
   );
 }
