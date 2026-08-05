@@ -7,7 +7,9 @@ import { MAX_WEB_SEARCH_INCLUDED_DOMAINS } from '@/configuration-text-inputs/con
 import { cn } from '@/utils/tailwind';
 import { Card, CardContent } from '@ui/components/card';
 import { UrlPreset } from '@shared/web-search/url-presets/types';
-import { Chip } from '@ui/components/chip';
+import { RemovableChip } from '@ui/components/removable-chip';
+
+const UNASSIGNED_PRESET_NAME = 'unassigned';
 
 type WebSearchSelectedWebsitesProps = {
   availablePresets: UrlPreset[];
@@ -44,7 +46,7 @@ export function WebSearchSelectedWebsites({
 
   const selectedWebsitesByPresetName =
     unassignedWebsites.length > 0
-      ? new Map([['unassigned', unassignedWebsites], ...websitesByPreset])
+      ? new Map([[UNASSIGNED_PRESET_NAME, unassignedWebsites], ...websitesByPreset])
       : new Map(websitesByPreset);
 
   return (
@@ -54,26 +56,20 @@ export function WebSearchSelectedWebsites({
           {Array.from(selectedWebsitesByPresetName.entries()).map(([presetName, websites]) => {
             return (
               <div key={presetName} className="mt-6">
-                <div className="text-xs uppercase text-muted-foreground">
-                  {presetName === 'unassigned' ? t('presets-title-unassigned') : presetName}
+                <div className="text-xs uppercase text-muted-foreground tracking-wide">
+                  {presetName === UNASSIGNED_PRESET_NAME
+                    ? t('presets-title-unassigned')
+                    : presetName}
                 </div>
                 <ul className="flex flex-wrap gap-2 mt-3">
                   {websites.map((website, index) => (
                     <li key={presetName + index}>
-                      <Chip key={presetName + index}>
-                        {website}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="hover:bg-primary/15"
-                          aria-label={t('websites-aria-delete', {
-                            website,
-                          })}
-                          onClick={() => onDeleteWebsite(website)}
-                        >
-                          <TrashSimpleIcon data-icon="inline-end" />
-                        </Button>
-                      </Chip>
+                      <RemovableChip
+                        href={`https://${website}`}
+                        label={website}
+                        ariaDeleteLabel={t('websites-aria-delete', { website })}
+                        onDelete={() => onDeleteWebsite(website)}
+                      />
                     </li>
                   ))}
                 </ul>
