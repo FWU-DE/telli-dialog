@@ -28,7 +28,6 @@ import { TrashSimpleIcon } from '@phosphor-icons/react';
 import { CreateNewUrlPreset } from './CreateNewUrlPreset';
 import { EditUrlPresetForm } from './EditUrlPresetForm';
 import { toast } from 'sonner';
-import { TooltipProvider } from '@ui/components/tooltip';
 
 export function UrlPresetsListView() {
   const [urlPresets, setUrlPresets] = useState<UrlPreset[]>([]);
