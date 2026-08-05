@@ -57,7 +57,7 @@ describe('mundoSearch', () => {
       {
         title: 'Photosynthese erklärt',
         description: 'Ein Erklärvideo zur Photosynthese.',
-        resourceType: ['VIDEO'],
+        learnResourceType: ['VIDEO'],
         language: ['Deutsch'],
         url: 'https://mundo.schule/details/SODIX-0001159031',
         source: '',

@@ -1,12 +1,14 @@
 import { logError } from '@shared/logging';
 import { z } from 'zod';
 import {
+  MUNDO_CLASS_LEVELS,
   MUNDO_DETAILS_URL_PREFIX,
   MUNDO_SEARCH_DESCRIPTION_LENGTH_LIMIT,
   MUNDO_SEARCH_ENDPOINT,
   MUNDO_SEARCH_RESULTS_LIMIT,
   MUNDO_SEARCH_TIMEOUT_MS,
   MUNDO_SEARCH_TITLE_LENGTH_LIMIT,
+  MUNDO_SUBJECTS,
 } from '@/configuration-text-inputs/const';
 
 const mundoSearchTileSchema = z.object({
@@ -31,11 +33,14 @@ type MundoSearchTile = z.infer<typeof mundoSearchTileSchema>;
 export type MundoSearchResult = {
   title: string;
   description: string;
-  resourceType: string[];
+  learnResourceType: string[];
   language: string[];
   url: string;
   source: string;
 };
+
+type MundoClassLevel = (typeof MUNDO_CLASS_LEVELS)[number];
+type MundoSubject = (typeof MUNDO_SUBJECTS)[number];
 
 function truncate(value: string | null | undefined, limit: number): string {
   if (!value) return '';
@@ -56,66 +61,25 @@ function formatElement(element: MundoSearchTile): MundoSearchResult | null {
   return {
     title: truncate(element.title, MUNDO_SEARCH_TITLE_LENGTH_LIMIT),
     description: truncate(element.description, MUNDO_SEARCH_DESCRIPTION_LENGTH_LIMIT),
-    resourceType: normalizeList(element.learnResourceType),
+    learnResourceType: normalizeList(element.learnResourceType),
     language: normalizeList(element.language),
     url: `${MUNDO_DETAILS_URL_PREFIX}${identifier}`,
     source: element.source?.name?.trim() ?? '',
   };
 }
 
-export const MUNDO_CLASS_LEVELS = ['1-4', '5-10', '11-13'] as const;
-export type MundoClassLevel = (typeof MUNDO_CLASS_LEVELS)[number];
-
-export const MUNDO_SUBJECTS = [
-  'Deutsch',
-  'Deutsch als Zweitsprache',
-  'Englisch',
-  'Französisch',
-  'Griechisch',
-  'Italienisch',
-  'Latein',
-  'Russisch',
-  'Spanisch',
-  'Türkisch',
-  'Biologie',
-  'Chemie',
-  'Informatik/ITB',
-  'Mathematik',
-  'Physik',
-  'Sachunterricht',
-  'Sexualerziehung',
-  'Umwelt',
-  'Geografie',
-  'Geschichte',
-  'Politische Bildung',
-  'Wirtschaftskunde',
-  'Bildende Kunst',
-  'Musik',
-  'Ethik',
-  'Philosophie',
-  'Religion',
-  'Sport',
-  'Arbeitslehre',
-  'Gesundheit',
-  'Interkulturelle Bildung',
-  'Medienpädagogik',
-  'Pädagogik',
-  'Psychologie',
-  'Sucht und Prävention',
-  'Verkehrserziehung',
-] as const;
-export type MundoSubject = (typeof MUNDO_SUBJECTS)[number];
-
-export function sanitizeClassLevel(value: string | undefined): MundoClassLevel | null {
-  if (typeof value !== 'string') return null;
+export function sanitizeClassLevel(value: unknown): MundoClassLevel | undefined {
+  if (typeof value !== 'string') return undefined;
   return (MUNDO_CLASS_LEVELS as readonly string[]).includes(value)
     ? (value as MundoClassLevel)
-    : null;
+    : undefined;
 }
 
-export function sanitizeSubject(value: string | undefined): MundoSubject | null {
-  if (typeof value !== 'string') return null;
-  return (MUNDO_SUBJECTS as readonly string[]).includes(value) ? (value as MundoSubject) : null;
+export function sanitizeSubject(value: unknown): MundoSubject | undefined {
+  if (typeof value !== 'string') return undefined;
+  return (MUNDO_SUBJECTS as readonly string[]).includes(value)
+    ? (value as MundoSubject)
+    : undefined;
 }
 
 export async function mundoSearch({
@@ -124,15 +88,10 @@ export async function mundoSearch({
   subject,
 }: {
   query: string;
-  classLevel?: string;
-  subject?: string;
+  classLevel?: MundoClassLevel;
+  subject?: MundoSubject;
 }): Promise<MundoSearchResult[]> {
   try {
-    const filteredClassLevel = sanitizeClassLevel(classLevel);
-    const filterClassLevels = filteredClassLevel ? [filteredClassLevel] : [];
-    const filteredSubject = sanitizeSubject(subject);
-    const filterSubjects = filteredSubject ? [filteredSubject] : [];
-
     const response = await fetch(MUNDO_SEARCH_ENDPOINT, {
       method: 'POST',
       headers: {
@@ -141,7 +100,10 @@ export async function mundoSearch({
       },
       body: JSON.stringify({
         search: query,
-        filters: { classLevels: filterClassLevels, subjects: filterSubjects },
+        filters: {
+          classLevels: classLevel ? [classLevel] : [],
+          subjects: subject ? [subject] : [],
+        },
         size: MUNDO_SEARCH_RESULTS_LIMIT,
       }),
       signal: AbortSignal.timeout(MUNDO_SEARCH_TIMEOUT_MS),
@@ -163,8 +125,7 @@ export async function mundoSearch({
     const tiles = parsed.data.tiles ?? [];
     return tiles
       .map(formatElement)
-      .filter((result): result is MundoSearchResult => result !== null)
-      .slice(0, MUNDO_SEARCH_RESULTS_LIMIT);
+      .filter((result): result is MundoSearchResult => result !== null);
   } catch (error) {
     logError('Error during MUNDO search', error);
     return [];

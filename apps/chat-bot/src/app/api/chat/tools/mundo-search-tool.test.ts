@@ -14,7 +14,7 @@ vi.mock(import('../mundo-search'), async (importOriginal) => ({
 const sampleResult: MundoSearchResult = {
   title: 'Photosynthese',
   description: 'Video.',
-  resourceType: ['VIDEO'],
+  learnResourceType: ['VIDEO'],
   language: ['Deutsch'],
   url: 'https://mundo.schule/details/SODIX-1',
   source: 'ARD',
@@ -51,7 +51,7 @@ describe('buildMundoSearchTool', () => {
     });
     expect(JSON.parse(raw)).toEqual({
       results: [sampleResult],
-      filtersDropped: false,
+      retriedWithoutFilters: false,
       error: null,
     });
   });
@@ -91,7 +91,7 @@ describe('buildMundoSearchTool', () => {
     expect(mocks.mundoSearchMock).toHaveBeenCalledTimes(1);
     expect(JSON.parse(raw)).toEqual({
       results: [],
-      filtersDropped: false,
+      retriedWithoutFilters: false,
       error: 'No MUNDO results found.',
     });
   });
@@ -116,12 +116,12 @@ describe('buildMundoSearchTool', () => {
     });
     expect(JSON.parse(raw)).toEqual({
       results: [],
-      filtersDropped: false,
+      retriedWithoutFilters: false,
       error: 'No MUNDO results found.',
     });
   });
 
-  it('retries without filters and reports filtersDropped when a filtered search returns nothing', async () => {
+  it('retries without filters and reports retriedWithoutFilters when a filtered search returns nothing', async () => {
     mocks.mundoSearchMock.mockResolvedValueOnce([]).mockResolvedValueOnce([sampleResult]);
 
     const { buildMundoSearchTool } = await import('./mundo-search-tool');
@@ -142,12 +142,12 @@ describe('buildMundoSearchTool', () => {
     expect(mocks.mundoSearchMock).toHaveBeenNthCalledWith(2, { query: 'Photosynthese' });
     expect(JSON.parse(raw)).toEqual({
       results: [sampleResult],
-      filtersDropped: true,
+      retriedWithoutFilters: true,
       error: null,
     });
   });
 
-  it('reports filtersDropped even when the retry also returns no results', async () => {
+  it('reports retriedWithoutFilters even when the retry also returns no results', async () => {
     mocks.mundoSearchMock.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
 
     const { buildMundoSearchTool } = await import('./mundo-search-tool');
@@ -162,7 +162,7 @@ describe('buildMundoSearchTool', () => {
     expect(mocks.mundoSearchMock).toHaveBeenCalledTimes(2);
     expect(JSON.parse(raw)).toEqual({
       results: [],
-      filtersDropped: true,
+      retriedWithoutFilters: true,
       error: 'No MUNDO results found.',
     });
   });
@@ -176,7 +176,7 @@ describe('buildMundoSearchTool', () => {
     expect(mocks.mundoSearchMock).not.toHaveBeenCalled();
     expect(JSON.parse(raw)).toEqual({
       results: [],
-      filtersDropped: false,
+      retriedWithoutFilters: false,
       error: 'Error: Missing search query.',
     });
   });

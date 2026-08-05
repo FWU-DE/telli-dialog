@@ -1,11 +1,11 @@
 import {
+  MUNDO_CLASS_LEVELS,
   MUNDO_SEARCH_QUERY_LENGTH_LIMIT,
   MUNDO_SEARCH_RESULTS_LIMIT,
+  MUNDO_SUBJECTS,
 } from '@/configuration-text-inputs/const';
 import {
   mundoSearch,
-  MUNDO_CLASS_LEVELS,
-  MUNDO_SUBJECTS,
   sanitizeClassLevel,
   sanitizeSubject,
   type MundoSearchResult,
@@ -14,14 +14,14 @@ import type { ToolDefinition, ToolRegistration } from './types';
 
 type MundoSearchToolResponse = {
   results: MundoSearchResult[];
-  filtersDropped: boolean;
+  retriedWithoutFilters: boolean;
   error: string | null;
 };
 
 export function buildMundoSearchTool(): ToolRegistration {
   const definition: ToolDefinition = {
     name: 'mundo_search',
-    description: `Search the public MUNDO educational media library (mundo.schule) for teaching materials, e.g. videos or worksheets. Use this tool when the user asks for lesson materials or media suggestions for a specific topic. Returns up to ${MUNDO_SEARCH_RESULTS_LIMIT} matching MUNDO media entries. If a search with filters returns nothing, filters are automatically dropped and the search is retried once; when the response has "filtersDropped": true, do not retry with different filters — instead retry with a broader, simpler or alternative query.`,
+    description: `Search the public MUNDO educational media library (mundo.schule) for teaching materials, e.g. videos or worksheets. Use this tool when the user asks for lesson materials or media suggestions for a specific topic. Returns up to ${MUNDO_SEARCH_RESULTS_LIMIT} matching MUNDO media entries. If a search with filters returns nothing, filters are automatically dropped and the search is retried once; when the response has "retriedWithoutFilters": true, do not retry with different filters — instead retry with a broader, simpler or alternative query.`,
     parameters: {
       type: 'object',
       properties: {
@@ -55,30 +55,27 @@ export function buildMundoSearchTool(): ToolRegistration {
     if (query.length === 0) {
       const response: MundoSearchToolResponse = {
         results: [],
-        filtersDropped: false,
+        retriedWithoutFilters: false,
         error: 'Error: Missing search query.',
       };
       return JSON.stringify(response);
     }
 
-    const classLevel =
-      sanitizeClassLevel(typeof args.classLevel === 'string' ? args.classLevel : undefined) ??
-      undefined;
-    const subject =
-      sanitizeSubject(typeof args.subject === 'string' ? args.subject : undefined) ?? undefined;
+    const classLevel = sanitizeClassLevel(args.classLevel);
+    const subject = sanitizeSubject(args.subject);
     const hasFilters = classLevel !== undefined || subject !== undefined;
 
     let results = await mundoSearch({ query, classLevel, subject });
-    let filtersDropped = false;
+    let retriedWithoutFilters = false;
 
     if (results.length === 0 && hasFilters) {
       results = await mundoSearch({ query });
-      filtersDropped = true;
+      retriedWithoutFilters = true;
     }
 
     const response: MundoSearchToolResponse = {
       results,
-      filtersDropped,
+      retriedWithoutFilters,
       error: results.length === 0 ? 'No MUNDO results found.' : null,
     };
 
