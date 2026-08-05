@@ -12,6 +12,7 @@ export type LargeLanguageModel = {
   additionalParameters: object;
   isNew: boolean;
   isDeleted: boolean;
+  useBifrost: boolean;
 };
 
 export type CreateLargeLanguageModel = {
@@ -23,6 +24,7 @@ export type CreateLargeLanguageModel = {
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
+  useBifrost: boolean;
   providerKeys: Array<{ providerKeyId: string; upstreamModelName: string }>;
 };
 
@@ -35,5 +37,6 @@ export type UpdateLargeLanguageModel = {
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
+  useBifrost: boolean;
   providerKeys: Array<{ providerKeyId: string; upstreamModelName: string }>;
 };

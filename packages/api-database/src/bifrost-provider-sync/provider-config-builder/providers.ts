@@ -9,7 +9,9 @@ function buildKey(
   value: string,
   extra?: Partial<BifrostKey>,
 ): BifrostKey {
-  const activeMappings = providerKey.models.filter(({ model }) => !model.isDeleted);
+  const activeMappings = providerKey.models.filter(
+    ({ model }) => !model.isDeleted && model.useBifrost,
+  );
   return {
     name: `ais-chat-${providerKey.id}`,
     value,

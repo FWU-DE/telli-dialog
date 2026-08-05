@@ -39,6 +39,7 @@ export async function createLargeLanguageModel(
     organizationId,
     isNew: data.isNew,
     isDeleted: data.isDeleted,
+    useBifrost: data.useBifrost,
   });
 
   logInfo('LLM was created successfully', { organizationId, data });
@@ -78,6 +79,7 @@ export async function updateLargeLanguageModel(
       : undefined,
     isNew: data.isNew,
     isDeleted: data.isDeleted,
+    useBifrost: data.useBifrost,
   });
 
   await dbReplaceModelProviderKeyMappings({

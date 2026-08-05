@@ -40,6 +40,7 @@ const llmFormSchema = z.object({
   additionalParameters: jsonStringSchema.optional().default(''),
   isNew: z.boolean().default(false),
   isDeleted: z.boolean().default(false),
+  useBifrost: z.boolean().default(true),
   providerKeys: z.array(
     z.object({
       providerKeyId: z.string(),
@@ -90,6 +91,7 @@ export function LargeLanguageModelDetailView({
           additionalParameters: JSON.stringify(model.additionalParameters, null, 2),
           isNew: model.isNew,
           isDeleted: model.isDeleted,
+          useBifrost: model.useBifrost,
           providerKeys: providerKeys.map((providerKey) => ({
             providerKeyId: providerKey.id,
             selected: assignments.has(providerKey.id),
@@ -108,6 +110,7 @@ export function LargeLanguageModelDetailView({
           additionalParameters: '{}',
           isNew: false,
           isDeleted: false,
+          useBifrost: true,
           providerKeys: providerKeys.map((providerKey) => ({
             providerKeyId: providerKey.id,
             selected: false,
@@ -236,6 +239,13 @@ export function LargeLanguageModelDetailView({
             name="isDeleted"
             label="Als gelöscht markieren"
             description="Kennzeichnet das Modell als gelöscht"
+            control={control}
+          />
+
+          <FormFieldCheckbox
+            name="useBifrost"
+            label="Bifrost verwenden"
+            description="Bifrost ermöglicht mehrere Provider-Schlüssel und automatische Provider-Auswahl. Für direkte Provider-Aufrufe muss genau ein aktivierter Provider-Schlüssel zugewiesen sein."
             control={control}
           />
 

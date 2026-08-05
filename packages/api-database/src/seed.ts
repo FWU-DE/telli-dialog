@@ -295,7 +295,12 @@ export async function seedDatabase() {
     for (const model of DEFAULT_MODELS) {
       await db
         .insert(llmModelTable)
-        .values({ ...model, provider: 'bifrost', setting: { provider: 'bifrost' } })
+        .values({
+          ...model,
+          provider: 'bifrost',
+          setting: { provider: 'bifrost' },
+          useBifrost: true,
+        })
         .onConflictDoUpdate({
           target: llmModelTable.id,
           set: {
@@ -309,6 +314,7 @@ export async function seedDatabase() {
             additionalParameters: model.additionalParameters,
             isNew: model.isNew,
             isDeleted: model.isDeleted,
+            useBifrost: true,
           },
         });
 

@@ -63,6 +63,7 @@ function createBifrostModel(settingProvider: 'azure' | 'openai' | 'ionos' | 'goo
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     description: 'Bifrost test model',
     isDeleted: false,
+    useBifrost: true,
     isNew: false,
     organizationId: 'organization-id',
     priceMetadata: {

@@ -190,3 +190,39 @@ export async function dbGetModelIdByProviderAndUpstreamName({
     .limit(1);
   return mapping?.modelId;
 }
+
+export async function dbGetDirectModelConfiguration(modelId: string) {
+  const rows = await db
+    .select({
+      model: llmModelTable,
+      providerKey: llmProviderKeyTable,
+      upstreamModelName: llmModelProviderKeyMappingTable.upstreamModelName,
+    })
+    .from(llmModelProviderKeyMappingTable)
+    .innerJoin(llmModelTable, eq(llmModelTable.id, llmModelProviderKeyMappingTable.llmModelId))
+    .innerJoin(
+      llmProviderKeyTable,
+      eq(llmProviderKeyTable.id, llmModelProviderKeyMappingTable.providerKeyId),
+    )
+    .where(
+      and(
+        eq(llmModelProviderKeyMappingTable.llmModelId, modelId),
+        eq(llmProviderKeyTable.isEnabled, true),
+      ),
+    );
+  if (rows.length !== 1) return undefined;
+  const row = rows[0]!;
+  const setting =
+    row.providerKey.settings.provider === 'azure'
+      ? {
+          ...row.providerKey.settings,
+          baseUrl: `${row.providerKey.settings.baseUrl}/openai/deployments/${row.upstreamModelName}`,
+        }
+      : row.providerKey.settings;
+  return {
+    ...row.model,
+    provider: row.providerKey.provider === 'google' ? 'google' : row.providerKey.provider,
+    setting,
+    name: row.upstreamModelName,
+  };
+}

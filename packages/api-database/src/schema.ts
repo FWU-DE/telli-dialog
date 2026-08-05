@@ -47,6 +47,7 @@ export const llmModelTable = pgTable(
     displayName: text('display_name').notNull(),
     description: text('description').notNull().default(''),
     setting: json('settings').$type<LlmModelProviderSettings>().notNull(),
+    useBifrost: boolean('use_bifrost').notNull().default(true),
     priceMetadata: json('price_metada').$type<LlmModelPriceMetadata>().notNull(),
     organizationId: uuid('organization_id')
       .references(() => organizationTable.id)

@@ -12,7 +12,10 @@ export function buildBifrostProviderConfigs(
   logger?: BifrostProviderSyncLogger,
 ): BifrostProviderConfig[] {
   const configs = providerKeys.flatMap((providerKey) => {
-    if (!providerKey.isEnabled || providerKey.models.every(({ model }) => model.isDeleted))
+    if (
+      !providerKey.isEnabled ||
+      providerKey.models.every(({ model }) => model.isDeleted || !model.useBifrost)
+    )
       return [];
     const provider = getBifrostProvider(providerKey.provider);
     if (!provider) {
