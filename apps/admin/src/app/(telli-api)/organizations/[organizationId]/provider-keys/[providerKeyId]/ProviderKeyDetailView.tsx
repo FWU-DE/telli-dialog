@@ -70,19 +70,19 @@ export function ProviderKeyDetailView({
       if (isCreate) {
         const result = await createProviderKeyAction(organizationId, payload);
         if (!result.success) throw new Error(result.error.message);
-        toast.success('Provider-Schlüssel erfolgreich erstellt');
+        toast.success('Provider-Key erfolgreich erstellt');
         router.push(ROUTES.api.providerKeyDetails(organizationId, result.value.id));
       } else if (providerKey) {
         const result = await updateProviderKeyAction(organizationId, providerKey.id, payload);
         if (!result.success) throw new Error(result.error.message);
-        toast.success('Provider-Schlüssel erfolgreich aktualisiert');
+        toast.success('Provider-Key erfolgreich aktualisiert');
       }
     } catch (error) {
       logError('Error saving provider key', error);
       toast.error(
         isCreate
-          ? 'Fehler beim Erstellen des Provider-Schlüssels'
-          : 'Fehler beim Aktualisieren des Provider-Schlüssels',
+          ? 'Fehler beim Erstellen des Provider-Keys'
+          : 'Fehler beim Aktualisieren des Provider-Keys',
       );
     }
   }
@@ -92,8 +92,8 @@ export function ProviderKeyDetailView({
       <CardHeader>
         <CardTitle>
           {isCreate
-            ? 'Neuen Provider-Schlüssel erstellen'
-            : `Provider-Schlüssel bearbeiten: ${providerKey?.name}`}
+            ? 'Neuen Provider-Key erstellen'
+            : `Provider-Key bearbeiten: ${providerKey?.name}`}
         </CardTitle>
         <CardDescription>
           Provider-Zugang konfigurieren und logischen Sprachmodellen zuweisen.

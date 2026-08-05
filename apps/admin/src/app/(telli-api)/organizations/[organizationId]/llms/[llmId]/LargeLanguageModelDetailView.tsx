@@ -245,20 +245,20 @@ export function LargeLanguageModelDetailView({
           <FormFieldCheckbox
             name="useBifrost"
             label="Bifrost verwenden"
-            description="Bifrost ermöglicht mehrere Provider-Schlüssel und automatische Provider-Auswahl. Für direkte Provider-Aufrufe muss genau ein aktivierter Provider-Schlüssel zugewiesen sein."
+            description="Bifrost ermöglicht mehrere Provider-Keys und automatische Provider-Auswahl. Für direkte Provider-Aufrufe muss genau ein aktivierter Provider-Key zugewiesen sein."
             control={control}
           />
 
           <div className="flex flex-col gap-3">
             <div>
-              <h2 className="font-medium">Provider-Schlüssel</h2>
+              <h2 className="font-medium">Provider-Keys</h2>
               <p className="text-muted-foreground text-sm">
                 Schlüssel auswählen. Der Provider-Modellname muss nur bei abweichenden Namen oder
                 Azure-Deployments angepasst werden.
               </p>
             </div>
             {providerKeys.length === 0 && (
-              <p className="text-muted-foreground text-sm">Keine Provider-Schlüssel vorhanden.</p>
+              <p className="text-muted-foreground text-sm">Keine Provider-Keys vorhanden.</p>
             )}
             <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
               {providerKeys.map((providerKey, index) => (

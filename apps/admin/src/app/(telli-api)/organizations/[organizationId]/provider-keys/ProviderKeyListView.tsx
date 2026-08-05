@@ -31,17 +31,12 @@ export function ProviderKeyListView({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Provider-Schlüssel</CardTitle>
+        <CardTitle>Provider-Keys</CardTitle>
         <CardDescription>Provider-Zugänge und ihre zugewiesenen Sprachmodelle.</CardDescription>
         <CardAction>
-          <div className="flex gap-2">
-            <Button variant="outline" asChild>
-              <Link href={ROUTES.api.llms(organizationId)}>Sprachmodelle</Link>
-            </Button>
-            <Button asChild>
-              <Link href={ROUTES.api.providerKeyNew(organizationId)}>Neuer Provider-Schlüssel</Link>
-            </Button>
-          </div>
+          <Button asChild>
+            <Link href={ROUTES.api.providerKeyNew(organizationId)}>Neuer Provider-Key</Link>
+          </Button>
         </CardAction>
       </CardHeader>
       <CardContent>
