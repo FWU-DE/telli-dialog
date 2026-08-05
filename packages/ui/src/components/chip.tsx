@@ -3,16 +3,23 @@
  * It adds a size variant and interactivity.
  * In ui systems badges are usually used for displaying static information.
  * Chips are used for displaying information that can be interacted with.
+ *
+ * Passing `onDelete` turns the Chip into a removable chip: it renders
+ * a delete button, optionally wraps the label in a link (`href`), shows a loading
+ * spinner (`isProcessing`) and can be wrapped in a tooltip (`tooltip`).
  */
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Slot } from 'radix-ui';
+import { XIcon } from '@phosphor-icons/react';
 
 import { cn } from '../lib/utils';
+import { Spinner } from './spinner';
+import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 
 const chipVariants = cva(
   cn(
-    'group/badge flex w-fit shrink-0 items-center justify-center gap-2 overflow-hidden rounded-full border font-medium leading-none whitespace-nowrap has-data-[icon=inline-end]:pr-1.0 has-data-[icon=inline-start]:pl-1.5',
+    'group/badge flex w-fit shrink-0 items-center justify-center gap-2 overflow-hidden rounded-full border font-medium leading-none whitespace-nowrap has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5',
     'focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
     'has-[>a:focus-visible]:outline-none has-[>a:focus-visible]:ring-3 has-[>a:focus-visible]:ring-ring/50',
     '[&>a]:focus:outline-none [&>a]:focus-visible:outline-none',
@@ -38,23 +45,71 @@ const chipVariants = cva(
   },
 );
 
+type ChipProps = React.ComponentProps<'span'> &
+  VariantProps<typeof chipVariants> & { asChild?: boolean } & {
+    label?: string;
+    href?: string;
+    isProcessing?: boolean;
+    ariaDeleteLabel?: string;
+    tooltip?: string;
+    onDelete?: () => void;
+  };
+
 function Chip({
   className,
   variant = 'default',
   size = 'default',
   asChild = false,
+  label,
+  href,
+  isProcessing,
+  ariaDeleteLabel,
+  tooltip,
+  onDelete,
+  key,
+  children,
   ...props
-}: React.ComponentProps<'span'> & VariantProps<typeof chipVariants> & { asChild?: boolean }) {
+}: ChipProps) {
   const Comp = asChild ? Slot.Root : 'span';
 
   return (
-    <Comp
-      data-slot="chip"
-      data-variant={variant}
-      data-size={size}
-      className={cn(chipVariants({ variant, size }), className)}
-      {...props}
-    />
+    <Tooltip key={key}>
+      <TooltipTrigger asChild disableKeyboardToggle>
+        <Comp
+          data-slot="chip"
+          data-variant={variant}
+          data-size={size}
+          className={cn(chipVariants({ variant, size }), className)}
+          {...props}
+        >
+          {isProcessing && <Spinner className="size-4" />}
+          {href ? (
+            <a
+              className="max-w-37.5 truncate"
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.currentTarget.blur()} // closes the tooltip after navigation
+            >
+              {label}
+            </a>
+          ) : (
+            (children ?? <span className="max-w-37.5 truncate">{label}</span>)
+          )}
+          <button
+            type="button"
+            disabled={isProcessing}
+            data-icon="inline-end"
+            aria-label={ariaDeleteLabel}
+            className="rounded-full hover:cursor-pointer hover:bg-primary/15 p-1 -m-1 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            onClick={onDelete}
+          >
+            <XIcon />
+          </button>
+        </Comp>
+      </TooltipTrigger>
+      {tooltip && <TooltipContent>{tooltip}</TooltipContent>}
+    </Tooltip>
   );
 }
 

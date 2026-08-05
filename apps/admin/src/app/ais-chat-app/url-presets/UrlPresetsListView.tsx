@@ -28,6 +28,7 @@ import { TrashSimpleIcon } from '@phosphor-icons/react';
 import { CreateNewUrlPreset } from './CreateNewUrlPreset';
 import { EditUrlPresetForm } from './EditUrlPresetForm';
 import { toast } from 'sonner';
+import { TooltipProvider } from '@ui/components/tooltip';
 
 export function UrlPresetsListView() {
   const [urlPresets, setUrlPresets] = useState<UrlPreset[]>([]);
@@ -170,16 +171,12 @@ export function UrlPresetsListView() {
                 {preset.urls
                   .toSorted((a, b) => a.localeCompare(b))
                   .map((url, index) => (
-                    <Chip key={`url_${index}`}>
-                      {url}
-                      <Button
-                        onClick={() => handleDeleteUrlFromPreset(preset.id, url)}
-                        variant="ghost"
-                        size="icon-sm"
-                      >
-                        <TrashSimpleIcon data-icon="inline-end" />
-                      </Button>
-                    </Chip>
+                    <Chip
+                      key={`url_${index}`}
+                      label={url}
+                      onDelete={() => handleDeleteUrlFromPreset(preset.id, url)}
+                      ariaDeleteLabel={`Löschen von ${url}`}
+                    />
                   ))}
               </div>
             </CardContent>

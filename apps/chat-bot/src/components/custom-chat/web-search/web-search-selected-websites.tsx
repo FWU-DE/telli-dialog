@@ -3,10 +3,10 @@
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@ui/components/card';
 import { UrlPreset } from '@shared/web-search/url-presets/types';
-import { RemovableChip } from '@ui/components/removable-chip';
+import { Chip } from '@ui/components/chip';
 import { WebSearchSelectedWebsitesFooter } from './web-search-selected-websites-footer';
 
-const UNASSIGNED_PRESET_NAME = 'unassigned';
+const UNASSIGNED_PRESET_NAME = '__unassigned__';
 
 type WebSearchSelectedWebsitesProps = {
   availablePresets: UrlPreset[];
@@ -59,7 +59,7 @@ export function WebSearchSelectedWebsites({
                 <ul className="flex flex-wrap gap-2 mt-3">
                   {websites.map((website, index) => (
                     <li key={presetName + index}>
-                      <RemovableChip
+                      <Chip
                         href={`https://${website}`}
                         label={website}
                         ariaDeleteLabel={t('websites-aria-delete', { website })}

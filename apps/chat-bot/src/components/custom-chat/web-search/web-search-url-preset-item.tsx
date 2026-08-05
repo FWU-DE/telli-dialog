@@ -53,11 +53,7 @@ export function WebSearchUrlPresetItem({
         <ul className="flex flex-wrap gap-2 my-4">
           {preset.urls.toSorted().map((url) => (
             <li className="" key={`${preset.id}-${url}`}>
-              <Chip asChild>
-                <a href={`https://${url}`} target="_blank" rel="noopener noreferrer">
-                  {url}
-                </a>
-              </Chip>
+              <Chip href={`https://${url}`} label={url} />
             </li>
           ))}
         </ul>
