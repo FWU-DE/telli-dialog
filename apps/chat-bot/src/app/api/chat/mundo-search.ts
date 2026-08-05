@@ -66,30 +66,84 @@ function formatElement(element: MundoSearchTile): MundoSearchResult | null {
 export const MUNDO_CLASS_LEVELS = ['1-4', '5-10', '11-13'] as const;
 export type MundoClassLevel = (typeof MUNDO_CLASS_LEVELS)[number];
 
-function sanitizeClassLevel(value: string | undefined): MundoClassLevel | null {
+export const MUNDO_SUBJECTS = [
+  'Deutsch',
+  'Deutsch als Zweitsprache',
+  'Englisch',
+  'Französisch',
+  'Griechisch',
+  'Italienisch',
+  'Latein',
+  'Russisch',
+  'Spanisch',
+  'Türkisch',
+  'Biologie',
+  'Chemie',
+  'Informatik/ITB',
+  'Mathematik',
+  'Physik',
+  'Sachunterricht',
+  'Sexualerziehung',
+  'Umwelt',
+  'Geografie',
+  'Geschichte',
+  'Politische Bildung',
+  'Wirtschaftskunde',
+  'Bildende Kunst',
+  'Musik',
+  'Ethik',
+  'Philosophie',
+  'Religion',
+  'Sport',
+  'Arbeitslehre',
+  'Gesundheit',
+  'Interkulturelle Bildung',
+  'Medienpädagogik',
+  'Pädagogik',
+  'Psychologie',
+  'Sucht und Prävention',
+  'Verkehrserziehung',
+] as const;
+export type MundoSubject = (typeof MUNDO_SUBJECTS)[number];
+
+export function sanitizeClassLevel(value: string | undefined): MundoClassLevel | null {
   if (typeof value !== 'string') return null;
   return (MUNDO_CLASS_LEVELS as readonly string[]).includes(value)
     ? (value as MundoClassLevel)
     : null;
 }
 
+export function sanitizeSubject(value: string | undefined): MundoSubject | null {
+  if (typeof value !== 'string') return null;
+  return (MUNDO_SUBJECTS as readonly string[]).includes(value) ? (value as MundoSubject) : null;
+}
+
 export async function mundoSearch({
   query,
   classLevel,
+  subject,
 }: {
   query: string;
   classLevel?: string;
+  subject?: string;
 }): Promise<MundoSearchResult[]> {
   try {
     const filteredClassLevel = sanitizeClassLevel(classLevel);
     const filterClassLevels = filteredClassLevel ? [filteredClassLevel] : [];
+    const filteredSubject = sanitizeSubject(subject);
+    const filterSubjects = filteredSubject ? [filteredSubject] : [];
+
     const response = await fetch(MUNDO_SEARCH_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-      body: JSON.stringify({ search: query, filters: { classLevels: filterClassLevels } }),
+      body: JSON.stringify({
+        search: query,
+        filters: { classLevels: filterClassLevels, subjects: filterSubjects },
+        size: MUNDO_SEARCH_RESULTS_LIMIT,
+      }),
       signal: AbortSignal.timeout(MUNDO_SEARCH_TIMEOUT_MS),
     });
 

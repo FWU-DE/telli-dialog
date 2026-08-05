@@ -2,7 +2,14 @@ import {
   MUNDO_SEARCH_QUERY_LENGTH_LIMIT,
   MUNDO_SEARCH_RESULTS_LIMIT,
 } from '@/configuration-text-inputs/const';
-import { mundoSearch, MUNDO_CLASS_LEVELS, type MundoSearchResult } from '../mundo-search';
+import {
+  mundoSearch,
+  MUNDO_CLASS_LEVELS,
+  MUNDO_SUBJECTS,
+  sanitizeClassLevel,
+  sanitizeSubject,
+  type MundoSearchResult,
+} from '../mundo-search';
 import type { ToolDefinition, ToolRegistration } from './types';
 
 type MundoSearchToolResponse = {
@@ -24,13 +31,19 @@ export function buildMundoSearchTool(): ToolRegistration {
             'A concise search query in German describing the topic (max 2 words). Examples: "Photosynthese", "Bruchrechnung", "Weimarer Republik".',
         },
         classLevel: {
-          type: 'string',
+          type: ['string', 'null'],
           description:
-            'Optional class level range to filter results by. Only set this when the teacher explicitly mentioned the class or grade the lesson is intended for; then pick the single range that best matches. If the teacher did not specify a target class or grade, omit this parameter so no filter is applied.',
-          enum: [...MUNDO_CLASS_LEVELS],
+            'Optional class level range to filter results by. Only set this when the teacher explicitly mentioned the class or grade the lesson is intended for; then pick the single range that best matches. If the teacher did not specify a target class or grade, pass null so no filter is applied.',
+          enum: [...MUNDO_CLASS_LEVELS, null],
+        },
+        subject: {
+          type: ['string', 'null'],
+          description:
+            'Optional school subject to filter results by. Pick exactly one subject from the enum that best matches the topic of the query. If no subject clearly fits, pass null so no filter is applied.',
+          enum: [...MUNDO_SUBJECTS, null],
         },
       },
-      required: ['query'],
+      required: ['query', 'classLevel', 'subject'],
       additionalProperties: false,
     },
   };
@@ -48,10 +61,14 @@ export function buildMundoSearchTool(): ToolRegistration {
       return JSON.stringify(response);
     }
 
-    const classLevel = typeof args.classLevel === 'string' ? args.classLevel : undefined;
-    const hasFilters = classLevel !== undefined;
+    const classLevel =
+      sanitizeClassLevel(typeof args.classLevel === 'string' ? args.classLevel : undefined) ??
+      undefined;
+    const subject =
+      sanitizeSubject(typeof args.subject === 'string' ? args.subject : undefined) ?? undefined;
+    const hasFilters = classLevel !== undefined || subject !== undefined;
 
-    let results = await mundoSearch({ query, classLevel });
+    let results = await mundoSearch({ query, classLevel, subject });
     let filtersDropped = false;
 
     if (results.length === 0 && hasFilters) {

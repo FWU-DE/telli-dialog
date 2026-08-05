@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MUNDO_SEARCH_RESULTS_LIMIT } from '@/configuration-text-inputs/const';
 
 vi.mock('@shared/logging', () => ({
   logError: vi.fn(),
@@ -44,7 +45,11 @@ describe('mundoSearch', () => {
       'https://mundo.schule/api/search',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ search: 'Photosynthese' }),
+        body: JSON.stringify({
+          search: 'Photosynthese',
+          filters: { classLevels: [], subjects: [] },
+          size: MUNDO_SEARCH_RESULTS_LIMIT,
+        }),
       }),
     );
 
@@ -52,9 +57,10 @@ describe('mundoSearch', () => {
       {
         title: 'Photosynthese erklärt',
         description: 'Ein Erklärvideo zur Photosynthese.',
-        learnResourceType: ['VIDEO'],
+        resourceType: ['VIDEO'],
         language: ['Deutsch'],
         url: 'https://mundo.schule/details/SODIX-0001159031',
+        source: '',
       },
     ]);
   });
