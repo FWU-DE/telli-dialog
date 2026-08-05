@@ -20,7 +20,7 @@ vi.mock('../db/functions/chat', () => ({
   dbGetConversationMessages: vi.fn(),
 }));
 
-vi.mock('../db/functions/character', () => ({
+vi.mock('@shared/db/functions/character', () => ({
   dbGetCharacterById: vi.fn(),
 }));
 

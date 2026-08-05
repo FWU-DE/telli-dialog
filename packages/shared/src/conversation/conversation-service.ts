@@ -14,7 +14,9 @@ import { ForbiddenError, NotFoundError } from '@shared/error';
 import { dbGetCharacterById } from '@shared/db/functions/character';
 
 function isToolResultMessage(message: ConversationMessageModel): boolean {
-  return message.role === 'tool' || message.toolCallId !== null;
+  return (
+    message.role === 'tool' || (message.toolCallId !== null && message.toolCallId !== undefined)
+  );
 }
 
 /**
