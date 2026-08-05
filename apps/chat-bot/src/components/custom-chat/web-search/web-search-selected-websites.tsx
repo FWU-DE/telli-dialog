@@ -1,13 +1,10 @@
 'use client';
 
-import { TrashSimpleIcon } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@ui/components/button';
-import { MAX_WEB_SEARCH_INCLUDED_DOMAINS } from '@/configuration-text-inputs/const';
-import { cn } from '@/utils/tailwind';
 import { Card, CardContent } from '@ui/components/card';
 import { UrlPreset } from '@shared/web-search/url-presets/types';
 import { RemovableChip } from '@ui/components/removable-chip';
+import { WebSearchSelectedWebsitesFooter } from './web-search-selected-websites-footer';
 
 const UNASSIGNED_PRESET_NAME = 'unassigned';
 
@@ -29,8 +26,6 @@ export function WebSearchSelectedWebsites({
   if (selectedWebsites.length === 0) {
     return null;
   }
-
-  const isLimitReached = selectedWebsites.length >= MAX_WEB_SEARCH_INCLUDED_DOMAINS;
 
   const allPresetUrls = new Set(availablePresets.flatMap((preset) => preset.urls));
   const unassignedWebsites = selectedWebsites.filter((website) => !allPresetUrls.has(website));
@@ -78,20 +73,10 @@ export function WebSearchSelectedWebsites({
           })}
         </CardContent>
       </Card>
-      <div className="flex items-center justify-end gap-2">
-        <div
-          className={cn('text-sm', isLimitReached ? 'text-destructive' : 'text-muted-foreground')}
-        >
-          {t('websites-counter', {
-            count: selectedWebsites.length,
-            max: MAX_WEB_SEARCH_INCLUDED_DOMAINS,
-          })}
-        </div>
-        <Button variant="link" size="sm" onClick={onClearWebsites}>
-          <TrashSimpleIcon />
-          {t('websites-clear-button')}
-        </Button>
-      </div>
+      <WebSearchSelectedWebsitesFooter
+        selectedWebsitesCount={selectedWebsites.length}
+        onClearWebsites={onClearWebsites}
+      />
     </div>
   );
 }
