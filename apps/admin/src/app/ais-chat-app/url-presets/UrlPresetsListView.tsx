@@ -164,6 +164,7 @@ export function UrlPresetsListView() {
               </CardAction>
             </CardHeader>
             <CardContent className="flex flex-col gap-2">
+              <div>Reihenfolge: {preset.orderNumber}</div>
               <div>Webseiten</div>
               <div className="flex flex-row flex-wrap gap-2">
                 {preset.urls
