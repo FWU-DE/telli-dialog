@@ -12,10 +12,17 @@ import {
 import { ConversationMessageModel, ConversationModel } from '@shared/db/types';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 import { dbGetCharacterById } from '@shared/db/functions/character';
+import { ToolCall } from '@ais-chat/ai-core/chat/types';
 
-function isToolResultMessage(message: ConversationMessageModel): boolean {
+export function isToolRelatedMessage(
+  message:
+    | Pick<ConversationMessageModel, 'role' | 'toolCallId' | 'toolCalls'>
+    | { role: string; toolCallId?: string | null; toolCalls?: ToolCall[] | null },
+): boolean {
   return (
-    message.role === 'tool' || (message.toolCallId !== null && message.toolCallId !== undefined)
+    message.role === 'tool' ||
+    (message.toolCallId !== null && message.toolCallId !== undefined) ||
+    (Array.isArray(message.toolCalls) && message.toolCalls.length > 0)
   );
 }
 
@@ -134,7 +141,7 @@ export async function getConversationAndMessagesForExport({
   }
   return {
     conversation,
-    messages: messages.filter((message) => !isToolResultMessage(message)),
+    messages: messages.filter((message) => !isToolRelatedMessage(message)),
   };
 }
 
@@ -158,7 +165,7 @@ export async function getConversationMessageForExport({
     throw new NotFoundError('Conversation message not found');
   }
 
-  if (isToolResultMessage(message)) {
+  if (isToolRelatedMessage(message)) {
     throw new NotFoundError('Conversation message not found');
   }
 

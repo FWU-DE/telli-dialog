@@ -8,6 +8,7 @@ import {
   type ToolCall,
 } from '@ais-chat/ai-core/chat/types';
 import z from 'zod';
+import { isToolRelatedMessage } from '@shared/conversation/conversation-service';
 
 /**
  * Serialized error that can be safely transmitted across the Server Action boundary.
@@ -112,7 +113,7 @@ export type UIMessage = ChatMessage & {
  */
 export function toUIMessages(messages: ChatMessage[]): UIMessage[] {
   return messages
-    .filter((m) => m.role !== 'tool' && !m.toolCalls?.length)
+    .filter((m) => !isToolRelatedMessage(m))
     .map((m) => ({
       ...m,
       parts: [{ type: 'text' as const, text: m.content }],
