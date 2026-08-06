@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MUNDO_SEARCH_RESULTS_LIMIT } from '@/configuration-text-inputs/const';
 
 vi.mock('@shared/logging', () => ({
   logError: vi.fn(),
@@ -44,7 +45,11 @@ describe('mundoSearch', () => {
       'https://mundo.schule/api/search',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ search: 'Photosynthese' }),
+        body: JSON.stringify({
+          search: 'Photosynthese',
+          filters: { classLevels: [], subjects: [] },
+          size: MUNDO_SEARCH_RESULTS_LIMIT,
+        }),
       }),
     );
 
@@ -55,6 +60,7 @@ describe('mundoSearch', () => {
         learnResourceType: ['VIDEO'],
         language: ['Deutsch'],
         url: 'https://mundo.schule/details/SODIX-0001159031',
+        source: '',
       },
     ]);
   });
@@ -92,27 +98,7 @@ describe('mundoSearch', () => {
     await expect(mundoSearch({ query: 'test' })).resolves.toEqual([]);
   });
 
-  it('caps the number of returned results at 10', async () => {
-    const tiles = Array.from({ length: 25 }, (_, i) => ({
-      identifier: `SODIX-${i}`,
-      title: `Title ${i}`,
-    }));
-
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({ tiles }),
-    });
-
-    const { mundoSearch } = await import('./mundo-search');
-
-    const results = await mundoSearch({ query: 'many' });
-
-    expect(results).toHaveLength(10);
-    expect(results[0]!.url).toBe('https://mundo.schule/details/SODIX-0');
-  });
-
-  it('skips tiles without an identifier and keeps enough valid tiles to fill the cap', async () => {
+  it('skips tiles without an identifier', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
       status: 200,
