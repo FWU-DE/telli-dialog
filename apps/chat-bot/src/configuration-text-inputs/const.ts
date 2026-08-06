@@ -29,6 +29,45 @@ export const MUNDO_SEARCH_TITLE_LENGTH_LIMIT = 200; // Maximum characters kept f
 export const MUNDO_SEARCH_DESCRIPTION_LENGTH_LIMIT = 800; // Maximum characters kept from each MUNDO result description
 export const MUNDO_SEARCH_TIMEOUT_MS = 10_000; // Request timeout for the MUNDO search API
 export const MUNDO_DETAILS_URL_PREFIX = 'https://mundo.schule/details/';
+export const MUNDO_CLASS_LEVELS = ['1-4', '5-10', '11-13'] as const;
+export const MUNDO_SUBJECTS = [
+  'Deutsch',
+  'Deutsch als Zweitsprache',
+  'Englisch',
+  'Französisch',
+  'Griechisch',
+  'Italienisch',
+  'Latein',
+  'Russisch',
+  'Spanisch',
+  'Türkisch',
+  'Biologie',
+  'Chemie',
+  'Informatik/ITB',
+  'Mathematik',
+  'Physik',
+  'Sachunterricht',
+  'Sexualerziehung',
+  'Umwelt',
+  'Geografie',
+  'Geschichte',
+  'Politische Bildung',
+  'Wirtschaftskunde',
+  'Bildende Kunst',
+  'Musik',
+  'Ethik',
+  'Philosophie',
+  'Religion',
+  'Sport',
+  'Arbeitslehre',
+  'Gesundheit',
+  'Interkulturelle Bildung',
+  'Medienpädagogik',
+  'Pädagogik',
+  'Psychologie',
+  'Sucht und Prävention',
+  'Verkehrserziehung',
+] as const;
 
 // Attachments
 export const NUMBER_OF_FILES_LIMIT = 20; // Maximum number of files that can be attached to a chat

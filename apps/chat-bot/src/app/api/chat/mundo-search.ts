@@ -1,12 +1,14 @@
 import { logError } from '@shared/logging';
 import { z } from 'zod';
 import {
+  MUNDO_CLASS_LEVELS,
   MUNDO_DETAILS_URL_PREFIX,
   MUNDO_SEARCH_DESCRIPTION_LENGTH_LIMIT,
   MUNDO_SEARCH_ENDPOINT,
   MUNDO_SEARCH_RESULTS_LIMIT,
   MUNDO_SEARCH_TIMEOUT_MS,
   MUNDO_SEARCH_TITLE_LENGTH_LIMIT,
+  MUNDO_SUBJECTS,
 } from '@/configuration-text-inputs/const';
 
 const mundoSearchTileSchema = z.object({
@@ -15,6 +17,11 @@ const mundoSearchTileSchema = z.object({
   description: z.string().nullish(),
   learnResourceType: z.array(z.string()).nullish(),
   language: z.array(z.string()).nullish(),
+  source: z
+    .object({
+      name: z.string().nullish(),
+    })
+    .nullish(),
 });
 
 const mundoSearchApiResponseSchema = z.object({
@@ -29,7 +36,11 @@ export type MundoSearchResult = {
   learnResourceType: string[];
   language: string[];
   url: string;
+  source: string;
 };
+
+type MundoClassLevel = (typeof MUNDO_CLASS_LEVELS)[number];
+type MundoSubject = (typeof MUNDO_SUBJECTS)[number];
 
 function truncate(value: string | null | undefined, limit: number): string {
   if (!value) return '';
@@ -53,10 +64,33 @@ function formatElement(element: MundoSearchTile): MundoSearchResult | null {
     learnResourceType: normalizeList(element.learnResourceType),
     language: normalizeList(element.language),
     url: `${MUNDO_DETAILS_URL_PREFIX}${identifier}`,
+    source: element.source?.name?.trim() ?? '',
   };
 }
 
-export async function mundoSearch({ query }: { query: string }): Promise<MundoSearchResult[]> {
+export function sanitizeClassLevel(value: unknown): MundoClassLevel | undefined {
+  if (typeof value !== 'string') return undefined;
+  return (MUNDO_CLASS_LEVELS as readonly string[]).includes(value)
+    ? (value as MundoClassLevel)
+    : undefined;
+}
+
+export function sanitizeSubject(value: unknown): MundoSubject | undefined {
+  if (typeof value !== 'string') return undefined;
+  return (MUNDO_SUBJECTS as readonly string[]).includes(value)
+    ? (value as MundoSubject)
+    : undefined;
+}
+
+export async function mundoSearch({
+  query,
+  classLevel,
+  subject,
+}: {
+  query: string;
+  classLevel?: MundoClassLevel;
+  subject?: MundoSubject;
+}): Promise<MundoSearchResult[]> {
   try {
     const response = await fetch(MUNDO_SEARCH_ENDPOINT, {
       method: 'POST',
@@ -64,7 +98,14 @@ export async function mundoSearch({ query }: { query: string }): Promise<MundoSe
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-      body: JSON.stringify({ search: query }),
+      body: JSON.stringify({
+        search: query,
+        filters: {
+          classLevels: classLevel ? [classLevel] : [],
+          subjects: subject ? [subject] : [],
+        },
+        size: MUNDO_SEARCH_RESULTS_LIMIT,
+      }),
       signal: AbortSignal.timeout(MUNDO_SEARCH_TIMEOUT_MS),
     });
 
@@ -84,8 +125,7 @@ export async function mundoSearch({ query }: { query: string }): Promise<MundoSe
     const tiles = parsed.data.tiles ?? [];
     return tiles
       .map(formatElement)
-      .filter((result): result is MundoSearchResult => result !== null)
-      .slice(0, MUNDO_SEARCH_RESULTS_LIMIT);
+      .filter((result): result is MundoSearchResult => result !== null);
   } catch (error) {
     logError('Error during MUNDO search', error);
     return [];

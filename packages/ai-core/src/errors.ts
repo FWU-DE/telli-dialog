@@ -1,5 +1,3 @@
-import * as Sentry from '@sentry/core';
-
 /**
  * Base error class for AI generation errors.
  * Only use directly if no child error class fits the case.
@@ -26,27 +24,17 @@ export class EmptyResponseError extends AiGenerationError {
     providerName,
     modelName,
     hasContent,
-    stage,
     message = 'Empty response from provider',
   }: {
     providerName: string;
     modelName: string;
     hasContent: boolean;
-    stage: string;
     message?: string;
   }) {
-    super(message);
+    super(
+      `${message} (providerName=${providerName}, modelName=${modelName}, hasContent=${String(hasContent)})`,
+    );
     this.name = 'EmptyResponseError';
-
-    Sentry.captureMessage(`Empty response from ${providerName}`, {
-      level: 'warning',
-      extra: {
-        provider: providerName,
-        stage,
-        modelName,
-        hasContent,
-      },
-    });
   }
 
   static is(error: unknown): error is EmptyResponseError {
