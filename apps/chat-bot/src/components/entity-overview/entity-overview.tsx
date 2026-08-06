@@ -4,13 +4,7 @@ import React from 'react';
 import { OverviewFilter, overviewFilterSchema } from '@shared/overview-filter';
 import { useTranslations } from 'next-intl';
 import { Input } from '@ais-chat/ui/components/input';
-import {
-  MagnifyingGlassIcon,
-  InfoIcon,
-  XCircleIcon,
-  XIcon,
-  CaretDownIcon,
-} from '@phosphor-icons/react';
+import { MagnifyingGlassIcon, InfoIcon, XCircleIcon, CaretDownIcon } from '@phosphor-icons/react';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import { Button } from '@ais-chat/ui/components/button';
 import { FilterTabs } from '@ais-chat/ui/components/filter-tabs';
@@ -23,6 +17,7 @@ import {
 } from '@ais-chat/ui/components/select';
 import { InfoDialog } from '@/components/common/dialog';
 import { isSortOption, SortOption } from './utils';
+import { Chip } from '@ui/components/chip';
 
 type EntityOverviewProps = {
   title: string;
@@ -33,12 +28,12 @@ type EntityOverviewProps = {
   onFilterChange: (filter: OverviewFilter) => void;
   children: (searchQuery: string, sortBy: SortOption) => React.ReactNode;
   itemCount: number;
-  isFilterPanelOpen?: boolean;
-  onFilterPanelToggle?: () => void;
-  filterPanel?: React.ReactNode;
-  filterActiveCount?: number;
-  activeFilterPills?: Array<{ label: string; group: string; value: string }>;
-  onRemoveFilter?: (group: string, value: string) => void;
+  isFilterPanelOpen: boolean;
+  onFilterPanelToggle: () => void;
+  filterPanel: React.ReactNode;
+  filterActiveCount: number;
+  activeFilterPills: Array<{ label: string; group: string; value: string }>;
+  onRemoveFilter: (group: string, value: string) => void;
 };
 
 const FILTER_OPTIONS = overviewFilterSchema.options;
@@ -54,11 +49,11 @@ export default function EntityOverview({
   onFilterChange,
   children,
   itemCount,
-  isFilterPanelOpen = false,
+  isFilterPanelOpen,
   onFilterPanelToggle,
   filterPanel,
-  filterActiveCount = 0,
-  activeFilterPills = [],
+  filterActiveCount,
+  activeFilterPills,
   onRemoveFilter,
 }: EntityOverviewProps) {
   const [searchInput, setSearchInput] = React.useState('');
@@ -155,32 +150,30 @@ export default function EntityOverview({
             <FilterTabs tabs={visibleTabs} activeTab={activeFilter} onTabChange={onFilterChange} />
             <div className="grow" />
             <div className="flex gap-2 whitespace-nowrap">
-              {onFilterPanelToggle ? (
-                <div className="text-primary hover:text-primary-dark">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={onFilterPanelToggle}
-                    className={`${OVERVIEW_CONTROL_TRIGGER_CLASSNAME} relative aria-expanded:bg-transparent aria-expanded:text-primary`}
-                    aria-label={t('filter-label')}
-                    aria-expanded={isFilterPanelOpen}
-                    aria-controls={filterPanelId}
-                  >
-                    <span className="font-normal text-primary">{t('filter-label')}</span>
-                    <CaretDownIcon
-                      className="size-4 transition-transform"
-                      aria-hidden="true"
-                      weight="bold"
-                    />
-                    {filterActiveCount > 0 ? (
-                      <span className="absolute -top-1 -right-1 inline-flex size-4 items-center justify-center rounded-full bg-primary text-[10px] leading-none text-primary-foreground">
-                        {filterActiveCount}
-                      </span>
-                    ) : null}
-                  </Button>
-                </div>
-              ) : null}
+              <div className="text-primary hover:text-primary-dark">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={onFilterPanelToggle}
+                  className={`${OVERVIEW_CONTROL_TRIGGER_CLASSNAME} relative aria-expanded:bg-transparent aria-expanded:text-primary`}
+                  aria-label={t('filter-label')}
+                  aria-expanded={isFilterPanelOpen}
+                  aria-controls={filterPanelId}
+                >
+                  <span className="font-normal text-primary">{t('filter-label')}</span>
+                  <CaretDownIcon
+                    className="size-4 transition-transform"
+                    aria-hidden="true"
+                    weight="bold"
+                  />
+                  {filterActiveCount > 0 ? (
+                    <span className="absolute -top-1 -right-1 inline-flex size-4 items-center justify-center rounded-full bg-primary text-[10px] leading-none text-primary-foreground">
+                      {filterActiveCount}
+                    </span>
+                  ) : null}
+                </Button>
+              </div>
               <div className="text-primary hover:text-primary-dark">
                 <Select
                   value={sortBy}
@@ -208,7 +201,7 @@ export default function EntityOverview({
             </div>
           </div>
 
-          {isFilterPanelOpen && filterPanel ? (
+          {isFilterPanelOpen ? (
             <div
               id={filterPanelId}
               className="mt-3 rounded-xl border border-gray-200 bg-background p-3 sm:p-4"
@@ -223,22 +216,13 @@ export default function EntityOverview({
                 {t('hits-for', { count: renderedCount })}
               </span>
               {activeFilterPills.map((pill) => (
-                <span
+                <Chip
                   key={`${pill.group}-${pill.value}`}
-                  className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
-                >
-                  <span>{pill.label}</span>
-                  {onRemoveFilter ? (
-                    <button
-                      type="button"
-                      onClick={() => onRemoveFilter(pill.group, pill.value)}
-                      className="ml-1.5 flex items-center justify-center rounded-full hover:bg-primary/20 transition-colors"
-                      aria-label={`${pill.label}-Filter zurücksetzen`}
-                    >
-                      <XIcon className="size-3" aria-hidden="true" />
-                    </button>
-                  ) : null}
-                </span>
+                  size="sm"
+                  label={pill.label}
+                  onDelete={() => onRemoveFilter(pill.group, pill.value)}
+                  ariaDeleteLabel={`${pill.label}-Filter zurücksetzen`}
+                />
               ))}
             </div>
           ) : null}

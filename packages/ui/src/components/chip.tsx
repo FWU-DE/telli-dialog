@@ -36,6 +36,7 @@ const chipVariants = cva(
       },
       size: {
         default: 'h-7 px-3 text-sm',
+        sm: 'h-6 px-2 text-xs [&_svg:not([class*="size-"])]:size-3',
       },
     },
     defaultVariants: {
@@ -101,7 +102,7 @@ function Chip({
             disabled={isProcessing}
             data-icon="inline-end"
             aria-label={ariaDeleteLabel}
-            className="rounded-full hover:cursor-pointer hover:bg-primary/15 p-1 -m-1 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="rounded-full hover:cursor-pointer hover:bg-primary/15 p-1 -m-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             onClick={onDelete}
           >
             <XIcon />
