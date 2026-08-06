@@ -1,4 +1,5 @@
 import {
+  EmptyResponseError,
   InvalidModelError,
   ResponsibleAIError,
   SharedChatExpiredError,
@@ -12,6 +13,16 @@ describe('getErrorMessageByType', () => {
   it('returns key for mapped ai-core errors', () => {
     expect(getErrorMessageByType(new TokenPointsExceededError())).toBe('rate-limit-error');
     expect(getErrorMessageByType(new SharedChatExpiredError())).toBe('chat-expired-error');
+    expect(
+      getErrorMessageByType(
+        new EmptyResponseError({
+          providerName: 'p',
+          modelName: 'm',
+          hasContent: false,
+          stage: 's',
+        }),
+      ),
+    ).toBe('empty-response-error');
   });
 
   it('returns not-found key for NotFoundError', () => {
