@@ -118,7 +118,7 @@
     "eslint": "10.7.0",
     "k6": "0.0.0",
     "playwright-core": "1.61.1",
-    "postcss": "8.5.20",
+    "postcss": "8.5.23",
     "prettier": "3.9.5",
     "prettier-eslint": "17.1.1",
     "tailwindcss": "4.3.3",
