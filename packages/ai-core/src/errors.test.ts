@@ -7,6 +7,7 @@ import {
   ProviderConfigurationError,
   TokenPointsExceededError,
   SharedChatExpiredError,
+  EmptyResponseError,
   isKnownAiGenerationError,
 } from './errors';
 
@@ -130,6 +131,31 @@ describe('SharedChatExpiredError', () => {
   });
 });
 
+describe('EmptyResponseError', () => {
+  it('should create an error with neutral default message and correct name', () => {
+    const error = new EmptyResponseError({
+      providerName: 'provider',
+      modelName: 'model',
+      hasContent: false,
+    });
+    expect(error.name).toBe('EmptyResponseError');
+    expect(error.message).toBe(
+      'Empty response from provider (providerName=provider, modelName=model, hasContent=false)',
+    );
+    expect(error).toBeInstanceOf(AiGenerationError);
+  });
+
+  it('should correctly identify EmptyResponseError instances', () => {
+    const error = new EmptyResponseError({
+      providerName: 'p',
+      modelName: 'm',
+      hasContent: false,
+    });
+    expect(EmptyResponseError.is(error)).toBe(true);
+    expect(EmptyResponseError.is(new AiGenerationError('Test'))).toBe(false);
+  });
+});
+
 describe('isKnownAiGenerationError', () => {
   it('should return true for known AI generation errors', () => {
     expect(isKnownAiGenerationError(new AiGenerationError('Test'))).toBe(true);
@@ -139,6 +165,15 @@ describe('isKnownAiGenerationError', () => {
     expect(isKnownAiGenerationError(new ProviderConfigurationError('Test'))).toBe(true);
     expect(isKnownAiGenerationError(new TokenPointsExceededError('Test'))).toBe(true);
     expect(isKnownAiGenerationError(new SharedChatExpiredError('Test'))).toBe(true);
+    expect(
+      isKnownAiGenerationError(
+        new EmptyResponseError({
+          providerName: 'p',
+          modelName: 'm',
+          hasContent: false,
+        }),
+      ),
+    ).toBe(true);
   });
 
   it('should return false for unknown values', () => {
