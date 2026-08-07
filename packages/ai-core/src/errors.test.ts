@@ -139,7 +139,9 @@ describe('EmptyResponseError', () => {
       hasContent: false,
     });
     expect(error.name).toBe('EmptyResponseError');
-    expect(error.message).toBe('Empty response from provider');
+    expect(error.message).toBe(
+      'Empty response from provider (providerName=provider, modelName=model, hasContent=false)',
+    );
     expect(error).toBeInstanceOf(AiGenerationError);
   });
 
