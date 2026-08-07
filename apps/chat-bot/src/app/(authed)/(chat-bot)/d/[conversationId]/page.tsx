@@ -4,7 +4,7 @@ import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { redirect } from 'next/navigation';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/llm-model-service';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
 import Logo from '@/components/common/logo';
 import z from 'zod';
@@ -53,9 +53,13 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   });
 
   const lastUsedModelInChat = messages.at(-1)?.modelName;
+  const defaultModelName = await getDefaultModelNameByFederalStateId(
+    userAndContext.federalState.id,
+    models,
+  );
 
   const currentModel =
-    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? defaultModelName;
 
   const convertedMessages = convertMessageModelToMessage(messages);
   const webSourceMapping = new Map<string, WebSource[]>();
@@ -75,7 +79,8 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   return (
     <LlmModelsProvider
       models={models}
-      defaultLlmModelByCookie={currentModel}
+      initialModelName={currentModel}
+      defaultModelName={defaultModelName}
       initialDownloadConversationEnabled={convertedMessages.length > 0}
     >
       <DefaultPageLayout

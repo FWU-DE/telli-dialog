@@ -30,6 +30,7 @@ export const ROUTES = {
     infoBannerNew: '/ais-chat-app/info-banners/new',
     infoBannerDetails: (infoBannerId: string) => `/ais-chat-app/info-banners/${infoBannerId}`,
     toolCallCosts: '/ais-chat-app/tool-call-costs',
+    staticModels: '/ais-chat-app/static-models',
     templates: '/ais-chat-app/templates',
     template: (templateType: TemplateTypes, templateId: string) =>
       `/ais-chat-app/templates/${templateType}/${templateId}`,
