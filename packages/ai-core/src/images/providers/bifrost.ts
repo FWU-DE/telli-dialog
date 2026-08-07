@@ -3,7 +3,6 @@ import OpenAI from 'openai';
 import type { AiModel, ImageGenerationFn } from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { env } from '../../env';
-import { getBifrostModelName } from '../../bifrost';
 
 function createBifrostClient(model: AiModel): {
   client: OpenAI;
@@ -25,7 +24,7 @@ function createBifrostClient(model: AiModel): {
         ...(env.bifrostApiKey ? { defaultHeaders: { 'x-bf-vk': env.bifrostApiKey } } : {}),
       }),
     ),
-    modelName: getBifrostModelName(model.name),
+    modelName: model.name,
   };
 }
 

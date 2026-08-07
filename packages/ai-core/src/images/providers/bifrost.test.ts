@@ -84,7 +84,7 @@ describe('constructBifrostImageGenerationFn', () => {
     });
   });
 
-  it('strips the anthropic prefix from logical image model names', async () => {
+  it('preserves logical image model names containing a slash', async () => {
     generateMock.mockResolvedValue({
       data: [{ b64_json: 'base64-bifrost-image' }],
       output_format: 'png',
@@ -109,7 +109,7 @@ describe('constructBifrostImageGenerationFn', () => {
     await generateImage({ prompt: 'a cat', model: model.name });
 
     expect(generateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'claude-3-5-sonnet-v2@20241022' }),
+      expect.objectContaining({ model: 'anthropic/claude-3-5-sonnet-v2@20241022' }),
     );
   });
 

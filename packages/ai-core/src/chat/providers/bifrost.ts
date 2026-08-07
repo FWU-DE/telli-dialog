@@ -12,7 +12,6 @@ import { toOpenAIResponsesInput } from '../utils';
 import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
 import { env } from '../../env';
 import { dbGetModelIdByProviderAndUpstreamName } from '@ais-chat/api-database';
-import { getBifrostModelName } from '../../bifrost';
 
 type BifrostExtraFields = {
   provider?: string;
@@ -39,8 +38,12 @@ function createBifrostClient(model: AiModel): { client: OpenAI; modelName: strin
         ...(env.bifrostApiKey ? { defaultHeaders: { 'x-bf-vk': env.bifrostApiKey } } : {}),
       }),
     ),
-    modelName: getBifrostModelName(model.name),
+    modelName: getBifrostModelName(model),
   };
+}
+
+function getBifrostModelName(model: AiModel): string {
+  return model.name.replace(/^anthropic\//, '');
 }
 
 async function getUsedModelId(
@@ -54,7 +57,7 @@ async function getUsedModelId(
   );
   for (const returnedName of returnedNames) {
     const matchingModel = models.find((candidate) => {
-      const candidateName = getBifrostModelName(candidate.name);
+      const candidateName = getBifrostModelName(candidate);
       return returnedName === candidateName || returnedName.endsWith(`/${candidateName}`);
     });
     if (matchingModel) return matchingModel.id;
@@ -80,9 +83,7 @@ export function constructBifrostTextStreamFn(model: AiModel): TextStreamFn {
       stream: true,
       max_output_tokens: maxTokens,
       ...model.additionalParameters,
-      ...(fallbackModels?.length
-        ? { fallbacks: fallbackModels.map(({ name }) => getBifrostModelName(name)) }
-        : {}),
+      ...(fallbackModels?.length ? { fallbacks: fallbackModels.map(getBifrostModelName) } : {}),
     });
 
     let usage: TokenUsage | undefined;
@@ -140,9 +141,7 @@ export function constructBifrostAgenticStreamFn(model: AiModel): AgenticStreamFn
       providerName: 'Bifrost',
       additionalParameters: {
         ...(model.additionalParameters as Record<string, unknown>),
-        ...(fallbackModels?.length
-          ? { fallbacks: fallbackModels.map(({ name }) => getBifrostModelName(name)) }
-          : {}),
+        ...(fallbackModels?.length ? { fallbacks: fallbackModels.map(getBifrostModelName) } : {}),
       },
       getModelId: (extraFields) => getUsedModelId(extraFields, [model, ...(fallbackModels ?? [])]),
     });
@@ -159,9 +158,7 @@ export function constructBifrostTextGenerationFn(model: AiModel): TextGeneration
       stream: false,
       max_output_tokens: maxTokens,
       ...model.additionalParameters,
-      ...(fallbackModels?.length
-        ? { fallbacks: fallbackModels.map(({ name }) => getBifrostModelName(name)) }
-        : {}),
+      ...(fallbackModels?.length ? { fallbacks: fallbackModels.map(getBifrostModelName) } : {}),
     });
 
     const textOutput = response.output.find((item) => item.type === 'message');
