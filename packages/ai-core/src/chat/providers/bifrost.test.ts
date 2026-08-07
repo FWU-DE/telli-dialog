@@ -34,6 +34,10 @@ vi.mock('@sentry/core', () => ({
   instrumentOpenAiClient: instrumentOpenAiClientMock,
 }));
 
+vi.mock('@ais-chat/api-database', () => ({
+  dbGetModelIdByProviderAndUpstreamName: vi.fn(),
+}));
+
 vi.mock('../../env', () => ({
   env: {
     bifrostApiKey: 'bifrost-api-key',
@@ -59,6 +63,7 @@ function createBifrostModel(settingProvider: 'azure' | 'openai' | 'ionos' | 'goo
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     description: 'Bifrost test model',
     isDeleted: false,
+    useBifrost: true,
     isNew: false,
     organizationId: 'organization-id',
     priceMetadata: {
@@ -75,7 +80,7 @@ describe('Bifrost chat provider', () => {
     vi.clearAllMocks();
   });
 
-  it('uses the Responses API with a Bifrost-prefixed Azure model', async () => {
+  it('uses the Responses API with a bare logical model name', async () => {
     responsesCreateMock.mockResolvedValue({
       output: [
         {
@@ -99,10 +104,11 @@ describe('Bifrost chat provider', () => {
     expect(openAiConstructorMock).toHaveBeenCalledWith({
       apiKey: 'bifrost-api-key',
       baseURL: 'http://localhost:8089/openai/v1',
+      defaultHeaders: { 'x-bf-vk': 'bifrost-api-key' },
     });
     expect(responsesCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'azure/gpt-5',
+        model: 'gpt-5',
         stream: false,
         max_output_tokens: 128,
         reasoning: { effort: 'low' },
@@ -115,7 +121,7 @@ describe('Bifrost chat provider', () => {
     });
   });
 
-  it('maps Google settings to the Bifrost vertex provider', async () => {
+  it('uses the same logical name regardless of provider settings', async () => {
     responsesCreateMock.mockResolvedValue({
       output: [{ type: 'message', content: [{ type: 'output_text', text: 'Vertex' }] }],
       usage: { input_tokens: 1, output_tokens: 2, total_tokens: 3 },
@@ -126,12 +132,10 @@ describe('Bifrost chat provider', () => {
 
     await generateText({ messages: [{ role: 'user', content: 'Hello' }], model: model.name });
 
-    expect(responsesCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'vertex/gpt-5' }),
-    );
+    expect(responsesCreateMock).toHaveBeenCalledWith(expect.objectContaining({ model: 'gpt-5' }));
   });
 
-  it('strips the anthropic prefix for Google Claude models on Vertex', async () => {
+  it('strips the anthropic prefix from logical model names', async () => {
     responsesCreateMock.mockResolvedValue({
       output: [{ type: 'message', content: [{ type: 'output_text', text: 'Claude' }] }],
       usage: { input_tokens: 1, output_tokens: 2, total_tokens: 3 },
@@ -146,7 +150,7 @@ describe('Bifrost chat provider', () => {
     await generateText({ messages: [{ role: 'user', content: 'Hello' }], model: model.name });
 
     expect(responsesCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'vertex/claude-3-5-sonnet-v2@20241022' }),
+      expect.objectContaining({ model: 'claude-3-5-sonnet-v2@20241022' }),
     );
   });
 
@@ -175,13 +179,41 @@ describe('Bifrost chat provider', () => {
     }
 
     expect(chunks).toEqual(['Hello', ' world']);
-    expect(responsesCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'ionos/gpt-5' }),
-    );
+    expect(responsesCreateMock).toHaveBeenCalledWith(expect.objectContaining({ model: 'gpt-5' }));
     expect(onComplete).toHaveBeenCalledWith({
       promptTokens: 4,
       completionTokens: 5,
       totalTokens: 9,
     });
+  });
+
+  it('uses the actual deployment when identifying a fallback response', async () => {
+    responsesCreateMock.mockResolvedValue({
+      output: [{ type: 'message', content: [{ type: 'output_text', text: 'Fallback' }] }],
+      usage: { input_tokens: 1, output_tokens: 2, total_tokens: 3 },
+      extra_fields: {
+        model_requested: 'azure/primary',
+        model_deployment: 'openai/fallback',
+      },
+    });
+
+    const primary = createBifrostModel('azure');
+    const fallback = {
+      ...createBifrostModel('openai'),
+      id: 'model-fallback',
+      name: 'anthropic/fallback',
+    };
+    const generateText = constructBifrostTextGenerationFn(primary);
+
+    const result = await generateText({
+      messages: [{ role: 'user', content: 'Hello' }],
+      model: primary.name,
+      fallbackModels: [fallback],
+    });
+
+    expect(responsesCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ fallbacks: ['fallback'] }),
+    );
+    expect(result.modelId).toBe('model-fallback');
   });
 });

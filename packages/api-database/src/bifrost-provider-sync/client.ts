@@ -53,6 +53,56 @@ export async function syncBifrostProvider({
       }),
     ),
   );
+  const desiredKeyNames = new Set(providerConfig.keys.map(({ name }) => name));
+  await Promise.all(
+    existingKeysBeforeSync
+      .filter(
+        ({ name, id }) =>
+          id && isManagedKeyName(providerConfig.provider, name) && !desiredKeyNames.has(name),
+      )
+      .map((key) =>
+        deleteBifrostProviderKey({
+          bifrostAdminUrl,
+          bifrostAdminUsername,
+          bifrostAdminPassword,
+          provider: providerConfig.provider,
+          keyId: key.id!,
+          logger,
+        }),
+      ),
+  );
+}
+
+function isManagedKeyName(provider: BifrostProvider, name: string): boolean {
+  return name.startsWith('ais-chat-') || new RegExp(`^${provider}-.+-[a-f0-9]{8}$`).test(name);
+}
+
+async function deleteBifrostProviderKey({
+  bifrostAdminUrl,
+  bifrostAdminUsername,
+  bifrostAdminPassword,
+  provider,
+  keyId,
+  logger,
+}: {
+  bifrostAdminUrl: string;
+  bifrostAdminUsername?: string;
+  bifrostAdminPassword?: string;
+  provider: BifrostProvider;
+  keyId: string;
+  logger?: BifrostProviderSyncLogger;
+}): Promise<void> {
+  await assertBifrostResponse(
+    bifrostFetch({
+      bifrostAdminUrl,
+      bifrostAdminUsername,
+      bifrostAdminPassword,
+      path: `/api/providers/${provider}/keys/${keyId}`,
+      init: { method: 'DELETE' },
+    }),
+    provider,
+    logger,
+  );
 }
 
 async function ensureBifrostProvider({

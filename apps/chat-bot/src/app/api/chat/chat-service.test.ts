@@ -43,6 +43,7 @@ const mocks = vi.hoisted(() => ({
   constructChatSystemPromptMock: vi.fn(),
   getModelAndApiKeyWithResultMock: vi.fn(),
   getAuxiliaryModelMock: vi.fn(),
+  getChatModelSelectionMock: vi.fn(),
   determineImageAttachmentTypeForModelMock: vi.fn(),
   dbGetConversationAndMessagesMock: vi.fn(),
   dbGetOrCreateConversationMock: vi.fn(),
@@ -95,6 +96,10 @@ vi.mock('@shared/users/usage', () => ({
 vi.mock('../utils/utils', () => ({
   getModelAndApiKeyWithResult: mocks.getModelAndApiKeyWithResultMock,
   getAuxiliaryModel: mocks.getAuxiliaryModelMock,
+}));
+
+vi.mock('../utils/model-circuit-breaker', () => ({
+  getChatModelSelection: mocks.getChatModelSelectionMock,
 }));
 
 vi.mock('@shared/db/functions/chat', () => ({
@@ -260,6 +265,12 @@ beforeEach(() => {
     },
   );
   mocks.getAuxiliaryModelMock.mockResolvedValue(auxiliaryModel);
+  mocks.getChatModelSelectionMock.mockImplementation(
+    async ({ model }: { model: typeof mainModel }) => ({
+      modelIds: [model.id],
+      modelName: model.name,
+    }),
+  );
   mocks.dbGetOrCreateConversationMock.mockResolvedValue(conversation as never);
   mocks.dbGetConversationAndMessagesMock.mockResolvedValue(conversationObject as never);
   mocks.userHasReachedTokenPointsLimitMock.mockResolvedValue(false);

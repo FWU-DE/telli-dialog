@@ -10,7 +10,7 @@ export const env = createEnv({
     // TODO: @AsamMax - "optional" is highly temporary, just to skip some e2e errors
     apiDatabaseUrl: z.string().optional(),
     bifrostApiKey: z.string().optional(),
-    bifrostBaseUrl: z.string().url().optional(),
+    bifrostBaseUrl: z.url().optional(),
   },
   runtimeEnv: {
     apiDatabaseUrl: process.env.API_DATABASE_URL,

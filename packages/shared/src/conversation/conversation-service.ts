@@ -12,19 +12,7 @@ import {
 import { ConversationMessageModel, ConversationModel } from '@shared/db/types';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 import { dbGetCharacterById } from '@shared/db/functions/character';
-import { ToolCall } from '@ais-chat/ai-core/chat/types';
-
-export function isToolRelatedMessage(
-  message:
-    | Pick<ConversationMessageModel, 'role' | 'toolCallId' | 'toolCalls'>
-    | { role: string; toolCallId?: string | null; toolCalls?: ToolCall[] | null },
-): boolean {
-  return (
-    message.role === 'tool' ||
-    (message.toolCallId !== null && message.toolCallId !== undefined) ||
-    (Array.isArray(message.toolCalls) && message.toolCalls.length > 0)
-  );
-}
+import { isToolRelatedMessage } from '@shared/utils/tool-related-message';
 
 /**
  * Returns all conversations that belong to the user for the chat history.

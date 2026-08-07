@@ -63,6 +63,7 @@ function createGoogleAnthropicModel(projectId = 'test-project', location = 'us-c
     additionalParameters: {},
     isNew: false,
     isDeleted: false,
+    useBifrost: true,
     setting: {
       provider: 'google',
       projectId,
