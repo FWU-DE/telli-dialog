@@ -113,7 +113,7 @@ jobs:
             --name xberg \
             -p 8000:8000 \
             -e XBERG_MAX_UPLOAD_SIZE_MB=$XBERG_MAX_UPLOAD_SIZE_MB \
-            ghcr.io/xberg-io/xberg:1.0.0-rc.29-core > /tmp/xberg.log 2>&1 &
+            ghcr.io/xberg-io/xberg:1.0.8-core > /tmp/xberg.log 2>&1 &
 
       - name: Start bifrost container (in background)
         run: |
