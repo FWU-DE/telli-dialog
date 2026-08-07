@@ -11,8 +11,7 @@ import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { toOpenAIResponsesInput } from '../utils';
 import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
 import { env } from '../../env';
-
-type BifrostUpstreamProvider = 'azure' | 'openai' | 'ionos' | 'vertex';
+import { dbGetModelIdByProviderAndUpstreamName } from '@ais-chat/api-database';
 
 type BifrostExtraFields = {
   provider?: string;
@@ -31,41 +30,26 @@ function createBifrostClient(model: AiModel): { client: OpenAI; modelName: strin
     throw new ProviderConfigurationError('BIFROST_BASE_URL is not configured');
   }
 
-  const provider = getBifrostUpstreamProvider(model);
-  const modelName = provider === 'vertex' ? stripAnthropicPrefix(model.name) : model.name;
-
   return {
     client: instrumentOpenAiClient(
       new OpenAI({
         apiKey: env.bifrostApiKey ?? 'not-needed',
         baseURL: env.bifrostBaseUrl,
+        ...(env.bifrostApiKey ? { defaultHeaders: { 'x-bf-vk': env.bifrostApiKey } } : {}),
       }),
     ),
-    modelName: `${provider}/${modelName}`,
+    modelName: model.name,
   };
 }
 
-function getBifrostUpstreamProvider(model: AiModel): BifrostUpstreamProvider {
-  const settingProvider = model.setting.provider;
-  if (settingProvider === 'azure') return 'azure';
-  if (settingProvider === 'openai') return 'openai';
-  if (settingProvider === 'ionos') return 'ionos';
-  if (settingProvider === 'google') return 'vertex';
-
-  throw new ProviderConfigurationError('Unsupported Bifrost upstream provider');
-}
-
-function stripAnthropicPrefix(modelName: string): string {
-  return modelName.replace(/^anthropic\//, '');
-}
-
 function getBifrostModelName(model: AiModel): string {
-  const provider = getBifrostUpstreamProvider(model);
-  const modelName = provider === 'vertex' ? stripAnthropicPrefix(model.name) : model.name;
-  return `${provider}/${modelName}`;
+  return model.name;
 }
 
-function getUsedModelId(extraFields: unknown, models: AiModel[]): string | undefined {
+async function getUsedModelId(
+  extraFields: unknown,
+  models: AiModel[],
+): Promise<string | undefined> {
   if (!extraFields || typeof extraFields !== 'object') return undefined;
   const fields = extraFields as BifrostExtraFields;
   const returnedNames = [fields.model_deployment, fields.model_requested].filter(
@@ -74,9 +58,17 @@ function getUsedModelId(extraFields: unknown, models: AiModel[]): string | undef
   for (const returnedName of returnedNames) {
     const matchingModel = models.find((candidate) => {
       const candidateName = getBifrostModelName(candidate);
-      return returnedName === candidateName || returnedName === candidate.name;
+      return returnedName === candidateName || returnedName.endsWith(`/${candidateName}`);
     });
     if (matchingModel) return matchingModel.id;
+  }
+  if (fields.provider && fields.model_deployment) {
+    const upstreamModelName = fields.model_deployment.replace(`${fields.provider}/`, '');
+    return dbGetModelIdByProviderAndUpstreamName({
+      modelIds: models.map(({ id }) => id),
+      provider: fields.provider,
+      upstreamModelName,
+    });
   }
   return undefined;
 }
@@ -108,7 +100,7 @@ export function constructBifrostTextStreamFn(model: AiModel): TextStreamFn {
           promptTokens: event.response.usage.input_tokens,
           totalTokens: event.response.usage.total_tokens,
         };
-        modelId = getUsedModelId(
+        modelId = await getUsedModelId(
           (event.response as typeof event.response & { extra_fields?: unknown }).extra_fields,
           [model, ...(fallbackModels ?? [])],
         );
@@ -191,7 +183,7 @@ export function constructBifrostTextGenerationFn(model: AiModel): TextGeneration
         promptTokens: usage.input_tokens,
         totalTokens: usage.total_tokens,
       },
-      modelId: getUsedModelId(
+      modelId: await getUsedModelId(
         (response as typeof response & { extra_fields?: unknown }).extra_fields,
         [model, ...(fallbackModels ?? [])],
       ),

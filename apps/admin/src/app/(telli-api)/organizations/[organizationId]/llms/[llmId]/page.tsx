@@ -1,5 +1,6 @@
 import { getLargeLanguageModelsAction } from '../actions';
 import { LargeLanguageModelDetailView } from './LargeLanguageModelDetailView';
+import { getProviderKeysAction } from '../../provider-keys/actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,10 +8,19 @@ export default async function Page(
   props: PageProps<'/organizations/[organizationId]/llms/[llmId]'>,
 ) {
   const { organizationId, llmId } = await props.params;
+  const providerKeysResult = await getProviderKeysAction(organizationId);
+  if (!providerKeysResult.success) throw new Error(providerKeysResult.error.message);
+  const providerKeys = providerKeysResult.value;
 
   if (llmId === 'new') {
     // Create new LLM
-    return <LargeLanguageModelDetailView organizationId={organizationId} mode="create" />;
+    return (
+      <LargeLanguageModelDetailView
+        organizationId={organizationId}
+        providerKeys={providerKeys}
+        mode="create"
+      />
+    );
   }
 
   // Edit existing LLM
@@ -28,5 +38,12 @@ export default async function Page(
     );
   }
 
-  return <LargeLanguageModelDetailView organizationId={organizationId} model={model} mode="edit" />;
+  return (
+    <LargeLanguageModelDetailView
+      organizationId={organizationId}
+      model={model}
+      providerKeys={providerKeys}
+      mode="edit"
+    />
+  );
 }

@@ -65,9 +65,10 @@ describe('constructBifrostImageGenerationFn', () => {
     expect(openAiConstructorMock).toHaveBeenCalledWith({
       apiKey: 'bifrost-api-key',
       baseURL: 'http://localhost:8089/openai/v1',
+      defaultHeaders: { 'x-bf-vk': 'bifrost-api-key' },
     });
     expect(generateMock).toHaveBeenCalledWith({
-      model: 'azure/image-model',
+      model: 'image-model',
       prompt: 'a cat',
       n: 1,
       size: '1024x1024',
@@ -83,7 +84,7 @@ describe('constructBifrostImageGenerationFn', () => {
     });
   });
 
-  it('strips the anthropic prefix for vertex Claude models', async () => {
+  it('preserves logical image model names containing a slash', async () => {
     generateMock.mockResolvedValue({
       data: [{ b64_json: 'base64-bifrost-image' }],
       output_format: 'png',
@@ -108,7 +109,7 @@ describe('constructBifrostImageGenerationFn', () => {
     await generateImage({ prompt: 'a cat', model: model.name });
 
     expect(generateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'vertex/claude-3-5-sonnet-v2@20241022' }),
+      expect.objectContaining({ model: 'anthropic/claude-3-5-sonnet-v2@20241022' }),
     );
   });
 

@@ -56,9 +56,10 @@ describe('constructBifrostEmbeddingGenerationFn', () => {
     expect(openAiConstructorMock).toHaveBeenCalledWith({
       apiKey: 'bifrost-api-key',
       baseURL: 'http://localhost:8089/openai/v1',
+      defaultHeaders: { 'x-bf-vk': 'bifrost-api-key' },
     });
     expect(createMock).toHaveBeenCalledWith({
-      model: 'openai/embedding-model',
+      model: 'embedding-model',
       input: ['hello'],
       encoding_format: 'float',
     });
@@ -68,7 +69,7 @@ describe('constructBifrostEmbeddingGenerationFn', () => {
     });
   });
 
-  it('strips the anthropic prefix for vertex Claude embeddings', async () => {
+  it('preserves logical embedding model names containing a slash', async () => {
     createMock.mockResolvedValue({
       data: [{ embedding: [0.1, 0.2, 0.3] }],
       usage: { prompt_tokens: 4, total_tokens: 5 },
@@ -85,7 +86,7 @@ describe('constructBifrostEmbeddingGenerationFn', () => {
     await generateEmbeddings({ texts: ['hello'], model: model.name });
 
     expect(createMock).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'vertex/claude-embedding-model' }),
+      expect.objectContaining({ model: 'anthropic/claude-embedding-model' }),
     );
   });
 });

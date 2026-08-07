@@ -16,6 +16,7 @@ const baseModel: LlmModel = {
   additionalParameters: {},
   isNew: false,
   isDeleted: false,
+  useBifrost: true,
 };
 
 describe('obscureModels', () => {
