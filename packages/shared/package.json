@@ -43,8 +43,6 @@
     "@sentry/nextjs": "10.69.0",
     "@sentry/opentelemetry": "10.69.0",
     "@t3-oss/env-core": "0.13.11",
-    "@x402/core": "2.20.0",
-    "@x402/evm": "2.20.0",
     "drizzle-kit": "0.31.10",
     "drizzle-orm": "0.45.2",
     "drizzle-zod": "0.8.3",
