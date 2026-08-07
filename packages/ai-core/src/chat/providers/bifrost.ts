@@ -38,12 +38,13 @@ function createBifrostClient(model: AiModel): { client: OpenAI; modelName: strin
         ...(env.bifrostApiKey ? { defaultHeaders: { 'x-bf-vk': env.bifrostApiKey } } : {}),
       }),
     ),
-    modelName: model.name,
+    modelName: getBifrostModelName(model),
   };
 }
 
+// Temporary until the other provider paths are removed and all requests use Bifrost.
 function getBifrostModelName(model: AiModel): string {
-  return model.name;
+  return model.name.replace(/^anthropic\//, '');
 }
 
 async function getUsedModelId(
