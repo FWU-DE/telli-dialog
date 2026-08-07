@@ -3,10 +3,15 @@ import type { WebSearchScope } from '@shared/db/schema';
 /**
  * All entities have isWebSearchEnabled, but only characters and learning scenarios
  * have webSearchScope and webSearchIncludedDomains.
- * Therefore, we define a type that includes all three fields, but make the latter two optional.
+ * Therefore, we define two separate types and combine them into a union type for the form fields.
  */
-export type WebSearchFields = {
+export type WebSearchToggleFields = {
   isWebSearchEnabled: boolean;
-  webSearchScope?: WebSearchScope;
-  webSearchIncludedDomains?: string[];
 };
+
+export type WebSearchScopedFields = WebSearchToggleFields & {
+  webSearchScope: WebSearchScope;
+  webSearchIncludedDomains: string[];
+};
+
+export type WebSearchFields = WebSearchToggleFields | WebSearchScopedFields;

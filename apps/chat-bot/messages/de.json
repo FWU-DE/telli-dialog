@@ -584,6 +584,7 @@
       "heading": "Websuche für Aktuelles",
       "heading-tooltip": "Falls aktiviert, sucht AIS.chat automatisch im Internet, sofern aktuelle Informationen nötig sind.",
       "activated": "Aktiviert",
+      "deactivated": "Deaktiviert",
       "scope-aria-label": "Umfang der Websuche",
       "scope-all-web": "Gesamtes Web",
       "scope-included-domains": "Nur nachfolgende Webseiten",

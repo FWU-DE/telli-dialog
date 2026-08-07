@@ -9,7 +9,6 @@ import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
-import { CustomChatWebSearch } from '@/components/custom-chat/web-search/custom-chat-web-search';
 import type { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import type { WebSource } from '@shared/db/types';
 import { useRouter } from 'next/navigation';
@@ -36,6 +35,7 @@ import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action
 import { FilterDisplaySection } from '@/components/custom-chat/filter/custom-chat-filter-display-section';
 import { extractFilterValues } from '@/components/custom-chat/filter/custom-chat-filter-utils';
 import { FieldGroup } from '@ui/components/field';
+import { CustomChatWebSearchView } from '@/components/custom-chat/web-search/custom-chat-web-search-view';
 
 export function LearningScenarioView({
   learningScenario,
@@ -215,9 +215,7 @@ export function LearningScenarioView({
         initialLinks={initialLinks}
         onDownloadFile={handleDownloadFile}
       />
-      {learningScenario.isWebSearchEnabled && isWebSearchAvailable && (
-        <CustomChatWebSearch readonly />
-      )}
+      {isWebSearchAvailable && <CustomChatWebSearchView {...learningScenario} />}
 
       {(learningScenario.hasLinkAccess || learningScenario.accessLevel === 'community') && (
         <CustomChatCreateSuspensionRequestButton

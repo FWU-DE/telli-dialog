@@ -17,7 +17,6 @@ import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
-import { CustomChatWebSearch } from '@/components/custom-chat/web-search/custom-chat-web-search';
 import { Card, CardContent } from '@ui/components/card';
 import { FieldGroup } from '@ui/components/field';
 import { useToast } from '@/components/common/toast';
@@ -36,6 +35,7 @@ import { CustomChatCreateSuspensionRequestButton } from '@/components/custom-cha
 import { CustomChatAuthorInfo } from '@/components/custom-chat/custom-chat-author-info';
 import { FilterDisplaySection } from '@/components/custom-chat/filter/custom-chat-filter-display-section';
 import { extractFilterValues } from '@/components/custom-chat/filter/custom-chat-filter-utils';
+import { CustomChatWebSearchView } from '@/components/custom-chat/web-search/custom-chat-web-search-view';
 
 export function CharacterView({
   character,
@@ -193,7 +193,7 @@ export function CharacterView({
           onDownloadFile={handleDownloadFile}
         />
       </div>
-      {character.isWebSearchEnabled && isWebSearchAvailable && <CustomChatWebSearch readonly />}
+      {isWebSearchAvailable && <CustomChatWebSearchView {...character} />}
 
       {(character.hasLinkAccess || character.accessLevel === 'community') && (
         <CustomChatCreateSuspensionRequestButton

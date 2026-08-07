@@ -97,16 +97,18 @@ function Chip({
           ) : (
             (children ?? <span className="max-w-37.5 truncate">{label}</span>)
           )}
-          <button
-            type="button"
-            disabled={isProcessing}
-            data-icon="inline-end"
-            aria-label={ariaDeleteLabel}
-            className="rounded-full hover:cursor-pointer hover:bg-primary/15 p-1 -m-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-            onClick={onDelete}
-          >
-            <XIcon />
-          </button>
+          {onDelete && (
+            <button
+              type="button"
+              disabled={isProcessing}
+              data-icon="inline-end"
+              aria-label={ariaDeleteLabel}
+              className="rounded-full hover:cursor-pointer hover:bg-primary/15 p-1 -m-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              onClick={onDelete}
+            >
+              <XIcon />
+            </button>
+          )}
         </Comp>
       </TooltipTrigger>
       {tooltip && <TooltipContent>{tooltip}</TooltipContent>}
