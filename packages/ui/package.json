@@ -30,7 +30,7 @@
     "@types/react-dom": "19.2.3",
     "@types/react-syntax-highlighter": "15.5.13",
     "eslint": "10.7.0",
-    "postcss": "8.5.20",
+    "postcss": "8.5.23",
     "prettier": "3.9.5",
     "prettier-eslint": "17.1.1",
     "react": "19.2.7",
