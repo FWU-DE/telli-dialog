@@ -135,7 +135,7 @@ describe('Bifrost chat provider', () => {
     expect(responsesCreateMock).toHaveBeenCalledWith(expect.objectContaining({ model: 'gpt-5' }));
   });
 
-  it('preserves logical model names containing a slash', async () => {
+  it('strips the anthropic prefix from logical model names', async () => {
     responsesCreateMock.mockResolvedValue({
       output: [{ type: 'message', content: [{ type: 'output_text', text: 'Claude' }] }],
       usage: { input_tokens: 1, output_tokens: 2, total_tokens: 3 },
@@ -150,7 +150,32 @@ describe('Bifrost chat provider', () => {
     await generateText({ messages: [{ role: 'user', content: 'Hello' }], model: model.name });
 
     expect(responsesCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'anthropic/claude-3-5-sonnet-v2@20241022' }),
+      expect.objectContaining({ model: 'claude-3-5-sonnet-v2@20241022' }),
+    );
+  });
+
+  it('strips the anthropic prefix from fallback model names', async () => {
+    responsesCreateMock.mockResolvedValue({
+      output: [{ type: 'message', content: [{ type: 'output_text', text: 'Claude' }] }],
+      usage: { input_tokens: 1, output_tokens: 2, total_tokens: 3 },
+    });
+
+    const model = createBifrostModel('google');
+    const fallback = {
+      ...createBifrostModel('google'),
+      id: 'model-fallback',
+      name: 'anthropic/claude-3-5-sonnet-v2@20241022',
+    };
+    const generateText = constructBifrostTextGenerationFn(model);
+
+    await generateText({
+      messages: [{ role: 'user', content: 'Hello' }],
+      model: model.name,
+      fallbackModels: [fallback],
+    });
+
+    expect(responsesCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ fallbacks: ['claude-3-5-sonnet-v2@20241022'] }),
     );
   });
 

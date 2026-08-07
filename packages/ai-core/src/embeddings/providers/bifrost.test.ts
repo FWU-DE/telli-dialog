@@ -69,7 +69,7 @@ describe('constructBifrostEmbeddingGenerationFn', () => {
     });
   });
 
-  it('preserves logical embedding model names containing a slash', async () => {
+  it('strips the anthropic prefix from logical embedding model names', async () => {
     createMock.mockResolvedValue({
       data: [{ embedding: [0.1, 0.2, 0.3] }],
       usage: { prompt_tokens: 4, total_tokens: 5 },
@@ -86,7 +86,7 @@ describe('constructBifrostEmbeddingGenerationFn', () => {
     await generateEmbeddings({ texts: ['hello'], model: model.name });
 
     expect(createMock).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'anthropic/claude-embedding-model' }),
+      expect.objectContaining({ model: 'claude-embedding-model' }),
     );
   });
 });
