@@ -3,7 +3,8 @@ import { generateText, generateTextStream } from './providers';
 import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
 import { getTextModelById, getTextModelByName } from '../models';
-import type { Message, TokenUsage, GenerationOptions } from './types';
+import { getUsedModelId, normalizeModelSelection } from './model-selection';
+import type { Message, TokenUsage, GenerationOptions, ModelSelection } from './types';
 export { runAgentLoop, MAX_AGENTIC_ITERATIONS, MAX_TOOL_CALLS_PER_ITERATION } from './agent-loop';
 export { generateAgenticStreamWithBilling } from './agentic-stream';
 export { countTokens } from './utils';
@@ -22,6 +23,7 @@ export type {
   ToolRegistryEntry,
   StreamEvent,
   AgenticStreamFn,
+  ModelSelection,
 } from './types';
 
 // Re-export utility functions and guards
@@ -40,11 +42,13 @@ export { isChatImageAttachment } from './types';
  * @returns A promise that resolves to an object containing the generated text response, usage, and the price in cents
  */
 export async function generateTextWithBilling(
-  modelId: string,
+  modelSelection: string | ModelSelection,
   messages: Message[],
   apiKeyId: string,
   options?: GenerationOptions,
 ) {
+  const selection = normalizeModelSelection(modelSelection);
+  const [modelId, ...fallbackModelIds] = selection.modelIds;
   const model = await getTextModelById(modelId);
 
   // Run access check and quota check in parallel for better performance
@@ -62,11 +66,21 @@ export async function generateTextWithBilling(
   }
 
   try {
-    const textResponse = await generateText(model, messages, options);
-    const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, textResponse.usage);
+    const fallbackModels = await resolveFallbackModels(fallbackModelIds, apiKeyId);
+    const generationOptions = fallbackModels.length ? { ...options, fallbackModels } : options;
+    const textResponse = await generateText(model, messages, generationOptions);
+    const usedModelId = getUsedModelId(selection, textResponse.modelId);
+    const billingModel = getModelById([model, ...fallbackModels], usedModelId) ?? model;
+    const priceInCents = await billTextGenerationUsageToApiKey(
+      apiKeyId,
+      billingModel,
+      textResponse.usage,
+    );
+    await selection.onModelUsed?.(usedModelId);
 
     return {
       ...textResponse,
+      modelId: usedModelId,
       priceInCents,
     };
   } catch (error) {
@@ -94,12 +108,18 @@ export async function generateTextWithBilling(
  * @returns An async generator that yields text chunks and returns usage data with price
  */
 export async function* generateTextStreamWithBilling(
-  modelId: string,
+  modelSelection: string | ModelSelection,
   messages: Message[],
   apiKeyId: string,
-  onComplete?: (result: { usage: TokenUsage; priceInCents: number }) => void | Promise<void>,
+  onComplete?: (result: {
+    usage: TokenUsage;
+    priceInCents: number;
+    modelId: string;
+  }) => void | Promise<void>,
   options?: GenerationOptions,
 ) {
+  const selection = normalizeModelSelection(modelSelection);
+  const [modelId, ...fallbackModelIds] = selection.modelIds;
   const model = await getTextModelById(modelId);
 
   // Run access check and quota check in parallel for better performance
@@ -117,14 +137,19 @@ export async function* generateTextStreamWithBilling(
   }
 
   try {
-    const billingCallback = async (usage: TokenUsage) => {
-      const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, usage);
+    const fallbackModels = await resolveFallbackModels(fallbackModelIds, apiKeyId);
+    const billingCallback = async (usage: TokenUsage, modelId?: string) => {
+      const usedModelId = getUsedModelId(selection, modelId);
+      const billingModel = getModelById([model, ...fallbackModels], usedModelId) ?? model;
+      const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, billingModel, usage);
+      await selection.onModelUsed?.(usedModelId);
       if (onComplete) {
-        await onComplete({ usage, priceInCents });
+        await onComplete({ usage, priceInCents, modelId: usedModelId });
       }
     };
 
-    const stream = generateTextStream(model, messages, billingCallback, options);
+    const generationOptions = fallbackModels.length ? { ...options, fallbackModels } : options;
+    const stream = generateTextStream(model, messages, billingCallback, generationOptions);
 
     for await (const chunk of stream) {
       yield chunk;
@@ -138,6 +163,21 @@ export async function* generateTextStreamWithBilling(
     }
     throw error;
   }
+}
+
+async function resolveFallbackModels(modelIds: string[] | undefined, apiKeyId: string) {
+  if (!modelIds?.length) return [];
+  const models = await Promise.all(
+    modelIds.map(async (modelId) => {
+      const model = await getTextModelById(modelId);
+      return (await hasAccessToModel(apiKeyId, model)) ? model : undefined;
+    }),
+  );
+  return models.filter((model): model is NonNullable<typeof model> => model !== undefined);
+}
+
+function getModelById<T extends { id: string }>(models: T[], modelId: string | undefined) {
+  return modelId ? models.find((candidate) => candidate.id === modelId) : undefined;
 }
 
 // ── Name-based variants (for API app) ──

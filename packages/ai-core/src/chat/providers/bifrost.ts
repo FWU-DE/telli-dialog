@@ -14,6 +14,14 @@ import { env } from '../../env';
 
 type BifrostUpstreamProvider = 'azure' | 'openai' | 'ionos' | 'vertex';
 
+type BifrostExtraFields = {
+  provider?: string;
+  // Bifrost returns the originally requested model and the deployment that served it.
+  // The deployment may identify a fallback, but it can also be an upstream-specific alias.
+  model_requested?: string;
+  model_deployment?: string;
+};
+
 function createBifrostClient(model: AiModel): { client: OpenAI; modelName: string } {
   if (model.provider !== 'bifrost') {
     throw new ProviderConfigurationError('Invalid model configuration for Bifrost');
@@ -51,19 +59,43 @@ function stripAnthropicPrefix(modelName: string): string {
   return modelName.replace(/^anthropic\//, '');
 }
 
+function getBifrostModelName(model: AiModel): string {
+  const provider = getBifrostUpstreamProvider(model);
+  const modelName = provider === 'vertex' ? stripAnthropicPrefix(model.name) : model.name;
+  return `${provider}/${modelName}`;
+}
+
+function getUsedModelId(extraFields: unknown, models: AiModel[]): string | undefined {
+  if (!extraFields || typeof extraFields !== 'object') return undefined;
+  const fields = extraFields as BifrostExtraFields;
+  const returnedNames = [fields.model_deployment, fields.model_requested].filter(
+    (value): value is string => typeof value === 'string',
+  );
+  for (const returnedName of returnedNames) {
+    const matchingModel = models.find((candidate) => {
+      const candidateName = getBifrostModelName(candidate);
+      return returnedName === candidateName || returnedName === candidate.name;
+    });
+    if (matchingModel) return matchingModel.id;
+  }
+  return undefined;
+}
+
 export function constructBifrostTextStreamFn(model: AiModel): TextStreamFn {
   const { client, modelName } = createBifrostClient(model);
 
-  return async function* getBifrostTextStream({ messages, maxTokens }, onComplete) {
+  return async function* getBifrostTextStream({ messages, maxTokens, fallbackModels }, onComplete) {
     const response = await client.responses.create({
       model: modelName,
       input: toOpenAIResponsesInput(messages),
       stream: true,
       max_output_tokens: maxTokens,
       ...model.additionalParameters,
+      ...(fallbackModels?.length ? { fallbacks: fallbackModels.map(getBifrostModelName) } : {}),
     });
 
     let usage: TokenUsage | undefined;
+    let modelId: string | undefined;
 
     for await (const event of response) {
       if (event.type === 'response.output_text.delta') {
@@ -76,6 +108,10 @@ export function constructBifrostTextStreamFn(model: AiModel): TextStreamFn {
           promptTokens: event.response.usage.input_tokens,
           totalTokens: event.response.usage.total_tokens,
         };
+        modelId = getUsedModelId(
+          (event.response as typeof event.response & { extra_fields?: unknown }).extra_fields,
+          [model, ...(fallbackModels ?? [])],
+        );
       }
     }
 
@@ -84,7 +120,11 @@ export function constructBifrostTextStreamFn(model: AiModel): TextStreamFn {
     }
 
     if (onComplete) {
-      await onComplete(usage);
+      if (modelId) {
+        await onComplete(usage, modelId);
+      } else {
+        await onComplete(usage);
+      }
     }
   };
 }
@@ -92,7 +132,13 @@ export function constructBifrostTextStreamFn(model: AiModel): TextStreamFn {
 export function constructBifrostAgenticStreamFn(model: AiModel): AgenticStreamFn {
   const { client, modelName } = createBifrostClient(model);
 
-  return async function* getBifrostAgenticStream({ messages, maxTokens, tools, toolChoice }) {
+  return async function* getBifrostAgenticStream({
+    messages,
+    maxTokens,
+    tools,
+    toolChoice,
+    fallbackModels,
+  }) {
     yield* streamOpenAICompatibleAgenticResponse({
       client,
       messages,
@@ -101,7 +147,11 @@ export function constructBifrostAgenticStreamFn(model: AiModel): AgenticStreamFn
       tools,
       toolChoice,
       providerName: 'Bifrost',
-      additionalParameters: model.additionalParameters as Record<string, unknown>,
+      additionalParameters: {
+        ...(model.additionalParameters as Record<string, unknown>),
+        ...(fallbackModels?.length ? { fallbacks: fallbackModels.map(getBifrostModelName) } : {}),
+      },
+      getModelId: (extraFields) => getUsedModelId(extraFields, [model, ...(fallbackModels ?? [])]),
     });
   };
 }
@@ -109,13 +159,14 @@ export function constructBifrostAgenticStreamFn(model: AiModel): AgenticStreamFn
 export function constructBifrostTextGenerationFn(model: AiModel): TextGenerationFn {
   const { client, modelName } = createBifrostClient(model);
 
-  return async function getBifrostTextGeneration({ messages, maxTokens }) {
+  return async function getBifrostTextGeneration({ messages, maxTokens, fallbackModels }) {
     const response = await client.responses.create({
       model: modelName,
       input: toOpenAIResponsesInput(messages),
       stream: false,
       max_output_tokens: maxTokens,
       ...model.additionalParameters,
+      ...(fallbackModels?.length ? { fallbacks: fallbackModels.map(getBifrostModelName) } : {}),
     });
 
     const textOutput = response.output.find((item) => item.type === 'message');
@@ -140,6 +191,10 @@ export function constructBifrostTextGenerationFn(model: AiModel): TextGeneration
         promptTokens: usage.input_tokens,
         totalTokens: usage.total_tokens,
       },
+      modelId: getUsedModelId(
+        (response as typeof response & { extra_fields?: unknown }).extra_fields,
+        [model, ...(fallbackModels ?? [])],
+      ),
     };
   };
 }

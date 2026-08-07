@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   sharedLearningScenarioChatHasReachedTokenPointsLimitMock: vi.fn(),
   userHasReachedTokenPointsLimitMock: vi.fn(),
   getModelAndApiKeyWithResultMock: vi.fn(),
+  getChatModelSelectionMock: vi.fn(),
   dbGetLearningScenarioByIdAndInviteCodeMock: vi.fn(),
   dbUpdateTokenUsageBySharedLearningScenarioIdMock: vi.fn(),
   dbGetRelatedLearningScenarioFilesMock: vi.fn(),
@@ -56,6 +57,10 @@ vi.mock('@shared/users/usage', () => ({
 
 vi.mock('../utils/utils', () => ({
   getModelAndApiKeyWithResult: mocks.getModelAndApiKeyWithResultMock,
+}));
+
+vi.mock('../utils/model-circuit-breaker', () => ({
+  getChatModelSelection: mocks.getChatModelSelectionMock,
 }));
 
 vi.mock('@shared/db/functions/learning-scenario', () => ({
@@ -182,6 +187,10 @@ beforeEach(() => {
   mocks.getUserAndContextByUserIdMock.mockResolvedValue(teacherUserAndContext);
   mocks.checkProductAccessMock.mockReturnValue({ hasAccess: true });
   mocks.getModelAndApiKeyWithResultMock.mockResolvedValue([null, { model, apiKeyId: 'api-key-1' }]);
+  mocks.getChatModelSelectionMock.mockResolvedValue({
+    modelIds: [model.id],
+    modelName: model.name,
+  });
   mocks.sharedChatHasExpiredMock.mockReturnValue(false);
   mocks.sharedLearningScenarioChatHasReachedTokenPointsLimitMock.mockResolvedValue(false);
   mocks.userHasReachedTokenPointsLimitMock.mockResolvedValue(false);

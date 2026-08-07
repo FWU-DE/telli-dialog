@@ -1,4 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('@ais-chat/api-database', () => ({
+  dbValidateApiKey: vi.fn(),
+}));
+
 import {
   getMaybeBearerToken,
   getContentFilterFailedChunk,
