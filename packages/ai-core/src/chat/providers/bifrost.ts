@@ -42,6 +42,7 @@ function createBifrostClient(model: AiModel): { client: OpenAI; modelName: strin
   };
 }
 
+// Temporary until the other provider paths are removed and all requests use Bifrost.
 function getBifrostModelName(model: AiModel): string {
   return model.name.replace(/^anthropic\//, '');
 }
