@@ -82,6 +82,12 @@ export type TokenUsage = {
   totalTokens: number;
 };
 
+export type ModelSelection = {
+  modelIds: readonly [string, ...string[]];
+  modelName: string;
+  onModelUsed?: (modelId: string) => void | Promise<void>;
+};
+
 export type TextResponse = {
   text: string;
   usage: TokenUsage;

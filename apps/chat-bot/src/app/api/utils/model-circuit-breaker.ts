@@ -2,6 +2,7 @@ import { findStaticModelByRoleAndFederalStateId } from '@shared/llm-models/llm-m
 import { logError } from '@shared/logging';
 import { valkey } from '@shared/valkey';
 import type { LlmModelSelectModel } from '@shared/db/schema';
+import type { ModelSelection } from '@ais-chat/ai-core';
 
 const MODEL_UNAVAILABLE_TTL_SECONDS = 45;
 const MODEL_UNAVAILABLE_PREFIX = 'model-unavailable:v1:';
@@ -25,19 +26,17 @@ async function markUnavailable(modelId: string) {
   }
 }
 
-export async function getChatModelFallback({
+export async function getChatModelSelection({
   model,
   federalStateId,
 }: {
   model: LlmModelSelectModel;
   federalStateId: string;
-}) {
+}): Promise<ModelSelection> {
   if (model.provider !== 'bifrost') {
     return {
-      generationModelId: model.id,
-      generationModelName: model.name,
-      fallbackModelIds: [],
-      candidateModelIds: [model.id],
+      modelIds: [model.id],
+      modelName: model.name,
     };
   }
 
@@ -47,10 +46,8 @@ export async function getChatModelFallback({
   });
   if (!fallback || fallback.id === model.id) {
     return {
-      generationModelId: model.id,
-      generationModelName: model.name,
-      fallbackModelIds: [],
-      candidateModelIds: [model.id],
+      modelIds: [model.id],
+      modelName: model.name,
     };
   }
 
@@ -60,23 +57,15 @@ export async function getChatModelFallback({
   const availableCandidates = [model, fallback].filter((_, index) => !unavailable[index]);
   const candidates = availableCandidates.length > 0 ? availableCandidates : [fallback];
 
+  const modelIds = candidates.map((candidate) => candidate.id) as [string, ...string[]];
   return {
-    generationModelId: candidates[0]!.id,
-    generationModelName: candidates[0]!.name,
-    fallbackModelIds: candidates.slice(1).map((candidate) => candidate.id),
-    candidateModelIds: candidates.map((candidate) => candidate.id),
+    modelIds,
+    modelName: candidates[0]!.name,
+    onModelUsed: async (usedModelId) => {
+      const usedIndex = modelIds.indexOf(usedModelId);
+      if (usedIndex > 0) {
+        await Promise.all(modelIds.slice(0, usedIndex).map(markUnavailable));
+      }
+    },
   };
-}
-
-export async function markSkippedChatModels({
-  candidateModelIds,
-  usedModelId,
-}: {
-  candidateModelIds: string[];
-  usedModelId?: string;
-}) {
-  const usedIndex = usedModelId ? candidateModelIds.indexOf(usedModelId) : -1;
-  if (usedIndex <= 0) return;
-
-  await Promise.all(candidateModelIds.slice(0, usedIndex).map(markUnavailable));
 }

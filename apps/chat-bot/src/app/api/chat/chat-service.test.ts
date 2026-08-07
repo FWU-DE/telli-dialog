@@ -43,8 +43,7 @@ const mocks = vi.hoisted(() => ({
   constructChatSystemPromptMock: vi.fn(),
   getModelAndApiKeyWithResultMock: vi.fn(),
   getAuxiliaryModelMock: vi.fn(),
-  getChatModelFallbackMock: vi.fn(),
-  markSkippedChatModelsMock: vi.fn(),
+  getChatModelSelectionMock: vi.fn(),
   determineImageAttachmentTypeForModelMock: vi.fn(),
   dbGetConversationAndMessagesMock: vi.fn(),
   dbGetOrCreateConversationMock: vi.fn(),
@@ -100,8 +99,7 @@ vi.mock('../utils/utils', () => ({
 }));
 
 vi.mock('../utils/model-circuit-breaker', () => ({
-  getChatModelFallback: mocks.getChatModelFallbackMock,
-  markSkippedChatModels: mocks.markSkippedChatModelsMock,
+  getChatModelSelection: mocks.getChatModelSelectionMock,
 }));
 
 vi.mock('@shared/db/functions/chat', () => ({
@@ -267,12 +265,10 @@ beforeEach(() => {
     },
   );
   mocks.getAuxiliaryModelMock.mockResolvedValue(auxiliaryModel);
-  mocks.getChatModelFallbackMock.mockImplementation(
+  mocks.getChatModelSelectionMock.mockImplementation(
     async ({ model }: { model: typeof mainModel }) => ({
-      generationModelId: model.id,
-      generationModelName: model.name,
-      fallbackModelIds: [],
-      candidateModelIds: [model.id],
+      modelIds: [model.id],
+      modelName: model.name,
     }),
   );
   mocks.dbGetOrCreateConversationMock.mockResolvedValue(conversation as never);

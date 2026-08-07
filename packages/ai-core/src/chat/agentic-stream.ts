@@ -3,7 +3,8 @@ import { generateAgenticStream } from './providers';
 import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
 import { getTextModelById } from '../models';
-import type { TokenUsage, GenerationOptions, StreamEvent, Message } from './types';
+import { getUsedModelId } from './model-selection';
+import type { TokenUsage, GenerationOptions, StreamEvent, Message, ModelSelection } from './types';
 
 /**
  * Generates streaming agentic output using the specified model and messages, with access control and billing.
@@ -20,17 +21,17 @@ import type { TokenUsage, GenerationOptions, StreamEvent, Message } from './type
  * @returns An async generator yielding StreamEvent objects
  */
 export async function* generateAgenticStreamWithBilling(
-  modelId: string,
+  selection: ModelSelection,
   messages: Message[],
   apiKeyId: string,
   onComplete?: (result: {
     usage: TokenUsage;
     priceInCents: number;
-    modelId?: string;
+    modelId: string;
   }) => void | Promise<void>,
   options?: GenerationOptions,
-  fallbackModelIds?: string[],
 ): AsyncGenerator<StreamEvent> {
+  const [modelId, ...fallbackModelIds] = selection.modelIds;
   const model = await getTextModelById(modelId);
 
   const [hasAccess, isOverQuota] = await Promise.all([
@@ -47,36 +48,33 @@ export async function* generateAgenticStreamWithBilling(
   }
 
   try {
-    const fallbackModels = fallbackModelIds
-      ? (
-          await Promise.all(
-            fallbackModelIds.map(async (id) => {
-              const fallbackModel = await getTextModelById(id);
-              return (await hasAccessToModel(apiKeyId, fallbackModel)) ? fallbackModel : undefined;
-            }),
-          )
-        ).filter(
-          (fallbackModel): fallbackModel is NonNullable<typeof fallbackModel> =>
-            fallbackModel !== undefined,
-        )
-      : [];
+    const fallbackModels = (
+      await Promise.all(
+        fallbackModelIds.map(async (id) => {
+          const fallbackModel = await getTextModelById(id);
+          return (await hasAccessToModel(apiKeyId, fallbackModel)) ? fallbackModel : undefined;
+        }),
+      )
+    ).filter(
+      (fallbackModel): fallbackModel is NonNullable<typeof fallbackModel> =>
+        fallbackModel !== undefined,
+    );
     const stream = generateAgenticStream(model, messages, { ...options, fallbackModels });
 
     for await (const event of stream) {
       yield event;
 
       if (event.type === 'finish') {
-        const billingModel = event.modelId
-          ? ([model, ...fallbackModels].find((candidate) => candidate.id === event.modelId) ??
-            model)
-          : model;
+        const usedModelId = getUsedModelId(selection, event.modelId);
+        const billingModel =
+          [model, ...fallbackModels].find((candidate) => candidate.id === usedModelId) ?? model;
         const priceInCents = await billTextGenerationUsageToApiKey(
           apiKeyId,
           billingModel,
           event.usage,
         );
         if (onComplete) {
-          await onComplete({ usage: event.usage, priceInCents, modelId: event.modelId });
+          await onComplete({ usage: event.usage, priceInCents, modelId: usedModelId });
         }
       }
     }

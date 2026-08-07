@@ -10,7 +10,7 @@ import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
-import { getChatModelFallback, markSkippedChatModels } from '../utils/model-circuit-breaker';
+import { getChatModelSelection } from '../utils/model-circuit-breaker';
 import {
   dbGetCharacterByIdAndInviteCode,
   dbUpdateTokenUsageByCharacterChatId,
@@ -91,11 +91,11 @@ export async function sendCharacterMessage({
   }
 
   const { model: definedModel, apiKeyId } = modelAndApiKey;
-  const { generationModelId, generationModelName, fallbackModelIds, candidateModelIds } =
-    await getChatModelFallback({
-      model: definedModel,
-      federalStateId: teacherUserAndContext.federalState.id,
-    });
+  const modelSelection = await getChatModelSelection({
+    model: definedModel,
+    federalStateId: teacherUserAndContext.federalState.id,
+  });
+  const generationModelId = modelSelection.modelIds[0];
   const agenticChatEnabled =
     teacherUserAndContext.federalState.featureToggles.isAgenticChatEnabled ?? false;
 
@@ -231,13 +231,8 @@ export async function sendCharacterMessage({
     const agentName = resolveAgentNameForTracing({ characterId: character.id });
 
     runAgentLoop({
-      modelId: generationModelId,
-      modelName: generationModelName,
+      modelSelection,
       apiKeyId,
-      fallbackModelIds,
-      onModelUsed: (modelId) => {
-        void markSkippedChatModels({ candidateModelIds, usedModelId: modelId });
-      },
       messages: aiCoreMessages,
       toolRegistry,
       agentName,
@@ -287,11 +282,10 @@ export async function sendCharacterMessage({
     void (async () => {
       try {
         const textStream = generateTextStreamWithBilling(
-          generationModelId,
+          modelSelection,
           aiCoreMessages,
           apiKeyId,
           async ({ usage, priceInCents, modelId }) => {
-            await markSkippedChatModels({ candidateModelIds, usedModelId: modelId });
             const { promptTokens, completionTokens } = usage;
 
             await dbUpdateTokenUsageByCharacterChatId({
@@ -316,7 +310,6 @@ export async function sendCharacterMessage({
             );
           },
           undefined,
-          fallbackModelIds,
         );
 
         for await (const chunk of textStream) {

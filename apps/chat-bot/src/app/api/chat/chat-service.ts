@@ -8,7 +8,7 @@ import {
 } from '@ais-chat/ai-core';
 import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { getModelAndApiKeyWithResult, getAuxiliaryModel } from '../utils/utils';
-import { getChatModelFallback, markSkippedChatModels } from '../utils/model-circuit-breaker';
+import { getChatModelSelection } from '../utils/model-circuit-breaker';
 import {
   dbGetConversationAndMessages,
   dbGetOrCreateConversation,
@@ -215,11 +215,11 @@ export async function sendChatMessage({
   }
 
   const { model: definedModel, apiKeyId } = modelAndApiKey;
-  const { generationModelId, generationModelName, fallbackModelIds, candidateModelIds } =
-    await getChatModelFallback({
-      model: definedModel,
-      federalStateId: user.federalState.id,
-    });
+  const modelSelection = await getChatModelSelection({
+    model: definedModel,
+    federalStateId: user.federalState.id,
+  });
+  const generationModelId = modelSelection.modelIds[0];
 
   // Get auxiliary model for title generation
   const auxiliaryModel = await getAuxiliaryModel(user.federalState.id);
@@ -344,7 +344,7 @@ export async function sendChatMessage({
       content: userMessage.content,
       role: 'user',
       userId: user.id,
-      modelName: generationModelName,
+      modelName: modelSelection.modelName,
       orderNumber: userMessageOrderNumber,
     });
   }
@@ -604,13 +604,8 @@ export async function sendChatMessage({
 
     // Start the agent loop in the background
     runAgentLoop({
-      modelId: generationModelId,
-      modelName: generationModelName,
+      modelSelection,
       apiKeyId,
-      fallbackModelIds,
-      onModelUsed: (modelId) => {
-        void markSkippedChatModels({ candidateModelIds, usedModelId: modelId });
-      },
       messages: aiCoreMessages,
       toolRegistry,
       agentName,
@@ -652,15 +647,13 @@ export async function sendChatMessage({
 
       try {
         const textStream = generateTextStreamWithBilling(
-          generationModelId,
+          modelSelection,
           aiCoreMessages,
           apiKeyId,
           async ({ usage, priceInCents, modelId }) => {
-            await markSkippedChatModels({ candidateModelIds, usedModelId: modelId });
-            await persistAssistantMessage({ fullText, usage, priceInCents });
+            await persistAssistantMessage({ fullText, usage, priceInCents, modelId });
           },
           undefined,
-          fallbackModelIds,
         );
 
         for await (const chunk of textStream) {

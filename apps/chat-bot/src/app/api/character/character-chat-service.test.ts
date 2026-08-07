@@ -10,8 +10,7 @@ const mocks = vi.hoisted(() => ({
   sharedChatHasExpiredMock: vi.fn(),
   userHasReachedTokenPointsLimitMock: vi.fn(),
   getModelAndApiKeyWithResultMock: vi.fn(),
-  getChatModelFallbackMock: vi.fn(),
-  markSkippedChatModelsMock: vi.fn(),
+  getChatModelSelectionMock: vi.fn(),
   dbGetCharacterByIdAndInviteCodeMock: vi.fn(),
   dbUpdateTokenUsageByCharacterChatIdMock: vi.fn(),
   dbGetRelatedCharacterFilesMock: vi.fn(),
@@ -61,8 +60,7 @@ vi.mock('../utils/utils', () => ({
 }));
 
 vi.mock('../utils/model-circuit-breaker', () => ({
-  getChatModelFallback: mocks.getChatModelFallbackMock,
-  markSkippedChatModels: mocks.markSkippedChatModelsMock,
+  getChatModelSelection: mocks.getChatModelSelectionMock,
 }));
 
 vi.mock('@shared/db/functions/character', () => ({
@@ -188,11 +186,9 @@ beforeEach(() => {
   mocks.getUserAndContextByUserIdMock.mockResolvedValue(teacherUserAndContext);
   mocks.checkProductAccessMock.mockReturnValue({ hasAccess: true });
   mocks.getModelAndApiKeyWithResultMock.mockResolvedValue([null, { model, apiKeyId: 'api-key-1' }]);
-  mocks.getChatModelFallbackMock.mockResolvedValue({
-    generationModelId: model.id,
-    generationModelName: model.name,
-    fallbackModelIds: [],
-    candidateModelIds: [model.id],
+  mocks.getChatModelSelectionMock.mockResolvedValue({
+    modelIds: [model.id],
+    modelName: model.name,
   });
   mocks.sharedChatHasExpiredMock.mockReturnValue(false);
   mocks.sharedCharacterChatHasReachedTokenPointsLimitMock.mockResolvedValue(false);

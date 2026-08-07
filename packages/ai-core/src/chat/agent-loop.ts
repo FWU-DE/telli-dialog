@@ -1,5 +1,11 @@
 import * as Sentry from '@sentry/core';
-import type { Message as AiCoreMessage, TokenUsage, ToolCall, ToolRegistry } from './types';
+import type {
+  Message as AiCoreMessage,
+  ModelSelection,
+  TokenUsage,
+  ToolCall,
+  ToolRegistry,
+} from './types';
 
 export const MAX_AGENTIC_ITERATIONS = 3;
 export const MAX_TOOL_CALLS_PER_ITERATION = 2;
@@ -9,14 +15,11 @@ function logError(message: string, error: unknown) {
 }
 
 type RunAgentLoopParams = {
-  modelId: string;
-  modelName: string;
+  modelSelection: ModelSelection;
   apiKeyId: string;
   messages: AiCoreMessage[];
   toolRegistry?: ToolRegistry;
   agentName: string;
-  fallbackModelIds?: string[];
-  onModelUsed?: (modelId?: string) => void;
   onTextChunk: (delta: string) => void;
   onComplete: (result: {
     fullText: string;
@@ -30,14 +33,11 @@ type RunAgentLoopParams = {
 };
 
 export function runAgentLoop({
-  modelId,
-  modelName,
+  modelSelection,
   apiKeyId,
   messages,
   toolRegistry,
   agentName,
-  fallbackModelIds,
-  onModelUsed,
   onTextChunk,
   onComplete,
   onError,
@@ -48,7 +48,7 @@ export function runAgentLoop({
     let fullText = '';
     let totalUsage: TokenUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
     let totalPriceInCents = 0;
-    let lastModelId = modelId;
+    let lastModelId = modelSelection.modelIds[0];
     const modelUsages: Array<{ modelId: string; usage: TokenUsage; priceInCents: number }> = [];
     const loopMessages = [...messages];
     const tools = toolRegistry ? Object.values(toolRegistry).map((entry) => entry.definition) : [];
@@ -61,7 +61,7 @@ export function runAgentLoop({
           attributes: {
             'gen_ai.operation.name': 'invoke_agent',
             'gen_ai.operation.type': 'agent',
-            'gen_ai.request.model': modelName,
+            'gen_ai.request.model': modelSelection.modelName,
             'gen_ai.agent.name': agentName,
           },
         },
@@ -79,14 +79,13 @@ export function runAgentLoop({
 
             const isLastIteration = iteration === MAX_AGENTIC_ITERATIONS - 1;
             const stream = generateAgenticStreamWithBilling(
-              modelId,
+              modelSelection,
               loopMessages,
               apiKeyId,
               async ({ usage, priceInCents, modelId: usedModelId }) => {
-                const effectiveModelId = usedModelId ?? modelId;
-                onModelUsed?.(effectiveModelId);
-                lastModelId = effectiveModelId;
-                modelUsages.push({ modelId: effectiveModelId, usage, priceInCents });
+                await modelSelection.onModelUsed?.(usedModelId);
+                lastModelId = usedModelId;
+                modelUsages.push({ modelId: usedModelId, usage, priceInCents });
                 totalUsage = {
                   promptTokens: totalUsage.promptTokens + usage.promptTokens,
                   completionTokens: totalUsage.completionTokens + usage.completionTokens,
@@ -95,7 +94,6 @@ export function runAgentLoop({
                 totalPriceInCents += priceInCents;
               },
               tools.length > 0 && !isLastIteration ? { tools, toolChoice: 'auto' } : undefined,
-              fallbackModelIds,
             );
 
             for await (const event of stream) {
