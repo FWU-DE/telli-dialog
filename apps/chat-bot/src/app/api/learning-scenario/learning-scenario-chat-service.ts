@@ -10,6 +10,7 @@ import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
+import { getChatModelSelection } from '../utils/model-circuit-breaker';
 import {
   dbGetLearningScenarioByIdAndInviteCode,
   dbUpdateTokenUsageBySharedLearningScenarioId,
@@ -95,6 +96,11 @@ export async function sendLearningScenarioMessage({
   }
 
   const { model: definedModel, apiKeyId } = modelAndApiKey;
+  const modelSelection = await getChatModelSelection({
+    model: definedModel,
+    federalStateId: teacherUserAndContext.federalState.id,
+  });
+  const generationModelId = modelSelection.modelIds[0];
   const agenticChatEnabled =
     teacherUserAndContext.federalState.featureToggles.isAgenticChatEnabled ?? false;
 
@@ -230,8 +236,7 @@ export async function sendLearningScenarioMessage({
     const agentName = resolveAgentNameForTracing({ learningScenarioId: learningScenario.id });
 
     runAgentLoop({
-      modelId: definedModel.id,
-      modelName: definedModel.name,
+      modelSelection,
       apiKeyId,
       messages: aiCoreMessages,
       toolRegistry,
@@ -239,17 +244,24 @@ export async function sendLearningScenarioMessage({
       onTextChunk: (delta) => {
         update(delta);
       },
-      onComplete: async ({ usage, priceInCents }) => {
+      onComplete: async ({ usage, priceInCents, modelId, modelUsages }) => {
         const { promptTokens, completionTokens } = usage;
 
-        await dbUpdateTokenUsageBySharedLearningScenarioId({
-          modelId: definedModel.id,
-          completionTokens,
-          promptTokens,
-          learningScenarioId: learningScenario.id,
-          userId: teacherUserAndContext.id,
-          costsInCent: priceInCents,
-        });
+        // Agentic requests can invoke several models across iterations. Persist each usage
+        // entry separately so pricing and reporting stay associated with the serving model. The
+        // fallback is only needed until non-agentic streaming chat is removed.
+        for (const modelUsage of modelUsages ?? [
+          { modelId: modelId ?? generationModelId, usage, priceInCents },
+        ]) {
+          await dbUpdateTokenUsageBySharedLearningScenarioId({
+            modelId: modelUsage.modelId ?? generationModelId,
+            completionTokens: modelUsage.usage.completionTokens,
+            promptTokens: modelUsage.usage.promptTokens,
+            learningScenarioId: learningScenario.id,
+            userId: teacherUserAndContext.id,
+            costsInCent: modelUsage.priceInCents,
+          });
+        }
 
         await sendRabbitmqEvent(
           constructNewMessageEvent({
@@ -275,14 +287,14 @@ export async function sendLearningScenarioMessage({
     void (async () => {
       try {
         const textStream = generateTextStreamWithBilling(
-          definedModel.id,
+          modelSelection,
           aiCoreMessages,
           apiKeyId,
-          async ({ usage, priceInCents }) => {
+          async ({ usage, priceInCents, modelId }) => {
             const { promptTokens, completionTokens } = usage;
 
             await dbUpdateTokenUsageBySharedLearningScenarioId({
-              modelId: definedModel.id,
+              modelId: modelId ?? generationModelId,
               completionTokens,
               promptTokens,
               learningScenarioId: learningScenario.id,
@@ -302,6 +314,7 @@ export async function sendLearningScenarioMessage({
               }),
             );
           },
+          undefined,
         );
 
         for await (const chunk of textStream) {

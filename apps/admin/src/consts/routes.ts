@@ -13,6 +13,11 @@ export const ROUTES = {
     llmDetails: (organizationId: string, llmId: string) =>
       `/organizations/${organizationId}/llms/${llmId}`,
     llmNew: (organizationId: string) => `/organizations/${organizationId}/llms/new`,
+    providerKeys: (organizationId: string) => `/organizations/${organizationId}/provider-keys`,
+    providerKeyDetails: (organizationId: string, providerKeyId: string) =>
+      `/organizations/${organizationId}/provider-keys/${providerKeyId}`,
+    providerKeyNew: (organizationId: string) =>
+      `/organizations/${organizationId}/provider-keys/new`,
     models: (organizationId: string) => `/organizations/${organizationId}/models`,
     organizations: '/organizations',
     organizationDetails: (organizationId: string) => `/organizations/${organizationId}`,
@@ -30,6 +35,7 @@ export const ROUTES = {
     infoBannerNew: '/ais-chat-app/info-banners/new',
     infoBannerDetails: (infoBannerId: string) => `/ais-chat-app/info-banners/${infoBannerId}`,
     toolCallCosts: '/ais-chat-app/tool-call-costs',
+    staticModels: '/ais-chat-app/static-models',
     templates: '/ais-chat-app/templates',
     template: (templateType: TemplateTypes, templateId: string) =>
       `/ais-chat-app/templates/${templateType}/${templateId}`,

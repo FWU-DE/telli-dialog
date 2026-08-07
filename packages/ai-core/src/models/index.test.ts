@@ -4,6 +4,7 @@ import { getImageModelById } from './index';
 // Mock the api-database functions
 vi.mock('@ais-chat/api-database', () => ({
   dbGetModelById: vi.fn(),
+  dbGetDirectModelConfiguration: vi.fn(),
 }));
 
 import { dbGetModelById } from '@ais-chat/api-database';

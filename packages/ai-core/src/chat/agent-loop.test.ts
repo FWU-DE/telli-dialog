@@ -68,8 +68,7 @@ describe('agent-loop', () => {
     };
 
     runAgentLoop({
-      modelId: 'test-model',
-      modelName: 'Test Model',
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
@@ -111,8 +110,7 @@ describe('agent-loop', () => {
     });
 
     runAgentLoop({
-      modelId: 'test-model',
-      modelName: 'Test Model',
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
       apiKeyId: 'test-key',
       messages,
       agentName: 'Test Agent',
@@ -172,8 +170,7 @@ describe('agent-loop', () => {
     };
 
     runAgentLoop({
-      modelId: 'test-model',
-      modelName: 'Test Model',
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
@@ -235,8 +232,7 @@ describe('agent-loop', () => {
     };
 
     runAgentLoop({
-      modelId: 'test-model',
-      modelName: 'Test Model',
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
@@ -301,8 +297,7 @@ describe('agent-loop', () => {
     };
 
     runAgentLoop({
-      modelId: 'test-model',
-      modelName: 'Test Model',
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
@@ -384,8 +379,7 @@ describe('agent-loop', () => {
     };
 
     runAgentLoop({
-      modelId: 'test-model',
-      modelName: 'Test Model',
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
@@ -437,8 +431,7 @@ describe('agent-loop', () => {
       });
 
       runAgentLoop({
-        modelId: 'test-model',
-        modelName: 'Test Model',
+        modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
         apiKeyId: 'test-key',
         messages,
         agentName: 'Test Agent',
@@ -478,8 +471,7 @@ describe('agent-loop', () => {
       };
 
       runAgentLoop({
-        modelId: 'test-model',
-        modelName: 'Test Model',
+        modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
         apiKeyId: 'test-key',
         messages,
         toolRegistry,
@@ -535,8 +527,7 @@ describe('agent-loop', () => {
       };
 
       runAgentLoop({
-        modelId: 'test-model',
-        modelName: 'Test Model',
+        modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
         apiKeyId: 'test-key',
         messages,
         toolRegistry,

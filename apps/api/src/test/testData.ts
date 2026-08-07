@@ -41,4 +41,5 @@ export const testModel: LlmInsertModel = {
   },
   isNew: true,
   isDeleted: false,
+  useBifrost: true,
 };

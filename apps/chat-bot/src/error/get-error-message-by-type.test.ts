@@ -19,7 +19,6 @@ describe('getErrorMessageByType', () => {
           providerName: 'p',
           modelName: 'm',
           hasContent: false,
-          stage: 's',
         }),
       ),
     ).toBe('empty-response-error');

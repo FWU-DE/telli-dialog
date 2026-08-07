@@ -78,7 +78,6 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
         providerName: 'Azure OpenAI',
         modelName: deployment,
         hasContent,
-        stage: 'stream',
       });
     }
 
@@ -145,7 +144,6 @@ export function constructAzureResponsesGenerationFn(model: AiModel): TextGenerat
         providerName: 'Azure OpenAI',
         modelName: deployment,
         hasContent: text.trim().length > 0,
-        stage: 'generation',
       });
     }
 

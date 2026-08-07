@@ -65,7 +65,6 @@ export function constructOpenAITextStreamFn(model: AiModel): TextStreamFn {
         providerName: 'OpenAI',
         modelName,
         hasContent,
-        stage: 'stream',
       });
     }
 
@@ -100,7 +99,6 @@ export function constructOpenAITextGenerationFn(model: AiModel): TextGenerationF
         providerName: 'OpenAI',
         modelName,
         hasContent: text.trim().length > 0,
-        stage: 'generation',
       });
     }
 

@@ -137,7 +137,6 @@ describe('EmptyResponseError', () => {
       providerName: 'provider',
       modelName: 'model',
       hasContent: false,
-      stage: 'response',
     });
     expect(error.name).toBe('EmptyResponseError');
     expect(error.message).toBe('Empty response from provider');
@@ -149,7 +148,6 @@ describe('EmptyResponseError', () => {
       providerName: 'p',
       modelName: 'm',
       hasContent: false,
-      stage: 's',
     });
     expect(EmptyResponseError.is(error)).toBe(true);
     expect(EmptyResponseError.is(new AiGenerationError('Test'))).toBe(false);
@@ -171,7 +169,6 @@ describe('isKnownAiGenerationError', () => {
           providerName: 'p',
           modelName: 'm',
           hasContent: false,
-          stage: 's',
         }),
       ),
     ).toBe(true);

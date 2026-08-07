@@ -2,7 +2,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import Chat from '@/components/chat/chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/llm-model-service';
 import Logo from '@/components/common/logo';
 import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
@@ -40,11 +40,16 @@ export default async function Page(props: PageProps<'/assistants/d/[assistantId]
     federalStateId: federalState.id,
   });
 
-  const currentModel = user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+  const defaultModelName = await getDefaultModelNameByFederalStateId(federalState.id, models);
+  const currentModel = user.lastUsedModel ?? defaultModelName;
   const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
 
   return (
-    <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
+    <LlmModelsProvider
+      models={models}
+      initialModelName={currentModel}
+      defaultModelName={defaultModelName}
+    >
       <DefaultPageLayout
         layoutConfig={{
           layout: 'chat',
