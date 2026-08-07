@@ -89,7 +89,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Generate artifact attestation
-        uses: actions/attest@v4.2.0
+        uses: actions/attest@v4.2.2
         with:
           subject-name: ${{ matrix.image_ref }}
           subject-digest: ${{ steps.docker-build.outputs.digest }}
