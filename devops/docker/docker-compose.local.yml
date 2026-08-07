@@ -98,7 +98,7 @@ services:
       start_period: 40s
 
   xberg:
-    image: ghcr.io/xberg-io/xberg:1.0.0-rc.29-core
+    image: ghcr.io/xberg-io/xberg:1.0.8-core
     environment:
       XBERG_MAX_UPLOAD_SIZE_MB: '50'
     ports:
@@ -123,13 +123,11 @@ services:
     image: ghcr.io/maximhq/bifrost:v1.6.7
     restart: unless-stopped
     environment:
-      APP_HOST: 0.0.0.0
-      APP_PORT: '8089'
       BIFROST_ADMIN_USERNAME: admin
       BIFROST_ADMIN_PASSWORD: admin
       BIFROST_API_KEY: sk-bf-example-key
     ports:
-      - '8089:8089'
+      - '8089:8080'
     volumes:
       - ./bifrost/config.json:/app/data/config.json:ro
       - bifrost_data:/app/data

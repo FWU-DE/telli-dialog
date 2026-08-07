@@ -21,7 +21,6 @@ services:
       - '3001:3001' # ais-chat-admin
       - '3002:3002' # ais-chat-api
       - '8080:8080' # keycloak
-      - '8089:8089' # bifrost
     depends_on:
       fix-keycloak-volume-ownership:
         condition: service_completed_successfully
@@ -109,7 +108,7 @@ services:
 
   # Xberg text extraction service
   xberg:
-    image: ghcr.io/xberg-io/xberg:1.0.0-rc.29-core
+    image: ghcr.io/xberg-io/xberg:1.0.8-core
     restart: unless-stopped
     environment:
       XBERG_MAX_UPLOAD_SIZE_MB: '50'
@@ -150,18 +149,14 @@ services:
     image: ghcr.io/maximhq/bifrost:v1.6.7
     restart: unless-stopped
     environment:
-      APP_HOST: 0.0.0.0
-      APP_PORT: '8089'
       BIFROST_ADMIN_USERNAME: admin
       BIFROST_ADMIN_PASSWORD: admin
       BIFROST_API_KEY: sk-bf-example-key
     volumes:
       - ./bifrost/config.json:/app/data/config.json:ro
       - bifrost_data:/app/data
-    network_mode: service:keycloak
-    depends_on:
-      keycloak:
-        condition: service_started
+    ports:
+      - '8089:8080'
 
   # AIS.chat API - OpenAI compatible API service
   ais-chat-api:
@@ -186,11 +181,17 @@ services:
       LLM_GPT4OMINI_BASE_URL: PLACEHOLDER_BASE_URL
       LLM_GPT5NANO_API_KEY: API_KEY_PLACEHOLDER
       LLM_GPT5NANO_BASE_URL: PLACEHOLDER_BASE_URL
+
+      # Bifrost LLM proxy
+      BIFROST_BASE_URL: http://bifrost:8080/openai/v1
+      BIFROST_API_KEY: sk-bf-example-key
     network_mode: service:keycloak
     depends_on:
       postgres:
         condition: service_healthy
       keycloak:
+        condition: service_started
+      bifrost:
         condition: service_started
 
   # AIS.chat App - Main user-facing application
@@ -235,6 +236,10 @@ services:
       # Xberg text extraction
       XBERG_URL: http://xberg:8000
 
+      # Bifrost LLM proxy
+      BIFROST_BASE_URL: http://bifrost:8080/openai/v1
+      BIFROST_API_KEY: sk-bf-example-key
+
       # S3 Object Storage for file uploads and image generation
       # Note: must be changed to a publicly accessible S3 storage, when LLM should have file access (e.g., uploading pictures and asking about content)
       OTC_SECRET_ACCESS_KEY: rustfsadmin123
@@ -266,6 +271,8 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_started
+      bifrost:
+        condition: service_started
 
   # AIS.chat Admin - Administration interface
   ais-chat-admin:
@@ -295,6 +302,11 @@ services:
       API_URL: http://localhost:3002
       # Note: DB_CACHE_TTL_SECONDS should NOT be set in admin app
 
+      # Bifrost LLM proxy
+      BIFROST_ADMIN_URL: http://bifrost:8080
+      BIFROST_ADMIN_USERNAME: admin
+      BIFROST_ADMIN_PASSWORD: admin
+
       # Monitoring (optional, leave empty to disable)
       NEXT_PUBLIC_SENTRY_LOG_LEVEL: info
     network_mode: service:keycloak
@@ -302,6 +314,8 @@ services:
       postgres:
         condition: service_healthy
       keycloak:
+        condition: service_started
+      bifrost:
         condition: service_started
 
   # Initialization container
