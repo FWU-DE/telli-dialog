@@ -94,7 +94,7 @@ jobs:
             -p 8080:8080 \
             -e CLIENT_NAME=$VIDIS_CLIENT_ID -e CLIENT_SECRET=$VIDIS_CLIENT_SECRET \
             --entrypoint /opt/keycloak/data/import/entrypoint.sh \
-            quay.io/keycloak/keycloak:26.7.0 > /tmp/keycloak.log 2>&1 &
+            quay.io/keycloak/keycloak:26.7.1 > /tmp/keycloak.log 2>&1 &
 
       # crawl4ai is not started under services because its large image (~40s pull) would delay the whole pipeline
       - name: Start crawl4ai container (in background)
