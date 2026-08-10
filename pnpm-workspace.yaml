@@ -1,6 +1,7 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+engineStrict: true
 allowBuilds:
   '@google/genai': true
   '@parcel/watcher': true
