@@ -119,6 +119,44 @@ services:
     ports:
       - '6556:6556'
 
+  piston:
+    image: ghcr.io/engineer-man/piston:latest
+    privileged: true
+    restart: unless-stopped
+    environment:
+      PISTON_RUN_TIMEOUT: '5000'
+      PISTON_COMPILE_TIMEOUT: '5000'
+      PISTON_RUN_MEMORY_LIMIT: '134217728'
+      PISTON_COMPILE_MEMORY_LIMIT: '134217728'
+    ports:
+      - '2000:2000'
+    volumes:
+      - piston_packages:/piston/packages
+    tmpfs:
+      - /tmp:exec
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:2000/']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  piston-init:
+    image: curlimages/curl:8.16.0
+    restart: 'no'
+    depends_on:
+      piston:
+        condition: service_healthy
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - >-
+        curl --fail --silent --show-error -X POST http://piston:2000/api/v2/packages
+        -H 'content-type: application/json' -d '{"language":"python","version":"3.12.0"}' || true;
+        curl --fail --silent --show-error -X POST http://piston:2000/api/v2/packages
+        -H 'content-type: application/json' -d '{"language":"node","version":"20.11.1"}' || true
+        ; curl --fail --silent --show-error -X POST http://piston:2000/api/v2/packages
+        -H 'content-type: application/json' -d '{"language":"typescript","version":"5.0.3"}' || true
+
   bifrost:
     image: ghcr.io/maximhq/bifrost:v1.6.7
     restart: unless-stopped
@@ -138,3 +176,4 @@ volumes:
   postgres_data:
   valkey_data:
   xberg_cache:
+  piston_packages:

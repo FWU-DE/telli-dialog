@@ -30,6 +30,7 @@ import {
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import { buildTools } from '../chat/build-tools';
+import { isPistonConfigured } from '../chat/tools/execute-code-client';
 import { isWebSearchEnabledForEntity } from '../chat/websearch';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
@@ -163,6 +164,9 @@ export async function sendCharacterMessage({
       featureToggles: teacherUserAndContext.federalState.featureToggles,
       entity: character,
     });
+    const allowCodeExecution =
+      (teacherUserAndContext.federalState.featureToggles.isCodeExecutionEnabled ?? false) &&
+      isPistonConfigured();
 
     const tools = await buildTools({
       user: teacherUserAndContext,
@@ -172,6 +176,7 @@ export async function sendCharacterMessage({
       sourceUrls: processedUrls,
       allowWebTools,
       allowMundoSearch: false,
+      allowCodeExecution,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

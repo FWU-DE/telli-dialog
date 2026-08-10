@@ -40,6 +40,7 @@ import { UserAndContext } from '@/auth/types';
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 import { buildTools } from './build-tools';
+import { isPistonConfigured } from './tools/execute-code-client';
 import { isWebSearchEnabledForEntity, runWebSearchPipeline } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
 import type {
@@ -402,6 +403,8 @@ export async function sendChatMessage({
         activeLearningScenario ??
         activeAssistant ?? { isWebSearchEnabled: true },
     });
+    const allowCodeExecution =
+      (user.federalState.featureToggles.isCodeExecutionEnabled ?? false) && isPistonConfigured();
 
     const tools = await buildTools({
       user,
@@ -414,6 +417,7 @@ export async function sendChatMessage({
       sourceUrls: ingestResult.processedUrls,
       allowWebTools,
       allowMundoSearch: true,
+      allowCodeExecution,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

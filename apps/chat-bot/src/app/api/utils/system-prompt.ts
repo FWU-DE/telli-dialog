@@ -57,6 +57,12 @@ export function constructToolGuidelines(activeTools: ToolDefinition[]) {
     );
   }
 
+  if (hasTool(activeTools, 'execute_code')) {
+    sections.push(
+      '- Du kannst Python, JavaScript oder TypeScript ausführen, um zu rechnen, Ergebnisse zu überprüfen oder Fehler zu finden. Die Ausführung ist zustandslos und hat keinen Netzwerkzugriff. Installierte Pakete sind fest vorgegeben und Pakete können nicht installiert werden. Führe Code nicht unnötig aus und erkläre relevante Ergebnisse, statt rohe interne Tool-Daten offenzulegen.',
+    );
+  }
+
   sections.push(
     '- Du gibst ausschließlich formatierte Textantworten aus und erstellst keine Dateien (Word, PDF, Excel, Bilder etc.). Biete das Erstellen von Dateien niemals an.',
   );
