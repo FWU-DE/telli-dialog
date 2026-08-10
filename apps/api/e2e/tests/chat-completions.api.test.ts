@@ -62,12 +62,12 @@ test.describe('POST /v1/chat/completions', () => {
     test('returns a successful response when sending temperature to gpt-5-mini', async ({
       request,
     }) => {
-      const reasoningModel = await getModel(request, 'gpt-5-mini');
+      const gpt5MiniModel = await getModel(request, 'gpt-5-mini');
 
       const response = await request.post('/v1/chat/completions', {
         headers: authorizationHeader,
         data: {
-          model: reasoningModel.name,
+          model: gpt5MiniModel.name,
           messages: [{ role: 'user', content: 'Reply with exactly: hello' }],
           max_tokens: 200,
           temperature: 0.1,
