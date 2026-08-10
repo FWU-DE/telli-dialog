@@ -37,7 +37,7 @@ type CodeLanguage = keyof typeof runtimes;
 
 export type ExecuteCodeResult = {
   language: CodeLanguage;
-  status: 'success' | 'compilation_error' | 'runtime_error' | 'timeout' | 'output_limit';
+  status: 'success' | 'compilation_error' | 'runtime_error';
   exitCode: number | null;
   signal: string | null;
   stdout: string;

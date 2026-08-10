@@ -278,7 +278,7 @@ export function FederalStateView(props: FederalStateViewProps) {
           <FormFieldCheckbox
             name="featureToggles.isCodeExecutionEnabled"
             label="Code-Ausführung aktivieren"
-            description="Erlaubt dem Chat, Python- und JavaScript-Code in einer isolierten Umgebung auszuführen."
+            description="Erlaubt dem Chat, Python-, JavaScript- und TypeScript-Code in einer isolierten Umgebung auszuführen."
             control={control}
           />
           <FormField

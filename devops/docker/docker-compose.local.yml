@@ -120,7 +120,7 @@ services:
       - '6556:6556'
 
   piston:
-    image: ghcr.io/engineer-man/piston:latest
+    image: ghcr.io/engineer-man/piston@sha256:2f66b7456189c4d713aa986d98eccd0b6ee16d26c7ec5f21b30e942756fd127a
     privileged: true
     restart: unless-stopped
     environment:
