@@ -125,7 +125,7 @@ jobs:
             -e BIFROST_ADMIN_USERNAME=admin \
             -e BIFROST_ADMIN_PASSWORD=admin \
             -e BIFROST_API_KEY=sk-bf-example-key \
-            ghcr.io/maximhq/bifrost:v1.6.7 > /tmp/bifrost.log 2>&1 &
+            ghcr.io/maximhq/bifrost:v1.6.8 > /tmp/bifrost.log 2>&1 &
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
