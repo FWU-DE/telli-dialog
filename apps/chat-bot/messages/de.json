@@ -598,7 +598,7 @@
       "websites-invalid-error": "Bitte eine gültige URL eingeben.",
       "websites-counter": "{count} / {max} Webseiten",
       "websites-clear-button": "Alle entfernen",
-      "websites-presets-load-error": "Fehler beim Laden der URL-Presets",
+      "websites-presets-load-error": "Fehler beim Laden der Webseitenpakete",
       "presets-title": "Webseitenpakete",
       "presets-title-unassigned": "Selbst hinzugefügt",
       "presets-domain-count": "{count, plural, =1 {# Webseite} other {# Webseiten}}",
