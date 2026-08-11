@@ -58,7 +58,7 @@ import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { useForm, useWatch } from 'react-hook-form';
 import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
-import { CustomChatWebSearch } from '@/components/custom-chat/web-search/custom-chat-web-search';
+import { CustomChatWebSearchEditView } from '@/components/custom-chat/web-search/custom-chat-web-search-edit-view';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { FormField } from '@ui/components/form/form-field';
 import { createNewCharacterAction } from '../../actions';
@@ -538,12 +538,14 @@ export function CharacterEdit({
           />
 
           {isWebSearchAvailable && (
-            <CustomChatWebSearch
+            <CustomChatWebSearchEditView
               control={control}
+              onCheckedChange={() => {
+                void flushAutoSave();
+              }}
               onChange={() => {
                 void flushAutoSave();
               }}
-              showScopeOptions
             />
           )}
 

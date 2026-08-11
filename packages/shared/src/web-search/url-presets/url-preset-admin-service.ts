@@ -4,14 +4,6 @@ import { urlPresetTable } from '@shared/db/schema';
 import { UrlPreset, UrlPresetInsert, UrlPresetUpdate } from './types';
 import { NotFoundError } from '@shared/error';
 
-export async function getAllUrlPresets(): Promise<UrlPreset[]> {
-  const presets = await db
-    .select()
-    .from(urlPresetTable)
-    .orderBy(urlPresetTable.orderNumber, urlPresetTable.name);
-  return presets;
-}
-
 export async function getUrlPresetById(id: string): Promise<UrlPreset> {
   const [preset] = await db.select().from(urlPresetTable).where(eq(urlPresetTable.id, id));
   if (!preset) {

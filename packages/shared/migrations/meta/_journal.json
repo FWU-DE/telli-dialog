@@ -610,6 +610,13 @@
       "when": 1785485195201,
       "tag": "0086_wooden_ezekiel_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "7",
+      "when": 1786438146031,
+      "tag": "0087_mighty_whirlwind",
+      "breakpoints": true
     }
   ]
 }

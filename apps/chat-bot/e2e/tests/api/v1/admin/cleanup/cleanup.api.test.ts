@@ -247,7 +247,11 @@ async function createCharacter(data?: Partial<z.infer<typeof characterInsertSche
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const assistantInsertSchema = createInsertSchema(assistantTable).omit({ accessLevel: true });
+const assistantInsertSchema = createInsertSchema(assistantTable).omit({
+  accessLevel: true,
+  webSearchScope: true,
+  webSearchIncludedDomains: true,
+});
 async function createAssistant(data?: Partial<z.infer<typeof assistantInsertSchema>>) {
   const userId = data?.userId ?? generateUUID();
   const [assistant] = await db

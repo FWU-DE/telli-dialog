@@ -585,6 +585,7 @@
       "heading": "Websuche für Aktuelles",
       "heading-tooltip": "Falls aktiviert, sucht AIS.chat automatisch im Internet, sofern aktuelle Informationen nötig sind.",
       "activated": "Aktiviert",
+      "deactivated": "Deaktiviert",
       "scope-aria-label": "Umfang der Websuche",
       "scope-all-web": "Gesamtes Web",
       "scope-included-domains": "Nur nachfolgende Webseiten",
@@ -595,7 +596,13 @@
       "websites-empty-error": "Bitte eine URL eingeben.",
       "websites-duplicate-error": "Diese URL wurde bereits hinzugefügt",
       "websites-invalid-error": "Bitte eine gültige URL eingeben.",
-      "websites-counter": "{count} / {max} Domains"
+      "websites-counter": "{count} / {max} Webseiten",
+      "websites-clear-button": "Alle entfernen",
+      "websites-presets-load-error": "Fehler beim Laden der Webseitenpakete",
+      "presets-title": "Webseitenpakete",
+      "presets-title-unassigned": "Selbst hinzugefügt",
+      "presets-domain-count": "{count, plural, =1 {# Webseite} other {# Webseiten}}",
+      "presets-add-preset-button": "Paket hinzufügen"
     }
   },
   "assistants": {
@@ -665,6 +672,7 @@
     "filter-label": "Filter",
     "filter-reset": "Zurücksetzen",
     "filter-tabs-label": "Filteroptionen",
+    "filter-aria-delete": "Filter {filter_name} entfernen",
     "info-tooltip-label": "Informationen anzeigen",
     "badge-mine": "von mir",
     "sort-label": "Sortierung",

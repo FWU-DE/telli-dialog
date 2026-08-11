@@ -250,6 +250,48 @@ describe('resolveWebSearchConfig', () => {
       includedDomains: ['example.com', 'foo.de'],
     });
   });
+
+  it('returns disabled config when assistant web search is disabled', async () => {
+    mocks.dbGetAssistantByIdMock.mockResolvedValue({
+      isWebSearchEnabled: false,
+      webSearchScope: 'included-domains',
+      webSearchIncludedDomains: ['example.com'],
+    });
+
+    const { resolveWebSearchConfig } = await import('./websearch');
+
+    const config = await resolveWebSearchConfig({
+      user,
+      assistantId: 'assistant-uuid',
+    });
+
+    expect(config).toEqual({
+      enabled: false,
+      scope: 'all-web',
+      includedDomains: [],
+    });
+  });
+
+  it('trims and drops empty domain entries from an assistant', async () => {
+    mocks.dbGetAssistantByIdMock.mockResolvedValue({
+      isWebSearchEnabled: true,
+      webSearchScope: 'included-domains',
+      webSearchIncludedDomains: ['  example.com  ', '', '   ', 'foo.de'],
+    });
+
+    const { resolveWebSearchConfig } = await import('./websearch');
+
+    const config = await resolveWebSearchConfig({
+      user,
+      assistantId: 'assistant-uuid',
+    });
+
+    expect(config).toEqual({
+      enabled: true,
+      scope: 'included-domains',
+      includedDomains: ['example.com', 'foo.de'],
+    });
+  });
 });
 
 describe('isWebSearchEnabledForEntity', () => {

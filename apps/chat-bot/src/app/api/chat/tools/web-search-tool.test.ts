@@ -165,6 +165,54 @@ describe('buildWebSearchTool', () => {
     );
   });
 
+  it('forwards includedDomains for learning scenarios when scope is included-domains', async () => {
+    mocks.resolveWebSearchConfigMock.mockResolvedValue({
+      enabled: true,
+      scope: 'included-domains',
+      includedDomains: ['example.com', 'foo.de'],
+    } satisfies WebSearchConfig);
+
+    const { buildWebSearchTool } = await import('./web-search-tool');
+
+    const tool = await buildWebSearchTool({
+      user,
+      learningScenarioId: 'learning-scenario-uuid',
+      conversationId: 'conversation-1',
+    });
+
+    await tool!.handler({ query: 'aktuelle information' });
+
+    expect(mocks.searchWebMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        includedDomains: ['example.com', 'foo.de'],
+      }),
+    );
+  });
+
+  it('forwards includedDomains for assistants when scope is included-domains', async () => {
+    mocks.resolveWebSearchConfigMock.mockResolvedValue({
+      enabled: true,
+      scope: 'included-domains',
+      includedDomains: ['example.com', 'foo.de'],
+    } satisfies WebSearchConfig);
+
+    const { buildWebSearchTool } = await import('./web-search-tool');
+
+    const tool = await buildWebSearchTool({
+      user,
+      assistantId: 'assistant-uuid',
+      conversationId: 'conversation-1',
+    });
+
+    await tool!.handler({ query: 'aktuelle information' });
+
+    expect(mocks.searchWebMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        includedDomains: ['example.com', 'foo.de'],
+      }),
+    );
+  });
+
   it('does not forward includedDomains when scope is all-web', async () => {
     mocks.resolveWebSearchConfigMock.mockResolvedValue(allWebConfig);
 

@@ -16,6 +16,7 @@ import {
   categoriesSchema,
   federalStatesSchema,
   languagesSchema,
+  webSearchScopeSchema,
 } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/card';
@@ -55,7 +56,7 @@ import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-cha
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
-import { CustomChatWebSearch } from '@/components/custom-chat/web-search/custom-chat-web-search';
+import { CustomChatWebSearchEditView } from '@/components/custom-chat/web-search/custom-chat-web-search-edit-view';
 import { CustomChatSuspensionError } from '@/components/custom-chat/custom-chat-suspension-error';
 import {
   getAccessLevelFromShareForm,
@@ -112,6 +113,8 @@ function createAssistantFormValuesSchema(t: AssistantTranslator) {
     isCommunityShared: z.boolean(),
     hasLinkAccess: z.boolean(),
     isWebSearchEnabled: z.boolean(),
+    webSearchScope: webSearchScopeSchema,
+    webSearchIncludedDomains: z.array(z.string()),
     promptSuggestions: z
       .array(
         z.object({
@@ -163,6 +166,8 @@ export function AssistantEdit({
     ...getShareFormValues(assistant.accessLevel),
     hasLinkAccess: assistant.hasLinkAccess,
     isWebSearchEnabled: assistant.isWebSearchEnabled,
+    webSearchScope: assistant.webSearchScope,
+    webSearchIncludedDomains: assistant.webSearchIncludedDomains,
     promptSuggestions:
       assistant.promptSuggestions && assistant.promptSuggestions.length > 0
         ? assistant.promptSuggestions.map((s) => ({ value: s }))
@@ -201,6 +206,8 @@ export function AssistantEdit({
           filterGroup: toFilterGroup(data),
           hasLinkAccess: data.hasLinkAccess,
           isWebSearchEnabled: data.isWebSearchEnabled,
+          webSearchScope: data.webSearchScope,
+          webSearchIncludedDomains: data.webSearchIncludedDomains,
           promptSuggestions: data.promptSuggestions
             .map((suggestion) => suggestion.value.trim())
             .filter((suggestion) => suggestion.length > 0),
@@ -450,9 +457,12 @@ export function AssistantEdit({
           />
 
           {isWebSearchAvailable && (
-            <CustomChatWebSearch
+            <CustomChatWebSearchEditView
               control={control}
               onCheckedChange={() => {
+                void flushAutoSave();
+              }}
+              onChange={() => {
                 void flushAutoSave();
               }}
             />

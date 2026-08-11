@@ -5,10 +5,10 @@ import { runServerAction } from '@shared/actions/run-server-action';
 import { UrlPresetInsert, UrlPresetUpdate } from '@shared/web-search/url-presets/types';
 import {
   insertUrlPreset,
-  getAllUrlPresets,
   deleteUrlPreset,
   updateUrlPreset,
 } from '@shared/web-search/url-presets/url-preset-admin-service';
+import { getAllUrlPresets } from '@shared/web-search/url-presets/url-preset-service';
 
 export async function getUrlPresetsAction() {
   await requireAdminAuth();
