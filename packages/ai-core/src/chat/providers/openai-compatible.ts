@@ -96,7 +96,12 @@ export async function* streamOpenAICompatibleAgenticResponse({
       existingToolCall.name = chunk.item.name;
       existingToolCall.arguments = chunk.item.arguments;
       toolCalls.set(chunk.output_index, existingToolCall);
-    } else if (chunk.type === 'response.completed' && chunk.response.usage) {
+    } else if (
+      (chunk.type === 'response.completed' ||
+        chunk.type === 'response.incomplete' ||
+        chunk.type === 'response.failed') &&
+      chunk.response.usage
+    ) {
       usage = {
         completionTokens: chunk.response.usage.output_tokens,
         promptTokens: chunk.response.usage.input_tokens,

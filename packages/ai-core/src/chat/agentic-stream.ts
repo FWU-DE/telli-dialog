@@ -12,7 +12,7 @@ import type { TokenUsage, GenerationOptions, StreamEvent, Message, ModelSelectio
  * This function first verifies that the provided API key has access to the requested text model.
  * Note: Billing happens after the stream completes when usage data is available.
  *
- * @param modelId - The ID of the text model to use for generation
+ * @param selection - The model selection (candidate model IDs, display name, and usage callback) to use for generation
  * @param messages - The conversation messages (system, user, assistant)
  * @param apiKeyId - The ID of the API key to verify access and bill usage
  * @param onComplete - Called after the stream finishes with usage and cost
