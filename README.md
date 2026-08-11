@@ -90,6 +90,15 @@ corepack prepare
 pnpm i # installs the dependencies
 ```
 
+### Updating Node.js
+
+If your local Node version doesn't match the version required in `.nvmrc` (e.g. `pnpm install` or `pnpm dev` fails with an engine version error), install the correct version and set it as your nvm default:
+
+```sh
+nvm install # installs the node version from .nvmrc
+nvm alias default "$(cat .nvmrc)" # sets it as the default node version
+```
+
 ### Environment variables
 
 The project uses environment variables in `.env.local` files for local development configuration.

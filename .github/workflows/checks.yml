@@ -16,6 +16,29 @@ env:
   TURBO_TELEMETRY_DISABLED: 1
 
 jobs:
+  check_node_version_sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Verify Node version matches across .nvmrc, package.json and Dockerfiles
+        run: |
+          nvmrc_version=$(sed -E 's/^v//' .nvmrc | tr -d '[:space:]')
+          engines_version=$(node -pe "require('./package.json').engines.node.replace(/^>=/, '')")
+
+          if [ "$nvmrc_version" != "$engines_version" ]; then
+            echo "::error::Node version mismatch: .nvmrc=$nvmrc_version, package.json engines.node=$engines_version"
+            exit 1
+          fi
+
+          for dockerfile in $(find . -type f -name Dockerfile); do
+            docker_version=$(grep -oP '(?<=^FROM node:)[0-9.]+' "$dockerfile" | head -n1)
+            if [ -n "$docker_version" ] && [ "$docker_version" != "$nvmrc_version" ]; then
+              echo "::error::Node version mismatch: .nvmrc=$nvmrc_version, $dockerfile=$docker_version"
+              exit 1
+            fi
+          done
+
   install:
     runs-on: ubuntu-latest
     steps:
