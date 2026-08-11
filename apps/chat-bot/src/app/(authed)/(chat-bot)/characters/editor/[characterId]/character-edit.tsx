@@ -543,7 +543,6 @@ export function CharacterEdit({
               onChange={() => {
                 void flushAutoSave();
               }}
-              showScopeOptions
             />
           )}
 

@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { MAX_WEB_SEARCH_INCLUDED_DOMAINS } from '@/configuration-text-inputs/const';
 import { utils } from '@shared/utils';
 import { useToast } from '@/components/common/toast';
-import type { WebSearchScopedFields } from './web-search.types';
+import type { WebSearchFields } from './web-search.types';
 import { useUrlPresets } from './use-url-presets';
 import { WebSearchUrlPresets } from './web-search-url-presets';
 import { UrlPreset } from '@shared/web-search/url-presets/types';
@@ -17,7 +17,7 @@ export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
   control,
   onChange,
 }: {
-  control: Control<TFieldValues & WebSearchScopedFields>;
+  control: Control<TFieldValues & WebSearchFields>;
   onChange?: () => void;
 }) {
   const t = useTranslations('custom-chat.web-search');
@@ -25,7 +25,7 @@ export function WebSearchIncludedDomains<TFieldValues extends FieldValues>({
   const [currentWebsite, setCurrentWebsite] = useState('');
   const { data: availablePresets, isError } = useUrlPresets();
   const { field } = useController({
-    name: 'webSearchIncludedDomains' as FieldPath<TFieldValues & WebSearchScopedFields>,
+    name: 'webSearchIncludedDomains' as FieldPath<TFieldValues & WebSearchFields>,
     control,
   });
   const websites = (field.value as string[] | undefined) ?? [];

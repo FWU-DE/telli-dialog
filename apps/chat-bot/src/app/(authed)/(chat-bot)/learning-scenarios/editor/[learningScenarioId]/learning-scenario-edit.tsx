@@ -566,7 +566,6 @@ export function LearningScenarioEdit({
                 onChange={() => {
                   void flushAutoSave();
                 }}
-                showScopeOptions
               />
             )}
 

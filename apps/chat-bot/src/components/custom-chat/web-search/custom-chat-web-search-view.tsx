@@ -31,21 +31,18 @@ export function CustomChatWebSearchView(props: CustomChatWebSearchViewProps) {
             )}
           </div>
 
-          {props.isWebSearchEnabled &&
-            'webSearchScope' in props &&
-            props.webSearchScope === 'included-domains' &&
-            props.webSearchIncludedDomains && (
-              <>
-                <div>{t('scope-included-domains')}</div>
-                <ul className="flex flex-row flex-wrap gap-2 pt-4">
-                  {props.webSearchIncludedDomains.toSorted().map((domain) => (
-                    <li key={domain}>
-                      <Chip href={`https://${domain}`} label={domain} />
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
+          {props.isWebSearchEnabled && props.webSearchScope === 'included-domains' && (
+            <>
+              <div>{t('scope-included-domains')}</div>
+              <ul className="flex flex-row flex-wrap gap-2 pt-4">
+                {props.webSearchIncludedDomains.toSorted().map((domain) => (
+                  <li key={domain}>
+                    <Chip href={`https://${domain}`} label={domain} />
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
