@@ -85,7 +85,13 @@ export async function resolveWebSearchConfig({
   if (assistantId === HELP_MODE_ASSISTANT_ID) return DISABLED_WEB_SEARCH_CONFIG;
 
   const assistant = await dbGetAssistantById({ assistantId });
-  return assistant?.isWebSearchEnabled ? ENABLED_ALL_WEB_CONFIG : DISABLED_WEB_SEARCH_CONFIG;
+  if (!assistant?.isWebSearchEnabled) return DISABLED_WEB_SEARCH_CONFIG;
+
+  return {
+    enabled: true,
+    scope: assistant.webSearchScope,
+    includedDomains: normalizeIncludedDomains(assistant.webSearchIncludedDomains),
+  };
 }
 
 export function isWebSearchEnabledForEntity({
