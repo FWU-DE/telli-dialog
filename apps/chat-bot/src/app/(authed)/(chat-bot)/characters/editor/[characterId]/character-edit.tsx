@@ -540,6 +540,9 @@ export function CharacterEdit({
           {isWebSearchAvailable && (
             <CustomChatWebSearchEditView
               control={control}
+              onCheckedChange={() => {
+                void flushAutoSave();
+              }}
               onChange={() => {
                 void flushAutoSave();
               }}

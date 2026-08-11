@@ -8,15 +8,11 @@ import { WebSearchIncludedDomains } from './web-search-included-domains';
 import type { WebSearchScope } from '@shared/db/schema';
 import type { WebSearchFields } from './web-search.types';
 
-type BaseWebSearchEditViewProps = {
-  onCheckedChange?: (checked: boolean) => void;
-  onChange?: () => void;
+export type WebSearchEditViewProps<TFieldValues extends FieldValues = FieldValues> = {
+  onCheckedChange: (checked: boolean) => void;
+  onChange: () => void;
+  control: Control<TFieldValues & WebSearchFields>;
 };
-
-export type WebSearchEditViewProps<TFieldValues extends FieldValues = FieldValues> =
-  BaseWebSearchEditViewProps & {
-    control: Control<TFieldValues & WebSearchFields>;
-  };
 
 function WebSearchScopeSection<TFieldValues extends FieldValues = FieldValues>({
   control,

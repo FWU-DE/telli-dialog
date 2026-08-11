@@ -672,6 +672,7 @@
     "filter-label": "Filter",
     "filter-reset": "Zurücksetzen",
     "filter-tabs-label": "Filteroptionen",
+    "filter-aria-delete": "Filter {filter_name} entfernen",
     "info-tooltip-label": "Informationen anzeigen",
     "badge-mine": "von mir",
     "sort-label": "Sortierung",

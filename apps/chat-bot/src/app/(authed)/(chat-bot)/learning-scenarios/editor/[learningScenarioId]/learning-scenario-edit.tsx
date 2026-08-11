@@ -563,6 +563,9 @@ export function LearningScenarioEdit({
             {isWebSearchAvailable && (
               <CustomChatWebSearchEditView
                 control={control}
+                onCheckedChange={() => {
+                  void flushAutoSave();
+                }}
                 onChange={() => {
                   void flushAutoSave();
                 }}

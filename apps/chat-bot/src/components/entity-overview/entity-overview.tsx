@@ -221,7 +221,7 @@ export default function EntityOverview({
                   size="sm"
                   label={pill.label}
                   onDelete={() => onRemoveFilter(pill.group, pill.value)}
-                  ariaDeleteLabel={`${pill.label}-Filter zurücksetzen`}
+                  ariaDeleteLabel={t('filter-aria-delete', { filter_name: pill.label })}
                 />
               ))}
             </div>
