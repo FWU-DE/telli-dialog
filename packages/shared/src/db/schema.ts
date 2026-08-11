@@ -1307,6 +1307,11 @@ export const assistantTable = pgTable(
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     isWebSearchEnabled: boolean('is_web_search_enabled').notNull().default(false),
+    webSearchScope: webSearchScopeEnum('web_search_scope').notNull().default('all-web'),
+    webSearchIncludedDomains: text('web_search_included_domains')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     pictureId: text('picture_id'),
     description: text('description'),
     instructions: text('instructions'),
@@ -1335,12 +1340,16 @@ export const assistantSelectSchema = createSelectSchema(assistantTable).extend({
   accessLevel: accessLevelSchema,
   filterGroup: filterGroupSchema,
   ownerSchoolIds: z.array(z.string()),
+  webSearchScope: webSearchScopeSchema,
+  webSearchIncludedDomains: webSearchIncludedDomainsSchema,
 });
 export const assistantInsertSchema = createInsertSchema(assistantTable)
   .omit({ id: true, createdAt: true, updatedAt: true, suspended: true })
   .extend({
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
+    webSearchScope: webSearchScopeSchema.optional(),
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema.optional(),
   });
 export const assistantUpdateSchema = createUpdateSchema(assistantTable)
   .omit({
@@ -1354,6 +1363,8 @@ export const assistantUpdateSchema = createUpdateSchema(assistantTable)
     // for any reason accessLevel has a different type so we have to override it here
     accessLevel: accessLevelSchema.optional(),
     filterGroup: filterGroupSchema.optional(),
+    webSearchScope: webSearchScopeSchema.optional(),
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema.optional(),
   });
 
 export type AssistantSelectModel = z.infer<typeof assistantSelectSchema>;
