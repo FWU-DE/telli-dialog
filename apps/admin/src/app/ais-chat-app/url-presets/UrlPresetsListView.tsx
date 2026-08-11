@@ -169,9 +169,9 @@ export function UrlPresetsListView() {
               <div className="flex flex-row flex-wrap gap-2">
                 {preset.urls
                   .toSorted((a, b) => a.localeCompare(b))
-                  .map((url, index) => (
+                  .map((url) => (
                     <Chip
-                      key={`url_${index}`}
+                      key={url}
                       label={url}
                       onDelete={() => handleDeleteUrlFromPreset(preset.id, url)}
                       ariaDeleteLabel={`Löschen von ${url}`}

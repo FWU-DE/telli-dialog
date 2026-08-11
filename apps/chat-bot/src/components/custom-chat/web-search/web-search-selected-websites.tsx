@@ -57,8 +57,8 @@ export function WebSearchSelectedWebsites({
                     : presetName}
                 </div>
                 <ul className="flex flex-wrap gap-2 mt-3">
-                  {websites.map((website, index) => (
-                    <li key={presetName + index}>
+                  {websites.map((website) => (
+                    <li key={website}>
                       <Chip
                         href={`https://${website}`}
                         label={website}
