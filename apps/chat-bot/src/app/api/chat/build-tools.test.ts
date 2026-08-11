@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   buildRetrieveEntireFileToolMock: vi.fn(),
   buildRetrieveTextChunksToolMock: vi.fn(),
   buildMundoSearchToolMock: vi.fn(),
+  buildExecuteCodeToolMock: vi.fn(),
 }));
 
 vi.mock('./tools/web-search-tool', () => ({
@@ -28,6 +29,10 @@ vi.mock('./tools/retrieve-text-chunks-tool', () => ({
 
 vi.mock('./tools/mundo-search-tool', () => ({
   buildMundoSearchTool: mocks.buildMundoSearchToolMock,
+}));
+
+vi.mock('./tools/execute-code-tool', () => ({
+  buildExecuteCodeTool: mocks.buildExecuteCodeToolMock,
 }));
 
 const user = {
@@ -92,6 +97,10 @@ beforeEach(() => {
       description: 'Search MUNDO',
       parameters: { type: 'object', properties: {} },
     },
+    handler: vi.fn(),
+  });
+  mocks.buildExecuteCodeToolMock.mockReturnValue({
+    definition: { name: 'execute_code', description: 'Execute code', parameters: {} },
     handler: vi.fn(),
   });
 });
@@ -194,5 +203,38 @@ describe('buildTools', () => {
 
     expect(Object.keys(toolRegistry)).toContain('mundo_search');
     expect(mocks.buildMundoSearchToolMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('registers execute_code only when code execution is allowed and the tool is available', async () => {
+    const { buildTools } = await import('./build-tools');
+
+    const enabled = await buildTools({
+      user,
+      conversationId: 'conv-1',
+      relatedFileEntities,
+      allowWebTools: false,
+      allowCodeExecution: true,
+    });
+    expect(enabled.toolRegistry).toHaveProperty('execute_code');
+    expect(mocks.buildExecuteCodeToolMock).toHaveBeenCalledTimes(1);
+
+    mocks.buildExecuteCodeToolMock.mockReturnValue(null);
+    const unavailable = await buildTools({
+      user,
+      conversationId: 'conv-1',
+      relatedFileEntities,
+      allowWebTools: false,
+      allowCodeExecution: true,
+    });
+    expect(unavailable.toolRegistry).not.toHaveProperty('execute_code');
+
+    const disabled = await buildTools({
+      user,
+      conversationId: 'conv-1',
+      relatedFileEntities,
+      allowWebTools: false,
+      allowCodeExecution: false,
+    });
+    expect(disabled.toolRegistry).not.toHaveProperty('execute_code');
   });
 });

@@ -172,6 +172,8 @@ export async function sendCharacterMessage({
       sourceUrls: processedUrls,
       allowWebTools,
       allowMundoSearch: false,
+      allowCodeExecution:
+        teacherUserAndContext.federalState.featureToggles.isCodeExecutionEnabled ?? false,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

@@ -177,6 +177,8 @@ export async function sendLearningScenarioMessage({
       sourceUrls: processedUrls,
       allowWebTools,
       allowMundoSearch: false,
+      allowCodeExecution:
+        teacherUserAndContext.federalState.featureToggles.isCodeExecutionEnabled ?? false,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

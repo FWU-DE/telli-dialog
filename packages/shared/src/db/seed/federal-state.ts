@@ -165,6 +165,7 @@ export const FEDERAL_STATES = FEDERAL_STATE_DEFINITIONS.filter((state) => {
     isShareTemplateWithSchoolEnabled: true,
     isSharedPageLocaleDetectionEnabled: true,
     isAgenticChatEnabled: true,
+    isCodeExecutionEnabled: state.id === 'DE-TEST',
     isImageGenerationEnabled: true,
     isWebSearchEnabled: true,
   },

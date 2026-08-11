@@ -132,9 +132,83 @@ services:
       - ./bifrost/config.json:/app/data/config.json:ro
       - bifrost_data:/app/data
 
+  llm-sandbox-dind:
+    image: docker:28.3.3-dind
+    privileged: true
+    restart: unless-stopped
+    environment:
+      DOCKER_TLS_CERTDIR: ''
+    volumes:
+      - llm_sandbox_dind_data:/var/lib/docker
+    networks: [llm-sandbox-internal]
+    healthcheck:
+      test: ['CMD', 'docker', 'info']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  llm-sandbox-images:
+    image: docker:28.3.3-cli
+    restart: 'no'
+    environment:
+      DOCKER_HOST: tcp://llm-sandbox-dind:2375
+    volumes:
+      - ./llm-sandbox:/llm-sandbox:ro
+    networks: [llm-sandbox-internal]
+    depends_on:
+      llm-sandbox-dind:
+        condition: service_healthy
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >-
+        docker pull python:3.12.10-slim-bookworm &&
+        docker pull node:22.14.0-bookworm-slim &&
+        docker build -t ais-chat/llm-sandbox-typescript:1 -f /llm-sandbox/Dockerfile.typescript /llm-sandbox
+
+  llm-sandbox:
+    build:
+      context: ./llm-sandbox
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DOCKER_HOST: tcp://llm-sandbox-dind:2375
+      SANDBOX_GATEWAY_TOKEN: ${SANDBOX_GATEWAY_TOKEN:-local-llm-sandbox-token}
+      SANDBOX_PYTHON_IMAGE: python:3.12.10-slim-bookworm
+      SANDBOX_NODE_IMAGE: node:22.14.0-bookworm-slim
+      SANDBOX_TYPESCRIPT_IMAGE: ais-chat/llm-sandbox-typescript:1
+    ports:
+      - '127.0.0.1:8091:8080'
+    networks:
+      - default
+      - llm-sandbox-internal
+    depends_on:
+      llm-sandbox-dind:
+        condition: service_healthy
+      llm-sandbox-images:
+        condition: service_completed_successfully
+    tmpfs: ['/tmp:size=16m,noexec,nosuid']
+    cap_drop: ['ALL']
+    security_opt: ['no-new-privileges:true']
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request; urllib.request.urlopen('http://localhost:8080/ready')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
 volumes:
   bifrost_data:
   keycloak_data:
   postgres_data:
   valkey_data:
   xberg_cache:
+  llm_sandbox_dind_data:
+
+networks:
+  llm-sandbox-internal:

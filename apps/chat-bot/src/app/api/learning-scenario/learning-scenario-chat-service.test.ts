@@ -151,6 +151,7 @@ const teacherUserAndContext = {
     id: 'federal-state-1',
     featureToggles: {
       isAgenticChatEnabled: false,
+      isCodeExecutionEnabled: false,
     },
   },
 };
@@ -285,6 +286,7 @@ describe('sendLearningScenarioMessage', () => {
         featureToggles: {
           ...teacherUserAndContext.federalState.featureToggles,
           isAgenticChatEnabled: true,
+          isCodeExecutionEnabled: true,
         },
       },
     });
@@ -307,6 +309,7 @@ describe('sendLearningScenarioMessage', () => {
     expect(mocks.buildToolsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         allowWebTools: false,
+        allowCodeExecution: true,
       }),
     );
   });

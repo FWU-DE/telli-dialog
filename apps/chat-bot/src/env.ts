@@ -20,6 +20,8 @@ export const env = createEnv({
     crawl4AIUrl: z.url().default('http://localhost:11235'),
     crawl4AIToken: z.string().optional(),
     xbergUrl: z.url().default('http://localhost:8000'),
+    llmSandboxUrl: z.url().optional(),
+    llmSandboxApiToken: z.string().optional(),
   },
   runtimeEnv: {
     apiKey: process.env.API_KEY,
@@ -38,5 +40,7 @@ export const env = createEnv({
     crawl4AIUrl: process.env.CRAWL4AI_URL,
     crawl4AIToken: process.env.CRAWL4AI_API_TOKEN,
     xbergUrl: process.env.XBERG_URL,
+    llmSandboxUrl: process.env.LLM_SANDBOX_URL,
+    llmSandboxApiToken: process.env.LLM_SANDBOX_API_TOKEN,
   },
 });

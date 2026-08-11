@@ -58,6 +58,21 @@ This guide helps you run AIS.chat using pre-built Docker images with minimal con
 All services are preconfigured with sensible defaults in `devops/docker/docker-compose.yml`.
 To customize environment variables edit `devops/docker/docker-compose.yml` directly or create a `docker-compose.override.yml`.
 
+### LLM Sandbox gateway
+
+The compose stacks include an authenticated, stateless code-execution gateway at
+`http://localhost:8090`. It supports Python, JavaScript, and TypeScript, with no package
+installation, no execution network, a 10-second timeout, and 64 KiB source/output limits. The
+gateway uses a dedicated pinned Docker-in-Docker `28.3.3` sidecar; sandbox containers are created
+with no network, dropped capabilities, resource limits, and automatic cleanup.
+
+Set `SANDBOX_GATEWAY_TOKEN` to a strong secret (in an override file or deployment secret) and send
+`Authorization: Bearer <token>`. The local stack uses `local-llm-sandbox-token` for convenience and
+allows overriding it; the complete self-hosted stack refuses to start without an explicit token.
+Execute with `POST /v1/execute`; health and readiness are
+available at `/health` and `/ready`. Readiness is only successful after the DinD daemon contains
+the pinned Python, JavaScript, and TypeScript runtime images.
+
 ### Stopping and Cleanup
 
 ```sh
@@ -114,6 +129,8 @@ For local development spin up all required services using docker compose:
 ```sh
 docker compose -f devops/docker/docker-compose.local.yml up -d --build
 ```
+
+The local stack includes the stateless LLM Sandbox gateway at `http://localhost:8091`. The chat app's development defaults use the matching local bearer token. The gateway creates a fresh network-disabled container for every Python, JavaScript, or TypeScript execution.
 
 To remove all data and start from scratch, you can stop and remove the container and its volume.
 This will delete your database and keycloak configuration.

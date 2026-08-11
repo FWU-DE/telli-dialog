@@ -77,6 +77,11 @@ function filterPersistedAgentLoopMessages(agentLoopMessages: AiCoreMessage[]) {
           return false;
         }
 
+        if (toolCall.name === 'execute_code') {
+          excludedToolCallIds.add(toolCall.id);
+          return false;
+        }
+
         return true;
       });
 
@@ -414,6 +419,7 @@ export async function sendChatMessage({
       sourceUrls: ingestResult.processedUrls,
       allowWebTools,
       allowMundoSearch: true,
+      allowCodeExecution: user.federalState.featureToggles.isCodeExecutionEnabled ?? false,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

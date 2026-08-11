@@ -20,6 +20,7 @@ services:
       - '3000:3000' # ais-chat-app
       - '3001:3001' # ais-chat-admin
       - '3002:3002' # ais-chat-api
+      - '8090:8090' # LLM Sandbox gateway
       - '8080:8080' # keycloak
     depends_on:
       fix-keycloak-volume-ownership:
@@ -158,6 +159,76 @@ services:
     ports:
       - '8089:8080'
 
+  llm-sandbox-dind:
+    image: docker:28.3.3-dind
+    privileged: true
+    restart: unless-stopped
+    environment:
+      DOCKER_TLS_CERTDIR: ''
+    volumes:
+      - llm_sandbox_dind_data:/var/lib/docker
+    networks: [llm-sandbox-internal]
+    healthcheck:
+      test: ['CMD', 'docker', 'info']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  llm-sandbox-images:
+    image: docker:28.3.3-cli
+    restart: 'no'
+    environment:
+      DOCKER_HOST: tcp://llm-sandbox-dind:2375
+    volumes:
+      - ./llm-sandbox:/llm-sandbox:ro
+    networks: [llm-sandbox-internal]
+    depends_on:
+      llm-sandbox-dind:
+        condition: service_healthy
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >-
+        docker pull python:3.12.10-slim-bookworm &&
+        docker pull node:22.14.0-bookworm-slim &&
+        docker build -t ais-chat/llm-sandbox-typescript:1 -f /llm-sandbox/Dockerfile.typescript /llm-sandbox
+
+  llm-sandbox:
+    build:
+      context: ./llm-sandbox
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DOCKER_HOST: tcp://llm-sandbox-dind:2375
+      SANDBOX_GATEWAY_TOKEN: ${SANDBOX_GATEWAY_TOKEN:?SANDBOX_GATEWAY_TOKEN must be set}
+      SANDBOX_PYTHON_IMAGE: python:3.12.10-slim-bookworm
+      SANDBOX_NODE_IMAGE: node:22.14.0-bookworm-slim
+      SANDBOX_TYPESCRIPT_IMAGE: ais-chat/llm-sandbox-typescript:1
+    ports:
+      - '127.0.0.1:8090:8080'
+    networks:
+      - default
+      - llm-sandbox-internal
+    depends_on:
+      llm-sandbox-dind:
+        condition: service_healthy
+      llm-sandbox-images:
+        condition: service_completed_successfully
+    tmpfs: ['/tmp:size=16m,noexec,nosuid']
+    cap_drop: ['ALL']
+    security_opt: ['no-new-privileges:true']
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request; urllib.request.urlopen('http://localhost:8080/ready')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
   # AIS.chat API - OpenAI compatible API service
   ais-chat-api:
     image: ghcr.io/fwu-de/ais-chat-api:latest
@@ -236,6 +307,10 @@ services:
       # Xberg text extraction
       XBERG_URL: http://xberg:8000
 
+      # Stateless code execution
+      LLM_SANDBOX_URL: http://llm-sandbox:8080
+      LLM_SANDBOX_API_TOKEN: ${SANDBOX_GATEWAY_TOKEN:?SANDBOX_GATEWAY_TOKEN must be set}
+
       # Bifrost LLM proxy
       BIFROST_BASE_URL: http://bifrost:8080/openai/v1
       BIFROST_API_KEY: sk-bf-example-key
@@ -273,6 +348,8 @@ services:
         condition: service_started
       bifrost:
         condition: service_started
+      llm-sandbox:
+        condition: service_healthy
 
   # AIS.chat Admin - Administration interface
   ais-chat-admin:
@@ -371,3 +448,7 @@ volumes:
   bifrost_data:
   rustfs_data:
   xberg_cache:
+  llm_sandbox_dind_data:
+
+networks:
+  llm-sandbox-internal:

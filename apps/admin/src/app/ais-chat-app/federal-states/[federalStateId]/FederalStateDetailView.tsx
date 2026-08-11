@@ -64,6 +64,7 @@ function transformToFederalStateEditForm(federalState: FederalStateModel): Feder
       isSharedPageLocaleDetectionEnabled:
         federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true,
       isAgenticChatEnabled: federalState.featureToggles.isAgenticChatEnabled ?? false,
+      isCodeExecutionEnabled: federalState.featureToggles.isCodeExecutionEnabled ?? false,
     },
     supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
     designConfiguration: federalState.designConfiguration
@@ -272,6 +273,12 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="featureToggles.isAgenticChatEnabled"
             label="Agentic Chat aktivieren"
             description="Erlaubt die Nutzung des neuen agentic loop im Chat."
+            control={control}
+          />
+          <FormFieldCheckbox
+            name="featureToggles.isCodeExecutionEnabled"
+            label="Codeausführung aktivieren"
+            description="Erlaubt die Ausführung von Code im Chat."
             control={control}
           />
           <FormField

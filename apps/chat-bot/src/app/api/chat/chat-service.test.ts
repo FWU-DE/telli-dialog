@@ -209,7 +209,7 @@ const messages: ChatMessage[] = [
   { id: 'message-3', role: 'user', content: 'Current question' },
 ];
 
-function createUser(isAgenticChatEnabled: boolean): UserAndContext {
+function createUser(isAgenticChatEnabled: boolean, isCodeExecutionEnabled = false): UserAndContext {
   return {
     id: 'user-1',
     userRole: 'teacher',
@@ -224,6 +224,7 @@ function createUser(isAgenticChatEnabled: boolean): UserAndContext {
         isCustomGptEnabled: true,
         isShareTemplateWithSchoolEnabled: true,
         isAgenticChatEnabled,
+        isCodeExecutionEnabled,
         isImageGenerationEnabled: true,
         isWebSearchEnabled: true,
       },
@@ -354,58 +355,65 @@ beforeEach(() => {
 
 describe('sendChatMessage', () => {
   it.each([
-    { isAgenticChatEnabled: false, expectedBranch: 'legacy' },
-    { isAgenticChatEnabled: true, expectedBranch: 'agentic' },
-  ])('routes $expectedBranch chats correctly', async ({ isAgenticChatEnabled }) => {
-    const { sendChatMessage } = await import('./chat-service');
+    { isAgenticChatEnabled: false, isCodeExecutionEnabled: false, expectedBranch: 'legacy' },
+    { isAgenticChatEnabled: true, isCodeExecutionEnabled: false, expectedBranch: 'agentic' },
+    { isAgenticChatEnabled: true, isCodeExecutionEnabled: true, expectedBranch: 'agentic' },
+  ])(
+    'routes $expectedBranch chats correctly',
+    async ({ isAgenticChatEnabled, isCodeExecutionEnabled }) => {
+      const { sendChatMessage } = await import('./chat-service');
 
-    const result = await sendChatMessage({
-      conversationId: conversation.id,
-      messages,
-      modelId: mainModel.id,
-      user: createUser(isAgenticChatEnabled),
-    });
+      const result = await sendChatMessage({
+        conversationId: conversation.id,
+        messages,
+        modelId: mainModel.id,
+        user: createUser(isAgenticChatEnabled, isCodeExecutionEnabled),
+      });
 
-    const streamedText = await collectStream(result.stream);
+      const streamedText = await collectStream(result.stream);
 
-    if (isAgenticChatEnabled) {
-      expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
-      expect(mocks.retrieveChunksMock).not.toHaveBeenCalled();
-      expect(mocks.runWebSearchPipelineMock).not.toHaveBeenCalled();
-      expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
-      expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
-      expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          errorUrls: [],
-          webSearchResults: [],
-          activeToolDefinitions: [buildToolsOutput.toolRegistry.web_search.definition],
-        }),
+      if (isAgenticChatEnabled) {
+        expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
+        expect(mocks.buildToolsMock).toHaveBeenCalledWith(
+          expect.objectContaining({ allowCodeExecution: isCodeExecutionEnabled }),
+        );
+        expect(mocks.retrieveChunksMock).not.toHaveBeenCalled();
+        expect(mocks.runWebSearchPipelineMock).not.toHaveBeenCalled();
+        expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
+        expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
+        expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            errorUrls: [],
+            webSearchResults: [],
+            activeToolDefinitions: [buildToolsOutput.toolRegistry.web_search.definition],
+          }),
+        );
+        expect(streamedText).toBe('agentic chunk');
+      } else {
+        expect(mocks.buildToolsMock).not.toHaveBeenCalled();
+        expect(mocks.runAgentLoopMock).not.toHaveBeenCalled();
+        expect(mocks.runWebSearchPipelineMock).toHaveBeenCalledTimes(1);
+        expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
+        expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
+        expect(result.webSearchResults).toEqual(webSearchResults);
+        expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
+          expect.objectContaining({ webSearchResults, activeToolDefinitions: [] }),
+        );
+        expect(streamedText).toBe('fallback chunk');
+      }
+
+      expect(mocks.dbInsertChatContentBatchMock).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: result.messageId,
+            role: 'assistant',
+          }),
+        ]),
       );
-      expect(streamedText).toBe('agentic chunk');
-    } else {
-      expect(mocks.buildToolsMock).not.toHaveBeenCalled();
-      expect(mocks.runAgentLoopMock).not.toHaveBeenCalled();
-      expect(mocks.runWebSearchPipelineMock).toHaveBeenCalledTimes(1);
-      expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
-      expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
-      expect(result.webSearchResults).toEqual(webSearchResults);
-      expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
-        expect.objectContaining({ webSearchResults, activeToolDefinitions: [] }),
-      );
-      expect(streamedText).toBe('fallback chunk');
-    }
+    },
+  );
 
-    expect(mocks.dbInsertChatContentBatchMock).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: result.messageId,
-          role: 'assistant',
-        }),
-      ]),
-    );
-  });
-
-  it('does not persist retrieve_entire_file tool calls or results', async () => {
+  it('does not persist hidden tool calls or results', async () => {
     mocks.runAgentLoopMock.mockImplementationOnce(
       ({ onComplete }: { onComplete: (args: unknown) => Promise<void> | void }) => {
         void onComplete({
@@ -427,6 +435,11 @@ describe('sendChatMessage', () => {
                   name: 'web_search',
                   arguments: '{"query":"test"}',
                 },
+                {
+                  id: 'call-execute-code',
+                  name: 'execute_code',
+                  arguments: '{"language":"python","source":"print(42)"}',
+                },
               ],
             },
             {
@@ -438,6 +451,11 @@ describe('sendChatMessage', () => {
               role: 'tool',
               content: 'search content',
               toolCallId: 'call-web-search',
+            },
+            {
+              role: 'tool',
+              content: '{"exitCode":0,"stdout":"42\\n","stderr":"","timedOut":false}',
+              toolCallId: 'call-execute-code',
             },
           ],
         });
@@ -490,9 +508,15 @@ describe('sendChatMessage', () => {
           toolCallId: 'call-retrieve-entire-file',
         }),
         expect.objectContaining({
+          toolCallId: 'call-execute-code',
+        }),
+        expect.objectContaining({
           toolCalls: expect.arrayContaining([
             expect.objectContaining({
               name: 'retrieve_entire_file',
+            }),
+            expect.objectContaining({
+              name: 'execute_code',
             }),
           ]),
         }),
