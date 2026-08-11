@@ -462,6 +462,9 @@ export function AssistantEdit({
               onCheckedChange={() => {
                 void flushAutoSave();
               }}
+              onChange={() => {
+                void flushAutoSave();
+              }}
             />
           )}
 
