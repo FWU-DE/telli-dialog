@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { BackButton } from '@/components/common/back-button';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
@@ -60,8 +59,8 @@ export function CharacterView({
   const toast = useToast();
   const t = useTranslations('characters');
   const tChat = useTranslations('custom-chat');
-  const { models } = useLlmModels();
-  const maybeDefaultModelId = getDefaultModel(models)?.id;
+  const { models, defaultModel } = useLlmModels();
+  const maybeDefaultModelId = defaultModel?.id;
   const isModelAvailable = character.modelId && models.some((m) => m.id === character.modelId);
   const selectedModelId = isModelAvailable ? character.modelId : maybeDefaultModelId;
   const selectedModel = models.find((m) => m.id === selectedModelId);

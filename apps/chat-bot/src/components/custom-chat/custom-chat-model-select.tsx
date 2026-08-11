@@ -2,7 +2,7 @@
 
 import { LlmModelSelectModel } from '@shared/db/schema';
 import { useTranslations } from 'next-intl';
-import { getFilteredTextModels } from '@shared/llm-models/llm-model-service';
+import { getFilteredTextModels } from '@shared/llm-models/llm-model-utils';
 import {
   Select,
   SelectContent,

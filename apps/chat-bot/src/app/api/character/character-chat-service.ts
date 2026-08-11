@@ -10,6 +10,7 @@ import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
+import { getChatModelSelection } from '../utils/model-circuit-breaker';
 import {
   dbGetCharacterByIdAndInviteCode,
   dbUpdateTokenUsageByCharacterChatId,
@@ -90,6 +91,11 @@ export async function sendCharacterMessage({
   }
 
   const { model: definedModel, apiKeyId } = modelAndApiKey;
+  const modelSelection = await getChatModelSelection({
+    model: definedModel,
+    federalStateId: teacherUserAndContext.federalState.id,
+  });
+  const generationModelId = modelSelection.modelIds[0];
   const agenticChatEnabled =
     teacherUserAndContext.federalState.featureToggles.isAgenticChatEnabled ?? false;
 
@@ -165,6 +171,7 @@ export async function sendCharacterMessage({
       attachedLinks: character.attachedLinks,
       sourceUrls: processedUrls,
       allowWebTools,
+      allowMundoSearch: false,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({
@@ -224,8 +231,7 @@ export async function sendCharacterMessage({
     const agentName = resolveAgentNameForTracing({ characterId: character.id });
 
     runAgentLoop({
-      modelId: definedModel.id,
-      modelName: definedModel.name,
+      modelSelection,
       apiKeyId,
       messages: aiCoreMessages,
       toolRegistry,
@@ -233,17 +239,24 @@ export async function sendCharacterMessage({
       onTextChunk: (delta) => {
         update(delta);
       },
-      onComplete: async ({ usage, priceInCents }) => {
+      onComplete: async ({ usage, priceInCents, modelId, modelUsages }) => {
         const { promptTokens, completionTokens } = usage;
 
-        await dbUpdateTokenUsageByCharacterChatId({
-          modelId: definedModel.id,
-          completionTokens,
-          promptTokens,
-          characterId: character.id,
-          userId: teacherUserAndContext.id,
-          costsInCent: priceInCents,
-        });
+        // Agentic requests can invoke several models across iterations. Persist each usage
+        // entry separately so pricing and reporting stay associated with the serving model. The
+        // fallback is only needed until non-agentic streaming chat is removed.
+        for (const modelUsage of modelUsages ?? [
+          { modelId: modelId ?? generationModelId, usage, priceInCents },
+        ]) {
+          await dbUpdateTokenUsageByCharacterChatId({
+            modelId: modelUsage.modelId ?? generationModelId,
+            completionTokens: modelUsage.usage.completionTokens,
+            promptTokens: modelUsage.usage.promptTokens,
+            characterId: character.id,
+            userId: teacherUserAndContext.id,
+            costsInCent: modelUsage.priceInCents,
+          });
+        }
 
         await sendRabbitmqEvent(
           constructNewMessageEvent({
@@ -269,14 +282,14 @@ export async function sendCharacterMessage({
     void (async () => {
       try {
         const textStream = generateTextStreamWithBilling(
-          definedModel.id,
+          modelSelection,
           aiCoreMessages,
           apiKeyId,
-          async ({ usage, priceInCents }) => {
+          async ({ usage, priceInCents, modelId }) => {
             const { promptTokens, completionTokens } = usage;
 
             await dbUpdateTokenUsageByCharacterChatId({
-              modelId: definedModel.id,
+              modelId: modelId ?? generationModelId,
               completionTokens,
               promptTokens,
               characterId: character.id,
@@ -296,6 +309,7 @@ export async function sendCharacterMessage({
               }),
             );
           },
+          undefined,
         );
 
         for await (const chunk of textStream) {

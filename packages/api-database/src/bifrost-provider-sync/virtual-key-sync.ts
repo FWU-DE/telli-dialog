@@ -1,4 +1,4 @@
-import { dbGetAllModels } from '../functions';
+import { dbGetAllProviderKeysWithModels } from '../functions';
 import { BifrostProviderSyncError } from './error';
 import { buildBifrostProviderConfigs } from './provider-config-builder';
 import {
@@ -35,9 +35,8 @@ export async function ensureBifrostVirtualKeyProviderAccess({
   bifrostAdminPassword?: string;
   logger?: BifrostProviderSyncLogger;
 }): Promise<void> {
-  const models = await dbGetAllModels();
   const providerConfigs = buildBifrostProviderConfigs(
-    models.filter((model) => !model.isDeleted),
+    await dbGetAllProviderKeysWithModels(),
     logger,
   );
 

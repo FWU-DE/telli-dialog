@@ -8,6 +8,7 @@ import {
 } from '@ais-chat/ai-core';
 import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { getModelAndApiKeyWithResult, getAuxiliaryModel } from '../utils/utils';
+import { getChatModelSelection } from '../utils/model-circuit-breaker';
 import {
   dbGetConversationAndMessages,
   dbGetOrCreateConversation,
@@ -214,6 +215,11 @@ export async function sendChatMessage({
   }
 
   const { model: definedModel, apiKeyId } = modelAndApiKey;
+  const modelSelection = await getChatModelSelection({
+    model: definedModel,
+    federalStateId: user.federalState.id,
+  });
+  const generationModelId = modelSelection.modelIds[0];
 
   // Get auxiliary model for title generation
   const auxiliaryModel = await getAuxiliaryModel(user.federalState.id);
@@ -338,7 +344,7 @@ export async function sendChatMessage({
       content: userMessage.content,
       role: 'user',
       userId: user.id,
-      modelName: definedModel.name,
+      modelName: modelSelection.modelName,
       orderNumber: userMessageOrderNumber,
     });
   }
@@ -407,6 +413,7 @@ export async function sendChatMessage({
       attachedLinks,
       sourceUrls: ingestResult.processedUrls,
       allowWebTools,
+      allowMundoSearch: true,
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({
@@ -496,11 +503,15 @@ export async function sendChatMessage({
     fullText,
     usage,
     priceInCents,
+    modelId = generationModelId,
     agentLoopMessages = [],
+    modelUsages,
   }: {
     fullText: string;
     usage: TokenUsage;
     priceInCents: number;
+    modelId?: string;
+    modelUsages?: Array<{ modelId: string; usage: TokenUsage; priceInCents: number }>;
     agentLoopMessages?: AiCoreMessage[];
   }) {
     const persistedAgentLoopMessages = filterPersistedAgentLoopMessages(agentLoopMessages);
@@ -546,14 +557,22 @@ export async function sendChatMessage({
 
     const { promptTokens, completionTokens } = usage;
 
-    await dbInsertConversationUsage({
-      conversationId: activeConversation.id,
-      userId: user.id,
-      modelId: definedModel.id,
-      completionTokens,
-      promptTokens,
-      costsInCent: priceInCents,
-    });
+    // Agentic requests can invoke several models across iterations. Persist each usage
+    // entry separately so pricing and reporting stay associated with the serving model. The
+    // fallback is only needed until non-agentic streaming chat is removed.
+    const usages = modelUsages ?? [{ modelId: modelId ?? generationModelId, usage, priceInCents }];
+    await Promise.all(
+      usages.map((modelUsage) =>
+        dbInsertConversationUsage({
+          conversationId: activeConversation.id,
+          userId: user.id,
+          modelId: modelUsage.modelId,
+          completionTokens: modelUsage.usage.completionTokens,
+          promptTokens: modelUsage.usage.promptTokens,
+          costsInCent: modelUsage.priceInCents,
+        }),
+      ),
+    );
 
     await sendRabbitmqEvent(
       constructNewMessageEvent({
@@ -585,8 +604,7 @@ export async function sendChatMessage({
 
     // Start the agent loop in the background
     runAgentLoop({
-      modelId: definedModel.id,
-      modelName: definedModel.name,
+      modelSelection,
       apiKeyId,
       messages: aiCoreMessages,
       toolRegistry,
@@ -594,9 +612,23 @@ export async function sendChatMessage({
       onTextChunk: (delta: string) => {
         update(delta);
       },
-      onComplete: async ({ fullText, usage, priceInCents, agentLoopMessages }) => {
+      onComplete: async ({
+        fullText,
+        usage,
+        priceInCents,
+        modelId,
+        modelUsages,
+        agentLoopMessages,
+      }) => {
         try {
-          await persistAssistantMessage({ fullText, usage, priceInCents, agentLoopMessages });
+          await persistAssistantMessage({
+            fullText,
+            usage,
+            priceInCents,
+            modelId,
+            modelUsages,
+            agentLoopMessages,
+          });
           done();
         } catch (error) {
           logError('Error during agent loop completion:', error);
@@ -615,12 +647,13 @@ export async function sendChatMessage({
 
       try {
         const textStream = generateTextStreamWithBilling(
-          definedModel.id,
+          modelSelection,
           aiCoreMessages,
           apiKeyId,
-          async ({ usage, priceInCents }) => {
-            await persistAssistantMessage({ fullText, usage, priceInCents });
+          async ({ usage, priceInCents, modelId }) => {
+            await persistAssistantMessage({ fullText, usage, priceInCents, modelId });
           },
+          undefined,
         );
 
         for await (const chunk of textStream) {

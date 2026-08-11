@@ -53,6 +53,31 @@ export async function dbGetLlmModelsByFederalStateId({
     .$withCache();
 }
 
+export async function dbFindModelByIdAndFederalStateId({
+  modelId,
+  federalStateId,
+}: {
+  modelId: string;
+  federalStateId: string;
+}) {
+  const [model] = await db
+    .select({ ...getTableColumns(llmModelTable) })
+    .from(llmModelTable)
+    .innerJoin(
+      federalStateLlmModelMappingTable,
+      eq(federalStateLlmModelMappingTable.llmModelId, llmModelTable.id),
+    )
+    .where(
+      and(
+        eq(llmModelTable.id, modelId),
+        eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
+        eq(llmModelTable.isDeleted, false),
+      ),
+    )
+    .$withCache();
+  return model;
+}
+
 export async function dbFindModelsToUpdate({
   federalStateId,
 }: {
@@ -125,7 +150,7 @@ export async function dbGetModelByIdAndFederalStateId({
 }: {
   modelId: string;
   federalStateId: string;
-}) {
+}): Promise<LlmModelSelectModel | undefined> {
   const [result] = await db
     .select({ ...getTableColumns(llmModelTable) })
     .from(llmModelTable)

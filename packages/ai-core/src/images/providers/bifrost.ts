@@ -4,8 +4,6 @@ import type { AiModel, ImageGenerationFn } from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { env } from '../../env';
 
-type BifrostUpstreamProvider = 'azure' | 'openai' | 'ionos' | 'vertex';
-
 function createBifrostClient(model: AiModel): {
   client: OpenAI;
   modelName: string;
@@ -18,31 +16,16 @@ function createBifrostClient(model: AiModel): {
     throw new ProviderConfigurationError('BIFROST_BASE_URL is not configured');
   }
 
-  const provider = getBifrostUpstreamProvider(model);
-
   return {
     client: instrumentOpenAiClient(
       new OpenAI({
         apiKey: env.bifrostApiKey ?? 'not-needed',
         baseURL: env.bifrostBaseUrl,
+        ...(env.bifrostApiKey ? { defaultHeaders: { 'x-bf-vk': env.bifrostApiKey } } : {}),
       }),
     ),
-    modelName: `${provider}/${provider === 'vertex' ? stripAnthropicPrefix(model.name) : model.name}`,
+    modelName: model.name,
   };
-}
-
-function getBifrostUpstreamProvider(model: AiModel): BifrostUpstreamProvider {
-  const settingProvider = model.setting.provider;
-  if (settingProvider === 'azure') return 'azure';
-  if (settingProvider === 'openai') return 'openai';
-  if (settingProvider === 'ionos') return 'ionos';
-  if (settingProvider === 'google') return 'vertex';
-
-  throw new ProviderConfigurationError('Unsupported Bifrost upstream provider');
-}
-
-function stripAnthropicPrefix(modelName: string): string {
-  return modelName.replace(/^anthropic\//, '');
 }
 
 export function constructBifrostImageGenerationFn(model: AiModel): ImageGenerationFn {

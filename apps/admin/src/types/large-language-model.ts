@@ -12,30 +12,31 @@ export type LargeLanguageModel = {
   additionalParameters: object;
   isNew: boolean;
   isDeleted: boolean;
+  useBifrost: boolean;
 };
 
 export type CreateLargeLanguageModel = {
   name: string;
   displayName: string;
-  provider: string;
   description?: string;
-  setting?: string;
   priceMetadata?: string;
   supportedImageFormats?: string;
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
+  useBifrost: boolean;
+  providerKeys: Array<{ providerKeyId: string; upstreamModelName: string }>;
 };
 
 export type UpdateLargeLanguageModel = {
   name: string;
   displayName: string;
-  provider: string;
   description?: string;
-  setting?: string;
   priceMetadata?: string;
   supportedImageFormats?: string;
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
+  useBifrost: boolean;
+  providerKeys: Array<{ providerKeyId: string; upstreamModelName: string }>;
 };

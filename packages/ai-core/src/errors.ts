@@ -17,6 +17,35 @@ export class AiGenerationError extends Error {
 }
 
 /**
+ * Error thrown when a provider returns an empty or unusable generation result.
+ */
+export class EmptyResponseError extends AiGenerationError {
+  constructor({
+    providerName,
+    modelName,
+    hasContent,
+    message = 'Empty response from provider',
+  }: {
+    providerName: string;
+    modelName: string;
+    hasContent: boolean;
+    message?: string;
+  }) {
+    super(
+      `${message} (providerName=${providerName}, modelName=${modelName}, hasContent=${String(hasContent)})`,
+    );
+    this.name = 'EmptyResponseError';
+  }
+
+  static is(error: unknown): error is EmptyResponseError {
+    if (error && typeof error === 'object') {
+      return 'name' in error && error.name === 'EmptyResponseError';
+    }
+    return false;
+  }
+}
+
+/**
  * Error thrown when AI content moderation flags content as inappropriate.
  */
 export class ResponsibleAIError extends AiGenerationError {
@@ -124,6 +153,7 @@ type AiGenerationErrorType<T extends AiGenerationError = AiGenerationError> = {
 
 export const aiGenerationErrorTypes = [
   AiGenerationError,
+  EmptyResponseError,
   ResponsibleAIError,
   RateLimitExceededError,
   InvalidModelError,

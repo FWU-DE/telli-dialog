@@ -10,9 +10,9 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/llm-model-service';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
 import { type Metadata } from 'next';
@@ -66,9 +66,10 @@ export default async function Page(
   });
 
   const lastUsedModelInChat = rawChatMessages.at(-1)?.modelName;
+  const defaultModelName = await getDefaultModelNameByFederalStateId(federalState.id, models);
 
   const currentModel =
-    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? defaultModelName;
 
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
@@ -76,7 +77,8 @@ export default async function Page(
   return (
     <LlmModelsProvider
       models={models}
-      defaultLlmModelByCookie={currentModel}
+      initialModelName={currentModel}
+      defaultModelName={defaultModelName}
       initialDownloadConversationEnabled={rawChatMessages.length > 0}
     >
       <DefaultPageLayout
