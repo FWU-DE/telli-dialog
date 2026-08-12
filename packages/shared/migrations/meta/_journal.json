@@ -617,6 +617,13 @@
       "when": 1786438146031,
       "tag": "0087_mighty_whirlwind",
       "breakpoints": true
+    },
+    {
+      "idx": 88,
+      "version": "7",
+      "when": 1786530648025,
+      "tag": "0088_dizzy_legion",
+      "breakpoints": true
     }
   ]
 }
