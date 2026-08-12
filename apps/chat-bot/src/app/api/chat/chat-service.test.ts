@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ChatMessage } from '@/types/chat';
 import type { UserAndContext } from '@/auth/types';
+import type { Message } from '@ais-chat/ai-core';
+import { filterPersistedAgentLoopMessages } from './chat-service';
 
 const webSearchResults = [
   {
@@ -349,6 +351,32 @@ beforeEach(() => {
   );
   mocks.generateAgenticStreamWithBillingMock.mockImplementation(async function* () {
     yield { type: 'text', delta: 'agentic chunk' };
+  });
+});
+
+describe('filterPersistedAgentLoopMessages', () => {
+  it('omits execute_code calls and their matching results while retaining other content', () => {
+    const messages: Message[] = [
+      {
+        role: 'assistant',
+        content: '',
+        toolCalls: [
+          { id: 'code-call', name: 'execute_code', arguments: '{"sourceCode":"print(1)"}' },
+          { id: 'search-call', name: 'web_search', arguments: '{"query":"test"}' },
+        ],
+      },
+      { role: 'tool', content: '{"stdout":"1"}', toolCallId: 'code-call' },
+      { role: 'tool', content: 'search result', toolCallId: 'search-call' },
+    ];
+
+    expect(filterPersistedAgentLoopMessages(messages)).toEqual([
+      {
+        role: 'assistant',
+        content: '',
+        toolCalls: [{ id: 'search-call', name: 'web_search', arguments: '{"query":"test"}' }],
+      },
+      { role: 'tool', content: 'search result', toolCallId: 'search-call' },
+    ]);
   });
 });
 

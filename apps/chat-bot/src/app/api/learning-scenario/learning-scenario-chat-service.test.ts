@@ -310,4 +310,27 @@ describe('sendLearningScenarioMessage', () => {
       }),
     );
   });
+
+  it('uses the shared learning-scenario owner federal-state code execution toggle', async () => {
+    mocks.getUserAndContextByUserIdMock.mockResolvedValue({
+      ...teacherUserAndContext,
+      federalState: {
+        ...teacherUserAndContext.federalState,
+        featureToggles: { isAgenticChatEnabled: true, isCodeExecutionEnabled: true },
+      },
+    });
+    mocks.buildToolsMock.mockResolvedValue({ toolRegistry: {} });
+
+    const { sendLearningScenarioMessage } = await import('./learning-scenario-chat-service');
+    await sendLearningScenarioMessage({
+      learningScenarioId: learningScenario.id,
+      inviteCode: 'invite-code',
+      messages,
+      modelId: model.id,
+    });
+
+    expect(mocks.buildToolsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ allowCodeExecution: true }),
+    );
+  });
 });

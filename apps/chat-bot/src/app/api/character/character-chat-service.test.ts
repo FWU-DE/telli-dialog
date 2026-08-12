@@ -311,4 +311,27 @@ describe('sendCharacterMessage', () => {
       }),
     );
   });
+
+  it('uses the shared character owner federal-state code execution toggle', async () => {
+    mocks.getUserAndContextByUserIdMock.mockResolvedValue({
+      ...teacherUserAndContext,
+      federalState: {
+        ...teacherUserAndContext.federalState,
+        featureToggles: { isAgenticChatEnabled: true, isCodeExecutionEnabled: true },
+      },
+    });
+    mocks.buildToolsMock.mockResolvedValue({ toolRegistry: {} });
+
+    const { sendCharacterMessage } = await import('./character-chat-service');
+    await sendCharacterMessage({
+      characterId: character.id,
+      inviteCode: 'invite-code',
+      messages,
+      modelId: model.id,
+    });
+
+    expect(mocks.buildToolsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ allowCodeExecution: true }),
+    );
+  });
 });

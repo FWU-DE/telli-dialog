@@ -207,6 +207,7 @@ export const federalStateFeatureTogglesSchema = z.object({
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
   isSharedPageLocaleDetectionEnabled: z.boolean().optional(),
   isAgenticChatEnabled: z.boolean().optional(),
+  isCodeExecutionEnabled: z.boolean().optional(),
   isImageGenerationEnabled: z.boolean().optional(),
   isWebSearchEnabled: z.boolean().optional(),
 });

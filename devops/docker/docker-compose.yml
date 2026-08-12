@@ -24,6 +24,9 @@ services:
     depends_on:
       fix-keycloak-volume-ownership:
         condition: service_completed_successfully
+    networks:
+      - default
+      - judge0-private
 
   # Fix keycloak volume permissions (runs with uid 1000)
   fix-keycloak-volume-ownership:
@@ -170,6 +173,8 @@ services:
       API_NAME: ais-chat
       API_KEY: ais-chat-api_api-key
       PORT: 3002
+      JUDGE0_URL: http://judge0-server:2358
+      JUDGE0_TOKEN: ${JUDGE0_TOKEN:?set JUDGE0_TOKEN}
 
       # Logging
       LOG_LEVEL: info
@@ -371,3 +376,8 @@ volumes:
   bifrost_data:
   rustfs_data:
   xberg_cache:
+
+networks:
+  judge0-private:
+    external: true
+    name: judge0-private

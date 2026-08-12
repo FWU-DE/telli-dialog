@@ -10,6 +10,7 @@ import { modelRequestSwaggerSchema } from './routes/(app)/v1/models/swagger-sche
 import { usageRequestSwaggerSchema } from './routes/(app)/v1/usage/swagger-schemas';
 import { embeddingRequestSwaggerSchema } from './routes/(app)/v1/embeddings/swagger-schemas';
 import { imageGenerationRequestSwaggerSchema } from './routes/(app)/v1/images/generations/swagger-schemas';
+import { handler as v1_code_execute_postHandler } from './routes/(app)/v1/code/execute/post';
 
 export type RouteHandlerDefinition = Pick<RouteShorthandOptions, 'schema' | 'bodyLimit'> & {
   path: string;
@@ -30,6 +31,24 @@ export const healthSchema = {
 };
 
 export const routeHandlerDefinitions: Array<RouteHandlerDefinition> = [
+  {
+    path: '/v1/code/execute',
+    method: 'POST',
+    schema: {
+      security: [{ bearerAuth: [] }],
+      body: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['language', 'sourceCode'],
+        properties: {
+          language: { type: 'string', enum: ['python', 'javascript', 'typescript'] },
+          sourceCode: { type: 'string', maxLength: 256000 },
+        },
+      },
+    },
+    bodyLimit: 270_000,
+    handler: v1_code_execute_postHandler,
+  },
   {
     path: '/health',
     method: 'GET',

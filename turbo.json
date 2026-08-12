@@ -63,7 +63,11 @@
     "PORT",
     "SENTRY_PROFILE_SESSION_SAMPLE_RATE",
     "STAGE_DATABASE_URL",
-    "LOG_LEVEL"
+    "LOG_LEVEL",
+    "JUDGE0_URL",
+    "JUDGE0_TOKEN",
+    "JUDGE0_TIMEOUT_MS",
+    "JUDGE0_POLL_INTERVAL_MS"
   ],
   "tasks": {
     "build": {

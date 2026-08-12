@@ -31,6 +31,10 @@ export const env = createEnv({
     sentryEnvironment: z.string().optional(),
     sentryTracesSampleRate: z.coerce.number().default(1.0),
     sentryProfileSessionSampleRate: z.coerce.number().default(0.0),
+    judge0Url: z.string().url().default('http://127.0.0.1:2358'),
+    judge0Token: z.string().min(32),
+    judge0TimeoutMs: z.coerce.number().int().positive().max(30_000).default(10_000),
+    judge0PollIntervalMs: z.coerce.number().int().positive().max(5_000).default(250),
   },
   runtimeEnv: {
     appVersion: process.env.APP_VERSION,
@@ -46,5 +50,9 @@ export const env = createEnv({
     sentryEnvironment: process.env.SENTRY_ENVIRONMENT,
     sentryProfileSessionSampleRate: process.env.SENTRY_PROFILE_SESSION_SAMPLE_RATE,
     sentryTracesSampleRate: process.env.SENTRY_TRACES_SAMPLE_RATE,
+    judge0Url: process.env.JUDGE0_URL,
+    judge0Token: process.env.JUDGE0_TOKEN,
+    judge0TimeoutMs: process.env.JUDGE0_TIMEOUT_MS,
+    judge0PollIntervalMs: process.env.JUDGE0_POLL_INTERVAL_MS,
   },
 });

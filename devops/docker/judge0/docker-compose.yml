@@ -1,0 +1,74 @@
+services:
+  judge0-db:
+    image: postgres:16.8-alpine
+    environment:
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: ${JUDGE0_DB_PASSWORD:?set JUDGE0_DB_PASSWORD}
+    tmpfs:
+      - /var/lib/postgresql/data
+    networks: [judge0-private]
+    restart: unless-stopped
+
+  judge0-redis:
+    image: redis:7.4.2-alpine
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    networks: [judge0-private]
+    restart: unless-stopped
+
+  judge0-server:
+    image: judge0/judge0:1.13.1
+    command: ['./scripts/server']
+    environment: &judge0-env
+      POSTGRES_HOST: judge0-db
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: ${JUDGE0_DB_PASSWORD:?set JUDGE0_DB_PASSWORD}
+      REDIS_HOST: judge0-redis
+      JUDGE0_TELEMETRY_ENABLE: 'false'
+      ENABLE_WAIT_RESULT: 'false'
+      ENABLE_COMPILER_OPTIONS: 'false'
+      ENABLE_COMMAND_LINE_ARGUMENTS: 'false'
+      ENABLE_SUBMISSION_DELETE: 'true'
+      ENABLE_BATCHED_SUBMISSIONS: 'false'
+      ENABLE_CALLBACKS: 'false'
+      ENABLE_ADDITIONAL_FILES: 'false'
+      AUTHN_TOKEN: ${JUDGE0_TOKEN:?set JUDGE0_TOKEN}
+      AUTHZ_TOKEN: ${JUDGE0_TOKEN:?set JUDGE0_TOKEN}
+      MAX_QUEUE_SIZE: '32'
+      ENABLE_NETWORK: 'false'
+      ALLOW_ENABLE_NETWORK: 'false'
+      ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT: 'false'
+      ALLOW_ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT: 'false'
+      CPU_TIME_LIMIT: '2'
+      MAX_CPU_TIME_LIMIT: '2'
+      WALL_TIME_LIMIT: '5'
+      MAX_WALL_TIME_LIMIT: '5'
+      MEMORY_LIMIT: '128000'
+      MAX_MEMORY_LIMIT: '128000'
+      MAX_PROCESSES_AND_OR_THREADS: '32'
+      MAX_MAX_PROCESSES_AND_OR_THREADS: '32'
+      MAX_FILE_SIZE: '1024'
+      MAX_MAX_FILE_SIZE: '1024'
+    depends_on: [judge0-db, judge0-redis]
+    networks:
+      - judge0-private
+      - judge0-loopback
+    ports:
+      - '127.0.0.1:2358:2358'
+    restart: unless-stopped
+
+  judge0-workers:
+    image: judge0/judge0:1.13.1
+    command: ['./scripts/workers']
+    privileged: true
+    environment: *judge0-env
+    depends_on: [judge0-server]
+    networks: [judge0-private]
+    restart: unless-stopped
+
+networks:
+  judge0-private:
+    name: judge0-private
+    internal: true
+  judge0-loopback:

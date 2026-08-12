@@ -66,13 +66,13 @@ type CustomChatIds = {
   assistantId?: string | undefined;
 };
 
-function filterPersistedAgentLoopMessages(agentLoopMessages: AiCoreMessage[]) {
+export function filterPersistedAgentLoopMessages(agentLoopMessages: AiCoreMessage[]) {
   const excludedToolCallIds = new Set<string>();
 
   return agentLoopMessages.flatMap((message) => {
     if (message.role === 'assistant' && message.toolCalls?.length) {
       const retainedToolCalls = message.toolCalls.filter((toolCall) => {
-        if (toolCall.name === 'retrieve_entire_file') {
+        if (toolCall.name === 'retrieve_entire_file' || toolCall.name === 'execute_code') {
           excludedToolCallIds.add(toolCall.id);
           return false;
         }
@@ -414,6 +414,9 @@ export async function sendChatMessage({
       sourceUrls: ingestResult.processedUrls,
       allowWebTools,
       allowMundoSearch: true,
+      allowCodeExecution:
+        (user.federalState.featureToggles.isAgenticChatEnabled ?? false) &&
+        (user.federalState.featureToggles.isCodeExecutionEnabled ?? false),
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

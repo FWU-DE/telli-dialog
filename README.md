@@ -115,6 +115,19 @@ For local development spin up all required services using docker compose:
 docker compose -f devops/docker/docker-compose.local.yml up -d --build
 ```
 
+Code execution additionally requires the isolated Judge0 stack. It uses privileged sandbox workers,
+so run it only on a trusted development machine or dedicated production host/VM:
+
+```sh
+export JUDGE0_DB_PASSWORD='use-a-local-secret'
+export JUDGE0_TOKEN='use-a-different-random-secret-at-least-32-characters'
+docker compose -f devops/docker/judge0/docker-compose.yml up -d
+```
+
+Host-run API development uses `JUDGE0_URL=http://127.0.0.1:2358`. For the packaged Docker stack,
+start Judge0 first; the API reaches `judge0-server` over the named private network. See
+[`devops/docker/judge0/README.md`](devops/docker/judge0/README.md) for security and retention details.
+
 To remove all data and start from scratch, you can stop and remove the container and its volume.
 This will delete your database and keycloak configuration.
 
