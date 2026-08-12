@@ -6,6 +6,7 @@ import type {
   ToolCall,
   ToolRegistry,
 } from './types';
+import { EmptyResponseError } from '../errors';
 
 export const MAX_AGENTIC_ITERATIONS = 3;
 export const MAX_TOOL_CALLS_PER_ITERATION = 2;
@@ -178,6 +179,11 @@ export function runAgentLoop({
           agentSpan.setAttribute('gen_ai.usage.total_tokens', totalUsage.totalTokens);
         },
       );
+
+      if (fullText.trim().length === 0) {
+        onError(new EmptyResponseError({ modelId: lastModelId }));
+        return;
+      }
 
       onComplete({
         fullText,

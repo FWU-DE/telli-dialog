@@ -21,19 +21,13 @@ export class AiGenerationError extends Error {
  */
 export class EmptyResponseError extends AiGenerationError {
   constructor({
-    providerName,
-    modelName,
-    hasContent,
+    modelId,
     message = 'Empty response from provider',
   }: {
-    providerName: string;
-    modelName: string;
-    hasContent: boolean;
+    modelId: string;
     message?: string;
   }) {
-    super(
-      `${message} (providerName=${providerName}, modelName=${modelName}, hasContent=${String(hasContent)})`,
-    );
+    super(`${message} (modelId=${modelId})`);
     this.name = 'EmptyResponseError';
   }
 

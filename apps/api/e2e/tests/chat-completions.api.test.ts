@@ -84,6 +84,23 @@ test.describe('POST /v1/chat/completions', () => {
       expect(body.choices[0]).toHaveProperty('message');
       expect(body.choices[0].message).toHaveProperty('content');
     });
+
+    test('returns a successful empty response for max_tokens: 0', async ({ request }) => {
+      const textModel = await getTextModel(request);
+
+      const response = await request.post('/v1/chat/completions', {
+        headers: authorizationHeader,
+        data: {
+          model: textModel.name,
+          messages: [{ role: 'user', content: 'Reply with exactly: hello' }],
+          max_tokens: 0,
+          temperature: 0.1,
+          stream: false,
+        },
+      });
+
+      expect(response.status()).toBe(200);
+    });
   });
 
   test.describe('Streaming', () => {
@@ -134,6 +151,27 @@ test.describe('POST /v1/chat/completions', () => {
             chunk.choices?.[0]?.delta?.content,
         );
       expect(contentChunks.length).toBeGreaterThan(0);
+    });
+
+    test('returns a successful empty stream for max_tokens: 0', async ({ request }) => {
+      const textModel = await getTextModel(request);
+
+      const response = await request.post('/v1/chat/completions', {
+        headers: authorizationHeader,
+        data: {
+          model: textModel.name,
+          messages: [{ role: 'user', content: 'Reply with exactly: hello' }],
+          max_tokens: 0,
+          temperature: 0.1,
+          stream: true,
+        },
+      });
+
+      expect(response.status()).toBe(200);
+
+      const responseBody = await response.text();
+
+      expect(responseBody).toContain('[DONE]');
     });
   });
 });
