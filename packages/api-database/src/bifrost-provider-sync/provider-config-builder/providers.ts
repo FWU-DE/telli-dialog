@@ -15,10 +15,7 @@ function buildKey(
   const modelMappings = activeMappings.flatMap(({ model, upstreamModelName }) => {
     const bifrostModelName = getBifrostModelName(model.name);
     const bifrostUpstreamModelName = getBifrostModelName(upstreamModelName);
-    return [
-      [model.name, bifrostUpstreamModelName],
-      [bifrostModelName, bifrostUpstreamModelName],
-    ] as const;
+    return [[bifrostModelName, bifrostUpstreamModelName]] as const;
   });
   return {
     name: `ais-chat-${providerKey.id}`,
