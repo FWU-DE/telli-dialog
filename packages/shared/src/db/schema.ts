@@ -696,6 +696,14 @@ export const staticModelsConfigurationSchema = z.object({
 });
 export type StaticModelsConfiguration = z.infer<typeof staticModelsConfigurationSchema>;
 
+export type ImageGenerationOptions = {
+  aspectRatio: {
+    square: string;
+    landscape: string;
+    portrait: string;
+  };
+};
+
 export const llmModelTable = pgTable(
   'llm_model',
   {
@@ -707,6 +715,7 @@ export const llmModelTable = pgTable(
     priceMetadata: json('price_metadata').$type<LlmModelPriceMetadata>().notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     supportedImageFormats: json('supported_image_formats').$type<string[]>(),
+    imageGenerationOptions: json('image_generation_options').$type<ImageGenerationOptions>(),
     isNew: boolean('is_new').notNull().default(false),
     isDeleted: boolean('is_deleted').notNull().default(false),
   },
