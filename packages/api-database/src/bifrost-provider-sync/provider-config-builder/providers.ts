@@ -12,16 +12,19 @@ function buildKey(
   const activeMappings = providerKey.models.filter(
     ({ model }) => !model.isDeleted && model.useBifrost,
   );
+  const modelMappings = activeMappings.flatMap(({ model, upstreamModelName }) => {
+    const bifrostModelName = getBifrostModelName(model.name);
+    const bifrostUpstreamModelName = getBifrostModelName(upstreamModelName);
+    return [
+      [model.name, bifrostUpstreamModelName],
+      [bifrostModelName, bifrostUpstreamModelName],
+    ] as const;
+  });
   return {
     name: `ais-chat-${providerKey.id}`,
     value,
-    models: [...new Set(activeMappings.map(({ model }) => getBifrostModelName(model.name)))].sort(),
-    aliases: Object.fromEntries(
-      activeMappings.map(({ model, upstreamModelName }) => [
-        getBifrostModelName(model.name),
-        upstreamModelName,
-      ]),
-    ),
+    models: [...new Set(modelMappings.map(([modelName]) => modelName))].sort(),
+    aliases: Object.fromEntries(modelMappings),
     weight: providerKey.weight,
     enabled: providerKey.isEnabled,
     ...extra,
