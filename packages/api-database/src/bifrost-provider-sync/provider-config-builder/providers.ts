@@ -15,14 +15,21 @@ function buildKey(
   return {
     name: `ais-chat-${providerKey.id}`,
     value,
-    models: [...new Set(activeMappings.map(({ model }) => model.name))].sort(),
+    models: [...new Set(activeMappings.map(({ model }) => getBifrostModelName(model.name)))].sort(),
     aliases: Object.fromEntries(
-      activeMappings.map(({ model, upstreamModelName }) => [model.name, upstreamModelName]),
+      activeMappings.map(({ model, upstreamModelName }) => [
+        getBifrostModelName(model.name),
+        upstreamModelName,
+      ]),
     ),
     weight: providerKey.weight,
     enabled: providerKey.isEnabled,
     ...extra,
   };
+}
+
+function getBifrostModelName(modelName: string): string {
+  return modelName.replace(/^anthropic\//, '');
 }
 
 export function buildAzureProviderConfig(
