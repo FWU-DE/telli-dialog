@@ -12,7 +12,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
-import { ImageAspectRatioProvider } from '@/components/providers/image-aspect-ratio-provider';
+import { ImageAspectRatioProvider } from '@/components/image-generation/image-aspect-ratio-provider';
 
 export const dynamic = 'force-dynamic';
 

@@ -71,7 +71,7 @@ describe('constructBifrostImageGenerationFn', () => {
       model: 'image-model',
       prompt: 'a cat',
       n: 1,
-      size: '1024x1024',
+      size: 'auto',
     });
     expect(result).toEqual({
       data: ['base64-bifrost-image'],
