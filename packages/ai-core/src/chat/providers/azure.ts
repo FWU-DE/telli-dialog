@@ -27,7 +27,10 @@ function createAzureClient(model: AiModel): {
     new OpenAI({
       apiKey: model.setting.apiKey,
       baseURL: basePath,
-      defaultQuery: Object.fromEntries(searchParams.entries()),
+      defaultQuery: {
+        ...Object.fromEntries(searchParams.entries()),
+        'api-version': '2025-04-01-preview',
+      },
     }),
   );
 

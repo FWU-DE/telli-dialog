@@ -176,7 +176,7 @@ describe('Azure Responses chat providers', () => {
       apiKey: 'azure-api-key',
       baseURL: 'https://example.openai.azure.com',
       defaultQuery: {
-        'api-version': '2024-02-15-preview',
+        'api-version': '2025-04-01-preview',
       },
     });
   });
