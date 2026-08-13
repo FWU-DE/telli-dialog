@@ -10,6 +10,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { ImageAspectRatioProvider } from '@/components/providers/image-aspect-ratio-provider';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,13 +39,15 @@ export default async function ImageGenerationPage() {
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider>
-        <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
-          <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-auto">
-              <ImageGenerationChat />
+        <ImageAspectRatioProvider>
+          <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
+            <div className="flex flex-col h-full">
+              <div className="flex-1 overflow-auto">
+                <ImageGenerationChat />
+              </div>
             </div>
-          </div>
-        </DefaultPageLayout>
+          </DefaultPageLayout>
+        </ImageAspectRatioProvider>
       </ImageStyleProvider>
     </ImageModelsProvider>
   );
