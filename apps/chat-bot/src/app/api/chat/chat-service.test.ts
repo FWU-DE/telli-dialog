@@ -500,6 +500,51 @@ describe('sendChatMessage', () => {
     );
   });
 
+  it('persists web search results received during agentic chat', async () => {
+    let onWebSearchResults: ((results: typeof webSearchResults) => void) | undefined;
+
+    mocks.buildToolsMock.mockImplementationOnce(
+      async ({
+        onWebSearchResults: callback,
+      }: {
+        onWebSearchResults: (results: typeof webSearchResults) => void;
+      }) => {
+        onWebSearchResults = callback;
+        return buildToolsOutput;
+      },
+    );
+    mocks.runAgentLoopMock.mockImplementationOnce(
+      ({ onComplete }: { onComplete: (args: unknown) => Promise<void> | void }) => {
+        onWebSearchResults?.(webSearchResults);
+        void onComplete({
+          fullText: 'agentic chunk',
+          usage: { promptTokens: 11, completionTokens: 22, totalTokens: 33 },
+          priceInCents: 44,
+        });
+      },
+    );
+
+    const { sendChatMessage } = await import('./chat-service');
+
+    const result = await sendChatMessage({
+      conversationId: conversation.id,
+      messages,
+      modelId: mainModel.id,
+      user: createUser(true),
+    });
+
+    await collectStream(result.stream);
+
+    expect(mocks.dbInsertChatContentBatchMock).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: result.messageId,
+          webSearchResults,
+        }),
+      ]),
+    );
+  });
+
   it('throws when conversation context ids do not match', async () => {
     const { sendChatMessage } = await import('./chat-service');
 

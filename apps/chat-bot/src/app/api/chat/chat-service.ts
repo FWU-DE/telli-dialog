@@ -415,6 +415,7 @@ export async function sendChatMessage({
       allowWebTools,
       allowMundoSearch: true,
       onWebSearchResults: (results) => {
+        webSearchResults = results;
         update(
           encodeChatStreamEvent({
             type: 'web_search_results',
