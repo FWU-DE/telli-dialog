@@ -95,7 +95,7 @@ describe('constructAzureImageGenerationFn', () => {
       apiKey: 'azure-api-key',
       baseURL: 'https://example.openai.azure.com',
       defaultQuery: {
-        'api-version': '2024-02-15-preview',
+        'api-version': '2024-02-01',
         foo: 'bar',
       },
     });
