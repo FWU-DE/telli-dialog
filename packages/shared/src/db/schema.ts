@@ -711,7 +711,7 @@ export const llmModelTable = pgTable(
     priceMetadata: json('price_metadata').$type<LlmModelPriceMetadata>().notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     supportedImageFormats: json('supported_image_formats').$type<string[]>(),
-    imageGenerationOptions: json('image_generation_options').$type<ImageGenerationConfig>(),
+    imageGenerationConfig: json('image_generation_config').$type<ImageGenerationConfig>(),
     isNew: boolean('is_new').notNull().default(false),
     isDeleted: boolean('is_deleted').notNull().default(false),
   },

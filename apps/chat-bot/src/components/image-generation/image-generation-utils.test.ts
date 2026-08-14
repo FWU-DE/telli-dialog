@@ -5,14 +5,14 @@ import { getSizeFromAspectRatio } from './image-generation-utils';
 describe('getSizeFromAspectRatio', () => {
   it('returns configured size for the requested aspect ratio', () => {
     const model = {
-      imageGenerationOptions: {
+      imageGenerationConfig: {
         aspectRatio: {
           quadratic: '1024x1024',
           landscape: '1536x1024',
           portrait: '1024x1536',
         },
       },
-    } as Pick<LlmModelSelectModel, 'imageGenerationOptions'>;
+    } as Pick<LlmModelSelectModel, 'imageGenerationConfig'>;
 
     expect(getSizeFromAspectRatio(model, 'quadratic')).toBe('1024x1024');
     expect(getSizeFromAspectRatio(model, 'landscape')).toBe('1536x1024');
@@ -20,14 +20,14 @@ describe('getSizeFromAspectRatio', () => {
   });
 
   it('returns auto when no matching aspect ratio is configured', () => {
-    const modelWithoutOptions = {} as Pick<LlmModelSelectModel, 'imageGenerationOptions'>;
+    const modelWithoutOptions = {} as Pick<LlmModelSelectModel, 'imageGenerationConfig'>;
     const modelWithoutRequestedRatio = {
-      imageGenerationOptions: {
+      imageGenerationConfig: {
         aspectRatio: {
           quadratic: '1024x1024',
         },
       },
-    } as Pick<LlmModelSelectModel, 'imageGenerationOptions'>;
+    } as Pick<LlmModelSelectModel, 'imageGenerationConfig'>;
 
     expect(getSizeFromAspectRatio(modelWithoutOptions, 'portrait')).toBe('auto');
     expect(getSizeFromAspectRatio(modelWithoutRequestedRatio, 'landscape')).toBe('auto');
