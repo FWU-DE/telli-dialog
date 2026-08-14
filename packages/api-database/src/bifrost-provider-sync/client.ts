@@ -53,13 +53,10 @@ export async function syncBifrostProvider({
       }),
     ),
   );
-  const desiredKeyNames = new Set(providerConfig.keys.map(({ name }) => name));
+  const desiredKeyNames = new Set(providerConfig.keys.map(({ name }) => name.toLowerCase()));
   await Promise.all(
     existingKeysBeforeSync
-      .filter(
-        ({ name, id }) =>
-          id && isManagedKeyName(providerConfig.provider, name) && !desiredKeyNames.has(name),
-      )
+      .filter(({ name, id }) => id && !desiredKeyNames.has(name.toLowerCase()))
       .map((key) =>
         deleteBifrostProviderKey({
           bifrostAdminUrl,
@@ -71,10 +68,6 @@ export async function syncBifrostProvider({
         }),
       ),
   );
-}
-
-function isManagedKeyName(provider: BifrostProvider, name: string): boolean {
-  return name.startsWith('ais-chat-') || new RegExp(`^${provider}-.+-[a-f0-9]{8}$`).test(name);
 }
 
 async function deleteBifrostProviderKey({
@@ -186,7 +179,9 @@ async function syncBifrostProviderKey({
   existingKeys: BifrostKey[];
   logger?: BifrostProviderSyncLogger;
 }): Promise<void> {
-  const existingKey = existingKeys.find((existingKey) => existingKey.name === key.name);
+  const existingKey = existingKeys.find(
+    (existingKey) => existingKey.name.toLowerCase() === key.name.toLowerCase(),
+  );
 
   if (existingKey?.id) {
     await assertBifrostResponse(
