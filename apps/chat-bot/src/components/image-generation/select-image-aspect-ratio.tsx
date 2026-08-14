@@ -1,38 +1,33 @@
 'use client';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@ui/components/dropdown-menu';
 import { useImageAspectRatio } from './image-aspect-ratio-provider';
-import { RectangleIcon, SquareIcon } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
+import { CustomRectangleIcon } from '../icons/custom-rectangle-icon';
+import { HeaderMainMenuItem } from '../layout/header-main-menu-item';
+import { HeaderMenuItem } from '../layout/header-menu-item';
 
 export default function SelectImageAspectRatio() {
   const { aspectRatio, setAspectRatio } = useImageAspectRatio();
+  const t = useTranslations('image-generation.aspect-ratio');
 
   return (
-    <div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button">Seitenverhältnis auswählen: {aspectRatio}</button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem>
-            <SquareIcon />
-            <button onClick={() => setAspectRatio('quadratic')}>Quadratisch</button>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <RectangleIcon style={{ transform: 'rotate(90deg)' }} />
-            <button onClick={() => setAspectRatio('portrait')}>Hochformat</button>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <RectangleIcon />
-            <button onClick={() => setAspectRatio('landscape')}>Querformat</button>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    <HeaderMainMenuItem
+      caption={t('label')}
+      triggerLabel={t(aspectRatio)}
+      triggerAriaLabel={t('aria-label')}
+    >
+      <HeaderMenuItem onClick={() => setAspectRatio('quadratic')}>
+        <CustomRectangleIcon width={16} height={16} />
+        {t('quadratic')}
+      </HeaderMenuItem>
+      <HeaderMenuItem onClick={() => setAspectRatio('portrait')}>
+        <CustomRectangleIcon width={14} height={20} />
+        {t('portrait')}
+      </HeaderMenuItem>
+      <HeaderMenuItem onClick={() => setAspectRatio('landscape')}>
+        <CustomRectangleIcon width={20} height={14} />
+        {t('landscape')}
+      </HeaderMenuItem>
+    </HeaderMainMenuItem>
   );
 }

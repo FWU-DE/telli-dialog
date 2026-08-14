@@ -11,6 +11,7 @@ import SelectImageStyle from '@/components/image-generation/select-image-style';
 import { ApplicationHeaderContent } from '@/components/layout/application-header';
 import type { DefaultPageLayoutConfig } from '@/components/layout/default-page-layout';
 import { ReactNode } from 'react';
+import SelectImageAspectRatio from '../image-generation/select-image-aspect-ratio';
 
 function FormPageHeader() {
   const { formStateProps } = useCustomChatHeaderContent();
@@ -31,6 +32,7 @@ function ImagePageHeader() {
       <div className="flex w-full gap-4">
         <SelectImageModel />
         <SelectImageStyle />
+        <SelectImageAspectRatio />
       </div>
     </ApplicationHeaderContent>
   );
