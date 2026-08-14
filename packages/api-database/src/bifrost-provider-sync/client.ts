@@ -93,7 +93,6 @@ async function deleteBifrostProviderKey({
       path: `/api/providers/${provider}/keys/${keyId}`,
       init: { method: 'DELETE' },
     }),
-    provider,
     logger,
   );
 }
@@ -133,7 +132,6 @@ async function ensureBifrostProvider({
           body: JSON.stringify(getAddProviderPayload(providerConfig)),
         },
       }),
-      providerConfig.provider,
       logger,
     );
     return;
@@ -141,7 +139,6 @@ async function ensureBifrostProvider({
 
   const existingProviderResponse = await assertBifrostResponse(
     Promise.resolve(providerResponse),
-    providerConfig.provider,
     logger,
   );
   const existingProvider = (await existingProviderResponse.json()) as BifrostProviderResponse;
@@ -157,7 +154,6 @@ async function ensureBifrostProvider({
         body: JSON.stringify(getUpdateProviderPayload(providerConfig, existingProvider)),
       },
     }),
-    providerConfig.provider,
     logger,
   );
 }
@@ -195,7 +191,6 @@ async function syncBifrostProviderKey({
           body: JSON.stringify({ ...existingKey, ...key, id: existingKey.id }),
         },
       }),
-      provider,
       logger,
     );
     return;
@@ -212,7 +207,6 @@ async function syncBifrostProviderKey({
         body: JSON.stringify(key),
       },
     }),
-    provider,
     logger,
   );
 }
@@ -238,7 +232,6 @@ async function listBifrostProviderKeys({
       path: `/api/providers/${provider}/keys`,
       init: { method: 'GET' },
     }),
-    provider,
     logger,
   );
   const keys = (await keysResponse.json()) as { keys?: BifrostKey[] };
