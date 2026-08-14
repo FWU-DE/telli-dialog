@@ -56,7 +56,12 @@ async function getProviderKeysWithModels(
 }
 
 export async function dbCreateProviderKey(providerKey: LlmProviderKeyInsertModel) {
-  return (await db.insert(llmProviderKeyTable).values(providerKey).returning())[0];
+  return (
+    await db
+      .insert(llmProviderKeyTable)
+      .values({ ...providerKey, name: providerKey.name.toLowerCase() })
+      .returning()
+  )[0];
 }
 
 export async function dbUpdateProviderKey(
@@ -67,7 +72,10 @@ export async function dbUpdateProviderKey(
   return (
     await db
       .update(llmProviderKeyTable)
-      .set(providerKey)
+      .set({
+        ...providerKey,
+        ...(providerKey.name ? { name: providerKey.name.toLowerCase() } : {}),
+      })
       .where(
         and(eq(llmProviderKeyTable.id, id), eq(llmProviderKeyTable.organizationId, organizationId)),
       )
