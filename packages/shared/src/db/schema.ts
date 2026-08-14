@@ -743,7 +743,9 @@ export const llmModelTable = pgTable(
   (table) => [unique().on(table.provider, table.name)],
 );
 
-export const llmModelSelectSchema = createSelectSchema(llmModelTable);
+export const llmModelSelectSchema = createSelectSchema(llmModelTable).extend({
+  createdAt: z.coerce.date(),
+});
 export const llmModelInsertSchema = createInsertSchema(llmModelTable).omit({
   id: true,
   createdAt: true,
