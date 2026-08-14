@@ -10,19 +10,19 @@ import { useTranslations } from 'next-intl';
 // Extended type for pending files that includes a local blob URL
 export type PendingFileModel = FileModel & { localUrl?: string };
 
-type DisplayUploadedImageProps = {
+type MessageImageAttachmentProps = {
   file: FileModel | PendingFileModel;
   status: FileStatus;
   onDeattachFile?: () => void;
   showBanner?: boolean;
 };
 
-export default function DisplayUploadedImage({
+export default function MessageImageAttachment({
   file,
   status,
   onDeattachFile,
   showBanner = true,
-}: DisplayUploadedImageProps) {
+}: MessageImageAttachmentProps) {
   const t = useTranslations();
 
   // Check if file has a local URL (for pending files)
