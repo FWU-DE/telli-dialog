@@ -116,7 +116,7 @@ export async function seedDatabase() {
     for (const providerKey of await getProviderKeys()) {
       const [localProviderKey] = await localDb
         .insert(llmProviderKeyTable)
-        .values(providerKey)
+        .values({ ...providerKey, name: providerKey.name.toLowerCase() })
         .onConflictDoUpdate({
           target: [llmProviderKeyTable.organizationId, llmProviderKeyTable.name],
           set: {
