@@ -22,9 +22,9 @@ async function add() {
 
 add()
   .then(() => {
-    console.log('Seeding completed');
+    console.log('Seeding ais.chat db completed');
   })
   .catch((error) => {
-    console.log('Seeding failed', error);
+    console.log('Seeding ais.chat db failed', error);
     process.exit(1);
   });

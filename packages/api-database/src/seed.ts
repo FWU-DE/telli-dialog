@@ -212,7 +212,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = normalizeSeedModelsForBifrost([
 ]);
 
 export async function seedDatabase() {
-  console.log('Starting database seeding...');
+  console.log('Starting api database seeding...');
 
   try {
     // 1. Create/update test organization
@@ -347,16 +347,16 @@ export async function seedDatabase() {
       models: DEFAULT_MODELS,
     };
   } catch (error) {
-    console.error('Error seeding database:', error);
+    console.error('Error seeding api database:', error);
     throw error;
   }
 }
 
 try {
   await seedDatabase();
-  console.log('Seeding completed');
+  console.log('Seeding api database completed');
   process.exit(0);
 } catch (error) {
-  console.error('Seeding failed:', error);
+  console.error('Seeding api database failed:', error);
   process.exit(1);
 }
