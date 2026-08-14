@@ -1,6 +1,6 @@
 import { FileModel } from '@shared/db/schema';
-import DisplayUploadedFile from './display-uploaded-file';
-import DisplayUploadedImage, { type PendingFileModel } from './display-uploaded-image';
+import MessageFileAttachment from './message-file-attachment';
+import MessageImageAttachment, { type PendingFileModel } from './message-image-attachment';
 import CopyToClipboardButton from '../common/clipboard-button';
 import ReloadIcon from '../icons/reload';
 import MarkdownDisplay from './markdown-display';
@@ -98,7 +98,7 @@ export function ChatBox({
         {imageFiles.length > 0 && (
           <div className="flex flex-row gap-2 overflow-auto">
             {imageFiles.map((file) => (
-              <DisplayUploadedImage
+              <MessageImageAttachment
                 file={file}
                 status="processed"
                 key={file.id}
@@ -111,7 +111,7 @@ export function ChatBox({
         {nonImageFiles.length > 0 && (
           <div className="flex w-fit max-w-full min-w-0 flex-row flex-wrap justify-end gap-2 overflow-hidden">
             {nonImageFiles.map((file) => (
-              <DisplayUploadedFile fileName={file.name} status="processed" key={file.id} />
+              <MessageFileAttachment fileName={file.name} key={file.id} />
             ))}
           </div>
         )}

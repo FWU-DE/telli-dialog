@@ -1,6 +1,4 @@
 import React from 'react';
-import { FileStatus } from './upload-file-button';
-
 import { getFileIconByFileExtension } from '../icons/file-upload-icons/file-icons-dict';
 import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
@@ -9,44 +7,34 @@ import { getFileNameAndFileExtension, isImageFile } from '@/utils/files/generic'
 import { LocalFileState } from './send-message-form';
 import { cn } from '@/utils/tailwind';
 
-type DisplayUploadedFileProps = {
-  fileName: string;
-  status: FileStatus;
-  file?: LocalFileState;
+type ChatInputAttachmentPreviewProps = {
+  file: LocalFileState;
   onDeattachFile?: () => void;
   height?: 'default' | 'large';
   width?: 'default' | 'small';
 };
 
-export default function DisplayUploadedFile({
-  fileName,
-  status,
+export default function ChatInputAttachmentPreview({
   file,
   onDeattachFile,
   height = 'default',
   width = 'default',
-}: DisplayUploadedFileProps) {
+}: ChatInputAttachmentPreviewProps) {
+  const fileName = file.file.name;
   const [fileStem, fileExtension] = getFileNameAndFileExtension(fileName);
   const isImage = isImageFile(fileName);
   const [imageUrl, setImageUrl] = React.useState<string>();
-
   const { Icon: FileIcon, fillColor: backgroundColor } = getFileIconByFileExtension(fileExtension);
-
   React.useEffect(() => {
-    if (!isImage || file === undefined) {
-      return;
-    }
-
+    if (!isImage) return;
     const objectUrl = URL.createObjectURL(file.file);
     const animationFrame = requestAnimationFrame(() => setImageUrl(objectUrl));
-
     return () => {
       cancelAnimationFrame(animationFrame);
       URL.revokeObjectURL(objectUrl);
     };
   }, [file, isImage]);
-
-  if (isImage && file) {
+  if (isImage)
     return (
       <div className="flex items-center justify-center text-sm relative group">
         <div
@@ -62,10 +50,13 @@ export default function DisplayUploadedFile({
           </button>
         )}
         <div className="relative flex items-center gap-2 h-14 w-14 overflow-hidden rounded-enterprise-sm">
-          {status !== 'failed' && imageUrl !== undefined ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={imageUrl} alt={fileName} className="w-full h-full object-cover" />
-          ) : status === 'uploading' ? (
+          {file.status !== 'failed' && imageUrl !== undefined ? (
+            <>
+              <span className="sr-only">{fileName}</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imageUrl} alt={fileName} className="w-full h-full object-cover" />
+            </>
+          ) : file.status === 'uploading' ? (
             <Spinner className="w-14 h-5" />
           ) : (
             <CrossIcon className="w-5 h-5" />
@@ -73,8 +64,6 @@ export default function DisplayUploadedFile({
         </div>
       </div>
     );
-  }
-
   return (
     <div
       className={cn(
@@ -94,11 +83,11 @@ export default function DisplayUploadedFile({
           height === 'large' ? 'h-14' : 'h-6',
         )}
       >
-        {status === 'processed' && (
+        {file.status === 'processed' && (
           <FileIcon className="h-5 w-5 shrink-0" color={backgroundColor} />
         )}
-        {status === 'uploading' && <Spinner className="h-5 w-5 shrink-0" />}
-        {status === 'failed' && <CrossIcon className="h-5 w-5 shrink-0" />}
+        {file.status === 'uploading' && <Spinner className="h-5 w-5 shrink-0" />}
+        {file.status === 'failed' && <CrossIcon className="h-5 w-5 shrink-0" />}
         <div className={cn('flex min-w-0 flex-col', width === 'small' ? 'max-w-24' : 'max-w-80')}>
           <p className="truncate overflow-hidden text-sm" title={fileName}>
             {fileStem}
