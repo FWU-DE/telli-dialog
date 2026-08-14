@@ -9,16 +9,14 @@ function buildKey(
   value: string,
   extra?: Partial<BifrostKey>,
 ): BifrostKey {
-  const activeMappings = providerKey.models.filter(
-    ({ model }) => !model.isDeleted && model.useBifrost,
-  );
+  const activeMappings = providerKey.models.filter(({ model }) => !model.isDeleted);
   const modelMappings = activeMappings.flatMap(({ model, upstreamModelName }) => {
     const bifrostModelName = getBifrostModelName(model.name);
     const bifrostUpstreamModelName = getBifrostModelName(upstreamModelName);
     return [[bifrostModelName, bifrostUpstreamModelName]] as const;
   });
   return {
-    name: `ais-chat-${providerKey.id}`,
+    name: providerKey.name.toLowerCase(),
     value,
     models: [...new Set(modelMappings.map(([modelName]) => modelName))].sort(),
     aliases: Object.fromEntries(modelMappings),
