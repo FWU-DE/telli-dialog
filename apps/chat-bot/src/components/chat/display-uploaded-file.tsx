@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import { FileStatus } from './upload-file-button';
 
 import { getFileIconByFileExtension } from '../icons/file-upload-icons/file-icons-dict';
@@ -7,8 +6,6 @@ import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
 import CrossIcon from '../icons/cross';
 import { getFileNameAndFileExtension, isImageFile } from '@/utils/files/generic';
-import { getReadOnlySignedUrlAction } from '@/app/api/file-operations/actions';
-import { useQuery } from '@tanstack/react-query';
 import { LocalFileState } from './send-message-form';
 import { cn } from '@/utils/tailwind';
 
@@ -17,7 +14,6 @@ type DisplayUploadedFileProps = {
   status: FileStatus;
   file?: LocalFileState;
   onDeattachFile?: () => void;
-  getSignedUrl?: (fileId: string) => Promise<string>;
   height?: 'default' | 'large';
   width?: 'default' | 'small';
 };
@@ -27,37 +23,29 @@ export default function DisplayUploadedFile({
   status,
   file,
   onDeattachFile,
-  getSignedUrl,
   height = 'default',
   width = 'default',
 }: DisplayUploadedFileProps) {
   const [fileStem, fileExtension] = getFileNameAndFileExtension(fileName);
   const isImage = isImageFile(fileName);
+  const [imageUrl, setImageUrl] = React.useState<string>();
 
   const { Icon: FileIcon, fillColor: backgroundColor } = getFileIconByFileExtension(fileExtension);
 
-  const { data: imageUrl, isLoading } = useQuery({
-    queryKey: file
-      ? ['signed-url', file.fileId, file.file.name, file.file.type]
-      : ['signed-url', null, null, null],
-    queryFn: async () => {
-      if (!file) {
-        throw new Error('File is undefined');
-      }
+  React.useEffect(() => {
+    if (!isImage || file === undefined) {
+      return;
+    }
 
-      if (getSignedUrl !== undefined && file.fileId !== undefined) {
-        return getSignedUrl(file.fileId);
-      }
+    const objectUrl = URL.createObjectURL(file.file);
+    const animationFrame = requestAnimationFrame(() => setImageUrl(objectUrl));
 
-      const signedUrl = await getReadOnlySignedUrlAction({
-        key: `message_attachments/${file.fileId}`,
-      });
-      return signedUrl;
-    },
-    enabled: status === 'processed' && file?.fileId !== undefined, // Only fetch when status is processed and a fileId exists
-    staleTime: 5 * 60 * 1000, // 5 minutes - signed URLs are typically valid for longer
-    gcTime: 10 * 60 * 1000, // 10 minutes garbage collection time
-  });
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [file, isImage]);
+
   if (isImage && file) {
     return (
       <div className="flex items-center justify-center text-sm relative group">
@@ -74,17 +62,10 @@ export default function DisplayUploadedFile({
           </button>
         )}
         <div className="relative flex items-center gap-2 h-14 w-14 overflow-hidden rounded-enterprise-sm">
-          {status === 'processed' && !isLoading && !!imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={fileName}
-              width={200}
-              height={200}
-              loading="eager"
-              className="w-full h-full object-cover"
-              unoptimized // Since we're using signed URLs from S3
-            />
-          ) : status === 'uploading' || isLoading ? (
+          {status !== 'failed' && imageUrl !== undefined ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={imageUrl} alt={fileName} className="w-full h-full object-cover" />
+          ) : status === 'uploading' ? (
             <Spinner className="w-14 h-5" />
           ) : (
             <CrossIcon className="w-5 h-5" />

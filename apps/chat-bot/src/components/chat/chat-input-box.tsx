@@ -37,7 +37,6 @@ export function ChatInputBox({
   input,
   enableFileUpload = false,
   fileUploadFn,
-  getSignedUrlFn,
   showPlaceholder = true,
 }: {
   files?: Map<string, LocalFileState>;
@@ -50,7 +49,6 @@ export function ChatInputBox({
   input: string;
   enableFileUpload?: boolean;
   fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
-  getSignedUrlFn?: (fileId: string) => Promise<string>;
   showPlaceholder?: boolean;
 }) {
   const tCommon = useTranslations('common');
@@ -153,7 +151,6 @@ export function ChatInputBox({
                 status={file.status}
                 file={file}
                 onDeattachFile={() => handleDeattachFile(localId)}
-                getSignedUrl={getSignedUrlFn}
                 height="large"
                 width="small"
               />
