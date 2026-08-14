@@ -1,5 +1,5 @@
 {
-  "id": "794a6c2f-08c1-4a83-9054-3c762e71549a",
+  "id": "70f416d3-c5a7-46b0-ad08-f2a7714b64c4",
   "prevId": "a7d468f3-6524-4945-932a-ec64938841cf",
   "version": "7",
   "dialect": "postgresql",
@@ -2545,12 +2545,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "image_generation_options": {
-          "name": "image_generation_options",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
         "is_new": {
           "name": "is_new",
           "type": "boolean",
@@ -3360,15 +3354,7 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "url_preset_name_unique": {
-          "name": "url_preset_name_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

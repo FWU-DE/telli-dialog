@@ -154,38 +154,41 @@ describe('Bifrost chat provider', () => {
     );
   });
 
-  it('streams text and maps usage', async () => {
-    responsesCreateMock.mockResolvedValue({
-      [Symbol.asyncIterator]: async function* () {
-        yield { type: 'response.output_text.delta', delta: 'Hello' };
-        yield { type: 'response.output_text.delta', delta: ' world' };
-        yield {
-          type: 'response.completed',
-          response: { usage: { input_tokens: 4, output_tokens: 5, total_tokens: 9 } },
-        };
-      },
-    });
+  it.each(['response.completed', 'response.incomplete', 'response.failed'] as const)(
+    'streams text and captures usage from a %s event',
+    async (eventType) => {
+      responsesCreateMock.mockResolvedValue({
+        [Symbol.asyncIterator]: async function* () {
+          yield { type: 'response.output_text.delta', delta: 'Hello' };
+          yield { type: 'response.output_text.delta', delta: ' world' };
+          yield {
+            type: eventType,
+            response: { usage: { input_tokens: 4, output_tokens: 5, total_tokens: 9 } },
+          };
+        },
+      });
 
-    const model = createBifrostModel('ionos');
-    const streamText = constructBifrostTextStreamFn(model);
-    const onComplete = vi.fn();
-    const chunks: string[] = [];
+      const model = createBifrostModel('ionos');
+      const streamText = constructBifrostTextStreamFn(model);
+      const onComplete = vi.fn();
+      const chunks: string[] = [];
 
-    for await (const chunk of streamText(
-      { messages: [{ role: 'user', content: 'Hello' }], model: model.name },
-      onComplete,
-    )) {
-      chunks.push(chunk);
-    }
+      for await (const chunk of streamText(
+        { messages: [{ role: 'user', content: 'Hello' }], model: model.name },
+        onComplete,
+      )) {
+        chunks.push(chunk);
+      }
 
-    expect(chunks).toEqual(['Hello', ' world']);
-    expect(responsesCreateMock).toHaveBeenCalledWith(expect.objectContaining({ model: 'gpt-5' }));
-    expect(onComplete).toHaveBeenCalledWith({
-      promptTokens: 4,
-      completionTokens: 5,
-      totalTokens: 9,
-    });
-  });
+      expect(chunks).toEqual(['Hello', ' world']);
+      expect(responsesCreateMock).toHaveBeenCalledWith(expect.objectContaining({ model: 'gpt-5' }));
+      expect(onComplete).toHaveBeenCalledWith({
+        promptTokens: 4,
+        completionTokens: 5,
+        totalTokens: 9,
+      });
+    },
+  );
 
   it('uses the actual deployment when identifying a fallback response', async () => {
     responsesCreateMock.mockResolvedValue({

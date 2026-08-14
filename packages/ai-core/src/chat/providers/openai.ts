@@ -7,7 +7,7 @@ import type {
   TextStreamFn,
   TokenUsage,
 } from '../types';
-import { EmptyResponseError, ProviderConfigurationError } from '../../errors';
+import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { toOpenAIMessages } from '../utils';
 import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
 
@@ -40,14 +40,12 @@ export function constructOpenAITextStreamFn(model: AiModel): TextStreamFn {
       temperature,
     });
 
-    let hasContent = false;
     let usage: TokenUsage | undefined;
 
     for await (const chunk of stream) {
       const chunkContent = chunk.choices[0]?.delta?.content;
 
       if (chunkContent) {
-        hasContent = true;
         yield chunkContent;
       }
 
@@ -60,12 +58,8 @@ export function constructOpenAITextStreamFn(model: AiModel): TextStreamFn {
       }
     }
 
-    if (!usage || !hasContent) {
-      throw new EmptyResponseError({
-        providerName: 'OpenAI',
-        modelName,
-        hasContent,
-      });
+    if (!usage) {
+      throw new AiGenerationError('No usage data returned from OpenAI stream');
     }
 
     if (onComplete) {
@@ -94,12 +88,8 @@ export function constructOpenAITextGenerationFn(model: AiModel): TextGenerationF
     const text = response.choices[0]?.message?.content ?? '';
     const usage = response.usage;
 
-    if (!usage || text.trim().length === 0) {
-      throw new EmptyResponseError({
-        providerName: 'OpenAI',
-        modelName,
-        hasContent: text.trim().length > 0,
-      });
+    if (!usage) {
+      throw new AiGenerationError('No usage data returned from OpenAI');
     }
 
     return {

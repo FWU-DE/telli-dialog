@@ -1786,13 +1786,9 @@ export type VoucherInsertModel = z.infer<typeof voucherInsertSchema>;
 export type VoucherUpdateModel = z.infer<typeof voucherUpdateSchema>;
 
 /**** Url Presets ****/
-export const urlPresetTable = pgTable(
-  'url_preset',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    name: text('name').notNull(),
-    orderNumber: integer('order_number').notNull().default(0),
-    urls: text('urls').array().notNull(),
-  },
-  (table) => [unique().on(table.name)],
-);
+export const urlPresetTable = pgTable('url_preset', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name').notNull(),
+  orderNumber: integer('order_number').notNull().default(0),
+  urls: text('urls').array().notNull(),
+});

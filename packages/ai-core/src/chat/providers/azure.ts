@@ -7,7 +7,7 @@ import type {
   TextStreamFn,
   TokenUsage,
 } from '../types';
-import { EmptyResponseError, ProviderConfigurationError } from '../../errors';
+import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { toOpenAIResponsesInput } from '../utils';
 import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
 
@@ -27,7 +27,10 @@ function createAzureClient(model: AiModel): {
     new OpenAI({
       apiKey: model.setting.apiKey,
       baseURL: basePath,
-      defaultQuery: Object.fromEntries(searchParams.entries()),
+      defaultQuery: {
+        ...Object.fromEntries(searchParams.entries()),
+        'api-version': '2025-04-01-preview',
+      },
     }),
   );
 
@@ -55,16 +58,19 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
       },
     );
 
-    let hasContent = false;
     let usage: TokenUsage | undefined;
 
     for await (const event of response) {
       if (event.type === 'response.output_text.delta') {
-        hasContent = true;
         yield event.delta;
       }
 
-      if (event.type === 'response.completed' && event.response.usage) {
+      if (
+        (event.type === 'response.completed' ||
+          event.type === 'response.incomplete' ||
+          event.type === 'response.failed') &&
+        event.response.usage
+      ) {
         usage = {
           completionTokens: event.response.usage.output_tokens,
           promptTokens: event.response.usage.input_tokens,
@@ -73,12 +79,8 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
       }
     }
 
-    if (!usage || !hasContent) {
-      throw new EmptyResponseError({
-        providerName: 'Azure OpenAI',
-        modelName: deployment,
-        hasContent,
-      });
+    if (!usage) {
+      throw new AiGenerationError('No usage data returned from Azure OpenAI Responses API stream');
     }
 
     if (onComplete) {
@@ -139,12 +141,8 @@ export function constructAzureResponsesGenerationFn(model: AiModel): TextGenerat
 
     const usage = response.usage;
 
-    if (!usage || text.trim().length === 0) {
-      throw new EmptyResponseError({
-        providerName: 'Azure OpenAI',
-        modelName: deployment,
-        hasContent: text.trim().length > 0,
-      });
+    if (!usage) {
+      throw new AiGenerationError('No usage data returned from Azure OpenAI Responses API');
     }
 
     return {
