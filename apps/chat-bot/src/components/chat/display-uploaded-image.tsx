@@ -2,7 +2,6 @@ import React from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { FileModel } from '@shared/db/schema';
-import { getReadOnlySignedUrlAction } from '@/app/api/file-operations/actions';
 import { FileStatus } from './upload-file-button';
 import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
@@ -19,7 +18,6 @@ type DisplayUploadedImageProps = {
   status: FileStatus;
   onDeattachFile?: () => void;
   showBanner?: boolean;
-  getSignedUrl?: (fileId: string) => Promise<string>;
 };
 
 export default function DisplayUploadedImage({
@@ -27,37 +25,28 @@ export default function DisplayUploadedImage({
   status,
   onDeattachFile,
   showBanner = true,
-  getSignedUrl,
 }: DisplayUploadedImageProps) {
   const t = useTranslations();
 
   // Check if file has a local URL (for pending files)
   const localUrl = 'localUrl' in file ? file.localUrl : undefined;
-
   const {
-    data: signedUrl,
+    data: fetchedImageUrl,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['signed-url', file.id, file.name, file.type],
+    queryKey: ['scaled-image-url', file.id, file.name, file.type],
     queryFn: async () => {
-      if (getSignedUrl !== undefined) {
-        return getSignedUrl(file.id);
-      }
-
-      const signedUrl = await getReadOnlySignedUrlAction({
-        key: `message_attachments/${file.id}`,
-      });
-      return signedUrl;
+      return `/api/files/${file.id}/scaled-image?width=200&height=200`;
     },
     // Don't fetch if we have a local URL or status is not processed
     enabled: status === 'processed' && !localUrl,
-    staleTime: 5 * 60 * 1000, // 5 minutes - signed URLs are typically valid for longer
-    gcTime: 10 * 60 * 1000, // 10 minutes garbage collection time
+    staleTime: Infinity,
+    gcTime: 24 * 60 * 60 * 1000, // 24 hours garbage collection time
   });
 
   // Use local URL if available, otherwise use signed URL from S3
-  const imageUrl = localUrl ?? signedUrl;
+  const imageUrl = localUrl ?? fetchedImageUrl;
 
   if (status === 'uploading') {
     return (

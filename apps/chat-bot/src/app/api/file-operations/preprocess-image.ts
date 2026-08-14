@@ -2,9 +2,9 @@ import { TRUNCATE_IMAGE_HEIGHT } from '@/const';
 import { FileMetadata, FileModel } from '@shared/db/schema';
 import { getFileFromS3, getReadOnlySignedUrl } from '@shared/s3';
 import { isImageFile } from '@/utils/files/generic';
+import { getImageContentType, streamToBase64 } from '@/utils/files/image-data';
 import sharp from 'sharp';
 import { logError } from '@shared/logging';
-import { Readable } from 'stream';
 import { ChatAttachment } from '@ais-chat/ai-core';
 
 export type ChatAttachmentWithMessageId = ChatAttachment & {
@@ -57,12 +57,6 @@ export async function createImageAttachmentsForConversation(
   return images.filter((img) => img !== undefined);
 }
 
-function getImageContentType(type: string): string {
-  if (type === 'jpg') return 'image/jpeg';
-  if (type === 'svg') return 'image/svg+xml';
-  return `image/${type}`;
-}
-
 export async function preprocessImage(
   fileContent: Buffer,
   type: string,
@@ -109,18 +103,6 @@ export async function preprocessImage(
     metadata: { width, height },
     type: processedType,
   };
-}
-
-async function streamToBase64(stream: Readable): Promise<string> {
-  const chunks: Buffer[] = [];
-
-  for await (const chunk of stream) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-
-  const buffer = Buffer.concat(chunks);
-
-  return buffer.toString('base64');
 }
 
 // returns true if the file has a conversationMessageId which is needed to

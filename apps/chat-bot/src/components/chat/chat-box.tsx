@@ -105,7 +105,6 @@ export function ChatBox({
                 status="processed"
                 key={file.id}
                 showBanner={false}
-                getSignedUrl={getSignedUrlFn}
               />
             ))}
           </div>
