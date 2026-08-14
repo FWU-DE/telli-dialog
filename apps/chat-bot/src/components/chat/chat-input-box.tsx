@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import AutoResizeTextarea from '../common/auto-resize-textarea';
-import DisplayUploadedFile from './display-uploaded-file';
+import ChatInputAttachmentPreview from './chat-input-attachment-preview';
 import { LocalFileState } from './send-message-form';
 import {
   CHAT_MESSAGE_LENGTH_LIMIT,
@@ -145,10 +145,8 @@ export function ChatInputBox({
         {files !== undefined && handleDeattachFile !== undefined && files.size > 0 && (
           <div className="mx-2 py-2 flex gap-1 overflow-x-auto">
             {Array.from(files).map(([localId, file]) => (
-              <DisplayUploadedFile
-                fileName={file.file.name}
+              <ChatInputAttachmentPreview
                 key={localId}
-                status={file.status}
                 file={file}
                 onDeattachFile={() => handleDeattachFile(localId)}
                 height="large"
