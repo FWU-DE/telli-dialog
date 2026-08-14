@@ -16,9 +16,9 @@ import {
   uuid,
   vector,
   varchar,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import { type KnotenpunktPriceMetadata } from '@shared/knotenpunkt/schema';
 import {
   conversationRoleSchema,
   conversationTypeSchema,
@@ -32,7 +32,30 @@ export type DesignConfiguration = {
   secondaryTextColor: string;
 };
 
-export type LlmModelPriceMetadata = KnotenpunktPriceMetadata;
+export const llmModelPriceMetadataSchema = z.union([
+  z.object({
+    type: z.literal('text'),
+    completionTokenPrice: z.number(),
+    promptTokenPrice: z.number(),
+  }),
+  z.object({
+    type: z.literal('image'),
+    pricePerImageInCent: z.number(),
+  }),
+  z.object({
+    type: z.literal('image'),
+    inputTextTokenPrice: z.number(),
+    outputTextTokenPrice: z.number().optional(),
+    outputImageTokenPrice: z.number(),
+  }),
+  z.object({
+    type: z.literal('embedding'),
+    promptTokenPrice: z.number(),
+  }),
+]);
+
+export type LlmModelPriceMetadata = z.infer<typeof llmModelPriceMetadataSchema>;
+
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
 import { ToolCall } from '@ais-chat/ai-core/chat/types';
@@ -696,9 +719,11 @@ export const staticModelsConfigurationSchema = z.object({
 });
 export type StaticModelsConfiguration = z.infer<typeof staticModelsConfigurationSchema>;
 
-export type ImageGenerationConfig = {
-  aspectRatio: Record<string, string>;
-};
+export const imageGenerationConfigSchema = z.object({
+  aspectRatio: z.record(z.string(), z.string()),
+});
+
+export type ImageGenerationConfig = z.infer<typeof imageGenerationConfigSchema>;
 
 export const llmModelTable = pgTable(
   'llm_model',
@@ -711,7 +736,7 @@ export const llmModelTable = pgTable(
     priceMetadata: json('price_metadata').$type<LlmModelPriceMetadata>().notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     supportedImageFormats: json('supported_image_formats').$type<string[]>(),
-    imageGenerationConfig: json('image_generation_config').$type<ImageGenerationConfig>(),
+    imageGenerationConfig: jsonb('image_generation_config').$type<ImageGenerationConfig>(),
     isNew: boolean('is_new').notNull().default(false),
     isDeleted: boolean('is_deleted').notNull().default(false),
   },

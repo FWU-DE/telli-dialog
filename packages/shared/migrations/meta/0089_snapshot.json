@@ -1,5 +1,5 @@
 {
-  "id": "96ad5d48-84d0-40eb-913d-a876d2c8308c",
+  "id": "1da89a07-af79-4a9d-a411-c7089afc3020",
   "prevId": "70f416d3-c5a7-46b0-ad08-f2a7714b64c4",
   "version": "7",
   "dialect": "postgresql",
@@ -2547,7 +2547,7 @@
         },
         "image_generation_config": {
           "name": "image_generation_config",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },

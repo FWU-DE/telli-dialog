@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { knotenpunktLlmModelSchema } from './schema';
 import { env } from '../env';
+import { llmModelSelectSchema } from '@shared/db/schema';
 
 export async function fetchLlmModels({ apiKey }: { apiKey: string }) {
   // Todo: replace when api administration is moved to this repo
@@ -15,7 +15,7 @@ export async function fetchLlmModels({ apiKey }: { apiKey: string }) {
   }
 
   const json = await response.json();
-  const models = z.array(knotenpunktLlmModelSchema).parse(json);
+  const models = z.array(llmModelSelectSchema).parse(json);
 
   return models;
 }
