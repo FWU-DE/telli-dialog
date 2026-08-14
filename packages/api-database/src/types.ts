@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+export const imageGenerationConfigSchema = z.object({
+  aspectRatio: z.record(z.string(), z.string()),
+});
+
+export type ImageGenerationConfig = z.infer<typeof imageGenerationConfigSchema>;
+
 export const llmModelPriceMetadataSchema = z.union([
   z.object({
     type: z.literal('text'),

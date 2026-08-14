@@ -4,6 +4,7 @@ import {
   index,
   integer,
   json,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -11,7 +12,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { LlmModelPriceMetadata } from './types';
+import { ImageGenerationConfig, LlmModelPriceMetadata } from './types';
 import { LlmModelProviderSettings, LlmProviderKeySettings } from './llm-model';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 
@@ -54,6 +55,7 @@ export const llmModelTable = pgTable(
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     supportedImageFormats: json('supported_image_formats').$type<string[]>().notNull().default([]),
+    imageGenerationConfig: jsonb('image_generation_config').$type<ImageGenerationConfig>(),
     additionalParameters: json('additional_parameters')
       .$type<Record<string, unknown>>()
       .notNull()
