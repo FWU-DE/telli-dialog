@@ -30,8 +30,6 @@ updates:
 
   - package-ecosystem: 'docker-compose'
     directories:
-      - '/apps/chat-bot/e2e'
-      - '/apps/chat-bot/e2e/mock'
       - '/devops/docker'
     labels: ['dependencies']
     schedule:
