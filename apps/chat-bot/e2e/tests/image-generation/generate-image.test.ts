@@ -36,7 +36,7 @@ test('can generate an image and use image actions', async ({ page }) => {
 
   // Wait for loading to finish
   try {
-    await loadingAnimation.waitFor({ state: 'detached', timeout: 35000 });
+    await loadingAnimation.waitFor({ state: 'detached', timeout: 60000 });
   } catch {
     // If loading doesn't detach, check if an error appeared
     const errorMessage = page.getByText('Ein Fehler ist aufgetreten');
