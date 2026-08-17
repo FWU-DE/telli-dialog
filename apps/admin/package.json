@@ -27,7 +27,7 @@
     "@t3-oss/env-nextjs": "0.13.11",
     "@tanstack/react-table": "8.21.3",
     "lucide-react": "1.31.0",
-    "next": "16.3.0",
+    "next": "16.2.12",
     "next-auth": "5.0.0-beta.32",
     "pg": "8.23.0",
     "react": "19.2.8",

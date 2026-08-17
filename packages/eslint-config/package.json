@@ -11,7 +11,7 @@
   "dependencies": {
     "@eslint/compat": "2.1.0",
     "@eslint/js": "10.0.1",
-    "eslint-config-next": "16.3.0",
+    "eslint-config-next": "16.2.12",
     "eslint-config-prettier": "10.1.8",
     "eslint-config-turbo": "2.10.9",
     "eslint-plugin-jsx-a11y": "6.10.2",
