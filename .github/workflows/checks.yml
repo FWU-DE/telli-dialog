@@ -52,7 +52,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
   check_formatting:
     runs-on: ubuntu-latest
@@ -68,7 +68,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Check formatting
         run: pnpm run format:check
 
@@ -86,7 +86,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Cache turbo build cache
         uses: actions/cache@v6
         with:
@@ -111,7 +111,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Cache turbo build cache
         uses: actions/cache@v6
         with:
@@ -154,7 +154,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Cache turbo build cache
         uses: actions/cache@v6
         with:

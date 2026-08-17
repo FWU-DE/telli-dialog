@@ -140,7 +140,7 @@ jobs:
           node devops/docker/mock-llm/server.mjs > /tmp/mock-llm.log 2>&1 &
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Cache Playwright browsers
         uses: actions/cache@v6
