@@ -44,7 +44,9 @@ function processInlineTokens(children: Token[]): TextRun[] {
         continue;
       }
       if (child.attrs && child.attrs[0]) {
-        runs.push(new TextRun({ text: child.attrs[0][1], size: fontSize, color: '2F80ED' }));
+        runs.push(
+          new TextRun({ text: String(child.attrs[0][1]), size: fontSize, color: '2F80ED' }),
+        );
       }
     }
   }
