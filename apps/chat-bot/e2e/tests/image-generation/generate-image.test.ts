@@ -17,10 +17,10 @@ test('can generate an image and use image actions', async ({ page }) => {
   const currentSelectedText = await dropdownLocator.textContent();
   expect(currentSelectedText).toBeTruthy();
 
-  if (!currentSelectedText?.includes('FLUX')) {
+  if (!currentSelectedText?.includes('GPT-Image')) {
     await dropdownLocator.click();
     await page.locator('div[data-radix-popper-content-wrapper]').waitFor();
-    const modelLocator = page.getByTestId(/flux/i);
+    const modelLocator = page.getByTestId(/gpt-image/i);
     await modelLocator.waitFor();
     await modelLocator.click();
   }

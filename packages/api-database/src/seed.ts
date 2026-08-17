@@ -28,6 +28,8 @@ const gpt4oMiniApiKey = process.env.LLM_GPT4OMINI_API_KEY ?? 'API_KEY_PLACEHOLDE
 const gpt4oMiniBaseUrl = process.env.LLM_GPT4OMINI_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const gpt5nanoApiKey = process.env.LLM_GPT5NANO_API_KEY ?? 'API_KEY_PLACEHOLDER';
 const gpt5nanoBaseUrl = process.env.LLM_GPT5NANO_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
+const gptImageApiKey = process.env.LLM_GPT_IMAGE_API_KEY ?? 'API_KEY_PLACEHOLDER';
+const gptImageBaseUrl = process.env.LLM_GPT_IMAGE_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const gpt5miniApiKey = process.env.LLM_GPT5MINI_API_KEY ?? 'API_KEY_PLACEHOLDER';
 const gpt5miniBaseUrl = process.env.LLM_GPT5MINI_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const mockLlmApiKey = process.env.LLM_MOCK_API_KEY ?? 'API_KEY_PLACEHOLDER';
@@ -158,6 +160,25 @@ const DEFAULT_MODELS: LlmInsertModel[] = normalizeSeedModelsForBifrost([
       completionTokenPrice: 60, // 0.060 € per 1M tokens
     },
     supportedImageFormats: ['jpg', 'jpeg', 'png', 'webp'],
+  },
+  {
+    id: '1a3d7a04-351d-4a09-a490-db256994a1b8',
+    organizationId: ORGANIZATION_ID,
+    provider: 'azure',
+    name: 'gpt-5-nano',
+    displayName: 'GPT-Image-1.5',
+    description: 'GPT-Image model for testing',
+    setting: {
+      provider: 'azure',
+      apiKey: gptImageApiKey,
+      baseUrl: gptImageBaseUrl,
+    },
+    priceMetadata: {
+      type: 'image',
+      inputTextTokenPrice: 414,
+      outputTextTokenPrice: 828,
+      outputImageTokenPrice: 2648,
+    },
   },
   {
     id: 'e7b3d9f2-1a4c-4e8b-b6d5-f0c2a9e8d1b7',

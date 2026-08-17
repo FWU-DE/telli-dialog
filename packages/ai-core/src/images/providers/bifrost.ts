@@ -36,7 +36,7 @@ export function constructBifrostImageGenerationFn(model: AiModel): ImageGenerati
       model: modelName,
       prompt,
       n: 1,
-      size: options?.output.size ?? 'auto', // gpt-image: 1536x1024, imagen4: 1408x768,
+      // size: options?.output.size ?? 'auto', // gpt-image: 1536x1024, imagen4: 1408x768,
     });
 
     if (!result.data || result.data.length === 0) {
