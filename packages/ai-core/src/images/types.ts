@@ -13,15 +13,9 @@ export type ImageResponse = {
   usage?: Usage;
 };
 
-/** Options for image output, such as size.
- * size: The size must have the correct aspect ratio that is supported by the model
- */
-export type ImageOutputOptions = {
-  size: string; // e.g. "1024x1024", "1536x1024", "1408x768"
-};
-
+/** size must have the correct aspect ratio that is supported by the model */
 export type ImageGenerationRequestOptions = {
-  output: ImageOutputOptions;
+  size: string; // e.g. "1024x1024", "1536x1024", "1408x768"
 };
 
 export type ImageGenerationFn = (args: {

@@ -116,7 +116,7 @@ export default function ImageGenerationChat({
       prompt: currentPrompt,
       model: selectedModel,
       style: selectedStyle,
-      options: { output: { size: size } },
+      options: { size: size },
     });
     if (result.success) {
       // Update the displayed image
