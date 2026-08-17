@@ -36,7 +36,6 @@ export async function listBifrostVirtualKeys({
         path: `/api/governance/virtual-keys?limit=${LIST_VIRTUAL_KEYS_PAGE_SIZE}&offset=${offset}`,
         init: { method: 'GET' },
       }),
-      'list virtual keys',
       logger,
     );
     const page = (await response.json()) as {
@@ -81,7 +80,6 @@ export async function updateBifrostVirtualKeyProviders({
         body: JSON.stringify({ provider_configs: providerConfigs }),
       },
     }),
-    virtualKeyId,
     logger,
   );
 }
