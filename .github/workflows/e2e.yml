@@ -12,44 +12,6 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    services:
-      postgres-dialog:
-        image: pgvector/pgvector:pg16
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: admin
-          POSTGRES_PASSWORD: test1234
-          POSTGRES_DB: app_db
-        options: >-
-          --health-cmd "pg_isready -U admin -d app_db"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      postgres-api:
-        image: pgvector/pgvector:pg16
-        ports:
-          - 6543:5432
-        env:
-          POSTGRES_USER: admin
-          POSTGRES_PASSWORD: test1234
-          POSTGRES_DB: api_db
-        options: >-
-          --health-cmd "pg_isready -U admin -d api_db"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      valkey:
-        image: ghcr.io/valkey-io/valkey:9.1.0-alpine
-        ports:
-          - 6379:6379
-      rabbitmq:
-        image: rabbitmq:4
-        ports:
-          - 5672:5672
-        env:
-          RABBITMQ_DEFAULT_PASS: password
-          RABBITMQ_DEFAULT_USER: user
 
     env:
       DATABASE_URL: postgresql://admin:test1234@127.0.0.1:5432/app_db
@@ -58,7 +20,7 @@ jobs:
       VIDIS_CLIENT_ID: ais-chat-e2e-client
       VIDIS_CLIENT_SECRET: ClientSecret-e2e
       VIDIS_ISSUER_URI: http://localhost:8080/realms/ais-chat-local
-      API_DATABASE_URL: postgresql://admin:test1234@127.0.0.1:6543/api_db
+      API_DATABASE_URL: postgresql://admin:test1234@127.0.0.1:5432/api_db
       API_URL: http://localhost:3002
       API_KEY: ApiKeyForAISChatApiAdminApi
       ENCRYPTION_KEY: EncryptionKeyForEncryptedApiKeysToAISChatApi
@@ -85,47 +47,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
-      # Keycloak container cannot be started under services, because it needs to mount files from the repo
-      - name: Start keycloak container (in background)
-        run: |
-          docker run \
-            --name keycloak \
-            -v "$PWD/devops/docker/keycloak:/opt/keycloak/data/import" \
-            -p 8080:8080 \
-            -e CLIENT_NAME=$VIDIS_CLIENT_ID -e CLIENT_SECRET=$VIDIS_CLIENT_SECRET \
-            --entrypoint /opt/keycloak/data/import/entrypoint.sh \
-            quay.io/keycloak/keycloak:26.7.1 > /tmp/keycloak.log 2>&1 &
-
-      # crawl4ai is not started under services because its large image (~40s pull) would delay the whole pipeline
-      - name: Start crawl4ai container (in background)
-        run: |
-          docker run \
-            --name crawl4ai \
-            --shm-size=2gb \
-            -p 11235:11235 \
-            -e CRAWL4AI_API_TOKEN=$CRAWL4AI_API_TOKEN \
-            unclecode/crawl4ai:0.9.2 > /tmp/crawl4ai.log 2>&1 &
-
-      # xberg is not started under services because its startup time would delay the whole pipeline
-      - name: Start xberg container (in background)
-        run: |
-          docker run \
-            --name xberg \
-            -p 8000:8000 \
-            -e XBERG_MAX_UPLOAD_SIZE_MB=$XBERG_MAX_UPLOAD_SIZE_MB \
-            ghcr.io/xberg-io/xberg:1.0.14-core > /tmp/xberg.log 2>&1 &
-
-      - name: Start bifrost container (in background)
-        run: |
-          docker run \
-            --name bifrost \
-            --network host \
-            -v "$PWD/devops/docker/bifrost/config.json:/app/data/config.json:ro" \
-            -e APP_PORT=8089 \
-            -e BIFROST_ADMIN_USERNAME=admin \
-            -e BIFROST_ADMIN_PASSWORD=admin \
-            -e BIFROST_API_KEY=sk-bf-example-key \
-            ghcr.io/maximhq/bifrost:v1.6.8 > /tmp/bifrost.log 2>&1 &
+      # Starts all e2e container dependencies in the background using the same compose file as
+      # local dev. Later steps only block on the specific containers they actually need, once needed.
+      - name: Start e2e container dependencies (in background)
+        run: docker compose -f devops/docker/docker-compose.local.yml up -d --build &
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -134,10 +59,6 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-
-      - name: Start mock-llm server
-        run: |
-          node devops/docker/mock-llm/server.mjs > /tmp/mock-llm.log 2>&1 &
 
       - name: Install dependencies
         run: pnpm install
@@ -153,6 +74,9 @@ jobs:
 
       - name: Install Playwright browsers
         run: pnpm --filter ais-chat-app exec playwright install chromium firefox
+
+      - name: Wait for postgres
+        run: docker compose -f devops/docker/docker-compose.local.yml up -d --wait postgres
 
       - name: Start ais-chat-api
         run: |
@@ -170,6 +94,9 @@ jobs:
           done
         env:
           PORT: 3002
+
+      - name: Wait for bifrost and mock-llm
+        run: docker compose -f devops/docker/docker-compose.local.yml up -d --wait bifrost mock-llm
 
       - name: Seed ais-chat-api database
         # db:seed will print the generated API KEY on the console
@@ -190,7 +117,7 @@ jobs:
           LLM_GPT5MINI_API_KEY: ${{ secrets.LLM_GPT5MINI_API_KEY }}
           LLM_GPT5MINI_BASE_URL: ${{ secrets.LLM_GPT5MINI_BASE_URL }}
           LLM_MOCK_API_KEY: mock-api-key
-          LLM_MOCK_BASE_URL: http://localhost:6556
+          LLM_MOCK_BASE_URL: http://mock-llm:6556
 
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @ais-chat/shared db:migrate && pnpm --filter @ais-chat/shared db:seed
@@ -258,32 +185,6 @@ jobs:
           echo "=== ais-chat-app logs ==="
           cat /tmp/ais-chat-app.log || true
 
-      - name: Print crawl4ai logs
+      - name: Print container logs
         if: always()
-        run: |
-          echo "=== crawl4ai logs ==="
-          cat /tmp/crawl4ai.log || true
-
-      - name: Print xberg logs
-        if: always()
-        run: |
-          echo "=== xberg logs ==="
-          cat /tmp/xberg.log || true
-
-      - name: Print bifrost logs
-        if: always()
-        run: |
-          echo "=== bifrost logs ==="
-          cat /tmp/bifrost.log || true
-
-      - name: Print mock-llm logs
-        if: always()
-        run: |
-          echo "=== mock-llm logs ==="
-          cat /tmp/mock-llm.log || true
-
-      - name: Print keycloak logs
-        if: always()
-        run: |
-          echo "=== keycloak logs ==="
-          cat /tmp/keycloak.log || true
+        run: docker compose -f devops/docker/docker-compose.local.yml logs
