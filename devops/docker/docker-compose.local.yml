@@ -131,6 +131,12 @@ services:
     volumes:
       - ./bifrost/config.json:/app/data/config.json:ro
       - bifrost_data:/app/data
+    # bifrost is reliably up within ~1s; poll faster than the image's default 30s interval.
+    healthcheck:
+      interval: 2s
+      timeout: 2s
+      retries: 5
+      start_period: 2s
 
 volumes:
   bifrost_data:

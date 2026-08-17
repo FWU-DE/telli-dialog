@@ -75,8 +75,8 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm --filter ais-chat-app exec playwright install chromium firefox
 
-      - name: Wait for postgres and bifrost
-        run: docker compose -f devops/docker/docker-compose.local.yml up -d --wait postgres bifrost
+      - name: Wait for postgres
+        run: docker compose -f devops/docker/docker-compose.local.yml up -d --wait postgres
 
       - name: Start ais-chat-api
         run: |
@@ -94,6 +94,9 @@ jobs:
           done
         env:
           PORT: 3002
+
+      - name: Wait for bifrost and mock-llm
+        run: docker compose -f devops/docker/docker-compose.local.yml up -d --wait bifrost mock-llm
 
       - name: Seed ais-chat-api database
         # db:seed will print the generated API KEY on the console
@@ -114,7 +117,7 @@ jobs:
           LLM_GPT5MINI_API_KEY: ${{ secrets.LLM_GPT5MINI_API_KEY }}
           LLM_GPT5MINI_BASE_URL: ${{ secrets.LLM_GPT5MINI_BASE_URL }}
           LLM_MOCK_API_KEY: mock-api-key
-          LLM_MOCK_BASE_URL: http://localhost:6556
+          LLM_MOCK_BASE_URL: http://mock-llm:6556
 
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @ais-chat/shared db:migrate && pnpm --filter @ais-chat/shared db:seed
@@ -140,9 +143,6 @@ jobs:
         env:
           NODE_ENV: test
           LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
-
-      - name: Wait for remaining e2e container dependencies
-        run: docker compose -f devops/docker/docker-compose.local.yml up -d --wait
 
       - name: Run E2E tests (app)
         run: pnpm --filter ais-chat-app e2e
