@@ -162,25 +162,6 @@ const DEFAULT_MODELS: LlmInsertModel[] = normalizeSeedModelsForBifrost([
     supportedImageFormats: ['jpg', 'jpeg', 'png', 'webp'],
   },
   {
-    id: '1a3d7a04-351d-4a09-a490-db256994a1b8',
-    organizationId: ORGANIZATION_ID,
-    provider: 'azure',
-    name: 'gpt-5-nano',
-    displayName: 'GPT-Image-1.5',
-    description: 'GPT-Image model for testing',
-    setting: {
-      provider: 'azure',
-      apiKey: gptImageApiKey,
-      baseUrl: gptImageBaseUrl,
-    },
-    priceMetadata: {
-      type: 'image',
-      inputTextTokenPrice: 414,
-      outputTextTokenPrice: 828,
-      outputImageTokenPrice: 2648,
-    },
-  },
-  {
     id: 'e7b3d9f2-1a4c-4e8b-b6d5-f0c2a9e8d1b7',
     organizationId: ORGANIZATION_ID,
     provider: 'azure',
@@ -204,6 +185,25 @@ const DEFAULT_MODELS: LlmInsertModel[] = normalizeSeedModelsForBifrost([
       },
     },
     supportedImageFormats: ['jpg', 'jpeg', 'png', 'webp'],
+  },
+  {
+    id: '1a3d7a04-351d-4a09-a490-db256994a1b8',
+    organizationId: ORGANIZATION_ID,
+    provider: 'azure',
+    name: 'gpt-image-1.5',
+    displayName: 'GPT-Image-1.5',
+    description: 'GPT-Image model for testing',
+    setting: {
+      provider: 'azure',
+      apiKey: gptImageApiKey,
+      baseUrl: gptImageBaseUrl,
+    },
+    priceMetadata: {
+      type: 'image',
+      inputTextTokenPrice: 414,
+      outputTextTokenPrice: 828,
+      outputImageTokenPrice: 2648,
+    },
   },
   {
     id: 'f1c2d3e4-5b6a-7c8d-9e0f-1a2b3c4d5e6f',
