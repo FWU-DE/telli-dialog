@@ -32,7 +32,7 @@ export function CopyPromptButton({ prompt }: CopyPromptButtonProps) {
       size="icon-sm"
       title={t('copy-prompt-tooltip')}
       aria-label={t('copy-prompt-tooltip')}
-      data-testid="copy-prompt-button"
+      data-testid="image-copy-prompt-button"
       className="ml-1 align-middle"
     >
       <CopyIcon />
