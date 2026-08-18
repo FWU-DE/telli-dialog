@@ -146,6 +146,9 @@ jobs:
           NODE_ENV: test
           LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
 
+      - name: Wait for valkey and keycloak
+        run: docker compose -f devops/docker/docker-compose.local.yml up -d --wait valkey keycloak
+
       - name: Run E2E tests (app)
         run: pnpm --filter ais-chat-app e2e
         env:
