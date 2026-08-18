@@ -66,11 +66,14 @@ export default async function Page(props: PageProps) {
   const lastUsedStyleInChat = reversedMessages.find(
     (msg) => msg.parameters?.imageStyle !== undefined,
   )?.parameters?.imageStyle;
+  const defaultAspectRatio =
+    reversedMessages.find((msg) => msg.parameters?.aspectRatio !== undefined)?.parameters
+      ?.aspectRatio ?? 'quadratic';
 
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider defaultImageStyle={lastUsedStyleInChat}>
-        <ImageAspectRatioProvider>
+        <ImageAspectRatioProvider defaultAspectRatio={defaultAspectRatio}>
           <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
             <div className="flex flex-col h-full">
               <div className="flex-1 overflow-auto">

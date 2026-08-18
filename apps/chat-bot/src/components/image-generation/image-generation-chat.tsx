@@ -19,7 +19,6 @@ import Image from 'next/image';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { CopyPromptButton } from './copy-prompt-button';
 import { useImageAspectRatio } from './image-aspect-ratio-provider';
-import { getSizeFromAspectRatio } from './image-generation-utils';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -111,13 +110,11 @@ export default function ImageGenerationChat({
     setIsGenerating(true);
     setErrorMessage(null);
 
-    const size = getSizeFromAspectRatio(selectedModel, aspectRatio);
-
     const result = await generateImageAction({
       prompt: currentPrompt,
       model: selectedModel,
       style: selectedStyle,
-      options: { size: size },
+      options: { aspectRatio },
     });
     if (result.success) {
       // Update the displayed image

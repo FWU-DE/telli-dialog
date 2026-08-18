@@ -6,7 +6,7 @@ import { ImageStyle } from '@shared/utils/chat';
 import { runServerAction } from '@shared/actions/run-server-action';
 import { requireAuth } from '@/auth/requireAuth';
 import { GENERATE_IMAGE_ACTION_NAME } from '@/server-action-names';
-import { ImageGenerationRequestOptions } from '@ais-chat/ai-core/images/types';
+import { ImageGenerationOptions } from '@/components/image-generation/image-generation-types';
 
 /**
  * Generates an image within an existing conversation using the image generation service
@@ -21,7 +21,7 @@ export async function generateImageAction({
   prompt: string;
   model: LlmModelSelectModel;
   style?: ImageStyle;
-  options: ImageGenerationRequestOptions;
+  options: ImageGenerationOptions;
 }) {
   const { user, federalState } = await requireAuth();
 
