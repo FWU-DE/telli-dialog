@@ -6,6 +6,8 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { notFound } from 'next/navigation';
 import { type Metadata } from 'next';
 import CustomChatSharePage from '@/components/custom-chat/custom-chat-share-page';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('learning-scenarios.page-titles');
@@ -14,10 +16,28 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Page(
+export default function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]/share'>,
 ) {
-  const { learningScenarioId } = await props.params;
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center p-8">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent params={props.params} />
+    </Suspense>
+  );
+}
+
+async function PageContent({
+  params,
+}: {
+  params: PageProps<'/learning-scenarios/editor/[learningScenarioId]/share'>['params'];
+}) {
+  const { learningScenarioId } = await params;
   const { user } = await requireAuth();
 
   const learningScenario = await getSharedLearningScenario({

@@ -18,6 +18,8 @@ import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/le
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { NotFoundError } from '@shared/error';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 const searchParamsSchema = z.object({ model: z.string().optional() });
 
@@ -28,11 +30,28 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Page(
+export default function Page(
   props: PageProps<'/learning-scenarios/d/[learningScenarioId]/[conversationId]'>,
 ) {
-  const params = await props.params;
-  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center p-8">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent params={props.params} searchParams={props.searchParams} />
+    </Suspense>
+  );
+}
+
+async function PageContent({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}: PageProps<'/learning-scenarios/d/[learningScenarioId]/[conversationId]'>) {
+  const params = await paramsPromise;
+  const searchParams = parseSearchParams(searchParamsSchema, await searchParamsPromise);
   const { user, federalState } = await requireAuth();
   const userAndContext = {
     ...user,
