@@ -69,7 +69,7 @@ describe('generateImageWithBilling', () => {
     expect(mockGetImageModelById).toHaveBeenCalledWith('model-123');
     expect(mockHasAccessToModel).toHaveBeenCalledWith('api-key-123', mockModel);
     expect(mockIsApiKeyOverQuota).toHaveBeenCalledWith('api-key-123');
-    expect(mockGenerateImage).toHaveBeenCalledWith(mockModel, 'test prompt');
+    expect(mockGenerateImage).toHaveBeenCalledWith(mockModel, 'test prompt', undefined);
     expect(mockBillImageGenerationUsageToApiKey).toHaveBeenCalledWith(
       'api-key-123',
       mockModel,

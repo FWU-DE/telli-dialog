@@ -60,6 +60,7 @@ function createGoogleAnthropicModel(projectId = 'test-project', location = 'us-c
     organizationId: 'org-test',
     createdAt: new Date(),
     supportedImageFormats: ['image/png', 'image/jpeg'],
+    imageGenerationConfig: null,
     additionalParameters: {},
     isNew: false,
     isDeleted: false,
