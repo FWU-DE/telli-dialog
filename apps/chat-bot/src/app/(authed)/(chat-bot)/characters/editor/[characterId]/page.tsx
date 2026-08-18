@@ -8,6 +8,8 @@ import { redirect } from 'next/navigation';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('characters.page-titles');
@@ -16,8 +18,22 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Page(props: PageProps<'/characters/editor/[characterId]'>) {
-  const { characterId } = await props.params;
+export default function Page(props: PageProps<'/characters/editor/[characterId]'>) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center p-8">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent params={props.params} />
+    </Suspense>
+  );
+}
+
+async function PageContent({ params }: { params: PageProps<'/characters/editor/[characterId]'>['params'] }) {
+  const { characterId } = await params;
   const { user, federalState } = await requireAuth();
 
   const {

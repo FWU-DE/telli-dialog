@@ -6,6 +6,8 @@ import { notFound } from 'next/navigation';
 import { calculateShareSessionState } from '@shared/sharing/calculate-share-session-state';
 import { type Metadata } from 'next';
 import CustomChatSharePage from '@/components/custom-chat/custom-chat-share-page';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('characters.page-titles');
@@ -14,8 +16,26 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
-  const params = await props.params;
+export default function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center p-8">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent params={props.params} />
+    </Suspense>
+  );
+}
+
+async function PageContent({
+  params: paramsPromise,
+}: {
+  params: PageProps<'/characters/editor/[characterId]/share'>['params'];
+}) {
+  const params = await paramsPromise;
   const { user } = await requireAuth();
 
   const character = await getSharedCharacter({

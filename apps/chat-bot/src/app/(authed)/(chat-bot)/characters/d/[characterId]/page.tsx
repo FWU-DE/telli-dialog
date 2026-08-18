@@ -14,6 +14,8 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 const searchParamsSchema = z.object({ model: z.string().optional() });
 
@@ -24,9 +26,26 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Page(props: PageProps<'/characters/d/[characterId]'>) {
-  const { characterId } = await props.params;
-  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
+export default function Page(props: PageProps<'/characters/d/[characterId]'>) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center p-8">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent params={props.params} searchParams={props.searchParams} />
+    </Suspense>
+  );
+}
+
+async function PageContent({
+  params,
+  searchParams: searchParamsPromise,
+}: PageProps<'/characters/d/[characterId]'>) {
+  const { characterId } = await params;
+  const searchParams = parseSearchParams(searchParamsSchema, await searchParamsPromise);
 
   const id = generateUUID();
   const { user, federalState } = await requireAuth();

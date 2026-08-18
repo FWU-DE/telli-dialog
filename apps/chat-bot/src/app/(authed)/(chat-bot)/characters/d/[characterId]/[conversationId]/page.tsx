@@ -19,6 +19,8 @@ import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { NotFoundError } from '@shared/error';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 const searchParamsSchema = z.object({ model: z.string().optional() });
 
@@ -29,11 +31,26 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Page(
-  props: PageProps<'/characters/d/[characterId]/[conversationId]'>,
-) {
-  const params = await props.params;
-  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
+export default function Page(props: PageProps<'/characters/d/[characterId]/[conversationId]'>) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center p-8">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent params={props.params} searchParams={props.searchParams} />
+    </Suspense>
+  );
+}
+
+async function PageContent({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}: PageProps<'/characters/d/[characterId]/[conversationId]'>) {
+  const params = await paramsPromise;
+  const searchParams = parseSearchParams(searchParamsSchema, await searchParamsPromise);
   const { user, federalState } = await requireAuth();
   const userAndContext = {
     ...user,
