@@ -91,22 +91,6 @@ const DEFAULT_MODELS: LlmInsertModel[] = normalizeSeedModelsForBifrost([
     },
   },
   {
-    id: '7dcb063f-5241-4846-b11f-a621ea1dd4a9',
-    organizationId: ORGANIZATION_ID,
-    provider: 'ionos',
-    name: 'black-forest-labs/FLUX.1-schnell',
-    displayName: 'FLUX.1',
-    setting: {
-      provider: 'ionos',
-      apiKey: ionosApiKey,
-      baseUrl: ionosBaseUrl,
-    },
-    priceMetadata: {
-      type: 'image',
-      pricePerImageInCent: 2.88,
-    },
-  },
-  {
     id: '9578ed80-b0c2-4968-b253-d897576e5512',
     organizationId: ORGANIZATION_ID,
     provider: 'ionos',
