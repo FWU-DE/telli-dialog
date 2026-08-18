@@ -2,8 +2,6 @@ import { getLargeLanguageModelsAction } from '../actions';
 import { LargeLanguageModelDetailView } from './LargeLanguageModelDetailView';
 import { getProviderKeysAction } from '../../provider-keys/actions';
 
-export const dynamic = 'force-dynamic';
-
 export default async function Page(
   props: PageProps<'/organizations/[organizationId]/llms/[llmId]'>,
 ) {

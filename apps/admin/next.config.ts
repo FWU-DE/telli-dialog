@@ -25,9 +25,9 @@ const baseNextConfig: NextConfig = {
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/output#automatically-copying-traced-files
   output: 'standalone',
   reactCompiler: true,
+  cacheComponents: true,
   productionBrowserSourceMaps: !isDevBuild,
   experimental: {
-    useCache: true,
     // Speed up dev builds by pre-bundling heavy packages instead of re-resolving on every HMR
     optimizePackageImports: ['@ais-chat/ui', '@ais-chat/shared', '@ais-chat/ai-core'],
     // Run the React Compiler natively inside Turbopack instead of via Babel

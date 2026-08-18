@@ -5,8 +5,6 @@ import { headers } from 'next/headers';
 import { getChatBotEntityUrl } from '../../utils';
 import { SuspensionRequestItemDetailView } from './SuspensionRequestItemDetailView';
 
-export const dynamic = 'force-dynamic';
-
 export default async function SuspensionRequestPage(
   props: PageProps<'/ais-chat-app/suspensions/[entityType]/[entityId]'>,
 ) {

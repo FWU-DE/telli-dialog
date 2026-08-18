@@ -21,6 +21,11 @@ const barlow = Barlow({
   subsets: ['latin'],
 });
 
+// Block: the root layout reads the user's session and federal-state design configuration
+// synchronously to render <body> and theming for every route. Revisit by streaming this
+// behind a <Suspense> boundary if instant navigation for the whole app is desired.
+export const instant = false;
+
 export async function generateMetadata(): Promise<Metadata> {
   const maybeUser = await getMaybeUser();
   const [, federalState] = await dbGetFederalStateByIdWithResult(maybeUser?.federalStateId);

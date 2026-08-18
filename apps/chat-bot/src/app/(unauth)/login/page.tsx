@@ -6,8 +6,6 @@ import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { getHostByHeaders } from '@/utils/host';
 
-export const dynamic = 'force-dynamic';
-
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('common.page-titles');
   return {

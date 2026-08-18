@@ -5,8 +5,6 @@ import { getAssistantByUser } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 
-export const dynamic = 'force-dynamic';
-
 const searchParamsSchema = z.object({
   create: z.string().optional().default('false'),
   templateId: z.string().optional(),

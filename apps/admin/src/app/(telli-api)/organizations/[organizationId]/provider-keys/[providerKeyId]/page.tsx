@@ -2,8 +2,6 @@ import { notFound } from 'next/navigation';
 import { getProviderKeysAction } from '../actions';
 import { ProviderKeyDetailView } from './ProviderKeyDetailView';
 
-export const dynamic = 'force-dynamic';
-
 export default async function ProviderKeyPage(
   props: PageProps<'/organizations/[organizationId]/provider-keys/[providerKeyId]'>,
 ) {

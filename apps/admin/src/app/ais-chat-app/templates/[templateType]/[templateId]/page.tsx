@@ -1,8 +1,6 @@
 import TemplateDetailView from './TemplateDetailView';
 import { isTemplateType } from '@shared/templates/template';
 
-export const dynamic = 'force-dynamic';
-
 export default async function Page(
   props: PageProps<'/ais-chat-app/templates/[templateType]/[templateId]'>,
 ) {

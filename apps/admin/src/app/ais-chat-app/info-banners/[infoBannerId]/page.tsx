@@ -7,8 +7,6 @@ import {
 } from '../actions';
 import InfoBannerEditorView from '../InfoBannerEditorView';
 
-export const dynamic = 'force-dynamic';
-
 export default async function InfoBannerDetailPage(
   props: PageProps<'/ais-chat-app/info-banners/[infoBannerId]'>,
 ) {

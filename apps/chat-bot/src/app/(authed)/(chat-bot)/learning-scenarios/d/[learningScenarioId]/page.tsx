@@ -14,7 +14,6 @@ import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/le
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
-export const dynamic = 'force-dynamic';
 const searchParamsSchema = z.object({ model: z.string().optional() });
 
 export async function generateMetadata(): Promise<Metadata> {

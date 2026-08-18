@@ -3,8 +3,6 @@ import { getToolCallCostByName } from '@shared/tool-call-costs/tool-call-cost-se
 import { AdminAppSidebar } from '../AdminAppSidebar';
 import ToolCallCostListView from './ToolCallCostListView';
 
-export const dynamic = 'force-dynamic';
-
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten.';
 }

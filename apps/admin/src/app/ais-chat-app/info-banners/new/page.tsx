@@ -3,8 +3,6 @@ import { AdminAppSidebar } from '../../AdminAppSidebar';
 import { getFederalStatesAction } from '../actions';
 import InfoBannerEditorView from '../InfoBannerEditorView';
 
-export const dynamic = 'force-dynamic';
-
 export default async function NewInfoBannerPage() {
   const federalStates = await getFederalStatesAction();
 

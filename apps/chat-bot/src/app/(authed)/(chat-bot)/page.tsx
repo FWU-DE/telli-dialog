@@ -10,8 +10,6 @@ import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
-export const dynamic = 'force-dynamic';
-
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('common.page-titles');
   return {
@@ -20,7 +18,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const id = generateUUID();
   const { user, federalState } = await requireAuth();
   const userAndContext = {
     ...user,
@@ -37,6 +34,8 @@ export default async function Page() {
   const defaultModelName = await getDefaultModelNameByFederalStateId(federalState.id, models);
 
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
+
+  const id = generateUUID();
 
   return (
     <LlmModelsProvider

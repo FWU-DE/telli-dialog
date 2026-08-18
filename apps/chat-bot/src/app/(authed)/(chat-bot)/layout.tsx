@@ -22,8 +22,6 @@ import {
   getUsedBudgetInCentByUser,
 } from '@shared/users/user-budget-service';
 
-export const dynamic = 'force-dynamic';
-
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
   const user = await getUser();

@@ -9,8 +9,6 @@ import { cn } from '@/utils/tailwind';
 import ChevronDownIcon from '../icons/chevron-down';
 import ChevronRightIcon from '../icons/chevron-right';
 
-export const dynamic = 'force-dynamic';
-
 // Floating, minimizable, movable learning context dialog (desktop only) on mobile it's sticky on the top
 export function FloatingText({
   learningContext,

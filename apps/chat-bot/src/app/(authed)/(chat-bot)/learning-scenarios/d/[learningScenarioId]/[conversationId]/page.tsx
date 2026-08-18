@@ -19,7 +19,6 @@ import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { NotFoundError } from '@shared/error';
 
-export const dynamic = 'force-dynamic';
 const searchParamsSchema = z.object({ model: z.string().optional() });
 
 export async function generateMetadata(): Promise<Metadata> {

@@ -14,8 +14,6 @@ import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { ImageAspectRatioProvider } from '@/components/image-generation/image-aspect-ratio-provider';
 
-export const dynamic = 'force-dynamic';
-
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('image-generation.page-titles');
   return {
