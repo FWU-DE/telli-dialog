@@ -8,6 +8,8 @@ export async function requireAuth(): Promise<{
   user: UserModel;
   federalState: FederalStateModel;
 }> {
+  'use cache: private';
+
   const session = await auth();
   if (!session) {
     const headersList = await headers();
