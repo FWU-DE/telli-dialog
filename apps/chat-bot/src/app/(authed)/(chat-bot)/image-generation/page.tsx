@@ -11,6 +11,8 @@ import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { ImageAspectRatioProvider } from '@/components/image-generation/image-aspect-ratio-provider';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('image-generation.page-titles');
@@ -19,7 +21,21 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ImageGenerationPage() {
+export default function Page() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center p-8">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent />
+    </Suspense>
+  );
+}
+
+async function PageContent() {
   const { federalState } = await requireAuth();
 
   if (!(federalState.featureToggles.isImageGenerationEnabled ?? false)) {

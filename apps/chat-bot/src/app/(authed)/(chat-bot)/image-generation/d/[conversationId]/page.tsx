@@ -13,6 +13,8 @@ import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { ImageAspectRatioProvider } from '@/components/image-generation/image-aspect-ratio-provider';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('image-generation.page-titles');
@@ -25,8 +27,22 @@ interface PageProps {
   params: Promise<{ conversationId: string }>;
 }
 
-export default async function Page(props: PageProps) {
-  const { conversationId } = await props.params;
+export default function Page(props: PageProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center p-8">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent params={props.params} />
+    </Suspense>
+  );
+}
+
+async function PageContent({ params }: PageProps) {
+  const { conversationId } = await params;
   const { user, federalState } = await requireAuth();
 
   if (!federalState.featureToggles.isImageGenerationEnabled) {
