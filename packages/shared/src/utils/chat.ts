@@ -38,6 +38,3 @@ export type ImageStyleType = z.infer<typeof imageStyleTypeSchema>;
 
 export const imageAspectRatioPresetSchema = z.enum(['quadratic', 'landscape', 'portrait']);
 export type ImageAspectRatioPreset = z.infer<typeof imageAspectRatioPresetSchema>;
-
-export const imageSizeSchema = z.union([z.literal('auto'), z.string().regex(/^\d+x\d+$/)]);
-export type ImageSize = z.infer<typeof imageSizeSchema>;
