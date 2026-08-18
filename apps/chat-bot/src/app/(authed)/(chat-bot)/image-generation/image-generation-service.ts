@@ -20,6 +20,8 @@ import { NotFoundError } from '@shared/error';
 import { getAvailableImageModelsForFederalState } from '@shared/image-generation/image-generation-service';
 import { userHasReachedTokenPointsLimit } from '@shared/users/usage';
 import { ImageGenerationRequestOptions } from '@ais-chat/ai-core/images/types';
+import { ImageGenerationOptions } from '@/components/image-generation/image-generation-types';
+
 export interface ImageGenerationParams {
   prompt: string;
   modelId: string;
@@ -72,7 +74,7 @@ export async function handleImageGeneration({
   style?: ImageStyle;
   userId: string;
   federalStateId: string;
-  options: ImageGenerationRequestOptions;
+  options: ImageGenerationOptions;
 }) {
   await checkIfImageModelIsAssignedToFederalState(model, federalStateId);
 
@@ -100,15 +102,17 @@ export async function handleImageGeneration({
       content: prompt,
       modelName: model.name,
       orderNumber: 1,
-      parameters: { imageStyle: style?.name, imageSize: options?.size },
+      parameters: { imageStyle: style?.name, aspectRatio: options.aspectRatio },
     });
+
+    const size = model.imageGenerationConfig?.aspectRatio?.[options.aspectRatio] ?? 'auto';
 
     // Generate image using the service
     const result = await generateImage({
       prompt: fullPrompt.trim(),
       modelId: model.id,
       conversationId,
-      options,
+      options: { size },
     });
 
     const image = result.data[0];
