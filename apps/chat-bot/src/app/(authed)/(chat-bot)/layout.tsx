@@ -1,5 +1,5 @@
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/llm-model-service';
@@ -21,8 +21,23 @@ import {
   getMaxBudgetInCentByUser,
   getUsedBudgetInCentByUser,
 } from '@shared/users/user-budget-service';
+import { Spinner } from '@ui/components/spinner';
 
-export default async function ChatLayout({ children }: { children: React.ReactNode }) {
+export default function ChatLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <ChatShell>{children}</ChatShell>
+    </Suspense>
+  );
+}
+
+async function ChatShell({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
   const user = await getUser();
   if (!user.federalState.hasApiKeyAssigned) throw new Error(t('no-api-key'));

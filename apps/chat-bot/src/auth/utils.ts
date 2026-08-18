@@ -50,6 +50,8 @@ export async function getMaybeUser() {
 }
 
 export async function getUser(): Promise<UserAndContext> {
+  'use cache: private';
+
   const session = await getValidSession();
 
   if (session.user === undefined) {
@@ -60,6 +62,8 @@ export async function getUser(): Promise<UserAndContext> {
 }
 
 export async function userHasCompletedTraining(): Promise<boolean> {
+  'use cache: private';
+
   const session = await getMaybeSession();
   return session?.hasCompletedTraining ?? false;
 }
