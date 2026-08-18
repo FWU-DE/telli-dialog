@@ -100,7 +100,7 @@ export async function handleImageGeneration({
       content: prompt,
       modelName: model.name,
       orderNumber: 1,
-      parameters: style ? { imageStyle: style.name } : undefined,
+      parameters: { imageStyle: style?.name, imageSize: options?.size },
     });
 
     // Generate image using the service

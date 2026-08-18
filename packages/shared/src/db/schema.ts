@@ -22,6 +22,7 @@ import { z } from 'zod';
 import {
   conversationRoleSchema,
   conversationTypeSchema,
+  imageSizeSchema,
   imageStyleTypeSchema,
 } from '../utils/chat';
 
@@ -156,6 +157,7 @@ export const conversationRoleEnum = pgEnum('conversation_role', conversationRole
 // Define the parameters type for conversation messages
 export const conversationMessageParametersSchema = z.object({
   imageStyle: imageStyleTypeSchema.optional(),
+  imageSize: imageSizeSchema.optional(),
 });
 
 export type ConversationMessageParameters = z.infer<typeof conversationMessageParametersSchema>;

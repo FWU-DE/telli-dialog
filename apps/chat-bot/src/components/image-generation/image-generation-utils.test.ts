@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LlmModelSelectModel } from '@shared/db/schema';
-import { getSizeFromAspectRatio } from './image-generation-utils';
+import { getAspectRatioFromSize, getSizeFromAspectRatio } from './image-generation-utils';
 
 describe('getSizeFromAspectRatio', () => {
   it('returns configured size for the requested aspect ratio', () => {
@@ -31,5 +31,20 @@ describe('getSizeFromAspectRatio', () => {
 
     expect(getSizeFromAspectRatio(modelWithoutOptions, 'portrait')).toBe('auto');
     expect(getSizeFromAspectRatio(modelWithoutRequestedRatio, 'landscape')).toBe('auto');
+  });
+});
+
+describe('getAspectRatioFromSize', () => {
+  it('derives quadratic, landscape, and portrait presets from persisted image sizes', () => {
+    expect(getAspectRatioFromSize('1024x1024')).toBe('quadratic');
+    expect(getAspectRatioFromSize('1536x1024')).toBe('landscape');
+    expect(getAspectRatioFromSize('1024x1536')).toBe('portrait');
+  });
+
+  it('falls back to quadratic for missing or invalid sizes', () => {
+    expect(getAspectRatioFromSize()).toBe('quadratic');
+    expect(getAspectRatioFromSize('auto')).toBe('quadratic');
+    expect(getAspectRatioFromSize('invalid')).toBe('quadratic');
+    expect(getAspectRatioFromSize('1024x0')).toBe('quadratic');
   });
 });

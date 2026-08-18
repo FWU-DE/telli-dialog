@@ -13,6 +13,7 @@ import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { ImageAspectRatioProvider } from '@/components/image-generation/image-aspect-ratio-provider';
+import { getAspectRatioFromSize } from '@/components/image-generation/image-generation-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,11 +67,15 @@ export default async function Page(props: PageProps) {
   const lastUsedStyleInChat = reversedMessages.find(
     (msg) => msg.parameters?.imageStyle !== undefined,
   )?.parameters?.imageStyle;
+  const lastUsedImageSizeInChat = reversedMessages.find(
+    (msg) => msg.parameters?.imageSize !== undefined,
+  )?.parameters?.imageSize;
+  const defaultAspectRatio = getAspectRatioFromSize(lastUsedImageSizeInChat);
 
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider defaultImageStyle={lastUsedStyleInChat}>
-        <ImageAspectRatioProvider>
+        <ImageAspectRatioProvider defaultAspectRatio={defaultAspectRatio}>
           <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
             <div className="flex flex-col h-full">
               <div className="flex-1 overflow-auto">
