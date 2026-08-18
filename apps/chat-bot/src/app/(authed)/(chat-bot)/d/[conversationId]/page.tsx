@@ -15,6 +15,8 @@ import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { utils } from '@shared/utils';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('common.page-titles');
@@ -25,9 +27,26 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const searchParamsSchema = z.object({ model: z.string().optional() });
 
-export default async function Page(props: PageProps<'/d/[conversationId]'>) {
-  const { conversationId } = await props.params;
-  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
+export default function Page(props: PageProps<'/d/[conversationId]'>) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center p-8">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent params={props.params} searchParams={props.searchParams} />
+    </Suspense>
+  );
+}
+
+async function PageContent({
+  params,
+  searchParams: searchParamsPromise,
+}: PageProps<'/d/[conversationId]'>) {
+  const { conversationId } = await params;
+  const searchParams = parseSearchParams(searchParamsSchema, await searchParamsPromise);
 
   const { user, federalState } = await requireAuth();
   const userAndContext = {
