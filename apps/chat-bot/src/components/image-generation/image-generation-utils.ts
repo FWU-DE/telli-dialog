@@ -1,4 +1,4 @@
-import { LlmModelSelectModel } from '@shared/db/schema';
+import type { LlmModelSelectModel } from '@shared/db/schema';
 import { ImageAspectRatioPreset } from './image-generation-types';
 
 export function getSizeFromAspectRatio(
