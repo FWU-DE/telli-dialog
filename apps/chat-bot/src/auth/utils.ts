@@ -35,12 +35,16 @@ export function redirectToLogin(pathname: string): never {
 }
 
 export async function getMaybeSession(): Promise<Session | null> {
+  'use cache: private';
+
   const session = await auth();
 
   return session;
 }
 
 export async function getMaybeUser() {
+  'use cache: private';
+
   const session = await auth();
   const user = session?.user;
 

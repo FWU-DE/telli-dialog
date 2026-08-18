@@ -5,6 +5,8 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { getHostByHeaders } from '@/utils/host';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('common.page-titles');
@@ -13,7 +15,25 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Page({
+export default function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-dvh items-center justify-center">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function PageContent({
   searchParams,
 }: {
   searchParams: Promise<{ callbackUrl?: string }>;
