@@ -4,7 +4,9 @@ import { FederalStateView } from './FederalStateDetailView';
 import { Sidebar, SidebarItem } from '@/components/navigation/Sidebar';
 import { ROUTES } from '@/consts/routes';
 
-export const dynamic = 'force-dynamic';
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 export default async function Page(
   props: PageProps<'/ais-chat-app/federal-states/[federalStateId]'>,

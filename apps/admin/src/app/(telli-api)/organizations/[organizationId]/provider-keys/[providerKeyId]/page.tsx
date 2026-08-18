@@ -2,7 +2,9 @@ import { notFound } from 'next/navigation';
 import { getProviderKeysAction } from '../actions';
 import { ProviderKeyDetailView } from './ProviderKeyDetailView';
 
-export const dynamic = 'force-dynamic';
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 export default async function ProviderKeyPage(
   props: PageProps<'/organizations/[organizationId]/provider-keys/[providerKeyId]'>,

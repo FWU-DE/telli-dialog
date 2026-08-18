@@ -5,8 +5,6 @@ import { getMaybeUser } from '@/auth/utils';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { dbGetFederalStateByIdWithResult } from '@shared/db/functions/federal-state';
 
-export const dynamic = 'force-dynamic';
-
 export const size = {
   width: 32,
   height: 32,

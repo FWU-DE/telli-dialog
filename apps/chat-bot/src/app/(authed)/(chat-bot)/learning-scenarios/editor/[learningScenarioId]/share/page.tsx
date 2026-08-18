@@ -7,6 +7,10 @@ import { notFound } from 'next/navigation';
 import { type Metadata } from 'next';
 import CustomChatSharePage from '@/components/custom-chat/custom-chat-share-page';
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('learning-scenarios.page-titles');
   return {

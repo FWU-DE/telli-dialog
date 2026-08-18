@@ -22,7 +22,10 @@ import {
   getUsedBudgetInCentByUser,
 } from '@shared/users/user-budget-service';
 
-export const dynamic = 'force-dynamic';
+// Block: reads the user's session and budget/model data synchronously for every
+// route under it. Revisit by streaming these behind a <Suspense> boundary if
+// instant navigation is desired.
+export const instant = false;
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');

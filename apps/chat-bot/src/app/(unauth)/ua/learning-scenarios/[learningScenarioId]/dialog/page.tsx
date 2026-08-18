@@ -15,6 +15,10 @@ import { NextIntlClientProvider } from 'next-intl';
 import { resolveSharingLocale } from '@/i18n/sharing-locale';
 import { loadTranslations } from '@/i18n/load-translations';
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('learning-scenarios.page-titles');
   return {

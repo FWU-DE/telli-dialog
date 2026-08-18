@@ -5,7 +5,9 @@ import { getAssistantByUser } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 
-export const dynamic = 'force-dynamic';
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 const searchParamsSchema = z.object({
   create: z.string().optional().default('false'),
