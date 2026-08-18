@@ -426,6 +426,13 @@
     }
   },
   "image-generation": {
+    "aspect-ratio": {
+      "label": "Format",
+      "aria-label": "Bildformat auswählen",
+      "quadratic": "Quadratisch",
+      "portrait": "Hochformat",
+      "landscape": "Querformat"
+    },
     "page-titles": {
       "chat": "Bildgenerierung"
     },
