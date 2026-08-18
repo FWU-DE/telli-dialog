@@ -17,6 +17,7 @@ import { logError } from '@shared/logging';
 import { ResponsibleAIError } from '@ais-chat/ai-core/errors';
 import Image from 'next/image';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
+import { CopyPromptButton } from './copy-prompt-button';
 import { useImageAspectRatio } from './image-aspect-ratio-provider';
 import { getSizeFromAspectRatio } from './image-generation-utils';
 
@@ -179,7 +180,10 @@ export default function ImageGenerationChat({
           {displayedImage && !isGenerating && !errorMessage && (
             <div className="mt-6">
               <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
-              <p className="text-sm mb-3">{displayedImage.prompt}</p>
+              <p className="text-sm mb-3">
+                {displayedImage.prompt}
+                <CopyPromptButton prompt={displayedImage.prompt} />
+              </p>
               <Image
                 ref={imageRef}
                 src={displayedImage.imageUrl}
@@ -196,7 +200,6 @@ export default function ImageGenerationChat({
               <ImageActionButtons
                 imageRef={imageRef}
                 fileId={displayedImage.fileId}
-                prompt={displayedImage.prompt}
                 isImageReady={isImageReady}
               />
             </div>
