@@ -146,7 +146,7 @@ services:
       start_period: 30s
 
   bifrost:
-    image: ghcr.io/maximhq/bifrost:v1.6.10
+    image: ghcr.io/maximhq/bifrost:v1.6.11
     restart: unless-stopped
     environment:
       BIFROST_ADMIN_USERNAME: admin
@@ -181,6 +181,8 @@ services:
       LLM_GPT4OMINI_BASE_URL: PLACEHOLDER_BASE_URL
       LLM_GPT5NANO_API_KEY: API_KEY_PLACEHOLDER
       LLM_GPT5NANO_BASE_URL: PLACEHOLDER_BASE_URL
+      LLM_GPT_IMAGE_API_KEY: API_KEY_PLACEHOLDER
+      LLM_GPT_IMAGE_BASE_URL: PLACEHOLDER_BASE_URL
 
       # Bifrost LLM proxy
       BIFROST_BASE_URL: http://bifrost:8080/openai/v1
@@ -334,6 +336,8 @@ services:
       LLM_GPT4OMINI_BASE_URL: PLACEHOLDER_BASE_URL
       LLM_GPT5NANO_API_KEY: API_KEY_PLACEHOLDER
       LLM_GPT5NANO_BASE_URL: PLACEHOLDER_BASE_URL
+      LLM_GPT5IMAGE_API_KEY: API_KEY_PLACEHOLDER
+      LLM_GPT5IMAGE_BASE_URL: PLACEHOLDER_BASE_URL
     command: >
       sh -c "
         echo '=== Starting AIS.chat Initialization ==='

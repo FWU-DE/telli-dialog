@@ -1,7 +1,6 @@
 import { and, eq, getTableColumns, inArray } from 'drizzle-orm';
 import { db } from '..';
 import { federalStateLlmModelMappingTable, LlmModelSelectModel, llmModelTable } from '../schema';
-import { KnotenpunktLlmModel } from '../../knotenpunkt/schema';
 import {
   dbGetFederalStateWithDecryptedApiKeyWithResult,
   dbGetFederalStates,
@@ -82,7 +81,7 @@ export async function dbFindModelsToUpdate({
   federalStateId,
 }: {
   federalStateId: string;
-}): Promise<{ models: KnotenpunktLlmModel[]; modelIdsToAdd: string[]; modelsToRemove: string[] }> {
+}): Promise<{ models: LlmModelSelectModel[]; modelIdsToAdd: string[]; modelsToRemove: string[] }> {
   const [error, result] = await dbGetFederalStateWithDecryptedApiKeyWithResult({ federalStateId });
   if (error !== null) {
     logError('Error getting federal state with decrypted API key', error, { federalStateId });
@@ -169,9 +168,9 @@ export async function dbGetModelByIdAndFederalStateId({
   return result;
 }
 
-async function dbUpsertLlmModels({ models }: { models: KnotenpunktLlmModel[] }) {
+async function dbUpsertLlmModels({ models }: { models: LlmModelSelectModel[] }) {
   // remove duplicates by id to avoid unnecessary upserts
-  const uniqueModelsMap: Record<string, KnotenpunktLlmModel> = {};
+  const uniqueModelsMap: Record<string, LlmModelSelectModel> = {};
   for (const model of models) {
     uniqueModelsMap[model.id] = model;
   }

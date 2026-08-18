@@ -28,6 +28,8 @@ const gpt4oMiniApiKey = process.env.LLM_GPT4OMINI_API_KEY ?? 'API_KEY_PLACEHOLDE
 const gpt4oMiniBaseUrl = process.env.LLM_GPT4OMINI_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const gpt5nanoApiKey = process.env.LLM_GPT5NANO_API_KEY ?? 'API_KEY_PLACEHOLDER';
 const gpt5nanoBaseUrl = process.env.LLM_GPT5NANO_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
+const gptImageApiKey = process.env.LLM_GPT_IMAGE_API_KEY ?? 'API_KEY_PLACEHOLDER';
+const gptImageBaseUrl = process.env.LLM_GPT_IMAGE_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const gpt5miniApiKey = process.env.LLM_GPT5MINI_API_KEY ?? 'API_KEY_PLACEHOLDER';
 const gpt5miniBaseUrl = process.env.LLM_GPT5MINI_BASE_URL ?? 'PLACEHOLDER_BASE_URL';
 const mockLlmApiKey = process.env.LLM_MOCK_API_KEY ?? 'API_KEY_PLACEHOLDER';
@@ -86,22 +88,6 @@ const DEFAULT_MODELS: LlmInsertModel[] = normalizeSeedModelsForBifrost([
     priceMetadata: {
       type: 'embedding',
       promptTokenPrice: 20, // 0.02 € per 1M tokens
-    },
-  },
-  {
-    id: '7dcb063f-5241-4846-b11f-a621ea1dd4a9',
-    organizationId: ORGANIZATION_ID,
-    provider: 'ionos',
-    name: 'black-forest-labs/FLUX.1-schnell',
-    displayName: 'FLUX.1',
-    setting: {
-      provider: 'ionos',
-      apiKey: ionosApiKey,
-      baseUrl: ionosBaseUrl,
-    },
-    priceMetadata: {
-      type: 'image',
-      pricePerImageInCent: 2.88,
     },
   },
   {
@@ -185,6 +171,25 @@ const DEFAULT_MODELS: LlmInsertModel[] = normalizeSeedModelsForBifrost([
     supportedImageFormats: ['jpg', 'jpeg', 'png', 'webp'],
   },
   {
+    id: '1a3d7a04-351d-4a09-a490-db256994a1b8',
+    organizationId: ORGANIZATION_ID,
+    provider: 'azure',
+    name: 'gpt-image-1.5',
+    displayName: 'GPT-Image-1.5',
+    description: 'GPT-Image model for testing',
+    setting: {
+      provider: 'azure',
+      apiKey: gptImageApiKey,
+      baseUrl: gptImageBaseUrl,
+    },
+    priceMetadata: {
+      type: 'image',
+      inputTextTokenPrice: 414,
+      outputTextTokenPrice: 828,
+      outputImageTokenPrice: 2648,
+    },
+  },
+  {
     id: 'f1c2d3e4-5b6a-7c8d-9e0f-1a2b3c4d5e6f',
     organizationId: ORGANIZATION_ID,
     provider: 'azure',
@@ -212,7 +217,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = normalizeSeedModelsForBifrost([
 ]);
 
 export async function seedDatabase() {
-  console.log('Starting database seeding...');
+  console.log('Starting api database seeding...');
 
   try {
     // 1. Create/update test organization
@@ -347,16 +352,16 @@ export async function seedDatabase() {
       models: DEFAULT_MODELS,
     };
   } catch (error) {
-    console.error('Error seeding database:', error);
+    console.error('Error seeding api database:', error);
     throw error;
   }
 }
 
 try {
   await seedDatabase();
-  console.log('Seeding completed');
+  console.log('Seeding api database completed');
   process.exit(0);
 } catch (error) {
-  console.error('Seeding failed:', error);
+  console.error('Seeding api database failed:', error);
   process.exit(1);
 }

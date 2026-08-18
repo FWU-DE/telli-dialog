@@ -31,12 +31,12 @@ function createBifrostClient(model: AiModel): {
 export function constructBifrostImageGenerationFn(model: AiModel): ImageGenerationFn {
   const { client, modelName } = createBifrostClient(model);
 
-  return async function getBifrostImageGeneration({ prompt }) {
+  return async function getBifrostImageGeneration({ prompt, options }) {
     const result = await client.images.generate({
       model: modelName,
       prompt,
       n: 1,
-      size: '1024x1024',
+      size: options?.size ?? 'auto',
     });
 
     if (!result.data || result.data.length === 0) {

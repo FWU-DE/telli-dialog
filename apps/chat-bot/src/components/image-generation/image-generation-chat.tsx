@@ -18,6 +18,8 @@ import { ResponsibleAIError } from '@ais-chat/ai-core/errors';
 import Image from 'next/image';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { CopyPromptButton } from './copy-prompt-button';
+import { useImageAspectRatio } from './image-aspect-ratio-provider';
+import { getSizeFromAspectRatio } from './image-generation-utils';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -47,6 +49,8 @@ export default function ImageGenerationChat({
   const imageRef = useRef<HTMLImageElement>(null);
   // isImageReady indicates if the image is loaded and visible in the browser
   const [isImageReady, setIsImageReady] = useState(false);
+
+  const { aspectRatio } = useImageAspectRatio();
 
   // Load the single image from initial messages and file attachments
   useEffect(() => {
@@ -107,10 +111,13 @@ export default function ImageGenerationChat({
     setIsGenerating(true);
     setErrorMessage(null);
 
+    const size = getSizeFromAspectRatio(selectedModel, aspectRatio);
+
     const result = await generateImageAction({
       prompt: currentPrompt,
       model: selectedModel,
       style: selectedStyle,
+      options: { size: size },
     });
     if (result.success) {
       // Update the displayed image

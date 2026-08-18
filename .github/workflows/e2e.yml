@@ -61,7 +61,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Cache Playwright browsers
         uses: actions/cache@v6
@@ -114,6 +114,8 @@ jobs:
           LLM_GPT4OMINI_BASE_URL: ${{ secrets.LLM_GPT4OMINI_BASE_URL }}
           LLM_GPT5NANO_API_KEY: ${{ secrets.LLM_GPT5NANO_API_KEY }}
           LLM_GPT5NANO_BASE_URL: ${{ secrets.LLM_GPT5NANO_BASE_URL }}
+          LLM_GPT_IMAGE_API_KEY: ${{ secrets.LLM_GPT_IMAGE_API_KEY }}
+          LLM_GPT_IMAGE_BASE_URL: ${{ secrets.LLM_GPT_IMAGE_BASE_URL }}
           LLM_GPT5MINI_API_KEY: ${{ secrets.LLM_GPT5MINI_API_KEY }}
           LLM_GPT5MINI_BASE_URL: ${{ secrets.LLM_GPT5MINI_BASE_URL }}
           LLM_MOCK_API_KEY: mock-api-key

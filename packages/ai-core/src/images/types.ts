@@ -13,7 +13,16 @@ export type ImageResponse = {
   usage?: Usage;
 };
 
-export type ImageGenerationFn = (args: { prompt: string; model: string }) => Promise<ImageResponse>;
+/** size must have the correct aspect ratio that is supported by the model */
+export type ImageGenerationRequestOptions = {
+  size: string; // e.g. "1024x1024", "1536x1024", "1408x768"
+};
+
+export type ImageGenerationFn = (args: {
+  prompt: string;
+  model: string;
+  options?: ImageGenerationRequestOptions;
+}) => Promise<ImageResponse>;
 
 // TODO: Just an alias for now, since the llmModel table needs renaming (it has image and embedding models too)
 export type AiModel = LlmModel;

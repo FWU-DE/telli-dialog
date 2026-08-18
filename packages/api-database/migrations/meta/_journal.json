@@ -99,6 +99,13 @@
       "when": 1786622329974,
       "tag": "0013_secret_luke_cage",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1786710903211,
+      "tag": "0014_foamy_the_executioner",
+      "breakpoints": true
     }
   ]
 }

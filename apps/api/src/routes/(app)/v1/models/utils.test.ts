@@ -13,6 +13,7 @@ const baseModel: LlmModel = {
   organizationId: 'org-123',
   createdAt: new Date('2025-01-01'),
   supportedImageFormats: [],
+  imageGenerationConfig: null,
   additionalParameters: {},
   isNew: false,
   isDeleted: false,

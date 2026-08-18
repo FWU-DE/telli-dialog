@@ -72,6 +72,7 @@ function createBifrostModel(settingProvider: 'azure' | 'openai' | 'ionos' | 'goo
       promptTokenPrice: 1,
     },
     supportedImageFormats: [],
+    imageGenerationConfig: null,
   } satisfies AiModel;
 }
 

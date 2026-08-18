@@ -3,6 +3,7 @@ import { generateImage } from './providers';
 import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
 import { getImageModelById, getImageModelByName } from '../models';
+import { ImageGenerationRequestOptions } from './types';
 
 /**
  * Generates an image using the specified model and prompt, with access control and billing.
@@ -13,10 +14,16 @@ import { getImageModelById, getImageModelByName } from '../models';
  * @param modelId - The image model to use for generation
  * @param prompt - The text prompt describing the desired image
  * @param apiKeyId - The ID of the API key to verify access and bill usage
+ * @param options - Optional image generation options, such as output size
  *
  * @returns A promise that resolves to an object containing the generated image response and the price in cents
  */
-export async function generateImageWithBilling(modelId: string, prompt: string, apiKeyId: string) {
+export async function generateImageWithBilling(
+  modelId: string,
+  prompt: string,
+  apiKeyId: string,
+  options?: ImageGenerationRequestOptions,
+) {
   const model = await getImageModelById(modelId);
 
   // Run access check and quota check in parallel for better performance
@@ -34,7 +41,7 @@ export async function generateImageWithBilling(modelId: string, prompt: string, 
   }
 
   try {
-    const imageResponse = await generateImage(model, prompt);
+    const imageResponse = await generateImage(model, prompt, options);
 
     const priceInCents = await billImageGenerationUsageToApiKey(
       apiKeyId,
@@ -70,8 +77,9 @@ export async function generateImageByNameWithBilling(
   modelName: string,
   prompt: string,
   apiKeyId: string,
+  options?: ImageGenerationRequestOptions,
 ) {
   const model = await getImageModelByName(modelName, apiKeyId);
-  const result = await generateImageWithBilling(model.id, prompt, apiKeyId);
+  const result = await generateImageWithBilling(model.id, prompt, apiKeyId, options);
   return { ...result, model };
 }

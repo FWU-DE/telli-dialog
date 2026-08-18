@@ -9,7 +9,7 @@ test('can generate an image and use image actions', async ({ page }) => {
   await page.goto('/image-generation');
   await page.waitForURL('/image-generation**');
 
-  // select flux as model
+  // select gpt-image model if not already selected
   const dropdownLocator = page.getByTestId('image-model-dropdown');
   await dropdownLocator.waitFor();
 
@@ -17,10 +17,10 @@ test('can generate an image and use image actions', async ({ page }) => {
   const currentSelectedText = await dropdownLocator.textContent();
   expect(currentSelectedText).toBeTruthy();
 
-  if (!currentSelectedText?.includes('FLUX')) {
+  if (!currentSelectedText?.includes('GPT-Image')) {
     await dropdownLocator.click();
     await page.locator('div[data-radix-popper-content-wrapper]').waitFor();
-    const modelLocator = page.getByTestId(/flux/i);
+    const modelLocator = page.getByTestId(/gpt-image/i);
     await modelLocator.waitFor();
     await modelLocator.click();
   }
@@ -36,7 +36,7 @@ test('can generate an image and use image actions', async ({ page }) => {
 
   // Wait for loading to finish
   try {
-    await loadingAnimation.waitFor({ state: 'detached', timeout: 35000 });
+    await loadingAnimation.waitFor({ state: 'detached', timeout: 60000 });
   } catch {
     // If loading doesn't detach, check if an error appeared
     const errorMessage = page.getByText('Ein Fehler ist aufgetreten');
