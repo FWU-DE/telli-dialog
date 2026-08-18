@@ -126,6 +126,7 @@ services:
       BIFROST_ADMIN_USERNAME: admin
       BIFROST_ADMIN_PASSWORD: admin
       BIFROST_API_KEY: sk-bf-example-key
+      BIFROST_ENV_LABEL: local
     ports:
       - '8089:8080'
     volumes:
@@ -133,6 +134,7 @@ services:
       - bifrost_data:/app/data
     # bifrost is reliably up within ~1s; poll faster than the image's default 30s interval.
     healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:8080/health']
       interval: 2s
       timeout: 2s
       retries: 5
