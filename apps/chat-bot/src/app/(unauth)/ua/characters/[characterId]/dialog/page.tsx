@@ -14,6 +14,8 @@ import { getTranslations } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { resolveSharingLocale } from '@/i18n/sharing-locale';
 import { loadTranslations } from '@/i18n/load-translations';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('characters.page-titles');
@@ -24,9 +26,26 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const searchParamsSchema = z.object({ inviteCode: z.string() });
 
-export default async function Page(props: PageProps<'/ua/characters/[characterId]/dialog'>) {
-  const { characterId } = await props.params;
-  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
+export default function Page(props: PageProps<'/ua/characters/[characterId]/dialog'>) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-dvh items-center justify-center">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent params={props.params} searchParams={props.searchParams} />
+    </Suspense>
+  );
+}
+
+async function PageContent({
+  params,
+  searchParams: searchParamsPromise,
+}: PageProps<'/ua/characters/[characterId]/dialog'>) {
+  const { characterId } = await params;
+  const searchParams = parseSearchParams(searchParamsSchema, await searchParamsPromise);
 
   const character = await dbGetCharacterByIdAndInviteCode({
     id: characterId,

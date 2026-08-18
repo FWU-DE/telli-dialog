@@ -14,6 +14,8 @@ import { getTranslations } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { resolveSharingLocale } from '@/i18n/sharing-locale';
 import { loadTranslations } from '@/i18n/load-translations';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('learning-scenarios.page-titles');
@@ -24,11 +26,28 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const searchParamsSchema = z.object({ inviteCode: z.string() });
 
-export default async function Page(
+export default function Page(
   props: PageProps<'/ua/learning-scenarios/[learningScenarioId]/dialog'>,
 ) {
-  const { learningScenarioId } = await props.params;
-  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-dvh items-center justify-center">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent params={props.params} searchParams={props.searchParams} />
+    </Suspense>
+  );
+}
+
+async function PageContent({
+  params,
+  searchParams: searchParamsPromise,
+}: PageProps<'/ua/learning-scenarios/[learningScenarioId]/dialog'>) {
+  const { learningScenarioId } = await params;
+  const searchParams = parseSearchParams(searchParamsSchema, await searchParamsPromise);
 
   const learningScenario = await dbGetLearningScenarioByIdAndInviteCode({
     learningScenarioId,
