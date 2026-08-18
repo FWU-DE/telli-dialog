@@ -9,7 +9,7 @@ test('can generate an image and use image actions', async ({ page }) => {
   await page.goto('/image-generation');
   await page.waitForURL('/image-generation**');
 
-  // select flux as model
+  // select gpt-image model if not already selected
   const dropdownLocator = page.getByTestId('image-model-dropdown');
   await dropdownLocator.waitFor();
 
