@@ -13,6 +13,8 @@ import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { Suspense } from 'react';
+import { Spinner } from '@ui/components/spinner';
 
 const searchParamsSchema = z.object({ model: z.string().optional() });
 
@@ -23,11 +25,26 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Page(
-  props: PageProps<'/assistants/d/[assistantId]/[conversationId]'>,
-) {
-  const { assistantId, conversationId } = await props.params;
-  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
+export default function Page(props: PageProps<'/assistants/d/[assistantId]/[conversationId]'>) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center p-8">
+          <Spinner className="size-8" />
+        </div>
+      }
+    >
+      <PageContent params={props.params} searchParams={props.searchParams} />
+    </Suspense>
+  );
+}
+
+async function PageContent({
+  params,
+  searchParams: searchParamsPromise,
+}: PageProps<'/assistants/d/[assistantId]/[conversationId]'>) {
+  const { assistantId, conversationId } = await params;
+  const searchParams = parseSearchParams(searchParamsSchema, await searchParamsPromise);
   const { user, federalState } = await requireAuth();
   const userAndContext = {
     ...user,
