@@ -34,7 +34,7 @@ export function HeaderMainMenuItem({
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="px-0"
+          className="px-0 py-0"
           onCloseAutoFocus={(event) => {
             event.preventDefault();
           }}

@@ -9,7 +9,7 @@ export function HeaderMenuItem({ onClick, children }: HeaderMenuItemProps) {
   return (
     <DropdownMenuItem
       onClick={onClick}
-      className="flex flex-row gap-3 items-center px-4 py-2.5 text-primary text-sm font-medium focus:bg-primary/15 rounded-none"
+      className="flex flex-row gap-3 items-center px-4 py-4 text-primary text-base focus:bg-primary/15 rounded-none"
     >
       {children}
     </DropdownMenuItem>

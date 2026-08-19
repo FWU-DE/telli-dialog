@@ -17,7 +17,7 @@ type ImageStyleContextProps = {
 const ImageStyleContext = React.createContext<ImageStyleContextProps | undefined>(undefined);
 
 function useImageStyles() {
-  const t = useTranslations('image-generation');
+  const t = useTranslations('image-generation.style');
 
   return [
     {
@@ -27,12 +27,12 @@ function useImageStyles() {
     },
     {
       name: 'photorealistic' as ImageStyleType,
-      displayName: t('style-photorealistic-name'),
+      displayName: t('photorealistic'),
       prompt: 'Create a photorealistic image with natural lighting and realistic textures',
     },
     {
       name: 'cartoon' as ImageStyleType,
-      displayName: t('style-cartoon-name'),
+      displayName: t('cartoon'),
       prompt: 'Create a cartoon-style image with vibrant colors and stylized features',
     },
   ];

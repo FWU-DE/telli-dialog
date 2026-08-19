@@ -2,9 +2,9 @@
 
 import { useImageAspectRatio } from './image-aspect-ratio-provider';
 import { useTranslations } from 'next-intl';
-import { CustomRectangleIcon } from '../icons/custom-rectangle-icon';
 import { HeaderMainMenuItem } from '../layout/header-main-menu-item';
 import { HeaderMenuItem } from '../layout/header-menu-item';
+import { Separator } from '@ui/components/separator';
 
 export default function SelectImageAspectRatio() {
   const { aspectRatio, setAspectRatio } = useImageAspectRatio();
@@ -16,18 +16,11 @@ export default function SelectImageAspectRatio() {
       triggerLabel={t(aspectRatio)}
       triggerAriaLabel={t('aria-label')}
     >
-      <HeaderMenuItem onClick={() => setAspectRatio('quadratic')}>
-        <CustomRectangleIcon width={16} height={16} />
-        {t('quadratic')}
-      </HeaderMenuItem>
-      <HeaderMenuItem onClick={() => setAspectRatio('portrait')}>
-        <CustomRectangleIcon width={14} height={20} />
-        {t('portrait')}
-      </HeaderMenuItem>
-      <HeaderMenuItem onClick={() => setAspectRatio('landscape')}>
-        <CustomRectangleIcon width={20} height={14} />
-        {t('landscape')}
-      </HeaderMenuItem>
+      <HeaderMenuItem onClick={() => setAspectRatio('quadratic')}>{t('quadratic')}</HeaderMenuItem>
+      <Separator className="mx-2 border-b-0" />
+      <HeaderMenuItem onClick={() => setAspectRatio('portrait')}>{t('portrait')}</HeaderMenuItem>
+      <Separator className="mx-2 border-b-0" />
+      <HeaderMenuItem onClick={() => setAspectRatio('landscape')}>{t('landscape')}</HeaderMenuItem>
     </HeaderMainMenuItem>
   );
 }
