@@ -5,12 +5,16 @@ import {
   DropdownMenuTrigger,
 } from '@ui/components/dropdown-menu';
 import { CaretDownIcon } from '@phosphor-icons/react';
+import { GreenLeafIcon } from '../icons/green-leave-icon';
+import { Badge } from '../common/badge';
 
 type HeaderMainMenuItemProps = {
   caption: string;
   triggerLabel: string;
   triggerAriaLabel: string;
   children: ReactNode;
+  isNew?: boolean;
+  isGreen?: boolean;
 };
 
 export function HeaderMainMenuItem({
@@ -18,6 +22,8 @@ export function HeaderMainMenuItem({
   triggerLabel,
   triggerAriaLabel,
   children,
+  isNew,
+  isGreen,
 }: HeaderMainMenuItemProps) {
   return (
     <div className="flex flex-col gap-2 p-2">
@@ -30,6 +36,8 @@ export function HeaderMainMenuItem({
             aria-label={triggerAriaLabel}
           >
             {triggerLabel}
+            {isGreen && <GreenLeafIcon />}
+            {isNew && <Badge text="NEU" />}
             <CaretDownIcon />
           </button>
         </DropdownMenuTrigger>

@@ -19,15 +19,16 @@ export default function SelectImageStyle() {
     >
       {selectableStyles.map((style) => {
         return (
-          <HeaderMenuItem
-            key={style.name}
-            onClick={() => setSelectedStyle(style.name === 'none' ? undefined : style)}
-          >
-            {style.displayName}
-          </HeaderMenuItem>
+          <React.Fragment key={style.name}>
+            <HeaderMenuItem
+              onClick={() => setSelectedStyle(style.name === 'none' ? undefined : style)}
+            >
+              {style.displayName}
+            </HeaderMenuItem>
+            <Separator className="mx-2 border-b-0 last:hidden" />
+          </React.Fragment>
         );
       })}
-      <Separator className="mx-2 border-b-0 last:hidden" />
     </HeaderMainMenuItem>
   );
 }
