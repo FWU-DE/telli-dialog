@@ -13,6 +13,7 @@ type HeaderMainMenuItemProps = {
   triggerLabel: string;
   triggerAriaLabel: string;
   children: ReactNode;
+  'data-testid'?: string;
   isNew?: boolean;
   isGreen?: boolean;
 };
@@ -24,6 +25,7 @@ export function HeaderMainMenuItem({
   children,
   isNew,
   isGreen,
+  'data-testid': dataTestId,
 }: HeaderMainMenuItemProps) {
   return (
     <div className="flex flex-col gap-2 p-2">
@@ -34,6 +36,7 @@ export function HeaderMainMenuItem({
             type="button"
             className="flex flex-row gap-1.5 items-center text-primary text-base font-medium outline-none focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-ring/50"
             aria-label={triggerAriaLabel}
+            data-testid={dataTestId}
           >
             {triggerLabel}
             {isGreen && <GreenLeafIcon />}
