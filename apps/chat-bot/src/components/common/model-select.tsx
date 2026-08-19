@@ -9,7 +9,7 @@ import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { HeaderMainMenuItem } from '../layout/header-main-menu-item';
 import { HeaderMenuItem } from '../layout/header-menu-item';
 import { Separator } from '@ui/components/separator';
-import { GreenLeafIcon } from '../icons/green-leave-icon';
+import { GreenLeafIcon } from '../icons/green-leaf-icon';
 
 type ModelSelectProps = {
   models: LlmModelSelectModel[];

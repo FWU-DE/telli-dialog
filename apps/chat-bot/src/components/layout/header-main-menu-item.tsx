@@ -5,7 +5,7 @@ import {
   DropdownMenuTrigger,
 } from '@ui/components/dropdown-menu';
 import { CaretDownIcon } from '@phosphor-icons/react';
-import { GreenLeafIcon } from '../icons/green-leave-icon';
+import { GreenLeafIcon } from '../icons/green-leaf-icon';
 import { Badge } from '../common/badge';
 
 type HeaderMainMenuItemProps = {
