@@ -80,19 +80,17 @@ export function usePersistedOverviewFilter(
   const selectedFilter = filter ?? 'mine';
   const [isLoading, setIsLoading] = useState(true);
   const onLoadRef = useRef(onLoad);
-  const lastLoadedFilterRef = useRef<OverviewFilter | null>(null);
 
   useEffect(() => {
     onLoadRef.current = onLoad;
   });
 
-  // Load data when filter is changed
+  // Load data whenever this effect (re-)runs: on mount, when filter changes, and when
+  // Next.js restores this route from its client-side segment cache (state persists, but
+  // the fetched list can be stale if the entity was created/edited elsewhere in the
+  // meantime), so refetch unconditionally rather than skipping repeats of the same filter.
   useEffect(() => {
-    if (lastLoadedFilterRef.current === filter) {
-      return;
-    }
     if (filter) {
-      lastLoadedFilterRef.current = filter;
       onLoadRef.current(filter).finally(() => startTransition(() => setIsLoading(false)));
     }
   }, [filter]);
