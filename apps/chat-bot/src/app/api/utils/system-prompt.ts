@@ -4,8 +4,6 @@ import {
   MAX_TOOL_CALLS_PER_ITERATION,
   type ToolDefinition,
 } from '@ais-chat/ai-core';
-import { RetrievedChunk } from '../rag/types';
-import type { WebSearchResult } from '@shared/db/schema';
 
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien
@@ -92,69 +90,6 @@ Beantworte die Frage immer zuerst mit der naheliegendsten Interpretation - stell
 Rückfragen oder Vorschläge kommen ausschließlich am Ende der Antwort.
 Bei einfachen Fragen erstelle maximal einen Vorschlag. Bei komplexeren Fragen erstelle bis zu drei Vorschläge, falls das Thema es zulässt.
 Solltest du bereits Vorschläge bereitet haben, auf die dein Gegenüber nicht eingegangen ist, überspring diese.`;
-
-export function constructRagContext(
-  chunks: RetrievedChunk[],
-  errorUrls: string[] = [],
-  webSearchResults: WebSearchResult[] = [],
-) {
-  if (chunks.length === 0 && errorUrls.length === 0 && webSearchResults.length === 0) return '';
-
-  const fileChunks = chunks
-    .filter((chunk) => chunk.sourceType === 'file')
-    .sort(
-      (a, b) => (a.fileName ?? '').localeCompare(b.fileName ?? '') || a.orderIndex - b.orderIndex,
-    );
-  const webpageChunks = chunks
-    .filter((chunk) => chunk.sourceType === 'webpage')
-    .sort(
-      (a, b) => (a.sourceUrl ?? '').localeCompare(b.sourceUrl ?? '') || a.orderIndex - b.orderIndex,
-    );
-
-  const sections: string[] = [];
-
-  if (fileChunks.length > 0) {
-    const fileTexts = fileChunks
-      .map(
-        (chunk) =>
-          `${chunk.fileName ? `Dateiname: ${chunk.fileName} - Abschnitt: ${chunk.orderIndex + 1}\n` : ''}${chunk.content}`,
-      )
-      .join('\n\n');
-    sections.push(
-      `### Hochgeladene Dateien\nDie folgenden Inhalte stammen aus Dateien, die für den Chat bereitgestellt wurden:\n\n${fileTexts}`,
-    );
-  }
-
-  if (webpageChunks.length > 0) {
-    const linkTexts = webpageChunks
-      .map(
-        (chunk) => `Url: ${chunk.sourceUrl} - Abschnitt: ${chunk.orderIndex + 1}\n${chunk.content}`,
-      )
-      .join('\n\n');
-    sections.push(
-      `### Verlinkte Webseiten\nDie folgenden Inhalte stammen aus Links, die zum Chat gehören:\n\n${linkTexts}`,
-    );
-  }
-
-  if (errorUrls.length > 0) {
-    sections.push(
-      `### Fehler beim Zugriff\nEs gab Probleme beim Zugriff auf die folgenden URLs:\n${errorUrls.map((url) => `- ${url}`).join('\n')}`,
-    );
-  }
-
-  if (webSearchResults.length > 0) {
-    const webSearchText = webSearchResults
-      .map((result) => `Url: ${result.url}\n${result.content}`)
-      .join('\n\n');
-    sections.push(
-      `### Websuche\nDie folgenden Inhalte stammen aus einer live Websuche:\n\n${webSearchText}`,
-    );
-  }
-
-  if (sections.length === 0) return '';
-
-  return `\n## Kontextinformationen\nNutze die folgenden Informationen, falls sinnvoll, für deine Antwort:\n\n${sections.join('\n\n')}`;
-}
 
 // Helper to format optional fields in a list
 // Takes a title and an array of objects with label and value, filters out undefined or null values, and formats them as a list
