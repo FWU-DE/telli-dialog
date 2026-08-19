@@ -6,6 +6,7 @@ import { buildWebScraperTool } from './tools/web-scraper-tool';
 import { buildRetrieveEntireFileTool } from './tools/retrieve-entire-file-tool';
 import { buildRetrieveTextChunksTool } from './tools/retrieve-text-chunks-tool';
 import { buildMundoSearchTool } from './tools/mundo-search-tool';
+import { buildExecuteCodeTool } from './tools/execute-code-tool';
 
 type BuildToolsParams = {
   user: UserAndContext;
@@ -18,8 +19,19 @@ type BuildToolsParams = {
   attachedLinks?: string[];
   allowWebTools: boolean;
   allowMundoSearch?: boolean;
+  allowExecuteCode?: boolean;
   onWebSearchResults?: (results: WebSearchResult[]) => void;
 };
+
+export function isExecuteCodeAllowed({
+  agenticChatEnabled,
+  featureToggles,
+}: {
+  agenticChatEnabled: boolean;
+  featureToggles: { isExecuteCodeEnabled?: boolean };
+}) {
+  return agenticChatEnabled && featureToggles.isExecuteCodeEnabled === true;
+}
 
 type BuildToolsResult = {
   toolRegistry: ToolRegistry;
@@ -36,6 +48,7 @@ export async function buildTools({
   attachedLinks = [],
   allowWebTools,
   allowMundoSearch,
+  allowExecuteCode,
   onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
   const toolRegistry: ToolRegistry = {};
@@ -69,6 +82,11 @@ export async function buildTools({
   if (allowMundoSearch) {
     const mundoSearchTool = buildMundoSearchTool();
     toolRegistry[mundoSearchTool.definition.name] = mundoSearchTool;
+  }
+
+  if (allowExecuteCode) {
+    const executeCodeTool = buildExecuteCodeTool();
+    if (executeCodeTool) toolRegistry[executeCodeTool.definition.name] = executeCodeTool;
   }
 
   const retrieveEntireFileTool = buildRetrieveEntireFileTool({

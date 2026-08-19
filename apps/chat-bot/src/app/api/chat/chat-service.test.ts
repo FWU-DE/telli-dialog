@@ -82,6 +82,13 @@ vi.mock('@ais-chat/ai-core', () => ({
 
 vi.mock('./build-tools', () => ({
   buildTools: mocks.buildToolsMock,
+  isExecuteCodeAllowed: ({
+    agenticChatEnabled,
+    featureToggles,
+  }: {
+    agenticChatEnabled: boolean;
+    featureToggles: { isExecuteCodeEnabled?: boolean };
+  }) => agenticChatEnabled && featureToggles.isExecuteCodeEnabled === true,
 }));
 
 vi.mock('./websearch', () => ({
@@ -370,6 +377,9 @@ describe('sendChatMessage', () => {
 
     if (isAgenticChatEnabled) {
       expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
+      expect(mocks.buildToolsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ allowExecuteCode: false }),
+      );
       expect(mocks.retrieveChunksMock).not.toHaveBeenCalled();
       expect(mocks.runWebSearchPipelineMock).not.toHaveBeenCalled();
       expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
@@ -498,6 +508,41 @@ describe('sendChatMessage', () => {
         }),
       ]),
     );
+  });
+
+  it('does not persist execute_code tool calls or results', async () => {
+    mocks.runAgentLoopMock.mockImplementationOnce(
+      ({ onComplete }: { onComplete: (args: unknown) => Promise<void> | void }) => {
+        void onComplete({
+          fullText: 'done',
+          usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 },
+          priceInCents: 1,
+          agentLoopMessages: [
+            {
+              role: 'assistant',
+              content: '',
+              toolCalls: [{ id: 'code-call', name: 'execute_code', arguments: '{}' }],
+            },
+            { role: 'tool', content: '{"status":"success"}', toolCallId: 'code-call' },
+          ],
+        });
+      },
+    );
+    const { sendChatMessage } = await import('./chat-service');
+    const result = await sendChatMessage({
+      conversationId: conversation.id,
+      messages,
+      modelId: mainModel.id,
+      user: createUser(true),
+    });
+    await collectStream(result.stream);
+    const inserted = mocks.dbInsertChatContentBatchMock.mock.calls[0]?.[0] as Array<{
+      role: string;
+      toolCallId?: string;
+      toolCalls?: unknown;
+    }>;
+    expect(inserted).toHaveLength(1);
+    expect(inserted[0]).toMatchObject({ role: 'assistant', id: result.messageId });
   });
 
   it('persists web search results received during agentic chat', async () => {

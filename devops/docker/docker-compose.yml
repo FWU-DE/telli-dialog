@@ -158,6 +158,30 @@ services:
     ports:
       - '8089:8080'
 
+  # Private code execution gateway. See sandbox-fusion/README.md.
+  sandbox-fusion:
+    build:
+      context: ./sandbox-fusion
+      dockerfile: Dockerfile
+    image: ais-chat-sandbox-fusion:server-20250609-hardened
+    restart: unless-stopped
+    # Required by upstream lite isolation for mount, cgroup and netns setup.
+    privileged: true
+    cgroup: private
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2g
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:8080/v1/ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - '127.0.0.1:8001:8080'
+
   # AIS.chat API - OpenAI compatible API service
   ais-chat-api:
     image: ghcr.io/fwu-de/ais-chat-api:latest
@@ -238,6 +262,9 @@ services:
       # Xberg text extraction
       XBERG_URL: http://xberg:8000
 
+      # SandboxFusion code execution (host clients use http://127.0.0.1:8001)
+      SANDBOX_FUSION_URL: http://sandbox-fusion:8080
+
       # Bifrost LLM proxy
       BIFROST_BASE_URL: http://bifrost:8080/openai/v1
       BIFROST_API_KEY: sk-bf-example-key
@@ -268,6 +295,8 @@ services:
       crawl4ai:
         condition: service_healthy
       xberg:
+        condition: service_healthy
+      sandbox-fusion:
         condition: service_healthy
       rustfs:
         condition: service_healthy

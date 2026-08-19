@@ -107,6 +107,13 @@ vi.mock('@shared/logging', () => ({
 
 vi.mock('../chat/build-tools', () => ({
   buildTools: mocks.buildToolsMock,
+  isExecuteCodeAllowed: ({
+    agenticChatEnabled,
+    featureToggles,
+  }: {
+    agenticChatEnabled: boolean;
+    featureToggles: { isExecuteCodeEnabled?: boolean };
+  }) => agenticChatEnabled && featureToggles.isExecuteCodeEnabled === true,
 }));
 
 vi.mock('../file-operations/preprocess-image', () => ({
@@ -307,7 +314,33 @@ describe('sendLearningScenarioMessage', () => {
     expect(mocks.buildToolsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         allowWebTools: false,
+        allowExecuteCode: false,
       }),
+    );
+  });
+
+  it('follows the owner federal-state execute-code toggle in agentic shared chat', async () => {
+    const { sendLearningScenarioMessage } = await import('./learning-scenario-chat-service');
+    mocks.getUserAndContextByUserIdMock.mockResolvedValue({
+      ...teacherUserAndContext,
+      federalState: {
+        ...teacherUserAndContext.federalState,
+        featureToggles: {
+          ...teacherUserAndContext.federalState.featureToggles,
+          isAgenticChatEnabled: true,
+          isExecuteCodeEnabled: true,
+        },
+      },
+    });
+    mocks.buildToolsMock.mockResolvedValue({ toolRegistry: {} });
+    await sendLearningScenarioMessage({
+      learningScenarioId: learningScenario.id,
+      inviteCode: 'invite-code',
+      messages,
+      modelId: model.id,
+    });
+    expect(mocks.buildToolsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ allowExecuteCode: true }),
     );
   });
 });

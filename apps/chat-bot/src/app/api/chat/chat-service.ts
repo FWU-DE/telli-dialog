@@ -39,7 +39,7 @@ import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
-import { buildTools } from './build-tools';
+import { buildTools, isExecuteCodeAllowed } from './build-tools';
 import { isWebSearchEnabledForEntity, runWebSearchPipeline } from './websearch';
 import type { WebSearchResult } from '@shared/db/schema';
 import type {
@@ -72,7 +72,7 @@ function filterPersistedAgentLoopMessages(agentLoopMessages: AiCoreMessage[]) {
   return agentLoopMessages.flatMap((message) => {
     if (message.role === 'assistant' && message.toolCalls?.length) {
       const retainedToolCalls = message.toolCalls.filter((toolCall) => {
-        if (toolCall.name === 'retrieve_entire_file') {
+        if (toolCall.name === 'retrieve_entire_file' || toolCall.name === 'execute_code') {
           excludedToolCallIds.add(toolCall.id);
           return false;
         }
@@ -414,6 +414,10 @@ export async function sendChatMessage({
       sourceUrls: ingestResult.processedUrls,
       allowWebTools,
       allowMundoSearch: true,
+      allowExecuteCode: isExecuteCodeAllowed({
+        agenticChatEnabled,
+        featureToggles: user.federalState.featureToggles,
+      }),
       onWebSearchResults: (results) => {
         webSearchResults = results;
         update(

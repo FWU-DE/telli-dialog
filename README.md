@@ -34,6 +34,7 @@ This guide helps you run AIS.chat using pre-built Docker images with minimal con
    - **API**: http://localhost:3002
    - **Keycloak**: http://localhost:8080 (credentials: `admin` / `admin`)
    - **RustFS Console**: http://localhost:9001 (S3-compatible storage, credentials: `rustfsadmin` / `rustfsadmin123`)
+   - **SandboxFusion**: private at http://127.0.0.1:8001 (see [deployment notes](devops/docker/sandbox-fusion/README.md))
 
 4. **Configure the application using ais-chat-admin:**
    - Navigate to the admin app at http://localhost:3001
@@ -109,6 +110,13 @@ The project uses environment variables in `.env.local` files for local developme
 - `apps/api/.env.local` — For the API app (database URL, logging, telemetry)
 
 For detailed variable documentation and values for local development with docker-compose, see the `.env.example` files in each app directory.
+
+SandboxFusion is included in both compose stacks. It builds a repository-owned
+image enabling upstream `lite` isolation and no-bridge network namespaces.
+Callers must send 5-second compile/run timeouts and a 128 MiB memory limit on
+every `/run_code` request. Its host port is loopback-only. The service requires
+Docker `privileged` mode for upstream mount, cgroup, and network namespace
+setup; use a dedicated trusted host.
 
 **How env files are loaded:**
 

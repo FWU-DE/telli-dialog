@@ -29,7 +29,7 @@ import {
 } from '../chat/utils';
 import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
-import { buildTools } from '../chat/build-tools';
+import { buildTools, isExecuteCodeAllowed } from '../chat/build-tools';
 import { isWebSearchEnabledForEntity } from '../chat/websearch';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
@@ -172,6 +172,10 @@ export async function sendCharacterMessage({
       sourceUrls: processedUrls,
       allowWebTools,
       allowMundoSearch: false,
+      allowExecuteCode: isExecuteCodeAllowed({
+        agenticChatEnabled,
+        featureToggles: teacherUserAndContext.federalState.featureToggles,
+      }),
       onWebSearchResults: (results) => {
         update(
           encodeChatStreamEvent({

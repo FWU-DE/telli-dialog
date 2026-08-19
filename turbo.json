@@ -19,6 +19,7 @@
     "DE_TEST_API_KEY",
     "API_KEY",
     "API_URL",
+    "SANDBOX_FUSION_URL",
     "ENCRYPTION_KEY",
     "RABBITMQ_URI",
     "NEXT_RUNTIME",

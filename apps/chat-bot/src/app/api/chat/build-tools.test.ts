@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   buildRetrieveEntireFileToolMock: vi.fn(),
   buildRetrieveTextChunksToolMock: vi.fn(),
   buildMundoSearchToolMock: vi.fn(),
+  buildExecuteCodeToolMock: vi.fn(),
 }));
 
 vi.mock('./tools/web-search-tool', () => ({
@@ -28,6 +29,9 @@ vi.mock('./tools/retrieve-text-chunks-tool', () => ({
 
 vi.mock('./tools/mundo-search-tool', () => ({
   buildMundoSearchTool: mocks.buildMundoSearchToolMock,
+}));
+vi.mock('./tools/execute-code-tool', () => ({
+  buildExecuteCodeTool: mocks.buildExecuteCodeToolMock,
 }));
 
 const user = {
@@ -92,6 +96,10 @@ beforeEach(() => {
       description: 'Search MUNDO',
       parameters: { type: 'object', properties: {} },
     },
+    handler: vi.fn(),
+  });
+  mocks.buildExecuteCodeToolMock.mockReturnValue({
+    definition: { name: 'execute_code', description: 'Execute code', parameters: {} },
     handler: vi.fn(),
   });
 });
@@ -195,4 +203,39 @@ describe('buildTools', () => {
     expect(Object.keys(toolRegistry)).toContain('mundo_search');
     expect(mocks.buildMundoSearchToolMock).toHaveBeenCalledTimes(1);
   });
+
+  it('adds execute_code only when explicitly enabled', async () => {
+    const { buildTools } = await import('./build-tools');
+    const disabled = await buildTools({ user, relatedFileEntities, allowWebTools: false });
+    expect(disabled.toolRegistry).not.toHaveProperty('execute_code');
+    const enabled = await buildTools({
+      user,
+      relatedFileEntities,
+      allowWebTools: false,
+      allowExecuteCode: true,
+    });
+    expect(enabled.toolRegistry).toHaveProperty('execute_code');
+    expect(mocks.buildExecuteCodeToolMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('isExecuteCodeAllowed', () => {
+  it.each([
+    { agenticChatEnabled: false, isExecuteCodeEnabled: false, expected: false },
+    { agenticChatEnabled: false, isExecuteCodeEnabled: true, expected: false },
+    { agenticChatEnabled: true, isExecuteCodeEnabled: false, expected: false },
+    { agenticChatEnabled: true, isExecuteCodeEnabled: true, expected: true },
+  ])(
+    'returns $expected when agentic chat is $agenticChatEnabled and execute code is $isExecuteCodeEnabled',
+    async ({ agenticChatEnabled, isExecuteCodeEnabled, expected }) => {
+      const { isExecuteCodeAllowed } = await import('./build-tools');
+
+      expect(
+        isExecuteCodeAllowed({
+          agenticChatEnabled,
+          featureToggles: { isExecuteCodeEnabled },
+        }),
+      ).toBe(expected);
+    },
+  );
 });

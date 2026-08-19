@@ -24,6 +24,43 @@ Use the local Docker Compose setup which includes the mock server.
 Tests in `tests/external-services/` are intentionally excluded from the mock and always run against real LLMs.
 They are skipped from the chromium/firefox test projects and must be run separately.
 
+### SandboxFusion code execution
+
+The direct gateway smoke test does not require an LLM or application startup:
+
+```sh
+docker compose -f ../../devops/docker/docker-compose.local.yml up -d sandbox-fusion
+../../devops/docker/sandbox-fusion/smoke.sh http://127.0.0.1:8001
+```
+
+For the real-provider Playwright test, start the local services and source
+applications, configure `SANDBOX_FUSION_URL`, and create at least one usable
+provider model/API key in the admin UI. Then opt in explicitly:
+
+```sh
+E2E_CODE_EXECUTION_REAL_PROVIDER=true \
+  SANDBOX_FUSION_URL=http://127.0.0.1:8001 \
+  dotenvx run -f .env.local -- pnpm exec playwright test \
+    e2e/tests/external-services/execute-code.test.ts --project=external-services
+```
+
+The acceptance invocation must include the required environment from `.env.local` as well as
+the explicit opt-in variables above; do not run this test with placeholder credentials or the
+mock provider. Use a safe, approved provider/model and redact secrets from any captured output.
+Acceptance evidence must report the actual number of executed tests (including passed and skipped
+tests, as shown by the Playwright result), identify the provider and model safely, and include
+corroboration from both the SandboxFusion request and its logs that the execution reached the
+gateway. The direct gateway smoke-test output alone is not sufficient evidence for this
+application-level acceptance test.
+
+This test is intentionally not a substitute for the direct smoke test. The
+gateway requires Docker `privileged` mode for upstream `lite` isolation and
+must run on a dedicated trusted host. It is not a kernel-grade guarantee
+against a compromised upstream runtime or host kernel; review the pinned
+image and patch again before upgrading it. The application sends no files to
+the provider; that policy does not prevent SandboxFusion from using its own
+isolated temporary working directory.
+
 ## Run e2e tests
 
 Make sure that there is a `.env.local` file that contains the configuration necessary for the tests to run.

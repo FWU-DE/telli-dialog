@@ -140,6 +140,30 @@ services:
       retries: 5
       start_period: 2s
 
+  sandbox-fusion:
+    build:
+      context: ./sandbox-fusion
+      dockerfile: Dockerfile
+    image: ais-chat-sandbox-fusion:server-20250609-hardened
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8001:8080'
+    # Upstream lite isolation mounts overlayfs, proc/sysfs and creates netns.
+    # Docker must grant those operations; this is the documented limitation.
+    privileged: true
+    cgroup: private
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2g
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:8080/v1/ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
 volumes:
   bifrost_data:
   keycloak_data:
