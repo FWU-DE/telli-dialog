@@ -34,7 +34,6 @@ const user = {
       isSharedChatEnabled: true,
       isCustomGptEnabled: true,
       isShareTemplateWithSchoolEnabled: true,
-      isAgenticChatEnabled: true,
       isImageGenerationEnabled: true,
       isWebSearchEnabled: false,
     },

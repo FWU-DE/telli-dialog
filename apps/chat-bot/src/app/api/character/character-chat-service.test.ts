@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ChatMessage } from '@/types/chat';
 
 const mocks = vi.hoisted(() => ({
-  generateTextStreamWithBillingMock: vi.fn(),
   runAgentLoopMock: vi.fn(),
   getUserAndContextByUserIdMock: vi.fn(),
   checkProductAccessMock: vi.fn(),
@@ -23,7 +22,6 @@ const mocks = vi.hoisted(() => ({
   enrichMessagesWithImageDataMock: vi.fn(),
   getMostRecentUserMessageMock: vi.fn(),
   limitChatHistoryMock: vi.fn(),
-  retrieveChunksMock: vi.fn(),
   logErrorMock: vi.fn(),
   buildToolsMock: vi.fn(),
   createImageAttachmentsForConversationMock: vi.fn(),
@@ -34,7 +32,6 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@ais-chat/ai-core', () => ({
-  generateTextStreamWithBilling: mocks.generateTextStreamWithBillingMock,
   runAgentLoop: mocks.runAgentLoopMock,
   TokenPointsExceededError: class TokenPointsExceededError extends Error {},
   SharedChatExpiredError: class SharedChatExpiredError extends Error {},
@@ -96,10 +93,6 @@ vi.mock('../chat/utils', () => ({
   limitChatHistory: mocks.limitChatHistoryMock,
 }));
 
-vi.mock('../rag/rag-service', () => ({
-  retrieveChunks: mocks.retrieveChunksMock,
-}));
-
 vi.mock('@shared/logging', () => ({
   logError: mocks.logErrorMock,
 }));
@@ -148,9 +141,6 @@ const teacherUserAndContext = {
   userRole: 'teacher',
   federalState: {
     id: 'federal-state-1',
-    featureToggles: {
-      isAgenticChatEnabled: false,
-    },
   },
 };
 
@@ -197,7 +187,7 @@ beforeEach(() => {
   mocks.combineSharedRelatedFilesMock.mockResolvedValue([]);
   mocks.ingestWebContentMock.mockResolvedValue({ processedUrls: [], errorUrls: [] });
   mocks.isWebSearchEnabledForEntityMock.mockReturnValue(true);
-  mocks.retrieveChunksMock.mockResolvedValue([]);
+  mocks.buildToolsMock.mockResolvedValue({ toolRegistry: {} });
   mocks.constructCharacterSystemPromptMock.mockReturnValue('system-prompt');
   mocks.limitChatHistoryMock.mockImplementation(
     (incomingMessages: ChatMessage[]) => incomingMessages,
@@ -216,21 +206,15 @@ beforeEach(() => {
   mocks.dbUpdateTokenUsageByCharacterChatIdMock.mockResolvedValue(undefined);
   mocks.constructNewMessageEventMock.mockReturnValue({ type: 'new-message' });
   mocks.sendRabbitmqEventMock.mockResolvedValue(undefined);
-  mocks.generateTextStreamWithBillingMock.mockImplementation(async function* (
-    _modelId: string,
-    _messages: unknown[],
-    _apiKeyId: string,
-    onComplete?: (args: {
-      usage: { promptTokens: number; completionTokens: number; totalTokens: number };
-      priceInCents: number;
-    }) => Promise<void> | void,
-  ) {
-    yield 'shared response';
-    await onComplete?.({
-      usage: { promptTokens: 1, completionTokens: 2, totalTokens: 3 },
-      priceInCents: 4,
-    });
-  });
+  mocks.runAgentLoopMock.mockImplementation(
+    ({ onComplete }: { onComplete: (args: unknown) => Promise<void> | void }) => {
+      void onComplete({
+        fullText: 'shared response',
+        usage: { promptTokens: 1, completionTokens: 2, totalTokens: 3 },
+        priceInCents: 4,
+      });
+    },
+  );
 });
 
 describe('sendCharacterMessage', () => {
@@ -282,8 +266,6 @@ describe('sendCharacterMessage', () => {
       federalState: {
         ...teacherUserAndContext.federalState,
         featureToggles: {
-          ...teacherUserAndContext.federalState.featureToggles,
-          isAgenticChatEnabled: true,
           isWebSearchEnabled: false,
         },
       },
@@ -300,7 +282,6 @@ describe('sendCharacterMessage', () => {
 
     expect(mocks.isWebSearchEnabledForEntityMock).toHaveBeenCalledWith({
       featureToggles: expect.objectContaining({
-        isAgenticChatEnabled: true,
         isWebSearchEnabled: false,
       }),
       entity: character,

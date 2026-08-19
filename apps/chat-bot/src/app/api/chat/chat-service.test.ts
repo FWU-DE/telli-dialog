@@ -34,11 +34,8 @@ const buildToolsOutput = {
 };
 
 const mocks = vi.hoisted(() => ({
-  generateTextStreamWithBillingMock: vi.fn(),
-  generateAgenticStreamWithBillingMock: vi.fn(),
   runAgentLoopMock: vi.fn(),
   buildToolsMock: vi.fn(),
-  runWebSearchPipelineMock: vi.fn(),
   isWebSearchEnabledForEntityMock: vi.fn(),
   constructChatSystemPromptMock: vi.fn(),
   getModelAndApiKeyWithResultMock: vi.fn(),
@@ -62,7 +59,6 @@ const mocks = vi.hoisted(() => ({
   convertToAiCoreMessagesMock: vi.fn(),
   getChatTitleMock: vi.fn(),
   limitChatHistoryMock: vi.fn(),
-  retrieveChunksMock: vi.fn(),
   extractUrlsMock: vi.fn(),
   createImageAttachmentsForConversationMock: vi.fn(),
   ingestWebContentMock: vi.fn(),
@@ -74,8 +70,6 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@ais-chat/ai-core', () => ({
-  generateTextStreamWithBilling: mocks.generateTextStreamWithBillingMock,
-  generateAgenticStreamWithBilling: mocks.generateAgenticStreamWithBillingMock,
   runAgentLoop: mocks.runAgentLoopMock,
   TokenPointsExceededError: class TokenPointsExceededError extends Error {},
 }));
@@ -85,7 +79,6 @@ vi.mock('./build-tools', () => ({
 }));
 
 vi.mock('./websearch', () => ({
-  runWebSearchPipeline: mocks.runWebSearchPipelineMock,
   isWebSearchEnabledForEntity: mocks.isWebSearchEnabledForEntityMock,
 }));
 
@@ -148,10 +141,6 @@ vi.mock('./utils', () => ({
   limitChatHistory: mocks.limitChatHistoryMock,
 }));
 
-vi.mock('../rag/rag-service', () => ({
-  retrieveChunks: mocks.retrieveChunksMock,
-}));
-
 vi.mock('../utils/extract-urls', () => ({
   extractUrls: mocks.extractUrlsMock,
 }));
@@ -209,7 +198,7 @@ const messages: ChatMessage[] = [
   { id: 'message-3', role: 'user', content: 'Current question' },
 ];
 
-function createUser(isAgenticChatEnabled: boolean): UserAndContext {
+function createUser(): UserAndContext {
   return {
     id: 'user-1',
     userRole: 'teacher',
@@ -223,7 +212,6 @@ function createUser(isAgenticChatEnabled: boolean): UserAndContext {
         isSharedChatEnabled: true,
         isCustomGptEnabled: true,
         isShareTemplateWithSchoolEnabled: true,
-        isAgenticChatEnabled,
         isImageGenerationEnabled: true,
         isWebSearchEnabled: true,
       },
@@ -277,7 +265,6 @@ beforeEach(() => {
   mocks.extractUrlsMock.mockResolvedValue([]);
   mocks.ingestWebContentMock.mockResolvedValue({ processedUrls: [], errorUrls: [] });
   mocks.dbGetAttachedFileByEntityIdMock.mockResolvedValue([]);
-  mocks.retrieveChunksMock.mockResolvedValue([]);
   mocks.limitChatHistoryMock.mockImplementation(
     ({ messages }: { messages: ChatMessage[] }) => messages,
   );
@@ -298,27 +285,8 @@ beforeEach(() => {
   mocks.constructTokenBudgetExceededEventMock.mockReturnValue({ type: 'budget-exceeded' });
   mocks.getChatTitleMock.mockResolvedValue('Generated title');
   mocks.logErrorMock.mockImplementation(() => undefined);
-  mocks.runWebSearchPipelineMock.mockResolvedValue(webSearchResults as never);
   mocks.isWebSearchEnabledForEntityMock.mockReturnValue(true);
   mocks.buildToolsMock.mockResolvedValue(buildToolsOutput as never);
-  mocks.generateTextStreamWithBillingMock.mockImplementation(async function* (
-    _modelId: string,
-    _messages: unknown[],
-    _apiKeyId: string,
-    onComplete?: ({
-      usage,
-      priceInCents,
-    }: {
-      usage: { promptTokens: number; completionTokens: number; totalTokens: number };
-      priceInCents: number;
-    }) => Promise<void> | void,
-  ) {
-    yield 'fallback chunk';
-    await onComplete?.({
-      usage: { promptTokens: 11, completionTokens: 22, totalTokens: 33 },
-      priceInCents: 44,
-    });
-  });
   mocks.runAgentLoopMock.mockImplementation(
     ({
       onTextChunk,
@@ -347,53 +315,30 @@ beforeEach(() => {
       });
     },
   );
-  mocks.generateAgenticStreamWithBillingMock.mockImplementation(async function* () {
-    yield { type: 'text', delta: 'agentic chunk' };
-  });
 });
 
 describe('sendChatMessage', () => {
-  it.each([
-    { isAgenticChatEnabled: false, expectedBranch: 'legacy' },
-    { isAgenticChatEnabled: true, expectedBranch: 'agentic' },
-  ])('routes $expectedBranch chats correctly', async ({ isAgenticChatEnabled }) => {
+  it('runs the agentic chat pipeline and persists the assistant message', async () => {
     const { sendChatMessage } = await import('./chat-service');
 
     const result = await sendChatMessage({
       conversationId: conversation.id,
       messages,
       modelId: mainModel.id,
-      user: createUser(isAgenticChatEnabled),
+      user: createUser(),
     });
 
     const streamedText = await collectStream(result.stream);
 
-    if (isAgenticChatEnabled) {
-      expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
-      expect(mocks.retrieveChunksMock).not.toHaveBeenCalled();
-      expect(mocks.runWebSearchPipelineMock).not.toHaveBeenCalled();
-      expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
-      expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
-      expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          errorUrls: [],
-          webSearchResults: [],
-          activeToolDefinitions: [buildToolsOutput.toolRegistry.web_search.definition],
-        }),
-      );
-      expect(streamedText).toBe('agentic chunk');
-    } else {
-      expect(mocks.buildToolsMock).not.toHaveBeenCalled();
-      expect(mocks.runAgentLoopMock).not.toHaveBeenCalled();
-      expect(mocks.runWebSearchPipelineMock).toHaveBeenCalledTimes(1);
-      expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
-      expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
-      expect(result.webSearchResults).toEqual(webSearchResults);
-      expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
-        expect.objectContaining({ webSearchResults, activeToolDefinitions: [] }),
-      );
-      expect(streamedText).toBe('fallback chunk');
-    }
+    expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
+    expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
+    expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
+    expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activeToolDefinitions: [buildToolsOutput.toolRegistry.web_search.definition],
+      }),
+    );
+    expect(streamedText).toBe('agentic chunk');
 
     expect(mocks.dbInsertChatContentBatchMock).toHaveBeenCalledWith(
       expect.arrayContaining([
@@ -450,7 +395,7 @@ describe('sendChatMessage', () => {
       conversationId: conversation.id,
       messages,
       modelId: mainModel.id,
-      user: createUser(true),
+      user: createUser(),
     });
 
     await collectStream(result.stream);
@@ -530,7 +475,7 @@ describe('sendChatMessage', () => {
       conversationId: conversation.id,
       messages,
       modelId: mainModel.id,
-      user: createUser(true),
+      user: createUser(),
     });
 
     await collectStream(result.stream);
@@ -560,7 +505,7 @@ describe('sendChatMessage', () => {
         conversationId: conversation.id,
         messages,
         modelId: mainModel.id,
-        user: createUser(false),
+        user: createUser(),
       }),
     ).rejects.toThrow('Conversation not found');
   });
@@ -583,7 +528,7 @@ describe('sendChatMessage', () => {
         messages,
         modelId: mainModel.id,
         characterId,
-        user: createUser(false),
+        user: createUser(),
       }),
     ).rejects.toThrow('Character not found');
   });
@@ -606,7 +551,7 @@ describe('sendChatMessage', () => {
         messages,
         modelId: mainModel.id,
         learningScenarioId,
-        user: createUser(false),
+        user: createUser(),
       }),
     ).rejects.toThrow('Learning scenario not found');
   });
@@ -629,7 +574,7 @@ describe('sendChatMessage', () => {
         messages,
         modelId: mainModel.id,
         assistantId,
-        user: createUser(false),
+        user: createUser(),
       }),
     ).rejects.toThrow('Assistant not found');
   });
