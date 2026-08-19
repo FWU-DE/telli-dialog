@@ -14,6 +14,10 @@ type ImageStyleContextProps = {
   setSelectedStyle: (style: ImageStyle | undefined) => void;
 };
 
+type UseImageStyleResult = ImageStyleContextProps & {
+  selectableStyles: ImageStyle[];
+};
+
 const ImageStyleContext = React.createContext<ImageStyleContextProps | undefined>(undefined);
 
 function useImageStyles() {
@@ -54,11 +58,23 @@ export function ImageStyleProvider({
   );
 }
 
-export function useImageStyle(): ImageStyleContextProps {
+export function useImageStyle(): UseImageStyleResult {
   const maybeContext = React.useContext(ImageStyleContext);
 
   if (maybeContext === undefined) {
     throw new Error('useImageStyle can only be used inside a ImageStyleProvider');
   }
-  return maybeContext;
+
+  const selectableStyles = maybeContext.styles.filter((style) => {
+    if (maybeContext.selectedStyle === undefined) {
+      return style.name !== 'none';
+    }
+
+    return style.name !== maybeContext.selectedStyle.name;
+  });
+
+  return {
+    ...maybeContext,
+    selectableStyles,
+  };
 }

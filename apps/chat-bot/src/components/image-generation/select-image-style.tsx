@@ -8,7 +8,7 @@ import { HeaderMenuItem } from '../layout/header-menu-item';
 import { Separator } from '@ui/components/separator';
 
 export default function SelectImageStyle() {
-  const { styles, selectedStyle, setSelectedStyle } = useImageStyle();
+  const { selectableStyles, selectedStyle, setSelectedStyle } = useImageStyle();
   const t = useTranslations('image-generation.style');
 
   return (
@@ -17,24 +17,16 @@ export default function SelectImageStyle() {
       triggerLabel={selectedStyle?.displayName ?? t('no-style')}
       triggerAriaLabel={t('aria-label')}
     >
-      {styles
-        .filter((style) => {
-          if (selectedStyle === undefined) {
-            return style.name !== 'none';
-          } else {
-            return style.name !== selectedStyle.name;
-          }
-        })
-        .map((style) => {
-          return (
-            <HeaderMenuItem
-              key={style.name}
-              onClick={() => setSelectedStyle(style.name === 'none' ? undefined : style)}
-            >
-              {style.displayName}
-            </HeaderMenuItem>
-          );
-        })}
+      {selectableStyles.map((style) => {
+        return (
+          <HeaderMenuItem
+            key={style.name}
+            onClick={() => setSelectedStyle(style.name === 'none' ? undefined : style)}
+          >
+            {style.displayName}
+          </HeaderMenuItem>
+        );
+      })}
       <Separator className="mx-2 border-b-0 last:hidden" />
     </HeaderMainMenuItem>
   );
