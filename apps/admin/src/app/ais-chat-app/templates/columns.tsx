@@ -3,6 +3,7 @@
 import { TemplateModel } from '@shared/templates/template';
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { ColumnDef } from '@tanstack/react-table';
+import { DataTableFeatures } from '@ui/components/data-table';
 import { Button } from '@ui/components/button';
 import { ArrowUpDownIcon } from 'lucide-react';
 import { getTemplateTypeName } from './templateTypeName';
@@ -10,7 +11,7 @@ import { ROUTES } from '@/consts/routes';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 
-export const columns: ColumnDef<TemplateModel>[] = [
+export const columns: ColumnDef<DataTableFeatures, TemplateModel>[] = [
   {
     accessorKey: 'id',
     header: ({ column }) => (

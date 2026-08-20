@@ -5,12 +5,17 @@ import {
   DropdownMenuTrigger,
 } from '@ui/components/dropdown-menu';
 import { CaretDownIcon } from '@phosphor-icons/react';
+import { GreenLeafIcon } from '../icons/green-leaf-icon';
+import { Badge } from '../common/badge';
 
 type HeaderMainMenuItemProps = {
   caption: string;
   triggerLabel: string;
   triggerAriaLabel: string;
   children: ReactNode;
+  'data-testid'?: string;
+  isNew?: boolean;
+  isGreen?: boolean;
 };
 
 export function HeaderMainMenuItem({
@@ -18,6 +23,9 @@ export function HeaderMainMenuItem({
   triggerLabel,
   triggerAriaLabel,
   children,
+  isNew,
+  isGreen,
+  'data-testid': dataTestId,
 }: HeaderMainMenuItemProps) {
   return (
     <div className="flex flex-col gap-2 p-2">
@@ -28,13 +36,16 @@ export function HeaderMainMenuItem({
             type="button"
             className="flex flex-row gap-1.5 items-center text-primary text-base font-medium outline-none focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-ring/50"
             aria-label={triggerAriaLabel}
+            data-testid={dataTestId}
           >
             {triggerLabel}
+            {isGreen && <GreenLeafIcon />}
+            {isNew && <Badge text="NEU" />}
             <CaretDownIcon />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="px-0"
+          className="px-0 py-0"
           onCloseAutoFocus={(event) => {
             event.preventDefault();
           }}
