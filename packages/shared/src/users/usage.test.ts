@@ -50,7 +50,6 @@ const mockFederalState = (): FederalStateModel =>
       isSharedChatEnabled: true,
       isCustomGptEnabled: true,
       isShareTemplateWithSchoolEnabled: true,
-      isAgenticChatEnabled: true,
       isImageGenerationEnabled: true,
       isWebSearchEnabled: true,
     },
