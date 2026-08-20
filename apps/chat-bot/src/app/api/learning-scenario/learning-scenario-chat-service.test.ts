@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { runAgentLoop } from '@ais-chat/ai-core';
 import type { ChatMessage } from '@/types/chat';
 
 const mocks = vi.hoisted(() => ({
@@ -208,11 +209,20 @@ beforeEach(() => {
   mocks.constructNewMessageEventMock.mockReturnValue({ type: 'new-message' });
   mocks.sendRabbitmqEventMock.mockResolvedValue(undefined);
   mocks.runAgentLoopMock.mockImplementation(
-    ({ onComplete }: { onComplete: (args: unknown) => Promise<void> | void }) => {
+    ({ onComplete }: Parameters<typeof runAgentLoop>[0]) => {
       void onComplete({
         fullText: 'shared response',
         usage: { promptTokens: 1, completionTokens: 2, totalTokens: 3 },
         priceInCents: 4,
+        modelId: model.id,
+        modelUsages: [
+          {
+            modelId: model.id,
+            usage: { promptTokens: 1, completionTokens: 2, totalTokens: 3 },
+            priceInCents: 4,
+          },
+        ],
+        agentLoopMessages: [],
       });
     },
   );

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { runAgentLoop } from '@ais-chat/ai-core';
 import type { ChatMessage } from '@/types/chat';
 import type { UserAndContext } from '@/auth/types';
 
@@ -288,23 +289,7 @@ beforeEach(() => {
   mocks.isWebSearchEnabledForEntityMock.mockReturnValue(true);
   mocks.buildToolsMock.mockResolvedValue(buildToolsOutput as never);
   mocks.runAgentLoopMock.mockImplementation(
-    ({
-      onTextChunk,
-      onComplete,
-      toolRegistry,
-    }: {
-      onTextChunk: (delta: string) => void;
-      onComplete: ({
-        fullText,
-        usage,
-        priceInCents,
-      }: {
-        fullText: string;
-        usage: { promptTokens: number; completionTokens: number; totalTokens: number };
-        priceInCents: number;
-      }) => Promise<void> | void;
-      toolRegistry?: Record<string, unknown>;
-    }) => {
+    ({ onTextChunk, onComplete, toolRegistry }: Parameters<typeof runAgentLoop>[0]) => {
       expect(toolRegistry).toEqual(buildToolsOutput.toolRegistry);
 
       onTextChunk('agentic chunk');
@@ -312,6 +297,15 @@ beforeEach(() => {
         fullText: 'agentic chunk',
         usage: { promptTokens: 11, completionTokens: 22, totalTokens: 33 },
         priceInCents: 44,
+        modelId: mainModel.id,
+        modelUsages: [
+          {
+            modelId: mainModel.id,
+            usage: { promptTokens: 1, completionTokens: 2, totalTokens: 3 },
+            priceInCents: 4,
+          },
+        ],
+        agentLoopMessages: [],
       });
     },
   );
@@ -352,11 +346,13 @@ describe('sendChatMessage', () => {
 
   it('does not persist retrieve_entire_file tool calls or results', async () => {
     mocks.runAgentLoopMock.mockImplementationOnce(
-      ({ onComplete }: { onComplete: (args: unknown) => Promise<void> | void }) => {
+      ({ onComplete }: Parameters<typeof runAgentLoop>[0]) => {
         void onComplete({
           fullText: 'agentic chunk',
           usage: { promptTokens: 11, completionTokens: 22, totalTokens: 33 },
           priceInCents: 44,
+          modelId: mainModel.id,
+          modelUsages: [],
           agentLoopMessages: [
             {
               role: 'assistant',
@@ -459,12 +455,15 @@ describe('sendChatMessage', () => {
       },
     );
     mocks.runAgentLoopMock.mockImplementationOnce(
-      ({ onComplete }: { onComplete: (args: unknown) => Promise<void> | void }) => {
+      ({ onComplete }: Parameters<typeof runAgentLoop>[0]) => {
         onWebSearchResults?.(webSearchResults);
         void onComplete({
           fullText: 'agentic chunk',
           usage: { promptTokens: 11, completionTokens: 22, totalTokens: 33 },
           priceInCents: 44,
+          modelId: mainModel.id,
+          modelUsages: [],
+          agentLoopMessages: [],
         });
       },
     );
