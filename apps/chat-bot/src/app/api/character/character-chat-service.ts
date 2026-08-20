@@ -139,7 +139,6 @@ export async function sendCharacterMessage({
   });
   const urls = extractUrls({
     character,
-    messages,
   });
   const { processedUrls } = await ingestWebContent({
     urls,
