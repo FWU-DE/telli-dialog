@@ -175,28 +175,16 @@ async function dbUpsertLlmModels({ models }: { models: LlmModelSelectModel[] }) 
     uniqueModelsMap[model.id] = model;
   }
   const uniqueModels = Object.values(uniqueModelsMap);
-  const insertedModels: LlmModelSelectModel[] = [];
   for (const model of uniqueModels) {
-    await db
-      .insert(llmModelTable)
-      .values(model)
-      .onConflictDoUpdate({
-        target: llmModelTable.id,
-        set: {
-          name: model.name,
-          displayName: model.displayName,
-          provider: model.provider,
-          description: model.description,
-          priceMetadata: model.priceMetadata,
-          supportedImageFormats: model.supportedImageFormats,
-          isNew: model.isNew,
-          isDeleted: model.isDeleted,
-        },
-      });
-    insertedModels.push(model);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _id, createdAt: _createdAt, ...conflictSet } = model;
+    await db.insert(llmModelTable).values(model).onConflictDoUpdate({
+      target: llmModelTable.id,
+      set: conflictSet,
+    });
   }
 
-  return insertedModels;
+  return uniqueModels;
 }
 
 async function dbUpsertFederalStateLlmModelMappings({

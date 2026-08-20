@@ -37,6 +37,7 @@ const llmFormSchema = z.object({
   description: z.string().optional().default(''),
   priceMetadata: jsonStringSchema.optional().default(''),
   supportedImageFormats: jsonStringSchema.optional().default(''),
+  imageGenerationConfig: jsonStringSchema.optional().default(''),
   additionalParameters: jsonStringSchema.optional().default(''),
   isNew: z.boolean().default(false),
   isDeleted: z.boolean().default(false),
@@ -88,6 +89,7 @@ export function LargeLanguageModelDetailView({
           description: model.description,
           priceMetadata: JSON.stringify(model.priceMetadata, null, 2),
           supportedImageFormats: JSON.stringify(model.supportedImageFormats, null, 2),
+          imageGenerationConfig: JSON.stringify(model.imageGenerationConfig, null, 2),
           additionalParameters: JSON.stringify(model.additionalParameters, null, 2),
           isNew: model.isNew,
           isDeleted: model.isDeleted,
@@ -107,6 +109,7 @@ export function LargeLanguageModelDetailView({
           description: '',
           priceMetadata: '{}',
           supportedImageFormats: '[]',
+          imageGenerationConfig: '',
           additionalParameters: '{}',
           isNew: false,
           isDeleted: false,
@@ -216,6 +219,14 @@ export function LargeLanguageModelDetailView({
             name="supportedImageFormats"
             label="Unterstützte Bildformate"
             description="JSON-Array mit unterstützten Bildformaten"
+            control={control}
+            type="textArea"
+          />
+
+          <FormField
+            name="imageGenerationConfig"
+            label="Bildgenerierungs-Konfiguration"
+            description="JSON mit Konfiguration für die Bildgenerierung"
             control={control}
             type="textArea"
           />
