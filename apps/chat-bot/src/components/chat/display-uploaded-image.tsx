@@ -1,13 +1,10 @@
 import React from 'react';
 import Image from 'next/image';
-import { useQuery } from '@tanstack/react-query';
 import { FileModel } from '@shared/db/schema';
 import { FileStatus } from './upload-file-button';
 import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
 import CrossIcon from '../icons/cross';
-import { EmptyImageIcon } from '../icons/empty-image';
-import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 
 // Extended type for pending files that includes a local blob URL
@@ -30,20 +27,10 @@ export default function DisplayUploadedImage({
 
   // Check if file has a local URL (for pending files)
   const localUrl = 'localUrl' in file ? file.localUrl : undefined;
-  const {
-    data: fetchedImageUrl,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['scaled-image-url', file.id, file.name, file.type],
-    queryFn: async () => {
-      return `/api/files/${file.id}/scaled-image?width=200&height=200`;
-    },
-    // Don't fetch if we have a local URL or status is not processed
-    enabled: status === 'processed' && !localUrl,
-    staleTime: Infinity,
-    gcTime: 24 * 60 * 60 * 1000, // 24 hours garbage collection time
-  });
+  const fetchedImageUrl =
+    status === 'processed' && !localUrl
+      ? `/api/files/${file.id}/scaled-image?width=200&height=200`
+      : null;
 
   // Use local URL if available, otherwise use signed URL from S3
   const imageUrl = localUrl ?? fetchedImageUrl;
@@ -56,16 +43,8 @@ export default function DisplayUploadedImage({
       </div>
     );
   }
-  // Only show loading if we don't have a local URL and are fetching signed URL
-  if (isLoading && !localUrl) {
-    return (
-      <div className="flex items-center justify-center gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px] bg-gray-50 rounded-lg">
-        <EmptyImageIcon className={cn(`w-[200px]`, 'text-gray-300 animate-pulse')} />
-      </div>
-    );
-  }
 
-  if ((error && !localUrl) || !imageUrl) {
+  if (!imageUrl) {
     return (
       <div className="flex items-center justify-center gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px] bg-red-50 rounded-lg">
         <CrossIcon className="w-5 h-5 text-red-500" />

@@ -31,6 +31,6 @@ export async function createScaledImage({
 
   return {
     buffer,
-    contentType: getImageContentType(metadata.format),
+    contentType: getImageContentType(metadata.format) ?? '',
   };
 }
