@@ -10,6 +10,7 @@
     "./bifrost-provider-sync": "./src/bifrost-provider-sync/index.ts",
     "./bifrost-provider-sync/error": "./src/bifrost-provider-sync/error.ts",
     "./llm-model": "./src/llm-model/index.ts",
+    "./types": "./src/types.ts",
     "./utils": "./src/api-utils/index.ts"
   },
   "scripts": {
