@@ -17,16 +17,29 @@ export async function GET(
       return NextResponse.json({ error: 'Not authorized to access this file' }, { status: 403 });
     }
 
+    const widthParam = request.nextUrl.searchParams.get('width');
+    const heightParam = request.nextUrl.searchParams.get('height');
+    const width = widthParam !== null ? Number.parseInt(widthParam, 10) : undefined;
+    const height = heightParam !== null ? Number.parseInt(heightParam, 10) : undefined;
+    if (
+      (width !== undefined && (!Number.isFinite(width) || width <= 0)) ||
+      (height !== undefined && (!Number.isFinite(height) || height <= 0)) ||
+      (width === undefined && height === undefined)
+    ) {
+      return NextResponse.json({ error: 'Invalid width/height' }, { status: 400 });
+    }
+
     const scaledImage = await createScaledImage({
       fileId,
-      width: Number(request.nextUrl.searchParams.get('width')) ?? undefined,
-      height: Number(request.nextUrl.searchParams.get('height')) ?? undefined,
+      width,
+      height,
     });
 
     return new NextResponse(new Uint8Array(scaledImage.buffer), {
       headers: {
         'Cache-Control': 'private, max-age=86400',
         'Content-Type': scaledImage.contentType,
+        'Content-Length': scaledImage.buffer.byteLength.toString(),
       },
     });
   } catch (error) {
