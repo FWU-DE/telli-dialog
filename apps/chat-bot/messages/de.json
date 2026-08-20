@@ -436,15 +436,18 @@
     "page-titles": {
       "chat": "Bildgenerierung"
     },
+    "style": {
+      "label": "Bildstil",
+      "aria-label": "Bildstil auswählen",
+      "no-style": "Kein Stil",
+      "photorealistic": "Fotorealistisch",
+      "cartoon": "Cartoon"
+    },
     "image-generation-model": "Modell",
     "no-model-available": "Kein Modell verfügbar",
     "placeholder": "Beschreibe, wie das Bild aussehen soll.",
     "generate-button": "Bild generieren",
     "prompt-label": "Prompt",
-    "style-label": "Bildstil",
-    "no-style": "Kein Stil",
-    "style-photorealistic-name": "Fotorealistisch",
-    "style-cartoon-name": "Cartoon",
     "generation-error": "Die Bildgenerierung ist fehlgeschlagen. Bitte versuche es erneut.",
     "responsible-ai-error": "Diese Anfrage wurde nicht ausgeführt, da sie möglicherweise gegen die Nutzungsrichtlinien verstößt.",
     "copy-image-success": "Bild in die Zwischenablage kopiert",
