@@ -8,6 +8,7 @@ import { logError, logInfo } from '@shared/logging';
 import { listFilesFromS3 } from '@shared/s3';
 import { registerCleanupHandler } from '@shared/shutdown/cleanup';
 import { shutdownRabbitMQ } from '@/rabbitmq/send';
+import { terminateCalculatorPool } from './app/api/chat/tools/calculator-tool';
 
 /**
  * Custom code that will be executed on application startup.
@@ -18,6 +19,7 @@ export async function startup() {
 
   registerCleanupHandler(shutdownDatabase);
   registerCleanupHandler(shutdownRabbitMQ);
+  registerCleanupHandler(terminateCalculatorPool);
 }
 
 /**

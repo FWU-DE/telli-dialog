@@ -1,10 +1,11 @@
 import { resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { Pool } from 'workerpool';
 import {
   buildCalculatorTool,
+  resetCalculatorPoolFactoryForTests,
   resolveCalculatorWorkerPath,
-  shutdownCalculatorPoolForTests,
-  resetCalculatorPoolLifecycleForTests,
+  setCalculatorPoolFactoryForTests,
   terminateCalculatorPool,
 } from './calculator-tool';
 import { evaluateExpression } from './calculator-runtime.mjs';
@@ -21,7 +22,7 @@ const runtime = (expression: string) => {
 describe('calculator tool', () => {
   afterEach(async () => {
     await terminateCalculatorPool();
-    resetCalculatorPoolLifecycleForTests();
+    resetCalculatorPoolFactoryForTests();
   });
 
   it('executes in a real workerpool process and recreates after termination', async () => {
@@ -47,11 +48,43 @@ describe('calculator tool', () => {
     );
   });
 
+  it('waits for an in-flight termination before creating the next pool', async () => {
+    let releaseTermination!: () => void;
+    const terminationFinished = new Promise<void>((resolve) => {
+      releaseTermination = resolve;
+    });
+    const execution = (result: ReturnType<typeof dto>) =>
+      Object.assign(Promise.resolve(result), { timeout: () => Promise.resolve(result) });
+    const firstPool = {
+      exec: vi.fn().mockReturnValue(execution(dto('first'))),
+      terminate: vi.fn(() => terminationFinished),
+    } as unknown as Pool;
+    const secondPool = {
+      exec: vi.fn().mockReturnValue(execution(dto('second'))),
+      terminate: vi.fn().mockResolvedValue(undefined),
+    } as unknown as Pool;
+    const factory = vi.fn().mockReturnValueOnce(firstPool).mockReturnValueOnce(secondPool);
+    setCalculatorPoolFactoryForTests(factory);
+    const tool = buildCalculatorTool();
+
+    await tool.handler({ expression: '1' });
+    const terminating = terminateCalculatorPool();
+    const nextExecution = tool.handler({ expression: '2' });
+    await Promise.resolve();
+    expect(factory).toHaveBeenCalledTimes(1);
+
+    releaseTermination();
+    await terminating;
+    expect(await nextExecution).toContain('second');
+    expect(factory).toHaveBeenCalledTimes(2);
+  });
+
   it('maps injected executor success, timeout, busy, worker, and protocol failures', async () => {
     const executor = vi
       .fn()
       .mockResolvedValueOnce(dto('42'))
       .mockRejectedValueOnce(Object.assign(new Error('timed out'), { name: 'TimeoutError' }))
+      .mockRejectedValueOnce({ error: { name: 'TimeoutError' } })
       .mockRejectedValueOnce(new Error('Max queue size of 16 reached'))
       .mockRejectedValueOnce(new Error('worker stopped'));
     const tool = buildCalculatorTool({ executor, timeoutMs: 25 });
@@ -59,17 +92,12 @@ describe('calculator tool', () => {
     expect(JSON.parse(await tool.handler({ expression: '1' })).error.code).toBe(
       'EXPRESSION_TIMEOUT',
     );
+    expect(JSON.parse(await tool.handler({ expression: '1' })).error.code).toBe(
+      'EXPRESSION_TIMEOUT',
+    );
     expect(JSON.parse(await tool.handler({ expression: '1' })).error.code).toBe('CALCULATOR_BUSY');
     expect(JSON.parse(await tool.handler({ expression: '1' })).error.code).toBe('PROTOCOL_ERROR');
     expect(executor).toHaveBeenCalledWith('1', 25);
-  });
-
-  it('rejects new default executions after graceful shutdown begins', async () => {
-    await shutdownCalculatorPoolForTests();
-    expect(JSON.parse(await buildCalculatorTool().handler({ expression: '2 + 2' }))).toMatchObject({
-      ok: false,
-      error: { code: 'CALCULATOR_SHUTTING_DOWN' },
-    });
   });
 
   it('rejects malformed DTOs and enforces input/output byte caps', async () => {

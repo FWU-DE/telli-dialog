@@ -24,8 +24,6 @@ const errorResponse = (code: string, message: string) =>
 const INVALID_INPUT_RESPONSE = (message: string) => errorResponse('INVALID_INPUT', message);
 const PROCESS_ERROR_RESPONSE = () => errorResponse('PROTOCOL_ERROR', 'Calculator worker failed');
 const busyResponse = () => errorResponse('CALCULATOR_BUSY', 'Calculator is busy');
-const SHUTTING_DOWN_RESPONSE = () =>
-  errorResponse('CALCULATOR_SHUTTING_DOWN', 'Calculator is shutting down');
 
 export type CalculatorOptions = {
   executor?: (expression: string, timeoutMs: number) => Promise<CalculatorResult>;
@@ -53,66 +51,69 @@ const isCalculatorResult = (value: unknown): value is CalculatorResult => {
 };
 
 let pool: Pool | undefined;
-let shuttingDown = false;
-const getCalculatorPool = () => {
+let terminationPromise: Promise<void> | undefined;
+const defaultPoolFactory = () =>
+  workerpool.pool(resolveCalculatorWorkerPath(), {
+    workerType: 'process',
+    minWorkers: 1,
+    maxWorkers: 4,
+    maxQueueSize: 16,
+    workerTerminateTimeout: 1000,
+    // eslint-disable-next-line turbo/no-undeclared-env-vars
+    forkOpts: { env: { NODE_ENV: 'production', PATH: process.env.PATH ?? '' } },
+  });
+let poolFactory: () => Pool = defaultPoolFactory;
+
+export const setCalculatorPoolFactoryForTests = (factory: () => Pool) => {
+  poolFactory = factory;
+};
+
+export const resetCalculatorPoolFactoryForTests = () => {
+  poolFactory = defaultPoolFactory;
+};
+
+const getCalculatorPool = async () => {
+  await terminationPromise;
   if (!pool) {
-    pool = workerpool.pool(resolveCalculatorWorkerPath(), {
-      workerType: 'process',
-      minWorkers: 1,
-      maxWorkers: 4,
-      maxQueueSize: 16,
-      workerTerminateTimeout: 1000,
-      // eslint-disable-next-line turbo/no-undeclared-env-vars
-      forkOpts: { env: { NODE_ENV: 'production', PATH: process.env.PATH ?? '' } },
-    });
+    pool = poolFactory();
   }
   return pool;
 };
 
 export async function terminateCalculatorPool(): Promise<void> {
-  if (shuttingDown) return;
-  const currentPool = pool;
-  pool = undefined;
-  if (currentPool) await currentPool.terminate(false, 1000);
-}
-
-async function shutdownCalculatorPool(): Promise<void> {
-  if (shuttingDown) return;
-  shuttingDown = true;
+  if (terminationPromise) return terminationPromise;
   const currentPool = pool;
   pool = undefined;
   if (!currentPool) return;
-  try {
-    await currentPool.terminate(false, 1000);
-  } catch {
-    // Best effort only: never leave an unhandled rejection during signal handling.
-  }
-}
 
-export const shutdownCalculatorPoolForTests = shutdownCalculatorPool;
-export const resetCalculatorPoolLifecycleForTests = () => {
-  shuttingDown = false;
-};
-
-for (const signal of ['SIGTERM', 'SIGINT'] as const) {
-  process.once(signal, () => {
-    void shutdownCalculatorPool().finally(() => process.exit(0));
-  });
+  const termination = Promise.resolve()
+    .then(() => currentPool.terminate(false, 1000))
+    .then(() => undefined)
+    .finally(() => {
+      if (terminationPromise === termination) terminationPromise = undefined;
+    });
+  terminationPromise = termination;
+  return termination;
 }
 
 const execute = async (expression: string, timeoutMs: number) => {
-  if (shuttingDown) throw new Error('Calculator pool is shutting down');
+  const calculatorPool = await getCalculatorPool();
   return (
-    getCalculatorPool().exec('calculate', [expression]) as Promise<CalculatorResult> & {
+    calculatorPool.exec('calculate', [expression]) as Promise<CalculatorResult> & {
       timeout: (ms: number) => Promise<CalculatorResult>;
     }
   ).timeout(timeoutMs);
 };
 
+const isTimeoutError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') return false;
+  if ('name' in error && error.name === 'TimeoutError') return true;
+  if ('error' in error) return isTimeoutError(error.error);
+  return false;
+};
+
 const mapWorkerError = (error: unknown) => {
-  const name = error instanceof Error ? error.name : '';
-  if (name === 'TimeoutError' || name === 'WrappedTimeoutError')
-    return errorResponse('EXPRESSION_TIMEOUT', 'Calculation timed out');
+  if (isTimeoutError(error)) return errorResponse('EXPRESSION_TIMEOUT', 'Calculation timed out');
   if (error instanceof Error && error.message.startsWith('Max queue size of'))
     return busyResponse();
   return PROCESS_ERROR_RESPONSE();
@@ -140,7 +141,6 @@ export function buildCalculatorTool(options: CalculatorOptions = {}): ToolRegist
       return INVALID_INPUT_RESPONSE('expression must be a non-empty string');
     if (Buffer.byteLength(args.expression) > MAX_INPUT_BYTES)
       return INVALID_INPUT_RESPONSE('expression is too long');
-    if (shuttingDown) return SHUTTING_DOWN_RESPONSE();
     try {
       const value = await executor(args.expression as string, timeoutMs);
       if (!isCalculatorResult(value)) return PROCESS_ERROR_RESPONSE();
