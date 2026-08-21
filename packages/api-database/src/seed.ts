@@ -316,6 +316,7 @@ export async function seedDatabase() {
             setting: { provider: 'bifrost' },
             priceMetadata: model.priceMetadata,
             supportedImageFormats: model.supportedImageFormats,
+            imageGenerationConfig: model.imageGenerationConfig,
             additionalParameters: model.additionalParameters,
             isNew: model.isNew,
             isDeleted: model.isDeleted,

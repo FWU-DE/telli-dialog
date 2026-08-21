@@ -9,6 +9,7 @@ export type LargeLanguageModel = {
   organizationId: string;
   createdAt: Date;
   supportedImageFormats: string[];
+  imageGenerationConfig: object | null;
   additionalParameters: object;
   isNew: boolean;
   isDeleted: boolean;
@@ -21,6 +22,7 @@ export type CreateLargeLanguageModel = {
   description?: string;
   priceMetadata?: string;
   supportedImageFormats?: string;
+  imageGenerationConfig?: string;
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
@@ -34,6 +36,7 @@ export type UpdateLargeLanguageModel = {
   description?: string;
   priceMetadata?: string;
   supportedImageFormats?: string;
+  imageGenerationConfig?: string;
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;

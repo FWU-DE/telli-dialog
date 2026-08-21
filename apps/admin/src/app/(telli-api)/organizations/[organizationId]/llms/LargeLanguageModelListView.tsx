@@ -24,6 +24,7 @@ import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 import type { LargeLanguageModel } from '@/types/large-language-model';
+import { formatDateToGermanTimestamp } from '@shared/utils/date';
 
 export type LargeLanguageModelListViewProps = {
   organizationId: string;
@@ -70,7 +71,7 @@ export function LargeLanguageModelListView({
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Anbieter</TableHead>
+              <TableHead>Bifrost</TableHead>
               <TableHead>Beschreibung</TableHead>
               <TableHead className="text-center">Neu</TableHead>
               <TableHead className="text-center">Gelöscht</TableHead>
@@ -90,9 +91,7 @@ export function LargeLanguageModelListView({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {model.provider}
-                  </span>
+                  <Checkbox checked={model.useBifrost} disabled />
                 </TableCell>
                 <TableCell>
                   <div className="max-w-xs truncate" title={model.description}>
@@ -105,7 +104,7 @@ export function LargeLanguageModelListView({
                 <TableCell className="text-center">
                   <Checkbox checked={model.isDeleted} disabled />
                 </TableCell>
-                <TableCell>{new Date(model.createdAt).toLocaleString()}</TableCell>
+                <TableCell>{formatDateToGermanTimestamp(model.createdAt)}</TableCell>
                 <TableCell>
                   <Link href={`/organizations/${organizationId}/llms/${model.id}`}>
                     <Search className="text-primary" />
