@@ -70,7 +70,8 @@ export default function ModelSelect({
         triggerLabel={currentSelectedModel?.displayName ?? noModelsLabel}
         triggerAriaLabel={`Select ${modelType} Model Dropdown`}
         isDropdownEnabled={selectableModels.length > 0}
-        data-testid={`${modelType}-model-dropdown`}
+        mainMenuItemTestId={`main-menu-item-${modelType}-model-dropdown`}
+        selectedMenuItemTestId={`main-menu-item-${modelType}-model-selected`}
         isNew={isNew}
         isGreen={isGreen}
       >
@@ -79,7 +80,7 @@ export default function ModelSelect({
             <React.Fragment key={model.id}>
               <HeaderMenuItem
                 aria-label={`Select ${model.name} Model`}
-                data-testid={model.displayName}
+                data-testid={`menu-item-${model.displayName}`}
                 onClick={() => {
                   handleSelectModel(model);
                 }}

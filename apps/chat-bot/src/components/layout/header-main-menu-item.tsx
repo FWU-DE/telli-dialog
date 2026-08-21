@@ -15,7 +15,8 @@ type HeaderMainMenuItemProps = {
   triggerAriaLabel: string;
   children: ReactNode;
   isDropdownEnabled?: boolean;
-  'data-testid'?: string;
+  selectedMenuItemTestId?: string;
+  mainMenuItemTestId?: string;
   isNew?: boolean;
   isGreen?: boolean;
 };
@@ -28,11 +29,14 @@ export function HeaderMainMenuItem({
   isDropdownEnabled = true,
   isNew,
   isGreen,
-  'data-testid': dataTestId,
+  selectedMenuItemTestId,
+  mainMenuItemTestId,
 }: HeaderMainMenuItemProps) {
   const mainMenuItem = (
     <span className="flex flex-row gap-1.5 items-center text-primary text-base font-medium flex-nowrap">
-      <span className="text-nowrap">{triggerLabel}</span>
+      <span className="text-nowrap" data-testid={selectedMenuItemTestId}>
+        {triggerLabel}
+      </span>
       {isGreen && <GreenLeafIcon />}
       {isNew && <Badge text="NEU" />}
       {isDropdownEnabled && <CaretDownIcon />}
@@ -44,7 +48,7 @@ export function HeaderMainMenuItem({
       disabled={!isDropdownEnabled}
       className="outline-none focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-ring/50"
       aria-label={triggerAriaLabel}
-      data-testid={dataTestId}
+      data-testid={mainMenuItemTestId}
     >
       {mainMenuItem}
     </button>
