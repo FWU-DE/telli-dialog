@@ -6,7 +6,6 @@ export const SMALL_TEXT_INPUT_FIELDS_LIMIT = 50;
 
 // Web scraper
 export const WEB_SCRAPE_RESULT_LENGTH_LIMIT = 6000; // Maximum total characters from a single web scrape result (~4 DIN A4 pages)
-export const MAX_WEB_SCRAPE_RESULTS_PER_CONVERSATION = 5; // Maximum number of URLs to scrape per conversation
 
 // Chat history
 export const TOTAL_CHAT_LENGTH_LIMIT = 60_000; // Maximum total characters in chat history (~40 DIN A4 pages)
