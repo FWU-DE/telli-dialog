@@ -5,7 +5,7 @@ import Spinner from '../icons/spinner';
 import CrossIcon from '../icons/cross';
 import { getFileNameAndFileExtension, isImageFile } from '@/utils/files/generic';
 import { LocalFileState } from './send-message-form';
-import { cn } from '@/utils/tailwind';
+import DisplayFileAttachment from './display-file-attachment';
 
 type ChatInputAttachmentPreviewProps = {
   file: LocalFileState;
@@ -21,10 +21,10 @@ export default function ChatInputAttachmentPreview({
   width = 'default',
 }: ChatInputAttachmentPreviewProps) {
   const fileName = file.file.name;
-  const [fileStem, fileExtension] = getFileNameAndFileExtension(fileName);
   const isImage = isImageFile(fileName);
   const [imageUrl, setImageUrl] = React.useState<string>();
-  const { Icon: FileIcon, fillColor: backgroundColor } = getFileIconByFileExtension(fileExtension);
+  const [, fileExtension] = getFileNameAndFileExtension(fileName);
+  const { fillColor: backgroundColor } = getFileIconByFileExtension(fileExtension);
   React.useEffect(() => {
     if (!isImage) return;
     const objectUrl = URL.createObjectURL(file.file);
@@ -65,35 +65,12 @@ export default function ChatInputAttachmentPreview({
       </div>
     );
   return (
-    <div
-      className={cn(
-        'flex w-fit min-w-0 max-w-full shrink-0 items-center justify-start gap-2 pl-4 pr-6 text-sm relative group',
-        height === 'large' ? 'py-0 h-14' : 'py-2',
-      )}
-    >
-      <div className="absolute inset-0 opacity-5 rounded-lg" style={{ backgroundColor }} />
-      {onDeattachFile !== undefined && (
-        <button onClick={onDeattachFile} className="absolute right-0 top-0 hover:bg-neutral-200">
-          <DeattachFileIcon />
-        </button>
-      )}
-      <div
-        className={cn(
-          'relative flex items-center gap-2 min-w-0',
-          height === 'large' ? 'h-14' : 'h-6',
-        )}
-      >
-        {file.status === 'processed' && (
-          <FileIcon className="h-5 w-5 shrink-0" color={backgroundColor} />
-        )}
-        {file.status === 'uploading' && <Spinner className="h-5 w-5 shrink-0" />}
-        {file.status === 'failed' && <CrossIcon className="h-5 w-5 shrink-0" />}
-        <div className={cn('flex min-w-0 flex-col', width === 'small' ? 'max-w-24' : 'max-w-80')}>
-          <p className="truncate overflow-hidden text-sm" title={fileName}>
-            {fileStem}
-          </p>
-        </div>
-      </div>
-    </div>
+    <DisplayFileAttachment
+      fileName={fileName}
+      status={file.status}
+      onDeattachFile={onDeattachFile}
+      height={height}
+      width={width}
+    />
   );
 }
