@@ -2,67 +2,58 @@ import { all, create } from 'mathjs';
 
 const math = create(all);
 math.config({ number: 'BigNumber', precision: 64, predictable: true });
+const parse = math.parse.bind(math);
 
-const ALLOWED_FUNCTIONS = new Set([
-  'sqrt',
-  'abs',
-  'sin',
-  'cos',
-  'tan',
-  'asin',
-  'acos',
-  'atan',
-  'log',
-  'log10',
-  'exp',
-  'round',
-  'floor',
-  'ceil',
-  'min',
-  'max',
-]);
-const ALLOWED_CONSTANTS = new Set(['pi', 'e', 'tau']);
-const ALLOWED_UNITS = new Set([
-  'm',
-  'cm',
-  'mm',
-  'km',
-  'in',
-  'ft',
-  'yd',
-  'mi',
-  'g',
-  'kg',
-  'mg',
-  'lb',
-  'oz',
-  's',
-  'ms',
-  'min',
-  'h',
-  'd',
-  'L',
-  'l',
-  'mL',
-  'ml',
-  'K',
-  'degC',
-  'degF',
-  'rad',
-  'deg',
-  'Hz',
-  'N',
-  'Pa',
-  'J',
-  'W',
-  'V',
-  'A',
-  'ohm',
-  'mol',
-  'bit',
-  'byte',
+const BLOCKED_FUNCTIONS = new Set([
+  'import',
+  'createUnit',
+  'reviver',
+  'evaluate',
+  'parse',
+  'simplify',
+  'derivative',
+  'resolve',
+  'random',
+  'range',
+  'matrix',
+  'bignumber',
+  'complex',
+  'boolean',
+  'string',
+  'fraction',
+  'index',
+  'zeros',
+  'ones',
+  'identity',
+  'diag',
+  'reshape',
+  'resize',
+  'subset',
+  'concat',
+  'map',
+  'filter',
+  'forEach',
+  'reduce',
+  'sort',
+  'flatten',
+  'squeeze',
+  'size',
+  'det',
+  'inv',
+  'transpose',
+  'lusolve',
+  'eigs',
+  'fft',
+  'ifft',
 ]);
 const ALLOWED_OPERATORS = new Set(['+', '-', '*', '/', '^', 'to']);
+
+const blockedFunction = () => {
+  throw new FunctionNotAllowedError('blocked');
+};
+math.import(Object.fromEntries([...BLOCKED_FUNCTIONS].map((name) => [name, blockedFunction])), {
+  override: true,
+});
 
 export const LIMITS = {
   nodes: 200,
@@ -169,13 +160,13 @@ export function validateExpression(node, depth = 0, state = { nodes: 0, literals
     return;
   }
   if (node.isSymbolNode) {
-    if (!ALLOWED_CONSTANTS.has(node.name) && !ALLOWED_UNITS.has(node.name))
-      throw new InvalidNodeError('Variables and unknown symbols are not allowed');
     return;
   }
   if (node.isFunctionNode) {
     const name = node.fn?.name;
-    if (!ALLOWED_FUNCTIONS.has(name)) throw new FunctionNotAllowedError(name);
+    if (!node.fn?.isSymbolNode)
+      throw new InvalidNodeError('Function callee must be a direct symbol');
+    if (BLOCKED_FUNCTIONS.has(name) || !name) throw new FunctionNotAllowedError(name);
     addCost(state, 10);
     node.args.forEach((arg) => validateExpression(arg, depth + 1, state));
     return;
@@ -201,24 +192,16 @@ export function validateExpression(node, depth = 0, state = { nodes: 0, literals
   throw new InvalidNodeError('Expression contains a disallowed node');
 }
 
-function containsComplexInput(expression) {
-  return (
-    /\bi\b/.test(expression) || /\d\s*i(?:\b|$)/.test(expression) || /\d+i(?:\b|$)/.test(expression)
-  );
-}
-
 function parseExpression(expression) {
   try {
-    return math.parse(expression);
+    return parse(expression);
   } catch {
     throw new InvalidExpressionError();
   }
 }
 
-function isComplexValue(value, expression) {
-  return Boolean(
-    value?.isComplex || value?.im !== undefined || /(?:\d|\))\s*i(?:\b|$)/.test(expression),
-  );
+function isComplexValue(value) {
+  return Boolean(value?.isComplex || value?.im !== undefined);
 }
 
 function resultIsFinite(value, isUnit) {
@@ -226,10 +209,11 @@ function resultIsFinite(value, isUnit) {
   return typeof value?.isFinite === 'function' ? value.isFinite() : Number.isFinite(Number(value));
 }
 
-function validateResult(value, expression) {
-  if (isComplexValue(value, expression))
-    throw new InvalidNodeError('Complex values are not supported');
+function validateResult(value) {
+  if (isComplexValue(value)) throw new InvalidNodeError('Complex values are not supported');
   const isUnit = Boolean(value?.isUnit || value?.unit);
+  if (!isUnit && typeof value !== 'number' && value?.isBigNumber !== true)
+    throw new InvalidNodeError('Only scalar numeric results are supported');
   if (!resultIsFinite(value, isUnit)) throw new NonFiniteResultError();
   return isUnit;
 }
@@ -239,12 +223,15 @@ function serializeResult(value) {
 }
 
 export function evaluateExpression(expression) {
-  if (containsComplexInput(expression))
-    throw new InvalidNodeError('Complex values are not supported');
   const node = parseExpression(expression);
   validateExpression(node);
-  const value = node.evaluate();
-  const isUnit = validateResult(value, expression);
+  let value;
+  try {
+    value = node.evaluate();
+  } catch {
+    throw new InvalidNodeError('Unknown symbol or invalid operation');
+  }
+  const isUnit = validateResult(value);
   const result = serializeResult(value);
   if (!result) throw new NonFiniteResultError();
   return { result, representation: isUnit ? 'unit' : 'scalar' };

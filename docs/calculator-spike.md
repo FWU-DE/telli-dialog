@@ -15,36 +15,31 @@ and would not test registration behavior.
 
 ## Supported surface
 
-Scientific functions are `sqrt`, `abs`, `sin`, `cos`, `tan`, `asin`, `acos`,
-`atan`, `log`, `log10`, `exp`, `round`, `floor`, `ceil`, `min`, and `max`.
-Constants are `pi`, `e`, and `tau`. Units are an explicit allowlist, not every
-unit supported by mathjs: length (`m`, `cm`, `mm`, `km`, `in`, `ft`, `yd`, `mi`),
-mass (`g`, `kg`, `mg`, `lb`, `oz`), time (`s`, `ms`, `min`, `h`, `d`), volume
-(`L`, `l`, `mL`, `ml`), temperature (`K`, `degC`, `degF`), angles (`rad`, `deg`),
-frequency/derived units (`Hz`, `N`, `Pa`, `J`, `W`, `V`, `A`, `ohm`), amount
-(`mol`), and data (`bit`, `byte`). Conversions use the `to` operator.
+The calculator supports broad scalar mathjs functions, constants, and units.
+Meta, mutation, reparser, collection, matrix, range, generator, and data
+functions, plus nondeterministic `random`, are rejected. Conversions use `to`.
 
-Deliberate exclusions include variables and unknown symbols, unapproved
-functions/operators, assignments, comparisons, factorials, arrays/indexing,
-and non-finite results. This is not a general-purpose math-language sandbox.
+Deliberate exclusions include unknown symbols, blacklisted functions, unsupported
+operators, assignments, indirect calls, comparisons, factorials, arrays/indexing,
+objects, ranges, blocks, conditionals, strings, and non-finite or complex results.
 
 ## Determinism and process boundary
 
-The tool limits input to 1,000 bytes and child output to 8,192 bytes. Runtime
+The tool limits input to 1,000 bytes and worker output to 8,192 bytes. Runtime
 validation limits are 200 AST nodes, depth 32, 100 literals, exponent magnitude
 1,000, and cost 1,000. Stable error codes include `INVALID_INPUT`,
 `FUNCTION_NOT_ALLOWED`, `OPERATOR_NOT_ALLOWED`, `INVALID_NODE`,
 `EXPONENT_NOT_ALLOWED`, `EXPRESSION_TOO_COMPLEX`, `NONFINITE_RESULT`,
 `EXPRESSION_TIMEOUT`, and `PROTOCOL_ERROR`. Malformed expressions currently
-fall through the child-process boundary as `INVALID_EXPRESSION`; document a
-replacement only once it is visible in the runtime implementation.
+are normalized as `INVALID_EXPRESSION`.
 
-Each invocation runs a child process with a 3-second timeout and kills it on
-timeout or oversized output. The process-local scheduler runs at most
-`MAX_CONCURRENT = 4` children and queues at most `MAX_QUEUE = 16` additional
-calls. When all slots are occupied, a new call returns `CALCULATOR_BUSY` once
-the queue is full. These counters are module-local, not cross-instance rate
-limiting; separate processes or replicas have separate limits.
+The module lazily creates a warm workerpool process pool with 1–4 workers, a
+16-task replica-local queue, and a 3-second task timeout. `terminateCalculatorPool`
+is exported for tests and graceful pool recreation. The module also installs
+one-time `SIGTERM`/`SIGINT` handlers: shutdown marks the pool unavailable, lets
+active tasks finish within the bounded termination timeout, and then exits.
+Standalone deployment must include worker/runtime source and a full Node.js
+runtime.
 
 ## Evidence collection
 

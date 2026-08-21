@@ -26,7 +26,7 @@ const baseNextConfig: NextConfig = {
   output: 'standalone',
   outputFileTracingIncludes: {
     '/*': [
-      './src/app/api/chat/tools/calculator-child.mjs',
+      './src/app/api/chat/tools/calculator-worker.mjs',
       './src/app/api/chat/tools/calculator-runtime.mjs',
     ],
   },
