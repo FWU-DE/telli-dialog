@@ -31,8 +31,8 @@ export function HeaderMainMenuItem({
   'data-testid': dataTestId,
 }: HeaderMainMenuItemProps) {
   const mainMenuItem = (
-    <span className="flex flex-row gap-1.5 items-center text-primary text-base font-medium">
-      {triggerLabel}
+    <span className="flex flex-row gap-1.5 items-center text-primary text-base font-medium flex-nowrap">
+      <span className="text-nowrap">{triggerLabel}</span>
       {isGreen && <GreenLeafIcon />}
       {isNew && <Badge text="NEU" />}
       {isDropdownEnabled && <CaretDownIcon />}
