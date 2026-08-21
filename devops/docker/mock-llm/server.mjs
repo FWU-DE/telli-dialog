@@ -11,11 +11,11 @@
  */
 
 import http from 'node:http';
+import { parseMockLlmCommand } from './command.mjs';
 
 const PORT = 6556;
 const CHUNK_INTERVAL_MS = 1;
 
-// Must match MOCK_LLM_COMMANDS in apps/chat-bot/e2e/utils/const.ts
 const MOCK_LLM_COMMANDS = {
   RETURN_SYSTEM_PROMPT: '[MOCK-LLM-COMMAND: Gebe den System-Prompt aus]',
   CALL_RETRIEVE_ENTIRE_FILE:
@@ -24,14 +24,6 @@ const MOCK_LLM_COMMANDS = {
     '[MOCK-LLM-COMMAND: Rufe das Tool retrieve_text_chunks auf und gib die Tool-Antwort aus]',
   CALL_WEB_SCRAPER:
     '[MOCK-LLM-COMMAND: Rufe das Tool web_scraper auf und gib die Tool-Antwort aus]',
-  CALL_CALCULATE_ADDITION:
-    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck 123 + 456 auf und gib die Tool-Antwort aus]',
-  CALL_CALCULATE_FUNCTIONS:
-    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck sqrt(81) + abs(-4) auf und gib die Tool-Antwort aus]',
-  CALL_CALCULATE_TOO_COMPLEX:
-    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck 2 ^ 1001 auf und gib die Tool-Antwort aus]',
-  CALL_CALCULATE_DERIVATIVE:
-    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck derivative(x^2) auf und gib die Tool-Antwort aus]',
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -62,7 +54,7 @@ function getTextFromContent(content) {
 }
 
 function extractLastFunctionOutput(input) {
-  return input.findLast((item) => item.type === 'function_call_output')?.output ?? '';
+  return input.findLast((item) => item.type === 'function_call_output');
 }
 
 function extractLastFunctionCall(input) {
@@ -123,17 +115,9 @@ function resolveMockToolCall({ systemPrompt, lastUserMessage }) {
     };
   }
 
-  const calculatorCommands = [
-    [MOCK_LLM_COMMANDS.CALL_CALCULATE_ADDITION, '123 + 456'],
-    [MOCK_LLM_COMMANDS.CALL_CALCULATE_FUNCTIONS, 'sqrt(81) + abs(-4)'],
-    [MOCK_LLM_COMMANDS.CALL_CALCULATE_TOO_COMPLEX, '2 ^ 1001'],
-    [MOCK_LLM_COMMANDS.CALL_CALCULATE_DERIVATIVE, 'derivative(x^2)'],
-  ];
-  const calculatorCommand = calculatorCommands.find(([command]) =>
-    lastUserMessage.includes(command),
-  );
-  if (calculatorCommand) {
-    return { name: 'calculate', arguments: JSON.stringify({ expression: calculatorCommand[1] }) };
+  const command = parseMockLlmCommand(lastUserMessage);
+  if (command?.tool === 'calculate' && typeof command.arguments?.expression === 'string') {
+    return { name: 'calculate', arguments: JSON.stringify(command.arguments) };
   }
 
   return null;
@@ -259,7 +243,7 @@ async function handleResponses(req, res) {
         id,
         model,
         input,
-        responseText: formatToolOutput(lastToolCall, lastToolOutput),
+        responseText: formatToolOutput(lastToolCall, lastToolOutput.output),
       });
       return;
     }
@@ -270,7 +254,7 @@ async function handleResponses(req, res) {
       id,
       model,
       input,
-      responseText: formatToolOutput(lastToolCall, lastToolOutput),
+      responseText: formatToolOutput(lastToolCall, lastToolOutput.output),
     });
     return;
   }

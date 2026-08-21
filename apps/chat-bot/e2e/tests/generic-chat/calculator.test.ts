@@ -1,5 +1,5 @@
 import { errors, expect, test, Page } from '@playwright/test';
-import { AUTH_FILES, MOCK_LLM_COMMANDS } from '../../utils/const';
+import { AUTH_FILES, buildMockLlmCommand } from '../../utils/const';
 import { deleteChat, selectDifferentModel, sendMessage } from '../../utils/chat';
 import path from 'node:path';
 
@@ -30,26 +30,26 @@ test.afterEach(async ({ page }) => {
   await deleteChat(page, conversationId);
 });
 
-test('calculates a simple addition through the calculate tool', async ({ page }) => {
-  const response = await askCalculator(page, MOCK_LLM_COMMANDS.CALL_CALCULATE_ADDITION);
-  await expect(response).toContainText('Berechnungsergebnis');
-  await expect(response).toContainText('579');
-});
+test.describe('calculator protocol', () => {
+  const cases = [
+    { name: 'addition', expression: '123 + 456', expected: '579' },
+    { name: 'multiple functions', expression: 'sqrt(81) + abs(-4)', expected: '13' },
+    { name: 'too complex', expression: '2 ^ 1001', expected: 'EXPRESSION_TOO_COMPLEX' },
+    {
+      name: 'unavailable function',
+      expression: 'derivative(x^2)',
+      expected: 'FUNCTION_NOT_ALLOWED',
+    },
+  ];
 
-test('calculates an expression using multiple allowed functions', async ({ page }) => {
-  const response = await askCalculator(page, MOCK_LLM_COMMANDS.CALL_CALCULATE_FUNCTIONS);
-  await expect(response).toContainText('Berechnungsergebnis');
-  await expect(response).toContainText('13');
-});
-
-test('reports when calculator computation is too complex', async ({ page }) => {
-  const response = await askCalculator(page, MOCK_LLM_COMMANDS.CALL_CALCULATE_TOO_COMPLEX);
-  await expect(response).toContainText('Berechnungsergebnis');
-  await expect(response).toContainText('EXPRESSION_TOO_COMPLEX');
-});
-
-test('reports when a calculator function is unavailable', async ({ page }) => {
-  const response = await askCalculator(page, MOCK_LLM_COMMANDS.CALL_CALCULATE_DERIVATIVE);
-  await expect(response).toContainText('Berechnungsergebnis');
-  await expect(response).toContainText('FUNCTION_NOT_ALLOWED');
+  for (const { name, expression, expected } of cases) {
+    test(name, async ({ page }) => {
+      const response = await askCalculator(
+        page,
+        buildMockLlmCommand({ tool: 'calculate', arguments: { expression } }),
+      );
+      await expect(response).toContainText('Berechnungsergebnis');
+      await expect(response).toContainText(expected);
+    });
+  }
 });

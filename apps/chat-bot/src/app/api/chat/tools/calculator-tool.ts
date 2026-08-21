@@ -6,14 +6,10 @@ import type { ToolDefinition, ToolRegistration } from './types';
 const TIMEOUT_MS = 3000;
 const MAX_INPUT_BYTES = 1000;
 const MAX_OUTPUT_BYTES = 8192;
+const DEFAULT_MAX_CONCURRENT = 4;
+const DEFAULT_MAX_QUEUE = 16;
 const calculatorRelativePath = 'src/app/api/chat/tools/calculator-child.mjs';
 
-/**
- * The standalone server runs from the repository root, while local Next.js
- * commands can run from the app directory (or the monorepo root). Resolve the
- * traced source file from either layout instead of using import.meta.url,
- * which Turbopack turns into a web asset URL.
- */
 export const resolveCalculatorChildPath = (cwd = process.cwd()) => {
   const candidates = [
     resolve(cwd, calculatorRelativePath),
@@ -24,105 +20,167 @@ export const resolveCalculatorChildPath = (cwd = process.cwd()) => {
   return childPath;
 };
 
-const childPath = resolveCalculatorChildPath();
-
 const errorResponse = (code: string, message: string) =>
   JSON.stringify({ ok: false, error: { code, message } });
 
+const INVALID_INPUT_RESPONSE = (message: string) => errorResponse('INVALID_INPUT', message);
+const PROCESS_ERROR_RESPONSE = () => errorResponse('PROTOCOL_ERROR', 'Calculator process failed');
+const busyResponse = () => errorResponse('CALCULATOR_BUSY', 'Calculator is busy');
+
 type CalculatorChild = Pick<ChildProcess, 'stdin' | 'stdout' | 'on' | 'kill'>;
-type CalculatorOptions = {
-  spawnProcess?: typeof spawn;
+type SpawnProcess = typeof spawn;
+
+export type CalculatorOptions = {
+  spawnProcess?: SpawnProcess;
+  resolveChildPath?: () => string;
   timeoutMs?: number;
   maxConcurrent?: number;
   maxQueue?: number;
 };
 
+const validatePositiveInteger = (name: string, value: number | undefined, fallback: number) => {
+  const resolved = value ?? fallback;
+  if (!Number.isInteger(resolved) || !Number.isFinite(resolved) || resolved <= 0)
+    throw new Error(`${name} must be a positive finite integer`);
+  return resolved;
+};
+
+const validateNonNegativeInteger = (name: string, value: number | undefined, fallback: number) => {
+  const resolved = value ?? fallback;
+  if (!Number.isInteger(resolved) || !Number.isFinite(resolved) || resolved < 0)
+    throw new Error(`${name} must be a non-negative finite integer`);
+  return resolved;
+};
+
+class ConcurrencyScheduler {
+  private active = 0;
+  private readonly queue: Array<() => void> = [];
+
+  constructor(
+    private readonly maxConcurrent: number,
+    private readonly maxQueue: number,
+  ) {}
+
+  run<T>(task: () => Promise<T>, busyValue: T): Promise<T> {
+    if (this.active >= this.maxConcurrent && this.queue.length >= this.maxQueue)
+      return Promise.resolve(busyValue);
+
+    return new Promise((resolveTask, rejectTask) => {
+      const start = () => {
+        this.active++;
+        task().then(
+          (value) => {
+            this.active--;
+            this.queue.shift()?.();
+            resolveTask(value);
+          },
+          (error: unknown) => {
+            this.active--;
+            this.queue.shift()?.();
+            rejectTask(error);
+          },
+        );
+      };
+      if (this.active < this.maxConcurrent) start();
+      else this.queue.push(start);
+    });
+  }
+}
+
+const definition: ToolDefinition = {
+  name: 'calculate',
+  description:
+    'Calculate high-precision scientific arithmetic and unit conversions. Use for arithmetic, scientific functions, and units; relay returned error messages clearly.',
+  parameters: {
+    type: 'object',
+    properties: { expression: { type: 'string', description: 'A mathematical expression.' } },
+    required: ['expression'],
+    additionalProperties: false,
+  },
+};
+
+const runCalculatorProcess = async ({
+  expression,
+  spawnProcess,
+  resolveChildPath,
+  timeoutMs,
+}: {
+  expression: string;
+  spawnProcess: SpawnProcess;
+  resolveChildPath: () => string;
+  timeoutMs: number;
+}) =>
+  new Promise<string>((resolveResult) => {
+    let child: CalculatorChild;
+    try {
+      child = spawnProcess(process.execPath, [resolveChildPath()], {
+        stdio: ['pipe', 'pipe', 'ignore'],
+        // eslint-disable-next-line turbo/no-undeclared-env-vars
+        env: { PATH: process.env.PATH, NODE_ENV: 'production' },
+      });
+    } catch {
+      resolveResult(PROCESS_ERROR_RESPONSE());
+      return;
+    }
+
+    let output = '';
+    let settled = false;
+    const timer = setTimeout(() => {
+      child.kill('SIGKILL');
+      settle(errorResponse('EXPRESSION_TIMEOUT', 'Calculation timed out'));
+    }, timeoutMs);
+
+    const settle = (response: string) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      child.stdin?.destroy();
+      resolveResult(response);
+    };
+
+    child.stdout?.on('data', (chunk: Buffer | string) => {
+      output += chunk.toString();
+      if (Buffer.byteLength(output) > MAX_OUTPUT_BYTES) {
+        child.kill('SIGKILL');
+        settle(errorResponse('PROTOCOL_ERROR', 'Calculator output exceeded limit'));
+      }
+    });
+    child.on('error', () => settle(PROCESS_ERROR_RESPONSE()));
+    child.on('close', (code) => {
+      if (settled) return;
+      settle(code === 0 && output.trim() ? output.trim() : PROCESS_ERROR_RESPONSE());
+    });
+    child.stdin?.end(JSON.stringify({ expression }));
+  });
+
 export function buildCalculatorTool(options: CalculatorOptions = {}): ToolRegistration {
+  const timeoutMs = validatePositiveInteger('timeoutMs', options.timeoutMs, TIMEOUT_MS);
+  const maxConcurrent = validatePositiveInteger(
+    'maxConcurrent',
+    options.maxConcurrent,
+    DEFAULT_MAX_CONCURRENT,
+  );
+  const maxQueue = validateNonNegativeInteger('maxQueue', options.maxQueue, DEFAULT_MAX_QUEUE);
+  const scheduler = new ConcurrencyScheduler(maxConcurrent, maxQueue);
   const spawnProcess = options.spawnProcess ?? spawn;
-  const timeoutMs = options.timeoutMs ?? TIMEOUT_MS;
-  const maxConcurrent = options.maxConcurrent ?? 4;
-  const maxQueue = options.maxQueue ?? 16;
-  let active = 0;
-  const queue: Array<() => void> = [];
-  const definition: ToolDefinition = {
-    name: 'calculate',
-    description:
-      'Calculate high-precision scientific arithmetic and unit conversions. Use for arithmetic, scientific functions, and units; relay returned error messages clearly.',
-    parameters: {
-      type: 'object',
-      properties: { expression: { type: 'string', description: 'A mathematical expression.' } },
-      required: ['expression'],
-      additionalProperties: false,
-    },
-  };
+  const resolveChildPath = options.resolveChildPath ?? resolveCalculatorChildPath;
+
   const handler = async (args: Record<string, unknown>): Promise<string> => {
     if (typeof args.expression !== 'string' || args.expression.trim() === '')
-      return errorResponse('INVALID_INPUT', 'expression must be a non-empty string');
+      return INVALID_INPUT_RESPONSE('expression must be a non-empty string');
     if (Buffer.byteLength(args.expression) > MAX_INPUT_BYTES)
-      return errorResponse('INVALID_INPUT', 'expression is too long');
-    if (active >= maxConcurrent && queue.length >= maxQueue)
-      return errorResponse('CALCULATOR_BUSY', 'Calculator is busy');
-    return new Promise((resolve) => {
-      const start = () => {
-        active++;
-        let child: CalculatorChild;
-        try {
-          child = spawnProcess(process.execPath, [childPath], {
-            stdio: ['pipe', 'pipe', 'ignore'],
-            // eslint-disable-next-line turbo/no-undeclared-env-vars
-            env: { PATH: process.env.PATH, NODE_ENV: 'production' },
-          });
-        } catch {
-          active--;
-          queue.shift()?.();
-          resolve(errorResponse('PROTOCOL_ERROR', 'Calculator process failed'));
-          return;
-        }
-        let output = '';
-        let settled = false;
-        let cleaned = false;
-        const timerRef: { current?: ReturnType<typeof setTimeout> } = {};
-        const cleanup = () => {
-          if (cleaned) return;
-          cleaned = true;
-          if (timerRef.current) clearTimeout(timerRef.current);
-          child.stdin?.destroy();
-          active--;
-          queue.shift()?.();
-        };
-        const settle = (value: string) => {
-          if (settled) return;
-          settled = true;
-          resolve(value);
-          cleanup();
-        };
-        timerRef.current = setTimeout(() => {
-          child.kill('SIGKILL');
-          settle(errorResponse('EXPRESSION_TIMEOUT', 'Calculation timed out'));
-        }, timeoutMs);
-        child.stdout?.on('data', (chunk: Buffer) => {
-          output += chunk.toString();
-          if (Buffer.byteLength(output) > MAX_OUTPUT_BYTES) {
-            child.kill('SIGKILL');
-            settle(errorResponse('PROTOCOL_ERROR', 'Calculator output exceeded limit'));
-          }
-        });
-        child.on('error', () =>
-          settle(errorResponse('PROTOCOL_ERROR', 'Calculator process failed')),
-        );
-        child.on('close', (code) => {
-          if (!settled)
-            settle(
-              code === 0 && output.trim()
-                ? output.trim()
-                : errorResponse('PROTOCOL_ERROR', 'Calculator process failed'),
-            );
-        });
-        child.stdin?.end(JSON.stringify({ expression: args.expression }));
-      };
-      if (active < maxConcurrent) start();
-      else queue.push(start);
-    });
+      return INVALID_INPUT_RESPONSE('expression is too long');
+    return scheduler.run(
+      () =>
+        runCalculatorProcess({
+          expression: args.expression as string,
+          spawnProcess,
+          resolveChildPath,
+          timeoutMs,
+        }),
+      busyResponse(),
+    );
   };
+
   return { definition, handler };
 }

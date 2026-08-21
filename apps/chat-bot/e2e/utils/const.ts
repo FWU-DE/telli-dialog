@@ -1,4 +1,10 @@
 import path from 'node:path';
+import {
+  buildMockLlmCommand,
+  parseMockLlmCommand,
+} from '../../../../devops/docker/mock-llm/command.mjs';
+
+export { buildMockLlmCommand, parseMockLlmCommand };
 
 export const E2E_FEDERAL_STATE = 'DE-TEST';
 
@@ -23,7 +29,7 @@ export const AUTH_FILES = {
 
 export const LLM_MODELS_FILE = path.resolve(process.cwd(), '.playwright-auth/llm-models.json');
 
-// Must match MOCK_LLM_COMMANDS in devops/docker/mock-llm/server.mjs
+// Keep unrelated mock commands stable; calculator commands use the generic JSON protocol.
 export const MOCK_LLM_COMMANDS = {
   RETURN_SYSTEM_PROMPT: '[MOCK-LLM-COMMAND: Gebe den System-Prompt aus]',
   CALL_RETRIEVE_ENTIRE_FILE:
@@ -32,12 +38,4 @@ export const MOCK_LLM_COMMANDS = {
     '[MOCK-LLM-COMMAND: Rufe das Tool retrieve_text_chunks auf und gib die Tool-Antwort aus]',
   CALL_WEB_SCRAPER:
     '[MOCK-LLM-COMMAND: Rufe das Tool web_scraper auf und gib die Tool-Antwort aus]',
-  CALL_CALCULATE_ADDITION:
-    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck 123 + 456 auf und gib die Tool-Antwort aus]',
-  CALL_CALCULATE_FUNCTIONS:
-    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck sqrt(81) + abs(-4) auf und gib die Tool-Antwort aus]',
-  CALL_CALCULATE_TOO_COMPLEX:
-    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck 2 ^ 1001 auf und gib die Tool-Antwort aus]',
-  CALL_CALCULATE_DERIVATIVE:
-    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck derivative(x^2) auf und gib die Tool-Antwort aus]',
 };
