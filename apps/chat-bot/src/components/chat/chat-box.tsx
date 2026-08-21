@@ -1,5 +1,4 @@
 import { FileModel } from '@shared/db/schema';
-import MessageFileAttachment from './message-file-attachment';
 import MessageImageAttachment, { type PendingFileModel } from './message-image-attachment';
 import CopyToClipboardButton from '../common/clipboard-button';
 import ReloadIcon from '../icons/reload';
@@ -21,6 +20,7 @@ import {
 } from './sources/web-search-sources';
 import DownloadConversationMessageButton from './download-conversation-message-button';
 import { utils } from '@shared/utils';
+import DisplayFileAttachment from './display-file-attachment';
 
 // Re-export for consumers
 export type { PendingFileModel };
@@ -111,7 +111,7 @@ export function ChatBox({
         {nonImageFiles.length > 0 && (
           <div className="flex w-fit max-w-full min-w-0 flex-row flex-wrap justify-end gap-2 overflow-hidden">
             {nonImageFiles.map((file) => (
-              <MessageFileAttachment fileName={file.name} key={file.id} />
+              <DisplayFileAttachment fileName={file.name} key={file.id} />
             ))}
           </div>
         )}
