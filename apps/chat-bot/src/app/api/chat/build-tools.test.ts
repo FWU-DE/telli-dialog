@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   buildRetrieveEntireFileToolMock: vi.fn(),
   buildRetrieveTextChunksToolMock: vi.fn(),
   buildMundoSearchToolMock: vi.fn(),
+  buildCalculatorToolMock: vi.fn(),
 }));
 
 vi.mock('./tools/web-search-tool', () => ({
@@ -28,6 +29,9 @@ vi.mock('./tools/retrieve-text-chunks-tool', () => ({
 
 vi.mock('./tools/mundo-search-tool', () => ({
   buildMundoSearchTool: mocks.buildMundoSearchToolMock,
+}));
+vi.mock('./tools/calculator-tool', () => ({
+  buildCalculatorTool: mocks.buildCalculatorToolMock,
 }));
 
 const user = {
@@ -94,6 +98,10 @@ beforeEach(() => {
     },
     handler: vi.fn(),
   });
+  mocks.buildCalculatorToolMock.mockReturnValue({
+    definition: { name: 'calculate', description: 'Calculate', parameters: {} },
+    handler: vi.fn(),
+  });
 });
 
 describe('buildTools', () => {
@@ -108,6 +116,7 @@ describe('buildTools', () => {
     });
 
     expect(Object.keys(toolRegistry)).toEqual([
+      'calculate',
       'web_search',
       'web_scraper',
       'retrieve_entire_file',
@@ -128,7 +137,11 @@ describe('buildTools', () => {
       allowWebTools: true,
     });
 
-    expect(Object.keys(toolRegistry)).toEqual(['retrieve_entire_file', 'retrieve_text_chunks']);
+    expect(Object.keys(toolRegistry)).toEqual([
+      'calculate',
+      'retrieve_entire_file',
+      'retrieve_text_chunks',
+    ]);
   });
 
   it('passes onWebSearchResults callback to web search tool', async () => {
@@ -161,9 +174,30 @@ describe('buildTools', () => {
       allowWebTools: false,
     });
 
-    expect(Object.keys(toolRegistry)).toEqual(['retrieve_entire_file', 'retrieve_text_chunks']);
+    expect(Object.keys(toolRegistry)).toEqual([
+      'calculate',
+      'retrieve_entire_file',
+      'retrieve_text_chunks',
+    ]);
     expect(mocks.buildWebSearchToolMock).not.toHaveBeenCalled();
     expect(mocks.buildWebScraperToolMock).not.toHaveBeenCalled();
+  });
+
+  it('does not register calculator in character, scenario, or assistant chats', async () => {
+    const { buildTools } = await import('./build-tools');
+    for (const context of [
+      { characterId: 'c' },
+      { learningScenarioId: 'l' },
+      { assistantId: 'a' },
+    ]) {
+      const { toolRegistry } = await buildTools({
+        user,
+        relatedFileEntities,
+        allowWebTools: false,
+        ...context,
+      });
+      expect(toolRegistry.calculate).toBeUndefined();
+    }
   });
 
   it('does not add mundo_search when allowMundoSearch is not set', async () => {

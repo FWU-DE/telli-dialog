@@ -15,6 +15,19 @@ const webSearchResults = [
 
 const buildToolsOutput = {
   toolRegistry: {
+    calculate: {
+      definition: {
+        name: 'calculate',
+        description: 'calculator tool',
+        parameters: {
+          type: 'object',
+          properties: { expression: { type: 'string' } },
+          required: ['expression'],
+          additionalProperties: false,
+        },
+      },
+      handler: vi.fn(),
+    },
     web_search: {
       definition: {
         name: 'web_search',
@@ -329,7 +342,10 @@ describe('sendChatMessage', () => {
     expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
     expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        activeToolDefinitions: [buildToolsOutput.toolRegistry.web_search.definition],
+        activeToolDefinitions: [
+          buildToolsOutput.toolRegistry.calculate.definition,
+          buildToolsOutput.toolRegistry.web_search.definition,
+        ],
       }),
     );
     expect(streamedText).toBe('agentic chunk');
@@ -339,6 +355,62 @@ describe('sendChatMessage', () => {
         expect.objectContaining({
           id: result.messageId,
           role: 'assistant',
+        }),
+      ]),
+    );
+  });
+
+  it('persists calculate calls and JSON tool results with their matching call id', async () => {
+    const callId = 'call-calculate-1';
+    const argumentsJson = JSON.stringify({ expression: 'sqrt(16) + 2 cm' });
+    const resultJson = JSON.stringify({ ok: true, result: '6 cm', representation: 'unit' });
+
+    mocks.runAgentLoopMock.mockImplementationOnce(
+      ({ onComplete, toolRegistry }: Parameters<typeof runAgentLoop>[0]) => {
+        expect(toolRegistry).toBeDefined();
+        if (!toolRegistry) throw new Error('Expected calculator tool registry');
+        expect(toolRegistry.calculate).toBe(buildToolsOutput.toolRegistry.calculate);
+        void onComplete({
+          fullText: 'The result is 6 cm.',
+          usage: { promptTokens: 11, completionTokens: 22, totalTokens: 33 },
+          priceInCents: 44,
+          modelId: mainModel.id,
+          modelUsages: [],
+          agentLoopMessages: [
+            {
+              role: 'assistant',
+              content: '',
+              toolCalls: [{ id: callId, name: 'calculate', arguments: argumentsJson }],
+            },
+            { role: 'tool', content: resultJson, toolCallId: callId },
+          ],
+        });
+      },
+    );
+
+    const { sendChatMessage } = await import('./chat-service');
+    const result = await sendChatMessage({
+      conversationId: conversation.id,
+      messages,
+      modelId: mainModel.id,
+      user: createUser(),
+    });
+
+    await collectStream(result.stream);
+
+    expect(mocks.dbInsertChatContentBatchMock).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: 'assistant',
+          content: '',
+          toolCalls: [{ id: callId, name: 'calculate', arguments: argumentsJson }],
+          toolCallId: null,
+        }),
+        expect.objectContaining({
+          role: 'tool',
+          content: resultJson,
+          toolCallId: callId,
+          toolCalls: null,
         }),
       ]),
     );

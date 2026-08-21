@@ -32,4 +32,12 @@ export const MOCK_LLM_COMMANDS = {
     '[MOCK-LLM-COMMAND: Rufe das Tool retrieve_text_chunks auf und gib die Tool-Antwort aus]',
   CALL_WEB_SCRAPER:
     '[MOCK-LLM-COMMAND: Rufe das Tool web_scraper auf und gib die Tool-Antwort aus]',
+  CALL_CALCULATE_ADDITION:
+    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck 123 + 456 auf und gib die Tool-Antwort aus]',
+  CALL_CALCULATE_FUNCTIONS:
+    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck sqrt(81) + abs(-4) auf und gib die Tool-Antwort aus]',
+  CALL_CALCULATE_TOO_COMPLEX:
+    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck 2 ^ 1001 auf und gib die Tool-Antwort aus]',
+  CALL_CALCULATE_DERIVATIVE:
+    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck derivative(x^2) auf und gib die Tool-Antwort aus]',
 };

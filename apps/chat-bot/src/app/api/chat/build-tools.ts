@@ -6,6 +6,7 @@ import { buildWebScraperTool } from './tools/web-scraper-tool';
 import { buildRetrieveEntireFileTool } from './tools/retrieve-entire-file-tool';
 import { buildRetrieveTextChunksTool } from './tools/retrieve-text-chunks-tool';
 import { buildMundoSearchTool } from './tools/mundo-search-tool';
+import { buildCalculatorTool } from './tools/calculator-tool';
 
 type BuildToolsParams = {
   user: UserAndContext;
@@ -39,6 +40,12 @@ export async function buildTools({
   onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
   const toolRegistry: ToolRegistry = {};
+
+  const isGenericChat = !characterId && !learningScenarioId && !assistantId;
+  if (isGenericChat) {
+    const calculatorTool = buildCalculatorTool();
+    toolRegistry[calculatorTool.definition.name] = calculatorTool;
+  }
 
   if (allowWebTools) {
     const webSearchTool = await buildWebSearchTool({

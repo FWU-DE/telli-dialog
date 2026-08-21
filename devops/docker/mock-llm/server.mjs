@@ -24,6 +24,14 @@ const MOCK_LLM_COMMANDS = {
     '[MOCK-LLM-COMMAND: Rufe das Tool retrieve_text_chunks auf und gib die Tool-Antwort aus]',
   CALL_WEB_SCRAPER:
     '[MOCK-LLM-COMMAND: Rufe das Tool web_scraper auf und gib die Tool-Antwort aus]',
+  CALL_CALCULATE_ADDITION:
+    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck 123 + 456 auf und gib die Tool-Antwort aus]',
+  CALL_CALCULATE_FUNCTIONS:
+    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck sqrt(81) + abs(-4) auf und gib die Tool-Antwort aus]',
+  CALL_CALCULATE_TOO_COMPLEX:
+    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck 2 ^ 1001 auf und gib die Tool-Antwort aus]',
+  CALL_CALCULATE_DERIVATIVE:
+    '[MOCK-LLM-COMMAND: Rufe calculate mit dem Ausdruck derivative(x^2) auf und gib die Tool-Antwort aus]',
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -59,6 +67,10 @@ function extractLastFunctionOutput(input) {
 
 function extractLastFunctionCall(input) {
   return input.findLast((item) => item.type === 'function_call');
+}
+
+function formatToolOutput(toolCall, output) {
+  return toolCall?.name === 'calculate' ? `Berechnungsergebnis: ${output}` : output;
 }
 
 function extractLastResponsesUserMessage(input) {
@@ -109,6 +121,19 @@ function resolveMockToolCall({ systemPrompt, lastUserMessage }) {
       name: 'web_scraper',
       arguments: JSON.stringify({ urls: extractUrls(lastUserMessage) }),
     };
+  }
+
+  const calculatorCommands = [
+    [MOCK_LLM_COMMANDS.CALL_CALCULATE_ADDITION, '123 + 456'],
+    [MOCK_LLM_COMMANDS.CALL_CALCULATE_FUNCTIONS, 'sqrt(81) + abs(-4)'],
+    [MOCK_LLM_COMMANDS.CALL_CALCULATE_TOO_COMPLEX, '2 ^ 1001'],
+    [MOCK_LLM_COMMANDS.CALL_CALCULATE_DERIVATIVE, 'derivative(x^2)'],
+  ];
+  const calculatorCommand = calculatorCommands.find(([command]) =>
+    lastUserMessage.includes(command),
+  );
+  if (calculatorCommand) {
+    return { name: 'calculate', arguments: JSON.stringify({ expression: calculatorCommand[1] }) };
   }
 
   return null;
@@ -229,7 +254,13 @@ async function handleResponses(req, res) {
 
   if (lastToolOutput) {
     if (!isStream) {
-      writeResponsesJson({ res, id, model, input, responseText: lastToolOutput });
+      writeResponsesJson({
+        res,
+        id,
+        model,
+        input,
+        responseText: formatToolOutput(lastToolCall, lastToolOutput),
+      });
       return;
     }
 
@@ -239,7 +270,7 @@ async function handleResponses(req, res) {
       id,
       model,
       input,
-      responseText: lastToolOutput,
+      responseText: formatToolOutput(lastToolCall, lastToolOutput),
     });
     return;
   }
