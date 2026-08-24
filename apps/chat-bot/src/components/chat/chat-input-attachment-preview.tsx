@@ -43,11 +43,10 @@ export default function ChatInputAttachmentPreview({
         />
         {onDeattachFile !== undefined && (
           <button
+            type="button"
             onClick={onDeattachFile}
             className="absolute right-0 top-0 bg-neutral-50 z-10 rounded-enterprise-tr-sm"
           >
-            <DeattachFileIcon />
-          </button>
         )}
         <div className="relative flex items-center gap-2 h-14 w-14 overflow-hidden rounded-enterprise-sm">
           {file.status !== 'failed' && imageUrl !== undefined ? (
