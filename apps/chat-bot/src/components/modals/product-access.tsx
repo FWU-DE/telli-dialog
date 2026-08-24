@@ -32,6 +32,8 @@ export default function ProductAccessModal({ children, modalTitle }: ProductAcce
           <AlertDialogAction
             variant="outline"
             onClick={() => {
+              // Full page navigation is required so the browser follows the route handler's redirect after clearing the session cookie.
+              // eslint-disable-next-line @next/next/no-location-assign-relative-destination
               window.location.assign(LOGOUT_URL);
             }}
           >
