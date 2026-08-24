@@ -37,7 +37,7 @@
     "react-hook-form": "7.85.0",
     "tailwindcss": "4.3.3",
     "tailwindcss-animate": "1.0.7",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "exports": {
     "./components/*": "./src/components/*.tsx",
