@@ -38,7 +38,6 @@ export function ChatBox({
   conversationId,
   characterName,
   status,
-  getSignedUrlFn,
   showWebSourcesInDialog = false,
 }: {
   assistantIcon?: ReactNode;
@@ -53,7 +52,6 @@ export function ChatBox({
   conversationId?: string;
   characterName?: string;
   status: ChatStatus;
-  getSignedUrlFn?: (fileId: string) => Promise<string>;
   showWebSourcesInDialog?: boolean;
 }) {
   const tCommon = useTranslations('common');
@@ -105,7 +103,6 @@ export function ChatBox({
                 status="processed"
                 key={file.id}
                 showBanner={false}
-                getSignedUrl={getSignedUrlFn}
               />
             ))}
           </div>

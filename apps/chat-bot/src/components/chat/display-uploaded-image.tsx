@@ -1,14 +1,10 @@
 import React from 'react';
 import Image from 'next/image';
-import { useQuery } from '@tanstack/react-query';
 import { FileModel } from '@shared/db/schema';
-import { getReadOnlySignedUrlAction } from '@/app/api/file-operations/actions';
 import { FileStatus } from './upload-file-button';
 import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
 import CrossIcon from '../icons/cross';
-import { EmptyImageIcon } from '../icons/empty-image';
-import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 
 // Extended type for pending files that includes a local blob URL
@@ -19,7 +15,6 @@ type DisplayUploadedImageProps = {
   status: FileStatus;
   onDeattachFile?: () => void;
   showBanner?: boolean;
-  getSignedUrl?: (fileId: string) => Promise<string>;
 };
 
 export default function DisplayUploadedImage({
@@ -27,37 +22,18 @@ export default function DisplayUploadedImage({
   status,
   onDeattachFile,
   showBanner = true,
-  getSignedUrl,
 }: DisplayUploadedImageProps) {
   const t = useTranslations();
 
   // Check if file has a local URL (for pending files)
   const localUrl = 'localUrl' in file ? file.localUrl : undefined;
-
-  const {
-    data: signedUrl,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['signed-url', file.id, file.name, file.type],
-    queryFn: async () => {
-      if (getSignedUrl !== undefined) {
-        return getSignedUrl(file.id);
-      }
-
-      const signedUrl = await getReadOnlySignedUrlAction({
-        key: `message_attachments/${file.id}`,
-      });
-      return signedUrl;
-    },
-    // Don't fetch if we have a local URL or status is not processed
-    enabled: status === 'processed' && !localUrl,
-    staleTime: 5 * 60 * 1000, // 5 minutes - signed URLs are typically valid for longer
-    gcTime: 10 * 60 * 1000, // 10 minutes garbage collection time
-  });
+  const fetchedImageUrl =
+    status === 'processed' && !localUrl
+      ? `/api/files/${file.id}/scaled-image?width=200&height=200`
+      : null;
 
   // Use local URL if available, otherwise use signed URL from S3
-  const imageUrl = localUrl ?? signedUrl;
+  const imageUrl = localUrl ?? fetchedImageUrl;
 
   if (status === 'uploading') {
     return (
@@ -67,16 +43,8 @@ export default function DisplayUploadedImage({
       </div>
     );
   }
-  // Only show loading if we don't have a local URL and are fetching signed URL
-  if (isLoading && !localUrl) {
-    return (
-      <div className="flex items-center justify-center gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px] bg-gray-50 rounded-lg">
-        <EmptyImageIcon className={cn(`w-[200px]`, 'text-gray-300 animate-pulse')} />
-      </div>
-    );
-  }
 
-  if ((error && !localUrl) || !imageUrl) {
+  if (!imageUrl) {
     return (
       <div className="flex items-center justify-center gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px] bg-red-50 rounded-lg">
         <CrossIcon className="w-5 h-5 text-red-500" />
@@ -85,7 +53,7 @@ export default function DisplayUploadedImage({
     );
   }
   return (
-    <div className="relative group max-w-xs rounded-lg overflow-hidden">
+    <div className="relative group w-48 max-w-xs rounded-lg overflow-hidden">
       {onDeattachFile !== undefined && (
         <button
           onClick={onDeattachFile}
@@ -95,14 +63,14 @@ export default function DisplayUploadedImage({
           <DeattachFileIcon />
         </button>
       )}
-      <div className="relative">
+      <div className="relative bg-gray-50">
         <Image
           src={imageUrl}
           alt={file.name}
           width={200}
           height={200}
           loading="eager"
-          className="w-full h-auto max-h-48 object-cover rounded-enterprise-md"
+          className="w-full h-48 object-contain rounded-enterprise-md"
           unoptimized // Since we're using signed URLs from S3
         />
         {showBanner && (
