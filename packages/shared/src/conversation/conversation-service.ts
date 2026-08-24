@@ -151,7 +151,6 @@ export async function getConversationMessageForExport({
 }) {
   const conversation = await getConversation({ conversationId, userId });
   const message = await dbGetConversationMessageById({ conversationId, messageId, userId });
-  const fileMapping = await dbGetRelatedFiles(conversationId);
 
   if (!message) {
     throw new NotFoundError('Conversation message not found');
@@ -160,6 +159,8 @@ export async function getConversationMessageForExport({
   if (isToolRelatedMessage(message)) {
     throw new NotFoundError('Conversation message not found');
   }
+
+  const fileMapping = await dbGetRelatedFiles(conversationId);
 
   return {
     conversation,
