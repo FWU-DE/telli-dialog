@@ -34,15 +34,6 @@ export const imageGenerationRequestSwaggerSchema = {
           size: '1024x1024',
         },
       },
-      dallE: {
-        summary: 'DALL-E 3',
-        description: 'Image generation using DALL-E 3',
-        value: {
-          model: 'dall-e-3',
-          prompt: 'A beautiful sunset over a mountain range',
-          size: '1024x1024',
-        },
-      },
     },
   },
   response: {
