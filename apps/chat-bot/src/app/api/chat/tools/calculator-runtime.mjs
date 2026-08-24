@@ -55,9 +55,6 @@ const BLOCKED_FUNCTIONS = new Set([
   'nthRoot',
 ]);
 const ALLOWED_OPERATORS = new Set(['+', '-', '*', '/', '^', 'to']);
-const GROWTH_FUNCTIONS = new Set(['exp', 'expm1', 'sinh', 'cosh', 'tanh']);
-const MAX_GROWTH_INPUT = math.bignumber(230);
-const ONE = math.bignumber(1);
 // BigNumber's `e` is the adjusted decimal exponent (not the exponent text in
 // the input), so this also covers decimals such as 0.1e-999.
 export const MAX_NUMERIC_EXPONENT = 100;
@@ -166,191 +163,6 @@ function validateNumericLiteral(node, state) {
   }
 }
 
-// This is deliberately an exponent interval rather than a value evaluation.
-// In particular, it lets us reject large intermediate values while leaving
-// units, symbols, and non-growth functions (whose result cannot be inferred
-// safely) unknown.
-function literalExponent(node) {
-  const text = String(node.value).replace(/^[+-]/, '');
-  const match = text.match(/^([0-9]*)(?:\.([0-9]*))?(?:e([+-]?\d+))?$/i);
-  if (!match) return undefined;
-  const integer = match[1] ?? '';
-  const fraction = match[2] ?? '';
-  const digits = integer + fraction;
-  const first = digits.search(/[1-9]/);
-  if (first < 0) return { min: 0, max: 0, maxAbs: 0, zero: true };
-  const explicitExponent = BigInt(match[3] ?? '0');
-  const decimalPosition = BigInt(integer.length) + explicitExponent;
-  const exponent = decimalPosition - BigInt(first) - 1n;
-  const numericExponent = Number(exponent);
-  return Number.isFinite(numericExponent)
-    ? {
-        min: numericExponent,
-        max: numericExponent,
-        maxAbs: Math.abs(numericExponent),
-        zero: false,
-      }
-    : undefined;
-}
-
-function staticMagnitude(node, allowExact = true, pureValues = new WeakMap()) {
-  const exact =
-    allowExact && node?.isOperatorNode && node.op === '^'
-      ? undefined
-      : allowExact && evaluatePureArithmetic(node, pureValues);
-  if (exact) return magnitudeFromBigNumber(exact);
-  if (node?.type === 'ConstantNode') return literalExponent(node);
-  if (node?.isParenthesisNode) return staticMagnitude(node.content, allowExact, pureValues);
-  if (node?.isFunctionNode && GROWTH_FUNCTIONS.has(node.fn?.name)) {
-    const input = evaluatePureArithmetic(node.args[0], pureValues);
-    return input ? growthMagnitude(node.fn.name, input) : undefined;
-  }
-  if (node?.isOperatorNode) {
-    if (node.op === 'to') return undefined;
-    if (node.op === '-' && node.args.length === 1)
-      return staticMagnitude(node.args[0], allowExact, pureValues);
-    if (node.args.length !== 2) return undefined;
-    const childAllowExact = allowExact && node.op !== '^';
-    const left = staticMagnitude(node.args[0], childAllowExact, pureValues);
-    const right = staticMagnitude(node.args[1], childAllowExact, pureValues);
-    if (!left || !right) return undefined;
-    if (node.op === '+' || node.op === '-') {
-      if (left.zero && right.zero) return { min: 0, max: 0, maxAbs: 0, zero: true };
-      return {
-        min: Number.NEGATIVE_INFINITY,
-        max: Math.max(left.max, right.max) + 1,
-        maxAbs: Math.max(left.maxAbs, right.maxAbs) + 1,
-        zero: false,
-      };
-    }
-    if (node.op === '*') {
-      if (left.zero || right.zero) return { min: 0, max: 0, maxAbs: 0, zero: true };
-      return {
-        min: left.min + right.min,
-        max: left.max + right.max,
-        maxAbs: left.maxAbs + right.maxAbs,
-        zero: false,
-      };
-    }
-    if (node.op === '/') {
-      if (right.zero) throw new NonFiniteResultError();
-      if (left.zero) return { min: 0, max: 0, maxAbs: 0, zero: true };
-      return {
-        min: left.min - right.max,
-        max: left.max - right.min,
-        maxAbs: left.maxAbs + right.maxAbs,
-        zero: false,
-      };
-    }
-    if (node.op === '^') {
-      const exponent = signedLiteralBigInt(node.args[1]);
-      if (exponent === undefined) return undefined;
-      if (exponent === 0n) return { min: 0, max: 0, maxAbs: 0, zero: false };
-      if (left.zero) {
-        if (exponent < 0n) throw new NonFiniteResultError();
-        return { min: 0, max: 0, maxAbs: 0, zero: true };
-      }
-      const min = left.min * Number(exponent);
-      const max = left.max * Number(exponent);
-      return {
-        min: Math.min(min, max),
-        max: Math.max(min, max),
-        maxAbs: left.maxAbs * Math.abs(Number(exponent)),
-        zero: false,
-      };
-    }
-  }
-  return undefined;
-}
-
-function isPureArithmetic(node) {
-  if (node?.type === 'ConstantNode') return node.value?.isBigNumber === true;
-  if (node?.isParenthesisNode) return isPureArithmetic(node.content);
-  if (!node?.isOperatorNode || node.op === 'to') return false;
-  if (node.op === '^') return node.args.length === 2 && isSignedNumericLiteral(node.args[1]);
-  return (
-    (node.args.length === 1 &&
-      (node.op === '+' || node.op === '-') &&
-      isPureArithmetic(node.args[0])) ||
-    (node.args.length === 2 && node.args.every(isPureArithmetic))
-  );
-}
-
-// Evaluation is restricted to a subtree proven to contain only BigNumber
-// constants and arithmetic operators. Never use this for function arguments.
-function evaluatePureArithmetic(node, cache = new WeakMap()) {
-  if (!isPureArithmetic(node)) return undefined;
-  if (cache.has(node)) return cache.get(node);
-  try {
-    const value = node.evaluate();
-    const result = value?.isBigNumber === true && value.isFinite() ? value : undefined;
-    cache.set(node, result);
-    return result;
-  } catch {
-    cache.set(node, undefined);
-    return undefined;
-  }
-}
-
-function growthMagnitude(name, input) {
-  const absoluteInput = input.abs();
-  if (name === 'tanh') return { min: -1, max: 1, maxAbs: 1, zero: false };
-  if (absoluteInput.lte(ONE)) {
-    if (name === 'expm1' && input.isZero()) return { min: 0, max: 0, maxAbs: 0, zero: true };
-    return { min: -1, max: 1, maxAbs: 1, zero: false };
-  }
-  if (name === 'exp' || name === 'expm1') {
-    return input.isNegative()
-      ? { min: -100, max: 0, maxAbs: 100, zero: false }
-      : { min: 0, max: 100, maxAbs: 100, zero: false };
-  }
-  return { min: -100, max: 100, maxAbs: 100, zero: false };
-}
-
-function magnitudeFromBigNumber(value) {
-  if (value.isZero()) return { min: 0, max: 0, maxAbs: 0, zero: true };
-  const exponent = value.abs().e;
-  if (!Number.isFinite(exponent)) return undefined;
-  return { min: exponent, max: exponent, maxAbs: Math.abs(exponent), zero: false };
-}
-
-function signedLiteralBigInt(node) {
-  if (node?.type === 'ConstantNode' && /^\d+$/.test(String(node.value)))
-    return BigInt(String(node.value));
-  if (
-    node?.isOperatorNode &&
-    node.op === '-' &&
-    node.args.length === 1 &&
-    node.args[0]?.type === 'ConstantNode' &&
-    /^\d+$/.test(String(node.args[0].value))
-  )
-    return -BigInt(String(node.args[0].value));
-  return undefined;
-}
-
-function validateStaticMagnitude(node, pureValues = new WeakMap()) {
-  if (node?.isFunctionNode) {
-    const name = node.fn?.name;
-    if (GROWTH_FUNCTIONS.has(name)) {
-      node.args.forEach((arg) => {
-        const value = evaluatePureArithmetic(arg, pureValues);
-        if (!value || value.abs().gt(MAX_GROWTH_INPUT))
-          throw new ExpressionTooComplexError('Growth function input exceeds limits');
-      });
-    }
-    node.args.forEach((arg) => validateStaticMagnitude(arg, pureValues));
-    return;
-  }
-  if (node?.isParenthesisNode) {
-    validateStaticMagnitude(node.content, pureValues);
-    return;
-  }
-  if (node?.isOperatorNode) node.args.forEach((arg) => validateStaticMagnitude(arg, pureValues));
-  const magnitude = staticMagnitude(node, true, pureValues);
-  if (magnitude && magnitude.maxAbs > MAX_NUMERIC_EXPONENT)
-    throw new ExpressionTooComplexError('Numeric magnitude exceeds limits');
-}
-
 export function validateExpression(node, depth = 0, state = { nodes: 0, literals: 0, cost: 0 }) {
   state.nodes++;
   addCost(state, 1);
@@ -429,7 +241,6 @@ function serializeResult(value) {
 export function evaluateExpression(expression) {
   const node = parseExpression(expression);
   validateExpression(node);
-  validateStaticMagnitude(node);
   let value;
   try {
     value = node.evaluate();

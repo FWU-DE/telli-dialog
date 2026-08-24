@@ -156,10 +156,12 @@ describe('calculator tool', () => {
     },
   );
 
-  it.each(['10^101', '10^100 * 10^100', '(10+0)^100'])(
-    'rejects oversized derived magnitude in %s before evaluation',
+  it.each(['10^101', 'exp(1000 + 0)', 'exp(230) * exp(230)'])(
+    'does not statically reject derived magnitude in %s',
     (expression) => {
-      expect(runtime(expression)).toMatchObject({ ok: false, code: 'EXPRESSION_TOO_COMPLEX' });
+      const result = runtime(expression);
+      expect(result.code).not.toBe('EXPRESSION_TOO_COMPLEX');
+      if (!result.ok) expect(['INVALID_NODE', 'NONFINITE_RESULT']).toContain(result.code);
     },
   );
 
@@ -170,24 +172,10 @@ describe('calculator tool', () => {
     },
   );
 
-  it.each(['exp(1e6)', 'exp(1000 + 0)', 'sinh(1e6)'])(
-    'rejects oversized growth input %s before evaluation',
-    (expression) => {
-      expect(runtime(expression)).toMatchObject({ ok: false, code: 'EXPRESSION_TOO_COMPLEX' });
-    },
-  );
-
   it.each(['exp(1)', 'expm1(1)', 'sinh(1)', 'cosh(1)', 'tanh(1)', 'exp(230)'])(
     'allows in-policy growth expression %s',
     (expression) => {
       expect(runtime(expression).ok).toBe(true);
-    },
-  );
-
-  it.each(['exp(230) * exp(230)', 'exp(230)^2', 'exp(230) * exp(230) * exp(1)'])(
-    'rejects composed growth magnitude in %s before evaluation',
-    (expression) => {
-      expect(runtime(expression)).toMatchObject({ ok: false, code: 'EXPRESSION_TOO_COMPLEX' });
     },
   );
 
