@@ -7,7 +7,10 @@
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./bifrost-provider-sync": "./src/bifrost-provider-sync/index.ts",
+    "./bifrost-provider-sync/error": "./src/bifrost-provider-sync/error.ts",
     "./llm-model": "./src/llm-model/index.ts",
+    "./types": "./src/types.ts",
     "./utils": "./src/api-utils/index.ts"
   },
   "scripts": {
@@ -27,21 +30,21 @@
     "bcryptjs": "3.0.3",
     "drizzle-orm": "0.45.2",
     "drizzle-zod": "0.8.3",
-    "nanoid": "5.1.16",
-    "pg": "8.22.0",
+    "nanoid": "6.0.1",
+    "pg": "8.23.0",
     "zod": "4.4.3"
   },
   "devDependencies": {
     "@ais-chat/eslint-config": "workspace:*",
     "@ais-chat/typescript-config": "workspace:*",
     "@types/node": "24.13.3",
-    "@types/pg": "8.20.0",
-    "@vitest/coverage-v8": "4.1.10",
+    "@types/pg": "8.23.1",
+    "@vitest/coverage-v8": "4.1.11",
     "dotenv-cli": "11.0.0",
     "drizzle-kit": "0.31.10",
-    "eslint": "10.7.0",
-    "tsx": "4.23.0",
+    "eslint": "10.8.1",
+    "tsx": "4.23.12",
     "typescript": "6.0.3",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   }
 }

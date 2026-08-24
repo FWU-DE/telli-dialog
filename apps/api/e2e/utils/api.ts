@@ -10,8 +10,6 @@ export const authorizationHeader = {
   Authorization: `Bearer ${API_KEY}`,
 };
 
-export const baseURL = `http://localhost:${process.env.PORT ?? '3002'}`;
-
 type ApiModel = {
   name: string;
   isDeleted?: boolean;
@@ -57,12 +55,12 @@ export async function getTextModel(request: APIRequestContext) {
   );
 }
 
-/** Returns a reasoning model. Throws if none available. */
-export async function getReasoningModel(request: APIRequestContext) {
+/** Finds a model by name. Throws if none available. */
+export async function getModel(request: APIRequestContext, name: string) {
   return findModel(
     request,
-    (m) => !m.isDeleted && m.name.includes('gpt-5'),
-    'No reasoning model available',
+    (m) => !m.isDeleted && m.name === name,
+    `No model available with name: ${name}`,
   );
 }
 

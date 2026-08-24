@@ -16,11 +16,11 @@ const MOCK_MODEL_DISPLAY_NAMES = new Set<string>([
 ]);
 
 async function readModelsFromDropdown(page: Page): Promise<string[]> {
-  const dropdown = page.getByLabel(`Select text Model Dropdown`);
+  const dropdown = page.getByTestId(`text-model-dropdown`);
 
   if (!(await dropdown.isVisible())) return [];
 
-  const selectedModelName = await dropdown.locator('span').first().innerText();
+  const selectedModelName = await dropdown.innerText();
 
   const isDisabled = await dropdown.evaluate((el) => (el as HTMLButtonElement).disabled);
   if (isDisabled) return selectedModelName ? [selectedModelName] : [];

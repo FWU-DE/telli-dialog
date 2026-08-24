@@ -86,6 +86,7 @@ describe('generateTextWithBilling', () => {
     );
     expect(result).toEqual({
       ...mockTextResponse,
+      modelId: 'model-123',
       priceInCents: 50,
     });
   });
@@ -248,7 +249,11 @@ describe('generateTextStreamWithBilling', () => {
     expect(mockGenerateTextStream).toHaveBeenCalled();
     expect(chunks).toEqual(['chunk1', 'chunk2', 'chunk3']);
     expect(mockBillTextGenerationUsageToApiKey).toHaveBeenCalled();
-    expect(onCompleteMock).toHaveBeenCalledWith({ usage: mockUsage, priceInCents: 75 });
+    expect(onCompleteMock).toHaveBeenCalledWith({
+      usage: mockUsage,
+      priceInCents: 75,
+      modelId: 'model-123',
+    });
   });
 
   it('should throw InvalidModelError when API key does not have access', async () => {

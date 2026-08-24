@@ -1,10 +1,15 @@
 import { isKnownAiGenerationError, type KnownAiGenerationError } from '@ais-chat/ai-core/errors';
 
 type ErrorMessageTranslationKey =
-  'rate-limit-error' | 'chat-expired-error' | 'not-found-error' | 'generic-error';
+  | 'rate-limit-error'
+  | 'chat-expired-error'
+  | 'empty-response-error'
+  | 'not-found-error'
+  | 'generic-error';
 
 const aiErrorNameToMessageKeyMap = {
   TokenPointsExceededError: 'rate-limit-error',
+  EmptyResponseError: 'empty-response-error',
   SharedChatExpiredError: 'chat-expired-error',
 } as const satisfies Partial<Record<KnownAiGenerationError['name'], ErrorMessageTranslationKey>>;
 

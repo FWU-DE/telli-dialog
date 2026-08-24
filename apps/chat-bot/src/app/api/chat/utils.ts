@@ -208,13 +208,13 @@ export async function getChatTitle({
 }
 
 /**
- * Some models (like google anthropic) require the image data to be included in the message as a base64 encoded string,
+ * Some models (like Anthropic models) require the image data to be included in the message as a base64 encoded string,
  * while others can work with just the image url. This function conditionally includes the base64 encoded data if required by the model.
  */
 export function determineImageAttachmentTypeForModel(model: LlmModelSelectModel): 'url' | 'base64' {
   // we do not have settings on the LlmModelSelectModel to determine if the model needs image data,
   // so we will use the model name as a heuristic for now
-  if (model.provider === 'google' && model.name.startsWith('anthropic/')) {
+  if (model.name.startsWith('anthropic/')) {
     return 'base64';
   }
   return 'url';

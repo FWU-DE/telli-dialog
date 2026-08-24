@@ -11,19 +11,19 @@
   "dependencies": {
     "@eslint/compat": "2.1.0",
     "@eslint/js": "10.0.1",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.3.2",
     "eslint-config-prettier": "10.1.8",
-    "eslint-config-turbo": "2.10.4",
+    "eslint-config-turbo": "2.10.11",
     "eslint-plugin-jsx-a11y": "6.10.2",
-    "eslint-plugin-package-json": "1.5.0",
+    "eslint-plugin-package-json": "1.7.1",
     "eslint-plugin-prettier": "5.5.6",
-    "prettier": "3.9.5",
-    "typescript-eslint": "8.63.0"
+    "prettier": "3.9.6",
+    "typescript-eslint": "8.67.0"
   },
   "peerDependencies": {
     "eslint": ">=10"
   },
   "devDependencies": {
-    "eslint": "10.7.0"
+    "eslint": "10.8.1"
   }
 }

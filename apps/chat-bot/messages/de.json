@@ -27,6 +27,7 @@
     "information-disclaimer": "AIS.chat kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",
     "character-limit-reached": "Zeichenlimit erreicht",
     "chat-expired-error": "Der Chat ist abgelaufen.",
+    "empty-response-error": "Antwort konnte nicht generiert werden",
     "new-chat": "Neuer Chat",
     "stop": "Stop",
     "copy": "Kopieren",
@@ -39,7 +40,7 @@
     "regenerate-message": "Antwort erneut generieren",
     "image-load-failed": "Bild konnte nicht geladen werden",
     "rate-limit-error": "Das bereitgestellte Tokenvolumen wurde aufgebraucht.",
-    "not-found-error": "Diese Seite gibt es leider nicht.",
+    "not-found-error": "Diese Ressource existiert nicht oder ist nicht freigegeben.",
     "generic-error": "Ein Fehler ist aufgetreten",
     "retry-button": "Erneut versuchen",
     "please-select": "Bitte auswählen"
@@ -373,7 +374,7 @@
       "delete-confirm": "Soll das Lernszenario wirklich gelöscht werden? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
     },
     "shared": {
-      "excercise-title": "Dein Arbeitsauftrag",
+      "exercise-title": "Dein Arbeitsauftrag",
       "title": "Lernszenario einsetzen",
       "description": "Wie viel des monatlichen Tokenvolumens darf durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
@@ -425,18 +426,28 @@
     }
   },
   "image-generation": {
+    "aspect-ratio": {
+      "label": "Format",
+      "aria-label": "Bildformat auswählen",
+      "quadratic": "Quadratisch",
+      "portrait": "Hochformat",
+      "landscape": "Querformat"
+    },
     "page-titles": {
       "chat": "Bildgenerierung"
+    },
+    "style": {
+      "label": "Bildstil",
+      "aria-label": "Bildstil auswählen",
+      "no-style": "Kein Stil",
+      "photorealistic": "Fotorealistisch",
+      "cartoon": "Cartoon"
     },
     "image-generation-model": "Modell",
     "no-model-available": "Kein Modell verfügbar",
     "placeholder": "Beschreibe, wie das Bild aussehen soll.",
     "generate-button": "Bild generieren",
     "prompt-label": "Prompt",
-    "style-label": "Bildstil",
-    "no-style": "Kein Stil",
-    "style-photorealistic-name": "Fotorealistisch",
-    "style-cartoon-name": "Cartoon",
     "generation-error": "Die Bildgenerierung ist fehlgeschlagen. Bitte versuche es erneut.",
     "responsible-ai-error": "Diese Anfrage wurde nicht ausgeführt, da sie möglicherweise gegen die Nutzungsrichtlinien verstößt.",
     "copy-image-success": "Bild in die Zwischenablage kopiert",
@@ -584,6 +595,7 @@
       "heading": "Websuche für Aktuelles",
       "heading-tooltip": "Falls aktiviert, sucht AIS.chat automatisch im Internet, sofern aktuelle Informationen nötig sind.",
       "activated": "Aktiviert",
+      "deactivated": "Deaktiviert",
       "scope-aria-label": "Umfang der Websuche",
       "scope-all-web": "Gesamtes Web",
       "scope-included-domains": "Nur nachfolgende Webseiten",
@@ -594,7 +606,13 @@
       "websites-empty-error": "Bitte eine URL eingeben.",
       "websites-duplicate-error": "Diese URL wurde bereits hinzugefügt",
       "websites-invalid-error": "Bitte eine gültige URL eingeben.",
-      "websites-counter": "{count} / {max} Domains"
+      "websites-counter": "{count} / {max} Webseiten",
+      "websites-clear-button": "Alle entfernen",
+      "websites-presets-load-error": "Fehler beim Laden der Webseitenpakete",
+      "presets-title": "Webseitenpakete",
+      "presets-title-unassigned": "Selbst hinzugefügt",
+      "presets-domain-count": "{count, plural, =1 {# Webseite} other {# Webseiten}}",
+      "presets-add-preset-button": "Paket hinzufügen"
     }
   },
   "assistants": {
@@ -664,6 +682,7 @@
     "filter-label": "Filter",
     "filter-reset": "Zurücksetzen",
     "filter-tabs-label": "Filteroptionen",
+    "filter-aria-delete": "Filter {filter_name} entfernen",
     "info-tooltip-label": "Informationen anzeigen",
     "badge-mine": "von mir",
     "sort-label": "Sortierung",

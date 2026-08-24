@@ -1,15 +1,10 @@
-import {
-  generateTextStreamWithBilling,
-  type ToolDefinition,
-  TokenPointsExceededError,
-  SharedChatExpiredError,
-  runAgentLoop,
-} from '@ais-chat/ai-core';
+import { TokenPointsExceededError, SharedChatExpiredError, runAgentLoop } from '@ais-chat/ai-core';
 import { NotFoundError } from '@shared/error';
 import { createTextStream, encodeChatStreamEvent } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
+import { getChatModelSelection } from '../utils/model-circuit-breaker';
 import {
   dbGetLearningScenarioByIdAndInviteCode,
   dbUpdateTokenUsageBySharedLearningScenarioId,
@@ -26,13 +21,12 @@ import {
   getMostRecentUserMessage,
   limitChatHistory,
 } from '../chat/utils';
-import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import { buildTools } from '../chat/build-tools';
+import { isWebSearchEnabledForEntity } from '../chat/websearch';
 import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { createImageAttachmentsForConversation } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
-import { RetrievedChunk } from '../rag/types';
 import { resolveAgentNameForTracing } from '../utils/agent-name';
 import { extractUrls } from '../utils/extract-urls';
 import { combineSharedRelatedFiles } from '../shared-chat/shared-chat-file-service';
@@ -94,8 +88,11 @@ export async function sendLearningScenarioMessage({
   }
 
   const { model: definedModel, apiKeyId } = modelAndApiKey;
-  const agenticChatEnabled =
-    teacherUserAndContext.federalState.featureToggles.isAgenticChatEnabled ?? false;
+  const modelSelection = await getChatModelSelection({
+    model: definedModel,
+    federalStateId: teacherUserAndContext.federalState.id,
+  });
+  const generationModelId = modelSelection.modelIds[0];
 
   // Check expiry
   if (sharedChatHasExpired(learningScenario)) {
@@ -137,59 +134,42 @@ export async function sendLearningScenarioMessage({
   });
   const urls = extractUrls({
     learningScenario,
-    messages,
   });
   const { processedUrls } = await ingestWebContent({
     urls,
     federalStateId: teacherUserAndContext.federalState.id,
   });
 
-  let activeToolDefinitions: ToolDefinition[] = [];
-  let chunks: RetrievedChunk[] = [];
-  let toolRegistry:
-    | Record<
-        string,
-        { definition: ToolDefinition; handler: (args: Record<string, unknown>) => Promise<string> }
-      >
-    | undefined;
-
   const { stream, update, done, error: streamError } = createTextStream();
   const assistantMessageId = crypto.randomUUID();
 
-  if (agenticChatEnabled) {
-    const tools = await buildTools({
-      user: teacherUserAndContext,
-      learningScenarioId: learningScenario.id,
-      relatedFileEntities,
-      attachedLinks: learningScenario.attachedLinks,
-      sourceUrls: processedUrls,
-      onWebSearchResults: (results) => {
-        update(
-          encodeChatStreamEvent({
-            type: 'web_search_results',
-            webSearchResults: results,
-          }),
-        );
-      },
-    });
+  const allowWebTools = isWebSearchEnabledForEntity({
+    featureToggles: teacherUserAndContext.federalState.featureToggles,
+    entity: learningScenario,
+  });
 
-    activeToolDefinitions = Object.values(tools.toolRegistry).map((entry) => entry.definition);
-
-    toolRegistry = tools.toolRegistry;
-  } else {
-    chunks = await retrieveChunks({
-      messages,
-      federalStateId: teacherUserAndContext.federalState.id,
-      relatedFileEntities,
-      sourceUrls: processedUrls,
-    });
-  }
+  const tools = await buildTools({
+    user: teacherUserAndContext,
+    learningScenarioId: learningScenario.id,
+    relatedFileEntities,
+    attachedLinks: learningScenario.attachedLinks,
+    sourceUrls: processedUrls,
+    allowWebTools,
+    allowMundoSearch: false,
+    onWebSearchResults: (results) => {
+      update(
+        encodeChatStreamEvent({
+          type: 'web_search_results',
+          webSearchResults: results,
+        }),
+      );
+    },
+  });
 
   // Build system prompt
   const systemPrompt = constructLearningScenarioSystemPrompt({
     learningScenario: learningScenario,
-    chunks,
-    activeToolDefinitions,
+    activeToolDefinitions: Object.values(tools.toolRegistry).map((entry) => entry.definition),
   });
 
   // Prune messages
@@ -215,98 +195,50 @@ export async function sendLearningScenarioMessage({
     imageAttachmentType,
   );
 
-  // Convert to ai-core format
-  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImages);
+  runAgentLoop({
+    modelSelection,
+    apiKeyId,
+    messages: convertToAiCoreMessages(systemPrompt, messagesWithImages),
+    toolRegistry: tools.toolRegistry,
+    agentName: resolveAgentNameForTracing({ learningScenarioId: learningScenario.id }),
+    onTextChunk: (delta) => {
+      update(delta);
+    },
+    onComplete: async ({ usage, priceInCents, modelUsages }) => {
+      const { promptTokens, completionTokens } = usage;
 
-  if (agenticChatEnabled) {
-    const agentName = resolveAgentNameForTracing({ learningScenarioId: learningScenario.id });
-
-    runAgentLoop({
-      modelId: definedModel.id,
-      modelName: definedModel.name,
-      apiKeyId,
-      messages: aiCoreMessages,
-      toolRegistry,
-      agentName,
-      onTextChunk: (delta) => {
-        update(delta);
-      },
-      onComplete: async ({ usage, priceInCents }) => {
-        const { promptTokens, completionTokens } = usage;
-
+      // Agentic requests can invoke several models across iterations. Persist each usage
+      // entry separately so pricing and reporting stay associated with the serving model.
+      for (const modelUsage of modelUsages) {
         await dbUpdateTokenUsageBySharedLearningScenarioId({
-          modelId: definedModel.id,
-          completionTokens,
-          promptTokens,
+          modelId: modelUsage.modelId ?? generationModelId,
+          completionTokens: modelUsage.usage.completionTokens,
+          promptTokens: modelUsage.usage.promptTokens,
           learningScenarioId: learningScenario.id,
           userId: teacherUserAndContext.id,
-          costsInCent: priceInCents,
+          costsInCent: modelUsage.priceInCents,
         });
-
-        await sendRabbitmqEvent(
-          constructNewMessageEvent({
-            user: teacherUserAndContext,
-            provider: definedModel.provider,
-            promptTokens,
-            completionTokens,
-            costsInCent: priceInCents,
-            anonymous: true,
-            sharedChat: learningScenario,
-          }),
-        );
-
-        done();
-      },
-      onError: (error) => {
-        logError('Error during shared chat streaming:', error);
-        streamError(error);
-      },
-    });
-  } else {
-    // Start streaming in the background
-    void (async () => {
-      try {
-        const textStream = generateTextStreamWithBilling(
-          definedModel.id,
-          aiCoreMessages,
-          apiKeyId,
-          async ({ usage, priceInCents }) => {
-            const { promptTokens, completionTokens } = usage;
-
-            await dbUpdateTokenUsageBySharedLearningScenarioId({
-              modelId: definedModel.id,
-              completionTokens,
-              promptTokens,
-              learningScenarioId: learningScenario.id,
-              userId: teacherUserAndContext.id,
-              costsInCent: priceInCents,
-            });
-
-            await sendRabbitmqEvent(
-              constructNewMessageEvent({
-                user: teacherUserAndContext,
-                provider: definedModel.provider,
-                promptTokens,
-                completionTokens,
-                costsInCent: priceInCents,
-                anonymous: true,
-                sharedChat: learningScenario,
-              }),
-            );
-          },
-        );
-
-        for await (const chunk of textStream) {
-          update(chunk);
-        }
-
-        done();
-      } catch (error) {
-        logError('Error during shared chat streaming:', error);
-        streamError(error instanceof Error ? error : new Error('Unknown error'));
       }
-    })();
-  }
+
+      await sendRabbitmqEvent(
+        constructNewMessageEvent({
+          user: teacherUserAndContext,
+          provider: definedModel.provider,
+          promptTokens,
+          completionTokens,
+          costsInCent: priceInCents,
+          anonymous: true,
+          sharedChat: learningScenario,
+        }),
+      );
+
+      done();
+    },
+    onError: (error) => {
+      logError('Error during shared chat streaming:', error);
+      streamError(error);
+    },
+  });
 
   return {
     stream,

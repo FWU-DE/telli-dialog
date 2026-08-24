@@ -65,11 +65,15 @@ export type GenerationOptions = {
   temperature?: number;
   tools?: ToolDefinition[];
   toolChoice?: 'auto' | 'none' | 'required';
+  /** Resolved server-side models used only by the Bifrost provider. */
+  fallbackModels?: AiModel[];
 };
 
 export type TextGenerationArgs = {
   messages: Message[];
   model: string;
+  /** Resolved server-side models used only by the Bifrost provider. */
+  fallbackModels?: AiModel[];
 } & GenerationOptions;
 
 export type TokenUsage = {
@@ -78,9 +82,16 @@ export type TokenUsage = {
   totalTokens: number;
 };
 
+export type ModelSelection = {
+  modelIds: readonly [string, ...string[]];
+  modelName: string;
+  onModelUsed?: (modelId: string) => void | Promise<void>;
+};
+
 export type TextResponse = {
   text: string;
   usage: TokenUsage;
+  modelId?: string;
 };
 
 /**
@@ -89,13 +100,13 @@ export type TextResponse = {
 export type StreamEvent =
   | { type: 'text'; delta: string }
   | { type: 'tool_call'; call: ToolCall }
-  | { type: 'finish'; usage: TokenUsage };
+  | { type: 'finish'; usage: TokenUsage; modelId?: string };
 
 export type TextGenerationFn = (args: TextGenerationArgs) => Promise<TextResponse>;
 
 export type TextStreamFn = (
   args: TextGenerationArgs,
-  onComplete?: (usage: TokenUsage) => void | Promise<void>,
+  onComplete?: (usage: TokenUsage, modelId?: string) => void | Promise<void>,
 ) => AsyncGenerator<string>;
 
 export type AgenticStreamFn = (args: TextGenerationArgs) => AsyncGenerator<StreamEvent>;

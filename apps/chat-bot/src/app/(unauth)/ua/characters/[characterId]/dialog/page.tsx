@@ -44,13 +44,20 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
   }
   const federalState = await dbGetFederalStateByUserId({ userId: character.startedBy });
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
-  const shareUrl = `/ua/characters/${character.id}/dialog?inviteCode=${searchParams.inviteCode}`;
-  const locale = await resolveSharingLocale(shareUrl);
+  const locale = await resolveSharingLocale({
+    customChatVariant: 'character',
+    customChatId: character.id,
+    sharingUserId: character.startedBy,
+  });
   const messages = await loadTranslations(locale);
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
+      <LlmModelsProvider
+        models={[model]}
+        initialModelName={model.name}
+        defaultModelName={model.name}
+      >
         <ThemeProvider designConfiguration={designConfiguration}>
           <CharacterSharedChat
             {...character}

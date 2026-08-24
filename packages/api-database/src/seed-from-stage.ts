@@ -5,14 +5,19 @@ import {
   apiKeyTable,
   llmModelTable,
   llmModelApiKeyMappingTable,
+  llmModelProviderKeyMappingTable,
+  llmProviderKeyTable,
   OrganizationModel,
   ProjectModel,
   LlmModel,
   ApiKeyModel,
   LlmModelApiKeyMappingModel,
+  LlmModelProviderKeyMappingModel,
+  LlmProviderKeyModel,
 } from './schema';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import { normalizeSeedModelsForBifrost, syncSeedModelsToBifrost } from './seed-bifrost';
 
 // Loads all required data from the staging database into the local database
 // including organizations, projects, api keys, llm models and mappings.
@@ -49,10 +54,20 @@ async function getModelKeyMappings(): Promise<LlmModelApiKeyMappingModel[]> {
   return await stageDb.select().from(llmModelApiKeyMappingTable);
 }
 
+async function getProviderKeys(): Promise<LlmProviderKeyModel[]> {
+  return await stageDb.select().from(llmProviderKeyTable);
+}
+
+async function getModelProviderKeyMappings(): Promise<LlmModelProviderKeyMappingModel[]> {
+  return await stageDb.select().from(llmModelProviderKeyMappingTable);
+}
+
 export async function seedDatabase() {
   console.log('Starting database seeding...');
 
   try {
+    const models = normalizeSeedModelsForBifrost(await getModels());
+
     // 1. Create organization
     await localDb
       .insert(organizationTable)
@@ -75,11 +90,47 @@ export async function seedDatabase() {
       .returning();
 
     // 4. Create LLM models
-    await localDb
-      .insert(llmModelTable)
-      .values(await getModels())
-      .onConflictDoNothing()
-      .returning();
+    for (const model of models) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _id, organizationId: _orgId, createdAt: _createdAt, ...conflictSet } = model;
+      await localDb
+        .insert(llmModelTable)
+        .values(model)
+        .onConflictDoUpdate({
+          target: llmModelTable.id,
+          set: conflictSet,
+        })
+        .returning();
+    }
+
+    const localProviderKeyIds = new Map<string, string>();
+    for (const providerKey of await getProviderKeys()) {
+      const [localProviderKey] = await localDb
+        .insert(llmProviderKeyTable)
+        .values({ ...providerKey, name: providerKey.name.toLowerCase() })
+        .onConflictDoUpdate({
+          target: [llmProviderKeyTable.organizationId, llmProviderKeyTable.name],
+          set: {
+            provider: providerKey.provider,
+            settings: providerKey.settings,
+            weight: providerKey.weight,
+            isEnabled: providerKey.isEnabled,
+          },
+        })
+        .returning({ id: llmProviderKeyTable.id });
+      if (localProviderKey) localProviderKeyIds.set(providerKey.id, localProviderKey.id);
+    }
+
+    const modelProviderKeyMappings = (await getModelProviderKeyMappings()).map((mapping) => ({
+      ...mapping,
+      providerKeyId: localProviderKeyIds.get(mapping.providerKeyId) ?? mapping.providerKeyId,
+    }));
+    if (modelProviderKeyMappings.length > 0) {
+      await localDb
+        .insert(llmModelProviderKeyMappingTable)
+        .values(modelProviderKeyMappings)
+        .onConflictDoNothing();
+    }
 
     // 5. Create model-key mappings
     await localDb
@@ -87,6 +138,8 @@ export async function seedDatabase() {
       .values(await getModelKeyMappings())
       .onConflictDoNothing()
       .returning();
+
+    await syncSeedModelsToBifrost();
 
     // 6. Summary
     console.log('Database seeding completed successfully!');

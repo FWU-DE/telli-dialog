@@ -9,33 +9,37 @@ export type LargeLanguageModel = {
   organizationId: string;
   createdAt: Date;
   supportedImageFormats: string[];
+  imageGenerationConfig: object | null;
   additionalParameters: object;
   isNew: boolean;
   isDeleted: boolean;
+  useBifrost: boolean;
 };
 
 export type CreateLargeLanguageModel = {
   name: string;
   displayName: string;
-  provider: string;
   description?: string;
-  setting?: string;
   priceMetadata?: string;
   supportedImageFormats?: string;
+  imageGenerationConfig?: string;
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
+  useBifrost: boolean;
+  providerKeys: Array<{ providerKeyId: string; upstreamModelName: string }>;
 };
 
 export type UpdateLargeLanguageModel = {
   name: string;
   displayName: string;
-  provider: string;
   description?: string;
-  setting?: string;
   priceMetadata?: string;
   supportedImageFormats?: string;
+  imageGenerationConfig?: string;
   additionalParameters?: string;
   isNew: boolean;
   isDeleted: boolean;
+  useBifrost: boolean;
+  providerKeys: Array<{ providerKeyId: string; upstreamModelName: string }>;
 };

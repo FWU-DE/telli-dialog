@@ -44,7 +44,8 @@ export default async function Page(
       customChatVariant="learning-scenario"
       expiredAt={learningScenario.expiredAt}
       manuallyStoppedAt={learningScenario.manuallyStoppedAt}
-      entityId={learningScenario.id}
+      customChatId={learningScenario.id}
+      sharingUserId={learningScenario.startedBy}
     />
   );
 }

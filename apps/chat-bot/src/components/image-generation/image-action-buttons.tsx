@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useToast } from '../common/toast';
-import { CopyIcon, DownloadSimpleIcon, InfoIcon } from '@phosphor-icons/react';
+import { CopyIcon, DownloadSimpleIcon } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import { logError } from '@shared/logging';
 import { Button } from '@ui/components/button';
@@ -11,16 +11,10 @@ import { downloadFileFromBlob } from '@/utils/files/blob-download';
 interface ImageActionButtonsProps {
   imageRef: React.RefObject<HTMLImageElement | null>;
   fileId: string;
-  prompt: string;
   isImageReady: boolean;
 }
 
-export function ImageActionButtons({
-  imageRef,
-  fileId,
-  prompt,
-  isImageReady,
-}: ImageActionButtonsProps) {
+export function ImageActionButtons({ imageRef, fileId, isImageReady }: ImageActionButtonsProps) {
   const toast = useToast();
   const t = useTranslations('image-generation');
 
@@ -88,17 +82,6 @@ export function ImageActionButtons({
     }
   }
 
-  function handleCopyPrompt() {
-    navigator.clipboard
-      .writeText(prompt)
-      .then(() => {
-        toast.success(t('copy-prompt-success'));
-      })
-      .catch(() => {
-        toast.error(t('copy-prompt-error'));
-      });
-  }
-
   return (
     <div className="flex mt-1.5">
       <Button
@@ -122,16 +105,6 @@ export function ImageActionButtons({
         disabled={!isImageReady}
       >
         <DownloadSimpleIcon />
-      </Button>
-      <Button
-        onClick={handleCopyPrompt}
-        variant="ghost"
-        size="icon-sm"
-        title={t('copy-prompt-tooltip')}
-        aria-label={t('copy-prompt-tooltip')}
-        data-testid="image-copy-prompt-button"
-      >
-        <InfoIcon />
       </Button>
     </div>
   );

@@ -19,6 +19,7 @@ const anthropicModel: LlmModelSelectModel = {
     promptTokenPrice: 0.001,
   },
   supportedImageFormats: ['image/png'],
+  imageGenerationConfig: null,
 };
 
 const openAiModel: LlmModelSelectModel = {
@@ -36,6 +37,7 @@ const openAiModel: LlmModelSelectModel = {
     promptTokenPrice: 0.001,
   },
   supportedImageFormats: ['image/png'],
+  imageGenerationConfig: null,
 };
 
 vi.mock('@shared/logging', () => ({
@@ -154,8 +156,14 @@ describe('enrichMessagesWithImageData', () => {
 });
 
 describe('determineImageAttachmentTypeForModel', () => {
-  it('should return "base64" for google provider with anthropic/ model name', () => {
+  it('should return "base64" for anthropic/ model names', () => {
     const model = anthropicModel;
+
+    expect(determineImageAttachmentTypeForModel(model)).toBe('base64');
+  });
+
+  it('should return "base64" for an anthropic/ model name regardless of provider', () => {
+    const model = { ...anthropicModel, provider: 'openai' };
 
     expect(determineImageAttachmentTypeForModel(model)).toBe('base64');
   });

@@ -36,7 +36,7 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
         relatedFiles={fileMappings}
         initialLinks={initialLinks}
         avatarPictureUrl={pictureUrl}
-        isWebSearchAvailable={isWebSearchAvailableForFederalState(federalState)}
+        isWebSearchAvailable={isWebSearchAvailableForFederalState(federalState.featureToggles)}
       />
     </DefaultPageLayout>
   );

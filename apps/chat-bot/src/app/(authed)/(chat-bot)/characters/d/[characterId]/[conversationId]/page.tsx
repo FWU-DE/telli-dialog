@@ -11,9 +11,9 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/llm-model-service';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import type { ChatMessage as Message } from '@/types/chat';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { type Metadata } from 'next';
@@ -75,16 +75,18 @@ export default async function Page(
   });
 
   const lastUsedModelInChat = rawChatMessages.at(-1)?.modelName;
+  const defaultModelName = await getDefaultModelNameByFederalStateId(federalState.id, models);
 
   const currentModel =
-    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? defaultModelName;
 
   const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
   return (
     <LlmModelsProvider
       models={models}
-      defaultLlmModelByCookie={currentModel}
+      initialModelName={currentModel}
+      defaultModelName={defaultModelName}
       initialDownloadConversationEnabled={rawChatMessages.length > 0}
     >
       <DefaultPageLayout
@@ -102,7 +104,7 @@ export default async function Page(
           id={chat.id}
           initialMessages={chatMessages}
           character={character}
-          enableFileUpload={false}
+          enableFileUpload={true}
           imageSource={avatarPictureUrl}
           logoElement={logoElement}
         />

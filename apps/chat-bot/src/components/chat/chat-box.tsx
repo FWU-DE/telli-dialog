@@ -7,7 +7,6 @@ import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 import Citation from './sources/citation';
-import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { isImageFile } from '@/utils/files/generic';
@@ -16,10 +15,12 @@ import { ReactNode } from 'react';
 import { WebSource } from '@shared/db/types';
 import {
   WebSearchSourcesButton,
+  WebSearchSourcesDialog,
   WebSearchSourcesPanel,
   useWebSearchSourcesDisclosure,
 } from './sources/web-search-sources';
 import DownloadConversationMessageButton from './download-conversation-message-button';
+import { utils } from '@shared/utils';
 
 // Re-export for consumers
 export type { PendingFileModel };
@@ -37,7 +38,7 @@ export function ChatBox({
   conversationId,
   characterName,
   status,
-  getSignedUrlFn,
+  showWebSourcesInDialog = false,
 }: {
   assistantIcon?: ReactNode;
   children: UIMessage;
@@ -51,7 +52,7 @@ export function ChatBox({
   conversationId?: string;
   characterName?: string;
   status: ChatStatus;
-  getSignedUrlFn?: (fileId: string) => Promise<string>;
+  showWebSourcesInDialog?: boolean;
 }) {
   const tCommon = useTranslations('common');
   const { isAtLeast } = useBreakpoints();
@@ -74,7 +75,8 @@ export function ChatBox({
   const allFiles = dbFiles ?? pendingFiles;
   const hasFiles = allFiles !== undefined && allFiles.length > 0;
 
-  const parsedUrls = children.role === 'user' ? (parseHyperlinks(children.content) ?? []) : [];
+  const parsedUrls =
+    children.role === 'user' ? (utils.url.parseHyperlinks(children.content) ?? []) : [];
   const userWebSources = children.role === 'user' ? [...(webSources ?? [])] : [];
   const assistantWebSearchSources =
     children.role === 'assistant' ? (children.webSearchResults ?? []) : [];
@@ -101,7 +103,6 @@ export function ChatBox({
                 status="processed"
                 key={file.id}
                 showBanner={false}
-                getSignedUrl={getSignedUrlFn}
               />
             ))}
           </div>
@@ -136,7 +137,7 @@ export function ChatBox({
     ) : null;
 
   const maybeAssistantWebSearchSources =
-    assistantWebSearchSources.length > 0 ? (
+    assistantWebSearchSources.length > 0 && !showWebSourcesInDialog ? (
       <WebSearchSourcesPanel
         sources={assistantWebSearchSources}
         isOpen={isAssistantSourcesOpen}
@@ -147,7 +148,7 @@ export function ChatBox({
     ) : null;
 
   const margin =
-    allFiles !== undefined || userWebSources.length > 0 || assistantWebSearchSources.length > 0
+    allFiles !== undefined || userWebSources.length > 0 || maybeAssistantWebSearchSources !== null
       ? 'm-0 mt-4'
       : 'm-4';
 
@@ -174,12 +175,15 @@ export function ChatBox({
             <ReloadIcon className="w-5 h-5" />
           </div>
         </button>
-        {assistantWebSearchSources.length > 0 && (
-          <WebSearchSourcesButton
-            panelId={`assistant-web-sources-${children.id}`}
-            onClick={openOrScrollIntoView}
-          />
-        )}
+        {assistantWebSearchSources.length > 0 &&
+          (showWebSourcesInDialog ? (
+            <WebSearchSourcesDialog sources={assistantWebSearchSources} />
+          ) : (
+            <WebSearchSourcesButton
+              panelId={`assistant-web-sources-${children.id}`}
+              onClick={openOrScrollIntoView}
+            />
+          ))}
       </div>
     ) : null;
 

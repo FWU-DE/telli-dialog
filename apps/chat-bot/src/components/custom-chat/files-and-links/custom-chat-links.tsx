@@ -1,13 +1,10 @@
 'use client';
 
 import React from 'react';
-import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
+import { PlusIcon } from '@phosphor-icons/react';
 import { Input } from '@ui/components/input';
 import { Button } from '@ui/components/button';
-import { Spinner } from '@ui/components/spinner';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/tooltip';
 import { WebSource } from '@shared/db/types';
-import { parseHyperlinks, getDisplayUrl } from '@/utils/web-search/parsing';
 import {
   NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
@@ -15,6 +12,8 @@ import {
 import { useToast } from '@/components/common/toast';
 import { ingestWebContentAction } from '@/components/custom-chat/files-and-links/actions';
 import { useTranslations } from 'next-intl';
+import { utils } from '@shared/utils';
+import { Chip } from '@ui/components/chip';
 
 export type CustomChatLinksProps = {
   initialLinks: WebSource[];
@@ -47,7 +46,7 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
       return;
     }
 
-    const parsedUrls = parseHyperlinks(normalizedLink);
+    const parsedUrls = utils.url.parseHyperlinks(normalizedLink);
     if (!parsedUrls || parsedUrls[0] !== normalizedLink) {
       toast.error(t('invalid-error'));
       return;
@@ -134,39 +133,17 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
         <div className="flex flex-wrap gap-2">
           {links.map((link, index) => {
             const isProcessing = processingLinks.has(link.link);
-            const displayTitle = getDisplayUrl(link.link);
+            const displayTitle = utils.url.getDisplayUrl(link.link);
             return (
-              <div
-                key={link.link}
-                className="flex items-center gap-1 h-9 px-3 py-0.5 rounded-md bg-primary/15 text-primary text-sm font-medium"
-              >
-                {isProcessing && <Spinner className="size-4" />}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <a
-                      href={link.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="max-w-37.5 truncate"
-                    >
-                      {displayTitle}
-                    </a>
-                  </TooltipTrigger>
-                  <TooltipContent>{link.link}</TooltipContent>
-                </Tooltip>
-                {!isReadonly && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hover:bg-primary/15"
-                    disabled={isProcessing}
-                    aria-label={t('aria-delete', { link: displayTitle })}
-                    onClick={() => handleDeleteLink(index)}
-                  >
-                    <TrashSimpleIcon className="size-4" />
-                  </Button>
-                )}
-              </div>
+              <Chip
+                key={`${displayTitle}_${index}`}
+                href={link.link}
+                label={displayTitle}
+                ariaDeleteLabel={t('aria-delete', { link: displayTitle })}
+                onDelete={() => handleDeleteLink(index)}
+                isProcessing={isProcessing}
+                tooltip={link.link}
+              />
             );
           })}
         </div>

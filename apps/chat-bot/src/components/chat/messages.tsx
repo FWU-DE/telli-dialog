@@ -18,7 +18,7 @@ interface MessagesProps {
   fileMapping?: Map<string, FileModel[]>;
   pendingFileMapping?: Map<string, PendingFileModel[]>;
   webSourceMapping?: Map<string, WebSource[]>;
-  getSignedUrlFn?: (fileId: string) => Promise<string>;
+  showWebSourcesInDialog?: boolean;
 }
 
 export function Messages({
@@ -32,7 +32,7 @@ export function Messages({
   fileMapping,
   pendingFileMapping,
   webSourceMapping,
-  getSignedUrlFn,
+  showWebSourcesInDialog,
 }: MessagesProps) {
   return (
     <div className={containerClassName}>
@@ -49,7 +49,7 @@ export function Messages({
           assistantIcon={assistantIcon}
           webSources={message.role === 'user' ? webSourceMapping?.get(message.id) : undefined}
           status={status}
-          getSignedUrlFn={getSignedUrlFn}
+          showWebSourcesInDialog={showWebSourcesInDialog}
         >
           {message}
         </ChatBox>

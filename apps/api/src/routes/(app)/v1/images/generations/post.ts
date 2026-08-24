@@ -4,9 +4,14 @@ import { validateApiKeyWithResult } from '@/routes/utils';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 
+const imageSizeSchema = z
+  .string()
+  .regex(/^[1-9]\d*x[1-9]\d*$/, 'size must be in the format "<width>x<height>", e.g. "1024x1024"');
+
 const imageGenerationRequestSchema = z.object({
   model: z.string(),
   prompt: z.string(),
+  size: imageSizeSchema.optional(),
 });
 
 export type ImageGenerationRequest = z.infer<typeof imageGenerationRequestSchema>;
@@ -37,6 +42,7 @@ export async function handler(request: FastifyRequest, reply: FastifyReply): Pro
       modelName: body.model,
       prompt: body.prompt,
       apiKeyId: apiKey.id,
+      options: body.size !== undefined ? { size: body.size } : undefined,
     });
 
     reply.status(200).send(response);

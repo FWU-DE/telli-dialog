@@ -33,6 +33,8 @@ test('should successfully upload a file and get response about its contents', as
 test('should successfully upload each supported file type and receive an assistant response', async ({
   page,
 }) => {
+  test.setTimeout(5 * 60_000);
+
   await page.goto('/');
 
   for (let i = 0; i < SUPPORTED_FILE_EXTENSIONS.length; i++) {

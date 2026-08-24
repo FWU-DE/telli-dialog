@@ -27,7 +27,10 @@ function createAzureClient(model: AiModel): {
     new OpenAI({
       apiKey: model.setting.apiKey,
       baseURL: basePath,
-      defaultQuery: Object.fromEntries(searchParams.entries()),
+      defaultQuery: {
+        ...Object.fromEntries(searchParams.entries()),
+        'api-version': '2025-04-01-preview',
+      },
     }),
   );
 
@@ -62,7 +65,12 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
         yield event.delta;
       }
 
-      if (event.type === 'response.completed' && event.response.usage) {
+      if (
+        (event.type === 'response.completed' ||
+          event.type === 'response.incomplete' ||
+          event.type === 'response.failed') &&
+        event.response.usage
+      ) {
         usage = {
           completionTokens: event.response.usage.output_tokens,
           promptTokens: event.response.usage.input_tokens,

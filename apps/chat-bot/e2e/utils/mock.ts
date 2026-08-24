@@ -39,7 +39,6 @@ export const mockUserAndContext = (): UserAndContext => {
         isCustomGptEnabled: false,
         isSharedChatEnabled: false,
         isShareTemplateWithSchoolEnabled: false,
-        isAgenticChatEnabled: true,
       },
       pictureUrls: null,
       hasApiKeyAssigned: true,
@@ -62,6 +61,7 @@ export const mockLlmModel = (): LlmModelSelectModel => {
       promptTokenPrice: 0,
     },
     supportedImageFormats: null,
+    imageGenerationConfig: null,
     isNew: false,
     isDeleted: false,
   };
