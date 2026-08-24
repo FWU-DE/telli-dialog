@@ -121,7 +121,7 @@
     "tailwindcss": "4.3.3",
     "tailwindcss-animate": "1.0.7",
     "tsx": "4.23.12",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "vitest": "4.1.11"
   }
 }
