@@ -15,6 +15,7 @@ type OpenAICompatibleAgenticStreamArgs = {
   providerName: string;
   createOptions?: Parameters<OpenAI['responses']['create']>[1];
   additionalParameters?: Record<string, unknown>;
+  getModelId?: (extraFields: unknown) => string | undefined | Promise<string | undefined>;
 };
 
 type ToolCallAccumulator = {
@@ -36,6 +37,7 @@ export async function* streamOpenAICompatibleAgenticResponse({
   providerName,
   createOptions,
   additionalParameters,
+  getModelId,
 }: OpenAICompatibleAgenticStreamArgs): AsyncGenerator<StreamEvent> {
   const stream = await client.responses.create(
     {
@@ -53,6 +55,7 @@ export async function* streamOpenAICompatibleAgenticResponse({
 
   let content = '';
   let usage: TokenUsage | undefined;
+  let modelId: string | undefined;
   const toolCalls = new Map<number, ToolCallAccumulator>();
 
   for await (const chunk of stream) {
@@ -93,12 +96,20 @@ export async function* streamOpenAICompatibleAgenticResponse({
       existingToolCall.name = chunk.item.name;
       existingToolCall.arguments = chunk.item.arguments;
       toolCalls.set(chunk.output_index, existingToolCall);
-    } else if (chunk.type === 'response.completed' && chunk.response.usage) {
+    } else if (
+      (chunk.type === 'response.completed' ||
+        chunk.type === 'response.incomplete' ||
+        chunk.type === 'response.failed') &&
+      chunk.response.usage
+    ) {
       usage = {
         completionTokens: chunk.response.usage.output_tokens,
         promptTokens: chunk.response.usage.input_tokens,
         totalTokens: chunk.response.usage.total_tokens,
       };
+      modelId = await getModelId?.(
+        (chunk.response as typeof chunk.response & { extra_fields?: unknown }).extra_fields,
+      );
     }
   }
 
@@ -130,5 +141,5 @@ export async function* streamOpenAICompatibleAgenticResponse({
     };
   }
 
-  yield { type: 'finish', usage };
+  yield { type: 'finish', usage, ...(modelId ? { modelId } : {}) };
 }

@@ -19,10 +19,14 @@ import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversa
 import { NotFoundError } from '@shared/error';
 import { getAvailableImageModelsForFederalState } from '@shared/image-generation/image-generation-service';
 import { userHasReachedTokenPointsLimit } from '@shared/users/usage';
+import { ImageGenerationRequestOptions } from '@ais-chat/ai-core/images/types';
+import { ImageGenerationOptions } from '@/components/image-generation/image-generation-types';
+
 export interface ImageGenerationParams {
   prompt: string;
   modelId: string;
   conversationId: string;
+  options: ImageGenerationRequestOptions;
 }
 
 export interface ImageGenerationResult {
@@ -63,12 +67,14 @@ export async function handleImageGeneration({
   style,
   userId,
   federalStateId,
+  options,
 }: {
   prompt: string;
   model: LlmModelSelectModel;
   style?: ImageStyle;
   userId: string;
   federalStateId: string;
+  options: ImageGenerationOptions;
 }) {
   await checkIfImageModelIsAssignedToFederalState(model, federalStateId);
 
@@ -96,14 +102,17 @@ export async function handleImageGeneration({
       content: prompt,
       modelName: model.name,
       orderNumber: 1,
-      parameters: style ? { imageStyle: style.name } : undefined,
+      parameters: { imageStyle: style?.name, aspectRatio: options.aspectRatio },
     });
+
+    const size = model.imageGenerationConfig?.aspectRatio?.[options.aspectRatio] ?? 'auto';
 
     // Generate image using the service
     const result = await generateImage({
       prompt: fullPrompt.trim(),
       modelId: model.id,
       conversationId,
+      options: { size },
     });
 
     const image = result.data[0];
@@ -187,6 +196,7 @@ export async function generateImage({
   prompt,
   modelId,
   conversationId,
+  options,
 }: ImageGenerationParams): Promise<ImageGenerationResult> {
   const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
   const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
@@ -252,6 +262,7 @@ export async function generateImage({
       definedModel.id,
       prompt.trim(),
       federalStateObject.apiKeyId,
+      options,
     );
 
     const costsInCent = result.priceInCents;

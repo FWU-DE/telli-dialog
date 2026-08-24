@@ -3,7 +3,7 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
-import { getFilteredTextModels } from '@shared/llm-models/llm-model-service';
+import { getFilteredTextModels } from '@shared/llm-models/llm-model-utils';
 import ModelSelect from '../common/model-select';
 
 type SelectLlmModelProps = {

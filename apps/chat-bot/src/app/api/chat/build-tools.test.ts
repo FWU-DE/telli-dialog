@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   buildWebScraperToolMock: vi.fn(),
   buildRetrieveEntireFileToolMock: vi.fn(),
   buildRetrieveTextChunksToolMock: vi.fn(),
+  buildMundoSearchToolMock: vi.fn(),
 }));
 
 vi.mock('./tools/web-search-tool', () => ({
@@ -23,6 +24,10 @@ vi.mock('./tools/retrieve-entire-file-tool', () => ({
 
 vi.mock('./tools/retrieve-text-chunks-tool', () => ({
   buildRetrieveTextChunksTool: mocks.buildRetrieveTextChunksToolMock,
+}));
+
+vi.mock('./tools/mundo-search-tool', () => ({
+  buildMundoSearchTool: mocks.buildMundoSearchToolMock,
 }));
 
 const user = {
@@ -80,6 +85,15 @@ beforeEach(() => {
     },
     handler: vi.fn(),
   });
+
+  mocks.buildMundoSearchToolMock.mockReturnValue({
+    definition: {
+      name: 'mundo_search',
+      description: 'Search MUNDO',
+      parameters: { type: 'object', properties: {} },
+    },
+    handler: vi.fn(),
+  });
 });
 
 describe('buildTools', () => {
@@ -90,6 +104,7 @@ describe('buildTools', () => {
       user,
       conversationId: 'conv-1',
       relatedFileEntities,
+      allowWebTools: true,
     });
 
     expect(Object.keys(toolRegistry)).toEqual([
@@ -110,6 +125,7 @@ describe('buildTools', () => {
       user,
       conversationId: 'conv-1',
       relatedFileEntities,
+      allowWebTools: true,
     });
 
     expect(Object.keys(toolRegistry)).toEqual(['retrieve_entire_file', 'retrieve_text_chunks']);
@@ -124,6 +140,7 @@ describe('buildTools', () => {
       user,
       conversationId: 'conv-1',
       relatedFileEntities,
+      allowWebTools: true,
       onWebSearchResults,
     });
 
@@ -132,5 +149,50 @@ describe('buildTools', () => {
         onWebSearchResults,
       }),
     );
+  });
+
+  it('does not build web tools when allowWebTools is false', async () => {
+    const { buildTools } = await import('./build-tools');
+
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conv-1',
+      relatedFileEntities,
+      allowWebTools: false,
+    });
+
+    expect(Object.keys(toolRegistry)).toEqual(['retrieve_entire_file', 'retrieve_text_chunks']);
+    expect(mocks.buildWebSearchToolMock).not.toHaveBeenCalled();
+    expect(mocks.buildWebScraperToolMock).not.toHaveBeenCalled();
+  });
+
+  it('does not add mundo_search when allowMundoSearch is not set', async () => {
+    const { buildTools } = await import('./build-tools');
+
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conv-1',
+      relatedFileEntities,
+      allowWebTools: true,
+      allowMundoSearch: false,
+    });
+
+    expect(Object.keys(toolRegistry)).not.toContain('mundo_search');
+    expect(mocks.buildMundoSearchToolMock).not.toHaveBeenCalled();
+  });
+
+  it('adds mundo_search when allowMundoSearch is true', async () => {
+    const { buildTools } = await import('./build-tools');
+
+    const { toolRegistry } = await buildTools({
+      user,
+      conversationId: 'conv-1',
+      relatedFileEntities,
+      allowWebTools: true,
+      allowMundoSearch: true,
+    });
+
+    expect(Object.keys(toolRegistry)).toContain('mundo_search');
+    expect(mocks.buildMundoSearchToolMock).toHaveBeenCalledTimes(1);
   });
 });

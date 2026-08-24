@@ -63,7 +63,6 @@ function transformToFederalStateEditForm(federalState: FederalStateModel): Feder
       isWebSearchEnabled: federalState.featureToggles.isWebSearchEnabled ?? false,
       isSharedPageLocaleDetectionEnabled:
         federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true,
-      isAgenticChatEnabled: federalState.featureToggles.isAgenticChatEnabled ?? false,
     },
     supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
     designConfiguration: federalState.designConfiguration
@@ -266,12 +265,6 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="featureToggles.isSharedPageLocaleDetectionEnabled"
             label="Spracherkennung für geteilte Seiten aktivieren"
             description="Ermittelt und setzt automatisch die Sprache für geteilte Seiten."
-            control={control}
-          />
-          <FormFieldCheckbox
-            name="featureToggles.isAgenticChatEnabled"
-            label="Agentic Chat aktivieren"
-            description="Erlaubt die Nutzung des neuen agentic loop im Chat."
             control={control}
           />
           <FormField

@@ -32,9 +32,15 @@ export const llmModelSettingsGoogleSchema = z.object({
   authCredentials: z.union([z.string(), z.record(z.string(), z.unknown())]).optional(),
 });
 
+export const llmModelSettingsBifrostSchema = z.object({
+  provider: z.literal(llmModelProviderSchema.enum.bifrost),
+});
+
 export const llmModelSettingsSchema = llmModelSettingsIonos
   .or(llmModelSettingsOpenAiSchema)
   .or(llmModelSettingsAzureSchema)
-  .or(llmModelSettingsGoogleSchema);
+  .or(llmModelSettingsGoogleSchema)
+  .or(llmModelSettingsBifrostSchema);
 
-export type LlmModelProviderSettings = z.infer<typeof llmModelSettingsSchema>;
+export type LlmProviderKeySettings = z.infer<typeof llmModelSettingsSchema>;
+export type LlmModelProviderSettings = LlmProviderKeySettings;

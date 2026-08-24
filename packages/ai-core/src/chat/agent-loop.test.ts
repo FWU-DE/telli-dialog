@@ -5,7 +5,7 @@ import type { Message, TokenUsage, StreamEvent } from './types';
 // Mock the generateAgenticStreamWithBilling import
 const mockGenerateAgenticStreamWithBilling = vi.fn();
 
-vi.mock('./index', () => ({
+vi.mock('./agentic-stream', () => ({
   generateAgenticStreamWithBilling: (...args: unknown[]) =>
     mockGenerateAgenticStreamWithBilling(...args),
 }));
@@ -68,8 +68,7 @@ describe('agent-loop', () => {
     };
 
     runAgentLoop({
-      modelId: 'test-model',
-      modelName: 'Test Model',
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
@@ -98,6 +97,34 @@ describe('agent-loop', () => {
     );
   });
 
+  it('calls onError with EmptyResponseError when the model produces no text', async () => {
+    const messages: Message[] = [{ role: 'user', content: 'Test query' }];
+    const onTextChunk = vi.fn();
+    const onComplete = vi.fn();
+    const onError = vi.fn();
+
+    mockGenerateAgenticStreamWithBilling.mockImplementation(async function* () {
+      yield { type: 'finish', usage } satisfies StreamEvent;
+    });
+
+    runAgentLoop({
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
+      apiKeyId: 'test-key',
+      messages,
+      agentName: 'Test Agent',
+      onTextChunk,
+      onComplete,
+      onError,
+    });
+
+    await vi.waitFor(() => {
+      expect(onError).toHaveBeenCalled();
+    });
+
+    expect(onComplete).not.toHaveBeenCalled();
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ name: 'EmptyResponseError' }));
+  });
+
   it('does not insert separator on first iteration', async () => {
     const messages: Message[] = [{ role: 'user', content: 'Test query' }];
     const onTextChunk = vi.fn();
@@ -111,8 +138,7 @@ describe('agent-loop', () => {
     });
 
     runAgentLoop({
-      modelId: 'test-model',
-      modelName: 'Test Model',
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
       apiKeyId: 'test-key',
       messages,
       agentName: 'Test Agent',
@@ -172,8 +198,7 @@ describe('agent-loop', () => {
     };
 
     runAgentLoop({
-      modelId: 'test-model',
-      modelName: 'Test Model',
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
@@ -235,8 +260,7 @@ describe('agent-loop', () => {
     };
 
     runAgentLoop({
-      modelId: 'test-model',
-      modelName: 'Test Model',
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
@@ -301,8 +325,7 @@ describe('agent-loop', () => {
     };
 
     runAgentLoop({
-      modelId: 'test-model',
-      modelName: 'Test Model',
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
@@ -384,8 +407,7 @@ describe('agent-loop', () => {
     };
 
     runAgentLoop({
-      modelId: 'test-model',
-      modelName: 'Test Model',
+      modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
       apiKeyId: 'test-key',
       messages,
       toolRegistry,
@@ -437,8 +459,7 @@ describe('agent-loop', () => {
       });
 
       runAgentLoop({
-        modelId: 'test-model',
-        modelName: 'Test Model',
+        modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
         apiKeyId: 'test-key',
         messages,
         agentName: 'Test Agent',
@@ -463,6 +484,7 @@ describe('agent-loop', () => {
       const onError = vi.fn();
 
       mockGenerateAgenticStreamWithBilling.mockImplementation(async function* () {
+        yield { type: 'text', delta: 'Using tool.' } satisfies StreamEvent;
         yield {
           type: 'tool_call',
           call: { id: 'call_1', name: 'test_tool', arguments: '{}' },
@@ -478,8 +500,7 @@ describe('agent-loop', () => {
       };
 
       runAgentLoop({
-        modelId: 'test-model',
-        modelName: 'Test Model',
+        modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
         apiKeyId: 'test-key',
         messages,
         toolRegistry,
@@ -535,8 +556,7 @@ describe('agent-loop', () => {
       };
 
       runAgentLoop({
-        modelId: 'test-model',
-        modelName: 'Test Model',
+        modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
         apiKeyId: 'test-key',
         messages,
         toolRegistry,

@@ -65,12 +65,13 @@ describe('constructBifrostImageGenerationFn', () => {
     expect(openAiConstructorMock).toHaveBeenCalledWith({
       apiKey: 'bifrost-api-key',
       baseURL: 'http://localhost:8089/openai/v1',
+      defaultHeaders: { 'x-bf-vk': 'bifrost-api-key' },
     });
     expect(generateMock).toHaveBeenCalledWith({
-      model: 'azure/image-model',
+      model: 'image-model',
       prompt: 'a cat',
       n: 1,
-      size: '1024x1024',
+      size: 'auto',
     });
     expect(result).toEqual({
       data: ['base64-bifrost-image'],
@@ -83,7 +84,31 @@ describe('constructBifrostImageGenerationFn', () => {
     });
   });
 
-  it('strips the anthropic prefix for vertex Claude models', async () => {
+  it('uses provided size from options', async () => {
+    generateMock.mockResolvedValue({
+      data: [{ b64_json: 'base64-bifrost-image' }],
+      output_format: 'png',
+      usage: {
+        input_tokens: 4,
+        output_tokens: 5,
+        output_tokens_details: { text_tokens: 2, image_tokens: 3 },
+      },
+    });
+
+    const model = {
+      id: 'model-bifrost-image',
+      name: 'image-model',
+      provider: 'bifrost',
+      setting: { provider: 'azure', apiKey: 'unused', baseUrl: 'unused' },
+    } as AiModel;
+
+    const generateImage = constructBifrostImageGenerationFn(model);
+    await generateImage({ prompt: 'a cat', model: model.name, options: { size: '1536x1024' } });
+
+    expect(generateMock).toHaveBeenCalledWith(expect.objectContaining({ size: '1536x1024' }));
+  });
+
+  it('preserves logical image model names containing a slash', async () => {
     generateMock.mockResolvedValue({
       data: [{ b64_json: 'base64-bifrost-image' }],
       output_format: 'png',
@@ -108,7 +133,7 @@ describe('constructBifrostImageGenerationFn', () => {
     await generateImage({ prompt: 'a cat', model: model.name });
 
     expect(generateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'vertex/claude-3-5-sonnet-v2@20241022' }),
+      expect.objectContaining({ model: 'anthropic/claude-3-5-sonnet-v2@20241022' }),
     );
   });
 

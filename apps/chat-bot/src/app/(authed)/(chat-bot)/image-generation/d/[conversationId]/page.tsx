@@ -12,6 +12,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
+import { ImageAspectRatioProvider } from '@/components/image-generation/image-aspect-ratio-provider';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,25 +62,30 @@ export default async function Page(props: PageProps) {
   )?.modelName;
   const selectedModel =
     imageModels.find((model) => model.name === lastUsedModelInChat) ??
-    getDefaultImageModel(imageModels);
+    (await getDefaultImageModel({ imageModels, federalStateId: federalState.id }));
   const lastUsedStyleInChat = reversedMessages.find(
     (msg) => msg.parameters?.imageStyle !== undefined,
   )?.parameters?.imageStyle;
+  const defaultAspectRatio =
+    reversedMessages.find((msg) => msg.parameters?.aspectRatio !== undefined)?.parameters
+      ?.aspectRatio ?? 'quadratic';
 
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider defaultImageStyle={lastUsedStyleInChat}>
-        <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
-          <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-auto">
-              <ImageGenerationChat
-                conversationId={conversationId}
-                initialMessages={messages}
-                fileMapping={fileMapping}
-              />
+        <ImageAspectRatioProvider defaultAspectRatio={defaultAspectRatio}>
+          <DefaultPageLayout layoutConfig={{ layout: 'image' }}>
+            <div className="flex flex-col h-full">
+              <div className="flex-1 overflow-auto">
+                <ImageGenerationChat
+                  conversationId={conversationId}
+                  initialMessages={messages}
+                  fileMapping={fileMapping}
+                />
+              </div>
             </div>
-          </div>
-        </DefaultPageLayout>
+          </DefaultPageLayout>
+        </ImageAspectRatioProvider>
       </ImageStyleProvider>
     </ImageModelsProvider>
   );

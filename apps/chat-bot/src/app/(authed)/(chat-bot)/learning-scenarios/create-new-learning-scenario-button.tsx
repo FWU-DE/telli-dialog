@@ -3,7 +3,6 @@ import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { createNewLearningScenarioAction } from './actions';
-import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { Button } from '@ui/components/button';
 import { PlusIcon } from '@phosphor-icons/react';
 
@@ -12,9 +11,9 @@ export function CreateNewLearningScenarioButton() {
   const toast = useToast();
   const t = useTranslations('learning-scenarios');
 
-  const { models } = useLlmModels();
+  const { defaultModel } = useLlmModels();
 
-  const maybeDefaultModelId = getDefaultModel(models)?.id;
+  const maybeDefaultModelId = defaultModel?.id;
 
   async function handleNewLearningScenario() {
     if (!maybeDefaultModelId) {

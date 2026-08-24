@@ -1,5 +1,7 @@
 import { getStartOfCurrentMonth, getEndOfCurrentMonth, errorifyAsyncFn } from '../api-utils';
-import { ApiKeyModel, db, dbGetApiKeyById } from '..';
+import { db } from '../db';
+import type { ApiKeyModel } from '../schema';
+import { dbGetApiKeyById } from './api-key';
 import { and, between, eq, sum } from 'drizzle-orm';
 import {
   apiKeyTable,

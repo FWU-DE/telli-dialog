@@ -15,7 +15,8 @@ type CustomChatSharePageProps = {
   customChatVariant: 'character' | 'learning-scenario';
   expiredAt: Date | null;
   manuallyStoppedAt: Date | null;
-  entityId: string;
+  customChatId: string;
+  sharingUserId: string;
 };
 
 export default async function CustomChatSharePage({
@@ -27,9 +28,14 @@ export default async function CustomChatSharePage({
   customChatVariant,
   expiredAt,
   manuallyStoppedAt,
-  entityId,
+  customChatId,
+  sharingUserId,
 }: CustomChatSharePageProps) {
-  const locale = await resolveSharingLocale(relativeShareUrl);
+  const locale = await resolveSharingLocale({
+    customChatVariant,
+    customChatId,
+    sharingUserId,
+  });
   const t = await getTranslations({ locale, namespace: 'custom-chat.share-page' });
   const messages = await loadTranslations(locale);
   const baseUrl = await getBaseUrlByHeaders();
@@ -54,7 +60,7 @@ export default async function CustomChatSharePage({
         tBackButton={t(`${customChatVariant}.back-button`)}
         tSubHeader={t(`${customChatVariant}.sub-header`)}
         customChatVariant={customChatVariant}
-        entityId={entityId}
+        customChatId={customChatId}
         expiredAt={expiredAt}
         manuallyStoppedAt={manuallyStoppedAt}
       />

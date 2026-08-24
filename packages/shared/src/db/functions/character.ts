@@ -23,14 +23,13 @@ import {
   CharacterWithShareDataModel,
   conversationTable,
   fileTable,
-  filterGroup,
+  FilterGroup,
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
   sharedCharacterConversation,
   userTable,
 } from '../schema';
-import { dbGetModelByName } from './llm-model';
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
+import { findStaticModelByRole } from '@shared/llm-models/llm-model-service';
 import { UserModel } from '@shared/auth/user-model';
 
 /**
@@ -246,7 +245,7 @@ export async function dbCreateCharacter(
 ) {
   let modelId = character.modelId;
   if (!modelId) {
-    modelId = (await dbGetModelByName(DEFAULT_CHAT_MODEL))?.id;
+    modelId = (await findStaticModelByRole('default-chat'))?.id;
     if (!modelId) {
       throw new Error('No default model found');
     }
@@ -705,7 +704,7 @@ export async function dbUpdateCharacterFilterGroup({
   filterGroup: updatedFilterGroup,
 }: {
   characterId: string;
-  filterGroup: filterGroup;
+  filterGroup: FilterGroup;
 }): Promise<void> {
   await db
     .update(characterTable)

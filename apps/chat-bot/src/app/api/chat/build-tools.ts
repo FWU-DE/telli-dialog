@@ -5,6 +5,7 @@ import { buildWebSearchTool } from './tools/web-search-tool';
 import { buildWebScraperTool } from './tools/web-scraper-tool';
 import { buildRetrieveEntireFileTool } from './tools/retrieve-entire-file-tool';
 import { buildRetrieveTextChunksTool } from './tools/retrieve-text-chunks-tool';
+import { buildMundoSearchTool } from './tools/mundo-search-tool';
 
 type BuildToolsParams = {
   user: UserAndContext;
@@ -15,6 +16,8 @@ type BuildToolsParams = {
   relatedFileEntities: FileModel[];
   sourceUrls?: string[];
   attachedLinks?: string[];
+  allowWebTools: boolean;
+  allowMundoSearch?: boolean;
   onWebSearchResults?: (results: WebSearchResult[]) => void;
 };
 
@@ -31,30 +34,41 @@ export async function buildTools({
   relatedFileEntities,
   sourceUrls = [],
   attachedLinks = [],
+  allowWebTools,
+  allowMundoSearch,
   onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
   const toolRegistry: ToolRegistry = {};
 
-  const webSearchTool = await buildWebSearchTool({
-    user,
-    characterId,
-    learningScenarioId,
-    assistantId,
-    conversationId,
-    onWebSearchResults,
-  });
+  if (allowWebTools) {
+    const webSearchTool = await buildWebSearchTool({
+      user,
+      characterId,
+      learningScenarioId,
+      assistantId,
+      conversationId,
+      onWebSearchResults,
+    });
 
-  if (webSearchTool) {
-    toolRegistry[webSearchTool.definition.name] = webSearchTool;
+    if (webSearchTool) {
+      toolRegistry[webSearchTool.definition.name] = webSearchTool;
+    }
   }
 
-  const webScraperTool = buildWebScraperTool({
-    sourceUrls,
-    attachedLinks,
-  });
+  if (allowWebTools) {
+    const webScraperTool = buildWebScraperTool({
+      sourceUrls,
+      attachedLinks,
+    });
 
-  if (webScraperTool) {
-    toolRegistry[webScraperTool.definition.name] = webScraperTool;
+    if (webScraperTool) {
+      toolRegistry[webScraperTool.definition.name] = webScraperTool;
+    }
+  }
+
+  if (allowMundoSearch) {
+    const mundoSearchTool = buildMundoSearchTool();
+    toolRegistry[mundoSearchTool.definition.name] = mundoSearchTool;
   }
 
   const retrieveEntireFileTool = buildRetrieveEntireFileTool({

@@ -25,6 +25,11 @@ Swagger docs will be served here: `http://127.0.0.1:3002/docs`.
 The API uses its own database managed by the `packages/api-database` package.
 Use the top-level seed script from the root directory to seed all databases at once:
 
+The API database seed writes Bifrost-backed model rows and syncs the corresponding provider
+keys to Bifrost when `BIFROST_ADMIN_URL`, `BIFROST_ADMIN_USERNAME`, and
+`BIFROST_ADMIN_PASSWORD` are configured. Keep the local Bifrost container running before
+seeding if you want the seeded models to work immediately.
+
 ```sh
 pnpm db:seed
 ```

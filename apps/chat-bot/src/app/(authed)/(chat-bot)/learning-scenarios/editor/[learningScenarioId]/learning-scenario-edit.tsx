@@ -55,11 +55,9 @@ import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-b
 import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
 import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
-import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
 import { WebSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/share-with-learners/custom-chat-share-with-learners';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
@@ -77,6 +75,7 @@ import {
   extractFilterValues,
   toFilterGroup,
 } from '@/components/custom-chat/filter/custom-chat-filter-utils';
+import { CustomChatWebSearchEditView } from '@/components/custom-chat/web-search/custom-chat-web-search-edit-view';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
@@ -165,8 +164,8 @@ export function LearningScenarioEdit({
     [t],
   );
 
-  const { models } = useLlmModels();
-  const maybeDefaultModelId = getDefaultModel(models)?.id;
+  const { models, defaultModel } = useLlmModels();
+  const maybeDefaultModelId = defaultModel?.id;
   const isModelAvailable =
     learningScenario.modelId && models.some((m) => m.id === learningScenario.modelId);
   const selectedModelId = isModelAvailable ? learningScenario.modelId : maybeDefaultModelId;
@@ -222,14 +221,7 @@ export function LearningScenarioEdit({
             name: data.name.trim(),
             description: data.description ?? '',
             studentExercise: data.studentExercise ?? '',
-            filterGroup: toFilterGroup({
-              schoolTypes: data.schoolTypes,
-              gradeRanges: data.gradeRanges,
-              subjects: data.subjects,
-              categories: data.categories,
-              federalStates: data.federalStates,
-              languages: data.languages,
-            }),
+            filterGroup: toFilterGroup(data),
             attachedLinks: attachedLinksRef.current,
           },
         });
@@ -569,15 +561,14 @@ export function LearningScenarioEdit({
             />
 
             {isWebSearchAvailable && (
-              <CustomChatWebSearch
-                name="isWebSearchEnabled"
+              <CustomChatWebSearchEditView
                 control={control}
+                onCheckedChange={() => {
+                  void flushAutoSave();
+                }}
                 onChange={() => {
                   void flushAutoSave();
                 }}
-                showScopeOptions
-                scopeName="webSearchScope"
-                includedDomainsName="webSearchIncludedDomains"
               />
             )}
 

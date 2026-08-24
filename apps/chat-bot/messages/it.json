@@ -13,7 +13,7 @@
   },
   "learning-scenarios": {
     "shared": {
-      "excercise-title": "Il tuo compito",
+      "exercise-title": "Il tuo compito",
       "delete-chat-modal-title": "Cancellare la chat attuale?",
       "delete-chat-modal-description": "Verrà avviata una nuova chat. La chat attuale verrà eliminata in modo definitivo.",
       "delete-chat-modal-confirm-button": "Cancella"
@@ -45,6 +45,11 @@
         "back-button": "Vai all’interlocutore",
         "join": "Partecipa al dialogo"
       }
+    }
+  },
+  "websearch": {
+    "results": {
+      "title": "Fonti Internet"
     }
   }
 }

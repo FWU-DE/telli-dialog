@@ -49,13 +49,20 @@ export default async function Page(
 
   const federalState = await dbGetFederalStateByUserId({ userId: learningScenario.startedBy });
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
-  const shareUrl = `/ua/learning-scenarios/${learningScenario.id}/dialog?inviteCode=${searchParams.inviteCode}`;
-  const locale = await resolveSharingLocale(shareUrl);
+  const locale = await resolveSharingLocale({
+    customChatVariant: 'learning-scenario',
+    customChatId: learningScenario.id,
+    sharingUserId: learningScenario.startedBy,
+  });
   const messages = await loadTranslations(locale);
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
+      <LlmModelsProvider
+        models={[model]}
+        initialModelName={model.name}
+        defaultModelName={model.name}
+      >
         <ThemeProvider designConfiguration={designConfiguration}>
           <LearningScenarioSharedChat
             {...learningScenario}

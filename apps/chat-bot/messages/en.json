@@ -13,7 +13,7 @@
   },
   "learning-scenarios": {
     "shared": {
-      "excercise-title": "Your task",
+      "exercise-title": "Your task",
       "delete-chat-modal-title": "Delete current chat?",
       "delete-chat-modal-description": "A new chat will be started. The current chat will be deleted permanently.",
       "delete-chat-modal-confirm-button": "Delete"
@@ -45,6 +45,11 @@
         "back-button": "Back to dialog partner",
         "join": "Join dialog"
       }
+    }
+  },
+  "websearch": {
+    "results": {
+      "title": "Web sources"
     }
   }
 }

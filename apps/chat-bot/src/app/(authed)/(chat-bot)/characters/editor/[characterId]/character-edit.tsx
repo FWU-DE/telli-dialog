@@ -55,11 +55,10 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useRef } from 'react';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { useForm, useWatch } from 'react-hook-form';
 import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/files-and-links/custom-chat-files-and-links';
-import { CustomChatWebSearch } from '@/components/custom-chat/custom-chat-web-search';
+import { CustomChatWebSearchEditView } from '@/components/custom-chat/web-search/custom-chat-web-search-edit-view';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { FormField } from '@ui/components/form/form-field';
 import { createNewCharacterAction } from '../../actions';
@@ -157,8 +156,8 @@ export function CharacterEdit({
   const t = useTranslations('characters');
   const characterFormValuesSchema = useMemo(() => createCharacterFormValuesSchema(t), [t]);
 
-  const { models } = useLlmModels();
-  const maybeDefaultModelId = getDefaultModel(models)?.id;
+  const { models, defaultModel } = useLlmModels();
+  const maybeDefaultModelId = defaultModel?.id;
   const isModelAvailable = character.modelId && models.some((m) => m.id === character.modelId);
   const selectedModelId = isModelAvailable ? character.modelId : maybeDefaultModelId;
   const filterValues = extractFilterValues(character);
@@ -214,14 +213,7 @@ export function CharacterEdit({
           instructions: data.instructions,
           initialMessage: data.initialMessage,
           modelId: data.modelId,
-          filterGroup: toFilterGroup({
-            schoolTypes: data.schoolTypes,
-            gradeRanges: data.gradeRanges,
-            subjects: data.subjects,
-            categories: data.categories,
-            federalStates: data.federalStates,
-            languages: data.languages,
-          }),
+          filterGroup: toFilterGroup(data),
           hasLinkAccess: data.hasLinkAccess,
           isWebSearchEnabled: data.isWebSearchEnabled,
           webSearchScope: data.webSearchScope,
@@ -546,15 +538,14 @@ export function CharacterEdit({
           />
 
           {isWebSearchAvailable && (
-            <CustomChatWebSearch
-              name="isWebSearchEnabled"
+            <CustomChatWebSearchEditView
               control={control}
+              onCheckedChange={() => {
+                void flushAutoSave();
+              }}
               onChange={() => {
                 void flushAutoSave();
               }}
-              showScopeOptions
-              scopeName="webSearchScope"
-              includedDomainsName="webSearchIncludedDomains"
             />
           )}
 

@@ -323,7 +323,7 @@ export default function Chat({
             <FloatingText
               learningContext={learningScenario.studentExercise}
               dialogStarted={true}
-              title={tLearningScenarioShared('excercise-title')}
+              title={tLearningScenarioShared('exercise-title')}
               maxWidth={600}
               maxHeight={600}
               minMargin={16}
@@ -343,6 +343,7 @@ export default function Chat({
               fileMapping={fileMapping}
               pendingFileMapping={pendingFileMapping}
               webSourceMapping={webSourceMapping}
+              showWebSourcesInDialog={character !== undefined}
             />
           )}
           {error && (

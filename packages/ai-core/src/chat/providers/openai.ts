@@ -43,10 +43,10 @@ export function constructOpenAITextStreamFn(model: AiModel): TextStreamFn {
     let usage: TokenUsage | undefined;
 
     for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content;
+      const chunkContent = chunk.choices[0]?.delta?.content;
 
-      if (content) {
-        yield content;
+      if (chunkContent) {
+        yield chunkContent;
       }
 
       if (chunk.usage) {

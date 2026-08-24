@@ -16,14 +16,47 @@ import {
   uuid,
   vector,
   varchar,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import { type DesignConfiguration, type LlmModelPriceMetadata } from './types';
 import {
   conversationRoleSchema,
   conversationTypeSchema,
+  imageAspectRatioPresetSchema,
   imageStyleTypeSchema,
 } from '../utils/chat';
+
+export type DesignConfiguration = {
+  primaryColor: string;
+  primaryTextColor: string;
+  secondaryColor: string;
+  secondaryTextColor: string;
+};
+
+export const llmModelPriceMetadataSchema = z.union([
+  z.object({
+    type: z.literal('text'),
+    completionTokenPrice: z.number(),
+    promptTokenPrice: z.number(),
+  }),
+  z.object({
+    type: z.literal('image'),
+    pricePerImageInCent: z.number(),
+  }),
+  z.object({
+    type: z.literal('image'),
+    inputTextTokenPrice: z.number(),
+    outputTextTokenPrice: z.number().optional(),
+    outputImageTokenPrice: z.number(),
+  }),
+  z.object({
+    type: z.literal('embedding'),
+    promptTokenPrice: z.number(),
+  }),
+]);
+
+export type LlmModelPriceMetadata = z.infer<typeof llmModelPriceMetadataSchema>;
+
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
 import { ToolCall } from '@ais-chat/ai-core/chat/types';
@@ -124,6 +157,7 @@ export const conversationRoleEnum = pgEnum('conversation_role', conversationRole
 // Define the parameters type for conversation messages
 export const conversationMessageParametersSchema = z.object({
   imageStyle: imageStyleTypeSchema.optional(),
+  aspectRatio: imageAspectRatioPresetSchema.optional(),
 });
 
 export type ConversationMessageParameters = z.infer<typeof conversationMessageParametersSchema>;
@@ -197,7 +231,6 @@ export const federalStateFeatureTogglesSchema = z.object({
   isCustomGptEnabled: z.boolean().default(true),
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
   isSharedPageLocaleDetectionEnabled: z.boolean().optional(),
-  isAgenticChatEnabled: z.boolean().optional(),
   isImageGenerationEnabled: z.boolean().optional(),
   isWebSearchEnabled: z.boolean().optional(),
 });
@@ -376,6 +409,14 @@ export const webSearchScopeSchema = z.enum(['all-web', 'included-domains']);
 export const webSearchScopeEnum = pgEnum('web_search_scope', webSearchScopeSchema.enum);
 export type WebSearchScope = z.infer<typeof webSearchScopeSchema>;
 
+export type WebSearchModel = {
+  isWebSearchEnabled: boolean;
+  webSearchScope: WebSearchScope;
+  webSearchIncludedDomains: string[];
+};
+
+export const webSearchIncludedDomainsSchema = z.array(z.string());
+
 export const suspensionRequestReasonSchema = z.enum([
   'copyright_violation',
   'false_or_outdated_information',
@@ -512,14 +553,14 @@ export const subjectsSchema = z.enum([
 export type Subject = z.infer<typeof subjectsSchema>;
 
 export const filterGroupSchema = z.object({
-  school_types: z.array(schoolTypesSchema).default([]),
-  grade_ranges: z.array(gradeRangesSchema).default([]),
-  subjects: z.array(subjectsSchema).default([]),
-  categories: z.array(categoriesSchema).default([]),
-  federal_states: z.array(federalStatesSchema).default([]),
-  languages: z.array(languagesSchema).default([]),
+  school_types: z.array(schoolTypesSchema).optional(),
+  grade_ranges: z.array(gradeRangesSchema).optional(),
+  subjects: z.array(subjectsSchema).optional(),
+  categories: z.array(categoriesSchema).optional(),
+  federal_states: z.array(federalStatesSchema).optional(),
+  languages: z.array(languagesSchema).optional(),
 });
-export type filterGroup = z.infer<typeof filterGroupSchema>;
+export type FilterGroup = z.infer<typeof filterGroupSchema>;
 
 export const characterTable = pgTable(
   'character',
@@ -539,7 +580,7 @@ export const characterTable = pgTable(
     learningContext: text('learning_context').notNull().default(''),
     competence: text('competence').notNull().default(''),
     filterGroup: json('filter_attributes')
-      .$type<filterGroup>()
+      .$type<FilterGroup>()
       .notNull()
       .default(sql`'{}'::json`),
     // not required
@@ -580,6 +621,7 @@ export const characterSelectSchema = createSelectSchema(characterTable)
     filterGroup: filterGroupSchema,
     ownerSchoolIds: z.array(z.string()),
     webSearchScope: webSearchScopeSchema,
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema,
   });
 export const characterInsertSchema = createInsertSchema(characterTable)
   .omit({
@@ -593,6 +635,7 @@ export const characterInsertSchema = createInsertSchema(characterTable)
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
     webSearchScope: webSearchScopeSchema.optional(),
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema.optional(),
   });
 export const characterUpdateSchema = createUpdateSchema(characterTable)
   .omit({
@@ -607,6 +650,7 @@ export const characterUpdateSchema = createUpdateSchema(characterTable)
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
     webSearchScope: webSearchScopeSchema.optional(),
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema.optional(),
   });
 
 export type CharacterSelectModel = z.infer<typeof characterSelectSchema>;
@@ -657,6 +701,30 @@ export type CharacterTemplateMappingInsertModel = z.infer<
 export const llmModelTypeSchema = z.enum(['text', 'image', 'fc']);
 export const llmModelTypeEnum = pgEnum('llm_model_type', llmModelTypeSchema.enum);
 export type LlmModeType = z.infer<typeof llmModelTypeSchema>;
+export const staticModelRoleSchema = z.enum([
+  'default-chat',
+  'fallback',
+  'auxiliary',
+  'strong-auxiliary',
+  'auxiliary-fallback',
+  'default-image',
+]);
+export type StaticModelRole = z.infer<typeof staticModelRoleSchema>;
+export const staticModelsConfigurationSchema = z.object({
+  'default-chat': z.string().uuid(),
+  fallback: z.string().uuid(),
+  auxiliary: z.string().uuid(),
+  'strong-auxiliary': z.string().uuid(),
+  'auxiliary-fallback': z.string().uuid(),
+  'default-image': z.string().uuid(),
+});
+export type StaticModelsConfiguration = z.infer<typeof staticModelsConfigurationSchema>;
+
+export const imageGenerationConfigSchema = z.object({
+  aspectRatio: z.record(z.string(), z.string()),
+});
+
+export type ImageGenerationConfig = z.infer<typeof imageGenerationConfigSchema>;
 
 export const llmModelTable = pgTable(
   'llm_model',
@@ -669,13 +737,16 @@ export const llmModelTable = pgTable(
     priceMetadata: json('price_metadata').$type<LlmModelPriceMetadata>().notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     supportedImageFormats: json('supported_image_formats').$type<string[]>(),
+    imageGenerationConfig: jsonb('image_generation_config').$type<ImageGenerationConfig>(),
     isNew: boolean('is_new').notNull().default(false),
     isDeleted: boolean('is_deleted').notNull().default(false),
   },
   (table) => [unique().on(table.provider, table.name)],
 );
 
-export const llmModelSelectSchema = createSelectSchema(llmModelTable);
+export const llmModelSelectSchema = createSelectSchema(llmModelTable).extend({
+  createdAt: z.coerce.date(),
+});
 export const llmModelInsertSchema = createInsertSchema(llmModelTable).omit({
   id: true,
   createdAt: true,
@@ -689,6 +760,14 @@ export const llmModelUpdateSchema = createUpdateSchema(llmModelTable)
 export type LlmModelSelectModel = z.infer<typeof llmModelSelectSchema>;
 export type LlmModelInsertModel = z.infer<typeof llmModelInsertSchema>;
 export type LlmModelUpdateModel = z.infer<typeof llmModelUpdateSchema>;
+
+/** Generic project-wide JSON configuration object; services validate each key's value schema. */
+export type ConfigurationValue = Record<string, unknown>;
+export const configurationTable = pgTable('configuration', {
+  key: text('key').primaryKey(),
+  value: json('value').$type<ConfigurationValue>().notNull(),
+});
+export type Configuration = typeof configurationTable.$inferSelect;
 
 /**
  * Schema for table federal_state_llm_model_mapping
@@ -761,7 +840,7 @@ export const learningScenarioTable = pgTable(
       .references(() => userTable.id)
       .notNull(),
     filterGroup: json('filter_attributes')
-      .$type<filterGroup>()
+      .$type<FilterGroup>()
       .notNull()
       .default(sql`'{}'::json`),
     studentExercise: text('student_exercise').default('').notNull(),
@@ -801,6 +880,7 @@ export const learningScenarioSelectSchema = createSelectSchema(learningScenarioT
     filterGroup: filterGroupSchema,
     ownerSchoolIds: z.array(z.string()),
     webSearchScope: webSearchScopeSchema,
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema,
   });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
   .omit({
@@ -813,6 +893,7 @@ export const learningScenarioInsertSchema = createInsertSchema(learningScenarioT
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
     webSearchScope: webSearchScopeSchema.optional(),
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema.optional(),
   });
 export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
   .omit({ userId: true, createdAt: true, updatedAt: true, suspended: true })
@@ -822,6 +903,7 @@ export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioT
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
     webSearchScope: webSearchScopeSchema.optional(),
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema.optional(),
   });
 
 export type LearningScenarioSelectModel = z.infer<typeof learningScenarioSelectSchema>;
@@ -1258,11 +1340,16 @@ export const assistantTable = pgTable(
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     isWebSearchEnabled: boolean('is_web_search_enabled').notNull().default(false),
+    webSearchScope: webSearchScopeEnum('web_search_scope').notNull().default('all-web'),
+    webSearchIncludedDomains: text('web_search_included_domains')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     pictureId: text('picture_id'),
     description: text('description'),
     instructions: text('instructions'),
     filterGroup: json('filter_attributes')
-      .$type<filterGroup>()
+      .$type<FilterGroup>()
       .notNull()
       .default(sql`'{}'::json`),
     promptSuggestions: text('prompt_suggestions')
@@ -1286,12 +1373,16 @@ export const assistantSelectSchema = createSelectSchema(assistantTable).extend({
   accessLevel: accessLevelSchema,
   filterGroup: filterGroupSchema,
   ownerSchoolIds: z.array(z.string()),
+  webSearchScope: webSearchScopeSchema,
+  webSearchIncludedDomains: webSearchIncludedDomainsSchema,
 });
 export const assistantInsertSchema = createInsertSchema(assistantTable)
   .omit({ id: true, createdAt: true, updatedAt: true, suspended: true })
   .extend({
     accessLevel: accessLevelSchema,
     filterGroup: filterGroupSchema.optional(),
+    webSearchScope: webSearchScopeSchema.optional(),
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema.optional(),
   });
 export const assistantUpdateSchema = createUpdateSchema(assistantTable)
   .omit({
@@ -1305,6 +1396,8 @@ export const assistantUpdateSchema = createUpdateSchema(assistantTable)
     // for any reason accessLevel has a different type so we have to override it here
     accessLevel: accessLevelSchema.optional(),
     filterGroup: filterGroupSchema.optional(),
+    webSearchScope: webSearchScopeSchema.optional(),
+    webSearchIncludedDomains: webSearchIncludedDomainsSchema.optional(),
   });
 
 export type AssistantSelectModel = z.infer<typeof assistantSelectSchema>;
@@ -1719,3 +1812,11 @@ export const voucherUpdateSchema = createUpdateSchema(VoucherTable)
 export type VoucherSelectModel = z.infer<typeof voucherSelectSchema>;
 export type VoucherInsertModel = z.infer<typeof voucherInsertSchema>;
 export type VoucherUpdateModel = z.infer<typeof voucherUpdateSchema>;
+
+/**** Url Presets ****/
+export const urlPresetTable = pgTable('url_preset', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name').notNull(),
+  orderNumber: integer('order_number').notNull().default(0),
+  urls: text('urls').array().notNull(),
+});

@@ -250,4 +250,92 @@ describe('resolveWebSearchConfig', () => {
       includedDomains: ['example.com', 'foo.de'],
     });
   });
+
+  it('returns disabled config when assistant web search is disabled', async () => {
+    mocks.dbGetAssistantByIdMock.mockResolvedValue({
+      isWebSearchEnabled: false,
+      webSearchScope: 'included-domains',
+      webSearchIncludedDomains: ['example.com'],
+    });
+
+    const { resolveWebSearchConfig } = await import('./websearch');
+
+    const config = await resolveWebSearchConfig({
+      user,
+      assistantId: 'assistant-uuid',
+    });
+
+    expect(config).toEqual({
+      enabled: false,
+      scope: 'all-web',
+      includedDomains: [],
+    });
+  });
+
+  it('trims and drops empty domain entries from an assistant', async () => {
+    mocks.dbGetAssistantByIdMock.mockResolvedValue({
+      isWebSearchEnabled: true,
+      webSearchScope: 'included-domains',
+      webSearchIncludedDomains: ['  example.com  ', '', '   ', 'foo.de'],
+    });
+
+    const { resolveWebSearchConfig } = await import('./websearch');
+
+    const config = await resolveWebSearchConfig({
+      user,
+      assistantId: 'assistant-uuid',
+    });
+
+    expect(config).toEqual({
+      enabled: true,
+      scope: 'included-domains',
+      includedDomains: ['example.com', 'foo.de'],
+    });
+  });
+});
+
+describe('isWebSearchEnabledForEntity', () => {
+  it('returns true when federal-state toggle and entity setting are both true', async () => {
+    const { isWebSearchEnabledForEntity } = await import('./websearch');
+
+    const result = isWebSearchEnabledForEntity({
+      featureToggles: { isWebSearchEnabled: true },
+      entity: { isWebSearchEnabled: true },
+    });
+
+    expect(result).toBe(true);
+  });
+
+  it('returns false when federal-state toggle is false', async () => {
+    const { isWebSearchEnabledForEntity } = await import('./websearch');
+
+    const result = isWebSearchEnabledForEntity({
+      featureToggles: { isWebSearchEnabled: false },
+      entity: { isWebSearchEnabled: true },
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it('returns false when federal-state toggle is missing', async () => {
+    const { isWebSearchEnabledForEntity } = await import('./websearch');
+
+    const result = isWebSearchEnabledForEntity({
+      featureToggles: {},
+      entity: { isWebSearchEnabled: true },
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it('returns false when entity setting is false', async () => {
+    const { isWebSearchEnabledForEntity } = await import('./websearch');
+
+    const result = isWebSearchEnabledForEntity({
+      featureToggles: { isWebSearchEnabled: true },
+      entity: { isWebSearchEnabled: false },
+    });
+
+    expect(result).toBe(false);
+  });
 });

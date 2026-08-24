@@ -5,10 +5,10 @@ import Logo from '@/components/common/logo';
 import { requireAuth } from '@/auth/requireAuth';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { getDefaultModelNameByFederalStateId } from '@shared/llm-models/llm-model-service';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import { getLearningScenarioForChatSession } from '@shared/learning-scenarios/learning-scenario-service';
 import { type Metadata } from 'next';
@@ -46,15 +46,20 @@ export default async function Page(props: PageProps<'/learning-scenarios/d/[lear
     federalStateId: federalState.id,
   });
   const learningScenarioModel = models.find((m) => m.id === learningScenario.modelId)?.name;
+  const defaultModelName = await getDefaultModelNameByFederalStateId(federalState.id, models);
 
   const currentModel =
-    searchParams.model ?? learningScenarioModel ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+    searchParams.model ?? learningScenarioModel ?? user.lastUsedModel ?? defaultModelName;
 
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
 
   return (
-    <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
+    <LlmModelsProvider
+      models={models}
+      initialModelName={currentModel}
+      defaultModelName={defaultModelName}
+    >
       <DefaultPageLayout
         layoutConfig={{
           layout: 'chat',
@@ -71,7 +76,7 @@ export default async function Page(props: PageProps<'/learning-scenarios/d/[lear
           initialMessages={[]}
           learningScenario={learningScenario}
           imageSource={avatarPictureUrl}
-          enableFileUpload={false}
+          enableFileUpload={true}
           logoElement={logoElement}
         />
       </DefaultPageLayout>

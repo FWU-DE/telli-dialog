@@ -90,6 +90,15 @@ corepack prepare
 pnpm i # installs the dependencies
 ```
 
+### Updating Node.js
+
+If your local Node version doesn't match the version required in `.nvmrc` (e.g. `pnpm install` or `pnpm dev` fails with an engine version error), install the correct version and set it as your nvm default:
+
+```sh
+nvm install # installs the node version from .nvmrc
+nvm alias default "$(cat .nvmrc)" # sets it as the default node version
+```
+
 ### Environment variables
 
 The project uses environment variables in `.env.local` files for local development configuration.
@@ -100,6 +109,12 @@ The project uses environment variables in `.env.local` files for local developme
 - `apps/api/.env.local` — For the API app (database URL, logging, telemetry)
 
 For detailed variable documentation and values for local development with docker-compose, see the `.env.example` files in each app directory.
+
+**How env files are loaded:**
+
+- Precedence (highest to lowest): `.env.local` > `.env.development`. `.env.development` holds working defaults for local dev, so `.env.local` doesn't need to set them.
+- `apps/chat-bot`/`apps/admin` get this (plus a lower-priority `.env` tier) via Next.js's built-in env loading.
+- `apps/api` (Fastify) has no built-in loading, so `apps/api/src/load-env.ts` replicates the `.env.local` > `.env.development` precedence manually (no `.env` tier, since no app ships one).
 
 ### Service dependencies
 
@@ -157,6 +172,8 @@ LLM_GPT5NANO_BASE_URL=...
 ```
 
 Without these, placeholder values are used and the models will not work until real keys are configured.
+
+The seeded models are routed through Bifrost. Start the local Docker services before seeding and keep `BIFROST_ADMIN_URL`, `BIFROST_ADMIN_USERNAME`, and `BIFROST_ADMIN_PASSWORD` configured so the seed can sync provider keys to Bifrost. With the standard local Docker Compose setup, `BIFROST_ADMIN_USERNAME=admin` and `BIFROST_ADMIN_PASSWORD=admin` work out of the box. Leave `LLM_MOCK_BASE_URL` unset or set it to `http://mock-llm:6556`; the URL must be reachable from the Bifrost container, not from the host.
 
 ```sh
 pnpm db:seed

@@ -14,6 +14,20 @@ Help coding agents ship safe changes quickly in the `ais-chat` monorepo (TypeScr
 - **[SECURITY.md](SECURITY.md)** — Security issue reporting
 - **[packages/ui/README.md](packages/ui/README.md)** — shadcn/ui component library usage
 
+## Documentation Guardrails
+
+### Non-authoritative architecture snapshots
+
+- The files under `docs/current_architecture/` are snapshot documentation and can be incomplete or outdated.
+- Do not use `docs/current_architecture/*` as factual context for implementation decisions, bug fixes, or code generation.
+- For implementation work, always derive architecture facts from code in `apps/*`, `packages/*`, migrations, and runtime configuration.
+
+### Manual update trigger only
+
+- Update `docs/current_architecture/*` only when the user explicitly asks to update architecture documentation.
+- Never update these files opportunistically during unrelated coding tasks.
+- When updating, verify statements against current code and schema before editing.
+
 ## Tech Stack
 
 TypeScript monorepo (Turborepo + pnpm) with:
@@ -131,12 +145,14 @@ After making any file changes:
 
 ### Git Conventions
 
+- **Jira tickets**: Use the `TD-<number>` format (for example, `TD-1234`). For ticket-based work without an identifier, ask the user for it unless they explicitly ask to work without a ticket.
+- **Branches**: For ticket-based work, use `feat/TD-<number>-<description>`. When the user explicitly requests ticketless work, use a work-type prefix and concise description, such as `feat/sidebar-shadow`, `fix/arbitrary-redirect`, or `chore/fix-formatting`.
 - **Prefix all commits with JIRA ticket**: `TD-1234: Concise summary`
 - **Keep commit messages concise**: Short subject line, optional body if needed
 
 ## Pull Requests
 
-- Write concise PR descriptions: 1-3 short paragraphs explaining what changed and why.
+- Write concise PR descriptions: 1-3 short paragraphs explaining what changed and why. Use the final changeset of the PR, to get an overview.
 - Avoid formal section headings; keep it simple and direct.
 - PRs must always be opened as draft
 
