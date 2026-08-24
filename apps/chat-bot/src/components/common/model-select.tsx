@@ -58,6 +58,10 @@ export default function ModelSelect({
   const isGreen =
     currentSelectedModel && modelType === 'text' && isGreenModel({ model: currentSelectedModel });
   const isNew = currentSelectedModel?.isNew ?? false;
+  const selectableModels = models
+    .filter((m) => m.priceMetadata.type === modelType)
+    .filter((m) => !isStudent || !m.name.includes('mistral')) // students should not be able to select mistral models
+    .filter((m) => m.id !== currentSelectedModel?.id);
 
   return (
     <>
@@ -65,30 +69,28 @@ export default function ModelSelect({
         caption={label}
         triggerLabel={currentSelectedModel?.displayName ?? noModelsLabel}
         triggerAriaLabel={`Select ${modelType} Model Dropdown`}
-        data-testid={`${modelType}-model-dropdown`}
+        isDropdownEnabled={selectableModels.length > 0}
+        mainMenuItemTestId={`main-menu-item-model-dropdown`}
+        selectedMenuItemTestId={`main-menu-item-${modelType}-model-selected`}
         isNew={isNew}
         isGreen={isGreen}
       >
-        {models
-          .filter((m) => m.priceMetadata.type === modelType)
-          .filter((m) => !isStudent || !m.name.includes('mistral')) // students should not be able to select mistral models
-          .filter((m) => m.id !== currentSelectedModel?.id)
-          .map((model) => {
-            return (
-              <React.Fragment key={model.id}>
-                <HeaderMenuItem
-                  aria-label={`Select ${model.name} Model`}
-                  data-testid={model.displayName}
-                  onClick={() => {
-                    handleSelectModel(model);
-                  }}
-                >
-                  <ModelSpan model={model} modelType={modelType} />
-                </HeaderMenuItem>
-                <Separator className="mx-2 border-b-0 last:hidden" />
-              </React.Fragment>
-            );
-          })}
+        {selectableModels.map((model) => {
+          return (
+            <React.Fragment key={model.id}>
+              <HeaderMenuItem
+                aria-label={`Select ${model.name} Model`}
+                data-testid={`menu-item-${model.displayName}`}
+                onClick={() => {
+                  handleSelectModel(model);
+                }}
+              >
+                <ModelSpan model={model} modelType={modelType} />
+              </HeaderMenuItem>
+              <Separator className="mx-2 border-b-0 last:hidden" />
+            </React.Fragment>
+          );
+        })}
       </HeaderMainMenuItem>
     </>
   );

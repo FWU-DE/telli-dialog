@@ -365,7 +365,6 @@ export async function sendChatMessage({
     assistant: activeAssistant,
     character: activeCharacter,
     learningScenario: activeLearningScenario,
-    messages,
   });
   const ingestResult = await ingestWebContent({
     urls,

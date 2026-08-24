@@ -43,11 +43,12 @@ export function ApplicationHeader({ userAndContext }: { userAndContext?: UserAnd
   );
 
   return (
-    <header className="h-20 flex-none px-6 py-4 flex items-center justify-between gap-4">
+    <header className="flex flex-row gap-4 min-h-20 px-6 py-2 items-start sm:items-center justify-between">
       <ToggleSidebarButton />
-      <div className="min-w-0 flex-1">
-        <div className="w-full" ref={headerMountRef} />
-      </div>
+      <div
+        className="flex flex-col sm:flex-row flex-wrap gap-4 min-w-0 flex-1"
+        ref={headerMountRef}
+      ></div>
       {isCompact && compactMenuItems.length > 0 ? (
         <ThreeDotsProfileMenu customItems={compactMenuItems} userAndContext={userAndContext} />
       ) : (

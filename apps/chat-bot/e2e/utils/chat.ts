@@ -55,7 +55,7 @@ export async function uploadFile(page: Page, filePath: string) {
 
 /** Opens the LLM model dropdown and selects a specific model by displayName, or the first available alternative if no name is provided. */
 export async function selectDifferentModel(page: Page, modelName?: string) {
-  const dropdown = page.getByLabel('Select text Model Dropdown');
+  const dropdown = page.getByTestId('main-menu-item-model-dropdown');
   await expect(dropdown).toBeVisible();
 
   const isDisabled = await dropdown.evaluate((el) => (el as HTMLButtonElement).disabled);
@@ -70,7 +70,7 @@ export async function selectDifferentModel(page: Page, modelName?: string) {
   await dropdown.click();
 
   if (modelName) {
-    const option = page.getByTestId(modelName);
+    const option = page.getByTestId(`menu-item-${modelName}`);
     await option.click();
   } else {
     // The selected model is not listed in the dropdown
