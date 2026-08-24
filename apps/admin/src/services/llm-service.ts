@@ -35,6 +35,9 @@ export async function createLargeLanguageModel(
       ? JSON.parse(data.priceMetadata)
       : { type: 'text' as const, completionTokenPrice: 0, promptTokenPrice: 0 },
     supportedImageFormats: data.supportedImageFormats ? JSON.parse(data.supportedImageFormats) : [],
+    imageGenerationConfig: data.imageGenerationConfig
+      ? JSON.parse(data.imageGenerationConfig)
+      : undefined,
     additionalParameters: data.additionalParameters ? JSON.parse(data.additionalParameters) : {},
     organizationId,
     isNew: data.isNew,
@@ -73,6 +76,9 @@ export async function updateLargeLanguageModel(
     priceMetadata: data.priceMetadata ? JSON.parse(data.priceMetadata) : undefined,
     supportedImageFormats: data.supportedImageFormats
       ? JSON.parse(data.supportedImageFormats)
+      : undefined,
+    imageGenerationConfig: data.imageGenerationConfig
+      ? JSON.parse(data.imageGenerationConfig)
       : undefined,
     additionalParameters: data.additionalParameters
       ? JSON.parse(data.additionalParameters)

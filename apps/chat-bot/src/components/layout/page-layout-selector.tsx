@@ -29,11 +29,11 @@ function FormPageHeader() {
 function ImagePageHeader() {
   return (
     <ApplicationHeaderContent>
-      <div className="flex w-full gap-4">
+      <>
         <SelectImageModel />
         <SelectImageStyle />
         <SelectImageAspectRatio />
-      </div>
+      </>
     </ApplicationHeaderContent>
   );
 }

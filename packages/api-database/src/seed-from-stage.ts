@@ -91,23 +91,14 @@ export async function seedDatabase() {
 
     // 4. Create LLM models
     for (const model of models) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _id, organizationId: _orgId, createdAt: _createdAt, ...conflictSet } = model;
       await localDb
         .insert(llmModelTable)
         .values(model)
         .onConflictDoUpdate({
           target: llmModelTable.id,
-          set: {
-            provider: model.provider,
-            name: model.name,
-            displayName: model.displayName,
-            description: model.description,
-            setting: model.setting,
-            priceMetadata: model.priceMetadata,
-            supportedImageFormats: model.supportedImageFormats,
-            additionalParameters: model.additionalParameters,
-            isNew: model.isNew,
-            isDeleted: model.isDeleted,
-          },
+          set: conflictSet,
         })
         .returning();
     }
