@@ -54,7 +54,7 @@ services:
 
   # keycloak runs with uid 1000, but docker creates volumes with root as owner; use a one-shot container to fix the permission
   fix-keycloak-volume-ownership:
-    image: alpine
+    image: alpine:3.24.1
     restart: no
     entrypoint: /bin/sh -c "chown 1000 /keycloak"
     volumes:
@@ -119,6 +119,38 @@ services:
     ports:
       - '6556:6556'
 
+  # RustFS - S3-compatible object storage
+  rustfs:
+    image: rustfs/rustfs:1.0.0-rc.3
+    restart: unless-stopped
+    environment:
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
+      RUSTFS_CONSOLE_ENABLE: 'true'
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: RustFS-Admin-123456
+      RUSTFS_VOLUMES: /data
+    volumes:
+      - rustfs_data:/data
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://127.0.0.1:9000/health']
+      interval: 2s
+      timeout: 2s
+      retries: 10
+      start_period: 2s
+
+  # One-shot init container to create the S3 bucket used by ais-chat on rustfs
+  rustfs-init:
+    image: alpine:3.24.1
+    restart: no
+    entrypoint: /bin/sh -c "apk add --no-cache s3cmd && s3cmd --access_key=rustfsadmin --secret_key=RustFS-Admin-123456 --host=rustfs:9000 --host-bucket='rustfs:9000/%(bucket)' --region=us-east-1 --no-ssl --no-check-certificate mb s3://ais-chat"
+    depends_on:
+      rustfs:
+        condition: service_healthy
+
   bifrost:
     image: ghcr.io/maximhq/bifrost:v1.6.11
     restart: unless-stopped
@@ -137,7 +169,7 @@ services:
       test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:8080/health']
       interval: 2s
       timeout: 2s
-      retries: 5
+      retries: 10
       start_period: 2s
 
 volumes:
@@ -146,3 +178,4 @@ volumes:
   postgres_data:
   valkey_data:
   xberg_cache:
+  rustfs_data:

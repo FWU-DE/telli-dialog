@@ -27,7 +27,7 @@ services:
 
   # Fix keycloak volume permissions (runs with uid 1000)
   fix-keycloak-volume-ownership:
-    image: alpine
+    image: alpine:3.24.1
     restart: no
     entrypoint: /bin/sh -c "chown 1000 /keycloak"
     volumes:
@@ -124,14 +124,14 @@ services:
 
   # RustFS - S3-compatible object storage
   rustfs:
-    image: rustfs/rustfs:latest
+    image: rustfs/rustfs:1.0.0-rc.3
     restart: unless-stopped
     environment:
       RUSTFS_ADDRESS: 0.0.0.0:9000
       RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
       RUSTFS_CONSOLE_ENABLE: 'true'
       RUSTFS_ACCESS_KEY: rustfsadmin
-      RUSTFS_SECRET_KEY: rustfsadmin123
+      RUSTFS_SECRET_KEY: RustFS-Admin-123456
       RUSTFS_VOLUMES: /data
     volumes:
       - rustfs_data:/data
@@ -140,10 +140,10 @@ services:
       - '9001:9001'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://127.0.0.1:9000/health']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+      interval: 2s
+      timeout: 2s
+      retries: 10
+      start_period: 2s
 
   bifrost:
     image: ghcr.io/maximhq/bifrost:v1.6.11
@@ -243,11 +243,13 @@ services:
       BIFROST_API_KEY: sk-bf-example-key
 
       # S3 Object Storage for file uploads and image generation
-      # Note: must be changed to a publicly accessible S3 storage, when LLM should have file access (e.g., uploading pictures and asking about content)
-      OTC_SECRET_ACCESS_KEY: rustfsadmin123
+      # RustFS here is internal-only (not publicly reachable), so IMAGE_ATTACHMENT_MODE=base64 is required
+      # for the LLM to access uploaded images.
+      OTC_SECRET_ACCESS_KEY: RustFS-Admin-123456
       OTC_ACCESS_KEY_ID: rustfsadmin
       OTC_S3_HOSTNAME: http://rustfs:9000
       OTC_BUCKET_NAME: ais-chat
+      IMAGE_ATTACHMENT_MODE: base64
 
       # Encryption key for sensitive data (IMPORTANT: Change in production!)
       ENCRYPTION_KEY: default-encryption-key-change-in-production
@@ -346,7 +348,7 @@ services:
         apk add --no-cache s3cmd
 
         echo '=== Creating S3 bucket: ais-chat ==='
-        s3cmd --access_key=rustfsadmin --secret_key=rustfsadmin123 --host=rustfs:9000 --host-bucket='rustfs:9000/%(bucket)' --region=us-east-1 --no-ssl --no-check-certificate mb s3://ais-chat
+        s3cmd --access_key=rustfsadmin --secret_key=RustFS-Admin-123456 --host=rustfs:9000 --host-bucket='rustfs:9000/%(bucket)' --region=us-east-1 --no-ssl --no-check-certificate mb s3://ais-chat
 
         echo '=== Seeding api_db ==='
         apk add --no-cache postgresql-client
