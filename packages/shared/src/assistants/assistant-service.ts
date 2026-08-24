@@ -34,11 +34,7 @@ import {
 import { buildAssistantPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
-import {
-  copyAssistant,
-  copyEntityPictureIfExists,
-  copyRelatedTemplateFiles,
-} from '@shared/templates/template-service';
+import { copyAssistant, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { generateUUID } from '@shared/utils/uuid';
 import {
@@ -264,31 +260,12 @@ export async function createNewAssistant({
     });
     verifySuspensionState({ item: sourceAssistant });
 
-    let insertedAssistant = await copyAssistant(
+    const insertedAssistant = await copyAssistant(
       templateId,
       'private',
       user,
       duplicateAssistantName,
     );
-
-    const copyOfTemplatePicture = await copyEntityPictureIfExists({
-      sourcePictureId: insertedAssistant.pictureId,
-      newEntityId: insertedAssistant.id,
-      buildPictureKey: buildAssistantPictureKey,
-    });
-
-    if (copyOfTemplatePicture) {
-      // Update the assistant with the new picture
-      const [updatedAssistant] = await db
-        .update(assistantTable)
-        .set({ pictureId: copyOfTemplatePicture })
-        .where(eq(assistantTable.id, insertedAssistant.id))
-        .returning();
-
-      if (updatedAssistant) {
-        insertedAssistant = { ...updatedAssistant, ownerSchoolIds: user.schoolIds };
-      }
-    }
 
     await copyRelatedTemplateFiles('assistant', templateId, insertedAssistant.id);
     return insertedAssistant;

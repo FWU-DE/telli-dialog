@@ -7,6 +7,7 @@ import { lookupApiKeys } from '@ais-chat/ai-core/api-keys/lookup';
 import { logError, logInfo } from '@shared/logging';
 import { listFilesFromS3 } from '@shared/s3';
 import { registerCleanupHandler } from '@shared/shutdown/cleanup';
+import { fixInvalidPictureIds } from '@shared/templates/fix-invalid-picture-ids';
 import { shutdownRabbitMQ } from '@/rabbitmq/send';
 
 /**
@@ -26,6 +27,8 @@ export async function startup() {
 async function postMigration() {
   await tempAddApiKeyIdsToFederalStates();
   await tempAddPictureUrlsToFederalStates();
+  // run fix in the background
+  void tempFixInvalidPictureIds();
 }
 
 /**
@@ -122,4 +125,15 @@ async function tempAddPictureUrlsToFederalStates() {
   }
 
   logInfo(`Completed picture URL updates for ${statesToUpdate.length} federal states`);
+}
+
+/**
+ * Temporary migration that fixes assistants/characters whose picture id still references
+ * another entity's S3 object instead of their own (a leftover of missing avatar duplication
+ * on template/duplicate creation).
+ *
+ * TODO: delete after executing in production once
+ */
+async function tempFixInvalidPictureIds() {
+  await fixInvalidPictureIds();
 }
