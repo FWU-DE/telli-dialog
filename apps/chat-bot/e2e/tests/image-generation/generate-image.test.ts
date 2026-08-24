@@ -9,18 +9,18 @@ test('can generate an image and use image actions', async ({ page }) => {
   await page.goto('/image-generation');
   await page.waitForURL('/image-generation**');
 
-  // select gpt-image model if not already selected
-  const dropdownLocator = page.getByTestId('image-model-dropdown');
-  await dropdownLocator.waitFor();
-
-  // Assert that a model is available and selected
-  const currentSelectedText = await dropdownLocator.textContent();
+  // get selected model
+  const selectedModelLocator = page.getByTestId('main-menu-item-image-model-selected');
+  const currentSelectedText = await selectedModelLocator.textContent();
   expect(currentSelectedText).toBeTruthy();
 
+  // Assert that gpt-image model is selected
   if (!currentSelectedText?.includes('GPT-Image')) {
+    const dropdownLocator = page.getByTestId('main-menu-item-image-model-dropdown');
+    await dropdownLocator.waitFor();
     await dropdownLocator.click();
     await page.locator('div[data-radix-popper-content-wrapper]').waitFor();
-    const modelLocator = page.getByTestId(/gpt-image/i);
+    const modelLocator = page.getByTestId(/menu-item-gpt-image/i);
     await modelLocator.waitFor();
     await modelLocator.click();
   }
