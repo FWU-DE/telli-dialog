@@ -14,12 +14,16 @@ const LOCK_KEY2 = 100003;
 
 /** Ensures the migration only runs on a single pod at a time; other pods wait their turn. */
 async function withAdvisoryLock(callback: () => Promise<void>) {
-  const pool = db.$client;
-  await pool.query(`SELECT pg_advisory_lock($1, $2)`, [LOCK_KEY1, LOCK_KEY2]);
+  const client = await db.$client.connect();
   try {
-    await callback();
+    await client.query('SELECT pg_advisory_lock($1, $2)', [LOCK_KEY1, LOCK_KEY2]);
+    try {
+      await callback();
+    } finally {
+      await client.query('SELECT pg_advisory_unlock($1, $2)', [LOCK_KEY1, LOCK_KEY2]);
+    }
   } finally {
-    await pool.query(`SELECT pg_advisory_unlock($1, $2)`, [LOCK_KEY1, LOCK_KEY2]);
+    client.release();
   }
 }
 
@@ -76,10 +80,16 @@ async function fixAssistantPictureIds() {
         continue;
       }
 
-      await db
+      const updated = await db
         .update(assistantTable)
         .set({ pictureId: newPictureId })
-        .where(eq(assistantTable.id, assistant.id));
+        .where(and(eq(assistantTable.id, assistant.id), eq(assistantTable.pictureId, oldPictureId)))
+        .returning({ id: assistantTable.id });
+
+      if (updated.length === 0) {
+        logInfo(`Skipped assistant ${assistant.id}: picture id changed concurrently.`);
+        continue;
+      }
       logInfo(`Fixed picture id for assistant ${assistant.id}`);
     } catch (error) {
       logError(`Failed to fix invalid picture id for assistant ${assistant.id}`, error);
@@ -114,10 +124,16 @@ async function fixCharacterPictureIds() {
         continue;
       }
 
-      await db
+      const updated = await db
         .update(characterTable)
         .set({ pictureId: newPictureId })
-        .where(eq(characterTable.id, character.id));
+        .where(and(eq(characterTable.id, character.id), eq(characterTable.pictureId, oldPictureId)))
+        .returning({ id: characterTable.id });
+
+      if (updated.length === 0) {
+        logInfo(`Skipped character ${character.id}: picture id changed concurrently.`);
+        continue;
+      }
       logInfo(`Fixed picture id for character ${character.id}`);
     } catch (error) {
       logError(`Failed to fix invalid picture id for character ${character.id}`, error);

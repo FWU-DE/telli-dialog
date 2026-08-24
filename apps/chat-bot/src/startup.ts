@@ -28,7 +28,9 @@ async function postMigration() {
   await tempAddApiKeyIdsToFederalStates();
   await tempAddPictureUrlsToFederalStates();
   // run fix in the background
-  void tempFixInvalidPictureIds();
+  void tempFixInvalidPictureIds().catch((error) =>
+    logError('Failed to run picture id migration', error),
+  );
 }
 
 /**

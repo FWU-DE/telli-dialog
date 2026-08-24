@@ -3,24 +3,46 @@ import { fixInvalidPictureIds } from './fix-invalid-picture-ids';
 import { copyFileInS3 } from '@shared/s3';
 import { logError, logInfo } from '@shared/logging';
 
-const { mockDbWhere, mockDbSelect, mockUpdateSet, mockDbUpdate, mockClientQuery } = vi.hoisted(
-  () => {
-    const mockDbWhere = vi.fn();
-    const mockDbFrom = vi.fn(() => ({ where: mockDbWhere }));
-    const mockDbSelect = vi.fn(() => ({ from: mockDbFrom }));
-    const mockUpdateWhere = vi.fn();
-    const mockUpdateSet = vi.fn(() => ({ where: mockUpdateWhere }));
-    const mockDbUpdate = vi.fn(() => ({ set: mockUpdateSet }));
-    const mockClientQuery = vi.fn().mockResolvedValue(undefined);
-    return { mockDbWhere, mockDbSelect, mockUpdateSet, mockDbUpdate, mockClientQuery };
-  },
-);
+const {
+  mockDbWhere,
+  mockDbSelect,
+  mockUpdateSet,
+  mockUpdateReturning,
+  mockDbUpdate,
+  mockClientQuery,
+  mockClientRelease,
+  mockClientConnect,
+} = vi.hoisted(() => {
+  const mockDbWhere = vi.fn();
+  const mockDbFrom = vi.fn(() => ({ where: mockDbWhere }));
+  const mockDbSelect = vi.fn(() => ({ from: mockDbFrom }));
+  const mockUpdateReturning = vi.fn();
+  const mockUpdateWhere = vi.fn(() => ({ returning: mockUpdateReturning }));
+  const mockUpdateSet = vi.fn(() => ({ where: mockUpdateWhere }));
+  const mockDbUpdate = vi.fn(() => ({ set: mockUpdateSet }));
+  const mockClientQuery = vi.fn().mockResolvedValue(undefined);
+  const mockClientRelease = vi.fn();
+  const mockClientConnect = vi.fn().mockResolvedValue({
+    query: mockClientQuery,
+    release: mockClientRelease,
+  });
+  return {
+    mockDbWhere,
+    mockDbSelect,
+    mockUpdateSet,
+    mockUpdateReturning,
+    mockDbUpdate,
+    mockClientQuery,
+    mockClientRelease,
+    mockClientConnect,
+  };
+});
 
 vi.mock('@shared/db', () => ({
   db: {
     select: mockDbSelect,
     update: mockDbUpdate,
-    $client: { query: mockClientQuery },
+    $client: { connect: mockClientConnect },
   },
 }));
 
@@ -31,13 +53,16 @@ describe('fixInvalidPictureIds', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockClientQuery.mockResolvedValue(undefined);
+    mockClientConnect.mockResolvedValue({ query: mockClientQuery, release: mockClientRelease });
+    mockUpdateReturning.mockResolvedValue([{ id: 'updated-id' }]);
     // First select call = assistants, second = characters, in this order.
     mockDbWhere.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
   });
 
-  it('takes and releases an advisory lock around the migration', async () => {
+  it('takes and releases an advisory lock on a dedicated client', async () => {
     await fixInvalidPictureIds();
 
+    expect(mockClientConnect).toHaveBeenCalledTimes(1);
     expect(mockClientQuery).toHaveBeenNthCalledWith(
       1,
       expect.stringContaining('pg_advisory_lock'),
@@ -48,6 +73,16 @@ describe('fixInvalidPictureIds', () => {
       expect.stringContaining('pg_advisory_unlock'),
       [1000, 100003],
     );
+    expect(mockClientRelease).toHaveBeenCalledTimes(1);
+  });
+
+  it('releases the client even if the migration throws', async () => {
+    mockDbWhere.mockReset();
+    mockDbWhere.mockRejectedValueOnce(new Error('select failed'));
+
+    await expect(fixInvalidPictureIds()).rejects.toThrow('select failed');
+
+    expect(mockClientRelease).toHaveBeenCalledTimes(1);
   });
 
   it('does nothing when there are no invalid picture ids', async () => {
@@ -88,6 +123,21 @@ describe('fixInvalidPictureIds', () => {
     expect(mockUpdateSet).toHaveBeenCalledWith({
       pictureId: 'custom-gpts/assistant-1/avatar_abc123',
     });
+  });
+
+  it('skips the update when the picture id changed concurrently', async () => {
+    mockDbWhere.mockReset();
+    mockDbWhere
+      .mockResolvedValueOnce([
+        { id: 'assistant-1', pictureId: 'custom-gpts/other-id/avatar_abc123' },
+      ])
+      .mockResolvedValueOnce([]);
+    (copyFileInS3 as MockedFunction<typeof copyFileInS3>).mockResolvedValue(undefined);
+    mockUpdateReturning.mockResolvedValueOnce([]);
+
+    await fixInvalidPictureIds();
+
+    expect(logInfo).toHaveBeenCalledWith(expect.stringContaining('changed concurrently'));
   });
 
   it('logs an info note and skips the row when the picture does not exist in S3', async () => {
