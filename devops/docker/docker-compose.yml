@@ -248,6 +248,7 @@ services:
       OTC_SECRET_ACCESS_KEY: RustFS-Admin-123456
       OTC_ACCESS_KEY_ID: rustfsadmin
       OTC_S3_HOSTNAME: http://rustfs:9000
+      OTC_S3_REGION: eu-de
       OTC_BUCKET_NAME: ais-chat
       IMAGE_ATTACHMENT_MODE: base64
 
@@ -348,7 +349,7 @@ services:
         apk add --no-cache s3cmd
 
         echo '=== Creating S3 bucket: ais-chat ==='
-        s3cmd --access_key=rustfsadmin --secret_key=RustFS-Admin-123456 --host=rustfs:9000 --host-bucket='rustfs:9000/%(bucket)' --region=us-east-1 --no-ssl --no-check-certificate mb s3://ais-chat
+        s3cmd --access_key=rustfsadmin --secret_key=RustFS-Admin-123456 --host=rustfs:9000 --host-bucket='rustfs:9000/%(bucket)' --region=eu-de --no-ssl --no-check-certificate mb s3://ais-chat
 
         echo '=== Seeding api_db ==='
         apk add --no-cache postgresql-client

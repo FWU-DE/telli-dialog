@@ -38,8 +38,7 @@ function encodeRFC5987Value(value: string) {
 }
 
 const s3Client = new S3Client({
-  // region: 'eu-de',
-  region: 'eu-nl',
+  region: env.otcS3Region,
   // otcS3Hostname is a bare hostname in production (OTC), but a full URL (e.g. http://rustfs:9000) for local RustFS.
   endpoint: /^https?:\/\//.test(env.otcS3Hostname)
     ? env.otcS3Hostname

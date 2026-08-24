@@ -30,6 +30,7 @@ jobs:
       OTC_SECRET_ACCESS_KEY: RustFS-Admin-123456
       OTC_ACCESS_KEY_ID: rustfsadmin
       OTC_S3_HOSTNAME: http://127.0.0.1:9000
+      OTC_S3_REGION: eu-de
       OTC_BUCKET_NAME: ais-chat
       # Send image attachments to the LLM as base64 since RustFS is not publicly reachable
       IMAGE_ATTACHMENT_MODE: base64
