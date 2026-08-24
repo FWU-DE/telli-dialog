@@ -148,4 +148,91 @@ describe('calculator tool', () => {
     );
     expect(runtime('1e10000').code).toBe('EXPRESSION_TOO_COMPLEX');
   });
+
+  it.each(['1e999 kg', '-(1e999)', 'abs(1e999)'])(
+    'rejects out-of-range numeric magnitude in %s before evaluation',
+    (expression) => {
+      expect(runtime(expression)).toMatchObject({ ok: false, code: 'EXPRESSION_TOO_COMPLEX' });
+    },
+  );
+
+  it.each(['10^101', '10^100 * 10^100', '(10+0)^100'])(
+    'rejects oversized derived magnitude in %s before evaluation',
+    (expression) => {
+      expect(runtime(expression)).toMatchObject({ ok: false, code: 'EXPRESSION_TOO_COMPLEX' });
+    },
+  );
+
+  it.each(['pow(10, 1001)', 'nthRoot(10, 0.0001)'])(
+    'blocks removed growth bypass %s without evaluating it',
+    (expression) => {
+      expect(runtime(expression)).toMatchObject({ ok: false, code: 'FUNCTION_NOT_ALLOWED' });
+    },
+  );
+
+  it.each(['exp(1e6)', 'exp(1000 + 0)', 'sinh(1e6)'])(
+    'rejects oversized growth input %s before evaluation',
+    (expression) => {
+      expect(runtime(expression)).toMatchObject({ ok: false, code: 'EXPRESSION_TOO_COMPLEX' });
+    },
+  );
+
+  it.each(['exp(1)', 'expm1(1)', 'sinh(1)', 'cosh(1)', 'tanh(1)', 'exp(230)'])(
+    'allows in-policy growth expression %s',
+    (expression) => {
+      expect(runtime(expression).ok).toBe(true);
+    },
+  );
+
+  it.each(['exp(230) * exp(230)', 'exp(230)^2', 'exp(230) * exp(230) * exp(1)'])(
+    'rejects composed growth magnitude in %s before evaluation',
+    (expression) => {
+      expect(runtime(expression)).toMatchObject({ ok: false, code: 'EXPRESSION_TOO_COMPLEX' });
+    },
+  );
+
+  it.each(['1e100 + 0', '1e100 + 1e100', '1e100 - 1e100'])(
+    'allows safe exact arithmetic %s',
+    (expression) => {
+      expect(runtime(expression).ok).toBe(true);
+    },
+  );
+
+  it.each(['1e100', '1e-100', '1.2e10', '1 kg to g', 'sqrt(16)'])(
+    'continues to evaluate legitimate numeric expression %s',
+    (expression) => {
+      expect(runtime(expression).ok).toBe(true);
+    },
+  );
+
+  it.each([
+    ['gamma', 'gamma(5)', 'gamma((10)^100)', 'gamma((10+0)^100)', 'gamma(1e999)'],
+    [
+      'factorial',
+      'factorial(5)',
+      'factorial((10)^10)',
+      'factorial((10+0)^100)',
+      'factorial(1e999)',
+    ],
+    [
+      'combinations',
+      'combinations(10, 2)',
+      'combinations(10^100, 2)',
+      'combinations((10+0)^100, 2)',
+      'combinations(1e999, 2)',
+    ],
+    ['combinationsWithRep', 'combinationsWithRep(10, 2)', 'combinationsWithRep(10^100, 2)'],
+    ['isPrime', 'isPrime(1e100)', 'isPrime(17)'],
+    [
+      'permutations',
+      'permutations(10, 2)',
+      'permutations(10^100, 2)',
+      'permutations((10+0)^100, 2)',
+      'permutations(1e999, 2)',
+    ],
+  ])('blocks %s before evaluating normal and pathological arguments', (_name, ...expressions) => {
+    expressions.forEach((expression) => {
+      expect(runtime(expression)).toMatchObject({ ok: false, code: 'FUNCTION_NOT_ALLOWED' });
+    });
+  });
 });
