@@ -87,7 +87,6 @@ export type SharedChatViewProps = {
    */
   assistantIcon?: ReactNode;
   uploadFileFn?: (file: File, sharedSessionId: string) => Promise<{ fileId: string }>;
-  getSignedUrlFn?: (fileId: string, sharedSessionId: string) => Promise<string>;
   /**
    * When true, web search results are shown in a modal dialog
    * triggered from the message icons row instead of the inline panel above
@@ -115,7 +114,6 @@ export default function GenericSharedChat({
   enableFloatingText = false,
   assistantIcon,
   uploadFileFn,
-  getSignedUrlFn,
   showWebSourcesInDialog,
 }: SharedChatViewProps) {
   const tCommon = useTranslations('common');
@@ -367,11 +365,6 @@ export default function GenericSharedChat({
                 assistantIcon={assistantIcon}
                 containerClassName="flex flex-col gap-4"
                 pendingFileMapping={pendingFileMapping}
-                getSignedUrlFn={
-                  getSignedUrlFn === undefined
-                    ? undefined
-                    : (fileId) => getSignedUrlFn(fileId, sharedSessionId)
-                }
                 showWebSourcesInDialog={showWebSourcesInDialog}
               />
             )}
@@ -399,11 +392,6 @@ export default function GenericSharedChat({
                     uploadFileFn === undefined
                       ? undefined
                       : (file) => uploadFileFn(file, sharedSessionId)
-                  }
-                  getSignedUrlFn={
-                    getSignedUrlFn === undefined
-                      ? undefined
-                      : (fileId) => getSignedUrlFn(fileId, sharedSessionId)
                   }
                   handleDeattachFile={handleDeattachFile}
                   showPlaceholder={false}
