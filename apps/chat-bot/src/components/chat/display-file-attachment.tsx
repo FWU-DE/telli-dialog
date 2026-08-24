@@ -31,7 +31,11 @@ export default function DisplayFileAttachment({
     >
       <div className="absolute inset-0 opacity-5 rounded-lg" style={{ backgroundColor }} />
       {onDeattachFile !== undefined && (
-        <button type="button" onClick={onDeattachFile} className="absolute right-0 top-0 hover:bg-neutral-200">
+        <button
+          type="button"
+          onClick={onDeattachFile}
+          className="absolute right-0 top-0 hover:bg-neutral-200"
+        >
           <DeattachFileIcon />
         </button>
       )}
