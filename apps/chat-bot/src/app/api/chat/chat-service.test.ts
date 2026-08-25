@@ -498,6 +498,42 @@ describe('sendChatMessage', () => {
     );
   });
 
+  it('reuses an existing conversation via the ForExistingConversation lookup', async () => {
+    const characterId = 'character-1';
+    const existingConversationObject = {
+      conversation: { ...conversation, characterId, learningScenarioId: null, assistantId: null },
+      messages: [{ id: 'existing-message' }],
+    };
+    mocks.dbGetConversationAndMessagesMock.mockReset();
+    mocks.dbGetConversationAndMessagesMock.mockResolvedValue(existingConversationObject as never);
+    mocks.dbGetOrCreateConversationMock.mockResolvedValue({
+      ...conversation,
+      characterId,
+      learningScenarioId: null,
+      assistantId: null,
+    } as never);
+    mocks.getCharacterForExistingConversationMock.mockResolvedValue({ suspended: false } as never);
+
+    const { sendChatMessage } = await import('./chat-service');
+
+    const result = await sendChatMessage({
+      conversationId: conversation.id,
+      messages,
+      modelId: mainModel.id,
+      characterId,
+      user: createUser(),
+    });
+
+    await collectStream(result.stream);
+
+    expect(mocks.getCharacterForExistingConversationMock).toHaveBeenCalledWith({
+      characterId,
+      conversationId: conversation.id,
+      user: expect.anything(),
+    });
+    expect(mocks.getCharacterForChatSessionMock).not.toHaveBeenCalled();
+  });
+
   it('throws when conversation context ids do not match', async () => {
     const { sendChatMessage } = await import('./chat-service');
 
