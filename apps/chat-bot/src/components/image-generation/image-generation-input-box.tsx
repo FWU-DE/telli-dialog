@@ -10,7 +10,7 @@ import { LocalFileState } from '../chat/send-message-form';
 import { FileUploadResponse, handleSingleFile } from '../chat/upload-file-button';
 import AttachFileIcon from '../icons/attach-file';
 import { useToast } from '../common/toast';
-import { SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
+import { SUPPORTED_IMAGE_GENERATION_EXTENSIONS } from '@/const';
 import { cn } from '@/utils/tailwind';
 import { iconClassName } from '@/utils/tailwind/icon';
 import ChatInputAttachmentPreview from '../chat/chat-input-attachment-preview';
@@ -99,7 +99,7 @@ export function ImageGenerationInputBox({
             type="file"
             ref={fileInputRef}
             onChange={onFileChange}
-            accept={SUPPORTED_IMAGE_EXTENSIONS.map((e) => `.${e}`).join(',')}
+            accept={SUPPORTED_IMAGE_GENERATION_EXTENSIONS.map((e) => `.${e}`).join(',')}
           />
           <button
             type="button"
