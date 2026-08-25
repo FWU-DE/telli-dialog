@@ -10,19 +10,19 @@ import { useTranslations } from 'next-intl';
 // Extended type for pending files that includes a local blob URL
 export type PendingFileModel = FileModel & { localUrl?: string };
 
-type DisplayUploadedImageProps = {
+type MessageImageAttachmentProps = {
   file: FileModel | PendingFileModel;
   status: FileStatus;
   onDeattachFile?: () => void;
   showBanner?: boolean;
 };
 
-export default function DisplayUploadedImage({
+export default function MessageImageAttachment({
   file,
   status,
   onDeattachFile,
   showBanner = true,
-}: DisplayUploadedImageProps) {
+}: MessageImageAttachmentProps) {
   const t = useTranslations();
 
   // Check if file has a local URL (for pending files)
@@ -53,7 +53,7 @@ export default function DisplayUploadedImage({
     );
   }
   return (
-    <div className="relative group w-48 max-w-xs rounded-lg overflow-hidden">
+    <div className="relative group max-w-xs rounded-lg overflow-hidden">
       {onDeattachFile !== undefined && (
         <button
           onClick={onDeattachFile}
@@ -63,14 +63,14 @@ export default function DisplayUploadedImage({
           <DeattachFileIcon />
         </button>
       )}
-      <div className="relative bg-gray-50">
+      <div className="relative">
         <Image
           src={imageUrl}
           alt={file.name}
           width={200}
           height={200}
           loading="eager"
-          className="w-full h-48 object-contain rounded-enterprise-md"
+          className="w-full h-auto max-h-48 object-cover rounded-enterprise-md"
           unoptimized // Since we're using signed URLs from S3
         />
         {showBanner && (

@@ -36,7 +36,11 @@ import {
   linkFileToCharacter,
   linkFileToLearningScenario,
 } from '@shared/files/fileService';
-import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
+import {
+  buildAssistantPictureKey,
+  buildCharacterPictureKey,
+  buildLearningScenarioPictureKey,
+} from '@shared/utils/picture-key';
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 import { NotFoundError } from '@shared/error';
 import { copyFileInS3 } from '@shared/s3';
@@ -536,15 +540,22 @@ export async function copyAssistant(
     throw new Error('Assistent nicht gefunden');
   }
 
+  const newAssistantId = generateUUID();
+
   const newAssistant = {
     ...sourceAssistant,
     name: (duplicateAssistantName ?? sourceAssistant.name).substring(0, MAX_ENTITY_NAME_LENGTH),
-    id: undefined,
+    id: newAssistantId,
     originalAssistantId: originalId,
     accessLevel,
     userId: user.id,
     isDeleted: false,
     hasLinkAccess: false, // Reset sharing settings for new template
+    pictureId: await copyEntityPictureIfExists({
+      sourcePictureId: sourceAssistant.pictureId,
+      newEntityId: newAssistantId,
+      buildPictureKey: buildAssistantPictureKey,
+    }),
   };
 
   const result = await dbUpsertAssistant({ assistant: newAssistant });
@@ -591,15 +602,22 @@ export async function copyCharacter(
     throw new Error('Dialogpartner nicht gefunden');
   }
 
+  const newCharacterId = generateUUID();
+
   const newCharacter = {
     ...sourceCharacter,
     name: (duplicateCharacterName ?? sourceCharacter.name).substring(0, MAX_ENTITY_NAME_LENGTH),
-    id: undefined,
+    id: newCharacterId,
     originalCharacterId: originalId,
     accessLevel,
     userId: user.id,
     isDeleted: false,
     hasLinkAccess: false, // Reset sharing settings for new template
+    pictureId: await copyEntityPictureIfExists({
+      sourcePictureId: sourceCharacter.pictureId,
+      newEntityId: newCharacterId,
+      buildPictureKey: buildCharacterPictureKey,
+    }),
   };
 
   const result = await dbCreateCharacter(newCharacter);
@@ -628,43 +646,52 @@ async function createCharacterTemplate(originalId: string) {
  * @param originalId - The id of the source learning scenario to create a template from.
  */
 async function createLearningScenarioTemplate(originalId: string) {
-  return copyLearningScenario(originalId, { id: DUMMY_USER_ID });
+  return copyLearningScenario(originalId, 'global', { id: DUMMY_USER_ID });
 }
 
 /**
- * Creates a new global learning scenario template based on an existing learning scenario.
+ * Copies a learning scenario and creates a new one based on an existing learning scenario.
+ * The new learning scenario inherits all properties from the source but can have customized
+ * access level, user, and school assignments.
  *
- * @param learningScenarioId - The id of the source learning scenario to copy
+ * @param originalId - The id of the source learning scenario to copy
+ * @param accessLevel - The access level for the new learning scenario
  * @param user - The user that is the owner of the new learning scenario
- * @returns
+ * @param duplicateLearningScenarioName - Optional custom name for the new learning scenario. If not provided, uses the source learning scenario's name.
+ * @returns Promise resolving to the newly created learning scenario object
+ * @throws Error if source learning scenario is not found or creation fails
  */
 async function copyLearningScenario(
-  learningScenarioId: string,
+  originalId: string,
+  accessLevel: AccessLevel,
   user: Pick<UserModel, 'id'>,
   duplicateLearningScenarioName?: string,
 ) {
-  const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
+  const learningScenario = await dbGetLearningScenarioById({ learningScenarioId: originalId });
   if (!learningScenario) {
     throw new NotFoundError('Original learning scenario not found');
   }
 
-  const copy = learningScenarioInsertSchema.parse(learningScenario);
-  copy.id = generateUUID();
-  copy.accessLevel = 'global';
-  copy.isDeleted = false;
-  copy.userId = user.id;
-  copy.originalLearningScenarioId = learningScenarioId;
-  copy.hasLinkAccess = false; // Reset sharing settings for new template
-  copy.name = (duplicateLearningScenarioName ?? learningScenario.name).substring(
-    0,
-    MAX_ENTITY_NAME_LENGTH,
-  );
+  const newLearningScenarioId = generateUUID();
 
-  copy.pictureId = await copyEntityPictureIfExists({
-    sourcePictureId: learningScenario.pictureId,
-    newEntityId: copy.id,
-    buildPictureKey: buildLearningScenarioPictureKey,
-  });
+  const copy = {
+    ...learningScenarioInsertSchema.parse(learningScenario),
+    name: (duplicateLearningScenarioName ?? learningScenario.name).substring(
+      0,
+      MAX_ENTITY_NAME_LENGTH,
+    ),
+    id: newLearningScenarioId,
+    originalLearningScenarioId: originalId,
+    accessLevel,
+    userId: user.id,
+    isDeleted: false,
+    hasLinkAccess: false, // Reset sharing settings for new template
+    pictureId: await copyEntityPictureIfExists({
+      sourcePictureId: learningScenario.pictureId,
+      newEntityId: newLearningScenarioId,
+      buildPictureKey: buildLearningScenarioPictureKey,
+    }),
+  };
   // attachments are copied in a separate step atm after the template is created
 
   const [newLearningScenario] = await db.insert(learningScenarioTable).values(copy).returning();

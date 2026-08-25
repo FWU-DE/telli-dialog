@@ -52,11 +52,7 @@ import {
   MAX_SHARE_USAGE_TIME_LIMIT_IN_MINUTES,
   SHARE_EXTENSION_WINDOW_MS,
 } from '@shared/sharing/const';
-import {
-  copyCharacter,
-  copyEntityPictureIfExists,
-  copyRelatedTemplateFiles,
-} from '@shared/templates/template-service';
+import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import {
@@ -112,34 +108,12 @@ export const createNewCharacter = async ({
     });
     verifySuspensionState({ item: sourceCharacter });
 
-    let insertedCharacter = await copyCharacter(
+    const insertedCharacter = await copyCharacter(
       templateId,
       'private',
       user,
       duplicateCharacterName,
     );
-
-    const copyOfTemplatePicture = await copyEntityPictureIfExists({
-      sourcePictureId: insertedCharacter.pictureId,
-      newEntityId: insertedCharacter.id,
-      buildPictureKey: buildCharacterPictureKey,
-    });
-
-    if (copyOfTemplatePicture) {
-      // Update the character with the new picture
-      const [updatedCharacter] = await db
-        .update(characterTable)
-        .set({ pictureId: copyOfTemplatePicture })
-        .where(eq(characterTable.id, insertedCharacter.id))
-        .returning();
-
-      if (updatedCharacter) {
-        insertedCharacter = {
-          ...updatedCharacter,
-          ownerSchoolIds: user.schoolIds,
-        } as typeof insertedCharacter;
-      }
-    }
 
     await copyRelatedTemplateFiles('character', templateId, insertedCharacter.id);
     return insertedCharacter;
