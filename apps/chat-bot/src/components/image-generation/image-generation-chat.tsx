@@ -17,12 +17,11 @@ import { logError } from '@shared/logging';
 import { ResponsibleAIError } from '@ais-chat/ai-core/errors';
 import Image from 'next/image';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
-import { CopyPromptButton } from './copy-prompt-button';
 import { useImageAspectRatio } from './image-aspect-ratio-provider';
 import { LocalFileState } from '../chat/send-message-form';
 import { defaultUploadFile } from '../chat/upload-file-button';
 import { isImageFile } from '@/utils/files/generic';
-import MessageImageAttachment from '../chat/message-image-attachment';
+import { ImageGenerationResult } from './image-generation-result';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -200,62 +199,23 @@ export default function ImageGenerationChat({
           supportedImageFormats={selectedModel?.supportedImageFormats}
         />
         <div className="w-3/4 mx-auto">
-          {/* Current generation in progress */}
           {isGenerating && (
-            <div className="mt-6">
-              <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
-              <p className="text-sm mb-3">
-                {lastPrompt}
-                <CopyPromptButton prompt={lastPrompt} />
-              </p>
-              <h3 className="text-xs text-gray-700">{tImageGeneration('attached-files-label')}</h3>
-              {submittedInputFiles.length > 0 && (
-                <div className="flex flex-row gap-2 overflow-auto mt-2 mb-5">
-                  {submittedInputFiles.map((file) => (
-                    <MessageImageAttachment key={file.id} file={file} width={56} height={56} />
-                  ))}
-                </div>
-              )}
+            <ImageGenerationResult prompt={lastPrompt} attachedFiles={submittedInputFiles}>
               <LoadingAnimation />
-            </div>
+            </ImageGenerationResult>
           )}
 
-          {/* Error state */}
           {errorMessage && !isGenerating && (
-            <div className="mt-6">
-              <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
-              <p className="text-sm mb-3">
-                {lastPrompt}
-                <CopyPromptButton prompt={lastPrompt} />
-              </p>
-              <h3 className="text-xs text-gray-700">{tImageGeneration('attached-files-label')}</h3>
-              {submittedInputFiles.length > 0 && (
-                <div className="flex flex-row gap-2 overflow-auto mt-2 mb-5">
-                  {submittedInputFiles.map((file) => (
-                    <MessageImageAttachment key={file.id} file={file} width={56} height={56} />
-                  ))}
-                </div>
-              )}
+            <ImageGenerationResult prompt={lastPrompt} attachedFiles={submittedInputFiles}>
               <ImageGenerationError message={errorMessage} />
-            </div>
+            </ImageGenerationResult>
           )}
 
-          {/* Display the single image for this conversation */}
           {displayedImage && !isGenerating && !errorMessage && (
-            <div className="mt-6">
-              <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
-              <p className="text-sm mb-3">
-                {displayedImage.prompt}
-                <CopyPromptButton prompt={displayedImage.prompt} />
-              </p>
-              <h3 className="text-xs text-gray-700">{tImageGeneration('attached-files-label')}</h3>
-              {submittedInputFiles.length > 0 && (
-                <div className="flex flex-row gap-2 overflow-auto mt-2 mb-5">
-                  {submittedInputFiles.map((file) => (
-                    <MessageImageAttachment key={file.id} file={file} width={56} height={56} />
-                  ))}
-                </div>
-              )}
+            <ImageGenerationResult
+              prompt={displayedImage.prompt}
+              attachedFiles={submittedInputFiles}
+            >
               <Image
                 ref={imageRef}
                 src={displayedImage.imageUrl}
@@ -274,7 +234,7 @@ export default function ImageGenerationChat({
                 fileId={displayedImage.fileId}
                 isImageReady={isImageReady}
               />
-            </div>
+            </ImageGenerationResult>
           )}
         </div>
       </div>
