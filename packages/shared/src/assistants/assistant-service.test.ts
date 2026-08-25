@@ -20,6 +20,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import {
   dbGetAssistantsByUserId,
   dbGetAssistantById,
+  dbGetAssistantByIdForConversation,
   dbGetCommunityGpts,
   dbGetGlobalGpts,
   dbGetGptsByAssociatedSchools,
@@ -43,6 +44,7 @@ import {
 vi.mock('../db/functions/assistants', () => ({
   dbGetAssistantsByUserId: vi.fn(),
   dbGetAssistantById: vi.fn(),
+  dbGetAssistantByIdForConversation: vi.fn(),
   dbGetCommunityGpts: vi.fn(),
   dbGetGlobalGpts: vi.fn(),
   dbGetGptsByAssociatedSchools: vi.fn(),
@@ -171,9 +173,11 @@ describe('assistant-service', () => {
 
       const mockAssistant: Partial<AssistantSelectModel> = { userId };
 
-      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
-        mockAssistant as never,
-      );
+      (
+        dbGetAssistantByIdForConversation as MockedFunction<
+          typeof dbGetAssistantByIdForConversation
+        >
+      ).mockResolvedValue(mockAssistant as never);
       (getConversation as MockedFunction<typeof getConversation>).mockRejectedValue(
         new NotFoundError('Conversation not found'),
       );
@@ -195,9 +199,11 @@ describe('assistant-service', () => {
       const assistantId = generateUUID();
       const conversationId = generateUUID();
 
-      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockRejectedValue(
-        new NotFoundError('assistant not found'),
-      );
+      (
+        dbGetAssistantByIdForConversation as MockedFunction<
+          typeof dbGetAssistantByIdForConversation
+        >
+      ).mockResolvedValue(undefined);
       (getConversation as MockedFunction<typeof getConversation>).mockResolvedValue(null as never);
       (getConversationMessages as MockedFunction<typeof getConversationMessages>).mockResolvedValue(
         null as never,
@@ -374,9 +380,11 @@ describe('assistant-service', () => {
       const assistantId = generateUUID();
       const conversationId = generateUUID();
 
-      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
-        null as never,
-      );
+      (
+        dbGetAssistantByIdForConversation as MockedFunction<
+          typeof dbGetAssistantByIdForConversation
+        >
+      ).mockResolvedValue(null as never);
       (getConversation as MockedFunction<typeof getConversation>).mockRejectedValue(
         new ForbiddenError('Not authorized to access conversation'),
       );

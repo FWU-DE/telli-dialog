@@ -1,5 +1,6 @@
 'use server';
 import { requireAdminAuth } from '@/auth/requireAdminAuth';
+import { runServerAction } from '@shared/actions/run-server-action';
 import { TemplateToFederalStateMapping, TemplateTypes } from '@shared/templates/template';
 import {
   getFederalStatesWithMappings,
@@ -22,7 +23,11 @@ export async function updateAuthorOfTemplateAction(
 ) {
   await requireAdminAuth();
 
-  return updateAuthorOfTemplate(templateType, templateId, newAuthor);
+  return runServerAction('updateAuthorOfTemplateAction', updateAuthorOfTemplate)(
+    templateType,
+    templateId,
+    newAuthor,
+  );
 }
 
 export async function updateTemplateDeletedStateAction(
@@ -32,7 +37,11 @@ export async function updateTemplateDeletedStateAction(
 ) {
   await requireAdminAuth();
 
-  return updateTemplateDeletedState(templateType, templateId, isDeleted);
+  return runServerAction('updateTemplateDeletedStateAction', updateTemplateDeletedState)(
+    templateType,
+    templateId,
+    isDeleted,
+  );
 }
 
 export async function getFederalStatesWithMappingsAction(

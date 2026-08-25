@@ -22,28 +22,32 @@ export function TemplateInfoCard({ template, onDataChanged }: TemplateInfoCardPr
     templateType: TemplateTypes,
     newAuthor: string,
   ) {
-    try {
-      await updateAuthorOfTemplateAction(templateType, templateId, newAuthor);
-      await onDataChanged();
-    } catch (error) {
+    const result = await updateAuthorOfTemplateAction(templateType, templateId, newAuthor);
+    if (!result.success) {
       toast.error('Fehler beim Aktualisieren des Autors.', {
-        description: (error as Error).message,
+        description: result.error.message,
       });
+      return;
     }
+    await onDataChanged();
   }
 
   async function handleToggleDeletedState() {
-    try {
-      setIsUpdatingDeletedState(true);
-      await updateTemplateDeletedStateAction(template.type, template.id, !template.isDeleted);
-      await onDataChanged();
-    } catch (error) {
+    setIsUpdatingDeletedState(true);
+    const result = await updateTemplateDeletedStateAction(
+      template.type,
+      template.id,
+      !template.isDeleted,
+    );
+    if (!result.success) {
       toast.error('Fehler beim Löschen/Wiederherstellen.', {
-        description: (error as Error).message,
+        description: result.error.message,
       });
-    } finally {
       setIsUpdatingDeletedState(false);
+      return;
     }
+    await onDataChanged();
+    setIsUpdatingDeletedState(false);
   }
 
   return (
