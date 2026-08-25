@@ -66,8 +66,11 @@ const mocks = vi.hoisted(() => ({
   userHasReachedTokenPointsLimitMock: vi.fn(),
   logErrorMock: vi.fn(),
   getCharacterForChatSessionMock: vi.fn(),
+  getCharacterForExistingConversationMock: vi.fn(),
   getLearningScenarioForChatSessionMock: vi.fn(),
+  getLearningScenarioForExistingConversationMock: vi.fn(),
   getAssistantForNewChatMock: vi.fn(),
+  getAssistantForExistingConversationMock: vi.fn(),
 }));
 
 vi.mock('@ais-chat/ai-core', () => ({
@@ -160,14 +163,17 @@ vi.mock('@shared/logging', () => ({
 
 vi.mock('@shared/characters/character-service', () => ({
   getCharacterForChatSession: mocks.getCharacterForChatSessionMock,
+  getCharacterForExistingConversation: mocks.getCharacterForExistingConversationMock,
 }));
 
 vi.mock('@shared/learning-scenarios/learning-scenario-service', () => ({
   getLearningScenarioForChatSession: mocks.getLearningScenarioForChatSessionMock,
+  getLearningScenarioForExistingConversation: mocks.getLearningScenarioForExistingConversationMock,
 }));
 
 vi.mock('@shared/assistants/assistant-service', () => ({
   getAssistantForNewChat: mocks.getAssistantForNewChatMock,
+  getAssistantForExistingConversation: mocks.getAssistantForExistingConversationMock,
 }));
 
 const mainModel = {
@@ -190,6 +196,7 @@ const conversation = {
 };
 
 const conversationObject = {
+  conversation,
   messages: [{ id: 'existing-message' }],
 };
 
@@ -261,6 +268,8 @@ beforeEach(() => {
     }),
   );
   mocks.dbGetOrCreateConversationMock.mockResolvedValue(conversation as never);
+  // First call checks for a pre-existing conversation before it is created; these tests start a new chat.
+  mocks.dbGetConversationAndMessagesMock.mockResolvedValueOnce(undefined as never);
   mocks.dbGetConversationAndMessagesMock.mockResolvedValue(conversationObject as never);
   mocks.userHasReachedTokenPointsLimitMock.mockResolvedValue(false);
   mocks.extractUrlsMock.mockResolvedValue([]);
