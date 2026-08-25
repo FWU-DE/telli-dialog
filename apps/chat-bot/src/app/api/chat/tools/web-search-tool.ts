@@ -15,7 +15,12 @@ type WebSearchToolResponse = {
 
 type BuildWebSearchToolParams = Pick<
   BuildToolsContext,
-  'user' | 'characterId' | 'learningScenarioId' | 'assistantId' | 'conversationId'
+  | 'user'
+  | 'characterId'
+  | 'learningScenarioId'
+  | 'assistantId'
+  | 'conversationId'
+  | 'webSearchEntity'
 > & {
   onWebSearchResults?: (results: WebSearchResult[]) => void;
 };
@@ -26,6 +31,7 @@ export async function buildWebSearchTool({
   learningScenarioId,
   assistantId,
   conversationId,
+  webSearchEntity,
   onWebSearchResults,
 }: BuildWebSearchToolParams): Promise<ToolRegistration | null> {
   const config = await resolveWebSearchConfig({
@@ -33,6 +39,7 @@ export async function buildWebSearchTool({
     characterId,
     learningScenarioId,
     assistantId,
+    entity: webSearchEntity,
   });
 
   if (!config.enabled) {

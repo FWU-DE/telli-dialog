@@ -151,6 +151,7 @@ export async function sendLearningScenarioMessage({
   const tools = await buildTools({
     user: teacherUserAndContext,
     learningScenarioId: learningScenario.id,
+    webSearchEntity: learningScenario,
     relatedFileEntities,
     attachedLinks: learningScenario.attachedLinks,
     sourceUrls: processedUrls,

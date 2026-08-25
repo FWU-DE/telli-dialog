@@ -5,6 +5,7 @@ import {
   getFederalStatesWithMappings,
   getTemplateById,
   updateAuthorOfTemplate,
+  updateTemplateDeletedState,
   updateTemplateMappings,
 } from '@ais-chat/shared/templates/template-service';
 
@@ -22,6 +23,16 @@ export async function updateAuthorOfTemplateAction(
   await requireAdminAuth();
 
   return updateAuthorOfTemplate(templateType, templateId, newAuthor);
+}
+
+export async function updateTemplateDeletedStateAction(
+  templateType: TemplateTypes,
+  templateId: string,
+  isDeleted: boolean,
+) {
+  await requireAdminAuth();
+
+  return updateTemplateDeletedState(templateType, templateId, isDeleted);
 }
 
 export async function getFederalStatesWithMappingsAction(

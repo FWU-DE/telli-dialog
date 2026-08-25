@@ -4,7 +4,7 @@ import {
   WEBSEARCH_RESULT_LENGTH_LIMIT,
   WEBSEARCH_RESULTS_LIMIT,
 } from '@/configuration-text-inputs/const';
-import type { WebSearchResult, WebSearchScope } from '@shared/db/schema';
+import type { WebSearchModel, WebSearchResult, WebSearchScope } from '@shared/db/schema';
 import { logError } from '@shared/logging';
 import { dbInsertConversationToolCallUsage } from '@shared/db/functions/token-usage';
 import { dbUpdateTokenUsageByCharacterChatId } from '@shared/db/functions/character';
@@ -49,14 +49,25 @@ export async function resolveWebSearchConfig({
   characterId,
   learningScenarioId,
   assistantId,
+  entity,
 }: {
   user: UserAndContext;
   characterId?: string;
   learningScenarioId?: string;
   assistantId?: string;
+  entity?: WebSearchModel;
 }): Promise<WebSearchConfig> {
   if (!isWebSearchAvailableForFederalState(user.federalState.featureToggles)) {
     return DISABLED_WEB_SEARCH_CONFIG;
+  }
+
+  if (entity) {
+    if (!entity.isWebSearchEnabled) return DISABLED_WEB_SEARCH_CONFIG;
+    return {
+      enabled: true,
+      scope: entity.webSearchScope,
+      includedDomains: normalizeIncludedDomains(entity.webSearchIncludedDomains),
+    };
   }
 
   if (characterId) {
@@ -70,7 +81,9 @@ export async function resolveWebSearchConfig({
   }
 
   if (learningScenarioId) {
-    const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
+    const learningScenario = await dbGetLearningScenarioById({
+      learningScenarioId,
+    });
     if (!learningScenario?.isWebSearchEnabled) return DISABLED_WEB_SEARCH_CONFIG;
     return {
       enabled: true,
