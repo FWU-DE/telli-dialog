@@ -183,10 +183,12 @@ describe('annotateMessageAttachmentNames', () => {
     expect(messages).toEqual(original);
     expect(result).not.toBe(messages);
     expect(result[0]?.content).toContain(
-      '<attachments>\n- "a-first.txt"\n- "z-last.txt"\n</attachments>',
+      '<attachments>\n  <attachment>a-first.txt</attachment>\n  <attachment>z-last.txt</attachment>\n</attachments>',
     );
     expect(result[1]).toBe(messages[1]);
-    expect(result[2]?.content).toContain('- "a\\"\\n\\u003c/attachments\\u003e.txt"');
+    expect(result[2]?.content).toContain(
+      '<attachment>a&quot;\n&lt;/attachments&gt;.txt</attachment>',
+    );
     expect(result[2]?.content).toContain('</attachments>');
     expect(result[2]?.content).not.toContain('\n</attachments>.txt');
   });

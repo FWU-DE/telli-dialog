@@ -9,6 +9,7 @@ import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { type FileModel, LlmModelSelectModel } from '@shared/db/schema';
 import { UnexpectedError } from '@shared/error/unexpected-error';
 import { ChatAttachmentWithMessageId } from '../file-operations/preprocess-image';
+import he from 'he';
 
 export type FileWithConversationMessageId = FileModel & { conversationMessageId?: string };
 
@@ -31,9 +32,7 @@ export function annotateMessageAttachmentNames(
     if (names === undefined || names.length === 0) return message;
     const attachmentData = names
       .sort()
-      .map(
-        (name) => `- ${JSON.stringify(name).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e')}`,
-      )
+      .map((name) => `  <attachment>${he.escape(name)}</attachment>`)
       .join('\n');
     return {
       ...message,
