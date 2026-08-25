@@ -36,7 +36,7 @@ RUN echo "${LIBQALCULATE_SHA256}  /tmp/libqalculate.tar.gz" | sha256sum -c - \
   && make install DESTDIR=/opt/qalc-root \
   && strip --strip-unneeded /opt/qalc-root/usr/local/bin/qalc /opt/qalc-root/usr/local/lib/libqalculate.so.*
 
-FROM node:22-bookworm-slim AS service-builder
+FROM node:24.19.0-bookworm-slim AS service-builder
 
 WORKDIR /service
 COPY package.json ./package.json
@@ -48,7 +48,7 @@ RUN npm install --no-save --no-fund --no-audit typescript@6.0.3 @types/node@24.1
   && npx tsc --outDir dist --rootDir src --module NodeNext --moduleResolution NodeNext \
        --target ES2022 --skipLibCheck --types node src/index.ts
 
-FROM node:22-bookworm-slim AS runtime
+FROM node:24.19.0-bookworm-slim AS runtime
 
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \

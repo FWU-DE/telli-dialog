@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({ qalcMock: vi.fn() }));
-vi.mock('../qalc', async (importOriginal) => ({
-  ...(await importOriginal()),
+vi.mock('../qalc', () => ({
   qalc: mocks.qalcMock,
+  QALC_MAX_EXPRESSION_LENGTH: 4_096,
 }));
 
 beforeEach(() => mocks.qalcMock.mockReset());
