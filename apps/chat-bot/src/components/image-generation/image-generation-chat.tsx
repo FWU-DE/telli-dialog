@@ -57,6 +57,8 @@ export default function ImageGenerationChat({
 
   const { aspectRatio } = useImageAspectRatio();
 
+  const modelSupportsImageInput = (selectedModel?.supportedImageFormats?.length ?? 0) > 0;
+
   // Load the single image from initial messages and file attachments
   useEffect(() => {
     const loadImageFromFiles = async () => {
@@ -132,7 +134,7 @@ export default function ImageGenerationChat({
       (f): f is LocalFileState & { fileId: string } =>
         f.status === 'processed' && f.fileId !== undefined,
     );
-    const inputFileIds = processedFiles.map((f) => f.fileId);
+    const inputFileIds = modelSupportsImageInput ? processedFiles.map((f) => f.fileId) : [];
 
     setSubmittedInputFiles(
       processedFiles.map((f) => ({
@@ -195,6 +197,7 @@ export default function ImageGenerationChat({
           setFiles={setFiles}
           handleDeattachFile={handleDeattachFile}
           fileUploadFn={defaultUploadFile}
+          supportedImageFormats={selectedModel?.supportedImageFormats}
         />
         <div className="w-3/4 mx-auto">
           {/* Current generation in progress */}

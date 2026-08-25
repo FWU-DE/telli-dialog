@@ -91,6 +91,11 @@ export async function handleImageGeneration({
     throw new Error('Prompt is required');
   }
 
+  const modelSupportsImageInput = (model.supportedImageFormats?.length ?? 0) > 0;
+  if (inputFileIds.length > 0 && !modelSupportsImageInput) {
+    throw new Error('Selected image model does not support image inputs');
+  }
+
   if (inputFileIds.length > IMAGE_GENERATION_INPUT_LIMIT) {
     throw new Error(
       `Too many input images: ${inputFileIds.length} exceeds the limit of ${IMAGE_GENERATION_INPUT_LIMIT}`,

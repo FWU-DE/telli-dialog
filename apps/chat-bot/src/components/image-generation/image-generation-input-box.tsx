@@ -10,7 +10,6 @@ import { LocalFileState } from '../chat/send-message-form';
 import { FileUploadResponse, handleSingleFile } from '../chat/upload-file-button';
 import AttachFileIcon from '../icons/attach-file';
 import { useToast } from '../common/toast';
-import { SUPPORTED_IMAGE_GENERATION_EXTENSIONS } from '@/const';
 import { cn } from '@/utils/tailwind';
 import { iconClassName } from '@/utils/tailwind/icon';
 import ChatInputAttachmentPreview from '../chat/chat-input-attachment-preview';
@@ -24,6 +23,7 @@ type ImageGenerationInputBoxProps = {
   setFiles: Dispatch<SetStateAction<Map<string, LocalFileState>>>;
   handleDeattachFile: (localId: string) => void;
   fileUploadFn: (file: File) => Promise<FileUploadResponse>;
+  supportedImageFormats: string[] | null | undefined;
 };
 
 export function ImageGenerationInputBox({
@@ -35,6 +35,7 @@ export function ImageGenerationInputBox({
   setFiles,
   handleDeattachFile,
   fileUploadFn,
+  supportedImageFormats,
 }: ImageGenerationInputBoxProps) {
   const tImageGeneration = useTranslations('image-generation');
   const tFileInteraction = useTranslations('file-interaction');
@@ -77,6 +78,10 @@ export function ImageGenerationInputBox({
   }
 
   const hasUploadingFile = Array.from(files.values()).some((f) => f.status === 'uploading');
+  const canUploadImages = (supportedImageFormats?.length ?? 0) > 0;
+  const acceptedFileExtensions = (supportedImageFormats ?? [])
+    .map((format) => `.${format}`)
+    .join(',');
 
   return (
     <>
@@ -93,30 +98,34 @@ export function ImageGenerationInputBox({
             maxLength={CHAT_MESSAGE_LENGTH_LIMIT}
             disabled={isLoading}
           />
-          <input
-            hidden
-            multiple
-            type="file"
-            ref={fileInputRef}
-            onChange={onFileChange}
-            accept={SUPPORTED_IMAGE_GENERATION_EXTENSIONS.map((e) => `.${e}`).join(',')}
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className={cn(iconClassName, 'my-2 mx-1 disabled:cursor-not-allowed')}
-            disabled={isLoading || uploadLimitReached}
-            title={
-              uploadLimitReached
-                ? tFileInteraction('upload.upload-file-button-disabled', {
-                    max_files: IMAGE_GENERATION_INPUT_LIMIT,
-                  })
-                : tFileInteraction('upload.upload-file-button')
-            }
-            data-testid="image-generation-upload-button"
-          >
-            <AttachFileIcon className="sm:w-10 sm:h-10 w-8 h-8" stroke="black" />
-          </button>
+          {canUploadImages && (
+            <>
+              <input
+                hidden
+                multiple
+                type="file"
+                ref={fileInputRef}
+                onChange={onFileChange}
+                accept={acceptedFileExtensions}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className={cn(iconClassName, 'my-2 mx-1 disabled:cursor-not-allowed')}
+                disabled={isLoading || uploadLimitReached}
+                title={
+                  uploadLimitReached
+                    ? tFileInteraction('upload.upload-file-button-disabled', {
+                        max_files: IMAGE_GENERATION_INPUT_LIMIT,
+                      })
+                    : tFileInteraction('upload.upload-file-button')
+                }
+                data-testid="image-generation-upload-button"
+              >
+                <AttachFileIcon className="sm:w-10 sm:h-10 w-8 h-8" stroke="black" />
+              </button>
+            </>
+          )}
         </div>
       </div>
       <div className="mt-3 flex items-start gap-2">

@@ -16,9 +16,6 @@ export const SUPPORTED_DOCUMENTS_EXTENSIONS = [
 
 export const SUPPORTED_IMAGE_EXTENSIONS = ['jpeg', 'jpg', 'png', 'svg', 'webp'] as const;
 
-// supported file extensions for image generation attachments
-export const SUPPORTED_IMAGE_GENERATION_EXTENSIONS = ['jpeg', 'jpg', 'png'] as const;
-
 export const SUPPORTED_FILE_EXTENSIONS = [
   ...SUPPORTED_DOCUMENTS_EXTENSIONS,
   ...SUPPORTED_IMAGE_EXTENSIONS,
