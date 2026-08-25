@@ -60,6 +60,7 @@ const mocks = vi.hoisted(() => ({
   convertToAiCoreMessagesMock: vi.fn(),
   getChatTitleMock: vi.fn(),
   limitChatHistoryMock: vi.fn(),
+  annotateMessageAttachmentNamesMock: vi.fn(),
   extractUrlsMock: vi.fn(),
   createImageAttachmentsForConversationMock: vi.fn(),
   ingestWebContentMock: vi.fn(),
@@ -140,6 +141,7 @@ vi.mock('./utils', () => ({
   convertToAiCoreMessages: mocks.convertToAiCoreMessagesMock,
   getChatTitle: mocks.getChatTitleMock,
   limitChatHistory: mocks.limitChatHistoryMock,
+  annotateMessageAttachmentNames: mocks.annotateMessageAttachmentNamesMock,
 }));
 
 vi.mock('../utils/extract-urls', () => ({
@@ -267,7 +269,11 @@ beforeEach(() => {
   mocks.ingestWebContentMock.mockResolvedValue({ processedUrls: [], errorUrls: [] });
   mocks.dbGetAttachedFileByEntityIdMock.mockResolvedValue([]);
   mocks.limitChatHistoryMock.mockImplementation(
-    ({ messages }: { messages: ChatMessage[] }) => messages,
+    (incoming: ChatMessage[] | { messages: ChatMessage[] }) =>
+      Array.isArray(incoming) ? incoming : incoming.messages,
+  );
+  mocks.annotateMessageAttachmentNamesMock.mockImplementation(
+    (incomingMessages: ChatMessage[]) => incomingMessages,
   );
   mocks.enrichMessagesWithImageDataMock.mockImplementation((messages: ChatMessage[]) => messages);
   mocks.createImageAttachmentsForConversationMock.mockResolvedValue([]);
@@ -312,6 +318,38 @@ beforeEach(() => {
 });
 
 describe('sendChatMessage', () => {
+  it('passes attachment annotations to the model without persisting them', async () => {
+    const file = { id: 'upload-1', name: 'upload.pdf', conversationMessageId: 'message-3' };
+    mocks.dbGetAttachedFileByEntityIdMock.mockResolvedValue([file]);
+    mocks.annotateMessageAttachmentNamesMock.mockImplementation((incoming: ChatMessage[]) =>
+      incoming.map((message) =>
+        message.id === 'message-3'
+          ? { ...message, content: `${message.content}\n<attachments>` }
+          : message,
+      ),
+    );
+
+    const { sendChatMessage } = await import('./chat-service');
+    const result = await sendChatMessage({
+      conversationId: conversation.id,
+      messages,
+      modelId: mainModel.id,
+      user: createUser(),
+      fileIds: ['upload-1'],
+    });
+    await collectStream(result.stream);
+
+    expect(mocks.convertToAiCoreMessagesMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.arrayContaining([
+        expect.objectContaining({ content: expect.stringContaining('<attachments>') }),
+      ]),
+    );
+    expect(mocks.dbInsertChatContentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ content: 'Current question' }),
+    );
+  });
+
   it('runs the agentic chat pipeline and persists the assistant message', async () => {
     const { sendChatMessage } = await import('./chat-service');
 
