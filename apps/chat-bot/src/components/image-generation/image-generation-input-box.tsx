@@ -7,13 +7,13 @@ import {
 import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useRef } from 'react';
 import { Button } from '@ui/components/button';
 import { LocalFileState } from '../chat/send-message-form';
-import DisplayUploadedFile from '../chat/display-uploaded-file';
 import { FileUploadResponse, handleSingleFile } from '../chat/upload-file-button';
 import AttachFileIcon from '../icons/attach-file';
 import { useToast } from '../common/toast';
 import { SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
 import { cn } from '@/utils/tailwind';
 import { iconClassName } from '@/utils/tailwind/icon';
+import ChatInputAttachmentPreview from '../chat/chat-input-attachment-preview';
 
 type ImageGenerationInputBoxProps = {
   isLoading: boolean;
@@ -91,6 +91,7 @@ export function ImageGenerationInputBox({
             onChange={handleInputChange}
             value={input}
             maxLength={CHAT_MESSAGE_LENGTH_LIMIT}
+            disabled={isLoading}
           />
           <input
             hidden
@@ -104,7 +105,7 @@ export function ImageGenerationInputBox({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className={cn(iconClassName, 'my-2 mx-1 disabled:cursor-not-allowed')}
-            disabled={uploadLimitReached}
+            disabled={isLoading || uploadLimitReached}
             title={
               uploadLimitReached
                 ? tFileInteraction('upload.upload-file-button-disabled', {
@@ -121,12 +122,10 @@ export function ImageGenerationInputBox({
       <div className="mt-3 flex items-start gap-2">
         <div className="flex flex-1 flex-wrap gap-1 min-w-0">
           {Array.from(files).map(([localId, file]) => (
-            <DisplayUploadedFile
+            <ChatInputAttachmentPreview
               key={localId}
-              fileName={file.file.name}
-              status={file.status}
               file={file}
-              onDeattachFile={() => handleDeattachFile(localId)}
+              onDeattachFile={isLoading ? undefined : () => handleDeattachFile(localId)}
               height="large"
               width="small"
             />
