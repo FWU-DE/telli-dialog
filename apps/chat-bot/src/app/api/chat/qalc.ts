@@ -109,6 +109,7 @@ export async function qalc(expression: string): Promise<QalcResponse> {
       return { status: 'malformed_output', result: null, error: 'Calculator output too large.' };
     }
     if (!response.ok) {
+      if (result.status !== 'success') return result;
       return {
         status: 'upstream_failure',
         result: null,

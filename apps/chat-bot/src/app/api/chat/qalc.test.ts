@@ -29,7 +29,7 @@ describe('qalc', () => {
     const { qalc } = await import('./qalc');
     await expect(qalc('x')).resolves.toMatchObject({ status: 'malformed_output', result: null });
     await expect(qalc('x')).resolves.toEqual({
-      status: 'upstream_failure',
+      status: 'invalid_input',
       result: null,
       error: 'bad',
     });

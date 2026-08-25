@@ -28,10 +28,17 @@ export async function runQalc(
   spawnQalc?: SpawnQalc,
   options: { signal?: AbortSignal } = {},
 ): Promise<Result> {
+  if (options.signal?.aborted) {
+    return { status: 'upstream_failure', error: 'request cancelled' };
+  }
+
   let home: string | undefined;
   let child: ReturnType<typeof spawn> | undefined;
   try {
     home = await mkdtemp(join(tmpdir(), 'qalc-'));
+    if (options.signal?.aborted) {
+      return { status: 'upstream_failure', error: 'request cancelled' };
+    }
     child = (spawnQalc ?? spawn)('qalc', [...QALC_ARGS, '--', expression], {
       cwd: home,
       env: { PATH: process.env.PATH ?? '', HOME: home },
@@ -85,16 +92,21 @@ export async function runQalc(
     if (options.signal?.aborted) return { status: 'upstream_failure', error: 'request cancelled' };
     if (outputTooLarge) return { status: 'malformed_output', error: 'output too large' };
     if (exit.signal === 'SIGKILL') return { status: 'timeout', error: 'qalc timed out' };
-    if (exit.code !== 0)
+    if (exit.signal !== null)
       return {
         status: 'crashed_worker',
         error: 'qalc worker crashed',
       };
+    if (exit.code !== 0)
+      return {
+        status: 'invalid_input',
+        error: 'qalc could not evaluate the expression',
+      };
     return parseQalcOutput(stdout.toString('utf8'), limits.maxOutputBytes);
-  } catch (error) {
+  } catch {
     return {
       status: 'upstream_failure',
-      error: error instanceof Error ? error.message : 'qalc unavailable',
+      error: 'qalc unavailable',
     };
   } finally {
     if (child && !child.killed) child.kill('SIGKILL');

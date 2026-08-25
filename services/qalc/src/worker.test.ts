@@ -30,6 +30,24 @@ function fakeSpawn(
 }
 
 describe('qalc worker lifecycle', () => {
+  it('does not spawn qalc for an already cancelled request', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    let spawned = false;
+
+    const result = await runQalc(
+      '1',
+      limits,
+      (() => {
+        spawned = true;
+      }) as never,
+      { signal: controller.signal },
+    );
+
+    expect(spawned).toBe(false);
+    expect(result).toEqual({ status: 'upstream_failure', error: 'request cancelled' });
+  });
+
   it('reports a timeout when the process does not exit', async () => {
     const result = await runQalc(
       '1',
@@ -71,7 +89,7 @@ describe('qalc worker lifecycle', () => {
     expect(result).toEqual({ status: 'success', result: '2' });
   });
 
-  it('reports a crashed worker', async () => {
+  it('reports invalid input for a normal nonzero qalc exit', async () => {
     const result = await runQalc(
       '1',
       { ...limits, wallTimeMs: 100 },
@@ -79,6 +97,27 @@ describe('qalc worker lifecycle', () => {
         queueMicrotask(() => child.emit('close', 1, null));
       }),
     );
+    expect(result).toEqual({
+      status: 'invalid_input',
+      error: 'qalc could not evaluate the expression',
+    });
+  });
+
+  it('reports a crashed worker when qalc is terminated by a signal', async () => {
+    const result = await runQalc(
+      '1',
+      { ...limits, wallTimeMs: 100 },
+      fakeSpawn((child) => {
+        queueMicrotask(() => child.emit('close', null, 'SIGSEGV'));
+      }),
+    );
     expect(result.status).toBe('crashed_worker');
+  });
+
+  it('does not expose spawn errors', async () => {
+    const result = await runQalc('1', limits, (() => {
+      throw new Error('/secret/path: permission denied');
+    }) as never);
+    expect(result).toEqual({ status: 'upstream_failure', error: 'qalc unavailable' });
   });
 });
