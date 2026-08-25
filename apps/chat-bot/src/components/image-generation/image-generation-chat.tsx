@@ -19,6 +19,9 @@ import Image from 'next/image';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { CopyPromptButton } from './copy-prompt-button';
 import { useImageAspectRatio } from './image-aspect-ratio-provider';
+import { LocalFileState } from '../chat/send-message-form';
+import { FileUploadResponse } from '../chat/upload-file-button';
+import { nanoid } from 'nanoid';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -44,6 +47,7 @@ export default function ImageGenerationChat({
     fileId: string;
   } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
   const queryClient = useQueryClient();
   const imageRef = useRef<HTMLImageElement>(null);
   // isImageReady indicates if the image is loaded and visible in the browser
@@ -92,6 +96,19 @@ export default function ImageGenerationChat({
 
   function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setInput(e.target.value);
+  }
+
+  function handleDeattachFile(localFileId: string) {
+    setFiles((prev) => {
+      const next = new Map(prev);
+      next.delete(localFileId);
+      return next;
+    });
+  }
+
+  // Phase 1 stub: returns a fake id without hitting the backend.
+  async function stubFileUploadFn(): Promise<FileUploadResponse> {
+    return { fileId: `stub_${nanoid()}` };
   }
 
   function refetchConversations() {
@@ -153,6 +170,10 @@ export default function ImageGenerationChat({
           handleInputChange={handleInputChange}
           customHandleSubmit={customHandleSubmit}
           input={input}
+          files={files}
+          setFiles={setFiles}
+          handleDeattachFile={handleDeattachFile}
+          fileUploadFn={stubFileUploadFn}
         />
         <div className="w-3/4 mx-auto">
           {/* Current generation in progress */}
