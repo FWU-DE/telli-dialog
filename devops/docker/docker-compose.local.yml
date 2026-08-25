@@ -162,6 +162,7 @@ services:
     security_opt:
       - no-new-privileges:true
     networks:
+      - default
       - qalc-isolated
     deploy:
       resources:
