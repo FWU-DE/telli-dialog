@@ -15,12 +15,14 @@ import { generateUUID } from '@shared/utils/uuid';
 import { uploadFileToS3, getReadOnlySignedUrl } from '@shared/s3';
 import { cnanoid } from '@shared/random/randomService';
 import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/files';
+import { dbVerifyFileOwnership } from '@shared/db/functions/files';
 import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
 import { NotFoundError } from '@shared/error';
 import { getAvailableImageModelsForFederalState } from '@shared/image-generation/image-generation-service';
 import { userHasReachedTokenPointsLimit } from '@shared/users/usage';
 import { ImageGenerationRequestOptions } from '@ais-chat/ai-core/images/types';
 import { ImageGenerationOptions } from '@/components/image-generation/image-generation-types';
+import { IMAGE_GENERATION_INPUT_LIMIT } from '@/configuration-text-inputs/const';
 
 export interface ImageGenerationParams {
   prompt: string;
@@ -68,6 +70,7 @@ export async function handleImageGeneration({
   userId,
   federalStateId,
   options,
+  inputFileIds = [],
 }: {
   prompt: string;
   model: LlmModelSelectModel;
@@ -75,12 +78,28 @@ export async function handleImageGeneration({
   userId: string;
   federalStateId: string;
   options: ImageGenerationOptions;
+  inputFileIds?: string[];
 }) {
   await checkIfImageModelIsAssignedToFederalState(model, federalStateId);
 
   if (!prompt || prompt.trim().length === 0) {
     throw new Error('Prompt is required');
   }
+
+  if (inputFileIds.length > IMAGE_GENERATION_INPUT_LIMIT) {
+    throw new Error(
+      `Too many input images: ${inputFileIds.length} exceeds the limit of ${IMAGE_GENERATION_INPUT_LIMIT}`,
+    );
+  }
+
+  await Promise.all(
+    inputFileIds.map(async (fileId) => {
+      const owned = await dbVerifyFileOwnership({ fileId, userId });
+      if (!owned) {
+        throw new NotFoundError(`Input file not found or not owned by user: ${fileId}`);
+      }
+    }),
+  );
 
   let conversationId: string | undefined;
 
@@ -95,7 +114,7 @@ export async function handleImageGeneration({
     }
 
     // Store user prompt as a message
-    await dbInsertChatContent({
+    const userMessage = await dbInsertChatContent({
       conversationId: conversationId,
       role: 'user',
       userId: userId,
@@ -104,6 +123,18 @@ export async function handleImageGeneration({
       orderNumber: 1,
       parameters: { imageStyle: style?.name, aspectRatio: options.aspectRatio },
     });
+
+    if (!userMessage) {
+      throw new Error('Failed to create user message');
+    }
+
+    if (inputFileIds.length > 0) {
+      await linkFilesToConversation({
+        conversationMessageId: userMessage.id,
+        conversationId,
+        fileIds: inputFileIds,
+      });
+    }
 
     const size = model.imageGenerationConfig?.aspectRatio?.[options.aspectRatio] ?? 'auto';
 

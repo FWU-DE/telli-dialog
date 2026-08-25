@@ -21,6 +21,8 @@ import { CopyPromptButton } from './copy-prompt-button';
 import { useImageAspectRatio } from './image-aspect-ratio-provider';
 import { LocalFileState } from '../chat/send-message-form';
 import { defaultUploadFile } from '../chat/upload-file-button';
+import DisplayUploadedImage from '../chat/display-uploaded-image';
+import { isImageFile } from '@/utils/files/generic';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -47,6 +49,7 @@ export default function ImageGenerationChat({
   } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
+  const [submittedInputFiles, setSubmittedInputFiles] = useState<FileModel[]>([]);
   const queryClient = useQueryClient();
   const imageRef = useRef<HTMLImageElement>(null);
   // isImageReady indicates if the image is loaded and visible in the browser
@@ -62,6 +65,11 @@ export default function ImageGenerationChat({
         const assistantMessage = initialMessages.find((msg) => msg.role === 'assistant');
 
         if (userMessage && assistantMessage) {
+          const userInputImages = (fileMapping.get(userMessage.id) ?? []).filter((file) =>
+            isImageFile(file.name),
+          );
+          setSubmittedInputFiles(userInputImages);
+
           // Get files attached to the assistant message
           const attachedFiles = fileMapping.get(assistantMessage.id) || [];
           const imageFile = attachedFiles.find((file) => file.type.startsWith('image/'));
@@ -121,11 +129,18 @@ export default function ImageGenerationChat({
     setIsGenerating(true);
     setErrorMessage(null);
 
+    const processedFiles = Array.from(files.values()).filter(
+      (f): f is LocalFileState & { fileId: string } =>
+        f.status === 'processed' && f.fileId !== undefined,
+    );
+    const inputFileIds = processedFiles.map((f) => f.fileId);
+
     const result = await generateImageAction({
       prompt: currentPrompt,
       model: selectedModel,
       style: selectedStyle,
       options: { aspectRatio },
+      inputFileIds,
     });
     if (result.success) {
       // Update the displayed image
@@ -137,6 +152,19 @@ export default function ImageGenerationChat({
           fileId: result.value.fileId,
         });
       }
+
+      setSubmittedInputFiles(
+        processedFiles.map((f) => ({
+          id: f.fileId,
+          name: f.file.name,
+          type: f.file.type,
+          size: f.file.size,
+          createdAt: new Date(),
+          metadata: null,
+          userId: null,
+        })),
+      );
+      setFiles(new Map());
 
       const newConversationId = result.value.conversationId;
       if (conversationId === undefined || conversationId !== newConversationId) {
@@ -175,6 +203,13 @@ export default function ImageGenerationChat({
             <div className="mt-6">
               <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
               <p className="text-sm mb-3">{lastPrompt}</p>
+              {submittedInputFiles.length > 0 && (
+                <div className="flex flex-row gap-2 overflow-auto mb-3">
+                  {submittedInputFiles.map((file) => (
+                    <DisplayUploadedImage key={file.id} file={file} status="processed" />
+                  ))}
+                </div>
+              )}
               <LoadingAnimation />
             </div>
           )}
@@ -184,6 +219,13 @@ export default function ImageGenerationChat({
             <div className="mt-6">
               <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
               <p className="text-sm mb-3">{lastPrompt}</p>
+              {submittedInputFiles.length > 0 && (
+                <div className="flex flex-row gap-2 overflow-auto mb-3">
+                  {submittedInputFiles.map((file) => (
+                    <DisplayUploadedImage key={file.id} file={file} status="processed" />
+                  ))}
+                </div>
+              )}
               <ImageGenerationError message={errorMessage} />
             </div>
           )}
@@ -196,6 +238,13 @@ export default function ImageGenerationChat({
                 {displayedImage.prompt}
                 <CopyPromptButton prompt={displayedImage.prompt} />
               </p>
+              {submittedInputFiles.length > 0 && (
+                <div className="flex flex-row gap-2 overflow-auto mb-3">
+                  {submittedInputFiles.map((file) => (
+                    <DisplayUploadedImage key={file.id} file={file} status="processed" />
+                  ))}
+                </div>
+              )}
               <Image
                 ref={imageRef}
                 src={displayedImage.imageUrl}
