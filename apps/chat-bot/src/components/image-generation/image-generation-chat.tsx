@@ -20,8 +20,7 @@ import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { CopyPromptButton } from './copy-prompt-button';
 import { useImageAspectRatio } from './image-aspect-ratio-provider';
 import { LocalFileState } from '../chat/send-message-form';
-import { FileUploadResponse } from '../chat/upload-file-button';
-import { nanoid } from 'nanoid';
+import { defaultUploadFile } from '../chat/upload-file-button';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -106,11 +105,6 @@ export default function ImageGenerationChat({
     });
   }
 
-  // Phase 1 stub: returns a fake id without hitting the backend.
-  async function stubFileUploadFn(): Promise<FileUploadResponse> {
-    return { fileId: `stub_${nanoid()}` };
-  }
-
   function refetchConversations() {
     void queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
@@ -173,7 +167,7 @@ export default function ImageGenerationChat({
           files={files}
           setFiles={setFiles}
           handleDeattachFile={handleDeattachFile}
-          fileUploadFn={stubFileUploadFn}
+          fileUploadFn={defaultUploadFile}
         />
         <div className="w-3/4 mx-auto">
           {/* Current generation in progress */}
