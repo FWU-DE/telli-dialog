@@ -13,23 +13,34 @@ import he from 'he';
 
 export type FileWithConversationMessageId = FileModel & { conversationMessageId?: string };
 
-/** Adds ephemeral, filename-only provenance to retained user messages. */
+/**
+ * Adds attached filenames to copies of user messages before they are sent to the model.
+ * The original messages remain unchanged, and files without a matching message are ignored.
+ */
 export function annotateMessageAttachmentNames(
   messages: ChatMessage[],
   files: FileWithConversationMessageId[],
 ): ChatMessage[] {
+  // Group filenames by the message they were attached to.
   const namesByMessageId = new Map<string, string[]>();
   for (const file of files) {
-    if (file.conversationMessageId === undefined) continue;
+    if (file.conversationMessageId === undefined) {
+      continue;
+    }
     const names = namesByMessageId.get(file.conversationMessageId) ?? [];
     names.push(file.name);
     namesByMessageId.set(file.conversationMessageId, names);
   }
 
+  // Add each group of filenames to a copy of its matching user message.
   return messages.map((message) => {
-    if (message.role !== 'user') return message;
+    if (message.role !== 'user') {
+      return message;
+    }
     const names = namesByMessageId.get(message.id);
-    if (names === undefined || names.length === 0) return message;
+    if (names === undefined || names.length === 0) {
+      return message;
+    }
     const attachmentData = names
       .sort()
       .map((name) => `  <attachment>${he.escape(name)}</attachment>`)
