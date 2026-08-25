@@ -58,6 +58,24 @@ This guide helps you run AIS.chat using pre-built Docker images with minimal con
 All services are preconfigured with sensible defaults in `devops/docker/docker-compose.yml`.
 To customize environment variables edit `devops/docker/docker-compose.yml` directly or create a `docker-compose.override.yml`.
 
+### Qalc arithmetic service
+
+The Compose setup includes a sandboxed libqalculate HTTP service. For now, it is published only
+on the local host at `http://127.0.0.1:8081`. The containerized chatbot uses the internal
+`http://qalc:8080` service URL; host clients should use the loopback port.
+
+- `GET /healthz` returns `{"status":"success","result":"ok"}`.
+- `POST /v1/calculate` accepts `Content-Type: application/json` and a body such as
+  `{"expression":"2 + 2"}`. Successful responses contain `status: "success"` and the calculated string in `result`.
+- Requests are limited to an 8 KiB body, a 4096-character expression, 16 KiB worker output, and
+  a 2-second worker wall time. Invalid requests return structured HTTP 400 JSON; a busy worker
+  pool returns HTTP 429.
+
+Start it with the other local services using `docker compose -f devops/docker/docker-compose.yml up -d`.
+For source development, use `docker compose -f devops/docker/docker-compose.local.yml up -d --build`.
+Focused service tests run with `pnpm --filter @ais-chat/qalc-service test` (type and lint checks use
+the corresponding `check-types` and `lint` scripts).
+
 ### Stopping and Cleanup
 
 ```sh

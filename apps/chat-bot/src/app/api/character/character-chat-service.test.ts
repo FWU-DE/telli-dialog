@@ -142,6 +142,7 @@ const teacherUserAndContext = {
   userRole: 'teacher',
   federalState: {
     id: 'federal-state-1',
+    featureToggles: { isQalcEnabled: true },
   },
 };
 
@@ -244,6 +245,9 @@ describe('sendCharacterMessage', () => {
       urls: ['https://character.example/context'],
       federalStateId: teacherUserAndContext.federalState.id,
     });
+    expect(mocks.buildToolsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ isQalcEnabled: true }),
+    );
   });
 
   it('forwards fileIds to shared file service', async () => {
