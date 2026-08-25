@@ -419,7 +419,9 @@ export async function sendChatMessage({
     : [...convertMessageModelToMessage(activeConversationMessages), userMessage];
 
   // Prune messages
-  const prunedMessages = limitChatHistory(fullMessages);
+  const prunedMessages = limitChatHistory(
+    annotateMessageAttachmentNames(fullMessages, relatedFileEntities),
+  );
 
   // Build system prompt
   const systemPrompt = constructChatSystemPrompt({
@@ -444,12 +446,8 @@ export async function sendChatMessage({
   );
 
   // Format messages with images if the model supports vision
-  const messagesWithAttachmentNames = annotateMessageAttachmentNames(
-    prunedMessages,
-    relatedFileEntities,
-  );
   const messagesWithImages = enrichMessagesWithImageData(
-    messagesWithAttachmentNames,
+    prunedMessages,
     extractedImages,
     modelSupportsImages,
     imageAttachmentType,

@@ -30,13 +30,14 @@ export function annotateMessageAttachmentNames(
     const names = namesByMessageId.get(message.id);
     if (names === undefined || names.length === 0) return message;
     const attachmentData = names
+      .sort()
       .map(
         (name) => `- ${JSON.stringify(name).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e')}`,
       )
       .join('\n');
     return {
       ...message,
-      content: `${message.content}\n\n<attachment_metadata>\n${attachmentData}\n</attachment_metadata>`,
+      content: `${message.content}\n\n<attachments>\n${attachmentData}\n</attachments>`,
     };
   });
 }

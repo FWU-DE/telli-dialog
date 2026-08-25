@@ -324,7 +324,7 @@ describe('sendChatMessage', () => {
     mocks.annotateMessageAttachmentNamesMock.mockImplementation((incoming: ChatMessage[]) =>
       incoming.map((message) =>
         message.id === 'message-3'
-          ? { ...message, content: `${message.content}\n<attachment_metadata>` }
+          ? { ...message, content: `${message.content}\n<attachments>` }
           : message,
       ),
     );
@@ -342,7 +342,7 @@ describe('sendChatMessage', () => {
     expect(mocks.convertToAiCoreMessagesMock).toHaveBeenCalledWith(
       expect.anything(),
       expect.arrayContaining([
-        expect.objectContaining({ content: expect.stringContaining('<attachment_metadata>') }),
+        expect.objectContaining({ content: expect.stringContaining('<attachments>') }),
       ]),
     );
     expect(mocks.dbInsertChatContentMock).toHaveBeenCalledWith(

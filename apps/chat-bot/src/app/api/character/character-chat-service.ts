@@ -169,7 +169,9 @@ export async function sendCharacterMessage({
   });
 
   // Prune messages
-  const prunedMessages = limitChatHistory(messages);
+  const prunedMessages = limitChatHistory(
+    annotateMessageAttachmentNames(messages, relatedFileEntities),
+  );
 
   // Check if the model supports images based on supportedImageFormats
   const modelSupportsImages =
@@ -185,7 +187,7 @@ export async function sendCharacterMessage({
 
   // Format messages with images if the model supports vision
   const messagesWithImages = enrichMessagesWithImageData(
-    annotateMessageAttachmentNames(prunedMessages, relatedFileEntities),
+    prunedMessages,
     extractedImages,
     modelSupportsImages,
     imageAttachmentType,
