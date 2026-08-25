@@ -5,6 +5,7 @@ import {
   copyEntityPictureIfExists,
   copyRelatedTemplateFiles,
   createTemplateFromUrl,
+  updateTemplateDeletedState,
 } from './template-service';
 import { dbGetAssistantById, dbUpsertAssistant } from '@shared/db/functions/assistants';
 import { dbCreateCharacter, dbGetCharacterById } from '@shared/db/functions/character';
@@ -21,6 +22,14 @@ import {
 } from '@shared/files/fileService';
 import { logError } from '@shared/logging';
 import { copyFileInS3 } from '@shared/s3';
+
+const { mockDbSet, mockDbUpdate } = vi.hoisted(() => {
+  const mockDbWhere = vi.fn().mockResolvedValue(undefined);
+  const mockDbSet = vi.fn(() => ({ where: mockDbWhere }));
+  const mockDbUpdate = vi.fn(() => ({ set: mockDbSet }));
+  return { mockDbSet, mockDbUpdate };
+});
+vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 
 vi.mock('@shared/db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
@@ -383,6 +392,27 @@ describe('template-service', () => {
   describe('createTemplateFromUrl', () => {
     it('should throw on invalid url format', async () => {
       await expect(createTemplateFromUrl('/invalid/url')).rejects.toThrow('Invalid url format.');
+    });
+  });
+
+  describe('updateTemplateDeletedState', () => {
+    it.each([
+      { templateType: 'character' as const },
+      { templateType: 'assistant' as const },
+      { templateType: 'learning-scenario' as const },
+    ])('updates the isDeleted flag for templateType=$templateType', async ({ templateType }) => {
+      await updateTemplateDeletedState(templateType, 'template-1', true);
+
+      expect(mockDbUpdate).toHaveBeenCalledTimes(1);
+      expect(mockDbSet).toHaveBeenCalledWith({ isDeleted: true });
+    });
+
+    it('throws for an invalid template type', async () => {
+      await expect(
+        updateTemplateDeletedState('invalid-template-type' as never, 'template-1', true),
+      ).rejects.toThrow('Invalid template type');
+
+      expect(mockDbUpdate).not.toHaveBeenCalled();
     });
   });
 });

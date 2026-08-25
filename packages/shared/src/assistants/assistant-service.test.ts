@@ -6,6 +6,7 @@ import {
   getAssistantByAccessLevel,
   getConversationWithMessagesAndAssistant,
   getAssistantForNewChat,
+  getAssistantForExistingConversation,
   getAssistantsByOverviewFilter,
   getFileMappings,
   linkFileToAssistant,
@@ -814,6 +815,73 @@ describe('assistant-service', () => {
 
         expect(assistant).toBe(mockAssistant);
       });
+    });
+  });
+
+  describe('getAssistantForExistingConversation', () => {
+    const assistantId = generateUUID();
+    const conversationId = generateUUID();
+
+    it('returns the assistant when it is linked to the given conversation', async () => {
+      const user = mockUser();
+      const mockAssistant: Partial<AssistantSelectModel> = {
+        userId: user.id,
+        accessLevel: 'private',
+      };
+      (
+        dbGetAssistantByIdForConversation as MockedFunction<
+          typeof dbGetAssistantByIdForConversation
+        >
+      ).mockResolvedValue(mockAssistant as never);
+
+      const result = await getAssistantForExistingConversation({
+        assistantId,
+        conversationId,
+        user,
+      });
+
+      expect(result).toBe(mockAssistant);
+      expect(dbGetAssistantByIdForConversation).toHaveBeenCalledWith({
+        assistantId,
+        conversationId,
+        userId: user.id,
+      });
+    });
+
+    it('throws NotFoundError when the assistant is not linked to the conversation', async () => {
+      (
+        dbGetAssistantByIdForConversation as MockedFunction<
+          typeof dbGetAssistantByIdForConversation
+        >
+      ).mockResolvedValue(undefined);
+
+      await expect(
+        getAssistantForExistingConversation({
+          assistantId,
+          conversationId,
+          user: mockUser(),
+        }),
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    it('throws ForbiddenError when the user is not authorized to read the assistant', async () => {
+      const mockAssistant: Partial<AssistantSelectModel> = {
+        userId: generateUUID(),
+        accessLevel: 'private',
+      };
+      (
+        dbGetAssistantByIdForConversation as MockedFunction<
+          typeof dbGetAssistantByIdForConversation
+        >
+      ).mockResolvedValue(mockAssistant as never);
+
+      await expect(
+        getAssistantForExistingConversation({
+          assistantId,
+          conversationId,
+          user: mockUser(),
+        }),
+      ).rejects.toThrow(ForbiddenError);
     });
   });
 
