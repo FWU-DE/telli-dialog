@@ -6,9 +6,40 @@ import {
   isChatImageAttachment,
 } from '@ais-chat/ai-core';
 import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { LlmModelSelectModel } from '@shared/db/schema';
+import { type FileModel, LlmModelSelectModel } from '@shared/db/schema';
 import { UnexpectedError } from '@shared/error/unexpected-error';
 import { ChatAttachmentWithMessageId } from '../file-operations/preprocess-image';
+
+export type FileWithConversationMessageId = FileModel & { conversationMessageId?: string };
+
+/** Adds ephemeral, filename-only provenance to retained user messages. */
+export function annotateMessageAttachmentNames(
+  messages: ChatMessage[],
+  files: FileWithConversationMessageId[],
+): ChatMessage[] {
+  const namesByMessageId = new Map<string, string[]>();
+  for (const file of files) {
+    if (file.conversationMessageId === undefined) continue;
+    const names = namesByMessageId.get(file.conversationMessageId) ?? [];
+    names.push(file.name);
+    namesByMessageId.set(file.conversationMessageId, names);
+  }
+
+  return messages.map((message) => {
+    if (message.role !== 'user') return message;
+    const names = namesByMessageId.get(message.id);
+    if (names === undefined || names.length === 0) return message;
+    const attachmentData = names
+      .map(
+        (name) => `- ${JSON.stringify(name).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e')}`,
+      )
+      .join('\n');
+    return {
+      ...message,
+      content: `${message.content}\n\n<attachment_metadata>\n${attachmentData}\n</attachment_metadata>`,
+    };
+  });
+}
 
 /**
  * Enrich messages with image data from attachments.

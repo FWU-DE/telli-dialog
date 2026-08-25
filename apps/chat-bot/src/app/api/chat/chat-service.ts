@@ -26,6 +26,7 @@ import {
   convertToAiCoreMessages,
   determineImageAttachmentTypeForModel,
   enrichMessagesWithImageData,
+  annotateMessageAttachmentNames,
   getChatTitle,
   limitChatHistory,
 } from './utils';
@@ -443,8 +444,12 @@ export async function sendChatMessage({
   );
 
   // Format messages with images if the model supports vision
-  const messagesWithImages = enrichMessagesWithImageData(
+  const messagesWithAttachmentNames = annotateMessageAttachmentNames(
     prunedMessages,
+    relatedFileEntities,
+  );
+  const messagesWithImages = enrichMessagesWithImageData(
+    messagesWithAttachmentNames,
     extractedImages,
     modelSupportsImages,
     imageAttachmentType,

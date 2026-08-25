@@ -20,6 +20,7 @@ import {
   enrichMessagesWithImageData,
   getMostRecentUserMessage,
   limitChatHistory,
+  annotateMessageAttachmentNames,
 } from '../chat/utils';
 import { logError } from '@shared/logging';
 import { buildTools } from '../chat/build-tools';
@@ -184,7 +185,7 @@ export async function sendCharacterMessage({
 
   // Format messages with images if the model supports vision
   const messagesWithImages = enrichMessagesWithImageData(
-    prunedMessages,
+    annotateMessageAttachmentNames(prunedMessages, relatedFileEntities),
     extractedImages,
     modelSupportsImages,
     imageAttachmentType,
