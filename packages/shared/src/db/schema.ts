@@ -233,7 +233,7 @@ export const federalStateFeatureTogglesSchema = z.object({
   isSharedPageLocaleDetectionEnabled: z.boolean().optional(),
   isImageGenerationEnabled: z.boolean().optional(),
   isWebSearchEnabled: z.boolean().optional(),
-  isQalcEnabled: z.preprocess((value) => value ?? false, z.boolean().optional()),
+  isQalcEnabled: z.boolean().optional(),
 });
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
 

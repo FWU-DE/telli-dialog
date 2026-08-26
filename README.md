@@ -71,8 +71,11 @@ on the local host at `http://127.0.0.1:8081`. The containerized chatbot uses the
   a 2-second worker wall time. Invalid requests return structured HTTP 400 JSON; a busy worker
   pool returns HTTP 429.
 
-Start it with the other local services using `docker compose -f devops/docker/docker-compose.yml up -d`.
-For source development, use `docker compose -f devops/docker/docker-compose.local.yml up -d --build`.
+Start it with the self-hosted stack using `docker compose -f devops/docker/docker-compose.yml up -d`.
+For source development, start it explicitly with
+`docker compose -f devops/docker/docker-compose.local.yml --profile qalc up -d --build qalc`.
+The `qalc` profile keeps the native build out of normal local and E2E infrastructure startup.
+Enable **QALC** for the relevant federal state in AIS.chat Admin before using the chatbot tool.
 Focused service tests run with `pnpm --filter @ais-chat/qalc-service test` (type and lint checks use
 the corresponding `check-types` and `lint` scripts).
 

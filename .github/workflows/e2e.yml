@@ -47,10 +47,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
-      # Start only the e2e container dependencies used by the workflow. Compose also starts
-      # fix-keycloak-volume-ownership because keycloak depends on it.
-      - name: Start e2e container dependencies
-        run: docker compose -f devops/docker/docker-compose.local.yml up -d --build postgres valkey keycloak rabbitmq xberg crawl4ai mock-llm bifrost
+      # Starts all e2e container dependencies in the background using the same compose file as
+      # local dev. Later steps only block on the specific containers they actually need, once needed.
+      - name: Start e2e container dependencies (in background)
+        run: docker compose -f devops/docker/docker-compose.local.yml up -d --build &
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -160,9 +160,6 @@ jobs:
             sleep 1
             elapsed=$((elapsed + 1))
           done
-
-      - name: Wait for E2E service dependencies
-        run: docker compose -f devops/docker/docker-compose.local.yml up -d --wait rabbitmq xberg crawl4ai
 
       - name: Run E2E tests (app)
         run: pnpm --filter ais-chat-app e2e

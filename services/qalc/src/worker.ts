@@ -42,10 +42,9 @@ export async function runQalc(
     child = (spawnQalc ?? spawn)('qalc', [...QALC_ARGS, '--', expression], {
       cwd: home,
       env: { PATH: process.env.PATH ?? '', HOME: home },
-      stdio: ['ignore', 'pipe', 'pipe'],
+      stdio: ['ignore', 'pipe', 'ignore'],
     });
     let stdout: Buffer<ArrayBufferLike> = Buffer.alloc(0);
-    let stderr: Buffer<ArrayBufferLike> = Buffer.alloc(0);
     let outputTooLarge = false;
     const append = (current: Buffer, chunk: string | Buffer): Buffer => {
       const next = Buffer.concat([current, Buffer.from(chunk)]);
@@ -53,15 +52,11 @@ export async function runQalc(
       return next.subarray(0, limits.maxOutputBytes + 1);
     };
     child.stdout?.setEncoding('utf8');
-    child.stderr?.setEncoding('utf8');
     child.stdout?.on('data', (chunk: string) => {
       stdout = append(stdout, chunk);
       if (outputTooLarge) child?.kill('SIGKILL');
     });
-    child.stderr?.on('data', (chunk: string) => {
-      stderr = append(stderr, chunk);
-      if (outputTooLarge) child?.kill('SIGKILL');
-    });
+    let timedOut = false;
     const exit = await new Promise<{ code: number | null; signal: NodeJS.Signals | null }>(
       (resolve, reject) => {
         let settled = false;
@@ -74,7 +69,10 @@ export async function runQalc(
           }
         };
         const abort = () => child?.kill('SIGKILL');
-        const timer = setTimeout(() => child?.kill('SIGKILL'), limits.wallTimeMs);
+        const timer = setTimeout(() => {
+          timedOut = true;
+          child?.kill('SIGKILL');
+        }, limits.wallTimeMs);
         options.signal?.addEventListener('abort', abort, { once: true });
         child?.once('error', (error) => {
           if (!settled) {
@@ -91,7 +89,7 @@ export async function runQalc(
     );
     if (options.signal?.aborted) return { status: 'upstream_failure', error: 'request cancelled' };
     if (outputTooLarge) return { status: 'malformed_output', error: 'output too large' };
-    if (exit.signal === 'SIGKILL') return { status: 'timeout', error: 'qalc timed out' };
+    if (timedOut) return { status: 'timeout', error: 'qalc timed out' };
     if (exit.signal !== null)
       return {
         status: 'crashed_worker',
