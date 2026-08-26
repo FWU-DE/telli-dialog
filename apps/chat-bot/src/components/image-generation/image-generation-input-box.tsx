@@ -113,6 +113,7 @@ export function ImageGenerationInputBox({
                 onClick={() => fileInputRef.current?.click()}
                 className={cn(iconClassName, 'my-2 mx-1 disabled:cursor-not-allowed')}
                 disabled={isLoading || uploadLimitReached}
+                aria-label={tFileInteraction('upload.upload-file-button')}
                 title={
                   uploadLimitReached
                     ? tFileInteraction('upload.upload-file-button-disabled', {

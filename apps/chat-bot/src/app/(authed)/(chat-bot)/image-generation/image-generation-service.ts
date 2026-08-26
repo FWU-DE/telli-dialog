@@ -372,9 +372,16 @@ async function fetchInputImages(inputFileIds: string[]): Promise<ImageGeneration
       const stream = await getFileFromS3(`message_attachments/${fileId}`);
       const data = await streamToBuffer(stream);
 
+      const mimeType = record.type.toLowerCase().startsWith('image/')
+        ? record.type
+        : getImageContentType(record.type);
+      if (!mimeType.toLowerCase().startsWith('image/')) {
+        throw new Error(`Input file is not an image: ${fileId}`);
+      }
+
       return {
         data,
-        mimeType: getImageContentType(record.type),
+        mimeType,
         filename: record.name,
       };
     }),
