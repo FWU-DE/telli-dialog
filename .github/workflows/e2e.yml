@@ -52,12 +52,8 @@ jobs:
 
       # Starts all e2e container dependencies in the background using the same compose file as
       # local dev. Later steps only block on the specific containers they actually need, once needed.
-      # Container logs are streamed to a file (with timestamps) so the Playwright reporter can
-      # slice them per test; the same file is printed at the end of the job.
       - name: Start e2e container dependencies (in background)
-        run: |
-          docker compose -f devops/docker/docker-compose.local.yml up -d --build &
-          docker compose -f devops/docker/docker-compose.local.yml logs --no-color --timestamps --follow > /tmp/container-logs.log 2>&1 &
+        run: docker compose -f devops/docker/docker-compose.local.yml up -d --build &
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -170,6 +166,11 @@ jobs:
             sleep 1
             elapsed=$((elapsed + 1))
           done
+
+      # Stream container logs (with timestamps) to a file so the Playwright reporter can slice
+      # them per test; the same file is printed at the end of the job.
+      - name: Stream container logs to file
+        run: docker compose -f devops/docker/docker-compose.local.yml logs --no-color --timestamps --follow > /tmp/container-logs.log 2>&1 &
 
       - name: Run E2E tests (app)
         run: pnpm --filter ais-chat-app e2e
