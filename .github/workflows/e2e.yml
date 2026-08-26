@@ -45,6 +45,9 @@ jobs:
       # Bifrost
       BIFROST_BASE_URL: http://localhost:8089/openai/v1
       BIFROST_API_KEY: sk-bf-example-key
+      # Log files shared between the app/container log steps and the Playwright log reporter
+      APP_LOG_FILE: /tmp/ais-chat-app.log
+      CONTAINER_LOG_FILE: /tmp/container-logs.log
 
     steps:
       - name: Checkout code
@@ -147,9 +150,9 @@ jobs:
           # Prepend each log line with a UTC timestamp so the Playwright reporter can correlate them with tests.
           node ./apps/chat-bot/server.js 2>&1 \
             | gawk '{ print strftime("%Y-%m-%dT%H:%M:%SZ", systime(), 1), $0; fflush() }' \
-            > /tmp/ais-chat-app.log &
+            > "$APP_LOG_FILE" &
         env:
-          # Surface all app log levels on stdout (captured in /tmp/ais-chat-app.log).
+          # Surface all app log levels on stdout (captured in $APP_LOG_FILE).
           LOG_TO_STDOUT: 'true'
           LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
 
@@ -170,7 +173,7 @@ jobs:
 
       # Stream container logs (with timestamps) to a file so the Playwright reporter can correlate them with tests.
       - name: Stream container logs to file
-        run: docker compose -f devops/docker/docker-compose.local.yml logs --no-color --timestamps --follow > /tmp/container-logs.log 2>&1 &
+        run: docker compose -f devops/docker/docker-compose.local.yml logs --no-color --timestamps --follow > "$CONTAINER_LOG_FILE" 2>&1 &
 
       - name: Run E2E tests (app)
         run: pnpm --filter ais-chat-app e2e
@@ -211,8 +214,8 @@ jobs:
         if: always()
         run: |
           echo "=== ais-chat-app logs ==="
-          cat /tmp/ais-chat-app.log || true
+          cat "$APP_LOG_FILE" || true
 
       - name: Print container logs
         if: always()
-        run: cat /tmp/container-logs.log || true
+        run: cat "$CONTAINER_LOG_FILE" || true

@@ -10,7 +10,8 @@ import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
  * Because app timestamps are second-resolution and tests run in parallel, slices are
  * approximate: TOLERANCE_MS pads the window and adjacent/concurrent tests may share lines.
  *
- * Missing log files are skipped silently so local runs are unaffected.
+ * Log file paths come from the APP_LOG_FILE / CONTAINER_LOG_FILE env vars; a source is
+ * skipped when its var is unset (e.g. local runs), and missing files are skipped silently.
  */
 
 const TOLERANCE_MS = 1500;
@@ -18,9 +19,9 @@ const TOLERANCE_MS = 1500;
 type Source = { name: string; file: string };
 
 const SOURCES: Source[] = [
-  { name: 'app-server-log', file: '/tmp/ais-chat-app.log' },
-  { name: 'container-logs', file: '/tmp/container-logs.log' },
-];
+  { name: 'app-server-log', file: process.env.APP_LOG_FILE },
+  { name: 'container-logs', file: process.env.CONTAINER_LOG_FILE },
+].filter((source): source is Source => source.file !== undefined);
 
 /**
  * Parses the timestamp of a log line. Handles two formats:
