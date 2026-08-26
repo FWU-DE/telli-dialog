@@ -34,11 +34,7 @@ import {
 } from '@shared/conversation/conversation-service';
 import { uploadFileToS3 } from '../s3';
 import { getAvatarPictureUrl } from '../files/fileService';
-import {
-  copyAssistant,
-  copyEntityPictureIfExists,
-  copyRelatedTemplateFiles,
-} from '../templates/template-service';
+import { copyAssistant, copyRelatedTemplateFiles } from '../templates/template-service';
 
 vi.mock('../db/functions/assistants', () => ({
   dbGetAssistantsByUserId: vi.fn(),
@@ -68,7 +64,6 @@ vi.mock('../files/fileService', () => ({
 vi.mock('../templates/template-service', () => ({
   copyAssistant: vi.fn(),
   copyRelatedTemplateFiles: vi.fn(),
-  copyEntityPictureIfExists: vi.fn(),
 }));
 const { mockDbReturning, mockDbSet, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
@@ -553,9 +548,6 @@ describe('assistant-service', () => {
       (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
         insertedAssistant as never,
       );
-      (
-        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
-      ).mockResolvedValue(undefined as never);
 
       const result = await createNewAssistant({
         templateId,
@@ -569,11 +561,6 @@ describe('assistant-service', () => {
         expect.objectContaining({ id: expect.any(String) }),
         duplicatedAssistantName,
       );
-      expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
-        sourcePictureId: null,
-        newEntityId: insertedAssistant.id,
-        buildPictureKey: expect.any(Function),
-      });
       expect(copyRelatedTemplateFiles).toHaveBeenCalledWith(
         'assistant',
         templateId,
@@ -596,9 +583,6 @@ describe('assistant-service', () => {
       (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
         insertedAssistant as never,
       );
-      (
-        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
-      ).mockResolvedValue(undefined as never);
 
       await createNewAssistant({
         templateId,
@@ -613,67 +597,25 @@ describe('assistant-service', () => {
       );
     });
 
-    it('should update assistant picture when template picture is copied', async () => {
-      const insertedAssistant = {
-        id: generateUUID(),
-        pictureId: 'custom-gpts/template-id/original.png',
-      } as AssistantSelectModel;
-      const copiedPictureKey = `custom-gpts/${insertedAssistant.id}/original.png`;
-      const updatedAssistant = {
-        ...insertedAssistant,
-        pictureId: copiedPictureKey,
-      } as AssistantSelectModel;
-      const user = mockUser('teacher');
-
-      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
-        templateAssistant({ userId: user.id, accessLevel: 'private' }) as never,
-      );
-
-      (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
-        insertedAssistant as never,
-      );
-      (
-        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
-      ).mockResolvedValue(copiedPictureKey as never);
-      mockDbReturning.mockResolvedValue([updatedAssistant]);
-
-      const result = await createNewAssistant({
-        templateId,
-        user,
-      });
-
-      expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
-        sourcePictureId: insertedAssistant.pictureId,
-        newEntityId: insertedAssistant.id,
-        buildPictureKey: expect.any(Function),
-      });
-      expect(result).toEqual({ ...updatedAssistant, ownerSchoolIds: user.schoolIds });
-    });
-
-    it('should keep assistant unchanged when no copied picture key is returned', async () => {
+    it('should return the assistant from copyAssistant as-is, without copying its picture again', async () => {
       const user = mockUser('teacher');
       const insertedAssistant = {
         id: generateUUID(),
-        pictureId: 'custom-gpts/template-id/original.png',
+        pictureId: 'custom-gpts/already-scoped-id/avatar_abc123',
       } as AssistantSelectModel;
 
       (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
         templateAssistant({ userId: user.id, accessLevel: 'private' }) as never,
       );
-
       (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
         insertedAssistant as never,
       );
-      (
-        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
-      ).mockResolvedValue(undefined as never);
 
-      const result = await createNewAssistant({
-        templateId,
-        user,
-      });
+      const result = await createNewAssistant({ templateId, user });
 
-      expect(result).toEqual(insertedAssistant);
+      // copyAssistant already duplicates the picture; createNewAssistant must not attempt to
+      // copy it again (which would be a no-op S3 self-copy at best, an error at worst).
+      expect(result).toBe(insertedAssistant);
     });
 
     it('should throw ForbiddenError when template is suspended', async () => {

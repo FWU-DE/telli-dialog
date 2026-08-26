@@ -23,7 +23,9 @@ export async function GET(
       return NextResponse.json({ error: 'Not authorized to access this file' }, { status: 403 });
     }
 
-    const dimensions = imageDimensionsSchema.safeParse(request.nextUrl.searchParams);
+    const dimensions = imageDimensionsSchema.safeParse(
+      Object.fromEntries(request.nextUrl.searchParams),
+    );
     if (!dimensions.success) {
       return NextResponse.json({ error: 'Invalid width/height' }, { status: 400 });
     }

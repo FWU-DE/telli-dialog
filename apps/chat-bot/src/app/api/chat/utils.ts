@@ -1,4 +1,5 @@
 import { logError } from '@shared/logging';
+import { env as imageAttachmentEnv } from './image-attachment-env';
 import { type ChatMessage } from '@/types/chat';
 import {
   generateTextWithBilling,
@@ -6,9 +7,51 @@ import {
   isChatImageAttachment,
 } from '@ais-chat/ai-core';
 import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { LlmModelSelectModel } from '@shared/db/schema';
+import { type FileModel, LlmModelSelectModel } from '@shared/db/schema';
 import { UnexpectedError } from '@shared/error/unexpected-error';
 import { ChatAttachmentWithMessageId } from '../file-operations/preprocess-image';
+import he from 'he';
+
+export type FileWithConversationMessageId = FileModel & { conversationMessageId?: string };
+
+/**
+ * Adds attached filenames to copies of user messages before they are sent to the model.
+ * The original messages remain unchanged, and files without a matching message are ignored.
+ */
+export function annotateMessageAttachmentNames(
+  messages: ChatMessage[],
+  files: FileWithConversationMessageId[],
+): ChatMessage[] {
+  // Group filenames by the message they were attached to.
+  const namesByMessageId = new Map<string, string[]>();
+  for (const file of files) {
+    if (file.conversationMessageId === undefined) {
+      continue;
+    }
+    const names = namesByMessageId.get(file.conversationMessageId) ?? [];
+    names.push(file.name);
+    namesByMessageId.set(file.conversationMessageId, names);
+  }
+
+  // Add each group of filenames to a copy of its matching user message.
+  return messages.map((message) => {
+    if (message.role !== 'user') {
+      return message;
+    }
+    const names = namesByMessageId.get(message.id);
+    if (names === undefined || names.length === 0) {
+      return message;
+    }
+    const attachmentData = names
+      .sort()
+      .map((name) => `  <attachment>${he.escape(name)}</attachment>`)
+      .join('\n');
+    return {
+      ...message,
+      content: `${message.content}\n\n<attachments>\n${attachmentData}\n</attachments>`,
+    };
+  });
+}
 
 /**
  * Enrich messages with image data from attachments.
@@ -210,8 +253,12 @@ export async function getChatTitle({
 /**
  * Some models (like Anthropic models) require the image data to be included in the message as a base64 encoded string,
  * while others can work with just the image url. This function conditionally includes the base64 encoded data if required by the model.
+ * Setting IMAGE_ATTACHMENT_MODE=base64 forces base64 for all models (e.g. when the S3 storage isn't publicly reachable by the LLM provider).
  */
 export function determineImageAttachmentTypeForModel(model: LlmModelSelectModel): 'url' | 'base64' {
+  if (imageAttachmentEnv.imageAttachmentMode === 'base64') {
+    return 'base64';
+  }
   // we do not have settings on the LlmModelSelectModel to determine if the model needs image data,
   // so we will use the model name as a heuristic for now
   if (model.name.startsWith('anthropic/')) {
