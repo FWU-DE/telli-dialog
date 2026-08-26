@@ -225,7 +225,7 @@ export default function ImageGenerationChat({
                 width={800}
                 height={800}
                 loading="eager"
-                unoptimized // Since we're using signed URLs from S3
+                unoptimized
                 crossOrigin="anonymous" // Needed for clipboard copy to work
                 onLoad={() => setIsImageReady(true)}
               />

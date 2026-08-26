@@ -27,7 +27,7 @@ export default function MessageImageAttachment({
       height={height}
       loading="eager"
       className="max-w-xs h-auto max-h-48 object-cover rounded-enterprise-md"
-      unoptimized // Since we're using signed URLs from S3
+      unoptimized
     />
   );
 }
