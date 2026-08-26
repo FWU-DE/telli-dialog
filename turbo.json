@@ -5,6 +5,7 @@
     "APP_VERSION",
     "AUTH_SECRET",
     "NODE_ENV",
+    "LOG_TO_STDOUT",
     "DATABASE_URL",
     "OTC_BUCKET_NAME",
     "OTC_SECRET_ACCESS_KEY",

@@ -139,9 +139,7 @@ jobs:
           restore-keys: |
             turbo-e2e-${{ runner.os }}-
 
-      # Build and start the app close to the prod container (Next.js standalone). Note this is
-      # not identical to prod: NODE_ENV=test (see below) flips build-time branching such as
-      # isDevelopment(), which prod builds don't.
+      # Build and start the app the same way as in the prod container (Next.js standalone)
       - name: Start application
         run: |
           pnpm --filter ais-chat-app build:envless
@@ -154,9 +152,8 @@ jobs:
             | gawk '{ print strftime("%Y-%m-%dT%H:%M:%SZ", systime(), 1), $0; fflush() }' \
             > /tmp/ais-chat-app.log &
         env:
-          # NODE_ENV=test makes isDevelopment() inline true at build time so the app
-          # logger writes all levels to stdout (captured in /tmp/ais-chat-app.log).
-          NODE_ENV: test
+          # Surface all app log levels on stdout (captured in /tmp/ais-chat-app.log).
+          LOG_TO_STDOUT: 'true'
           LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
 
       - name: Wait for valkey and keycloak

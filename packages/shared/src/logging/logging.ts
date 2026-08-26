@@ -8,6 +8,11 @@ const logLevels = logLevelOrder.slice(
   1 + logLevelOrder.indexOf(env.NEXT_PUBLIC_SENTRY_LOG_LEVEL),
 );
 
+// Write logs to stdout in development, or when explicitly enabled (e.g. e2e CI) so
+// prod-parity builds can still surface logs without changing NODE_ENV. LOG_TO_STDOUT is a
+// server-only env var, so guard the access to avoid throwing in client bundles.
+const logToStdout = isDevelopment() || (typeof window === 'undefined' && env.LOG_TO_STDOUT);
+
 export function logMessage(
   message: string,
   level: Sentry.SeverityLevel,
@@ -17,7 +22,7 @@ export function logMessage(
     Sentry.captureMessage(message, { level, extra });
   }
 
-  if (isDevelopment()) {
+  if (logToStdout) {
     // if `extra` arg is not provided, don't pass it to console.log; otherwise "undefined" will be logged
     const args = extra === undefined ? [] : [extra];
     console.log(`[${level.toUpperCase()}] ${message}`, ...args);
@@ -44,7 +49,7 @@ export function logError(message: string, error?: unknown, extra?: Record<string
     Sentry.captureMessage(message, { level: 'error', extra: { error, ...extra } });
   }
 
-  if (isDevelopment()) {
+  if (logToStdout) {
     const args = extra === undefined ? [] : [extra];
     console.log(`[ERROR] ${message}`, error, ...args);
   }
