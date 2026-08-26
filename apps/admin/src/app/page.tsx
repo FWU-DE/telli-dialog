@@ -1,4 +1,14 @@
+import { auth } from '@/auth';
+import { ROUTES } from '@/consts/routes';
+import { redirect } from 'next/navigation';
+
 export default async function Home() {
+  const session = await auth();
+
+  if (session?.adminRole === 'Editor') {
+    redirect(ROUTES.app.page);
+  }
+
   return (
     <div>
       <div>Willkommen bei AIS.chat-admin.</div>

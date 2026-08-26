@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const trustedRequest = withTrustedOrigin(request);
 
   try {
-    const response = NextResponse.redirect(new URL('/login', trustedRequest.url));
+    const response = NextResponse.redirect(new URL('/', trustedRequest.url));
     const cookieNames = request.cookies
       .getAll()
       .map((cookie) => cookie.name)
