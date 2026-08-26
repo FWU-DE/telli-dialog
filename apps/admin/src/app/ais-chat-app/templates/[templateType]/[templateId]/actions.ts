@@ -1,5 +1,5 @@
 'use server';
-import { requireAdminAuth } from '@/auth/requireAdminAuth';
+import { requireAdminAppAccess } from '@/auth/requireAdminAuth';
 import { TemplateToFederalStateMapping, TemplateTypes } from '@shared/templates/template';
 import {
   getFederalStatesWithMappings,
@@ -9,7 +9,7 @@ import {
 } from '@ais-chat/shared/templates/template-service';
 
 export async function getTemplateByIdAction(templateType: TemplateTypes, templateId: string) {
-  await requireAdminAuth();
+  await requireAdminAppAccess();
 
   return getTemplateById(templateType, templateId);
 }
@@ -19,7 +19,7 @@ export async function updateAuthorOfTemplateAction(
   templateId: string,
   newAuthor: string,
 ) {
-  await requireAdminAuth();
+  await requireAdminAppAccess();
 
   return updateAuthorOfTemplate(templateType, templateId, newAuthor);
 }
@@ -28,7 +28,7 @@ export async function getFederalStatesWithMappingsAction(
   templateType: TemplateTypes,
   templateId: string,
 ) {
-  await requireAdminAuth();
+  await requireAdminAppAccess();
 
   return getFederalStatesWithMappings(templateType, templateId);
 }
@@ -38,7 +38,7 @@ export async function updateTemplateMappingsAction(
   templateId: string,
   mappings: TemplateToFederalStateMapping[],
 ) {
-  await requireAdminAuth();
+  await requireAdminAppAccess();
 
   return updateTemplateMappings(templateType, templateId, mappings);
 }

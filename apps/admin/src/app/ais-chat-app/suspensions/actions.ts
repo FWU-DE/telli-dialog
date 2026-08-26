@@ -1,6 +1,6 @@
 'use server';
 
-import { requireAdminAuth } from '@/auth/requireAdminAuth';
+import { requireAdminAppAccess } from '@/auth/requireAdminAuth';
 import { runServerAction } from '@shared/actions/run-server-action';
 import {
   getSuspensionRequestOverviews,
@@ -12,22 +12,22 @@ import {
 import { EntityRef } from '@shared/entities/entity-types';
 
 export async function getSuspensionRequestEntitiesAction() {
-  await requireAdminAuth();
+  await requireAdminAppAccess();
   return runServerAction('getSuspensionRequestEntitiesAction', getSuspensionRequestOverviews)();
 }
 
 export async function suspendEntityAction(entityRef: EntityRef) {
-  await requireAdminAuth();
+  await requireAdminAppAccess();
   return runServerAction('suspendEntityAction', suspendEntity)(entityRef);
 }
 
 export async function liftSuspensionAction(entityRef: EntityRef) {
-  await requireAdminAuth();
+  await requireAdminAppAccess();
   return runServerAction('liftSuspensionAction', liftSuspensionOnEntity)(entityRef);
 }
 
 export async function markSuspensionRequestAsCheckedAction(suspensionRequestId: string) {
-  await requireAdminAuth();
+  await requireAdminAppAccess();
   return runServerAction(
     'markSuspensionRequestAsCheckedAction',
     markSuspensionRequestAsChecked,
@@ -38,7 +38,7 @@ export async function getSuspensionRequestItemWithDetailsAction({
   entityType,
   entityId,
 }: EntityRef) {
-  await requireAdminAuth();
+  await requireAdminAppAccess();
   return runServerAction(
     'getSuspensionRequestItemWithDetailsAction',
     getSuspensionRequestItemWithDetails,
