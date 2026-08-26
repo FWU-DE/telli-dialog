@@ -139,7 +139,9 @@ jobs:
           restore-keys: |
             turbo-e2e-${{ runner.os }}-
 
-      # Build and start the app the same way as in the prod container (Next.js standalone)
+      # Build and start the app close to the prod container (Next.js standalone). Note this is
+      # not identical to prod: NODE_ENV=test (see below) flips build-time branching such as
+      # isDevelopment(), which prod builds don't.
       - name: Start application
         run: |
           pnpm --filter ais-chat-app build:envless

@@ -27,7 +27,8 @@ const SOURCES: Source[] = [
  * Returns null when the token is not a valid date (e.g. a stack-trace line).
  */
 function parseLeadingTimestamp(line: string): number | null {
-  const token = line.slice(0, line.indexOf(' '));
+  const spaceIndex = line.indexOf(' ');
+  const token = spaceIndex === -1 ? line : line.slice(0, spaceIndex);
   if (token.length === 0) return null;
   const ms = Date.parse(token);
   return Number.isNaN(ms) ? null : ms;
