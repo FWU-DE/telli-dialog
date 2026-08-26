@@ -8,6 +8,7 @@ export const DEFAULT_LIMITS: Limits = {
   concurrency: 4,
 };
 
+// Enforce expression, body, output, time, and concurrency limits before evaluation begins.
 export function validateRequest(value: unknown, limits = DEFAULT_LIMITS): string | undefined {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     return 'body must be an object';

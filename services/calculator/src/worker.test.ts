@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { describe, expect, it } from 'vitest';
-import { runQalc } from './worker.js';
+import { runCalculator } from './worker.js';
 import type { Limits } from './types.js';
 
 const limits: Limits = {
@@ -34,7 +34,7 @@ describe('qalc worker lifecycle', () => {
     controller.abort();
     let spawned = false;
 
-    const result = await runQalc(
+    const result = await runCalculator(
       '1',
       limits,
       (() => {
@@ -48,7 +48,7 @@ describe('qalc worker lifecycle', () => {
   });
 
   it('reports a timeout when the process does not exit', async () => {
-    const result = await runQalc(
+    const result = await runCalculator(
       '1',
       limits,
       fakeSpawn(() => {}),
@@ -58,7 +58,7 @@ describe('qalc worker lifecycle', () => {
 
   it('passes one expression after the option terminator and never writes stdin', async () => {
     const args: string[] = [];
-    const result = await runQalc(
+    const result = await runCalculator(
       '-1 + 2',
       { ...limits, wallTimeMs: 100 },
       fakeSpawn((child) => {
@@ -89,7 +89,7 @@ describe('qalc worker lifecycle', () => {
   });
 
   it('reports invalid input for a normal nonzero qalc exit', async () => {
-    const result = await runQalc(
+    const result = await runCalculator(
       '1',
       { ...limits, wallTimeMs: 100 },
       fakeSpawn((child) => {
@@ -103,7 +103,7 @@ describe('qalc worker lifecycle', () => {
   });
 
   it('reports a crashed worker when qalc is terminated by a signal', async () => {
-    const result = await runQalc(
+    const result = await runCalculator(
       '1',
       { ...limits, wallTimeMs: 100 },
       fakeSpawn((child) => {
@@ -114,7 +114,7 @@ describe('qalc worker lifecycle', () => {
   });
 
   it('does not expose spawn errors', async () => {
-    const result = await runQalc('1', limits, (() => {
+    const result = await runCalculator('1', limits, (() => {
       throw new Error('/secret/path: permission denied');
     }) as never);
     expect(result).toEqual({ status: 'upstream_failure', error: 'qalc unavailable' });

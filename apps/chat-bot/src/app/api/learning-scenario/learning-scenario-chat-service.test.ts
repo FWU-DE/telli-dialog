@@ -143,7 +143,7 @@ const teacherUserAndContext = {
   userRole: 'teacher',
   federalState: {
     id: 'federal-state-1',
-    featureToggles: { isQalcEnabled: true },
+    featureToggles: { isCalculatorEnabled: true },
   },
 };
 
@@ -247,7 +247,7 @@ describe('sendLearningScenarioMessage', () => {
       federalStateId: teacherUserAndContext.federalState.id,
     });
     expect(mocks.buildToolsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ isQalcEnabled: true }),
+      expect.objectContaining({ isCalculatorEnabled: true }),
     );
   });
 

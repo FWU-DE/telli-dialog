@@ -25,10 +25,10 @@ services:
       fix-keycloak-volume-ownership:
         condition: service_completed_successfully
     # Application containers use keycloak's network namespace; this gives them
-    # access to qalc without giving qalc an egress-capable network.
+    # access to calculator without giving calculator an egress-capable network.
     networks:
       - default
-      - qalc-isolated
+      - calculator-isolated
 
   # Fix keycloak volume permissions (runs with uid 1000)
   fix-keycloak-volume-ownership:
@@ -164,9 +164,9 @@ services:
       - '8089:8080'
 
   # Sandboxed arithmetic service backed by libqalculate.
-  qalc:
+  calculator:
     build:
-      context: ../../services/qalc
+      context: ../../services/calculator
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
@@ -181,7 +181,7 @@ services:
     security_opt:
       - no-new-privileges:true
     networks:
-      - qalc-isolated
+      - calculator-isolated
     deploy:
       resources:
         limits:
@@ -280,8 +280,8 @@ services:
       # Xberg text extraction
       XBERG_URL: http://xberg:8000
 
-      # Qalc arithmetic service
-      QALC_URL: http://qalc:8080
+      # Calculator arithmetic service
+      CALCULATOR_URL: http://calculator:8080
 
       # Bifrost LLM proxy
       BIFROST_BASE_URL: http://bifrost:8080/openai/v1
@@ -320,7 +320,7 @@ services:
         condition: service_started
       bifrost:
         condition: service_started
-      qalc:
+      calculator:
         condition: service_healthy
 
   # AIS.chat Admin - Administration interface
@@ -424,5 +424,5 @@ volumes:
   xberg_cache:
 
 networks:
-  qalc-isolated:
+  calculator-isolated:
     internal: true

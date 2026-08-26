@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { WorkerPool } from './pool.js';
-import { runQalc } from './worker.js';
+import { runCalculator } from './worker.js';
 import type { Limits } from './types.js';
 
 const limits: Limits = {
@@ -22,7 +22,7 @@ describe('worker pool', () => {
     const runner = async () => {
       throw new Error('crash');
     };
-    const pool = new WorkerPool(limits, runner as typeof runQalc);
+    const pool = new WorkerPool(limits, runner as typeof runCalculator);
     expect((await pool.run('1')).status).toBe('internal_failure');
     expect((await pool.run('2')).status).toBe('internal_failure');
   });

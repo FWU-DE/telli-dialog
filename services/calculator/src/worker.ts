@@ -3,7 +3,7 @@ import type { ChildProcess } from 'node:child_process';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { parseQalcOutput } from './protocol.js';
+import { parseCalculatorOutput } from './protocol.js';
 import type { Limits, Result } from './types.js';
 
 export const QALC_ARGS = [
@@ -21,7 +21,7 @@ export const QALC_ARGS = [
   '-s',
   'update exchange rates 0',
 ] as const;
-export type SpawnQalc = typeof spawn;
+export type SpawnCalculator = typeof spawn;
 interface ExitStatus {
   code: number | null;
   signal: NodeJS.Signals | null;
@@ -91,10 +91,10 @@ async function waitForExit(
   return { exit, timedOut };
 }
 
-export async function runQalc(
+export async function runCalculator(
   expression: string,
   limits: Limits,
-  spawnQalc?: SpawnQalc,
+  spawnCalculator?: SpawnCalculator,
   options: { signal?: AbortSignal } = {},
 ): Promise<Result> {
   if (options.signal?.aborted) {
@@ -108,7 +108,8 @@ export async function runQalc(
     if (options.signal?.aborted) {
       return { status: 'upstream_failure', error: 'request cancelled' };
     }
-    const spawnedChild = (spawnQalc ?? spawn)('qalc', [...QALC_ARGS, '--', expression], {
+    // A fresh process and private HOME keep qalc stateless and isolate requests from one another.
+    const spawnedChild = (spawnCalculator ?? spawn)('qalc', [...QALC_ARGS, '--', expression], {
       cwd: home,
       env: { PATH: process.env.PATH ?? '', HOME: home },
       stdio: ['ignore', 'pipe', 'ignore'],
@@ -152,7 +153,7 @@ export async function runQalc(
       };
     }
 
-    return parseQalcOutput(stdout.toString('utf8'), limits.maxOutputBytes);
+    return parseCalculatorOutput(stdout.toString('utf8'), limits.maxOutputBytes);
   } catch {
     return {
       status: 'upstream_failure',

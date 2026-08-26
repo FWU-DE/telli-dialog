@@ -61,7 +61,7 @@ function transformToFederalStateEditForm(federalState: FederalStateModel): Feder
       ...federalState.featureToggles,
       isImageGenerationEnabled: federalState.featureToggles.isImageGenerationEnabled ?? false,
       isWebSearchEnabled: federalState.featureToggles.isWebSearchEnabled ?? false,
-      isQalcEnabled: federalState.featureToggles.isQalcEnabled ?? false,
+      isCalculatorEnabled: federalState.featureToggles.isCalculatorEnabled ?? false,
       isSharedPageLocaleDetectionEnabled:
         federalState.featureToggles.isSharedPageLocaleDetectionEnabled ?? true,
     },
@@ -263,9 +263,9 @@ export function FederalStateView(props: FederalStateViewProps) {
             control={control}
           />
           <FormFieldCheckbox
-            name="featureToggles.isQalcEnabled"
-            label="QALC aktivieren"
-            description="Erlaubt die Nutzung von QALC."
+            name="featureToggles.isCalculatorEnabled"
+            label="Taschenrechner aktivieren"
+            description="Erlaubt die Nutzung des Taschenrechners."
             control={control}
           />
           <FormFieldCheckbox

@@ -215,7 +215,7 @@ function createUser(): UserAndContext {
         isShareTemplateWithSchoolEnabled: true,
         isImageGenerationEnabled: true,
         isWebSearchEnabled: true,
-        isQalcEnabled: true,
+        isCalculatorEnabled: true,
       },
     },
   } as UserAndContext;
@@ -327,7 +327,7 @@ describe('sendChatMessage', () => {
 
     expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
     expect(mocks.buildToolsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ isQalcEnabled: true }),
+      expect.objectContaining({ isCalculatorEnabled: true }),
     );
     expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
     expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);

@@ -1,17 +1,17 @@
 import { request as httpRequest } from 'node:http';
 import { describe, expect, it } from 'vitest';
-import { createQalcServer, createQalcServerWithPool } from './server.js';
+import { createCalculatorServer, createCalculatorServerWithPool } from './server.js';
 import type { Result } from './types.js';
 
 async function listen() {
-  const server = createQalcServer();
+  const server = createCalculatorServer();
   await new Promise<void>((resolve) => server.listen(0, resolve));
   const address = server.address();
   const port = typeof address === 'object' && address ? address.port : 0;
   return { server, port };
 }
 
-async function close(server: ReturnType<typeof createQalcServer>) {
+async function close(server: ReturnType<typeof createCalculatorServer>) {
   await new Promise<void>((resolve, reject) =>
     server.close((error) => (error ? reject(error) : resolve())),
   );
@@ -85,7 +85,7 @@ describe('HTTP interface', () => {
   it('aborts qalc when the client disconnects after the request body completes', async () => {
     let signal: AbortSignal | undefined;
     let started: () => void = () => undefined;
-    const qalcStarted = new Promise<void>((resolve) => {
+    const calculatorStarted = new Promise<void>((resolve) => {
       started = resolve;
     });
     const pool = {
@@ -95,7 +95,7 @@ describe('HTTP interface', () => {
         return new Promise(() => undefined);
       },
     };
-    const server = createQalcServerWithPool(
+    const server = createCalculatorServerWithPool(
       {
         maxExpressionLength: 100,
         maxBodyBytes: 1000,
@@ -118,7 +118,7 @@ describe('HTTP interface', () => {
     client.on('error', () => undefined);
     client.end(JSON.stringify({ expression: '1+1' }));
 
-    await qalcStarted;
+    await calculatorStarted;
     expect(signal?.aborted).toBe(false);
     client.destroy();
     await new Promise<void>((resolve) => {

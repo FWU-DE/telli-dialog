@@ -1,5 +1,5 @@
 {
-  "name": "@ais-chat/qalc-service",
+  "name": "@ais-chat/calculator-service",
   "version": "0.1.0",
   "private": true,
   "type": "module",

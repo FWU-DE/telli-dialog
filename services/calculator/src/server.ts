@@ -14,6 +14,7 @@ const statusCodes: Record<Result['status'], number> = {
   internal_failure: 500,
 };
 
+// Expose GET /healthz for probes and POST /v1/calculate for bounded evaluations.
 function send(response: ServerResponse, result: Result): void {
   if (response.destroyed || response.writableEnded) {
     return;
@@ -47,11 +48,11 @@ function isCalculateRequest(request: IncomingMessage): boolean {
   return request.method === 'POST' && request.url === '/v1/calculate';
 }
 
-export function createQalcServer(limits: Limits = DEFAULT_LIMITS) {
-  return createQalcServerWithPool(limits, new WorkerPool(limits));
+export function createCalculatorServer(limits: Limits = DEFAULT_LIMITS) {
+  return createCalculatorServerWithPool(limits, new WorkerPool(limits));
 }
 
-export function createQalcServerWithPool(limits: Limits, pool: Pick<WorkerPool, 'run'>) {
+export function createCalculatorServerWithPool(limits: Limits, pool: Pick<WorkerPool, 'run'>) {
   const server = createServer((request: IncomingMessage, response: ServerResponse) => {
     const rejectBody = (error: string): void => {
       request.resume();
@@ -71,6 +72,7 @@ export function createQalcServerWithPool(limits: Limits, pool: Pick<WorkerPool, 
       return rejectBody(bodyError);
     }
 
+    // Disconnects cancel work so a caller cannot leave a worker running after its response is gone.
     const controller = new AbortController();
     const onRequestClose = () => {
       if (!request.complete) controller.abort();

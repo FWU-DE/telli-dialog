@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   buildRetrieveEntireFileToolMock: vi.fn(),
   buildRetrieveTextChunksToolMock: vi.fn(),
   buildMundoSearchToolMock: vi.fn(),
-  buildQalcToolMock: vi.fn(),
+  buildMathCalculateToolMock: vi.fn(),
 }));
 
 vi.mock('./tools/web-search-tool', () => ({
@@ -31,8 +31,8 @@ vi.mock('./tools/mundo-search-tool', () => ({
   buildMundoSearchTool: mocks.buildMundoSearchToolMock,
 }));
 
-vi.mock('./tools/qalc-tool', () => ({
-  buildQalcTool: mocks.buildQalcToolMock,
+vi.mock('./tools/math-calculate-tool', () => ({
+  buildMathCalculateTool: mocks.buildMathCalculateToolMock,
 }));
 
 const user = {
@@ -100,7 +100,7 @@ beforeEach(() => {
     handler: vi.fn(),
   });
 
-  mocks.buildQalcToolMock.mockReturnValue({
+  mocks.buildMathCalculateToolMock.mockReturnValue({
     definition: {
       name: 'math_calculate',
       description: 'Calculate',
@@ -119,7 +119,7 @@ describe('buildTools', () => {
       conversationId: 'conv-1',
       relatedFileEntities,
       allowWebTools: true,
-      isQalcEnabled: true,
+      isCalculatorEnabled: true,
     });
 
     expect(Object.keys(toolRegistry)).toEqual([
@@ -131,11 +131,11 @@ describe('buildTools', () => {
     ]);
   });
 
-  it('returns no qalc tool when disabled', async () => {
+  it('returns no calculator tool when disabled', async () => {
     const { buildTools } = await import('./build-tools');
     const { toolRegistry } = await buildTools({ user, relatedFileEntities, allowWebTools: false });
     expect(toolRegistry).not.toHaveProperty('math_calculate');
-    expect(mocks.buildQalcToolMock).not.toHaveBeenCalled();
+    expect(mocks.buildMathCalculateToolMock).not.toHaveBeenCalled();
   });
 
   it('skips tools that return null', async () => {

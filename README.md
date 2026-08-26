@@ -58,13 +58,13 @@ This guide helps you run AIS.chat using pre-built Docker images with minimal con
 All services are preconfigured with sensible defaults in `devops/docker/docker-compose.yml`.
 To customize environment variables edit `devops/docker/docker-compose.yml` directly or create a `docker-compose.override.yml`.
 
-### Qalc arithmetic service
+### Calculator arithmetic service
 
 The Compose setup includes a libqalculate HTTP service. In the production/self-hosted Compose file,
-qalc is reachable by the containerized chatbot through the internal qalc network and is also
+calculator is reachable by the containerized chatbot through the internal calculator network and is also
 published on the local host at `http://127.0.0.1:8081` for local testing. Host clients should use
-the loopback port. The production qalc container has no external network access; the application
-and Keycloak share a network namespace in this Compose setup so the application can reach qalc.
+the loopback port. The production calculator container has no external network access; the application
+and Keycloak share a network namespace in this Compose setup so the application can reach calculator.
 
 - `GET /healthz` returns `{"status":"success","result":"ok"}`.
 - `POST /v1/calculate` accepts `Content-Type: application/json` and a body such as
@@ -74,14 +74,14 @@ and Keycloak share a network namespace in this Compose setup so the application 
   pool returns HTTP 429.
 
 Start it with the self-hosted stack using `docker compose -f devops/docker/docker-compose.yml up -d`.
-For source development, qalc is opt-in because its native image build is not part of the normal
+For source development, calculator is opt-in because its native image build is not part of the normal
 local stack. Start it explicitly with
-`docker compose -f devops/docker/docker-compose.local.yml --profile qalc up -d --build qalc`.
-The local qalc service explicitly joins the default Compose network so containerized local apps can
-use `http://qalc:8080`; apps run directly on the host must use `http://127.0.0.1:8081`.
-The `qalc` profile keeps the native build out of normal local and E2E infrastructure startup.
-Enable **QALC** for the relevant federal state in AIS.chat Admin before using the chatbot tool.
-Focused service tests run with `pnpm --filter @ais-chat/qalc-service test` (type and lint checks use
+`docker compose -f devops/docker/docker-compose.local.yml --profile calculator up -d --build calculator`.
+The local calculator service explicitly joins the default Compose network so containerized local apps can
+use `http://calculator:8080`; apps run directly on the host must use `http://127.0.0.1:8081`.
+The `calculator` profile keeps the native build out of normal local and E2E infrastructure startup.
+Enable **calculator** for the relevant federal state in AIS.chat Admin before using the chatbot tool.
+Focused service tests run with `pnpm --filter @ais-chat/calculator-service test` (type and lint checks use
 the corresponding `check-types` and `lint` scripts).
 
 ### Stopping and Cleanup

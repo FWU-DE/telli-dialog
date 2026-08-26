@@ -140,12 +140,12 @@ services:
       retries: 5
       start_period: 2s
 
-  qalc:
-    # Opt in with --profile qalc. Keep the service on the default network so
+  calculator:
+    # Opt in with --profile calculator. Keep the service on the default network so
     # containerized local apps can reach it; host-run apps use the published port.
-    profiles: ['qalc']
+    profiles: ['calculator']
     build:
-      context: ../../services/qalc
+      context: ../../services/calculator
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:

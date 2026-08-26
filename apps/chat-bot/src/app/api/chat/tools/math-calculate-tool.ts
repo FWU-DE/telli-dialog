@@ -1,10 +1,14 @@
 import { z } from 'zod';
-import { qalc, QALC_MAX_EXPRESSION_LENGTH, type QalcResponse } from '../qalc';
+import {
+  calculate,
+  CALCULATOR_MAX_EXPRESSION_LENGTH,
+  type CalculatorResponse,
+} from '../calculator';
 import type { ToolDefinition, ToolRegistration } from './types';
 
-const expressionSchema = z.string().trim().min(1).max(QALC_MAX_EXPRESSION_LENGTH);
+const expressionSchema = z.string().trim().min(1).max(CALCULATOR_MAX_EXPRESSION_LENGTH);
 
-export function buildQalcTool(): ToolRegistration {
+export function buildMathCalculateTool(): ToolRegistration {
   const definition: ToolDefinition = {
     name: 'math_calculate',
     description:
@@ -16,7 +20,7 @@ export function buildQalcTool(): ToolRegistration {
           type: 'string',
           description: 'A single qalc expression (not a question or explanation).',
           minLength: 1,
-          maxLength: QALC_MAX_EXPRESSION_LENGTH,
+          maxLength: CALCULATOR_MAX_EXPRESSION_LENGTH,
         },
       },
       required: ['expression'],
@@ -27,14 +31,14 @@ export function buildQalcTool(): ToolRegistration {
   const handler = async (args: Record<string, unknown>): Promise<string> => {
     const parsed = expressionSchema.safeParse(args.expression);
     if (!parsed.success) {
-      const response: QalcResponse = {
+      const response: CalculatorResponse = {
         status: 'invalid_input',
         result: null,
         error: 'Invalid expression.',
       };
       return JSON.stringify(response);
     }
-    return JSON.stringify(await qalc(parsed.data));
+    return JSON.stringify(await calculate(parsed.data));
   };
 
   return { definition, handler };

@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { env } from '@/env';
 
-export const QALC_MAX_EXPRESSION_LENGTH = 4_096;
-export const QALC_MAX_OUTPUT_LENGTH = 16_000;
-export const QALC_TIMEOUT_MS = 5_000;
+export const CALCULATOR_MAX_EXPRESSION_LENGTH = 4_096;
+export const CALCULATOR_MAX_OUTPUT_LENGTH = 16_000;
+export const CALCULATOR_TIMEOUT_MS = 5_000;
 
-const QALC_STATUSES = [
+const CALCULATOR_STATUSES = [
   'success',
   'invalid_input',
   'overload',
@@ -16,9 +16,9 @@ const QALC_STATUSES = [
   'internal_failure',
 ] as const;
 
-const qalcResponseSchema = z
+const calculatorResponseSchema = z
   .object({
-    status: z.enum(QALC_STATUSES),
+    status: z.enum(CALCULATOR_STATUSES),
     result: z.string().optional(),
     error: z.string().optional(),
   })
@@ -31,13 +31,13 @@ const qalcResponseSchema = z
     }
   });
 
-export type QalcResponse = {
+export type CalculatorResponse = {
   status: string;
   result: string | null;
   error: string | null;
 };
 
-function stableResponse(input: z.infer<typeof qalcResponseSchema>): QalcResponse {
+function stableResponse(input: z.infer<typeof calculatorResponseSchema>): CalculatorResponse {
   return {
     status: input.status,
     result: input.result ?? null,
@@ -48,7 +48,7 @@ function stableResponse(input: z.infer<typeof qalcResponseSchema>): QalcResponse
 async function readBoundedBody(response: Response): Promise<string> {
   if (!response.body) {
     const text = await response.text();
-    if (Buffer.byteLength(text) > QALC_MAX_OUTPUT_LENGTH)
+    if (Buffer.byteLength(text) > CALCULATOR_MAX_OUTPUT_LENGTH)
       throw new Error('response body too large');
     return text;
   }
@@ -61,7 +61,7 @@ async function readBoundedBody(response: Response): Promise<string> {
       const { done, value } = await reader.read();
       if (done) break;
       bytes += value.byteLength;
-      if (bytes > QALC_MAX_OUTPUT_LENGTH) throw new Error('response body too large');
+      if (bytes > CALCULATOR_MAX_OUTPUT_LENGTH) throw new Error('response body too large');
       chunks.push(value);
     }
   } finally {
@@ -70,23 +70,23 @@ async function readBoundedBody(response: Response): Promise<string> {
   return new TextDecoder().decode(Buffer.concat(chunks));
 }
 
-export async function qalc(expression: string): Promise<QalcResponse> {
+export async function calculate(expression: string): Promise<CalculatorResponse> {
   const parsedExpression = z
     .string()
     .trim()
     .min(1)
-    .max(QALC_MAX_EXPRESSION_LENGTH)
+    .max(CALCULATOR_MAX_EXPRESSION_LENGTH)
     .safeParse(expression);
   if (!parsedExpression.success) {
     return { status: 'invalid_input', result: null, error: 'Invalid expression.' };
   }
 
   try {
-    const response = await fetch(`${env.qalcUrl}/v1/calculate`, {
+    const response = await fetch(`${env.calculatorUrl}/v1/calculate`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', accept: 'application/json' },
       body: JSON.stringify({ expression: parsedExpression.data }),
-      signal: AbortSignal.timeout(QALC_TIMEOUT_MS),
+      signal: AbortSignal.timeout(CALCULATOR_TIMEOUT_MS),
     });
     const body = await readBoundedBody(response);
     let rawBody: unknown;
@@ -95,7 +95,7 @@ export async function qalc(expression: string): Promise<QalcResponse> {
     } catch {
       return { status: 'malformed_output', result: null, error: 'Malformed calculator response.' };
     }
-    const parsed = qalcResponseSchema.safeParse(rawBody);
+    const parsed = calculatorResponseSchema.safeParse(rawBody);
     if (!parsed.success) {
       return response.ok
         ? { status: 'malformed_output', result: null, error: 'Malformed calculator response.' }
@@ -104,7 +104,7 @@ export async function qalc(expression: string): Promise<QalcResponse> {
     const result = stableResponse(parsed.data);
     if (
       result.result !== null &&
-      Buffer.byteLength(result.result, 'utf-8') > QALC_MAX_OUTPUT_LENGTH
+      Buffer.byteLength(result.result, 'utf-8') > CALCULATOR_MAX_OUTPUT_LENGTH
     ) {
       return { status: 'malformed_output', result: null, error: 'Calculator output too large.' };
     }

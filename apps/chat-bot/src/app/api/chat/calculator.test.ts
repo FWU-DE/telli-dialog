@@ -1,17 +1,21 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/env', () => ({ env: { qalcUrl: 'http://localhost:8081' } }));
+vi.mock('@/env', () => ({ env: { calculatorUrl: 'http://localhost:8081' } }));
 
 afterEach(() => vi.restoreAllMocks());
 
-describe('qalc', () => {
+describe('calculator', () => {
   it('returns a stable successful response', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(new Response(JSON.stringify({ status: 'success', result: '4' }))),
     );
-    const { qalc } = await import('./qalc');
-    await expect(qalc('2 + 2')).resolves.toEqual({ status: 'success', result: '4', error: null });
+    const { calculate } = await import('./calculator');
+    await expect(calculate('2 + 2')).resolves.toEqual({
+      status: 'success',
+      result: '4',
+      error: null,
+    });
     expect(fetch).toHaveBeenCalledWith(
       'http://localhost:8081/v1/calculate',
       expect.objectContaining({ method: 'POST' }),
@@ -26,9 +30,12 @@ describe('qalc', () => {
         new Response(JSON.stringify({ status: 'invalid_input', error: 'bad' }), { status: 400 }),
       );
     vi.stubGlobal('fetch', fetchMock);
-    const { qalc } = await import('./qalc');
-    await expect(qalc('x')).resolves.toMatchObject({ status: 'malformed_output', result: null });
-    await expect(qalc('x')).resolves.toEqual({
+    const { calculate } = await import('./calculator');
+    await expect(calculate('x')).resolves.toMatchObject({
+      status: 'malformed_output',
+      result: null,
+    });
+    await expect(calculate('x')).resolves.toEqual({
       status: 'invalid_input',
       result: null,
       error: 'bad',
@@ -42,8 +49,8 @@ describe('qalc', () => {
         .fn()
         .mockResolvedValue(new Response(JSON.stringify({ status: 'unexpected', result: '4' }))),
     );
-    const { qalc } = await import('./qalc');
-    await expect(qalc('2 + 2')).resolves.toMatchObject({ status: 'malformed_output' });
+    const { calculate } = await import('./calculator');
+    await expect(calculate('2 + 2')).resolves.toMatchObject({ status: 'malformed_output' });
   });
 
   it('maps contradictory and unknown non-2xx responses to stable upstream failures', async () => {
@@ -60,9 +67,9 @@ describe('qalc', () => {
           new Response(JSON.stringify({ status: 'unexpected', result: '4' }), { status: 502 }),
         ),
     );
-    const { qalc } = await import('./qalc');
-    await expect(qalc('x')).resolves.toMatchObject({ status: 'malformed_output' });
-    await expect(qalc('x')).resolves.toEqual({
+    const { calculate } = await import('./calculator');
+    await expect(calculate('x')).resolves.toMatchObject({ status: 'malformed_output' });
+    await expect(calculate('x')).resolves.toEqual({
       status: 'upstream_failure',
       result: null,
       error: 'Calculator request failed.',
@@ -74,11 +81,13 @@ describe('qalc', () => {
       'fetch',
       vi.fn().mockRejectedValue(new DOMException('timed out', 'TimeoutError')),
     );
-    const { qalc, QALC_MAX_EXPRESSION_LENGTH } = await import('./qalc');
-    await expect(qalc('x'.repeat(QALC_MAX_EXPRESSION_LENGTH + 1))).resolves.toMatchObject({
+    const { calculate, CALCULATOR_MAX_EXPRESSION_LENGTH } = await import('./calculator');
+    await expect(
+      calculate('x'.repeat(CALCULATOR_MAX_EXPRESSION_LENGTH + 1)),
+    ).resolves.toMatchObject({
       status: 'invalid_input',
     });
-    await expect(qalc('x')).resolves.toMatchObject({ status: 'timeout' });
+    await expect(calculate('x')).resolves.toMatchObject({ status: 'timeout' });
     vi.stubGlobal(
       'fetch',
       vi
@@ -87,6 +96,6 @@ describe('qalc', () => {
           new Response(JSON.stringify({ status: 'success', result: 'y'.repeat(16_001) })),
         ),
     );
-    await expect(qalc('x')).resolves.toMatchObject({ status: 'malformed_output' });
+    await expect(calculate('x')).resolves.toMatchObject({ status: 'malformed_output' });
   });
 });
