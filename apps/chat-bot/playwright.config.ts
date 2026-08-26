@@ -12,7 +12,13 @@ export default defineConfig({
   workers: process.env.CI ? 3 : 1,
   // Limit the number of failures on CI to save resources
   maxFailures: process.env.CI ? 10 : undefined,
-  reporter: [['html', { outputFolder: './playwright-report' }], ['json'], ['github'], ['list']],
+  reporter: [
+    ['html', { outputFolder: './playwright-report' }],
+    ['json'],
+    ['github'],
+    ['list'],
+    ['./e2e/reporters/app-log-reporter.ts'],
+  ],
   timeout: 90_000,
   use: {
     baseURL: 'http://localhost:3000',
