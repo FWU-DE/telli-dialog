@@ -5,10 +5,10 @@ import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
  * Attaches server- and container-side logs to each Playwright test by time-slicing
  * timestamped log files against the test's execution window.
  *
- * The app log is prefixed with UTC ISO seconds by the CI workflow; container logs
- * carry RFC3339Nano timestamps from `docker compose logs --timestamps`. Because app
- * timestamps are second-resolution and tests run in parallel, slices are approximate:
- * TOLERANCE_MS pads the window and adjacent/concurrent tests may share some lines.
+ * The app log is prefixed with UTC ISO seconds by the CI workflow; container logs carry
+ * "<service> | <RFC3339Nano timestamp>" lines from `docker compose logs --timestamps`.
+ * Because app timestamps are second-resolution and tests run in parallel, slices are
+ * approximate: TOLERANCE_MS pads the window and adjacent/concurrent tests may share lines.
  *
  * Missing log files are skipped silently so local runs are unaffected.
  */
@@ -23,15 +23,31 @@ const SOURCES: Source[] = [
 ];
 
 /**
- * Parses the leading whitespace-delimited token of a log line as a timestamp.
- * Returns null when the token is not a valid date (e.g. a stack-trace line).
+ * Parses the timestamp of a log line. Handles two formats:
+ *  - app log:       "<timestamp> <message>" (timestamp is the leading token)
+ *  - container log: "<service> | <timestamp> <message>" from `docker compose logs
+ *    --timestamps` (the leading token is the service name, not the timestamp)
+ * Returns null when no timestamp can be parsed (e.g. a stack-trace line).
  */
 function parseLeadingTimestamp(line: string): number | null {
-  const spaceIndex = line.indexOf(' ');
-  const token = spaceIndex === -1 ? line : line.slice(0, spaceIndex);
-  if (token.length === 0) return null;
-  const ms = Date.parse(token);
-  return Number.isNaN(ms) ? null : ms;
+  const parseFirstToken = (text: string): number | null => {
+    const spaceIndex = text.indexOf(' ');
+    const token = spaceIndex === -1 ? text : text.slice(0, spaceIndex);
+    if (token.length === 0) return null;
+    const ms = Date.parse(token);
+    return Number.isNaN(ms) ? null : ms;
+  };
+
+  // Strip an optional `docker compose logs` prefix ("<service> | ") before the timestamp,
+  // but only when the remainder actually starts with a valid date, so app-log lines that
+  // happen to contain a literal " | " are not misread.
+  const composeMatch = line.match(/^\S.*?\s+\|\s+(.*)$/);
+  if (composeMatch?.[1] !== undefined) {
+    const afterPrefix = parseFirstToken(composeMatch[1]);
+    if (afterPrefix !== null) return afterPrefix;
+  }
+
+  return parseFirstToken(line);
 }
 
 /**
