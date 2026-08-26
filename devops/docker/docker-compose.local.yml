@@ -141,6 +141,8 @@ services:
       start_period: 2s
 
   qalc:
+    # Opt in with --profile qalc. Keep the service on the default network so
+    # containerized local apps can reach it; host-run apps use the published port.
     profiles: ['qalc']
     build:
       context: ../../services/qalc
@@ -150,6 +152,8 @@ services:
       - '127.0.0.1:8081:8080'
     expose:
       - '8080'
+    networks:
+      - default
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev,size=64m

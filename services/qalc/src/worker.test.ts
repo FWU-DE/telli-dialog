@@ -19,7 +19,6 @@ function fakeSpawn(
     args?.push(...actualArgs);
     const child = new EventEmitter() as EventEmitter & Record<string, unknown>;
     child.stdout = Object.assign(new EventEmitter(), { setEncoding() {} });
-    child.stderr = Object.assign(new EventEmitter(), { setEncoding() {} });
     child.kill = () => {
       queueMicrotask(() => child.emit('close', null, 'SIGKILL'));
       return true;

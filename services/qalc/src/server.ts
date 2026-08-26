@@ -13,10 +13,38 @@ const statusCodes: Record<Result['status'], number> = {
   upstream_failure: 503,
   internal_failure: 500,
 };
+
 function send(response: ServerResponse, result: Result): void {
-  if (response.destroyed || response.writableEnded) return;
+  if (response.destroyed || response.writableEnded) {
+    return;
+  }
+
   response.writeHead(statusCodes[result.status], { 'content-type': 'application/json' });
   response.end(JSON.stringify(result));
+}
+
+function getBodyError(request: IncomingMessage, limits: Limits): string | undefined {
+  if (request.headers['content-type']?.split(';', 1)[0] !== 'application/json') {
+    return 'content-type must be application/json';
+  }
+
+  const contentLength = request.headers['content-length'];
+  if (
+    contentLength !== undefined &&
+    (!/^\d+$/.test(contentLength) || Number(contentLength) > limits.maxBodyBytes)
+  ) {
+    return 'body too large';
+  }
+
+  return undefined;
+}
+
+function isHealthRequest(request: IncomingMessage): boolean {
+  return request.method === 'GET' && request.url === '/healthz';
+}
+
+function isCalculateRequest(request: IncomingMessage): boolean {
+  return request.method === 'POST' && request.url === '/v1/calculate';
 }
 
 export function createQalcServer(limits: Limits = DEFAULT_LIMITS) {
@@ -25,22 +53,24 @@ export function createQalcServer(limits: Limits = DEFAULT_LIMITS) {
 
 export function createQalcServerWithPool(limits: Limits, pool: Pick<WorkerPool, 'run'>) {
   const server = createServer((request: IncomingMessage, response: ServerResponse) => {
-    const rejectBody = (error: string) => {
+    const rejectBody = (error: string): void => {
       request.resume();
       send(response, { status: 'invalid_input', error });
     };
-    if (request.method === 'GET' && request.url === '/healthz')
+
+    if (isHealthRequest(request)) {
       return send(response, { status: 'success', result: 'ok' });
-    if (request.method !== 'POST' || request.url !== '/v1/calculate')
+    }
+
+    if (!isCalculateRequest(request)) {
       return send(response, { status: 'invalid_input', error: 'not found' });
-    if (request.headers['content-type']?.split(';', 1)[0] !== 'application/json')
-      return rejectBody('content-type must be application/json');
-    const contentLength = request.headers['content-length'];
-    if (
-      contentLength !== undefined &&
-      (!/^\d+$/.test(contentLength) || Number(contentLength) > limits.maxBodyBytes)
-    )
-      return rejectBody('body too large');
+    }
+
+    const bodyError = getBodyError(request, limits);
+    if (bodyError !== undefined) {
+      return rejectBody(bodyError);
+    }
+
     const controller = new AbortController();
     const onRequestClose = () => {
       if (!request.complete) controller.abort();
@@ -55,7 +85,10 @@ export function createQalcServerWithPool(limits: Limits, pool: Pick<WorkerPool, 
     let done = false;
     request.setEncoding('utf8');
     request.on('data', (chunk: string) => {
-      if (done) return;
+      if (done) {
+        return;
+      }
+
       bytes += Buffer.byteLength(chunk);
       if (bytes > limits.maxBodyBytes) {
         done = true;
@@ -65,12 +98,18 @@ export function createQalcServerWithPool(limits: Limits, pool: Pick<WorkerPool, 
       }
       body += chunk;
     });
-    const finish = async () => {
-      if (done || controller.signal.aborted) return;
+    const finish = async (): Promise<void> => {
+      if (done || controller.signal.aborted) {
+        return;
+      }
+
       done = true;
       const input = parseJsonBody(body);
       const error = validateRequest(input, limits);
-      if (error) return send(response, { status: 'invalid_input', error });
+      if (error !== undefined) {
+        return send(response, { status: 'invalid_input', error });
+      }
+
       const result = await pool.run((input as { expression: string }).expression, {
         signal: controller.signal,
       });

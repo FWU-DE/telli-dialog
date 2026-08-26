@@ -60,9 +60,11 @@ To customize environment variables edit `devops/docker/docker-compose.yml` direc
 
 ### Qalc arithmetic service
 
-The Compose setup includes a sandboxed libqalculate HTTP service. For now, it is published only
-on the local host at `http://127.0.0.1:8081`. The containerized chatbot uses the internal
-`http://qalc:8080` service URL; host clients should use the loopback port.
+The Compose setup includes a libqalculate HTTP service. In the production/self-hosted Compose file,
+qalc is reachable by the containerized chatbot through the internal qalc network and is also
+published on the local host at `http://127.0.0.1:8081` for local testing. Host clients should use
+the loopback port. The production qalc container has no external network access; the application
+and Keycloak share a network namespace in this Compose setup so the application can reach qalc.
 
 - `GET /healthz` returns `{"status":"success","result":"ok"}`.
 - `POST /v1/calculate` accepts `Content-Type: application/json` and a body such as
@@ -72,8 +74,11 @@ on the local host at `http://127.0.0.1:8081`. The containerized chatbot uses the
   pool returns HTTP 429.
 
 Start it with the self-hosted stack using `docker compose -f devops/docker/docker-compose.yml up -d`.
-For source development, start it explicitly with
+For source development, qalc is opt-in because its native image build is not part of the normal
+local stack. Start it explicitly with
 `docker compose -f devops/docker/docker-compose.local.yml --profile qalc up -d --build qalc`.
+The local qalc service explicitly joins the default Compose network so containerized local apps can
+use `http://qalc:8080`; apps run directly on the host must use `http://127.0.0.1:8081`.
 The `qalc` profile keeps the native build out of normal local and E2E infrastructure startup.
 Enable **QALC** for the relevant federal state in AIS.chat Admin before using the chatbot tool.
 Focused service tests run with `pnpm --filter @ais-chat/qalc-service test` (type and lint checks use

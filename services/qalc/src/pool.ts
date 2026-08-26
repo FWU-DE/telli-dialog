@@ -10,18 +10,24 @@ export class WorkerPool {
   ) {}
 
   run(expression: string, options: RunOptions = {}): Promise<Result> {
-    if (this.active >= this.limits.concurrency)
+    if (this.active >= this.limits.concurrency) {
       return Promise.resolve({ status: 'overload', error: 'worker pool is busy' });
+    }
+
     this.active += 1;
-    const work = Promise.resolve().then(() =>
-      this.spawnQalc
-        ? this.runner(expression, this.limits, this.spawnQalc, options)
-        : this.runner(expression, this.limits, undefined, options),
-    );
+    const work = Promise.resolve().then(() => this.runWorker(expression, options));
     return work
       .catch((): Result => ({ status: 'internal_failure', error: 'worker failed' }))
       .finally(() => {
         this.active -= 1;
       });
+  }
+
+  private runWorker(expression: string, options: RunOptions): Promise<Result> {
+    if (this.spawnQalc !== undefined) {
+      return this.runner(expression, this.limits, this.spawnQalc, options);
+    }
+
+    return this.runner(expression, this.limits, undefined, options);
   }
 }

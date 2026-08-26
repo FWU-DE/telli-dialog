@@ -9,13 +9,24 @@ export const DEFAULT_LIMITS: Limits = {
 };
 
 export function validateRequest(value: unknown, limits = DEFAULT_LIMITS): string | undefined {
-  if (value === null || typeof value !== 'object' || Array.isArray(value))
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     return 'body must be an object';
+  }
+
   const expression = (value as { expression?: unknown }).expression;
-  if (typeof expression !== 'string') return 'expression must be a string';
+  if (typeof expression !== 'string') {
+    return 'expression must be a string';
+  }
+
   const trimmedExpression = expression.trim();
-  if (trimmedExpression.length === 0) return 'expression must not be empty';
-  if (trimmedExpression.length > limits.maxExpressionLength) return 'expression is too long';
+  if (trimmedExpression.length === 0) {
+    return 'expression must not be empty';
+  }
+
+  if (trimmedExpression.length > limits.maxExpressionLength) {
+    return 'expression is too long';
+  }
+
   // Keep the validated value identical to the value sent to the worker.
   (value as { expression: string }).expression = trimmedExpression;
   return undefined;
