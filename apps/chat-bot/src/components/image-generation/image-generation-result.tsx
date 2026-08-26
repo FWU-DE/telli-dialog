@@ -21,13 +21,15 @@ export function ImageGenerationResult({
         {prompt}
         <CopyPromptButton prompt={prompt} />
       </p>
-      <h3 className="text-xs text-gray-700">{tImageGeneration('attached-files-label')}</h3>
       {attachedFiles.length > 0 && (
-        <div className="flex flex-row gap-2 overflow-auto mt-2 mb-5">
-          {attachedFiles.map((file) => (
-            <MessageImageAttachment key={file.id} file={file} width={56} height={56} />
-          ))}
-        </div>
+        <>
+          <h3 className="text-xs text-gray-700">{tImageGeneration('attached-files-label')}</h3>
+          <div className="flex flex-row gap-2 overflow-auto mt-2 mb-5">
+            {attachedFiles.map((file) => (
+              <MessageImageAttachment key={file.id} file={file} width={56} height={56} />
+            ))}
+          </div>
+        </>
       )}
       {children}
     </div>

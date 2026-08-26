@@ -12,22 +12,16 @@ import { generateImageWithBilling } from '@ais-chat/ai-core';
 import { LlmModelSelectModel } from '@shared/db/schema';
 import { ImageStyle } from '@shared/utils/chat';
 import { generateUUID } from '@shared/utils/uuid';
-import { uploadFileToS3, getReadOnlySignedUrl, getFileFromS3 } from '@shared/s3';
+import { uploadFileToS3, getReadOnlySignedUrl } from '@shared/s3';
 import { cnanoid } from '@shared/random/randomService';
-import { linkFilesToConversation, dbInsertFile, dbGetFilesInIds } from '@shared/db/functions/files';
-import { dbVerifyFileOwnership } from '@shared/db/functions/files';
+import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/files';
 import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
 import { NotFoundError } from '@shared/error';
 import { getAvailableImageModelsForFederalState } from '@shared/image-generation/image-generation-service';
 import { userHasReachedTokenPointsLimit } from '@shared/users/usage';
-import {
-  ImageGenerationInputImage,
-  ImageGenerationRequestOptions,
-} from '@ais-chat/ai-core/images/types';
+import { ImageGenerationRequestOptions } from '@ais-chat/ai-core/images/types';
 import { ImageGenerationOptions } from '@/components/image-generation/image-generation-types';
-import { IMAGE_GENERATION_INPUT_LIMIT } from '@/configuration-text-inputs/const';
-import { streamToBuffer } from '@/utils/files/image-data';
-import { getImageContentType } from '@/utils/files/image-data';
+import { validateInputFiles, fetchInputImages } from './image-generation-input-files';
 
 export interface ImageGenerationParams {
   prompt: string;
@@ -91,25 +85,7 @@ export async function handleImageGeneration({
     throw new Error('Prompt is required');
   }
 
-  const modelSupportsImageInput = (model.supportedImageFormats?.length ?? 0) > 0;
-  if (inputFileIds.length > 0 && !modelSupportsImageInput) {
-    throw new Error('Selected image model does not support image inputs');
-  }
-
-  if (inputFileIds.length > IMAGE_GENERATION_INPUT_LIMIT) {
-    throw new Error(
-      `Too many input images: ${inputFileIds.length} exceeds the limit of ${IMAGE_GENERATION_INPUT_LIMIT}`,
-    );
-  }
-
-  await Promise.all(
-    inputFileIds.map(async (fileId) => {
-      const owned = await dbVerifyFileOwnership({ fileId, userId });
-      if (!owned) {
-        throw new NotFoundError(`Input file not found or not owned by user: ${fileId}`);
-      }
-    }),
-  );
+  validateInputFiles({ model, inputFileIds });
 
   let conversationId: string | undefined;
 
@@ -147,7 +123,7 @@ export async function handleImageGeneration({
     }
 
     const size = model.imageGenerationConfig?.aspectRatio?.[options.aspectRatio] ?? 'auto';
-    const inputImages = await fetchInputImages(inputFileIds);
+    const inputImages = await fetchInputImages({ inputFileIds, userId });
 
     // Generate image using the service
     const result = await generateImage({
@@ -355,35 +331,4 @@ async function checkIfImageModelIsAssignedToFederalState(
   if (!foundModel) {
     throw new NotFoundError('Could not find image generation model for federal state');
   }
-}
-
-async function fetchInputImages(inputFileIds: string[]): Promise<ImageGenerationInputImage[]> {
-  if (inputFileIds.length === 0) return [];
-
-  const recordsById = new Map((await dbGetFilesInIds(inputFileIds)).map((file) => [file.id, file]));
-
-  return Promise.all(
-    inputFileIds.map(async (fileId) => {
-      const record = recordsById.get(fileId);
-      if (!record) {
-        throw new NotFoundError(`Input file record missing: ${fileId}`);
-      }
-
-      const stream = await getFileFromS3(`message_attachments/${fileId}`);
-      const data = await streamToBuffer(stream);
-
-      const mimeType = record.type.toLowerCase().startsWith('image/')
-        ? record.type
-        : getImageContentType(record.type);
-      if (!mimeType.toLowerCase().startsWith('image/')) {
-        throw new Error(`Input file is not an image: ${fileId}`);
-      }
-
-      return {
-        data,
-        mimeType,
-        filename: record.name,
-      };
-    }),
-  );
 }
