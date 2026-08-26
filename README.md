@@ -33,7 +33,7 @@ This guide helps you run AIS.chat using pre-built Docker images with minimal con
    - **Admin app**: http://localhost:3001
    - **API**: http://localhost:3002
    - **Keycloak**: http://localhost:8080 (credentials: `admin` / `admin`)
-   - **RustFS Console**: http://localhost:9001 (S3-compatible storage, credentials: `rustfsadmin` / `rustfsadmin123`)
+   - **RustFS Console**: http://localhost:9001 (S3-compatible storage, credentials: `rustfsadmin` / `RustFS-Admin-123456`)
 
 4. **Configure the application using ais-chat-admin:**
    - Navigate to the admin app at http://localhost:3001

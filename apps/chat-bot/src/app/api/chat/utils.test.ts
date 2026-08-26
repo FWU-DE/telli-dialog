@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   annotateMessageAttachmentNames,
   enrichMessagesWithImageData,
@@ -7,6 +7,11 @@ import {
 import { type ChatMessage } from '@/types/chat';
 import { type ChatAttachmentWithMessageId } from '../file-operations/preprocess-image';
 import type { LlmModelSelectModel } from '@shared/db/schema';
+import { env as imageAttachmentEnv } from './image-attachment-env';
+
+vi.mock('./image-attachment-env', () => ({
+  env: { imageAttachmentMode: 'url' },
+}));
 
 const anthropicModel: LlmModelSelectModel = {
   id: 'model-1',
@@ -203,6 +208,12 @@ describe('annotateMessageAttachmentNames', () => {
 });
 
 describe('determineImageAttachmentTypeForModel', () => {
+  const mutableImageAttachmentEnv = imageAttachmentEnv as { imageAttachmentMode: 'url' | 'base64' };
+
+  afterEach(() => {
+    mutableImageAttachmentEnv.imageAttachmentMode = 'url';
+  });
+
   it('should return "base64" for anthropic/ model names', () => {
     const model = anthropicModel;
 
@@ -219,5 +230,12 @@ describe('determineImageAttachmentTypeForModel', () => {
     const model = openAiModel;
 
     expect(determineImageAttachmentTypeForModel(model)).toBe('url');
+  });
+
+  it('should return "base64" for a non-anthropic model when IMAGE_ATTACHMENT_MODE=base64', () => {
+    mutableImageAttachmentEnv.imageAttachmentMode = 'base64';
+    const model = openAiModel;
+
+    expect(determineImageAttachmentTypeForModel(model)).toBe('base64');
   });
 });

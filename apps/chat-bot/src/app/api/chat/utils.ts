@@ -1,4 +1,5 @@
 import { logError } from '@shared/logging';
+import { env as imageAttachmentEnv } from './image-attachment-env';
 import { type ChatMessage } from '@/types/chat';
 import {
   generateTextWithBilling,
@@ -252,8 +253,12 @@ export async function getChatTitle({
 /**
  * Some models (like Anthropic models) require the image data to be included in the message as a base64 encoded string,
  * while others can work with just the image url. This function conditionally includes the base64 encoded data if required by the model.
+ * Setting IMAGE_ATTACHMENT_MODE=base64 forces base64 for all models (e.g. when the S3 storage isn't publicly reachable by the LLM provider).
  */
 export function determineImageAttachmentTypeForModel(model: LlmModelSelectModel): 'url' | 'base64' {
+  if (imageAttachmentEnv.imageAttachmentMode === 'base64') {
+    return 'base64';
+  }
   // we do not have settings on the LlmModelSelectModel to determine if the model needs image data,
   // so we will use the model name as a heuristic for now
   if (model.name.startsWith('anthropic/')) {
