@@ -161,6 +161,9 @@ jobs:
             elapsed=$((elapsed + 1))
           done
 
+      - name: Wait for E2E service dependencies
+        run: docker compose -f devops/docker/docker-compose.local.yml up -d --wait rabbitmq xberg crawl4ai qalc
+
       - name: Run E2E tests (app)
         run: pnpm --filter ais-chat-app e2e
         env:
