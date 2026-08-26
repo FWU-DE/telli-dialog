@@ -144,6 +144,7 @@ jobs:
           cp -a .next/static .next/standalone/apps/chat-bot/.next/
           cp -a public .next/standalone/apps/chat-bot/
           cd .next/standalone
+          # Prepend each log line with a UTC timestamp so the Playwright reporter can correlate them with tests.
           node ./apps/chat-bot/server.js 2>&1 \
             | gawk '{ print strftime("%Y-%m-%dT%H:%M:%SZ", systime(), 1), $0; fflush() }' \
             > /tmp/ais-chat-app.log &
@@ -167,8 +168,7 @@ jobs:
             elapsed=$((elapsed + 1))
           done
 
-      # Stream container logs (with timestamps) to a file so the Playwright reporter can slice
-      # them per test; the same file is printed at the end of the job.
+      # Stream container logs (with timestamps) to a file so the Playwright reporter can correlate them with tests.
       - name: Stream container logs to file
         run: docker compose -f devops/docker/docker-compose.local.yml logs --no-color --timestamps --follow > /tmp/container-logs.log 2>&1 &
 

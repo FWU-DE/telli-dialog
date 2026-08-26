@@ -9,7 +9,7 @@ const logLevels = logLevelOrder.slice(
 );
 
 // Write logs to stdout in development, or when explicitly enabled (e.g. e2e CI) so
-// prod-parity builds can still surface logs without changing NODE_ENV. LOG_TO_STDOUT is a
+// prod builds can still surface logs without changing NODE_ENV. LOG_TO_STDOUT is a
 // server-only env var, so guard the access to avoid throwing in client bundles.
 const logToStdout = isDevelopment() || (typeof window === 'undefined' && env.LOG_TO_STDOUT);
 
