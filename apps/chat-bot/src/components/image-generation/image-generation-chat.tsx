@@ -7,6 +7,7 @@ import { generateImageAction } from '@/app/(authed)/(chat-bot)/image-generation/
 import { ImageGenerationInputBox } from './image-generation-input-box';
 import { ImageActionButtons } from './image-action-buttons';
 import { ImageGenerationError } from './image-generation-error';
+import { ImageGenerationWarning } from './image-generation-warning';
 import { useTranslations } from 'next-intl';
 import LoadingAnimation from './loading-animation';
 import { ConversationMessageModel } from '@shared/db/types';
@@ -129,11 +130,13 @@ export default function ImageGenerationChat({
     setLastPrompt(currentPrompt);
     setErrorMessage(null);
 
-    const processedFiles = Array.from(files.values()).filter(
-      (f): f is LocalFileState & { fileId: string } =>
-        f.status === 'processed' && f.fileId !== undefined,
-    );
-    const inputFileIds = modelSupportsImageInput ? processedFiles.map((f) => f.fileId) : [];
+    const processedFiles = modelSupportsImageInput
+      ? Array.from(files.values()).filter(
+          (f): f is LocalFileState & { fileId: string } =>
+            f.status === 'processed' && f.fileId !== undefined,
+        )
+      : [];
+    const inputFileIds = processedFiles.map((f) => f.fileId);
 
     setSubmittedInputFiles(
       processedFiles.map((f) => ({
@@ -198,6 +201,11 @@ export default function ImageGenerationChat({
           fileUploadFn={defaultUploadFile}
           supportedImageFormats={selectedModel?.supportedImageFormats}
         />
+        {files.size > 0 && !modelSupportsImageInput && (
+          <ImageGenerationWarning
+            message={tImageGeneration('input-images-not-supported-warning')}
+          />
+        )}
         <div className="w-3/4 mx-auto">
           {isGenerating && (
             <ImageGenerationResult prompt={lastPrompt} attachedFiles={submittedInputFiles}>
