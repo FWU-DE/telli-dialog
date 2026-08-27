@@ -87,6 +87,8 @@ export async function handleImageGeneration({
 
   validateInputFiles({ model, inputFileIds });
 
+  const inputImages = await fetchInputImages({ inputFileIds, userId });
+
   let conversationId: string | undefined;
 
   try {
@@ -123,7 +125,6 @@ export async function handleImageGeneration({
     }
 
     const size = model.imageGenerationConfig?.aspectRatio?.[options.aspectRatio] ?? 'auto';
-    const inputImages = await fetchInputImages({ inputFileIds, userId });
 
     // Generate image using the service
     const result = await generateImage({
