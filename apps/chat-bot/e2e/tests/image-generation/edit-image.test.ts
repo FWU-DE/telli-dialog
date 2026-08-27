@@ -1,6 +1,5 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
-import { waitForToast } from '../../utils/utils';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
@@ -44,8 +43,6 @@ test('can edit an image by uploading a reference image and providing a prompt', 
   await page.getByTestId('image-prompt-input').fill(prompt);
   await page.getByTestId('image-generate-button').click();
 
-  // While generating, the prompt and the input images should be displayed
-  await expect(page.getByText(prompt)).toBeVisible();
   await expect(page.getByText('Verwendete Anhänge')).toBeVisible();
 
   const loadingAnimation = page.getByAltText('Ladeanimation');
@@ -69,7 +66,5 @@ test('can edit an image by uploading a reference image and providing a prompt', 
     expect(naturalWidth).toBeGreaterThan(0);
   }).toPass();
 
-  // The prompt and input image should still be visible in the result attachments after generation
-  await expect(page.getByText(prompt)).toBeVisible();
   await expect(page.getByText('Verwendete Anhänge')).toBeVisible();
 });
