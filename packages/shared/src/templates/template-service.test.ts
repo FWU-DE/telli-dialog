@@ -13,6 +13,7 @@ import {
   dbGetRelatedAssistantFiles,
   dbGetRelatedCharacterFiles,
 } from '@shared/db/functions/files';
+import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 import {
   duplicateFileWithEmbeddings,
   linkFileToAssistant,
@@ -21,6 +22,7 @@ import {
 } from '@shared/files/fileService';
 import { logError } from '@shared/logging';
 import { copyFileInS3 } from '@shared/s3';
+import { generateUUID } from '@shared/utils/uuid';
 
 vi.mock('@shared/db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
@@ -38,6 +40,10 @@ vi.mock('@shared/db/functions/files', () => ({
   dbGetFilesForLearningScenario: vi.fn(),
 }));
 
+vi.mock('@shared/db/functions/learning-scenario', () => ({
+  dbGetLearningScenarioById: vi.fn(),
+}));
+
 vi.mock('@shared/files/fileService', () => ({
   duplicateFileWithEmbeddings: vi.fn(),
   linkFileToAssistant: vi.fn(),
@@ -53,6 +59,17 @@ vi.mock('@shared/logging', () => ({
 vi.mock('@shared/s3', () => ({
   copyFileInS3: vi.fn(),
 }));
+
+const { mockDbReturning, mockDbValues, mockDbInsert } = vi.hoisted(() => {
+  const mockDbReturning = vi.fn();
+  const mockDbValues = vi.fn<
+    (values: Record<string, unknown>) => { returning: typeof mockDbReturning }
+  >(() => ({ returning: mockDbReturning }));
+  const mockDbInsert = vi.fn(() => ({ values: mockDbValues }));
+  return { mockDbReturning, mockDbValues, mockDbInsert };
+});
+
+vi.mock('@shared/db', () => ({ db: { insert: mockDbInsert } }));
 
 describe('template-service', () => {
   beforeEach(() => {
@@ -94,7 +111,7 @@ describe('template-service', () => {
     });
 
     it('should bubble up s3 copy errors', async () => {
-      (copyFileInS3 as MockedFunction<typeof copyFileInS3>).mockRejectedValue(
+      (copyFileInS3 as MockedFunction<typeof copyFileInS3>).mockRejectedValueOnce(
         new Error('S3 copy failed') as never,
       );
 
@@ -145,6 +162,30 @@ describe('template-service', () => {
         }),
       });
       expect(result).toBe(upsertedAssistant);
+    });
+
+    it('should duplicate the picture in S3 under a key scoped to the new assistant id', async () => {
+      const sourceAssistant = {
+        id: 'assistant-origin',
+        name: 'Original name',
+        pictureId: 'custom-gpts/assistant-origin/avatar_abc123',
+      };
+      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+        sourceAssistant as never,
+      );
+      (dbUpsertAssistant as MockedFunction<typeof dbUpsertAssistant>).mockResolvedValue({
+        id: 'assistant-copy',
+      } as never);
+
+      await copyAssistant('assistant-origin', 'global', { id: 'user-1' });
+
+      const call = (dbUpsertAssistant as MockedFunction<typeof dbUpsertAssistant>).mock
+        .calls[0]?.[0];
+      expect(copyFileInS3).toHaveBeenCalledWith({
+        copySource: 'custom-gpts/assistant-origin/avatar_abc123',
+        newKey: call?.assistant.pictureId,
+      });
+      expect(call?.assistant.pictureId).not.toContain('assistant-origin');
     });
 
     it('should fallback to source name when duplicateAssistantName is not provided', async () => {
@@ -233,6 +274,30 @@ describe('template-service', () => {
         }),
       );
       expect(result).toBe(createdCharacter);
+    });
+
+    it('should duplicate the picture in S3 under a key scoped to the new character id', async () => {
+      const sourceCharacter = {
+        id: 'character-origin',
+        name: 'Original character',
+        pictureId: 'characters/character-origin/avatar_abc123',
+      };
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        sourceCharacter as never,
+      );
+      (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mockResolvedValue([
+        { id: 'character-copy' },
+      ] as never);
+
+      await copyCharacter('character-origin', 'global', { id: 'user-1' });
+
+      const call = (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mock
+        .calls[0]?.[0];
+      expect(copyFileInS3).toHaveBeenCalledWith({
+        copySource: 'characters/character-origin/avatar_abc123',
+        newKey: call?.pictureId,
+      });
+      expect(call?.pictureId).not.toContain('character-origin');
     });
 
     it('should fallback to source name when duplicateCharacterName is not provided', async () => {
@@ -383,6 +448,33 @@ describe('template-service', () => {
   describe('createTemplateFromUrl', () => {
     it('should throw on invalid url format', async () => {
       await expect(createTemplateFromUrl('/invalid/url')).rejects.toThrow('Invalid url format.');
+    });
+
+    it('should duplicate the learning scenario picture in S3 under a key scoped to the new template id', async () => {
+      const originalId = generateUUID();
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue({
+        id: originalId,
+        name: 'Original name',
+        modelId: generateUUID(),
+        userId: generateUUID(),
+        accessLevel: 'private',
+        pictureId: `shared-chats/${originalId}/avatar_abc123`,
+      } as never);
+      mockDbReturning.mockResolvedValue([{ id: generateUUID() }]);
+      (
+        dbGetFilesForLearningScenario as MockedFunction<typeof dbGetFilesForLearningScenario>
+      ).mockResolvedValue([]);
+
+      await createTemplateFromUrl(`/learning-scenarios/editor/${originalId}`);
+
+      const call = mockDbValues.mock.calls[0]?.[0];
+      expect(copyFileInS3).toHaveBeenCalledWith({
+        copySource: `shared-chats/${originalId}/avatar_abc123`,
+        newKey: call?.pictureId,
+      });
+      expect(call?.pictureId).not.toContain(originalId);
     });
   });
 });

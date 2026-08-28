@@ -20,6 +20,7 @@ import {
   enrichMessagesWithImageData,
   getMostRecentUserMessage,
   limitChatHistory,
+  annotateMessageAttachmentNames,
 } from '../chat/utils';
 import { logError } from '@shared/logging';
 import { buildTools } from '../chat/build-tools';
@@ -168,7 +169,9 @@ export async function sendCharacterMessage({
   });
 
   // Prune messages
-  const prunedMessages = limitChatHistory(messages);
+  const prunedMessages = limitChatHistory(
+    annotateMessageAttachmentNames(messages, relatedFileEntities),
+  );
 
   // Check if the model supports images based on supportedImageFormats
   const modelSupportsImages =
