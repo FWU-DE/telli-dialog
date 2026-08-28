@@ -207,7 +207,7 @@ async function getImageParagraph(file: FileModel): Promise<Paragraph | undefined
     const fileStream = await getFileFromS3(`message_attachments/${file.id}`);
     const imageBuffer = await streamToBuffer(fileStream);
     const { data, type } = await getDocxImageData({ imageBuffer, file });
-    const { width, height } = getExportedImageSize(file);
+    const { width, height } = await getExportedImageSize({ imageBuffer, file });
 
     return new Paragraph({
       children: [
@@ -264,11 +264,29 @@ function getDocxImageType(fileName: string): ExportedImageType | undefined {
   return undefined;
 }
 
-function getExportedImageSize(file: FileModel): { width: number; height: number } {
-  const width =
-    typeof file.metadata?.width === 'number' ? file.metadata.width : EXPORTED_IMAGE_MAX_HEIGHT;
-  const height =
-    typeof file.metadata?.height === 'number' ? file.metadata.height : EXPORTED_IMAGE_MAX_HEIGHT;
+async function getExportedImageSize({
+  imageBuffer,
+  file,
+}: {
+  imageBuffer: Buffer;
+  file: FileModel;
+}): Promise<{ width: number; height: number }> {
+  let width = typeof file.metadata?.width === 'number' ? file.metadata.width : undefined;
+  let height = typeof file.metadata?.height === 'number' ? file.metadata.height : undefined;
+
+  if (width === undefined || height === undefined) {
+    const metadata = await sharp(imageBuffer).metadata();
+    width ??= metadata.width;
+    height ??= metadata.height;
+  }
+
+  if (width === undefined || height === undefined || width <= 0 || height <= 0) {
+    return {
+      width: EXPORTED_IMAGE_MAX_HEIGHT,
+      height: EXPORTED_IMAGE_MAX_HEIGHT,
+    };
+  }
+
   const scale = Math.min(1, EXPORTED_IMAGE_MAX_HEIGHT / height);
 
   return {
