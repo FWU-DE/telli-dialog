@@ -9,10 +9,12 @@
     "build:envless": "next build --experimental-build-mode compile",
     "check-types": "next typegen && tsc --noEmit",
     "dev": "next dev -p 3001 --turbo",
+    "e2e": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
-    "start": "next start"
+    "start": "next start",
+    "test": "vitest run"
   },
   "dependencies": {
     "@ais-chat/api-database": "workspace:*",
@@ -42,6 +44,7 @@
   "devDependencies": {
     "@ais-chat/eslint-config": "workspace:*",
     "@ais-chat/typescript-config": "workspace:*",
+    "@playwright/test": "1.62.1",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "24.13.3",
     "@types/react": "19.2.18",
@@ -55,6 +58,7 @@
     "prettier-eslint": "17.1.2",
     "tailwindcss": "4.3.3",
     "tailwindcss-animate": "1.0.7",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
   }
 }
