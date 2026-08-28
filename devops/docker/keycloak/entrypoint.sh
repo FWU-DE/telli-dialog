@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export_realm() {
+export() {
   kill "$PID" 2>/dev/null || true
   wait "$PID" 2>/dev/null || true
   echo "Exporting realm and users..."
@@ -17,7 +17,7 @@ export_realm() {
   fi
 }
 
-trap 'export_realm' SIGTERM
+trap 'export' SIGTERM
 
 /opt/keycloak/bin/kc.sh start-dev --import-realm --db dev-file &
 PID=$!

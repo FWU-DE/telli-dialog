@@ -7,7 +7,7 @@ const SECURE_SESSION_COOKIE_NAME = `__Secure-${SESSION_COOKIE_NAME}`; // Used wh
 
 /**
  * This route is called by the IDP after logout.
- * We clear the session cookies and redirect to the login page.
+ * We clear the session cookies and redirect to the application root.
  * If the session cookie is bigger than 4 kb, the cookie might be split into multiple cookies.
  * Therefore, we clear all cookies that start with the session cookie name.
  */
@@ -35,6 +35,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     logError('Error during logout-callback', error);
-    return NextResponse.redirect(new URL('/login', trustedRequest.url));
+    return NextResponse.redirect(new URL('/', trustedRequest.url));
   }
 }

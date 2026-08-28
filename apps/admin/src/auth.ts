@@ -70,6 +70,8 @@ const result = NextAuth({
       });
       if (adminRole) {
         token.adminRole = adminRole;
+      } else {
+        delete token.adminRole;
       }
       return token;
     },

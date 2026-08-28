@@ -1,11 +1,12 @@
 import { auth } from '@/auth';
+import { EDITOR_ROLE } from '@/auth/roles';
 import { ROUTES } from '@/consts/routes';
 import { redirect } from 'next/navigation';
 
 export default async function Home() {
   const session = await auth();
 
-  if (session?.adminRole === 'Editor') {
+  if (session?.adminRole === EDITOR_ROLE) {
     redirect(ROUTES.app.page);
   }
 
