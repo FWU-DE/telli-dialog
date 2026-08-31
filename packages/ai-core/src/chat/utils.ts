@@ -1,6 +1,40 @@
 import { getEncoding, type Tiktoken } from 'js-tiktoken';
 import type OpenAI from 'openai';
-import type { Message, ToolDefinition } from './types';
+import type { ChatImageAttachment, Message, ToolDefinition } from './types';
+
+export async function createInlineImageDataUrl(attachment: ChatImageAttachment): Promise<string> {
+  if (attachment.url.startsWith('data:image/') && attachment.url.includes(';base64,')) {
+    return attachment.url;
+  }
+
+  const response = await fetch(attachment.url);
+  if (!response.ok) {
+    throw new Error(`Could not fetch image attachment: ${response.status} ${response.statusText}`);
+  }
+
+  const buffer = Buffer.from(await response.arrayBuffer());
+  return `data:${attachment.contentType};base64,${buffer.toString('base64')}`;
+}
+
+export async function convertImageAttachmentsToInlineData(messages: Message[]): Promise<Message[]> {
+  return Promise.all(
+    messages.map(async (message) => {
+      if (!message.attachments?.length) {
+        return message;
+      }
+
+      return {
+        ...message,
+        attachments: await Promise.all(
+          message.attachments.map(async (attachment) => ({
+            ...attachment,
+            url: await createInlineImageDataUrl(attachment),
+          })),
+        ),
+      };
+    }),
+  );
+}
 
 /**
  * Converts internal Message format to OpenAI ChatCompletionMessageParam format.

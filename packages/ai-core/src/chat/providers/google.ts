@@ -1,8 +1,8 @@
 import {
   FinishReason,
   FunctionCallingConfigMode,
+  createPartFromBase64,
   createPartFromText,
-  createPartFromUri,
 } from '@google/genai';
 import { randomUUID } from 'node:crypto';
 import type {
@@ -27,7 +27,7 @@ import type {
 } from '../types';
 import { AiGenerationError, ResponsibleAIError } from '../../errors';
 import { createGoogleClient, formatGoogleError } from '../../google-client';
-import { calculateCompletionUsage } from '../utils';
+import { calculateCompletionUsage, createInlineImageDataUrl } from '../utils';
 import {
   constructGoogleAnthropicAgenticStreamFn,
   constructGoogleAnthropicTextGenerationFn,
@@ -43,7 +43,7 @@ const RESPONSIBLE_AI_FINISH_REASONS = new Set<FinishReason>([
   FinishReason.IMAGE_PROHIBITED_CONTENT,
 ]);
 
-function buildGoogleParts(message: Message): Part[] {
+async function buildGoogleParts(message: Message): Promise<Part[]> {
   const parts: Part[] = [];
 
   if (message.content !== '') {
@@ -55,7 +55,8 @@ function buildGoogleParts(message: Message): Part[] {
       continue;
     }
 
-    parts.push(createPartFromUri(attachment.url, attachment.contentType));
+    const imageDataUrl = await createInlineImageDataUrl(attachment);
+    parts.push(createPartFromBase64(imageDataUrl.split(',')[1]!, attachment.contentType));
   }
 
   if (parts.length === 0) {
@@ -65,20 +66,22 @@ function buildGoogleParts(message: Message): Part[] {
   return parts;
 }
 
-function buildGoogleGenerateContentParameters({
+async function buildGoogleGenerateContentParameters({
   messages,
   model,
   maxTokens,
   temperature,
   tools,
   toolChoice,
-}: Parameters<TextGenerationFn>[0]): GenerateContentParameters {
-  const contents = messages
-    .filter((message) => message.role !== 'system')
-    .map((message) => ({
-      role: message.role === 'assistant' ? 'model' : 'user',
-      parts: buildGoogleParts(message),
-    }));
+}: Parameters<TextGenerationFn>[0]): Promise<GenerateContentParameters> {
+  const contents = await Promise.all(
+    messages
+      .filter((message) => message.role !== 'system')
+      .map(async (message) => ({
+        role: message.role === 'assistant' ? 'model' : 'user',
+        parts: await buildGoogleParts(message),
+      })),
+  );
   const systemInstruction = messages
     .filter((message) => message.role === 'system' && message.content !== '')
     .map((message) => createPartFromText(message.content));
@@ -232,7 +235,7 @@ export function constructGoogleTextStreamFn(model: AiModel): TextStreamFn {
   ) {
     try {
       const stream = await clientConfig.client.models.generateContentStream(
-        buildGoogleGenerateContentParameters({
+        await buildGoogleGenerateContentParameters({
           messages,
           model: modelName,
           maxTokens,
@@ -290,7 +293,7 @@ export function constructGoogleTextGenerationFn(model: AiModel): TextGenerationF
   }) {
     try {
       const response = await clientConfig.client.models.generateContent(
-        buildGoogleGenerateContentParameters({
+        await buildGoogleGenerateContentParameters({
           messages,
           model: modelName,
           maxTokens,
@@ -336,7 +339,7 @@ export function constructGoogleAgenticStreamFn(model: AiModel): AgenticStreamFn 
   }) {
     try {
       const stream = await clientConfig.client.models.generateContentStream(
-        buildGoogleGenerateContentParameters({
+        await buildGoogleGenerateContentParameters({
           messages,
           model: modelName,
           maxTokens,

@@ -8,7 +8,7 @@ import type {
   TokenUsage,
 } from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
-import { toOpenAIResponsesInput } from '../utils';
+import { convertImageAttachmentsToInlineData, toOpenAIResponsesInput } from '../utils';
 import { streamOpenAICompatibleAgenticResponse } from './openai-compatible';
 import { env } from '../../env';
 import { dbGetModelIdByProviderAndUpstreamName } from '@ais-chat/api-database';
@@ -47,6 +47,15 @@ function getBifrostModelName(model: AiModel): string {
   return model.name.replace(/^anthropic\//, '');
 }
 
+async function prepareMessagesForBifrost(
+  model: AiModel,
+  messages: Parameters<TextStreamFn>[0]['messages'],
+) {
+  return model.setting.provider === 'google'
+    ? convertImageAttachmentsToInlineData(messages)
+    : messages;
+}
+
 async function getUsedModelId(
   extraFields: unknown,
   models: AiModel[],
@@ -80,7 +89,7 @@ export function constructBifrostTextStreamFn(model: AiModel): TextStreamFn {
   return async function* getBifrostTextStream({ messages, maxTokens, fallbackModels }, onComplete) {
     const response = await client.responses.create({
       model: modelName,
-      input: toOpenAIResponsesInput(messages),
+      input: toOpenAIResponsesInput(await prepareMessagesForBifrost(model, messages)),
       stream: true,
       max_output_tokens: maxTokens,
       ...model.additionalParameters,
@@ -139,7 +148,7 @@ export function constructBifrostAgenticStreamFn(model: AiModel): AgenticStreamFn
   }) {
     yield* streamOpenAICompatibleAgenticResponse({
       client,
-      messages,
+      messages: await prepareMessagesForBifrost(model, messages),
       modelName,
       maxTokens,
       tools,
@@ -160,7 +169,7 @@ export function constructBifrostTextGenerationFn(model: AiModel): TextGeneration
   return async function getBifrostTextGeneration({ messages, maxTokens, fallbackModels }) {
     const response = await client.responses.create({
       model: modelName,
-      input: toOpenAIResponsesInput(messages),
+      input: toOpenAIResponsesInput(await prepareMessagesForBifrost(model, messages)),
       stream: false,
       max_output_tokens: maxTokens,
       ...model.additionalParameters,
