@@ -59,6 +59,12 @@ export default function ImageGenerationChat({
 
   const modelSupportsImageInput = (selectedModel?.supportedImageFormats?.length ?? 0) > 0;
 
+  const showInputBox =
+    conversationId === undefined &&
+    !isGenerating &&
+    displayedImage === null &&
+    errorMessage === null;
+
   // Load the single image from initial messages and file attachments
   useEffect(() => {
     const loadImageFromFiles = async () => {
@@ -190,21 +196,25 @@ export default function ImageGenerationChat({
   return (
     <div className="flex flex-col h-full w-full">
       <div className="flex-1 flex flex-col justify-start p-6 w-full mx-auto">
-        <ImageGenerationInputBox
-          isLoading={isGenerating}
-          handleInputChange={handleInputChange}
-          customHandleSubmit={customHandleSubmit}
-          input={input}
-          files={files}
-          setFiles={setFiles}
-          handleDeattachFile={handleDeattachFile}
-          fileUploadFn={defaultUploadFile}
-          supportedImageFormats={selectedModel?.supportedImageFormats}
-        />
-        {files.size > 0 && !modelSupportsImageInput && (
-          <ImageGenerationWarning
-            message={tImageGeneration('input-images-not-supported-warning')}
-          />
+        {showInputBox && (
+          <>
+            <ImageGenerationInputBox
+              isLoading={isGenerating}
+              handleInputChange={handleInputChange}
+              customHandleSubmit={customHandleSubmit}
+              input={input}
+              files={files}
+              setFiles={setFiles}
+              handleDeattachFile={handleDeattachFile}
+              fileUploadFn={defaultUploadFile}
+              supportedImageFormats={selectedModel?.supportedImageFormats}
+            />
+            {files.size > 0 && !modelSupportsImageInput && (
+              <ImageGenerationWarning
+                message={tImageGeneration('input-images-not-supported-warning')}
+              />
+            )}
+          </>
         )}
         <div className="w-3/4 mx-auto">
           {isGenerating && (
