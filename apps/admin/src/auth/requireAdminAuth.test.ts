@@ -11,7 +11,7 @@ const { authMock, setUserMock } = vi.hoisted(() => ({
 vi.mock('@/auth', () => ({ auth: authMock }));
 vi.mock('@sentry/nextjs', () => ({ setUser: setUserMock }));
 
-import { requireAdminAppAccess, requireAdminAuth } from './requireAdminAuth';
+import { requireAdminOrEditorAuth, requireAdminAuth } from './requireAdminAuth';
 
 function createSession(adminRole: Session['adminRole']): Session {
   return {
@@ -39,14 +39,14 @@ describe('admin authorization guards', () => {
   it('rejects an authenticated user without an admin role', async () => {
     authMock.mockResolvedValue(createSession(undefined));
 
-    await expect(requireAdminAppAccess()).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(requireAdminOrEditorAuth()).rejects.toBeInstanceOf(ForbiddenError);
   });
 
   it('allows an Editor to access the app administration only', async () => {
     const editorSession = createSession(EDITOR_ROLE);
     authMock.mockResolvedValue(editorSession);
 
-    await expect(requireAdminAppAccess()).resolves.toBe(editorSession);
+    await expect(requireAdminOrEditorAuth()).resolves.toBe(editorSession);
     await expect(requireAdminAuth()).rejects.toBeInstanceOf(ForbiddenError);
   });
 

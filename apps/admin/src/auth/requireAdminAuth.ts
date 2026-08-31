@@ -24,7 +24,7 @@ export async function requireAdminAuth(): Promise<ValidatedSession> {
   return session;
 }
 
-export async function requireAdminAppAccess(): Promise<ValidatedSession> {
+export async function requireAdminOrEditorAuth(): Promise<ValidatedSession> {
   const session = await requireAuthenticatedAdminRole();
 
   if (!canAccessEditorArea(session.adminRole)) {
