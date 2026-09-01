@@ -1,10 +1,12 @@
 'use server';
 import { requireAdminOrEditorAuth } from '@/auth/requireAdminAuth';
+import { runServerAction } from '@shared/actions/run-server-action';
 import { TemplateToFederalStateMapping, TemplateTypes } from '@shared/templates/template';
 import {
   getFederalStatesWithMappings,
   getTemplateById,
   updateAuthorOfTemplate,
+  updateTemplateDeletedState,
   updateTemplateMappings,
 } from '@ais-chat/shared/templates/template-service';
 
@@ -21,7 +23,25 @@ export async function updateAuthorOfTemplateAction(
 ) {
   await requireAdminOrEditorAuth();
 
-  return updateAuthorOfTemplate(templateType, templateId, newAuthor);
+  return runServerAction('updateAuthorOfTemplateAction', updateAuthorOfTemplate)(
+    templateType,
+    templateId,
+    newAuthor,
+  );
+}
+
+export async function updateTemplateDeletedStateAction(
+  templateType: TemplateTypes,
+  templateId: string,
+  isDeleted: boolean,
+) {
+  await requireAdminOrEditorAuth();
+
+  return runServerAction('updateTemplateDeletedStateAction', updateTemplateDeletedState)(
+    templateType,
+    templateId,
+    isDeleted,
+  );
 }
 
 export async function getFederalStatesWithMappingsAction(
