@@ -16,6 +16,7 @@ export default function SelectImageStyle() {
       caption={t('label')}
       triggerLabel={selectedStyle?.displayName ?? t('no-style')}
       triggerAriaLabel={t('aria-label')}
+      isDropdownEnabled={selectableStyles.length > 0}
     >
       {selectableStyles.map((style) => {
         return (

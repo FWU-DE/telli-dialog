@@ -1,6 +1,5 @@
 import { FileModel } from '@shared/db/schema';
-import DisplayUploadedFile from './display-uploaded-file';
-import DisplayUploadedImage, { type PendingFileModel } from './display-uploaded-image';
+import MessageImageAttachment, { type PendingFileModel } from './message-image-attachment';
 import CopyToClipboardButton from '../common/clipboard-button';
 import ReloadIcon from '../icons/reload';
 import MarkdownDisplay from './markdown-display';
@@ -21,6 +20,7 @@ import {
 } from './sources/web-search-sources';
 import DownloadConversationMessageButton from './download-conversation-message-button';
 import { utils } from '@shared/utils';
+import DisplayFileAttachment from './display-file-attachment';
 
 // Re-export for consumers
 export type { PendingFileModel };
@@ -38,7 +38,6 @@ export function ChatBox({
   conversationId,
   characterName,
   status,
-  getSignedUrlFn,
   showWebSourcesInDialog = false,
 }: {
   assistantIcon?: ReactNode;
@@ -53,7 +52,6 @@ export function ChatBox({
   conversationId?: string;
   characterName?: string;
   status: ChatStatus;
-  getSignedUrlFn?: (fileId: string) => Promise<string>;
   showWebSourcesInDialog?: boolean;
 }) {
   const tCommon = useTranslations('common');
@@ -100,13 +98,7 @@ export function ChatBox({
         {imageFiles.length > 0 && (
           <div className="flex flex-row gap-2 overflow-auto">
             {imageFiles.map((file) => (
-              <DisplayUploadedImage
-                file={file}
-                status="processed"
-                key={file.id}
-                showBanner={false}
-                getSignedUrl={getSignedUrlFn}
-              />
+              <MessageImageAttachment file={file} key={file.id} />
             ))}
           </div>
         )}
@@ -114,7 +106,7 @@ export function ChatBox({
         {nonImageFiles.length > 0 && (
           <div className="flex w-fit max-w-full min-w-0 flex-row flex-wrap justify-end gap-2 overflow-hidden">
             {nonImageFiles.map((file) => (
-              <DisplayUploadedFile fileName={file.name} status="processed" key={file.id} />
+              <DisplayFileAttachment fileName={file.name} key={file.id} />
             ))}
           </div>
         )}

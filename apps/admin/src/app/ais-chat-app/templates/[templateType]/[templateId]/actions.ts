@@ -1,5 +1,5 @@
 'use server';
-import { requireAdminAuth } from '@/auth/requireAdminAuth';
+import { requireAdminOrEditorAuth } from '@/auth/requireAdminAuth';
 import { runServerAction } from '@shared/actions/run-server-action';
 import { TemplateToFederalStateMapping, TemplateTypes } from '@shared/templates/template';
 import {
@@ -11,7 +11,7 @@ import {
 } from '@ais-chat/shared/templates/template-service';
 
 export async function getTemplateByIdAction(templateType: TemplateTypes, templateId: string) {
-  await requireAdminAuth();
+  await requireAdminOrEditorAuth();
 
   return getTemplateById(templateType, templateId);
 }
@@ -21,7 +21,7 @@ export async function updateAuthorOfTemplateAction(
   templateId: string,
   newAuthor: string,
 ) {
-  await requireAdminAuth();
+  await requireAdminOrEditorAuth();
 
   return runServerAction('updateAuthorOfTemplateAction', updateAuthorOfTemplate)(
     templateType,
@@ -35,7 +35,7 @@ export async function updateTemplateDeletedStateAction(
   templateId: string,
   isDeleted: boolean,
 ) {
-  await requireAdminAuth();
+  await requireAdminOrEditorAuth();
 
   return runServerAction('updateTemplateDeletedStateAction', updateTemplateDeletedState)(
     templateType,
@@ -48,7 +48,7 @@ export async function getFederalStatesWithMappingsAction(
   templateType: TemplateTypes,
   templateId: string,
 ) {
-  await requireAdminAuth();
+  await requireAdminOrEditorAuth();
 
   return getFederalStatesWithMappings(templateType, templateId);
 }
@@ -58,7 +58,7 @@ export async function updateTemplateMappingsAction(
   templateId: string,
   mappings: TemplateToFederalStateMapping[],
 ) {
-  await requireAdminAuth();
+  await requireAdminOrEditorAuth();
 
   return updateTemplateMappings(templateType, templateId, mappings);
 }

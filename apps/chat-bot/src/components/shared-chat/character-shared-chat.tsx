@@ -72,34 +72,6 @@ export default function CharacterSharedChat({
     };
   }
 
-  async function getSignedUrlForSharedCharacterFile(
-    fileId: string,
-    sharedSessionId: string,
-  ): Promise<string> {
-    const response = await fetch('/api/v1/shared-chat/files/signed-url', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        inviteCode,
-        entityType: 'character',
-        entityId: id,
-        fileId,
-        sharedSessionId,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Could not read file');
-    }
-
-    const json = await response.json();
-    const parsed = z.object({ signedUrl: z.string() }).parse(json);
-
-    return parsed.signedUrl;
-  }
-
   return (
     <GenericSharedChat
       headerT={t}
@@ -110,7 +82,6 @@ export default function CharacterSharedChat({
       dialogStartMode="derived"
       assistantIcon={assistantIcon}
       uploadFileFn={uploadSharedCharacterFile}
-      getSignedUrlFn={getSignedUrlForSharedCharacterFile}
       showWebSourcesInDialog
     />
   );

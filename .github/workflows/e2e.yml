@@ -20,17 +20,23 @@ jobs:
       VIDIS_CLIENT_ID: ais-chat-e2e-client
       VIDIS_CLIENT_SECRET: ClientSecret-e2e
       VIDIS_ISSUER_URI: http://localhost:8080/realms/ais-chat-local
+      KEYCLOAK_CLIENT_ID: ais-chat-e2e-client
+      KEYCLOAK_CLIENT_SECRET: ClientSecret-e2e
+      KEYCLOAK_ISSUER: http://localhost:8080/realms/ais-chat-local
       API_DATABASE_URL: postgresql://admin:test1234@127.0.0.1:5432/api_db
       API_URL: http://localhost:3002
       API_KEY: ApiKeyForAISChatApiAdminApi
       ENCRYPTION_KEY: EncryptionKeyForEncryptedApiKeysToAISChatApi
       # Auth.js secret
       AUTH_SECRET: 'yN1a0lQ77RgeEQam5DvGaddbdUDQoxswK+21FmEqBPs='
-      # S3 Storage
-      OTC_SECRET_ACCESS_KEY: ${{ secrets.OTC_SECRET_ACCESS_KEY }}
-      OTC_ACCESS_KEY_ID: ${{ secrets.OTC_ACCESS_KEY_ID }}
-      OTC_S3_HOSTNAME: ${{ secrets.OTC_S3_HOSTNAME }}
-      OTC_BUCKET_NAME: ${{ secrets.OTC_BUCKET_NAME }}
+      # S3 Storage (local RustFS, started via docker-compose.local.yml)
+      OTC_SECRET_ACCESS_KEY: RustFS-Admin-123456
+      OTC_ACCESS_KEY_ID: rustfsadmin
+      OTC_S3_HOSTNAME: http://127.0.0.1:9000
+      OTC_S3_REGION: eu-de
+      OTC_BUCKET_NAME: ais-chat
+      # Send image attachments to the LLM as base64 since RustFS is not publicly reachable
+      IMAGE_ATTACHMENT_MODE: base64
       # Disable telemetry
       NEXT_TELEMETRY_DISABLED: 1
       TURBO_TELEMETRY_DISABLED: 1
@@ -42,6 +48,9 @@ jobs:
       # Bifrost
       BIFROST_BASE_URL: http://localhost:8089/openai/v1
       BIFROST_API_KEY: sk-bf-example-key
+      # Log files shared between the app/container log steps and the Playwright log reporter
+      APP_LOG_FILE: /tmp/ais-chat-app.log
+      CONTAINER_LOG_FILE: /tmp/container-logs.log
 
     steps:
       - name: Checkout code
@@ -95,8 +104,8 @@ jobs:
         env:
           PORT: 3002
 
-      - name: Wait for bifrost and mock-llm
-        run: docker compose -f devops/docker/docker-compose.local.yml up -d --wait bifrost mock-llm
+      - name: Wait for bifrost, mock-llm and rustfs
+        run: docker compose -f devops/docker/docker-compose.local.yml up -d --wait bifrost mock-llm rustfs-init
 
       - name: Seed ais-chat-api database
         # db:seed will print the generated API KEY on the console
@@ -141,10 +150,29 @@ jobs:
           cp -a .next/static .next/standalone/apps/chat-bot/.next/
           cp -a public .next/standalone/apps/chat-bot/
           cd .next/standalone
-          node ./apps/chat-bot/server.js > /tmp/ais-chat-app.log 2>&1 &
+          # Prepend each log line with a UTC timestamp so the Playwright reporter can correlate them with tests.
+          node ./apps/chat-bot/server.js 2>&1 \
+            | gawk '{ print strftime("%Y-%m-%dT%H:%M:%SZ", systime(), 1), $0; fflush() }' \
+            > "$APP_LOG_FILE" &
         env:
-          NODE_ENV: test
+          # Surface all app log levels on stdout (captured in $APP_LOG_FILE).
+          LOG_TO_STDOUT: 'true'
           LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
+
+      - name: Start admin application
+        run: |
+          pnpm --filter ais-chat-admin dev > /tmp/ais-chat-admin.log 2>&1 &
+          timeout=60
+          elapsed=0
+          until wget -qO- http://localhost:3001/api/healthz > /dev/null 2>&1; do
+            if [ $elapsed -ge $timeout ]; then
+              echo "ais-chat-admin did not become ready within ${timeout}s"
+              exit 1
+            fi
+            echo "$(date) - waiting for ais-chat-admin to be ready"
+            sleep 1
+            elapsed=$((elapsed + 1))
+          done
 
       - name: Wait for valkey and keycloak
         run: |
@@ -161,12 +189,21 @@ jobs:
             elapsed=$((elapsed + 1))
           done
 
+      # Stream container logs (with timestamps) to a file so the Playwright reporter can correlate them with tests.
+      - name: Stream container logs to file
+        run: docker compose -f devops/docker/docker-compose.local.yml logs --no-color --timestamps --follow > "$CONTAINER_LOG_FILE" 2>&1 &
+
       - name: Run E2E tests (app)
         run: pnpm --filter ais-chat-app e2e
         env:
           CI: true
           E2E_TEXT_MODEL_1: Mock LLM
           E2E_TEXT_MODEL_2: Mock LLM (2)
+
+      - name: Run E2E tests (admin)
+        run: pnpm --filter ais-chat-admin e2e
+        env:
+          CI: true
 
       - name: Run E2E tests (api)
         run: pnpm --filter ais-chat-api e2e
@@ -190,6 +227,14 @@ jobs:
           path: apps/api/playwright-report
           retention-days: 30
 
+      - name: Upload Playwright reports (admin)
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: admin-playwright-report
+          path: apps/admin/playwright-report
+          retention-days: 30
+
       - name: Print ais-chat-api logs
         if: always()
         run: |
@@ -200,8 +245,14 @@ jobs:
         if: always()
         run: |
           echo "=== ais-chat-app logs ==="
-          cat /tmp/ais-chat-app.log || true
+          cat "$APP_LOG_FILE" || true
+
+      - name: Print ais-chat-admin logs
+        if: always()
+        run: |
+          echo "=== ais-chat-admin logs ==="
+          cat /tmp/ais-chat-admin.log || true
 
       - name: Print container logs
         if: always()
-        run: docker compose -f devops/docker/docker-compose.local.yml logs
+        run: cat "$CONTAINER_LOG_FILE" || true

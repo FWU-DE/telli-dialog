@@ -26,6 +26,7 @@ import {
   convertToAiCoreMessages,
   determineImageAttachmentTypeForModel,
   enrichMessagesWithImageData,
+  annotateMessageAttachmentNames,
   getChatTitle,
   limitChatHistory,
 } from './utils';
@@ -451,7 +452,9 @@ export async function sendChatMessage({
     : [...convertMessageModelToMessage(activeConversationMessages), userMessage];
 
   // Prune messages
-  const prunedMessages = limitChatHistory(fullMessages);
+  const prunedMessages = limitChatHistory(
+    annotateMessageAttachmentNames(fullMessages, relatedFileEntities),
+  );
 
   // Build system prompt
   const systemPrompt = constructChatSystemPrompt({

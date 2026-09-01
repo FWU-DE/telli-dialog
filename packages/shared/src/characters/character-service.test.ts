@@ -48,11 +48,7 @@ import { SHARE_EXTENSION_WINDOW_MS } from '../sharing/const';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { dbGetSharedCharacterChatUsageInCentByCharacterId } from '@shared/db/functions/token-points';
-import {
-  copyCharacter,
-  copyEntityPictureIfExists,
-  copyRelatedTemplateFiles,
-} from '../templates/template-service';
+import { copyCharacter, copyRelatedTemplateFiles } from '../templates/template-service';
 
 vi.mock('../db/functions/character', () => ({
   dbGetAllAccessibleCharacters: vi.fn(),
@@ -92,7 +88,6 @@ vi.mock('../files/fileService', () => ({
 }));
 vi.mock('../templates/template-service', () => ({
   copyCharacter: vi.fn(),
-  copyEntityPictureIfExists: vi.fn(),
   copyRelatedTemplateFiles: vi.fn(),
 }));
 vi.mock('@shared/db/functions/token-points', () => ({
@@ -855,7 +850,6 @@ describe('character-service', () => {
       );
 
       vi.mocked(copyCharacter).mockResolvedValue(insertedCharacter as never);
-      vi.mocked(copyEntityPictureIfExists).mockResolvedValue(undefined as never);
 
       const result = await createNewCharacter({
         federalStateId,
@@ -870,11 +864,6 @@ describe('character-service', () => {
         expect.objectContaining({ id: expect.any(String) }),
         duplicateCharacterName,
       );
-      expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
-        sourcePictureId: null,
-        newEntityId: insertedCharacter.id,
-        buildPictureKey: expect.any(Function),
-      });
       expect(copyRelatedTemplateFiles).toHaveBeenCalledWith(
         'character',
         templateId,
@@ -883,33 +872,23 @@ describe('character-service', () => {
       expect(result).toBe(insertedCharacter);
     });
 
-    it('should update character picture when template picture is copied', async () => {
+    it('should return the character from copyCharacter as-is, without copying its picture again', async () => {
       const user = mockUser('teacher');
       const insertedCharacter = {
         id: generateUUID(),
-        pictureId: 'characters/template-id/original.png',
-      } as CharacterSelectModel;
-      const copiedPictureKey = `characters/${insertedCharacter.id}/original.png`;
-      const updatedCharacter = {
-        ...insertedCharacter,
-        pictureId: copiedPictureKey,
+        pictureId: 'characters/already-scoped-id/avatar_abc123',
       } as CharacterSelectModel;
 
       vi.mocked(dbGetCharacterById).mockResolvedValue(
         templateCharacter({ userId: user.id, accessLevel: 'private' }) as never,
       );
-
       vi.mocked(copyCharacter).mockResolvedValue(insertedCharacter as never);
-      vi.mocked(copyEntityPictureIfExists).mockResolvedValue(copiedPictureKey as never);
-      mockDbReturning.mockResolvedValue([updatedCharacter]);
 
-      const result = await createNewCharacter({
-        federalStateId,
-        templateId,
-        user,
-      });
+      const result = await createNewCharacter({ federalStateId, templateId, user });
 
-      expect(result).toEqual({ ...updatedCharacter, ownerSchoolIds: expect.any(Array) });
+      // copyCharacter already duplicates the picture; createNewCharacter must not attempt to
+      // copy it again (which would be a no-op S3 self-copy at best, an error at worst).
+      expect(result).toBe(insertedCharacter);
     });
 
     it('should throw ForbiddenError when template is suspended', async () => {
