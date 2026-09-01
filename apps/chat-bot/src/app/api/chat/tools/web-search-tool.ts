@@ -34,10 +34,8 @@ export async function buildWebSearchTool({
   webSearchSettings,
   onWebSearchResults,
 }: BuildWebSearchToolParams): Promise<ToolRegistration | null> {
-  const config = await resolveWebSearchConfig({
+  const config = resolveWebSearchConfig({
     user,
-    characterId,
-    learningScenarioId,
     assistantId,
     webSearchSettings,
   });

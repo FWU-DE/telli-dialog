@@ -1,10 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserAndContext } from '@/auth/types';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 
 const mocks = vi.hoisted(() => ({
-  dbGetAssistantByIdMock: vi.fn(),
-  dbGetCharacterByIdMock: vi.fn(),
-  dbGetLearningScenarioByIdMock: vi.fn(),
   dbInsertConversationToolCallUsageMock: vi.fn(),
   dbUpdateTokenUsageByCharacterChatIdMock: vi.fn(),
   dbUpdateTokenUsageBySharedLearningScenarioIdMock: vi.fn(),
@@ -19,17 +17,11 @@ vi.mock('./env', () => ({
   },
 }));
 
-vi.mock('@shared/db/functions/assistants', () => ({
-  dbGetAssistantById: mocks.dbGetAssistantByIdMock,
-}));
-
 vi.mock('@shared/db/functions/character', () => ({
-  dbGetCharacterById: mocks.dbGetCharacterByIdMock,
   dbUpdateTokenUsageByCharacterChatId: mocks.dbUpdateTokenUsageByCharacterChatIdMock,
 }));
 
 vi.mock('@shared/db/functions/learning-scenario', () => ({
-  dbGetLearningScenarioById: mocks.dbGetLearningScenarioByIdMock,
   dbUpdateTokenUsageBySharedLearningScenarioId:
     mocks.dbUpdateTokenUsageBySharedLearningScenarioIdMock,
 }));
@@ -209,100 +201,15 @@ describe('resolveWebSearchConfig', () => {
     vi.clearAllMocks();
   });
 
-  it('trims and drops empty domain entries from a character', async () => {
-    mocks.dbGetCharacterByIdMock.mockResolvedValue({
-      isWebSearchEnabled: true,
-      webSearchScope: 'included-domains',
-      webSearchIncludedDomains: ['  example.com  ', '', '   ', 'foo.de'],
-    });
-
+  it('trims and drops empty domain entries from the given settings', async () => {
     const { resolveWebSearchConfig } = await import('./websearch');
 
-    const config = await resolveWebSearchConfig({
+    const config = resolveWebSearchConfig({
       user,
-      characterId: 'character-uuid',
-    });
-
-    expect(config).toEqual({
-      enabled: true,
-      scope: 'included-domains',
-      includedDomains: ['example.com', 'foo.de'],
-    });
-  });
-
-  it('trims and drops empty domain entries from a learning scenario', async () => {
-    mocks.dbGetLearningScenarioByIdMock.mockResolvedValue({
-      isWebSearchEnabled: true,
-      webSearchScope: 'included-domains',
-      webSearchIncludedDomains: ['  example.com  ', '', '   ', 'foo.de'],
-    });
-
-    const { resolveWebSearchConfig } = await import('./websearch');
-
-    const config = await resolveWebSearchConfig({
-      user,
-      learningScenarioId: 'learning-scenario-uuid',
-    });
-
-    expect(config).toEqual({
-      enabled: true,
-      scope: 'included-domains',
-      includedDomains: ['example.com', 'foo.de'],
-    });
-  });
-
-  it('returns disabled config when assistant web search is disabled', async () => {
-    mocks.dbGetAssistantByIdMock.mockResolvedValue({
-      isWebSearchEnabled: false,
-      webSearchScope: 'included-domains',
-      webSearchIncludedDomains: ['example.com'],
-    });
-
-    const { resolveWebSearchConfig } = await import('./websearch');
-
-    const config = await resolveWebSearchConfig({
-      user,
-      assistantId: 'assistant-uuid',
-    });
-
-    expect(config).toEqual({
-      enabled: false,
-      scope: 'all-web',
-      includedDomains: [],
-    });
-  });
-
-  it('trims and drops empty domain entries from an assistant', async () => {
-    mocks.dbGetAssistantByIdMock.mockResolvedValue({
-      isWebSearchEnabled: true,
-      webSearchScope: 'included-domains',
-      webSearchIncludedDomains: ['  example.com  ', '', '   ', 'foo.de'],
-    });
-
-    const { resolveWebSearchConfig } = await import('./websearch');
-
-    const config = await resolveWebSearchConfig({
-      user,
-      assistantId: 'assistant-uuid',
-    });
-
-    expect(config).toEqual({
-      enabled: true,
-      scope: 'included-domains',
-      includedDomains: ['example.com', 'foo.de'],
-    });
-  });
-
-  it('resolves the config from already-loaded settings without any db lookup', async () => {
-    const { resolveWebSearchConfig } = await import('./websearch');
-
-    const config = await resolveWebSearchConfig({
-      user,
-      characterId: 'character-uuid',
       webSearchSettings: {
         isWebSearchEnabled: true,
         webSearchScope: 'included-domains',
-        webSearchIncludedDomains: ['  example.com  ', '', 'foo.de'],
+        webSearchIncludedDomains: ['  example.com  ', '', '   ', 'foo.de'],
       },
     });
 
@@ -311,15 +218,13 @@ describe('resolveWebSearchConfig', () => {
       scope: 'included-domains',
       includedDomains: ['example.com', 'foo.de'],
     });
-    expect(mocks.dbGetCharacterByIdMock).not.toHaveBeenCalled();
   });
 
   it('returns disabled config when the given settings have web search disabled', async () => {
     const { resolveWebSearchConfig } = await import('./websearch');
 
-    const config = await resolveWebSearchConfig({
+    const config = resolveWebSearchConfig({
       user,
-      learningScenarioId: 'learning-scenario-uuid',
       webSearchSettings: {
         isWebSearchEnabled: false,
         webSearchScope: 'all-web',
@@ -332,7 +237,38 @@ describe('resolveWebSearchConfig', () => {
       scope: 'all-web',
       includedDomains: [],
     });
-    expect(mocks.dbGetLearningScenarioByIdMock).not.toHaveBeenCalled();
+  });
+
+  it('enables an unrestricted web search for a plain chat without custom chat settings', async () => {
+    const { resolveWebSearchConfig } = await import('./websearch');
+
+    const config = resolveWebSearchConfig({ user });
+
+    expect(config).toEqual({
+      enabled: true,
+      scope: 'all-web',
+      includedDomains: [],
+    });
+  });
+
+  it('returns disabled config for the help mode assistant even when its settings enable web search', async () => {
+    const { resolveWebSearchConfig } = await import('./websearch');
+
+    const config = resolveWebSearchConfig({
+      user,
+      assistantId: HELP_MODE_ASSISTANT_ID,
+      webSearchSettings: {
+        isWebSearchEnabled: true,
+        webSearchScope: 'all-web',
+        webSearchIncludedDomains: [],
+      },
+    });
+
+    expect(config).toEqual({
+      enabled: false,
+      scope: 'all-web',
+      includedDomains: [],
+    });
   });
 });
 
