@@ -293,13 +293,13 @@ describe('resolveWebSearchConfig', () => {
     });
   });
 
-  it('resolves the config from an already-loaded entity without any db lookup', async () => {
+  it('resolves the config from already-loaded settings without any db lookup', async () => {
     const { resolveWebSearchConfig } = await import('./websearch');
 
     const config = await resolveWebSearchConfig({
       user,
       characterId: 'character-uuid',
-      entity: {
+      webSearchSettings: {
         isWebSearchEnabled: true,
         webSearchScope: 'included-domains',
         webSearchIncludedDomains: ['  example.com  ', '', 'foo.de'],
@@ -314,13 +314,13 @@ describe('resolveWebSearchConfig', () => {
     expect(mocks.dbGetCharacterByIdMock).not.toHaveBeenCalled();
   });
 
-  it('returns disabled config when the given entity has web search disabled', async () => {
+  it('returns disabled config when the given settings have web search disabled', async () => {
     const { resolveWebSearchConfig } = await import('./websearch');
 
     const config = await resolveWebSearchConfig({
       user,
       learningScenarioId: 'learning-scenario-uuid',
-      entity: {
+      webSearchSettings: {
         isWebSearchEnabled: false,
         webSearchScope: 'all-web',
         webSearchIncludedDomains: [],

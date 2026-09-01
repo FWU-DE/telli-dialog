@@ -15,7 +15,7 @@ export type BuildToolsContext = {
   learningScenarioId?: string;
   assistantId?: string;
   conversationId?: string;
-  webSearchEntity?: WebSearchModel;
+  webSearchSettings?: WebSearchModel;
   relatedFileEntities: FileModel[];
   sourceUrls: string[];
   attachedLinks: string[];

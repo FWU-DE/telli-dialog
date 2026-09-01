@@ -146,7 +146,7 @@ export async function sendCharacterMessage({
   const tools = await buildTools({
     user: teacherUserAndContext,
     characterId: character.id,
-    webSearchEntity: character,
+    webSearchSettings: character,
     relatedFileEntities,
     attachedLinks: character.attachedLinks,
     sourceUrls: processedUrls,

@@ -13,7 +13,7 @@ type BuildToolsParams = {
   learningScenarioId?: string;
   assistantId?: string;
   conversationId?: string;
-  webSearchEntity?: WebSearchModel;
+  webSearchSettings?: WebSearchModel;
   relatedFileEntities: FileModel[];
   sourceUrls?: string[];
   attachedLinks?: string[];
@@ -32,7 +32,7 @@ export async function buildTools({
   learningScenarioId,
   assistantId,
   conversationId,
-  webSearchEntity,
+  webSearchSettings,
   relatedFileEntities,
   sourceUrls = [],
   attachedLinks = [],
@@ -49,7 +49,7 @@ export async function buildTools({
       learningScenarioId,
       assistantId,
       conversationId,
-      webSearchEntity,
+      webSearchSettings,
       onWebSearchResults,
     });
 

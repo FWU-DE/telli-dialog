@@ -49,24 +49,25 @@ export async function resolveWebSearchConfig({
   characterId,
   learningScenarioId,
   assistantId,
-  entity,
+  webSearchSettings,
 }: {
   user: UserAndContext;
   characterId?: string;
   learningScenarioId?: string;
   assistantId?: string;
-  entity?: WebSearchModel;
+  webSearchSettings?: WebSearchModel;
 }): Promise<WebSearchConfig> {
   if (!isWebSearchAvailableForFederalState(user.federalState.featureToggles)) {
     return DISABLED_WEB_SEARCH_CONFIG;
   }
 
-  if (entity) {
-    if (!entity.isWebSearchEnabled) return DISABLED_WEB_SEARCH_CONFIG;
+  // Short-circuit when the caller already loaded the settings; the ids below are the fallback lookup.
+  if (webSearchSettings) {
+    if (!webSearchSettings.isWebSearchEnabled) return DISABLED_WEB_SEARCH_CONFIG;
     return {
       enabled: true,
-      scope: entity.webSearchScope,
-      includedDomains: normalizeIncludedDomains(entity.webSearchIncludedDomains),
+      scope: webSearchSettings.webSearchScope,
+      includedDomains: normalizeIncludedDomains(webSearchSettings.webSearchIncludedDomains),
     };
   }
 

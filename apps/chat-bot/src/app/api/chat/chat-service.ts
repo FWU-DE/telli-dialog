@@ -424,7 +424,7 @@ export async function sendChatMessage({
     learningScenarioId,
     assistantId,
     conversationId: activeConversation.id,
-    webSearchEntity: activeCharacter ?? activeLearningScenario ?? activeAssistant,
+    webSearchSettings: activeCharacter ?? activeLearningScenario ?? activeAssistant,
     relatedFileEntities,
     attachedLinks,
     sourceUrls: ingestResult.processedUrls,
