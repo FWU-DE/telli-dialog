@@ -3,20 +3,24 @@ import { validateRequest } from './validation.js';
 
 describe('validation', () => {
   it('accepts an expression and rejects malformed requests', () => {
-    expect(validateRequest({ expression: '1 + 1' })).toBeUndefined();
-    expect(validateRequest({ expression: '' })).toBeTruthy();
-    expect(validateRequest({ expression: '   ' })).toBeTruthy();
-    expect(validateRequest({ expression: 1 })).toBeTruthy();
-    expect(validateRequest(null)).toBeTruthy();
+    expect(validateRequest({ expression: '1 + 1' })).toEqual({
+      valid: true,
+      value: { expression: '1 + 1' },
+    });
+    expect(validateRequest({ expression: '' }).valid).toBe(false);
+    expect(validateRequest({ expression: '   ' }).valid).toBe(false);
+    expect(validateRequest({ expression: 1 }).valid).toBe(false);
+    expect(validateRequest(null).valid).toBe(false);
   });
 
   it('trims before applying the length limit and execution', () => {
     const request = { expression: '  1 + 1  ' };
-    expect(validateRequest(request)).toBeUndefined();
-    expect(request.expression).toBe('1 + 1');
-    expect(validateRequest({ expression: ` ${'x'.repeat(4096)} ` })).toBeUndefined();
-    expect(validateRequest({ expression: ` ${'x'.repeat(4096)}x ` })).toBe(
-      'expression is too long',
-    );
+    expect(validateRequest(request)).toEqual({ valid: true, value: { expression: '1 + 1' } });
+    expect(request.expression).toBe('  1 + 1  ');
+    expect(validateRequest({ expression: ` ${'x'.repeat(4096)} ` }).valid).toBe(true);
+    expect(validateRequest({ expression: ` ${'x'.repeat(4096)}x ` })).toEqual({
+      valid: false,
+      error: 'expression is too long',
+    });
   });
 });

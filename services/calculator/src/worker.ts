@@ -41,6 +41,10 @@ function appendBoundedOutput(
 }
 
 function killProcess(child: ChildProcess): void {
+  if (child.killed) {
+    return;
+  }
+
   child.kill('SIGKILL');
 }
 
@@ -72,6 +76,9 @@ async function waitForExit(
       resolve(value);
     };
     signal?.addEventListener('abort', abort, { once: true });
+    if (signal?.aborted) {
+      abort();
+    }
     child.once('error', (error) => {
       if (settled) {
         return;
@@ -108,12 +115,22 @@ export async function runCalculator(
     const spawnedChild = (spawnCalculator ?? spawn)('qalc', [...QALC_ARGS, '--', expression], {
       cwd: home,
       env: { PATH: process.env.PATH ?? '', HOME: home },
-      stdio: ['ignore', 'pipe', 'ignore'],
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
     child = spawnedChild;
     let stdout: Buffer<ArrayBufferLike> = Buffer.alloc(0);
     let outputTooLarge = false;
+    let stderr: Buffer<ArrayBufferLike> = Buffer.alloc(0);
+    let stderrTooLarge = false;
     spawnedChild.stdout?.setEncoding('utf8');
+    spawnedChild.stderr?.on('data', (chunk: string | Buffer) => {
+      const appended = appendBoundedOutput(stderr, chunk, limits.maxOutputBytes);
+      stderr = appended.output;
+      stderrTooLarge ||= appended.tooLarge;
+      if (stderrTooLarge) {
+        killProcess(spawnedChild);
+      }
+    });
     spawnedChild.stdout?.on('data', (chunk: string) => {
       const appended = appendBoundedOutput(stdout, chunk, limits.maxOutputBytes);
       stdout = appended.output;
@@ -128,6 +145,9 @@ export async function runCalculator(
     }
     if (outputTooLarge) {
       return { status: 'malformed_output', error: 'output too large' };
+    }
+    if (stderrTooLarge) {
+      return { status: 'crashed_worker', error: 'qalc worker produced too much diagnostic output' };
     }
     if (timedOut) {
       return { status: 'timeout', error: 'qalc timed out' };

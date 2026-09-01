@@ -39,20 +39,24 @@ RUN echo "${LIBQALCULATE_SHA256}  /tmp/libqalculate.tar.gz" | sha256sum -c - \
 FROM node:24.19.0-bookworm-slim AS service-builder
 
 WORKDIR /service
-COPY package.json ./package.json
-COPY src ./src
+COPY services/calculator/package.json ./package.json
+COPY services/calculator/package-lock.json ./package-lock.json
+COPY services/calculator/src ./src
+COPY services/calculator/tsconfig.json ./tsconfig.json
+COPY services/calculator/tsconfig.build.json ./tsconfig.build.json
+COPY packages/typescript-config/base.json /packages/typescript-config/base.json
 
 # Compile the service separately from its production dependencies so the runtime
 # image does not need a package manager or tsx.
-RUN npm install --no-save --no-fund --no-audit typescript@6.0.3 @types/node@24.13.3 \
-  && npx tsc --outDir dist --rootDir src --module NodeNext --moduleResolution NodeNext \
-       --target ES2022 --skipLibCheck --types node src/index.ts
+RUN npm ci --ignore-scripts --no-fund --no-audit \
+  && npx tsc -p tsconfig.build.json
 
 FROM node:24.19.0-bookworm-slim AS service-dependencies
 
 WORKDIR /service
-COPY package.json ./package.json
-RUN npm install --omit=dev --no-save --no-fund --no-audit
+COPY services/calculator/package.json ./package.json
+COPY services/calculator/package-lock.json ./package-lock.json
+RUN npm ci --omit=dev --ignore-scripts --no-fund --no-audit
 
 FROM node:24.19.0-bookworm-slim AS runtime
 

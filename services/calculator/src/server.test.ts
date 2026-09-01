@@ -29,6 +29,15 @@ describe('HTTP interface', () => {
     await close(server);
   });
 
+  it('does not expose the misleading readiness endpoint', async () => {
+    const { server, port } = await listen();
+    const readiness = await fetch(`http://127.0.0.1:${port}/readyz`);
+
+    expect(readiness.status).toBe(400);
+    expect(await readiness.json()).toEqual({ status: 'invalid_input', error: 'not found' });
+    await close(server);
+  });
+
   it('returns stable errors for malformed JSON and unknown routes', async () => {
     const { server, port } = await listen();
     const malformed = await fetch(`http://127.0.0.1:${port}/v1/calculate`, {

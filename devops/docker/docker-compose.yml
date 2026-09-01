@@ -166,8 +166,8 @@ services:
   # Sandboxed arithmetic service backed by libqalculate.
   calculator:
     build:
-      context: ../../services/calculator
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: services/calculator/Dockerfile
     restart: unless-stopped
     ports:
       - '127.0.0.1:8081:8080'

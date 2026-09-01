@@ -32,21 +32,24 @@ export function createCalculatorServerWithPool(
     connectionTimeout: 5000,
   });
 
-  // Parse every body ourselves so unsupported content types can retain the service's 400 response.
-  app.addContentTypeParser('*', { parseAs: 'string' }, (_request, body, done) => {
+  app.addContentTypeParser('application/json', { parseAs: 'string' }, (_request, body, done) => {
     try {
       done(null, JSON.parse(body as string) as unknown);
     } catch {
-      done(null, undefined);
+      done(new Error('invalid JSON'));
     }
   });
 
   app.setErrorHandler((error: FastifyError, _request, reply) => {
-    if (error.code?.startsWith('FST_ERR_CTP_')) {
+    if (error.code?.startsWith('FST_ERR_CTP_') || error.message === 'invalid JSON') {
       return reply.code(statusCodes.invalid_input).send({
         status: 'invalid_input',
         error:
-          error.code === 'FST_ERR_CTP_BODY_TOO_LARGE' ? 'body too large' : 'body must be an object',
+          error.code === 'FST_ERR_CTP_BODY_TOO_LARGE'
+            ? 'body too large'
+            : error.code === 'FST_ERR_CTP_INVALID_MEDIA_TYPE'
+              ? 'content-type must be application/json'
+              : 'body must be an object',
       });
     }
 
@@ -67,9 +70,11 @@ export function createCalculatorServerWithPool(
     }
 
     const input = request.body;
-    const error = validateRequest(input, limits);
-    if (error !== undefined) {
-      return reply.code(statusCodes.invalid_input).send({ status: 'invalid_input', error });
+    const validation = validateRequest(input, limits);
+    if (!validation.valid) {
+      return reply
+        .code(statusCodes.invalid_input)
+        .send({ status: 'invalid_input', error: validation.error });
     }
 
     const controller = new AbortController();
@@ -87,7 +92,7 @@ export function createCalculatorServerWithPool(
     reply.raw.once('close', onReplyClose);
 
     try {
-      const result = await pool.run((input as { expression: string }).expression, {
+      const result = await pool.run(validation.value.expression, {
         signal: controller.signal,
       });
       return reply.code(statusCodes[result.status]).send(result);

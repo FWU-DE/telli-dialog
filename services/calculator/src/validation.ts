@@ -8,26 +8,28 @@ export const DEFAULT_LIMITS: Limits = {
   concurrency: 4,
 };
 
-export function validateRequest(value: unknown, limits = DEFAULT_LIMITS): string | undefined {
-  // Enforce request limits before evaluation and pass the trimmed value to the worker.
+export type ValidatedRequest = { expression: string };
+export type ValidationResult =
+  { valid: true; value: ValidatedRequest } | { valid: false; error: string };
+
+export function validateRequest(value: unknown, limits = DEFAULT_LIMITS): ValidationResult {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-    return 'body must be an object';
+    return { valid: false, error: 'body must be an object' };
   }
 
   const expression = (value as { expression?: unknown }).expression;
   if (typeof expression !== 'string') {
-    return 'expression must be a string';
+    return { valid: false, error: 'expression must be a string' };
   }
 
   const trimmedExpression = expression.trim();
   if (trimmedExpression.length === 0) {
-    return 'expression must not be empty';
+    return { valid: false, error: 'expression must not be empty' };
   }
 
   if (trimmedExpression.length > limits.maxExpressionLength) {
-    return 'expression is too long';
+    return { valid: false, error: 'expression is too long' };
   }
 
-  (value as { expression: string }).expression = trimmedExpression;
-  return undefined;
+  return { valid: true, value: { expression: trimmedExpression } };
 }

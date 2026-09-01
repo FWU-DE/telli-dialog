@@ -10,7 +10,9 @@ export const STATUSES = [
 ] as const;
 
 export type Status = (typeof STATUSES)[number];
-export type Result = { status: Status; result?: string; error?: string };
+export type Result =
+  | { status: 'success'; result: string; error?: never }
+  | { status: Exclude<Status, 'success'>; result?: never; error: string };
 
 export type Limits = {
   maxExpressionLength: number;
