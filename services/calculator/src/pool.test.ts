@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { WorkerPool } from './pool.js';
-import { runCalculator } from './worker.js';
 import type { Limits } from './types.js';
 
 const limits: Limits = {
@@ -10,20 +9,20 @@ const limits: Limits = {
   wallTimeMs: 10,
   concurrency: 1,
 };
+
 describe('worker pool', () => {
   it('rejects concurrent work rather than queueing it', async () => {
-    const pool = new WorkerPool(limits);
+    const pool = new WorkerPool(limits, async () => new Promise(() => undefined));
     const first = pool.run('1');
     expect((await pool.run('2')).status).toBe('overload');
-    await first;
+    first.catch(() => undefined);
   });
 
   it('returns a structured internal failure and releases a crashed slot', async () => {
-    const runner = async () => {
+    const failing = new WorkerPool(limits, async () => {
       throw new Error('crash');
-    };
-    const pool = new WorkerPool(limits, runner as typeof runCalculator);
-    expect((await pool.run('1')).status).toBe('internal_failure');
-    expect((await pool.run('2')).status).toBe('internal_failure');
+    });
+    expect((await failing.run('1')).status).toBe('internal_failure');
+    expect((await failing.run('2')).status).toBe('internal_failure');
   });
 });

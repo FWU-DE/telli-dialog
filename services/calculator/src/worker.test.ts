@@ -7,16 +7,20 @@ const limits: Limits = {
   maxExpressionLength: 20,
   maxBodyBytes: 100,
   maxOutputBytes: 100,
-  wallTimeMs: 5,
+  wallTimeMs: 100,
   concurrency: 1,
 };
 
 function fakeSpawn(
   close: (child: EventEmitter & Record<string, unknown>) => void,
-  args?: string[],
+  calls?: { command: string; args: string[]; options: Record<string, unknown> },
 ) {
-  return ((_: string, actualArgs: string[]) => {
-    args?.push(...actualArgs);
+  return ((command: string, args: string[], options: Record<string, unknown>) => {
+    if (calls) {
+      calls.command = command;
+      calls.args = args;
+      calls.options = options;
+    }
     const child = new EventEmitter() as EventEmitter & Record<string, unknown>;
     child.stdout = Object.assign(new EventEmitter(), { setEncoding() {} });
     child.kill = () => {
@@ -44,31 +48,40 @@ describe('qalc worker lifecycle', () => {
     );
 
     expect(spawned).toBe(false);
-    expect(result).toEqual({ status: 'upstream_failure', error: 'request cancelled' });
+    expect(result).toEqual({
+      status: 'upstream_failure',
+      error: 'request cancelled',
+    });
   });
 
   it('reports a timeout when the process does not exit', async () => {
     const result = await runCalculator(
       '1',
-      limits,
+      { ...limits, wallTimeMs: 5 },
       fakeSpawn(() => {}),
     );
     expect(result.status).toBe('timeout');
   });
 
-  it('passes one expression after the option terminator and never writes stdin', async () => {
-    const args: string[] = [];
+  it('passes the exact argv after the option terminator and never writes stdin', async () => {
+    const calls = { command: '', args: [], options: {} } as {
+      command: string;
+      args: string[];
+      options: Record<string, unknown>;
+    };
     const result = await runCalculator(
       '-1 + 2',
-      { ...limits, wallTimeMs: 100 },
+      limits,
       fakeSpawn((child) => {
         queueMicrotask(() => {
           (child.stdout as EventEmitter).emit('data', '2\n');
           child.emit('close', 0, null);
         });
-      }, args),
+      }, calls),
     );
-    expect(args).toEqual([
+
+    expect(calls.command).toBe('qalc');
+    expect(calls.args).toEqual([
       '--terse',
       '-s',
       'approximation exact',
@@ -85,16 +98,15 @@ describe('qalc worker lifecycle', () => {
       '--',
       '-1 + 2',
     ]);
+    expect(calls.options.stdio).toEqual(['ignore', 'pipe', 'ignore']);
     expect(result).toEqual({ status: 'success', result: '2' });
   });
 
   it('reports invalid input for a normal nonzero qalc exit', async () => {
     const result = await runCalculator(
       '1',
-      { ...limits, wallTimeMs: 100 },
-      fakeSpawn((child) => {
-        queueMicrotask(() => child.emit('close', 1, null));
-      }),
+      limits,
+      fakeSpawn((child) => queueMicrotask(() => child.emit('close', 1, null))),
     );
     expect(result).toEqual({
       status: 'invalid_input',
@@ -105,10 +117,8 @@ describe('qalc worker lifecycle', () => {
   it('reports a crashed worker when qalc is terminated by a signal', async () => {
     const result = await runCalculator(
       '1',
-      { ...limits, wallTimeMs: 100 },
-      fakeSpawn((child) => {
-        queueMicrotask(() => child.emit('close', null, 'SIGSEGV'));
-      }),
+      limits,
+      fakeSpawn((child) => queueMicrotask(() => child.emit('close', null, 'SIGSEGV'))),
     );
     expect(result.status).toBe('crashed_worker');
   });

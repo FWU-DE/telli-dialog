@@ -5,16 +5,14 @@ import type { Result } from './types.js';
 
 async function listen() {
   const server = createCalculatorServer();
-  await new Promise<void>((resolve) => server.listen(0, resolve));
-  const address = server.address();
+  await server.listen({ port: 0, host: '127.0.0.1' });
+  const address = server.server.address();
   const port = typeof address === 'object' && address ? address.port : 0;
   return { server, port };
 }
 
 async function close(server: ReturnType<typeof createCalculatorServer>) {
-  await new Promise<void>((resolve, reject) =>
-    server.close((error) => (error ? reject(error) : resolve())),
-  );
+  await server.close();
 }
 
 describe('HTTP interface', () => {
@@ -28,6 +26,56 @@ describe('HTTP interface', () => {
       body: '{}',
     });
     expect(invalid.status).toBe(400);
+    await close(server);
+  });
+
+  it('returns stable errors for malformed JSON and unknown routes', async () => {
+    const { server, port } = await listen();
+    const malformed = await fetch(`http://127.0.0.1:${port}/v1/calculate`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{not json',
+    });
+    expect(malformed.status).toBe(400);
+    expect(await malformed.json()).toEqual({
+      status: 'invalid_input',
+      error: 'body must be an object',
+    });
+
+    const unknown = await fetch(`http://127.0.0.1:${port}/unknown`);
+    expect(unknown.status).toBe(400);
+    expect(await unknown.json()).toEqual({ status: 'invalid_input', error: 'not found' });
+    await close(server);
+  });
+
+  it('does not expose unexpected error messages', async () => {
+    const server = createCalculatorServerWithPool(
+      {
+        maxExpressionLength: 100,
+        maxBodyBytes: 1000,
+        maxOutputBytes: 1000,
+        wallTimeMs: 1000,
+        concurrency: 1,
+      },
+      {
+        run: async () => {
+          throw new Error('secret failure');
+        },
+      },
+    );
+    await server.listen({ port: 0, host: '127.0.0.1' });
+    const address = server.server.address();
+    const port = typeof address === 'object' && address ? address.port : 0;
+    const response = await fetch(`http://127.0.0.1:${port}/v1/calculate`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ expression: '1+1' }),
+    });
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({
+      status: 'internal_failure',
+      error: 'internal failure',
+    });
     await close(server);
   });
 
@@ -105,8 +153,8 @@ describe('HTTP interface', () => {
       },
       pool,
     );
-    await new Promise<void>((resolve) => server.listen(0, resolve));
-    const address = server.address();
+    await server.listen({ port: 0, host: '127.0.0.1' });
+    const address = server.server.address();
     const port = typeof address === 'object' && address ? address.port : 0;
     const client = httpRequest({
       host: '127.0.0.1',

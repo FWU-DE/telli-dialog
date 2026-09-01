@@ -42,17 +42,24 @@ WORKDIR /service
 COPY package.json ./package.json
 COPY src ./src
 
-# The service has no runtime npm dependencies. Compile it so the runtime image
-# does not need a package manager or tsx.
+# Compile the service separately from its production dependencies so the runtime
+# image does not need a package manager or tsx.
 RUN npm install --no-save --no-fund --no-audit typescript@6.0.3 @types/node@24.13.3 \
   && npx tsc --outDir dist --rootDir src --module NodeNext --moduleResolution NodeNext \
        --target ES2022 --skipLibCheck --types node src/index.ts
+
+FROM node:24.19.0-bookworm-slim AS service-dependencies
+
+WORKDIR /service
+COPY package.json ./package.json
+RUN npm install --omit=dev --no-save --no-fund --no-audit
 
 FROM node:24.19.0-bookworm-slim AS runtime
 
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
-    PORT=8080
+    PORT=8080 \
+    QALCULATE_DATA_DIR=/usr/local/share/qalculate
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
       libgmp10 \
@@ -71,6 +78,7 @@ RUN ldconfig
 
 WORKDIR /service
 COPY --from=service-builder --chown=qalc:qalc /service/dist ./dist
+COPY --from=service-dependencies --chown=qalc:qalc /service/node_modules ./node_modules
 
 USER qalc:qalc
 EXPOSE 8080

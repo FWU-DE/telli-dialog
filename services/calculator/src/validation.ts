@@ -8,8 +8,8 @@ export const DEFAULT_LIMITS: Limits = {
   concurrency: 4,
 };
 
-// Enforce expression, body, output, time, and concurrency limits before evaluation begins.
 export function validateRequest(value: unknown, limits = DEFAULT_LIMITS): string | undefined {
+  // Enforce request limits before evaluation and pass the trimmed value to the worker.
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     return 'body must be an object';
   }
@@ -28,15 +28,6 @@ export function validateRequest(value: unknown, limits = DEFAULT_LIMITS): string
     return 'expression is too long';
   }
 
-  // Keep the validated value identical to the value sent to the worker.
   (value as { expression: string }).expression = trimmedExpression;
   return undefined;
-}
-
-export function parseJsonBody(body: string): unknown {
-  try {
-    return JSON.parse(body) as unknown;
-  } catch {
-    return undefined;
-  }
 }

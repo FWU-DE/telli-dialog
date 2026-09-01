@@ -1,5 +1,5 @@
-import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { DEFAULT_LIMITS, parseJsonBody, validateRequest } from './validation.js';
+import fastify, { type FastifyError, type FastifyInstance } from 'fastify';
+import { DEFAULT_LIMITS, validateRequest } from './validation.js';
 import { WorkerPool } from './pool.js';
 import type { Limits, Result } from './types.js';
 
@@ -14,117 +14,92 @@ const statusCodes: Record<Result['status'], number> = {
   internal_failure: 500,
 };
 
-// Expose GET /healthz for probes and POST /v1/calculate for bounded evaluations.
-function send(response: ServerResponse, result: Result): void {
-  if (response.destroyed || response.writableEnded) {
-    return;
-  }
+export type CalculatorServer = FastifyInstance;
 
-  response.writeHead(statusCodes[result.status], { 'content-type': 'application/json' });
-  response.end(JSON.stringify(result));
-}
-
-function getBodyError(request: IncomingMessage, limits: Limits): string | undefined {
-  if (request.headers['content-type']?.split(';', 1)[0] !== 'application/json') {
-    return 'content-type must be application/json';
-  }
-
-  const contentLength = request.headers['content-length'];
-  if (
-    contentLength !== undefined &&
-    (!/^\d+$/.test(contentLength) || Number(contentLength) > limits.maxBodyBytes)
-  ) {
-    return 'body too large';
-  }
-
-  return undefined;
-}
-
-function isHealthRequest(request: IncomingMessage): boolean {
-  return request.method === 'GET' && request.url === '/healthz';
-}
-
-function isCalculateRequest(request: IncomingMessage): boolean {
-  return request.method === 'POST' && request.url === '/v1/calculate';
-}
-
-export function createCalculatorServer(limits: Limits = DEFAULT_LIMITS) {
+export function createCalculatorServer(limits: Limits = DEFAULT_LIMITS): CalculatorServer {
   return createCalculatorServerWithPool(limits, new WorkerPool(limits));
 }
 
-export function createCalculatorServerWithPool(limits: Limits, pool: Pick<WorkerPool, 'run'>) {
-  const server = createServer((request: IncomingMessage, response: ServerResponse) => {
-    const rejectBody = (error: string): void => {
-      request.resume();
-      send(response, { status: 'invalid_input', error });
-    };
+export function createCalculatorServerWithPool(
+  limits: Limits,
+  pool: Pick<WorkerPool, 'run'>,
+): CalculatorServer {
+  const app = fastify({
+    logger: false,
+    bodyLimit: limits.maxBodyBytes,
+    requestTimeout: limits.wallTimeMs + 5000,
+    keepAliveTimeout: 5000,
+    connectionTimeout: 5000,
+  });
 
-    if (isHealthRequest(request)) {
-      return send(response, { status: 'success', result: 'ok' });
+  // Parse every body ourselves so unsupported content types can retain the service's 400 response.
+  app.addContentTypeParser('*', { parseAs: 'string' }, (_request, body, done) => {
+    try {
+      done(null, JSON.parse(body as string) as unknown);
+    } catch {
+      done(null, undefined);
+    }
+  });
+
+  app.setErrorHandler((error: FastifyError, _request, reply) => {
+    if (error.code?.startsWith('FST_ERR_CTP_')) {
+      return reply.code(statusCodes.invalid_input).send({
+        status: 'invalid_input',
+        error:
+          error.code === 'FST_ERR_CTP_BODY_TOO_LARGE' ? 'body too large' : 'body must be an object',
+      });
     }
 
-    if (!isCalculateRequest(request)) {
-      return send(response, { status: 'invalid_input', error: 'not found' });
+    return reply.code(statusCodes.internal_failure).send({
+      status: 'internal_failure',
+      error: 'internal failure',
+    });
+  });
+
+  app.get('/healthz', () => ({ status: 'success', result: 'ok' }));
+
+  app.post<{ Body: unknown }>('/v1/calculate', async (request, reply) => {
+    if (request.headers['content-type']?.split(';', 1)[0] !== 'application/json') {
+      return reply.code(statusCodes.invalid_input).send({
+        status: 'invalid_input',
+        error: 'content-type must be application/json',
+      });
     }
 
-    const bodyError = getBodyError(request, limits);
-    if (bodyError !== undefined) {
-      return rejectBody(bodyError);
+    const input = request.body;
+    const error = validateRequest(input, limits);
+    if (error !== undefined) {
+      return reply.code(statusCodes.invalid_input).send({ status: 'invalid_input', error });
     }
 
-    // Disconnects cancel work so a caller cannot leave a worker running after its response is gone.
     const controller = new AbortController();
     const onRequestClose = () => {
-      if (!request.complete) controller.abort();
+      if (!request.raw.complete) {
+        controller.abort();
+      }
     };
-    const onResponseClose = () => {
-      if (!response.writableEnded) controller.abort();
+    const onReplyClose = () => {
+      if (!reply.raw.writableEnded) {
+        controller.abort();
+      }
     };
-    request.once('close', onRequestClose);
-    response.once('close', onResponseClose);
-    let body = '';
-    let bytes = 0;
-    let done = false;
-    request.setEncoding('utf8');
-    request.on('data', (chunk: string) => {
-      if (done) {
-        return;
-      }
+    request.raw.once('close', onRequestClose);
+    reply.raw.once('close', onReplyClose);
 
-      bytes += Buffer.byteLength(chunk);
-      if (bytes > limits.maxBodyBytes) {
-        done = true;
-        send(response, { status: 'invalid_input', error: 'body too large' });
-        request.resume();
-        return;
-      }
-      body += chunk;
-    });
-    const finish = async (): Promise<void> => {
-      if (done || controller.signal.aborted) {
-        return;
-      }
-
-      done = true;
-      const input = parseJsonBody(body);
-      const error = validateRequest(input, limits);
-      if (error !== undefined) {
-        return send(response, { status: 'invalid_input', error });
-      }
-
+    try {
       const result = await pool.run((input as { expression: string }).expression, {
         signal: controller.signal,
       });
-      send(response, result);
-    };
-    request.once('end', () => void finish());
-    request.once('error', () => {
-      done = true;
-      controller.abort();
-    });
+      return reply.code(statusCodes[result.status]).send(result);
+    } finally {
+      request.raw.off('close', onRequestClose);
+      reply.raw.off('close', onReplyClose);
+    }
   });
-  server.requestTimeout = limits.wallTimeMs + 5000;
-  server.headersTimeout = 5000;
-  server.keepAliveTimeout = 5000;
-  return server;
+
+  app.setNotFoundHandler((_request, reply) =>
+    reply.code(statusCodes.invalid_input).send({ status: 'invalid_input', error: 'not found' }),
+  );
+
+  return app;
 }

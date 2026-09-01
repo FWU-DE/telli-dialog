@@ -8,7 +8,7 @@ function containsControlCharacter(value: string): boolean {
 }
 
 export function parseCalculatorOutput(stdout: string, maxBytes: number): Result {
-  // qalc is treated as an untrusted subprocess; accept only bounded, printable output.
+  // qalc is an untrusted subprocess; accept only bounded, printable output.
   if (Buffer.byteLength(stdout) > maxBytes) {
     return { status: 'malformed_output', error: 'output too large' };
   }
@@ -17,5 +17,6 @@ export function parseCalculatorOutput(stdout: string, maxBytes: number): Result 
   if (result.length === 0 || containsControlCharacter(result)) {
     return { status: 'malformed_output', error: 'qalc returned malformed output' };
   }
+
   return { status: 'success', result };
 }
