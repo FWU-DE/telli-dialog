@@ -22,32 +22,44 @@ export function TemplateInfoCard({ template, onDataChanged }: TemplateInfoCardPr
     templateType: TemplateTypes,
     newAuthor: string,
   ) {
-    const result = await updateAuthorOfTemplateAction(templateType, templateId, newAuthor);
-    if (!result.success) {
+    try {
+      const result = await updateAuthorOfTemplateAction(templateType, templateId, newAuthor);
+      if (!result.success) {
+        toast.error('Fehler beim Aktualisieren des Autors.', {
+          description: result.error.message,
+        });
+        return;
+      }
+      await onDataChanged();
+    } catch (error) {
       toast.error('Fehler beim Aktualisieren des Autors.', {
-        description: result.error.message,
+        description: (error as Error).message,
       });
-      return;
     }
-    await onDataChanged();
   }
 
   async function handleToggleDeletedState() {
     setIsUpdatingDeletedState(true);
-    const result = await updateTemplateDeletedStateAction(
-      template.type,
-      template.id,
-      !template.isDeleted,
-    );
-    if (!result.success) {
+    try {
+      const result = await updateTemplateDeletedStateAction(
+        template.type,
+        template.id,
+        !template.isDeleted,
+      );
+      if (!result.success) {
+        toast.error('Fehler beim Löschen/Wiederherstellen.', {
+          description: result.error.message,
+        });
+        return;
+      }
+      await onDataChanged();
+    } catch (error) {
       toast.error('Fehler beim Löschen/Wiederherstellen.', {
-        description: result.error.message,
+        description: (error as Error).message,
       });
+    } finally {
       setIsUpdatingDeletedState(false);
-      return;
     }
-    await onDataChanged();
-    setIsUpdatingDeletedState(false);
   }
 
   return (
