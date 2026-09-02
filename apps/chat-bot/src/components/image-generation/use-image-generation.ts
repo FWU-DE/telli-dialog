@@ -17,12 +17,7 @@ interface UseImageGenerationArgs {
   aspectRatio: ImageAspectRatioPreset;
 }
 
-interface GenerateParams {
-  prompt: string;
-  inputFileIds: string[];
-}
-
-export interface GeneratedImagePayload {
+export interface GeneratedImage {
   userMessageId: string;
   assistantMessageId: string;
   prompt: string;
@@ -34,7 +29,7 @@ interface UseImageGenerationResult {
   isGenerating: boolean;
   errorMessage: string | null;
   clearError: () => void;
-  generate: (params: GenerateParams) => Promise<GeneratedImagePayload | null>;
+  generate: (params: { prompt: string; inputFileIds: string[] }) => Promise<GeneratedImage | null>;
 }
 
 export function useImageGeneration({
@@ -55,7 +50,10 @@ export function useImageGeneration({
   async function generate({
     prompt,
     inputFileIds,
-  }: GenerateParams): Promise<GeneratedImagePayload | null> {
+  }: {
+    prompt: string;
+    inputFileIds: string[];
+  }): Promise<GeneratedImage | null> {
     if (!selectedModel) return null;
 
     const normalizedPrompt = prompt.trim();
@@ -71,7 +69,7 @@ export function useImageGeneration({
       conversationId: currentConversationId,
     });
 
-    let payload: GeneratedImagePayload | null = null;
+    let generatedImage: GeneratedImage | null = null;
 
     if (result.success) {
       const newConversationId = result.value.conversationId;
@@ -82,7 +80,7 @@ export function useImageGeneration({
       void queryClient.invalidateQueries({ queryKey: ['conversations'] });
 
       if (result.value.imageUrl) {
-        payload = {
+        generatedImage = {
           userMessageId: result.value.userMessageId,
           assistantMessageId: result.value.assistantMessageId,
           prompt: normalizedPrompt,
@@ -97,7 +95,7 @@ export function useImageGeneration({
     }
 
     setIsGenerating(false);
-    return payload;
+    return generatedImage;
   }
 
   return {

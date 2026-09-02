@@ -37,21 +37,15 @@ export default function ImageGenerationChat({
   const { selectedStyle } = useImageStyle();
   const tImageGeneration = useTranslations('image-generation');
 
-  const [input, setInput] = useState('');
   const { versions, selectedIndex, selectedVersion, setSelectedIndex, appendVersion } =
     useImageVersions({ initialMessages, fileMapping });
+
+  const [input, setInput] = useState('');
   const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
   const imageRef = useRef<HTMLImageElement>(null);
   const [isImageReady, setIsImageReady] = useState(false);
 
   const { aspectRatio } = useImageAspectRatio();
-
-  const modelSupportsImageInput = (selectedModel?.supportedImageFormats?.length ?? 0) > 0;
-
-  const canAppendVersion = modelSupportsImageInput && selectedVersion !== null;
-  const maxFiles = canAppendVersion
-    ? IMAGE_GENERATION_INPUT_LIMIT - 1
-    : IMAGE_GENERATION_INPUT_LIMIT;
 
   const [pending, setPending] = useState<{
     prompt: string;
@@ -64,6 +58,13 @@ export default function ImageGenerationChat({
     selectedStyle,
     aspectRatio,
   });
+
+  const modelSupportsImageInput = (selectedModel?.supportedImageFormats?.length ?? 0) > 0;
+
+  const canAppendVersion = modelSupportsImageInput && selectedVersion !== null;
+  const maxFiles = canAppendVersion
+    ? IMAGE_GENERATION_INPUT_LIMIT - 1
+    : IMAGE_GENERATION_INPUT_LIMIT;
 
   const showInputBox =
     !isGenerating &&
@@ -126,10 +127,10 @@ export default function ImageGenerationChat({
 
     setPending({ prompt, attachedFiles });
 
-    const payload = await generate({ prompt, inputFileIds });
-    if (payload !== null) {
+    const generatedImage = await generate({ prompt, inputFileIds });
+    if (generatedImage !== null) {
       setIsImageReady(false);
-      appendVersion({ ...payload, attachedFiles });
+      appendVersion({ ...generatedImage, attachedFiles });
     }
   }
 

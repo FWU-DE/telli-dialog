@@ -226,7 +226,6 @@ export async function handleImageGeneration({
     if (conversationId !== undefined) {
       try {
         if (isExistingConversation) {
-          // Soft-delete only the rows we may have inserted for this failed version.
           await dbDeleteRegeneratedConversationMessage({
             conversationId,
             orderNumber: baseOrderNumber,
