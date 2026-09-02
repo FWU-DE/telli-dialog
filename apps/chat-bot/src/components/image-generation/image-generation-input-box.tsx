@@ -1,9 +1,6 @@
 import { useTranslations } from 'next-intl';
 import AutoResizeTextarea from '../common/auto-resize-textarea';
-import {
-  CHAT_MESSAGE_LENGTH_LIMIT,
-  IMAGE_GENERATION_INPUT_LIMIT,
-} from '@/configuration-text-inputs/const';
+import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useRef } from 'react';
 import { Button } from '@ui/components/button';
 import { LocalFileState } from '../chat/send-message-form';
@@ -24,6 +21,7 @@ type ImageGenerationInputBoxProps = {
   handleDeattachFile: (localId: string) => void;
   fileUploadFn: (file: File) => Promise<FileUploadResponse>;
   supportedImageFormats: string[] | null | undefined;
+  maxFiles: number;
 };
 
 export function ImageGenerationInputBox({
@@ -36,25 +34,26 @@ export function ImageGenerationInputBox({
   handleDeattachFile,
   fileUploadFn,
   supportedImageFormats,
+  maxFiles,
 }: ImageGenerationInputBoxProps) {
   const tImageGeneration = useTranslations('image-generation');
   const tFileInteraction = useTranslations('file-interaction');
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const uploadLimitReached = files.size >= IMAGE_GENERATION_INPUT_LIMIT;
+  const uploadLimitReached = files.size >= maxFiles;
 
   async function onFileChange(event: ChangeEvent<HTMLInputElement>) {
     const selected = event.target.files;
     if (selected === null) return;
 
-    const accepted = Array.from(selected).slice(0, IMAGE_GENERATION_INPUT_LIMIT - files.size);
+    const accepted = Array.from(selected).slice(0, maxFiles - files.size);
     const rejectedCount = selected.length - accepted.length;
 
     if (rejectedCount > 0) {
       toast.error(
         tFileInteraction('upload.image-limit-reached', {
-          max_images: IMAGE_GENERATION_INPUT_LIMIT,
+          max_images: maxFiles,
           images_exceeded: rejectedCount,
         }),
       );
@@ -117,7 +116,7 @@ export function ImageGenerationInputBox({
                 title={
                   uploadLimitReached
                     ? tFileInteraction('upload.upload-file-button-disabled', {
-                        max_files: IMAGE_GENERATION_INPUT_LIMIT,
+                        max_files: maxFiles,
                       })
                     : tFileInteraction('upload.upload-file-button')
                 }

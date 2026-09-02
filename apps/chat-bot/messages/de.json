@@ -459,7 +459,10 @@
     "download-image-error": "Bild konnte nicht heruntergeladen werden",
     "copy-image-tooltip": "Bild kopieren",
     "download-image-tooltip": "Bild herunterladen",
-    "copy-prompt-tooltip": "Prompt kopieren"
+    "copy-prompt-tooltip": "Prompt kopieren",
+    "version-option-label": "Version {n}",
+    "version-select-aria-label": "Version auswählen",
+    "generated-image-alt": "Generiertes Bild"
   },
   "authentication": {
     "login-error": {
