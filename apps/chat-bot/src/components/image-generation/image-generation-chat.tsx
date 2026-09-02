@@ -72,7 +72,7 @@ export default function ImageGenerationChat({
       (conversationId === undefined && selectedVersion === null && errorMessage === null));
 
   const showInputBoxBelowImage =
-    showInputBox && modelSupportsImageInput && selectedVersion !== null && !errorMessage;
+    showInputBox && modelSupportsImageInput && selectedVersion !== null;
 
   function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setInput(e.target.value);
