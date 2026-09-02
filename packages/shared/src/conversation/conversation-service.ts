@@ -116,7 +116,10 @@ export async function getConversationAndMessagesForExport({
   let messages = await getConversationMessages({ conversationId, userId });
 
   if (conversation.characterId) {
-    const character = await dbGetCharacterById({ characterId: conversation.characterId });
+    const character = await dbGetCharacterById({
+      characterId: conversation.characterId,
+      includeDeleted: true,
+    });
 
     if (character?.initialMessage) {
       const initialMessage = {
