@@ -83,6 +83,30 @@ export default function ImageGenerationChat({
     (modelSupportsImageInput ||
       (conversationId === undefined && selectedVersion === null && errorMessage === null));
 
+  const showInputBoxBelowImage =
+    showInputBox && modelSupportsImageInput && selectedVersion !== null && !errorMessage;
+
+  const inputBox = (
+    <>
+      <ImageGenerationInputBox
+        isLoading={isGenerating}
+        handleInputChange={handleInputChange}
+        customHandleSubmit={customHandleSubmit}
+        input={input}
+        files={files}
+        setFiles={setFiles}
+        handleDeattachFile={handleDeattachFile}
+        fileUploadFn={defaultUploadFile}
+        supportedImageFormats={selectedModel?.supportedImageFormats}
+        maxFiles={maxFiles}
+        isEditMode={showInputBoxBelowImage}
+      />
+      {files.size > 0 && !modelSupportsImageInput && (
+        <ImageGenerationWarning message={tImageGeneration('input-images-not-supported-warning')} />
+      )}
+    </>
+  );
+
   function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setInput(e.target.value);
   }
@@ -163,27 +187,7 @@ export default function ImageGenerationChat({
             />
           </div>
         )}
-        {showInputBox && (
-          <>
-            <ImageGenerationInputBox
-              isLoading={isGenerating}
-              handleInputChange={handleInputChange}
-              customHandleSubmit={customHandleSubmit}
-              input={input}
-              files={files}
-              setFiles={setFiles}
-              handleDeattachFile={handleDeattachFile}
-              fileUploadFn={defaultUploadFile}
-              supportedImageFormats={selectedModel?.supportedImageFormats}
-              maxFiles={maxFiles}
-            />
-            {files.size > 0 && !modelSupportsImageInput && (
-              <ImageGenerationWarning
-                message={tImageGeneration('input-images-not-supported-warning')}
-              />
-            )}
-          </>
-        )}
+        {showInputBox && !showInputBoxBelowImage && inputBox}
         <div className="w-3/4 mx-auto">
           {isGenerating && pending !== null && (
             <ImageGenerationResult prompt={pending.prompt} attachedFiles={pending.attachedFiles}>
@@ -222,6 +226,7 @@ export default function ImageGenerationChat({
               />
             </ImageGenerationResult>
           )}
+          {showInputBoxBelowImage && <div className="mt-4">{inputBox}</div>}
         </div>
       </div>
     </div>
