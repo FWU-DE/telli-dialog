@@ -631,6 +631,13 @@
       "when": 1786703385739,
       "tag": "0089_petite_night_nurse",
       "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "7",
+      "when": 1788218359333,
+      "tag": "0090_condemned_doctor_octopus",
+      "breakpoints": true
     }
   ]
 }

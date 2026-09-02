@@ -1,0 +1,1 @@
+ALTER TABLE "conversation_message_file_mapping" DROP CONSTRAINT "conversation_message_file_mapping_conversationId_fileId_unique";
