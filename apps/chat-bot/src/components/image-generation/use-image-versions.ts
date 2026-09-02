@@ -18,7 +18,7 @@ interface UseImageVersionsResult {
   selectedIndex: number;
   selectedVersion: ImageVersion | null;
   setSelectedIndex: (index: number) => void;
-  appendVersion: (version: Omit<ImageVersion, 'orderNumber'>) => void;
+  appendVersion: (version: ImageVersion) => void;
 }
 
 async function buildInitialVersions(
@@ -52,7 +52,6 @@ async function buildInitialVersions(
           imageUrl: signedUrl,
           imageFileId: imageFile.id,
           attachedFiles: (fileMapping.get(user.id) ?? []).filter((f) => isImageFile(f.name)),
-          orderNumber: assistant.orderNumber,
         };
       } catch (error) {
         logError('Error loading image version:', error);
@@ -73,6 +72,7 @@ export function useImageVersions({
 
   useEffect(() => {
     if (initialMessages.length < 2 || !fileMapping) return;
+
     void (async () => {
       const initialVersions = await buildInitialVersions(initialMessages, fileMapping);
       if (initialVersions.length === 0) return;
@@ -81,13 +81,9 @@ export function useImageVersions({
     })();
   }, [initialMessages, fileMapping]);
 
-  const appendVersion = (version: Omit<ImageVersion, 'orderNumber'>) => {
+  const appendVersion = (version: ImageVersion) => {
     setVersions((prev) => {
-      const lastOrderNumber = prev.reduce(
-        (max, v) => (v.orderNumber > max ? v.orderNumber : max),
-        0,
-      );
-      const next = [...prev, { ...version, orderNumber: lastOrderNumber + 2 }];
+      const next = [...prev, version];
       setSelectedIndex(next.length - 1);
       return next;
     });

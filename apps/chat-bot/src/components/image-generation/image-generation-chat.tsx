@@ -20,26 +20,12 @@ import { IMAGE_GENERATION_INPUT_LIMIT } from '@/configuration-text-inputs/const'
 import { ImageVersionSelect } from './image-version-select';
 import { useImageVersions } from './use-image-versions';
 import { useImageGeneration } from './use-image-generation';
+import { ImageAttachment } from '../chat/message-image-attachment';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
   initialMessages?: ConversationMessageModel[];
   fileMapping?: Map<string, FileModel[]>;
-}
-
-// FileModel factory for UI-only chips
-function toDisplayFile({
-  id,
-  name,
-  type = 'image/png',
-  size = 0,
-}: {
-  id: string;
-  name: string;
-  type?: string;
-  size?: number;
-}): FileModel {
-  return { id, name, type, size, createdAt: new Date(), metadata: null, userId: null };
 }
 
 export default function ImageGenerationChat({
@@ -67,9 +53,10 @@ export default function ImageGenerationChat({
     ? IMAGE_GENERATION_INPUT_LIMIT - 1
     : IMAGE_GENERATION_INPUT_LIMIT;
 
-  const [pending, setPending] = useState<{ prompt: string; attachedFiles: FileModel[] } | null>(
-    null,
-  );
+  const [pending, setPending] = useState<{
+    prompt: string;
+    attachedFiles: ImageAttachment[];
+  } | null>(null);
 
   const { isGenerating, errorMessage, clearError, generate } = useImageGeneration({
     initialConversationId: conversationId,
@@ -85,27 +72,6 @@ export default function ImageGenerationChat({
 
   const showInputBoxBelowImage =
     showInputBox && modelSupportsImageInput && selectedVersion !== null && !errorMessage;
-
-  const inputBox = (
-    <>
-      <ImageGenerationInputBox
-        isLoading={isGenerating}
-        handleInputChange={handleInputChange}
-        customHandleSubmit={customHandleSubmit}
-        input={input}
-        files={files}
-        setFiles={setFiles}
-        handleDeattachFile={handleDeattachFile}
-        fileUploadFn={defaultUploadFile}
-        supportedImageFormats={selectedModel?.supportedImageFormats}
-        maxFiles={maxFiles}
-        isEditMode={showInputBoxBelowImage}
-      />
-      {files.size > 0 && !modelSupportsImageInput && (
-        <ImageGenerationWarning message={tImageGeneration('input-images-not-supported-warning')} />
-      )}
-    </>
-  );
 
   function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setInput(e.target.value);
@@ -145,19 +111,15 @@ export default function ImageGenerationChat({
         ? [inputImageFileId, ...uploadedFileIds]
         : uploadedFileIds;
 
-    const uploadedFileModels: FileModel[] = processedFiles.map((f) =>
-      toDisplayFile({
-        id: f.fileId,
-        name: f.file.name,
-        type: f.file.type,
-        size: f.file.size,
-      }),
-    );
-    const inputImageFileModel: FileModel | null =
+    const uploadedFileModels = processedFiles.map((f) => ({
+      id: f.fileId,
+      name: f.file.name,
+    }));
+    const inputImageFileModel =
       inputImageFileId !== null
-        ? toDisplayFile({ id: inputImageFileId, name: tImageGeneration('generated-image-alt') })
+        ? { id: inputImageFileId, name: tImageGeneration('generated-image-alt') }
         : null;
-    const attachedFiles: FileModel[] =
+    const attachedFiles =
       inputImageFileModel !== null
         ? [inputImageFileModel, ...uploadedFileModels]
         : uploadedFileModels;
@@ -170,6 +132,27 @@ export default function ImageGenerationChat({
       appendVersion({ ...payload, attachedFiles });
     }
   }
+
+  const inputBox = (
+    <>
+      <ImageGenerationInputBox
+        isLoading={isGenerating}
+        handleInputChange={handleInputChange}
+        customHandleSubmit={customHandleSubmit}
+        input={input}
+        files={files}
+        setFiles={setFiles}
+        handleDeattachFile={handleDeattachFile}
+        fileUploadFn={defaultUploadFile}
+        supportedImageFormats={selectedModel?.supportedImageFormats}
+        maxFiles={maxFiles}
+        isEditMode={showInputBoxBelowImage}
+      />
+      {files.size > 0 && !modelSupportsImageInput && (
+        <ImageGenerationWarning message={tImageGeneration('input-images-not-supported-warning')} />
+      )}
+    </>
+  );
 
   return (
     <div className="flex flex-col h-full w-full">

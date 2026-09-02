@@ -1,5 +1,5 @@
-import { FileModel } from '@shared/db/schema';
 import type { ImageAspectRatioPreset } from '@shared/utils/chat';
+import type { ImageAttachment } from '../chat/message-image-attachment';
 
 export type { ImageAspectRatioPreset };
 
@@ -13,6 +13,5 @@ export type ImageVersion = {
   prompt: string;
   imageUrl: string;
   imageFileId: string;
-  attachedFiles: FileModel[];
-  orderNumber: number;
+  attachedFiles: ImageAttachment[];
 };

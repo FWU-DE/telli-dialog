@@ -1,6 +1,5 @@
 import { useTranslations } from 'next-intl';
-import { FileModel } from '@shared/db/schema';
-import MessageImageAttachment from '../chat/message-image-attachment';
+import MessageImageAttachment, { ImageAttachment } from '../chat/message-image-attachment';
 import { CopyPromptButton } from './copy-prompt-button';
 
 export function ImageGenerationResult({
@@ -9,7 +8,7 @@ export function ImageGenerationResult({
   children,
 }: {
   prompt: string;
-  attachedFiles: FileModel[];
+  attachedFiles: ImageAttachment[];
   children: React.ReactNode;
 }) {
   const tImageGeneration = useTranslations('image-generation');

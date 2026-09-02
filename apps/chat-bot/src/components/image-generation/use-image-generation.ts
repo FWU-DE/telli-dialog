@@ -75,8 +75,8 @@ export function useImageGeneration({
 
     if (result.success) {
       const newConversationId = result.value.conversationId;
-      setCurrentConversationId(newConversationId);
-      if (initialConversationId === undefined || initialConversationId !== newConversationId) {
+      if (currentConversationId !== newConversationId) {
+        setCurrentConversationId(newConversationId);
         navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
       }
       void queryClient.invalidateQueries({ queryKey: ['conversations'] });

@@ -101,7 +101,7 @@ export async function handleImageGeneration({
   const isExistingConversation = existingConversationId !== undefined;
 
   try {
-    if (existingConversationId !== undefined) {
+    if (isExistingConversation) {
       const existing = await dbGetConversationAndMessages({
         conversationId: existingConversationId,
         userId,
