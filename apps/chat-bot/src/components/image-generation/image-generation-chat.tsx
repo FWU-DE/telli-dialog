@@ -209,7 +209,7 @@ export default function ImageGenerationChat({
               />
             </ImageGenerationResult>
           )}
-          {showInputBoxBelowImage && <div className="mt-4">{inputBox}</div>}
+          {showInputBoxBelowImage && <div className="mt-6">{inputBox}</div>}
         </div>
       </div>
     </div>

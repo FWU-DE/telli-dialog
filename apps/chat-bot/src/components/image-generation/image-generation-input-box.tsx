@@ -92,7 +92,7 @@ export function ImageGenerationInputBox({
     : tImageGeneration('generate-button');
 
   return (
-    <div className={cn(isEditMode && 'bg-secondary/30 rounded-2xl p-4')}>
+    <div className={cn(isEditMode && 'bg-[#F1EFF4] border border-primary/20 rounded-2xl p-4')}>
       {isEditMode && (
         <p className="mb-2 text-base font-medium">{tImageGeneration('edit-heading')}</p>
       )}
