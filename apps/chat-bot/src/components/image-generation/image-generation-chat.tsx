@@ -157,7 +157,7 @@ export default function ImageGenerationChat({
     <div className="flex flex-col h-full w-full">
       <div className="flex-1 flex flex-col justify-start p-6 w-full mx-auto">
         {versions.length > 1 && (
-          <div className="mb-3">
+          <div className="mb-3 w-3/4 mx-auto">
             <ImageVersionSelect
               count={versions.length}
               selectedIndex={selectedIndex}
@@ -170,7 +170,7 @@ export default function ImageGenerationChat({
           </div>
         )}
         {showInputBox && !showInputBoxBelowImage && inputBox}
-        <div className="w-3/4 mx-auto">
+        <div className="w-3/4 mx-auto mt-6 first:mt-0">
           {isGenerating && pending !== null && (
             <ImageGenerationResult prompt={pending.prompt} attachedFiles={pending.attachedFiles}>
               <LoadingAnimation />

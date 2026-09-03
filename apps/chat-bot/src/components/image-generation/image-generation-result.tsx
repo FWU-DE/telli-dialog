@@ -14,7 +14,7 @@ export function ImageGenerationResult({
   const tImageGeneration = useTranslations('image-generation');
 
   return (
-    <div className="mt-6">
+    <div>
       <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
       <p className="text-sm mb-3">
         {prompt}
