@@ -20,6 +20,7 @@ import {
   enrichMessagesWithImageData,
   getMostRecentUserMessage,
   limitChatHistory,
+  annotateMessageAttachmentNames,
 } from '../chat/utils';
 import { logError } from '@shared/logging';
 import { buildTools } from '../chat/build-tools';
@@ -151,6 +152,7 @@ export async function sendLearningScenarioMessage({
   const tools = await buildTools({
     user: teacherUserAndContext,
     learningScenarioId: learningScenario.id,
+    webSearchSettings: learningScenario,
     relatedFileEntities,
     attachedLinks: learningScenario.attachedLinks,
     sourceUrls: processedUrls,
@@ -174,7 +176,9 @@ export async function sendLearningScenarioMessage({
   });
 
   // Prune messages
-  const prunedMessages = limitChatHistory(messages);
+  const prunedMessages = limitChatHistory(
+    annotateMessageAttachmentNames(messages, relatedFileEntities),
+  );
 
   // Check if the model supports images based on supportedImageFormats
   const modelSupportsImages =

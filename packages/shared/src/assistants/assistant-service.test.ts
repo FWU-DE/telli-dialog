@@ -6,6 +6,7 @@ import {
   getAssistantByAccessLevel,
   getConversationWithMessagesAndAssistant,
   getAssistantForNewChat,
+  getAssistantForExistingConversation,
   getAssistantsByOverviewFilter,
   getFileMappings,
   linkFileToAssistant,
@@ -20,6 +21,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import {
   dbGetAssistantsByUserId,
   dbGetAssistantById,
+  dbGetAssistantByIdForConversation,
   dbGetCommunityGpts,
   dbGetGlobalGpts,
   dbGetGptsByAssociatedSchools,
@@ -34,15 +36,12 @@ import {
 } from '@shared/conversation/conversation-service';
 import { uploadFileToS3 } from '../s3';
 import { getAvatarPictureUrl } from '../files/fileService';
-import {
-  copyAssistant,
-  copyEntityPictureIfExists,
-  copyRelatedTemplateFiles,
-} from '../templates/template-service';
+import { copyAssistant, copyRelatedTemplateFiles } from '../templates/template-service';
 
 vi.mock('../db/functions/assistants', () => ({
   dbGetAssistantsByUserId: vi.fn(),
   dbGetAssistantById: vi.fn(),
+  dbGetAssistantByIdForConversation: vi.fn(),
   dbGetCommunityGpts: vi.fn(),
   dbGetGlobalGpts: vi.fn(),
   dbGetGptsByAssociatedSchools: vi.fn(),
@@ -68,7 +67,6 @@ vi.mock('../files/fileService', () => ({
 vi.mock('../templates/template-service', () => ({
   copyAssistant: vi.fn(),
   copyRelatedTemplateFiles: vi.fn(),
-  copyEntityPictureIfExists: vi.fn(),
 }));
 const { mockDbReturning, mockDbSet, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
@@ -171,9 +169,11 @@ describe('assistant-service', () => {
 
       const mockAssistant: Partial<AssistantSelectModel> = { userId };
 
-      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
-        mockAssistant as never,
-      );
+      (
+        dbGetAssistantByIdForConversation as MockedFunction<
+          typeof dbGetAssistantByIdForConversation
+        >
+      ).mockResolvedValue(mockAssistant as never);
       (getConversation as MockedFunction<typeof getConversation>).mockRejectedValue(
         new NotFoundError('Conversation not found'),
       );
@@ -195,9 +195,11 @@ describe('assistant-service', () => {
       const assistantId = generateUUID();
       const conversationId = generateUUID();
 
-      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockRejectedValue(
-        new NotFoundError('assistant not found'),
-      );
+      (
+        dbGetAssistantByIdForConversation as MockedFunction<
+          typeof dbGetAssistantByIdForConversation
+        >
+      ).mockResolvedValue(undefined);
       (getConversation as MockedFunction<typeof getConversation>).mockResolvedValue(null as never);
       (getConversationMessages as MockedFunction<typeof getConversationMessages>).mockResolvedValue(
         null as never,
@@ -374,9 +376,11 @@ describe('assistant-service', () => {
       const assistantId = generateUUID();
       const conversationId = generateUUID();
 
-      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
-        null as never,
-      );
+      (
+        dbGetAssistantByIdForConversation as MockedFunction<
+          typeof dbGetAssistantByIdForConversation
+        >
+      ).mockResolvedValue(null as never);
       (getConversation as MockedFunction<typeof getConversation>).mockRejectedValue(
         new ForbiddenError('Not authorized to access conversation'),
       );
@@ -553,9 +557,6 @@ describe('assistant-service', () => {
       (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
         insertedAssistant as never,
       );
-      (
-        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
-      ).mockResolvedValue(undefined as never);
 
       const result = await createNewAssistant({
         templateId,
@@ -569,11 +570,6 @@ describe('assistant-service', () => {
         expect.objectContaining({ id: expect.any(String) }),
         duplicatedAssistantName,
       );
-      expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
-        sourcePictureId: null,
-        newEntityId: insertedAssistant.id,
-        buildPictureKey: expect.any(Function),
-      });
       expect(copyRelatedTemplateFiles).toHaveBeenCalledWith(
         'assistant',
         templateId,
@@ -596,9 +592,6 @@ describe('assistant-service', () => {
       (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
         insertedAssistant as never,
       );
-      (
-        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
-      ).mockResolvedValue(undefined as never);
 
       await createNewAssistant({
         templateId,
@@ -613,67 +606,25 @@ describe('assistant-service', () => {
       );
     });
 
-    it('should update assistant picture when template picture is copied', async () => {
-      const insertedAssistant = {
-        id: generateUUID(),
-        pictureId: 'custom-gpts/template-id/original.png',
-      } as AssistantSelectModel;
-      const copiedPictureKey = `custom-gpts/${insertedAssistant.id}/original.png`;
-      const updatedAssistant = {
-        ...insertedAssistant,
-        pictureId: copiedPictureKey,
-      } as AssistantSelectModel;
-      const user = mockUser('teacher');
-
-      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
-        templateAssistant({ userId: user.id, accessLevel: 'private' }) as never,
-      );
-
-      (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
-        insertedAssistant as never,
-      );
-      (
-        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
-      ).mockResolvedValue(copiedPictureKey as never);
-      mockDbReturning.mockResolvedValue([updatedAssistant]);
-
-      const result = await createNewAssistant({
-        templateId,
-        user,
-      });
-
-      expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
-        sourcePictureId: insertedAssistant.pictureId,
-        newEntityId: insertedAssistant.id,
-        buildPictureKey: expect.any(Function),
-      });
-      expect(result).toEqual({ ...updatedAssistant, ownerSchoolIds: user.schoolIds });
-    });
-
-    it('should keep assistant unchanged when no copied picture key is returned', async () => {
+    it('should return the assistant from copyAssistant as-is, without copying its picture again', async () => {
       const user = mockUser('teacher');
       const insertedAssistant = {
         id: generateUUID(),
-        pictureId: 'custom-gpts/template-id/original.png',
+        pictureId: 'custom-gpts/already-scoped-id/avatar_abc123',
       } as AssistantSelectModel;
 
       (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
         templateAssistant({ userId: user.id, accessLevel: 'private' }) as never,
       );
-
       (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
         insertedAssistant as never,
       );
-      (
-        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
-      ).mockResolvedValue(undefined as never);
 
-      const result = await createNewAssistant({
-        templateId,
-        user,
-      });
+      const result = await createNewAssistant({ templateId, user });
 
-      expect(result).toEqual(insertedAssistant);
+      // copyAssistant already duplicates the picture; createNewAssistant must not attempt to
+      // copy it again (which would be a no-op S3 self-copy at best, an error at worst).
+      expect(result).toBe(insertedAssistant);
     });
 
     it('should throw ForbiddenError when template is suspended', async () => {
@@ -806,6 +757,73 @@ describe('assistant-service', () => {
 
         expect(assistant).toBe(mockAssistant);
       });
+    });
+  });
+
+  describe('getAssistantForExistingConversation', () => {
+    const assistantId = generateUUID();
+    const conversationId = generateUUID();
+
+    it('returns the assistant when it is linked to the given conversation', async () => {
+      const user = mockUser();
+      const mockAssistant: Partial<AssistantSelectModel> = {
+        userId: user.id,
+        accessLevel: 'private',
+      };
+      (
+        dbGetAssistantByIdForConversation as MockedFunction<
+          typeof dbGetAssistantByIdForConversation
+        >
+      ).mockResolvedValue(mockAssistant as never);
+
+      const result = await getAssistantForExistingConversation({
+        assistantId,
+        conversationId,
+        user,
+      });
+
+      expect(result).toBe(mockAssistant);
+      expect(dbGetAssistantByIdForConversation).toHaveBeenCalledWith({
+        assistantId,
+        conversationId,
+        userId: user.id,
+      });
+    });
+
+    it('throws NotFoundError when the assistant is not linked to the conversation', async () => {
+      (
+        dbGetAssistantByIdForConversation as MockedFunction<
+          typeof dbGetAssistantByIdForConversation
+        >
+      ).mockResolvedValue(undefined);
+
+      await expect(
+        getAssistantForExistingConversation({
+          assistantId,
+          conversationId,
+          user: mockUser(),
+        }),
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    it('throws ForbiddenError when the user is not authorized to read the assistant', async () => {
+      const mockAssistant: Partial<AssistantSelectModel> = {
+        userId: generateUUID(),
+        accessLevel: 'private',
+      };
+      (
+        dbGetAssistantByIdForConversation as MockedFunction<
+          typeof dbGetAssistantByIdForConversation
+        >
+      ).mockResolvedValue(mockAssistant as never);
+
+      await expect(
+        getAssistantForExistingConversation({
+          assistantId,
+          conversationId,
+          user: mockUser(),
+        }),
+      ).rejects.toThrow(ForbiddenError);
     });
   });
 

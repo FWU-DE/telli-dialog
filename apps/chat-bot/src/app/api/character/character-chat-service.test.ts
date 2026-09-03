@@ -23,6 +23,7 @@ const mocks = vi.hoisted(() => ({
   enrichMessagesWithImageDataMock: vi.fn(),
   getMostRecentUserMessageMock: vi.fn(),
   limitChatHistoryMock: vi.fn(),
+  annotateMessageAttachmentNamesMock: vi.fn(),
   logErrorMock: vi.fn(),
   buildToolsMock: vi.fn(),
   createImageAttachmentsForConversationMock: vi.fn(),
@@ -92,6 +93,7 @@ vi.mock('../chat/utils', () => ({
   enrichMessagesWithImageData: mocks.enrichMessagesWithImageDataMock,
   getMostRecentUserMessage: mocks.getMostRecentUserMessageMock,
   limitChatHistory: mocks.limitChatHistoryMock,
+  annotateMessageAttachmentNames: mocks.annotateMessageAttachmentNamesMock,
 }));
 
 vi.mock('@shared/logging', () => ({
@@ -192,6 +194,9 @@ beforeEach(() => {
   mocks.buildToolsMock.mockResolvedValue({ toolRegistry: {} });
   mocks.constructCharacterSystemPromptMock.mockReturnValue('system-prompt');
   mocks.limitChatHistoryMock.mockImplementation(
+    (incomingMessages: ChatMessage[]) => incomingMessages,
+  );
+  mocks.annotateMessageAttachmentNamesMock.mockImplementation(
     (incomingMessages: ChatMessage[]) => incomingMessages,
   );
   mocks.getMostRecentUserMessageMock.mockImplementation((incomingMessages: ChatMessage[]) =>

@@ -60,14 +60,18 @@ const mocks = vi.hoisted(() => ({
   convertToAiCoreMessagesMock: vi.fn(),
   getChatTitleMock: vi.fn(),
   limitChatHistoryMock: vi.fn(),
+  annotateMessageAttachmentNamesMock: vi.fn(),
   extractUrlsMock: vi.fn(),
   createImageAttachmentsForConversationMock: vi.fn(),
   ingestWebContentMock: vi.fn(),
   userHasReachedTokenPointsLimitMock: vi.fn(),
   logErrorMock: vi.fn(),
   getCharacterForChatSessionMock: vi.fn(),
+  getCharacterForExistingConversationMock: vi.fn(),
   getLearningScenarioForChatSessionMock: vi.fn(),
+  getLearningScenarioForExistingConversationMock: vi.fn(),
   getAssistantForNewChatMock: vi.fn(),
+  getAssistantForExistingConversationMock: vi.fn(),
 }));
 
 vi.mock('@ais-chat/ai-core', () => ({
@@ -140,6 +144,7 @@ vi.mock('./utils', () => ({
   convertToAiCoreMessages: mocks.convertToAiCoreMessagesMock,
   getChatTitle: mocks.getChatTitleMock,
   limitChatHistory: mocks.limitChatHistoryMock,
+  annotateMessageAttachmentNames: mocks.annotateMessageAttachmentNamesMock,
 }));
 
 vi.mock('../utils/extract-urls', () => ({
@@ -160,14 +165,17 @@ vi.mock('@shared/logging', () => ({
 
 vi.mock('@shared/characters/character-service', () => ({
   getCharacterForChatSession: mocks.getCharacterForChatSessionMock,
+  getCharacterForExistingConversation: mocks.getCharacterForExistingConversationMock,
 }));
 
 vi.mock('@shared/learning-scenarios/learning-scenario-service', () => ({
   getLearningScenarioForChatSession: mocks.getLearningScenarioForChatSessionMock,
+  getLearningScenarioForExistingConversation: mocks.getLearningScenarioForExistingConversationMock,
 }));
 
 vi.mock('@shared/assistants/assistant-service', () => ({
   getAssistantForNewChat: mocks.getAssistantForNewChatMock,
+  getAssistantForExistingConversation: mocks.getAssistantForExistingConversationMock,
 }));
 
 const mainModel = {
@@ -190,6 +198,7 @@ const conversation = {
 };
 
 const conversationObject = {
+  conversation,
   messages: [{ id: 'existing-message' }],
 };
 
@@ -262,13 +271,19 @@ beforeEach(() => {
     }),
   );
   mocks.dbGetOrCreateConversationMock.mockResolvedValue(conversation as never);
+  // First call checks for a pre-existing conversation before it is created; these tests start a new chat.
+  mocks.dbGetConversationAndMessagesMock.mockResolvedValueOnce(undefined as never);
   mocks.dbGetConversationAndMessagesMock.mockResolvedValue(conversationObject as never);
   mocks.userHasReachedTokenPointsLimitMock.mockResolvedValue(false);
   mocks.extractUrlsMock.mockResolvedValue([]);
   mocks.ingestWebContentMock.mockResolvedValue({ processedUrls: [], errorUrls: [] });
   mocks.dbGetAttachedFileByEntityIdMock.mockResolvedValue([]);
   mocks.limitChatHistoryMock.mockImplementation(
-    ({ messages }: { messages: ChatMessage[] }) => messages,
+    (incoming: ChatMessage[] | { messages: ChatMessage[] }) =>
+      Array.isArray(incoming) ? incoming : incoming.messages,
+  );
+  mocks.annotateMessageAttachmentNamesMock.mockImplementation(
+    (incomingMessages: ChatMessage[]) => incomingMessages,
   );
   mocks.enrichMessagesWithImageDataMock.mockImplementation((messages: ChatMessage[]) => messages);
   mocks.createImageAttachmentsForConversationMock.mockResolvedValue([]);
@@ -313,6 +328,38 @@ beforeEach(() => {
 });
 
 describe('sendChatMessage', () => {
+  it('passes attachment annotations to the model without persisting them', async () => {
+    const file = { id: 'upload-1', name: 'upload.pdf', conversationMessageId: 'message-3' };
+    mocks.dbGetAttachedFileByEntityIdMock.mockResolvedValue([file]);
+    mocks.annotateMessageAttachmentNamesMock.mockImplementation((incoming: ChatMessage[]) =>
+      incoming.map((message) =>
+        message.id === 'message-3'
+          ? { ...message, content: `${message.content}\n<attachments>` }
+          : message,
+      ),
+    );
+
+    const { sendChatMessage } = await import('./chat-service');
+    const result = await sendChatMessage({
+      conversationId: conversation.id,
+      messages,
+      modelId: mainModel.id,
+      user: createUser(),
+      fileIds: ['upload-1'],
+    });
+    await collectStream(result.stream);
+
+    expect(mocks.convertToAiCoreMessagesMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.arrayContaining([
+        expect.objectContaining({ content: expect.stringContaining('<attachments>') }),
+      ]),
+    );
+    expect(mocks.dbInsertChatContentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ content: 'Current question' }),
+    );
+  });
+
   it('runs the agentic chat pipeline and persists the assistant message', async () => {
     const { sendChatMessage } = await import('./chat-service');
 
@@ -491,6 +538,42 @@ describe('sendChatMessage', () => {
         }),
       ]),
     );
+  });
+
+  it('reuses an existing conversation via the ForExistingConversation lookup', async () => {
+    const characterId = 'character-1';
+    const existingConversationObject = {
+      conversation: { ...conversation, characterId, learningScenarioId: null, assistantId: null },
+      messages: [{ id: 'existing-message' }],
+    };
+    mocks.dbGetConversationAndMessagesMock.mockReset();
+    mocks.dbGetConversationAndMessagesMock.mockResolvedValue(existingConversationObject as never);
+    mocks.dbGetOrCreateConversationMock.mockResolvedValue({
+      ...conversation,
+      characterId,
+      learningScenarioId: null,
+      assistantId: null,
+    } as never);
+    mocks.getCharacterForExistingConversationMock.mockResolvedValue({ suspended: false } as never);
+
+    const { sendChatMessage } = await import('./chat-service');
+
+    const result = await sendChatMessage({
+      conversationId: conversation.id,
+      messages,
+      modelId: mainModel.id,
+      characterId,
+      user: createUser(),
+    });
+
+    await collectStream(result.stream);
+
+    expect(mocks.getCharacterForExistingConversationMock).toHaveBeenCalledWith({
+      characterId,
+      conversationId: conversation.id,
+      user: expect.anything(),
+    });
+    expect(mocks.getCharacterForChatSessionMock).not.toHaveBeenCalled();
   });
 
   it('throws when conversation context ids do not match', async () => {

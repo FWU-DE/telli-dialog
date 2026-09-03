@@ -8,6 +8,7 @@ import {
   dbGetAssistantsByUserId,
   dbDeleteAssistantByIdAndUser,
   dbGetAssistantById,
+  dbGetAssistantByIdForConversation,
   dbGetCommunityGpts,
   dbGetGlobalGpts,
   dbGetGptsByAssociatedSchools,
@@ -34,11 +35,7 @@ import {
 import { buildAssistantPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
-import {
-  copyAssistant,
-  copyEntityPictureIfExists,
-  copyRelatedTemplateFiles,
-} from '@shared/templates/template-service';
+import { copyAssistant, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { generateUUID } from '@shared/utils/uuid';
 import {
@@ -114,13 +111,32 @@ export async function getAssistantForNewChat({
   user: Pick<UserModel, 'id' | 'schoolIds'>;
 }) {
   checkParameterUUID(assistantId);
-  const assistant = await dbGetAssistantById({
-    assistantId,
-  });
+  const assistant = await dbGetAssistantById({ assistantId });
   verifyReadAccess({
     item: assistant,
     user,
   });
+
+  return assistant;
+}
+
+export async function getAssistantForExistingConversation({
+  assistantId,
+  conversationId,
+  user,
+}: {
+  assistantId: string;
+  conversationId: string;
+  user: Pick<UserModel, 'id' | 'schoolIds'>;
+}) {
+  checkParameterUUID(assistantId, conversationId);
+  const assistant = await dbGetAssistantByIdForConversation({
+    assistantId,
+    conversationId,
+    userId: user.id,
+  });
+  if (!assistant) throw new NotFoundError('Assistant not found');
+  verifyReadAccess({ item: assistant, user });
 
   return assistant;
 }
@@ -142,12 +158,12 @@ export async function getConversationWithMessagesAndAssistant({
 }) {
   checkParameterUUID(assistantId, conversationId);
   const [assistant, conversation, messages] = await Promise.all([
-    dbGetAssistantById({ assistantId }),
+    dbGetAssistantByIdForConversation({ assistantId, conversationId, userId }),
     getConversation({ conversationId, userId }),
     getConversationMessages({ conversationId, userId }),
   ]);
 
-  if (conversation.assistantId !== assistantId) {
+  if (!assistant || conversation.assistantId !== assistantId) {
     throw new NotFoundError('Conversation not found');
   }
 
@@ -264,31 +280,12 @@ export async function createNewAssistant({
     });
     verifySuspensionState({ item: sourceAssistant });
 
-    let insertedAssistant = await copyAssistant(
+    const insertedAssistant = await copyAssistant(
       templateId,
       'private',
       user,
       duplicateAssistantName,
     );
-
-    const copyOfTemplatePicture = await copyEntityPictureIfExists({
-      sourcePictureId: insertedAssistant.pictureId,
-      newEntityId: insertedAssistant.id,
-      buildPictureKey: buildAssistantPictureKey,
-    });
-
-    if (copyOfTemplatePicture) {
-      // Update the assistant with the new picture
-      const [updatedAssistant] = await db
-        .update(assistantTable)
-        .set({ pictureId: copyOfTemplatePicture })
-        .where(eq(assistantTable.id, insertedAssistant.id))
-        .returning();
-
-      if (updatedAssistant) {
-        insertedAssistant = { ...updatedAssistant, ownerSchoolIds: user.schoolIds };
-      }
-    }
 
     await copyRelatedTemplateFiles('assistant', templateId, insertedAssistant.id);
     return insertedAssistant;
