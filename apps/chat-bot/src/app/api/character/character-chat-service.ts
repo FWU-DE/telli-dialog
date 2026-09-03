@@ -153,6 +153,7 @@ export async function sendCharacterMessage({
     sourceUrls: processedUrls,
     allowWebTools,
     allowMundoSearch: false,
+    isCalculatorEnabled: teacherUserAndContext.federalState.featureToggles.isCalculatorEnabled,
     onWebSearchResults: (results) => {
       update(
         encodeChatStreamEvent({

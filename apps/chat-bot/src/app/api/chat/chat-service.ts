@@ -431,6 +431,7 @@ export async function sendChatMessage({
     sourceUrls: ingestResult.processedUrls,
     allowWebTools,
     allowMundoSearch: true,
+    isCalculatorEnabled: user.federalState.featureToggles.isCalculatorEnabled,
     onWebSearchResults: (results) => {
       webSearchResults = results;
       update(
