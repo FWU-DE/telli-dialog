@@ -67,9 +67,7 @@ export default function ImageGenerationChat({
     : IMAGE_GENERATION_INPUT_LIMIT;
 
   const showInputBox =
-    !isGenerating &&
-    (modelSupportsImageInput ||
-      (conversationId === undefined && selectedVersion === null && errorMessage === null));
+    modelSupportsImageInput || (conversationId === undefined && selectedVersion === null);
 
   const showInputBoxBelowImage =
     showInputBox && modelSupportsImageInput && selectedVersion !== null;

@@ -41,7 +41,13 @@ export async function linkFilesToConversation({
   if (fileIds.length === 0) return;
   await db
     .insert(ConversationMessageFileMappingTable)
-    .values(fileIds.map((fileId) => ({ conversationMessageId, fileId, conversationId })));
+    .values(fileIds.map((fileId) => ({ conversationMessageId, fileId, conversationId })))
+    .onConflictDoNothing({
+      target: [
+        ConversationMessageFileMappingTable.conversationMessageId,
+        ConversationMessageFileMappingTable.fileId,
+      ],
+    });
 }
 
 export async function dbVerifyFileOwnership({

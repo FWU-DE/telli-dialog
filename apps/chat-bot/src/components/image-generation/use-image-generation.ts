@@ -60,41 +60,46 @@ export function useImageGeneration({
     setErrorMessage(null);
     setIsGenerating(true);
 
-    const result = await generateImageAction({
-      prompt: normalizedPrompt,
-      model: selectedModel,
-      style: selectedStyle,
-      options: { aspectRatio },
-      inputFileIds,
-      conversationId: currentConversationId,
-    });
-
     let generatedImage: GeneratedImage | null = null;
 
-    if (result.success) {
-      const newConversationId = result.value.conversationId;
-      if (currentConversationId !== newConversationId) {
-        setCurrentConversationId(newConversationId);
-        navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
-      }
-      void queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    try {
+      const result = await generateImageAction({
+        prompt: normalizedPrompt,
+        model: selectedModel,
+        style: selectedStyle,
+        options: { aspectRatio },
+        inputFileIds,
+        conversationId: currentConversationId,
+      });
 
-      if (result.value.imageUrl) {
-        generatedImage = {
-          userMessageId: result.value.userMessageId,
-          assistantMessageId: result.value.assistantMessageId,
-          prompt: normalizedPrompt,
-          imageUrl: result.value.imageUrl,
-          imageFileId: result.value.fileId,
-        };
+      if (result.success) {
+        const newConversationId = result.value.conversationId;
+        if (currentConversationId !== newConversationId) {
+          setCurrentConversationId(newConversationId);
+          navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
+        }
+        void queryClient.invalidateQueries({ queryKey: ['conversations'] });
+
+        if (result.value.imageUrl) {
+          generatedImage = {
+            userMessageId: result.value.userMessageId,
+            assistantMessageId: result.value.assistantMessageId,
+            prompt: normalizedPrompt,
+            imageUrl: result.value.imageUrl,
+            imageFileId: result.value.fileId,
+          };
+        }
+      } else if (ResponsibleAIError.is(result.error)) {
+        setErrorMessage(t('responsible-ai-error'));
+      } else {
+        setErrorMessage(t('generation-error'));
       }
-    } else if (ResponsibleAIError.is(result.error)) {
-      setErrorMessage(t('responsible-ai-error'));
-    } else {
+    } catch {
       setErrorMessage(t('generation-error'));
+    } finally {
+      setIsGenerating(false);
     }
 
-    setIsGenerating(false);
     return generatedImage;
   }
 

@@ -1,5 +1,5 @@
 {
-  "id": "1cef0e40-d3dd-44eb-bf45-75a1f22f4317",
+  "id": "2092fcde-705d-45d8-bbba-179e08cfee9e",
   "prevId": "1da89a07-af79-4a9d-a411-c7089afc3020",
   "version": "7",
   "dialect": "postgresql",
@@ -250,7 +250,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "conversation_message_file_mapping_message_id_file_id_unique": {
+          "name": "conversation_message_file_mapping_message_id_file_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "conversationMessageId",
+            "fileId"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

@@ -1547,6 +1547,10 @@ export const ConversationMessageFileMappingTable = pgTable(
   },
   (table) => [
     index().on(table.conversationMessageId),
+    unique('conversation_message_file_mapping_message_id_file_id_unique').on(
+      table.conversationMessageId,
+      table.fileId,
+    ),
     foreignKey({
       columns: [table.conversationMessageId],
       foreignColumns: [conversationMessageTable.id],
