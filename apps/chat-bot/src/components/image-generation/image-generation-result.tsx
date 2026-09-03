@@ -26,7 +26,13 @@ export function ImageGenerationResult({
           <h3 className="text-xs text-gray-700">{tImageGeneration('attached-files-label')}</h3>
           <div className="flex flex-row gap-2 overflow-auto mt-2 mb-5">
             {attachedFiles.map((file) => (
-              <MessageImageAttachment key={file.id} file={file} width={56} height={56} />
+              <MessageImageAttachment
+                key={file.id}
+                file={file}
+                width={480}
+                height={160}
+                className="h-20 w-auto max-w-60 max-h-none object-cover aspect-auto"
+              />
             ))}
           </div>
         </>
