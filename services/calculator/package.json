@@ -11,6 +11,7 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
+    "execa": "9.6.1",
     "fastify": "5.12.1"
   },
   "devDependencies": {

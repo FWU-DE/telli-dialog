@@ -32,24 +32,30 @@ export function createCalculatorServerWithPool(
     connectionTimeout: 5000,
   });
 
-  app.addContentTypeParser('application/json', { parseAs: 'string' }, (_request, body, done) => {
-    try {
-      done(null, JSON.parse(body as string) as unknown);
-    } catch {
-      done(new Error('invalid JSON'));
-    }
-  });
-
-  app.setErrorHandler((error: FastifyError, _request, reply) => {
-    if (error.code?.startsWith('FST_ERR_CTP_') || error.message === 'invalid JSON') {
+  app.setErrorHandler((error: FastifyError, request, reply) => {
+    if (error.code === 'FST_ERR_CTP_BODY_TOO_LARGE') {
       return reply.code(statusCodes.invalid_input).send({
         status: 'invalid_input',
-        error:
-          error.code === 'FST_ERR_CTP_BODY_TOO_LARGE'
-            ? 'body too large'
-            : error.code === 'FST_ERR_CTP_INVALID_MEDIA_TYPE'
-              ? 'content-type must be application/json'
-              : 'body must be an object',
+        error: 'body too large',
+      });
+    }
+
+    if (
+      error.code === 'FST_ERR_CTP_INVALID_MEDIA_TYPE' ||
+      error.code === 'FST_ERR_CTP_BODY_INVALID_TYPE' ||
+      (error.code?.startsWith('FST_ERR_CTP_') &&
+        request.headers['content-type']?.split(';', 1)[0] !== 'application/json')
+    ) {
+      return reply.code(statusCodes.invalid_input).send({
+        status: 'invalid_input',
+        error: 'content-type must be application/json',
+      });
+    }
+
+    if (error.code === 'FST_ERR_CTP_INVALID_JSON_BODY') {
+      return reply.code(statusCodes.invalid_input).send({
+        status: 'invalid_input',
+        error: 'body must be an object',
       });
     }
 
@@ -101,10 +107,6 @@ export function createCalculatorServerWithPool(
       reply.raw.off('close', onReplyClose);
     }
   });
-
-  app.setNotFoundHandler((_request, reply) =>
-    reply.code(statusCodes.invalid_input).send({ status: 'invalid_input', error: 'not found' }),
-  );
 
   return app;
 }

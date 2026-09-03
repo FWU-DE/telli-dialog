@@ -141,9 +141,6 @@ services:
       start_period: 2s
 
   calculator:
-    # Opt in with --profile calculator. Keep the service on the default network so
-    # containerized local apps can reach it; host-run apps use the published port.
-    profiles: ['calculator']
     build:
       context: ../..
       dockerfile: services/calculator/Dockerfile

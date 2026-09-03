@@ -74,12 +74,10 @@ and Keycloak share a network namespace in this Compose setup so the application 
   pool returns HTTP 429.
 
 Start it with the self-hosted stack using `docker compose -f devops/docker/docker-compose.yml up -d`.
-For source development, calculator is opt-in because its native image build is not part of the normal
-local stack. Start it explicitly with
-`docker compose -f devops/docker/docker-compose.local.yml --profile calculator up -d --build calculator`.
+For source development, calculator starts with the normal local stack:
+`docker compose -f devops/docker/docker-compose.local.yml up -d --build`.
 The local calculator service explicitly joins the default Compose network so containerized local apps can
 use `http://calculator:8080`; apps run directly on the host must use `http://127.0.0.1:8081`.
-The `calculator` profile keeps the native build out of normal local and E2E infrastructure startup.
 Enable **calculator** for the relevant federal state in AIS.chat Admin before using the chatbot tool.
 Focused service tests run with `pnpm --filter @ais-chat/calculator-service test` (type and lint checks use
 the corresponding `check-types` and `lint` scripts).

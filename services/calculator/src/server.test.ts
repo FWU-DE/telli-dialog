@@ -33,8 +33,7 @@ describe('HTTP interface', () => {
     const { server, port } = await listen();
     const readiness = await fetch(`http://127.0.0.1:${port}/readyz`);
 
-    expect(readiness.status).toBe(400);
-    expect(await readiness.json()).toEqual({ status: 'invalid_input', error: 'not found' });
+    expect(readiness.status).toBe(404);
     await close(server);
   });
 
@@ -52,8 +51,7 @@ describe('HTTP interface', () => {
     });
 
     const unknown = await fetch(`http://127.0.0.1:${port}/unknown`);
-    expect(unknown.status).toBe(400);
-    expect(await unknown.json()).toEqual({ status: 'invalid_input', error: 'not found' });
+    expect(unknown.status).toBe(404);
     await close(server);
   });
 
