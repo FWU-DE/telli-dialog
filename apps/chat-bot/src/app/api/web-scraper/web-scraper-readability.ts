@@ -15,7 +15,7 @@ const headers = {
 
 // An unread response body keeps its stream and internal buffers alive for the lifetime of the process.
 function discardBody(response: Response): void {
-  response.body?.cancel().catch(() => {});
+  response.body?.cancel().catch(() => undefined);
 }
 
 /**
