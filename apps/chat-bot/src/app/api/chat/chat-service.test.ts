@@ -224,6 +224,7 @@ function createUser(): UserAndContext {
         isShareTemplateWithSchoolEnabled: true,
         isImageGenerationEnabled: true,
         isWebSearchEnabled: true,
+        isCalculatorEnabled: true,
       },
     },
   } as UserAndContext;
@@ -372,6 +373,9 @@ describe('sendChatMessage', () => {
     const streamedText = await collectStream(result.stream);
 
     expect(mocks.buildToolsMock).toHaveBeenCalledTimes(1);
+    expect(mocks.buildToolsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ isCalculatorEnabled: true }),
+    );
     expect(mocks.extractUrlsMock).toHaveBeenCalledTimes(1);
     expect(mocks.ingestWebContentMock).toHaveBeenCalledTimes(1);
     expect(mocks.constructChatSystemPromptMock).toHaveBeenCalledWith(

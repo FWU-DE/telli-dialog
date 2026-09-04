@@ -158,6 +158,7 @@ export async function sendLearningScenarioMessage({
     sourceUrls: processedUrls,
     allowWebTools,
     allowMundoSearch: false,
+    isCalculatorEnabled: teacherUserAndContext.federalState.featureToggles.isCalculatorEnabled,
     onWebSearchResults: (results) => {
       update(
         encodeChatStreamEvent({
