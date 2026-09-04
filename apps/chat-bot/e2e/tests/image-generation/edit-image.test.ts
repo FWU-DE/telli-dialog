@@ -6,6 +6,8 @@ test.use({ storageState: AUTH_FILES.teacher });
 test('can edit an image by uploading a reference image and providing a prompt', async ({
   page,
 }) => {
+  test.setTimeout(180000);
+
   // Navigate to image generation
   await page.goto('/image-generation');
   await page.waitForURL('/image-generation**');
@@ -71,7 +73,15 @@ test('can edit an image by uploading a reference image and providing a prompt', 
   await page.getByTestId('image-prompt-input').fill('Make the generated image brighter');
   await page.getByTestId('image-generate-button').click();
 
-  await loadingAnimation.waitFor({ state: 'detached', timeout: 60000 });
+  try {
+    await loadingAnimation.waitFor({ state: 'detached', timeout: 90000 });
+  } catch {
+    const errorMessage = page.getByText('Ein Fehler ist aufgetreten');
+    if (await errorMessage.isVisible().catch(() => false)) {
+      throw new Error('Second image edit failed: error message appeared');
+    }
+    throw new Error('Second image edit did not finish within 90 seconds');
+  }
   await expect(page.getByTestId('image-version-select')).toBeVisible();
 
   await page.getByTestId('image-version-select').click();

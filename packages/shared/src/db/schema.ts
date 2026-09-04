@@ -1548,6 +1548,7 @@ export const ConversationMessageFileMappingTable = pgTable(
   },
   (table) => [
     index().on(table.conversationMessageId),
+    index('conversation_message_file_mapping_conversation_id_index').on(table.conversationId),
     unique('conversation_message_file_mapping_message_id_file_id_unique').on(
       table.conversationMessageId,
       table.fileId,
