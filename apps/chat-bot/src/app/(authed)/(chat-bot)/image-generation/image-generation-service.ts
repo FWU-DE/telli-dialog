@@ -17,9 +17,13 @@ import { generateImageWithBilling } from '@ais-chat/ai-core';
 import { LlmModelSelectModel } from '@shared/db/schema';
 import { ImageStyle } from '@shared/utils/chat';
 import { generateUUID } from '@shared/utils/uuid';
-import { uploadFileToS3, getReadOnlySignedUrl } from '@shared/s3';
+import { deleteFileFromS3, uploadFileToS3, getReadOnlySignedUrl } from '@shared/s3';
 import { cnanoid } from '@shared/random/randomService';
-import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/files';
+import {
+  dbDeleteFileAndDetachFromConversation,
+  linkFilesToConversation,
+  dbInsertFile,
+} from '@shared/db/functions/files';
 import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
 import { NotFoundError } from '@shared/error';
 import { getAvailableImageModelsForFederalState } from '@shared/image-generation/image-generation-service';
@@ -97,6 +101,7 @@ export async function handleImageGeneration({
   const inputImages = await fetchInputImages({ inputFileIds, userId });
 
   let conversationId: string | undefined;
+  let generatedFileId: string | undefined;
   let baseOrderNumber = 0;
   const isExistingConversation = existingConversationId !== undefined;
 
@@ -175,6 +180,7 @@ export async function handleImageGeneration({
       body: imageBuffer,
       contentType: 'image/png',
     });
+    generatedFileId = fileId;
 
     // Create file record in database
     await dbInsertFile({
@@ -223,6 +229,19 @@ export async function handleImageGeneration({
       userMessageId: userMessage.id,
     };
   } catch (error) {
+    if (generatedFileId !== undefined) {
+      await Promise.allSettled([
+        deleteFileFromS3({ key: `message_attachments/${generatedFileId}` }),
+        dbDeleteFileAndDetachFromConversation([generatedFileId]),
+      ]).then((results) => {
+        for (const result of results) {
+          if (result.status === 'rejected') {
+            logError('Error cleaning up generated image file:', result.reason);
+          }
+        }
+      });
+    }
+
     if (conversationId !== undefined) {
       try {
         if (isExistingConversation) {

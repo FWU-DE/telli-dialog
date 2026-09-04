@@ -67,4 +67,16 @@ test('can edit an image by uploading a reference image and providing a prompt', 
   }).toPass();
 
   await expect(page.getByText('Verwendete Anhänge')).toBeVisible();
+
+  await page.getByTestId('image-prompt-input').fill('Make the generated image brighter');
+  await page.getByTestId('image-generate-button').click();
+
+  await loadingAnimation.waitFor({ state: 'detached', timeout: 60000 });
+  await expect(page.getByTestId('image-version-select')).toBeVisible();
+
+  await page.getByTestId('image-version-select').click();
+  await expect(page.getByTestId('image-version-option-0')).toBeVisible();
+  await expect(page.getByTestId('image-version-option-1')).toBeVisible();
+  await page.getByTestId('image-version-option-0').click();
+  await expect(generatedImage).toBeVisible();
 });
