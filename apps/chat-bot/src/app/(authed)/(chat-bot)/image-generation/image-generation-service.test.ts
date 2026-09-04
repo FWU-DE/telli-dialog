@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   checkProductAccess: vi.fn(),
   constructNewMessageEvent: vi.fn(),
   dbDeleteFileAndDetachFromConversation: vi.fn(),
+  dbDetachFilesFromConversationMessages: vi.fn(),
   dbDeleteRegeneratedConversationMessage: vi.fn(),
   dbGetFederalStateWithDecryptedApiKeyWithResult: vi.fn(),
   dbGetConversationAndMessages: vi.fn(),
@@ -34,6 +35,7 @@ vi.mock('@shared/db/functions/chat', () => ({
 }));
 vi.mock('@shared/db/functions/files', () => ({
   dbDeleteFileAndDetachFromConversation: mocks.dbDeleteFileAndDetachFromConversation,
+  dbDetachFilesFromConversationMessages: mocks.dbDetachFilesFromConversationMessages,
   dbInsertFile: mocks.dbInsertFile,
   linkFilesToConversation: mocks.linkFilesToConversation,
 }));
@@ -184,6 +186,10 @@ describe('handleImageGeneration', () => {
     });
     expect(mocks.dbDeleteFileAndDetachFromConversation).toHaveBeenCalledWith([
       'file_generated-file',
+    ]);
+    expect(mocks.dbDetachFilesFromConversationMessages).toHaveBeenCalledWith([
+      'new-user-message',
+      'new-assistant-message',
     ]);
     expect(mocks.dbDeleteRegeneratedConversationMessage).toHaveBeenCalledWith({
       conversationId: 'conversation-id',

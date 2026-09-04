@@ -21,6 +21,7 @@ import { deleteFileFromS3, uploadFileToS3, getReadOnlySignedUrl } from '@shared/
 import { cnanoid } from '@shared/random/randomService';
 import {
   dbDeleteFileAndDetachFromConversation,
+  dbDetachFilesFromConversationMessages,
   linkFilesToConversation,
   dbInsertFile,
 } from '@shared/db/functions/files';
@@ -102,6 +103,8 @@ export async function handleImageGeneration({
 
   let conversationId: string | undefined;
   let generatedFileId: string | undefined;
+  let generatedUserMessageId: string | undefined;
+  let generatedAssistantMessageId: string | undefined;
   let baseOrderNumber = 0;
   const isExistingConversation = existingConversationId !== undefined;
 
@@ -146,6 +149,7 @@ export async function handleImageGeneration({
     if (!userMessage) {
       throw new Error('Failed to create user message');
     }
+    generatedUserMessageId = userMessage.id;
 
     if (inputFileIds.length > 0) {
       await linkFilesToConversation({
@@ -205,6 +209,7 @@ export async function handleImageGeneration({
     if (!assistantMessage) {
       throw new Error('Failed to create assistant message');
     }
+    generatedAssistantMessageId = assistantMessage.id;
 
     // Link the image file to the assistant message
     await linkFilesToConversation({
@@ -245,6 +250,11 @@ export async function handleImageGeneration({
     if (conversationId !== undefined) {
       try {
         if (isExistingConversation) {
+          await dbDetachFilesFromConversationMessages(
+            [generatedUserMessageId, generatedAssistantMessageId].filter(
+              (messageId): messageId is string => messageId !== undefined,
+            ),
+          );
           await dbDeleteRegeneratedConversationMessage({
             conversationId,
             orderNumber: baseOrderNumber,

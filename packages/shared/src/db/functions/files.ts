@@ -50,6 +50,14 @@ export async function linkFilesToConversation({
     });
 }
 
+export async function dbDetachFilesFromConversationMessages(messageIds: string[]) {
+  if (messageIds.length === 0) return;
+
+  await db
+    .delete(ConversationMessageFileMappingTable)
+    .where(inArray(ConversationMessageFileMappingTable.conversationMessageId, messageIds));
+}
+
 export async function dbVerifyFileOwnership({
   fileId,
   userId,
