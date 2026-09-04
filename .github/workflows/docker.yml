@@ -44,6 +44,11 @@ jobs:
             image_ref: ghcr.io/fwu-de/ais-chat-admin
             sentry_project: ${{ vars.SENTRY_PROJECT_ADMIN }}
             server_actions_secret: NEXT_SERVER_ACTIONS_ENCRYPTION_KEY_ADMIN
+          - image_name: ais-chat-calculator
+            dockerfile: services/calculator/Dockerfile
+            image_ref: ghcr.io/fwu-de/ais-chat-calculator
+            sentry_project: ''
+            server_actions_secret: ''
 
     steps:
       - name: Checkout repository
