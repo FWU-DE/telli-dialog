@@ -147,11 +147,13 @@ export async function sendCharacterMessage({
   const tools = await buildTools({
     user: teacherUserAndContext,
     characterId: character.id,
+    webSearchSettings: character,
     relatedFileEntities,
     attachedLinks: character.attachedLinks,
     sourceUrls: processedUrls,
     allowWebTools,
     allowMundoSearch: false,
+    isCalculatorEnabled: teacherUserAndContext.federalState.featureToggles.isCalculatorEnabled,
     onWebSearchResults: (results) => {
       update(
         encodeChatStreamEvent({

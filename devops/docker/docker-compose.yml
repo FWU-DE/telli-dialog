@@ -5,7 +5,7 @@ services:
   # Containers share this network namespace via network_mode: "service:keycloak"
   # This is required to access keycloak using the same URL from within the container and the browser
   keycloak:
-    image: quay.io/keycloak/keycloak:26.7.2-1
+    image: quay.io/keycloak/keycloak:26.7.3-0
     restart: unless-stopped
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
@@ -26,6 +26,11 @@ services:
     depends_on:
       fix-keycloak-volume-ownership:
         condition: service_completed_successfully
+    # Application containers use keycloak's network namespace; this gives them
+    # access to calculator without giving calculator an egress-capable network.
+    networks:
+      - default
+      - calculator-isolated
 
   # Fix keycloak volume permissions (runs with uid 1000)
   fix-keycloak-volume-ownership:
@@ -58,7 +63,7 @@ services:
 
   # Valkey (Redis-compatible) for session storage
   valkey:
-    image: ghcr.io/valkey-io/valkey:9.1.1-alpine
+    image: ghcr.io/valkey-io/valkey:9.1.2-alpine
     restart: unless-stopped
     volumes:
       - valkey_data:/data
@@ -88,7 +93,7 @@ services:
 
   # Crawl4AI for web scraping capabilities
   crawl4ai:
-    image: unclecode/crawl4ai:0.9.2
+    image: unclecode/crawl4ai:0.9.3
     environment:
       CRAWL4AI_API_TOKEN: ais-chat-crawl4ai-token
     restart: unless-stopped
@@ -160,6 +165,43 @@ services:
       - bifrost_data:/app/data
     ports:
       - '8089:8080'
+
+  # Sandboxed arithmetic service backed by libqalculate.
+  calculator:
+    build:
+      context: ../..
+      dockerfile: services/calculator/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8081:8080'
+    expose:
+      - '8080'
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - calculator-isolated
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 256M
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:8080/healthz').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   # AIS.chat API - OpenAI compatible API service
   ais-chat-api:
@@ -241,6 +283,9 @@ services:
       # Xberg text extraction
       XBERG_URL: http://xberg:8000
 
+      # Calculator arithmetic service
+      CALCULATOR_URL: http://calculator:8080
+
       # Bifrost LLM proxy
       BIFROST_BASE_URL: http://bifrost:8080/openai/v1
       BIFROST_API_KEY: sk-bf-example-key
@@ -281,6 +326,8 @@ services:
         condition: service_started
       bifrost:
         condition: service_started
+      calculator:
+        condition: service_healthy
 
   # AIS.chat Admin - Administration interface
   ais-chat-admin:
@@ -381,3 +428,7 @@ volumes:
   bifrost_data:
   rustfs_data:
   xberg_cache:
+
+networks:
+  calculator-isolated:
+    internal: true

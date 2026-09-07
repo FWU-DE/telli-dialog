@@ -1,11 +1,12 @@
 import type { ToolRegistry } from '@ais-chat/ai-core';
 import type { UserAndContext } from '@/auth/types';
-import type { FileModel, WebSearchResult } from '@shared/db/schema';
+import type { FileModel, WebSearchModel, WebSearchResult } from '@shared/db/schema';
 import { buildWebSearchTool } from './tools/web-search-tool';
 import { buildWebScraperTool } from './tools/web-scraper-tool';
 import { buildRetrieveEntireFileTool } from './tools/retrieve-entire-file-tool';
 import { buildRetrieveTextChunksTool } from './tools/retrieve-text-chunks-tool';
 import { buildMundoSearchTool } from './tools/mundo-search-tool';
+import { buildMathCalculateTool } from './tools/math-calculate-tool';
 
 type BuildToolsParams = {
   user: UserAndContext;
@@ -13,11 +14,13 @@ type BuildToolsParams = {
   learningScenarioId?: string;
   assistantId?: string;
   conversationId?: string;
+  webSearchSettings?: WebSearchModel;
   relatedFileEntities: FileModel[];
   sourceUrls?: string[];
   attachedLinks?: string[];
   allowWebTools: boolean;
   allowMundoSearch?: boolean;
+  isCalculatorEnabled?: boolean;
   onWebSearchResults?: (results: WebSearchResult[]) => void;
 };
 
@@ -31,14 +34,21 @@ export async function buildTools({
   learningScenarioId,
   assistantId,
   conversationId,
+  webSearchSettings,
   relatedFileEntities,
   sourceUrls = [],
   attachedLinks = [],
   allowWebTools,
   allowMundoSearch,
+  isCalculatorEnabled = false,
   onWebSearchResults,
 }: BuildToolsParams): Promise<BuildToolsResult> {
   const toolRegistry: ToolRegistry = {};
+
+  if (isCalculatorEnabled) {
+    const calculatorTool = buildMathCalculateTool();
+    toolRegistry[calculatorTool.definition.name] = calculatorTool;
+  }
 
   if (allowWebTools) {
     const webSearchTool = await buildWebSearchTool({
@@ -47,6 +57,7 @@ export async function buildTools({
       learningScenarioId,
       assistantId,
       conversationId,
+      webSearchSettings,
       onWebSearchResults,
     });
 

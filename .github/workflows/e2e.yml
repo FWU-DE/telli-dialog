@@ -56,10 +56,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
-      # Starts all e2e container dependencies in the background using the same compose file as
-      # local dev. Later steps only block on the specific containers they actually need, once needed.
-      - name: Start e2e container dependencies (in background)
-        run: docker compose -f devops/docker/docker-compose.local.yml up -d --build &
+      - name: Start e2e container dependencies
+        run: |
+          docker compose -f devops/docker/docker-compose.local.yml up -d --build --wait \
+            postgres valkey keycloak rabbitmq crawl4ai xberg mock-llm bifrost
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
