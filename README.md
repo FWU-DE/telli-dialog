@@ -70,8 +70,9 @@ and Keycloak share a network namespace in this Compose setup so the application 
 - `POST /v1/calculate` accepts `Content-Type: application/json` and a body such as
   `{"expression":"2 + 2"}`. Successful responses contain `status: "success"` and the calculated string in `result`.
 - Requests are limited to an 8 KiB body, a 4096-character expression, 16 KiB worker output, and
-  a 2-second worker wall time. Invalid requests return structured HTTP 400 JSON; a busy worker
-  pool returns HTTP 429.
+  a 2-second worker wall time. The pool runs up to 4 workers concurrently and queues up to 32
+  additional requests in FIFO order. Invalid requests return structured HTTP 400 JSON; a full
+  worker pool returns HTTP 429.
 
 Start it with the self-hosted stack using `docker compose -f devops/docker/docker-compose.yml up -d`.
 For source development, calculator starts with the normal local stack:

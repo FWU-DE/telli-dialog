@@ -6,6 +6,7 @@ export const DEFAULT_LIMITS: Limits = {
   maxOutputBytes: 16384,
   wallTimeMs: 2000,
   concurrency: 4,
+  maxQueuedRequests: 32,
 };
 
 export type ValidatedRequest = { expression: string };

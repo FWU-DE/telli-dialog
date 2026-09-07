@@ -63,6 +63,7 @@ describe('HTTP interface', () => {
         maxOutputBytes: 1000,
         wallTimeMs: 1000,
         concurrency: 1,
+        maxQueuedRequests: 0,
       },
       {
         run: async () => {
@@ -157,6 +158,7 @@ describe('HTTP interface', () => {
         maxOutputBytes: 1000,
         wallTimeMs: 1000,
         concurrency: 1,
+        maxQueuedRequests: 0,
       },
       pool,
     );
