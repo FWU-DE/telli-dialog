@@ -8,6 +8,7 @@ const limits: Limits = {
   maxOutputBytes: 100,
   wallTimeMs: 100,
   concurrency: 1,
+  maxQueuedRequests: 0,
 };
 
 function fakeRunner(

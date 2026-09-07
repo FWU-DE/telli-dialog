@@ -20,6 +20,7 @@ export type Limits = {
   maxOutputBytes: number;
   wallTimeMs: number;
   concurrency: number;
+  maxQueuedRequests: number;
 };
 
 export type RunOptions = { signal?: AbortSignal };

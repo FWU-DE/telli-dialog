@@ -1,3 +1,4 @@
+import { metrics } from '@opentelemetry/api';
 import * as Sentry from '@sentry/core';
 import type {
   Message as AiCoreMessage,
@@ -10,6 +11,13 @@ import { EmptyResponseError } from '../errors';
 
 export const MAX_AGENTIC_ITERATIONS = 3;
 export const MAX_TOOL_CALLS_PER_ITERATION = 2;
+
+const toolCallDuration = metrics
+  .getMeter('ais-chat.tools', '0.0.1')
+  .createHistogram('tool_call_duration', {
+    description: 'Duration of executed AI tool calls',
+    unit: 'ms',
+  });
 
 function logError(message: string, error: unknown) {
   console.error(message, error);
@@ -139,24 +147,32 @@ export function runAgentLoop({
                   },
                   async (toolSpan) => {
                     const registryEntry = toolRegistry?.[toolCall.name];
+                    const startedAt = performance.now();
+                    let status = registryEntry ? 'success' : 'unknown_tool';
                     let result: string;
 
-                    if (registryEntry) {
-                      try {
+                    try {
+                      if (registryEntry) {
                         const args = JSON.parse(toolCall.arguments) as Record<string, unknown>;
                         result = await registryEntry.handler(args);
-                      } catch (error) {
-                        // TODO: see tech debt (refactoring of tool calls for error handling). The catch clause is usually never executed, because tool handlers return errors as plain string or in the 'error' key of a stringified json
-                        const message =
-                          error instanceof Error ? error.message : 'Tool execution failed';
+                      } else {
+                        const message = `Unknown tool "${toolCall.name}"`;
                         toolSpan.setStatus({ code: 2, message });
-                        logError(`Error executing tool ${toolCall.name}:`, error);
                         result = `Error: ${message}`;
                       }
-                    } else {
-                      const message = `Unknown tool "${toolCall.name}"`;
+                    } catch (error) {
+                      status = 'error';
+                      // TODO: see tech debt (refactoring of tool calls for error handling). The catch clause is usually never executed, because tool handlers return errors as plain string or in the 'error' key of a stringified json
+                      const message =
+                        error instanceof Error ? error.message : 'Tool execution failed';
                       toolSpan.setStatus({ code: 2, message });
+                      logError(`Error executing tool ${toolCall.name}:`, error);
                       result = `Error: ${message}`;
+                    } finally {
+                      toolCallDuration.record(performance.now() - startedAt, {
+                        'gen_ai.tool.name': registryEntry ? toolCall.name : 'unknown',
+                        'tool.status': status,
+                      });
                     }
 
                     return { toolCallId: toolCall.id, result };
