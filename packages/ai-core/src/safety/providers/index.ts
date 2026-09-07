@@ -1,6 +1,5 @@
 import { ProviderConfigurationError } from '../../errors';
 import type { AiModel, SafetyCheckFn } from '../types';
-import { constructBifrostSafetyCheckFn } from './bifrost';
 import { constructGoogleSafetyCheckFn } from './google';
 
 function getSafetyCheckFnByModel(model: AiModel): SafetyCheckFn | undefined {
@@ -8,7 +7,8 @@ function getSafetyCheckFnByModel(model: AiModel): SafetyCheckFn | undefined {
     return constructGoogleSafetyCheckFn(model);
   }
   if (model.provider === 'bifrost') {
-    return constructBifrostSafetyCheckFn(model);
+    // Bifrost cannot address custom Vertex endpoints, so use Vertex directly for safety models.
+    return constructGoogleSafetyCheckFn(model);
   }
   return undefined;
 }

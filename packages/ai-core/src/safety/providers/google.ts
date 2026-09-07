@@ -2,42 +2,51 @@ import type { SafetyCheckFn, SafetyResult, AiModel } from '../types';
 import { GoogleAuth } from 'google-auth-library';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { getGoogleServiceAddress } from '../../google-client';
+import { buildGuardPrompt } from '../prompt';
 
 type GoogleModelSettings = Extract<AiModel['setting'], { provider: 'google' }>;
-
-const SAFETY_CATEGORIES = `S1: Violent Crimes
-S2: Non-Violent Crimes
-S3: Sex-Related Crimes
-S4: Child Sexual Exploitation
-S5: Defamation
-S6: Specialized Advice
-S7: Privacy
-S8: Intellectual Property
-S9: Indiscriminate Weapons
-S10: Hate
-S11: Suicide & Self-Harm
-S12: Sexual Content
-S13: Elections
-S14: Code Interpreter Abuse`;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function buildGuardPrompt(text: string): string {
-  return `Task: Check if there is unsafe content in the User message according to our safety policy with the below categories.
+function extractSafetyResult(payload: unknown): string | undefined {
+  if (!isRecord(payload)) {
+    return undefined;
+  }
 
-<BEGIN UNSAFE CONTENT CATEGORIES>
-${SAFETY_CATEGORIES}
-<END UNSAFE CONTENT CATEGORIES>
+  const predictions = payload.predictions;
+  const prediction = Array.isArray(predictions) ? predictions[0] : predictions;
+  if (typeof prediction === 'string') {
+    return prediction;
+  }
+  if (!isRecord(prediction) || !Array.isArray(prediction.choices)) {
+    return undefined;
+  }
 
-<BEGIN CONVERSATION>
+  const choice = prediction.choices[0];
+  if (!isRecord(choice)) {
+    return undefined;
+  }
 
-User: ${text}
+  const message = isRecord(choice.message) ? choice.message : undefined;
+  const content = message?.content;
+  if (typeof content === 'string') {
+    if (content !== '') {
+      return content;
+    }
 
-<END CONVERSATION>
+    return typeof message?.reasoning_content === 'string' ? message.reasoning_content : undefined;
+  }
 
-Provide your safety assessment for the above content.`;
+  if (Array.isArray(content)) {
+    return content
+      .filter((part): part is Record<string, unknown> => isRecord(part))
+      .map((part) => (typeof part.text === 'string' ? part.text : ''))
+      .join('');
+  }
+
+  return typeof choice.text === 'string' ? choice.text : undefined;
 }
 
 function getEndpointId(model: AiModel): string {
@@ -93,11 +102,6 @@ export function constructGoogleSafetyCheckFn(model: AiModel): SafetyCheckFn {
 
       const requestUrl = `https://${endpointHost}/v1/projects/${settings.projectId}/locations/${settings.location}/endpoints/${endpointId}:predict`;
 
-      console.log('[safety] Google request', {
-        url: requestUrl,
-        body: JSON.stringify(requestBody),
-      });
-
       const response = await fetch(requestUrl, {
         method: 'POST',
         headers: {
@@ -108,59 +112,12 @@ export function constructGoogleSafetyCheckFn(model: AiModel): SafetyCheckFn {
       });
 
       const responseBody = await response.text();
-      console.log('[safety] Google raw response body', responseBody);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${responseBody}`);
       }
 
-      const payload = JSON.parse(responseBody) as {
-        predictions?: unknown;
-      };
-      const prediction = Array.isArray(payload.predictions)
-        ? payload.predictions[0]
-        : payload.predictions;
-      const predictionRecord = isRecord(prediction) ? prediction : undefined;
-      const choices = Array.isArray(predictionRecord?.choices) ? predictionRecord.choices : [];
-      const choice = isRecord(choices[0]) ? choices[0] : undefined;
-      const message = choice && isRecord(choice.message) ? choice.message : undefined;
-      const messageContent = message?.content;
-      const reasoningContent = message?.reasoning_content;
-      const result =
-        typeof messageContent === 'string'
-          ? messageContent || (typeof reasoningContent === 'string' ? reasoningContent : undefined)
-          : Array.isArray(messageContent)
-            ? messageContent
-                .filter((part): part is Record<string, unknown> => isRecord(part))
-                .map((part) => (typeof part.text === 'string' ? part.text : ''))
-                .join('')
-            : typeof choice?.text === 'string'
-              ? choice.text
-              : typeof prediction === 'string'
-                ? prediction
-                : undefined;
-
-      console.log('[safety] Google response', {
-        status: response.status,
-        predictionType: typeof prediction,
-        predictionKeys: predictionRecord ? Object.keys(predictionRecord) : [],
-        choiceKeys: choice ? Object.keys(choice) : [],
-        messageKeys: message ? Object.keys(message) : [],
-        finishReason: choice?.finish_reason,
-        stopReason: choice?.stop_reason,
-        contentType: typeof messageContent,
-        contentIsArray: Array.isArray(messageContent),
-        contentValue:
-          typeof messageContent === 'string'
-            ? messageContent.slice(0, 100)
-            : Array.isArray(messageContent)
-              ? messageContent.map((part) => (isRecord(part) ? Object.keys(part) : typeof part))
-              : undefined,
-        resultLength: result?.length ?? 0,
-        reasoningContentLength: typeof reasoningContent === 'string' ? reasoningContent.length : 0,
-        usage: predictionRecord?.usage,
-        requestTextLength: text.length,
-      });
+      const result = extractSafetyResult(JSON.parse(responseBody));
 
       if (!result) {
         throw new Error('Google safety model returned an empty result');
