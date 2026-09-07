@@ -1,6 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import type { ChatStreamEvent } from './streaming';
-import { createTextStream, decodeChatStreamEvent, encodeChatStreamEvent } from './streaming';
+import {
+  createTextStream,
+  decodeChatStreamEvent,
+  encodeChatStreamEvent,
+  readTextStream,
+} from './streaming';
 
 vi.mock('@shared/logging', () => ({
   logError: vi.fn(),
@@ -78,5 +83,36 @@ describe('createTextStream', () => {
       done();
       error(new Error('ignored'));
     }).not.toThrow();
+  });
+});
+
+describe('readTextStream', () => {
+  it('aborts the signal when the consumer stops reading early', async () => {
+    const { stream, signal, update } = createTextStream();
+
+    update('first');
+    update('second');
+
+    for await (const chunk of readTextStream(stream)) {
+      expect(chunk).toBe('first');
+      break;
+    }
+
+    expect(signal.aborted).toBe(true);
+  });
+
+  it('leaves the signal untouched when the producer completes normally', async () => {
+    const { stream, signal, update, done } = createTextStream();
+
+    update('all done');
+    done();
+
+    const chunks: string[] = [];
+    for await (const chunk of readTextStream(stream)) {
+      chunks.push(chunk);
+    }
+
+    expect(chunks).toEqual(['all done']);
+    expect(signal.aborted).toBe(false);
   });
 });

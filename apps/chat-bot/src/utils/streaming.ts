@@ -115,6 +115,8 @@ export async function* readTextStream(
       }
     }
   } finally {
+    // Cancels only when the stream is still readable, so an abandoned stream reaches its producer.
+    await reader.cancel().catch(() => undefined);
     reader.releaseLock();
   }
 }
