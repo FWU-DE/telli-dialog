@@ -38,15 +38,20 @@ export function decodeChatStreamEvent(chunk: string): ChatStreamEvent | null {
 /**
  * Creates a streamable text value for Server Actions.
  * Returns a controller to update/complete the stream and a ReadableStream to consume.
+ *
+ * `signal` aborts once the consumer disappears, so the producer can tear down its own
+ * upstream work instead of generating into a stream nobody reads.
  */
 export function createTextStream(): {
   stream: ReadableStream<string>;
+  signal: AbortSignal;
   update: (text: string) => void;
   done: () => void;
   error: (err: Error) => void;
 } {
   let controller: ReadableStreamDefaultController<string>;
   let cancelledByConsumer = false;
+  const abortController = new AbortController();
 
   const stream = new ReadableStream<string>({
     start(c) {
@@ -55,11 +60,13 @@ export function createTextStream(): {
     cancel() {
       // Consumer canceled the stream (e.g., user reloaded or closed the tab)
       cancelledByConsumer = true;
+      abortController.abort(new Error('consumer cancelled the stream'));
     },
   });
 
   return {
     stream,
+    signal: abortController.signal,
     update: (text: string) => {
       if (cancelledByConsumer) return;
       try {
@@ -108,6 +115,8 @@ export async function* readTextStream(
       }
     }
   } finally {
+    // Cancels only when the stream is still readable, so an abandoned stream reaches its producer.
+    await reader.cancel().catch(() => undefined);
     reader.releaseLock();
   }
 }

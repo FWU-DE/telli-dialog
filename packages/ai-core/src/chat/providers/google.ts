@@ -72,6 +72,7 @@ function buildGoogleGenerateContentParameters({
   temperature,
   tools,
   toolChoice,
+  abortSignal,
 }: Parameters<TextGenerationFn>[0]): GenerateContentParameters {
   const contents = messages
     .filter((message) => message.role !== 'system')
@@ -86,6 +87,7 @@ function buildGoogleGenerateContentParameters({
     ...(systemInstruction.length > 0 ? { systemInstruction } : {}),
     ...(maxTokens !== undefined ? { maxOutputTokens: maxTokens } : {}),
     ...(temperature !== undefined ? { temperature } : {}),
+    ...(abortSignal !== undefined ? { abortSignal } : {}),
     ...buildGoogleToolConfig(tools, toolChoice),
   };
 
@@ -227,7 +229,7 @@ export function constructGoogleTextStreamFn(model: AiModel): TextStreamFn {
   const clientConfig = createGoogleClient(model);
 
   return async function* getGoogleTextStream(
-    { messages, model: modelName, maxTokens, temperature },
+    { messages, model: modelName, maxTokens, temperature, abortSignal },
     onComplete,
   ) {
     try {
@@ -237,6 +239,7 @@ export function constructGoogleTextStreamFn(model: AiModel): TextStreamFn {
           model: modelName,
           maxTokens,
           temperature,
+          abortSignal,
         }),
       );
 
@@ -287,6 +290,7 @@ export function constructGoogleTextGenerationFn(model: AiModel): TextGenerationF
     model: modelName,
     maxTokens,
     temperature,
+    abortSignal,
   }) {
     try {
       const response = await clientConfig.client.models.generateContent(
@@ -295,6 +299,7 @@ export function constructGoogleTextGenerationFn(model: AiModel): TextGenerationF
           model: modelName,
           maxTokens,
           temperature,
+          abortSignal,
         }),
       );
 
@@ -333,6 +338,7 @@ export function constructGoogleAgenticStreamFn(model: AiModel): AgenticStreamFn 
     temperature,
     tools,
     toolChoice,
+    abortSignal,
   }) {
     try {
       const stream = await clientConfig.client.models.generateContentStream(
@@ -343,6 +349,7 @@ export function constructGoogleAgenticStreamFn(model: AiModel): AgenticStreamFn 
           temperature,
           tools,
           toolChoice,
+          abortSignal,
         }),
       );
 
