@@ -25,6 +25,18 @@ describe('worker pool', () => {
     first.catch(() => undefined);
   });
 
+  it('rejects work immediately when concurrency is non-positive', async () => {
+    const pool = new WorkerPool(
+      { ...limits, concurrency: 0, maxQueuedRequests: 2 },
+      async () => new Promise(() => undefined),
+    );
+
+    await expect(pool.run('1')).resolves.toEqual({
+      status: 'overload',
+      error: 'worker pool is busy',
+    });
+  });
+
   it('runs queued work in FIFO order with bounded active concurrency', async () => {
     const queuedLimits = { ...limits, concurrency: 2, maxQueuedRequests: 3 };
     const started: string[] = [];

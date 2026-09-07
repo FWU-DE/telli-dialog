@@ -16,6 +16,10 @@ export class WorkerPool {
       return Promise.resolve({ status: 'upstream_failure', error: 'request cancelled' });
     }
 
+    if (this.limits.concurrency <= 0) {
+      return Promise.resolve({ status: 'overload', error: 'worker pool is busy' });
+    }
+
     if (this.active < this.limits.concurrency) {
       return this.start(expression, options);
     }
