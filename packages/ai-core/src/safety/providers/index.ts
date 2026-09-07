@@ -8,6 +8,12 @@ function getSafetyCheckFnByModel(model: AiModel): SafetyCheckFn | undefined {
   }
   if (model.provider === 'bifrost') {
     // Bifrost cannot address custom Vertex endpoints, so use Vertex directly for safety models.
+    if (model.setting.provider !== 'google') {
+      throw new ProviderConfigurationError(
+        'Bifrost safety models must use Google provider settings for direct Vertex routing',
+      );
+    }
+
     return constructGoogleSafetyCheckFn(model);
   }
   return undefined;

@@ -1,10 +1,36 @@
 import type { SafetyCheckFn, SafetyResult, AiModel } from '../types';
-import { GoogleAuth } from 'google-auth-library';
+import { GoogleAuth, type GoogleAuthOptions } from 'google-auth-library';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { getGoogleServiceAddress } from '../../google-client';
 import { buildGuardPrompt } from '../prompt';
 
 type GoogleModelSettings = Extract<AiModel['setting'], { provider: 'google' }>;
+
+function getGoogleAuthOptions(settings: GoogleModelSettings): GoogleAuthOptions {
+  const authCredentials = settings.authCredentials;
+  if (authCredentials === undefined) {
+    return { scopes: ['https://www.googleapis.com/auth/cloud-platform'] };
+  }
+
+  if (typeof authCredentials === 'string') {
+    try {
+      return {
+        credentials: JSON.parse(authCredentials),
+        scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+      };
+    } catch {
+      return {
+        keyFile: authCredentials,
+        scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+      };
+    }
+  }
+
+  return {
+    credentials: authCredentials,
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  };
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -49,6 +75,15 @@ function extractSafetyResult(payload: unknown): string | undefined {
   return typeof choice.text === 'string' ? choice.text : undefined;
 }
 
+function validateSafetyResult(result: string): string {
+  const normalized = result.trim();
+  if (/^safe$/i.test(normalized) || /^unsafe(?:\s+S\d+(?:\s+S\d+)*)?$/i.test(normalized)) {
+    return normalized;
+  }
+
+  throw new Error('Google safety model returned an invalid classification');
+}
+
 function getEndpointId(model: AiModel): string {
   const parameters = model.additionalParameters;
   const endpointId = parameters?.endpointId;
@@ -77,9 +112,7 @@ export function constructGoogleSafetyCheckFn(model: AiModel): SafetyCheckFn {
   const settings = model.setting as GoogleModelSettings;
   const endpointId = getEndpointId(model);
   const endpointHost = getEndpointHost(model, settings.location);
-  const auth = new GoogleAuth({
-    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-  });
+  const auth = new GoogleAuth(getGoogleAuthOptions(settings));
 
   return async function checkGoogleSafety({ text }): Promise<SafetyResult> {
     try {
@@ -123,7 +156,7 @@ export function constructGoogleSafetyCheckFn(model: AiModel): SafetyCheckFn {
         throw new Error('Google safety model returned an empty result');
       }
 
-      return { result };
+      return { result: validateSafetyResult(result) };
     } catch (error) {
       throw new AiGenerationError(
         `Google Vertex AI Safety request failed: ${error instanceof Error ? error.message : String(error)}`,
