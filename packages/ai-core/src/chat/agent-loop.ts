@@ -149,6 +149,10 @@ export function runAgentLoop({
               break;
             }
 
+            if (abortSignal?.aborted) {
+              break;
+            }
+
             loopMessages.push({
               role: 'assistant',
               content: iterationText,

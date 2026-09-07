@@ -739,6 +739,52 @@ describe('agent-loop', () => {
       expect(onComplete).not.toHaveBeenCalled();
     });
 
+    it('does not run tool handlers when the abort lands before tool execution', async () => {
+      const messages: Message[] = [{ role: 'user', content: 'Test query' }];
+      const onComplete = vi.fn();
+      const onError = vi.fn();
+      const abortController = new AbortController();
+      const handler = vi.fn(async () => 'tool result');
+
+      mockGenerateAgenticStreamWithBilling.mockImplementation(async function* () {
+        yield { type: 'text', delta: 'Partial answer.' } satisfies StreamEvent;
+        yield {
+          type: 'tool_call',
+          call: { id: 'call_123', name: 'test_tool', arguments: '{}' },
+        } satisfies StreamEvent;
+        abortController.abort();
+        yield { type: 'finish', usage } satisfies StreamEvent;
+      });
+
+      runAgentLoop({
+        modelSelection: { modelIds: ['test-model'], modelName: 'Test Model' },
+        apiKeyId: 'test-key',
+        messages,
+        toolRegistry: {
+          test_tool: {
+            definition: { name: 'test_tool', description: 'Test', parameters: {} },
+            handler,
+          },
+        },
+        agentName: 'Test Agent',
+        abortSignal: abortController.signal,
+        onTextChunk: vi.fn(),
+        onComplete,
+        onError,
+      });
+
+      await vi.waitFor(() => {
+        expect(onComplete).toHaveBeenCalled();
+      });
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(mockGenerateAgenticStreamWithBilling).toHaveBeenCalledTimes(1);
+      expect(onError).not.toHaveBeenCalled();
+      expect(onComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ fullText: 'Partial answer.' }),
+      );
+    });
+
     it('keeps the partial text when the stream throws because of the abort', async () => {
       const messages: Message[] = [{ role: 'user', content: 'Test query' }];
       const onComplete = vi.fn();
