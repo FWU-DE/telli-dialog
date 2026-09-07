@@ -235,7 +235,6 @@ export function runAgentLoop({
       // An aborted generation is an expected teardown, not a failure to report, but whatever
       // was already generated must still reach the caller so it can be persisted.
       if (abortSignal?.aborted) {
-        logError('Agent loop aborted:', error);
         if (fullText.trim().length > 0) {
           complete();
         }

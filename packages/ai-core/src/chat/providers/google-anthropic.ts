@@ -40,6 +40,7 @@ export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGe
     messages,
     maxTokens,
     model: modelName,
+    abortSignal,
   }: TextGenerationArgs): Promise<TextResponse> {
     // Separate system messages from conversation messages
     const systemMessages = getSystemMessages(messages);
@@ -58,7 +59,7 @@ export function constructGoogleAnthropicTextGenerationFn(model: AiModel): TextGe
       system: buildSystemPrompt(systemMessages),
     };
 
-    const response = await client.messages.create(messageParams);
+    const response = await client.messages.create(messageParams, { signal: abortSignal });
 
     const text = response.content
       .filter((block) => block.type === 'text')
@@ -86,7 +87,7 @@ export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStream
     onComplete?: (usage: TokenUsage) => void | Promise<void>,
   ): AsyncGenerator<string> {
     try {
-      const { messages, maxTokens, model: modelName } = args;
+      const { messages, maxTokens, model: modelName, abortSignal } = args;
 
       // Separate system messages from conversation messages
       const systemMessages = getSystemMessages(messages);
@@ -105,7 +106,7 @@ export function constructGoogleAnthropicTextStreamFn(model: AiModel): TextStream
         system: buildSystemPrompt(systemMessages),
       };
 
-      const stream = client.messages.stream(messageParams);
+      const stream = client.messages.stream(messageParams, { signal: abortSignal });
 
       let usage: TokenUsage | undefined = undefined;
 

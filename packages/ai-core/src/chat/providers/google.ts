@@ -229,7 +229,7 @@ export function constructGoogleTextStreamFn(model: AiModel): TextStreamFn {
   const clientConfig = createGoogleClient(model);
 
   return async function* getGoogleTextStream(
-    { messages, model: modelName, maxTokens, temperature },
+    { messages, model: modelName, maxTokens, temperature, abortSignal },
     onComplete,
   ) {
     try {
@@ -239,6 +239,7 @@ export function constructGoogleTextStreamFn(model: AiModel): TextStreamFn {
           model: modelName,
           maxTokens,
           temperature,
+          abortSignal,
         }),
       );
 
@@ -289,6 +290,7 @@ export function constructGoogleTextGenerationFn(model: AiModel): TextGenerationF
     model: modelName,
     maxTokens,
     temperature,
+    abortSignal,
   }) {
     try {
       const response = await clientConfig.client.models.generateContent(
@@ -297,6 +299,7 @@ export function constructGoogleTextGenerationFn(model: AiModel): TextGenerationF
           model: modelName,
           maxTokens,
           temperature,
+          abortSignal,
         }),
       );
 

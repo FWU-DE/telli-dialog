@@ -133,13 +133,16 @@ describe('constructGoogleAnthropicTextGenerationFn', () => {
       model: 'anthropic/claude-3-5-sonnet-v2@20241022',
     });
 
-    expect(createMock).toHaveBeenCalledWith({
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }],
-      model: 'claude-3-5-sonnet-v2@20241022',
-      stream: false,
-      system: 'You are helpful',
-    });
+    expect(createMock).toHaveBeenCalledWith(
+      {
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }],
+        model: 'claude-3-5-sonnet-v2@20241022',
+        stream: false,
+        system: 'You are helpful',
+      },
+      expect.anything(),
+    );
   });
 
   it('should use default maxTokens of 4096 when not specified', async () => {
@@ -159,6 +162,7 @@ describe('constructGoogleAnthropicTextGenerationFn', () => {
       expect.objectContaining({
         max_tokens: 4096,
       }),
+      expect.anything(),
     );
   });
 
@@ -179,6 +183,7 @@ describe('constructGoogleAnthropicTextGenerationFn', () => {
       expect.objectContaining({
         model: 'claude-sonnet',
       }),
+      expect.anything(),
     );
   });
 
@@ -207,6 +212,7 @@ describe('constructGoogleAnthropicTextGenerationFn', () => {
         ],
         system: 'System prompt',
       }),
+      expect.anything(),
     );
   });
 
@@ -292,6 +298,7 @@ describe('constructGoogleAnthropicTextGenerationFn', () => {
           },
         ],
       }),
+      expect.anything(),
     );
   });
 
@@ -328,6 +335,7 @@ describe('constructGoogleAnthropicTextGenerationFn', () => {
           },
         ],
       }),
+      expect.anything(),
     );
   });
 
@@ -374,6 +382,7 @@ describe('constructGoogleAnthropicTextGenerationFn', () => {
           },
         ],
       }),
+      expect.anything(),
     );
   });
 
