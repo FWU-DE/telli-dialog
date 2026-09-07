@@ -4,9 +4,9 @@ import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 import { getGoogleServiceAddress } from '../../google-client';
 import { buildGuardPrompt } from '../prompt';
 
-type GoogleModelSettings = Extract<AiModel['setting'], { provider: 'google' }>;
-
-function getGoogleAuthOptions(settings: GoogleModelSettings): GoogleAuthOptions {
+function getGoogleAuthOptions(
+  settings: Extract<AiModel['setting'], { provider: 'google' }>,
+): GoogleAuthOptions {
   const authCredentials = settings.authCredentials;
   if (authCredentials === undefined) {
     return { scopes: ['https://www.googleapis.com/auth/cloud-platform'] };
@@ -109,7 +109,7 @@ export function constructGoogleSafetyCheckFn(model: AiModel): SafetyCheckFn {
     throw new ProviderConfigurationError('Invalid model configuration for Google');
   }
 
-  const settings = model.setting as GoogleModelSettings;
+  const settings = model.setting;
   const endpointId = getEndpointId(model);
   const endpointHost = getEndpointHost(model, settings.location);
   const auth = new GoogleAuth(getGoogleAuthOptions(settings));
