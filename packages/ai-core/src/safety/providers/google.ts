@@ -9,7 +9,9 @@ function getGoogleAuthOptions(
 ): GoogleAuthOptions {
   const authCredentials = settings.authCredentials;
   if (authCredentials === undefined) {
-    return { scopes: ['https://www.googleapis.com/auth/cloud-platform'] };
+    throw new ProviderConfigurationError(
+      'Google safety models require inline service-account credentials in settings.authCredentials',
+    );
   }
 
   if (typeof authCredentials === 'string') {
@@ -19,10 +21,9 @@ function getGoogleAuthOptions(
         scopes: ['https://www.googleapis.com/auth/cloud-platform'],
       };
     } catch {
-      return {
-        keyFile: authCredentials,
-        scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-      };
+      throw new ProviderConfigurationError(
+        'Google safety model settings.authCredentials must be valid service-account JSON',
+      );
     }
   }
 
