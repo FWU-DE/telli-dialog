@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { ChatStreamEvent } from './streaming';
 import {
   createTextStream,
@@ -83,6 +83,91 @@ describe('createTextStream', () => {
       done();
       error(new Error('ignored'));
     }).not.toThrow();
+  });
+
+  it('abandons the stream once the consumer stops draining it', () => {
+    const { signal, update } = createTextStream();
+
+    // One more than the queued chunk limit, so the last update sees a full queue.
+    for (let i = 0; i <= 1000; i++) {
+      update(`chunk ${i}`);
+    }
+
+    expect(signal.aborted).toBe(true);
+    expect((signal.reason as Error).message).toBe('consumer stopped reading');
+  });
+
+  describe('with fake timers', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('aborts the signal once the maximum duration elapses', () => {
+      const { signal, update } = createTextStream({
+        maxDurationMs: 1_000,
+        idleTimeoutMs: 60_000,
+      });
+
+      update('still going');
+      vi.advanceTimersByTime(1_000);
+
+      expect(signal.aborted).toBe(true);
+      expect((signal.reason as Error).message).toBe('generation exceeded maximum duration');
+    });
+
+    it('aborts the signal when the producer goes idle, and resets on each update', () => {
+      const { signal, update } = createTextStream({
+        maxDurationMs: 60_000,
+        idleTimeoutMs: 1_000,
+      });
+
+      vi.advanceTimersByTime(900);
+      update('activity');
+      vi.advanceTimersByTime(900);
+
+      expect(signal.aborted).toBe(false);
+
+      vi.advanceTimersByTime(100);
+
+      expect(signal.aborted).toBe(true);
+      expect((signal.reason as Error).message).toBe('producer stopped emitting text');
+    });
+
+    it('does not abort after done(), even if a late update arrives', () => {
+      const { signal, update, done } = createTextStream({
+        maxDurationMs: 60_000,
+        idleTimeoutMs: 1_000,
+      });
+
+      update('all of it');
+      done();
+      update('late chunk');
+
+      vi.advanceTimersByTime(60_000);
+
+      expect(signal.aborted).toBe(false);
+    });
+
+    it('does not abort after error(), even if a late update arrives', () => {
+      const { stream, signal, update, error } = createTextStream({
+        maxDurationMs: 60_000,
+        idleTimeoutMs: 1_000,
+      });
+
+      error(new Error('provider failed'));
+      update('late chunk');
+
+      vi.advanceTimersByTime(60_000);
+
+      expect(signal.aborted).toBe(false);
+
+      // Keep the rejected stream from surfacing as an unhandled rejection.
+      void stream.cancel().catch(() => {});
+    });
   });
 });
 

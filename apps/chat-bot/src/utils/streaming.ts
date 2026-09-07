@@ -69,6 +69,7 @@ export function createTextStream({
 } {
   let controller: ReadableStreamDefaultController<string>;
   let abandoned = false;
+  let finished = false;
   const abortController = new AbortController();
 
   const maxDurationTimer = setTimeout(
@@ -88,7 +89,7 @@ export function createTextStream({
   }
 
   function abandon(reason: string) {
-    if (abandoned) return;
+    if (abandoned || finished) return;
     abandoned = true;
     clearTimers();
     abortController.abort(new Error(reason));
@@ -118,7 +119,7 @@ export function createTextStream({
     stream,
     signal: abortController.signal,
     update: (text: string) => {
-      if (abandoned) return;
+      if (abandoned || finished) return;
 
       if (controller.desiredSize !== null && controller.desiredSize <= 0) {
         logError(
@@ -139,6 +140,7 @@ export function createTextStream({
     },
     done: () => {
       clearTimers();
+      finished = true;
       if (abandoned) return;
       try {
         controller.close();
@@ -148,6 +150,7 @@ export function createTextStream({
     },
     error: (err: Error) => {
       clearTimers();
+      finished = true;
       if (abandoned) return;
       try {
         controller.error(err);
